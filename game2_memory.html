@@ -17,14 +17,9 @@
             --text-color: #2c3e50;
             --blue: #3498db;
             --green: #2ecc71;
-            --ad-h: 50px;
         }
-        * {
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
-        }
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+
         html { height: 100%; }
         body {
             font-family: 'Noto Sans KR', sans-serif;
@@ -34,100 +29,83 @@
             min-height: 100dvh;
             display: flex; flex-direction: column;
             align-items: center;
-            padding-bottom: var(--ad-h);
-            overflow-x: hidden;
         }
 
-        /* ── 헤더 ── */
         header {
-            padding: 14px 16px 0;
+            padding: max(14px, env(safe-area-inset-top)) 16px 0;
             display: flex; align-items: center; justify-content: center;
             width: 100%; position: relative;
-            padding-top: max(14px, env(safe-area-inset-top));
-            flex-shrink: 0;
         }
         h1 {
             margin: 0; font-family: 'Jua';
             color: var(--accent); text-shadow: 2px 2px 0 #000;
-            font-size: clamp(1.3rem, 5vw, 2.4rem); /* 반응형 폰트 */
+            font-size: clamp(1.5rem, 5vw, 2.4rem);
             flex: 1; text-align: center;
         }
-        .header-btns { display: flex; gap: 6px; flex-shrink: 0; }
-        .hub-btn {
-            font-family: 'Jua'; font-size: 0.9rem;
-            color: rgba(255,255,255,0.7);
-            text-decoration: none;
-            border: 1px solid rgba(255,255,255,0.3);
-            padding: 0 14px;
-            height: 44px; /* 터치 최소 */
-            border-radius: 50px;
-            background: rgba(0,0,0,0.2);
-            transition: all 0.18s; white-space: nowrap;
-            display: flex; align-items: center; cursor: pointer;
+        .hub-link {
+            font-family: 'Jua'; font-size: 0.95rem; color: rgba(255,255,255,0.7);
+            text-decoration: none; border: 1px solid rgba(255,255,255,0.3);
+            padding: 7px 14px; border-radius: 50px; background: rgba(0,0,0,0.2);
+            transition: all 0.18s; white-space: nowrap; min-height: 44px;
+            display: flex; align-items: center;
         }
-        .hub-btn:active { color: #fff; border-color: var(--accent); background: rgba(230,126,34,0.2); }
 
-        /* ── 상태 바 ── */
+        /* 상단 상태바 */
         .status-bar {
-            display: flex; gap: clamp(10px, 4vw, 28px);
-            margin: 10px 0 4px;
+            display: flex; gap: clamp(14px,4vw,28px);
+            margin: 12px 0 6px;
             background: rgba(0,0,0,0.3);
-            padding: 10px clamp(14px, 5vw, 36px);
+            padding: 10px clamp(18px,5vw,36px);
             border-radius: 40px;
-            font-size: clamp(0.9rem, 3.5vw, 1.4rem);
+            font-size: clamp(1.1rem,3.5vw,1.4rem);
             font-weight: bold; align-items: center;
-            flex-wrap: wrap; justify-content: center;
         }
-        .moves   { color: var(--blue); }
+        .moves   { color: var(--accent2); }
         .matches { color: var(--green); }
-        .timer   {
-            color: #f39c12;
-            font-size: clamp(1rem, 4vw, 1.5rem);
-            min-width: 90px; text-align: center;
-        }
+        .timer   { color: #f39c12; font-size: clamp(1.1rem,3.5vw,1.5rem); min-width: 90px; text-align: center; }
         .timer.warning { color: var(--accent2); animation: blink 0.5s infinite; }
         @keyframes blink { 50% { opacity: 0.4; } }
 
         .score-formula {
-            font-size: clamp(0.7rem, 2.5vw, 0.92rem);
+            font-size: clamp(0.75rem,2.5vw,0.92rem);
             color: rgba(255,255,255,0.45);
-            margin-bottom: 8px;
-            text-align: center;
+            margin-bottom: 10px; text-align: center;
             padding: 0 12px;
         }
 
-        /* ── 카드 그리드 ──
-           JS에서 --card-w, --card-h CSS 변수를 동적으로 설정 */
+        /* 카드 그리드 */
         .grid-container {
             display: grid;
-            gap: clamp(6px, 2vw, 14px);
-            padding: 4px 8px 16px;
-            /* JS가 grid-template-columns/rows를 주입 */
+            gap: clamp(8px,2.5vw,14px);
+            padding: 4px clamp(8px,3vw,16px) 20px;
+            width: 100%;
+            justify-content: center;
+            align-content: start;
         }
 
-        /* ── 카드 — 크기를 CSS 변수로 제어 ── */
+        /* 카드 — 모바일 기준으로 크게 */
         .card {
             background-color: transparent;
             perspective: 1200px;
             cursor: pointer;
-            width:  var(--card-w, 140px);
-            height: var(--card-h, 100px);
-            /* 터치 최소 44px 보장 */
-            min-width: 70px;
-            min-height: 60px;
+            /* 크기는 JS에서 CSS 변수로 주입 */
+            width: var(--card-w, 140px);
+            height: var(--card-h, 90px);
         }
+
         .card-inner {
             position: relative;
             width: 100%; height: 100%;
             text-align: center;
-            transition: transform 0.4s;
+            transition: transform 0.38s;
             transform-style: preserve-3d;
             border-radius: 12px;
-            box-shadow: 0 5px 14px rgba(0,0,0,0.35);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.35);
         }
-        .card.flipped .card-inner { transform: rotateY(180deg); }
-        .card.matched .card-inner { transform: rotateY(180deg); }
-        .card.matched             { animation: pop 0.3s ease-out; opacity: 0.45; pointer-events: none; }
+
+        .card.flipped .card-inner  { transform: rotateY(180deg); }
+        .card.matched .card-inner  { transform: rotateY(180deg); }
+        .card.matched              { animation: pop 0.3s ease-out; opacity: 0.4; pointer-events: none; }
         .card.wrong-flash .card-inner { animation: shakeCard 0.4s ease; }
 
         .card-front, .card-back {
@@ -139,117 +117,104 @@
             border-radius: 12px;
             padding: 6px;
         }
+
         .card-back {
             background-color: var(--card-back);
             color: #7f8c8d;
-            font-size: clamp(1.6rem, 5vw, 2.6rem);
+            font-size: clamp(1.8rem,5vw,2.6rem);
             border: 2px solid #5d6d7e;
         }
+
         .card-front {
             background-color: var(--card-front);
             color: var(--text-color);
             transform: rotateY(180deg);
             font-family: 'Jua';
-            /* 카드 크기에 맞춰 폰트 자동 조정 */
-            font-size: clamp(0.7rem, 2.8vw, 1.35rem);
+            font-size: clamp(1rem,3.5vw,1.35rem);
             word-break: keep-all;
             line-height: 1.3;
             border: 3px solid var(--accent);
-            text-align: center;
         }
 
-        /* ── 오버레이 ── */
+        /* 오버레이 */
         .overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(22, 32, 42, 0.97);
+            background: rgba(22,32,42,0.97);
             display: flex; flex-direction: column;
-            justify-content: flex-start; /* 모바일: 상단부터 배치 */
-            align-items: center;
-            z-index: 100; padding: 20px 16px;
-            overflow-y: auto; /* 내용 넘치면 스크롤 */
+            justify-content: flex-start; align-items: center;
+            z-index: 100; padding: max(20px,env(safe-area-inset-top)) 20px 20px;
+            overflow-y: auto;
         }
-        /* 오버레이 내부를 세로 중앙에 가깝게 */
         .overlay-inner {
             display: flex; flex-direction: column;
-            align-items: center;
+            align-items: center; gap: 10px;
             width: 100%; max-width: 480px;
-            margin: auto; /* 상하 auto로 세로 중앙 */
-            padding: 10px 0;
+            margin: auto;
         }
-        .overlay h2 {
-            color: var(--accent); font-family: 'Jua';
-            font-size: clamp(1.6rem, 6vw, 2.6rem);
-            margin-bottom: 10px; text-align: center;
-        }
-        .overlay p {
-            font-size: clamp(0.85rem, 3vw, 1.2rem);
-            color: #ecf0f1; margin-bottom: 16px;
-            text-align: center; line-height: 1.7;
-        }
+        .overlay h2 { color: var(--accent); font-family: 'Jua'; font-size: clamp(1.6rem,5vw,2.6rem); margin-bottom: 4px; text-align: center; }
+        .overlay p  { font-size: clamp(0.95rem,3vw,1.2rem); color: #ecf0f1; text-align: center; line-height: 1.7; }
 
         .btn {
             background: var(--accent); color: white; border: none;
-            padding: 14px 36px;
-            font-size: clamp(1.1rem, 4vw, 1.5rem);
-            font-family: 'Jua';
-            border-radius: 50px; cursor: pointer;
-            box-shadow: 0 5px 18px rgba(0,0,0,0.4);
+            padding: 14px 40px; font-size: clamp(1.2rem,4vw,1.5rem); font-family: 'Jua';
+            border-radius: 50px; cursor: pointer; box-shadow: 0 5px 18px rgba(0,0,0,0.4);
             transition: transform 0.1s, background 0.2s;
-            min-height: 54px; /* 터치 최소 */
+            min-height: 52px; touch-action: manipulation;
         }
         .btn:active { transform: scale(0.96); background: #d35400; }
+        .btn-secondary {
+            background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.75);
+            border: 1px solid rgba(255,255,255,0.25);
+        }
+        .btn-secondary:active { background: rgba(255,255,255,0.22); }
 
-        /* ── 결과 점수 ── */
+        /* 결과 점수 */
         .result-score-box {
             background: rgba(0,0,0,0.3); border-radius: 16px;
-            padding: 14px 28px; margin-bottom: 14px;
+            padding: 14px 36px;
             text-align: center; border: 2px solid var(--accent);
             width: 100%;
         }
-        .result-score-box .big-score    { font-family: 'Jua'; font-size: clamp(2rem, 8vw, 3rem); color: #f1c40f; }
-        .result-score-box .score-detail { font-size: 0.85rem; color: rgba(255,255,255,0.6); margin-top: 4px; }
+        .result-score-box .big-score   { font-family: 'Jua'; font-size: clamp(2rem,7vw,3rem); color: #f1c40f; }
+        .result-score-box .score-detail{ font-size: clamp(0.78rem,2.5vw,0.95rem); color: rgba(255,255,255,0.6); margin-top: 4px; }
 
-        /* ── 이름 등록 ── */
-        .name-row { display: flex; gap: 8px; margin-bottom: 10px; width: 100%; }
+        /* 이름 등록 */
+        .name-row { display: flex; gap: 8px; width: 100%; }
         .name-row input {
             flex: 1;
-            padding: 12px 14px; border-radius: 10px;
-            border: 2px solid #5d6d7e;
+            padding: 11px 14px; border-radius: 10px; border: 2px solid #5d6d7e;
             background: rgba(255,255,255,0.1); color: white;
-            font-size: 1rem; font-family: 'Noto Sans KR';
-            outline: none; text-align: center;
-            min-height: 48px;
+            font-size: clamp(1rem,3vw,1.1rem); font-family: 'Noto Sans KR';
+            outline: none; text-align: center; min-height: 48px;
         }
         .name-row input::placeholder { color: rgba(255,255,255,0.4); }
         .name-row input:focus { border-color: var(--accent); }
         .name-row button {
-            padding: 12px 18px; background: var(--blue); border: none;
+            padding: 11px 18px; background: var(--blue); border: none;
             border-radius: 10px; color: white; font-weight: bold;
-            font-size: 1rem; cursor: pointer; font-family: 'Noto Sans KR';
-            min-height: 48px; white-space: nowrap;
+            font-size: clamp(0.9rem,3vw,1rem); cursor: pointer;
+            font-family: 'Noto Sans KR'; min-height: 48px; white-space: nowrap;
         }
-        .name-row button:active { background: #2980b9; }
+        .name-row button:active { opacity: 0.8; }
 
-        /* ── 랭킹 ── */
+        /* 랭킹 */
         .rank-wrap {
             width: 100%;
             background: rgba(0,0,0,0.25); border-radius: 12px;
-            overflow: hidden; margin-bottom: 14px;
-            max-height: 220px; overflow-y: auto;
+            overflow: hidden;
         }
         .rank-header {
-            display: grid; grid-template-columns: 44px 1fr 70px 66px;
+            display: grid; grid-template-columns: 44px 1fr 70px 70px;
             padding: 8px 12px;
             background: rgba(0,0,0,0.35);
             font-size: 0.82rem; color: rgba(255,255,255,0.5);
             font-weight: bold; text-align: center;
-            position: sticky; top: 0;
         }
         .rank-row {
-            display: grid; grid-template-columns: 44px 1fr 70px 66px;
+            display: grid; grid-template-columns: 44px 1fr 70px 70px;
             padding: 9px 12px;
             border-bottom: 1px solid rgba(255,255,255,0.07);
-            font-size: 0.88rem; text-align: center; align-items: center;
+            font-size: clamp(0.82rem,2.5vw,0.96rem); text-align: center; align-items: center;
         }
         .rank-row .rank-num        { font-family: 'Jua'; }
         .rank-row .rank-num.gold   { color: #f1c40f; }
@@ -258,556 +223,528 @@
         .rank-row .rank-score      { color: #f1c40f; font-weight: bold; font-family: 'Jua'; }
         .rank-me { background: rgba(52,152,219,0.15); }
 
-        .spinner {
-            width: 28px; height: 28px;
-            border: 3px solid rgba(255,255,255,0.2);
-            border-top-color: var(--accent);
-            border-radius: 50%;
-            animation: spin 0.7s linear infinite;
-            margin: 12px auto;
-        }
+        .spinner { width: 28px; height: 28px; border: 3px solid rgba(255,255,255,0.2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 12px auto; }
         @keyframes spin { to { transform: rotate(360deg); } }
-
-        .status-msg { font-size: 0.88rem; margin-bottom: 8px; min-height: 20px; text-align: center; }
+        .status-msg { font-size: 0.88rem; min-height: 20px; text-align: center; }
         .status-msg.ok  { color: var(--green); }
         .status-msg.err { color: var(--accent2); }
 
-        /* ── AdMob 광고 자리 ── */
-        .ad-placeholder {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            height: var(--ad-h);
-            background: rgba(0,0,0,0.6);
-            border-top: 1px solid rgba(255,255,255,0.08);
-            display: flex; align-items: center; justify-content: center;
-            z-index: 200; font-size: 0.6rem; letter-spacing: 2px;
-            color: rgba(255,255,255,0.2);
-        }
-
-        /* ── 애니메이션 ── */
         @keyframes pop       { 50% { transform: scale(1.08); } }
         @keyframes shakeCard {
-            0%,100% { transform: rotateY(0deg); }
-            25%     { transform: rotateY(-8deg); }
-            75%     { transform: rotateY(8deg); }
+            0%,100% { transform: rotateY(180deg); }
+            25%     { transform: rotateY(172deg); }
+            75%     { transform: rotateY(188deg); }
         }
     </style>
 </head>
 <body>
 
-<div class="ad-placeholder" id="adPlaceholder">AD</div>
-
-<header>
-    <h1>🧩 회계 기억의 전당 🧩</h1>
-    <div class="header-btns">
-        <button class="hub-btn" onclick="quitGame()">🚪 그만</button>
-        <a class="hub-btn" href="index.html">🏠 홈</a>
-    </div>
-</header>
-
-<div class="status-bar">
-    <div class="moves">오답: <span id="move-count">0</span>회</div>
-    <div class="matches">성공: <span id="match-count">0</span> / <span id="total-pairs">2</span></div>
-    <div class="timer" id="timer-display">⏱ 0.0s</div>
-</div>
-<div class="score-formula" id="score-formula">Stage 1 (2×2) — 점수 = 200 - 오답×20 - 시간×0.5</div>
-
-<div class="grid-container" id="grid"></div>
-
-<!-- 시작 화면 -->
-<div id="start-screen" class="overlay">
-    <div class="overlay-inner">
-        <h2>기억력 테스트</h2>
-        <p>계정과목과 그 설명이 짝꿍입니다.<br>
-           예: <b style="color:var(--blue)">접대비</b> ↔ <b style="color:var(--accent)">거래처 선물</b><br><br>
-           <span style="font-size:0.88rem; color:rgba(255,255,255,0.6)">
-             S1:2×2 → S2:3×2 → S3:4×2 → S4:5×2 → S5:3×4 → S6:4×4(14장) → S7:4×4(16장)<br>
-             단계 클리어마다 점수 누적!
-           </span>
-        </p>
-        <button class="btn" onclick="startGame()">게임 시작 🚀</button>
-    </div>
-</div>
-
-<!-- 결과 화면 -->
-<div id="result-screen" class="overlay" style="display:none;">
-    <div class="overlay-inner">
-        <h2>CLEAR! 🎉</h2>
-        <div id="result-rank" style="font-family:'Jua';font-size:clamp(1.4rem,5vw,2rem);margin-bottom:6px;text-align:center;">직급</div>
-        <p id="result-msg" style="margin-bottom:10px;">훌륭한 기억력입니다!</p>
-
-        <div class="result-score-box">
-            <div class="big-score" id="final-score">0점</div>
-            <div class="score-detail" id="score-detail">시도 0회 × 20 + 0초×0.5 = 0점</div>
+    <header>
+        <h1 style="flex:1;text-align:center;">🧩 기억의 전당 🧩</h1>
+        <div style="display:flex;gap:6px;flex-shrink:0;">
+            <button onclick="quitGame()" style="font-family:'Jua';font-size:0.9rem;color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.3);padding:7px 12px;border-radius:50px;background:rgba(0,0,0,0.2);cursor:pointer;min-height:44px;">🚪 그만</button>
+            <a class="hub-link" href="index.html">🏠 홈</a>
         </div>
+    </header>
 
-        <div class="name-row">
-            <input type="text" id="player-name" placeholder="이름 입력" maxlength="8">
-            <button onclick="saveScore()">등록 📝</button>
+    <div class="status-bar">
+        <div class="moves">오답: <span id="move-count">0</span>회</div>
+        <div class="matches">성공: <span id="match-count">0</span> / <span id="total-pairs">2</span></div>
+        <div class="timer" id="timer-display">⏱ 0.0s</div>
+    </div>
+    <div class="score-formula" id="score-formula">Stage 1 (2×2)</div>
+
+    <div class="grid-container" id="grid"></div>
+
+    <!-- 시작 화면 -->
+    <div id="start-screen" class="overlay">
+        <div class="overlay-inner">
+            <h2>기억력 테스트</h2>
+            <p>계정과목과 그 설명이 짝꿍입니다.<br>
+               예: <b style="color:var(--blue)">접대비</b> ↔ <b style="color:var(--accent)">거래처 선물</b><br><br>
+               <span style="font-size:0.92rem;color:rgba(255,255,255,0.6)">
+                 Stage 1→7 단계 클리어마다 점수 누적<br>최고 합산점수로 랭킹!
+               </span>
+            </p>
+            <button class="btn" onclick="startGame()">게임 시작 🚀</button>
         </div>
-        <div class="status-msg" id="save-status"></div>
+    </div>
 
-        <div class="rank-wrap">
-            <div class="rank-header">
-                <span>순위</span><span>이름</span><span>직급</span><span>점수</span>
+    <!-- 결과 화면 -->
+    <div id="result-screen" class="overlay" style="display:none;">
+        <div class="overlay-inner">
+            <h2>CLEAR! 🎉</h2>
+            <div id="result-rank" style="font-family:'Jua';font-size:clamp(1.4rem,5vw,2rem);margin-bottom:4px;">직급</div>
+            <p id="result-msg" style="margin-bottom:8px;">훌륭한 기억력입니다!</p>
+
+            <div class="result-score-box">
+                <div class="big-score" id="final-score">0점</div>
+                <div class="score-detail" id="score-detail">0점</div>
             </div>
-            <div id="rank-body"><div class="spinner"></div></div>
+
+            <div class="name-row">
+                <input type="text" id="player-name" placeholder="이름 입력" maxlength="20">
+                <button onclick="saveScore()">등록 📝</button>
+            </div>
+            <div class="status-msg" id="save-status"></div>
+
+            <div class="rank-wrap">
+                <div class="rank-header">
+                    <span>순위</span><span>이름</span><span>직급</span><span>점수</span>
+                </div>
+                <div id="rank-body"><div class="spinner"></div></div>
+            </div>
+
+            <button class="btn" id="next-stage-btn" onclick="nextStage()" style="display:none;background:var(--accent2);">다음 스테이지 ▶</button>
+            <button class="btn" id="restart-btn" onclick="startGame()">다시 하기 🔄</button>
+            <button class="btn btn-secondary" onclick="location.href='index.html'">🏠 허브로 나가기</button>
         </div>
-
-        <button class="btn" id="next-stage-btn" onclick="nextStage()"
-                style="display:none; background:var(--accent2); margin-bottom:8px;">
-            다음 스테이지 ▶
-        </button>
-        <button class="btn" id="restart-btn" onclick="startGame()">다시 하기 🔄</button>
     </div>
-</div>
 
-<script>
-    const SHEET_URL = "https://script.google.com/macros/s/AKfycby-N01s4e5gHHCRZal52CODVHBNYPRPr9aWORp4mMsxsSnwOxQINcOCoHYuVlE2Y652/exec";
-    const GAME_ID = "memory";
+    <script>
+        const SHEET_URL = "https://script.google.com/macros/s/AKfycby-N01s4e5gHHCRZal52CODVHBNYPRPr9aWORp4mMsxsSnwOxQINcOCoHYuVlE2Y652/exec";
+        const GAME_ID = "memory";
 
-    // ── 오디오 ──
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    function initAudio() { if (audioCtx.state === 'suspended') audioCtx.resume(); }
-    function playSound(type) {
-        try {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            const now = audioCtx.currentTime;
-            if (type === 'flip') {
-                osc.type = 'sine'; osc.frequency.setValueAtTime(400, now);
-                gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-                osc.start(now); osc.stop(now + 0.1);
-            } else if (type === 'match') {
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(600, now); osc.frequency.linearRampToValueAtTime(1200, now + 0.15);
-                gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
-                osc.start(now); osc.stop(now + 0.4);
-            } else if (type === 'wrong') {
-                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, now);
-                gain.gain.setValueAtTime(0.15, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
-                osc.start(now); osc.stop(now + 0.25);
-            } else if (type === 'clear') {
-                [523, 659, 784].forEach((freq, i) => {
-                    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-                    o.connect(g); g.connect(audioCtx.destination);
-                    o.type = 'triangle';
-                    o.frequency.setValueAtTime(freq, now + i * 0.12);
-                    g.gain.setValueAtTime(0.2, now + i * 0.12);
-                    g.gain.exponentialRampToValueAtTime(0.01, now + i * 0.12 + 0.3);
-                    o.start(now + i * 0.12); o.stop(now + i * 0.12 + 0.3);
-                });
-            }
-        } catch(e) {}
-    }
-
-    // ── 데이터 ──
-    const allPairs = [
-        { id: 1,  a: "현금",           b: "통화/동전/수표" },
-        { id: 2,  a: "보통예금",        b: "입출금 자유" },
-        { id: 3,  a: "당좌예금",        b: "당좌수표 발행용 예금" },
-        { id: 4,  a: "단기매매증권",    b: "단기 시세차익 주식" },
-        { id: 5,  a: "단기대여금",      b: "1년 내 빌려준 돈" },
-        { id: 6,  a: "장기대여금",      b: "1년 초과 빌려준 돈" },
-        { id: 7,  a: "외상매출금",      b: "상품 외상판매" },
-        { id: 8,  a: "받을어음",        b: "약속어음 수령" },
-        { id: 9,  a: "대손충당금",      b: "못 받을 채권 대비" },
-        { id: 10, a: "미수금",          b: "상품 외 외상채권" },
-        { id: 11, a: "선급금",          b: "계약금 지급" },
-        { id: 12, a: "소모품",          b: "아직 안 쓴 소모품" },
-        { id: 13, a: "가지급금",        b: "용도 불명 지출금" },
-        { id: 14, a: "현금과부족",      b: "현금 장부·실물 차이" },
-        { id: 15, a: "상품",            b: "판매 목적 재고자산" },
-        { id: 16, a: "투자부동산",      b: "임대·투자용 부동산" },
-        { id: 17, a: "토지",            b: "감가상각 안 하는 땅" },
-        { id: 18, a: "건물",            b: "사무실/공장 건축물" },
-        { id: 19, a: "구축물",          b: "담장/포장도로" },
-        { id: 20, a: "기계장치",        b: "생산용 기계설비" },
-        { id: 21, a: "차량운반구",      b: "트럭/승용차" },
-        { id: 22, a: "비품",            b: "컴퓨터/책상" },
-        { id: 23, a: "건설중인자산",    b: "완공 전 공사 원가" },
-        { id: 24, a: "영업권",          b: "인수 시 초과지급액" },
-        { id: 25, a: "개발비",          b: "제품 개발 지출액" },
-        { id: 26, a: "임차보증금",      b: "건물 임차 보증금" },
-        { id: 27, a: "외상매입금",      b: "상품 외상구매" },
-        { id: 28, a: "지급어음",        b: "약속어음 발행" },
-        { id: 29, a: "단기차입금",      b: "1년 내 갚을 대출" },
-        { id: 30, a: "미지급금",        b: "법인카드 결제" },
-        { id: 31, a: "선수금",          b: "계약금 받음" },
-        { id: 32, a: "예수금",          b: "원천징수 보관금" },
-        { id: 33, a: "가수금",          b: "용도 불명 입금액" },
-        { id: 34, a: "임대보증금",      b: "세입자에게 받은 보증금" },
-        { id: 35, a: "장기차입금",      b: "1년 초과 갚을 대출" },
-        { id: 36, a: "자본금",          b: "출자한 원금" },
-        { id: 37, a: "인출금",          b: "개인기업 사적 인출" },
-        { id: 38, a: "상품매출",        b: "상품 판매 수익" },
-        { id: 39, a: "이자수익",        b: "예금 이자 받음" },
-        { id: 40, a: "배당금수익",      b: "주식 배당금 받음" },
-        { id: 41, a: "임대료",          b: "건물 임대 수익" },
-        { id: 42, a: "급여",            b: "직원 월급" },
-        { id: 43, a: "복리후생비",      b: "직원 회식/식대" },
-        { id: 44, a: "여비교통비",      b: "출장비/택시비" },
-        { id: 45, a: "기업업무추진비",  b: "거래처 선물/접대" },
-        { id: 46, a: "통신비",          b: "전화/인터넷 요금" },
-        { id: 47, a: "수도광열비",      b: "가스/전기요금" },
-        { id: 48, a: "세금과공과",      b: "재산세/협회비" },
-        { id: 49, a: "감가상각비",      b: "자산 가치 감소분" },
-        { id: 50, a: "임차료",          b: "건물/장비 사용료" },
-        { id: 51, a: "수선비",          b: "자산 수리·유지비" },
-        { id: 52, a: "보험료",          b: "화재·자동차 보험" },
-        { id: 53, a: "차량유지비",      b: "주유·차량 수리비" },
-        { id: 54, a: "운반비",          b: "상품 배송·운송비" },
-        { id: 55, a: "교육훈련비",      b: "직원 연수·교육비" },
-        { id: 56, a: "도서인쇄비",      b: "책·인쇄물 구입비" },
-        { id: 57, a: "소모품비",        b: "사용한 소모품 비용" },
-        { id: 58, a: "수수료비용",      b: "은행·중개 수수료" },
-        { id: 59, a: "광고선전비",      b: "광고·홍보 비용" },
-        { id: 60, a: "이자비용",        b: "대출 이자 지급" },
-        { id: 61, a: "기부금",          b: "무상으로 준 금품" },
-    ];
-
-    // ── 스테이지 설정 ──
-    const STAGES = [
-        null,
-        { pairs:2, cols:2, rows:2, baseScore:200 },
-        { pairs:3, cols:3, rows:2, baseScore:300 },
-        { pairs:4, cols:4, rows:2, baseScore:400 },
-        { pairs:5, cols:5, rows:2, baseScore:500 },
-        { pairs:6, cols:3, rows:4, baseScore:600 },
-        { pairs:7, cols:4, rows:4, baseScore:700 },
-        { pairs:8, cols:4, rows:4, baseScore:800 },
-    ];
-    const MAX_STAGE = 7;
-    function currentStageConfig() { return STAGES[Math.min(stage, MAX_STAGE)]; }
-
-    // ── 상태 ──
-    let flippedCards = [], matchedCount = 0, moves = 0, wrongCount = 0, isLocked = false;
-    let timerInterval = null, startTime = 0, elapsedSeconds = 0;
-    let stage = 1, totalScore = 0, usedPairIds = new Set();
-
-    const grid      = document.getElementById('grid');
-    const movesEl   = document.getElementById('move-count');
-    const matchesEl = document.getElementById('match-count');
-    const timerEl   = document.getElementById('timer-display');
-
-    // ★ 핵심: 화면 크기에 맞춰 카드 크기를 동적 계산
-    function calcCardSize(cfg) {
-        const GAP = Math.max(6, Math.min(14, window.innerWidth * 0.02));
-        const PADDING = 16; // 좌우 패딩 합계
-        const AD_H = 50;    // 하단 광고
-        const HEADER_H = 120; // 헤더 + 상태바 + 공식바 대략 합계
-
-        // 가로: 화면 너비에서 패딩·갭 제거 후 열 수로 나눔
-        const availW = Math.min(window.innerWidth, 700) - PADDING * 2;
-        const cardW  = Math.floor((availW - GAP * (cfg.cols - 1)) / cfg.cols);
-
-        // 세로: 남은 세로 공간에서 행 수로 나눔 (비율 유지)
-        const availH = window.innerHeight - HEADER_H - AD_H - PADDING * 2;
-        const cardH  = Math.floor((availH - GAP * (cfg.rows - 1)) / cfg.rows);
-
-        // 카드가 너무 크거나 작지 않도록 클램핑
-        const w = Math.max(70, Math.min(cardW, 170));
-        const h = Math.max(60, Math.min(cardH, 120));
-        return { w, h, gap: GAP };
-    }
-
-    function applyGridStyle(cfg) {
-        const { w, h, gap } = calcCardSize(cfg);
-        // CSS 변수로 카드 크기 주입
-        document.documentElement.style.setProperty('--card-w', w + 'px');
-        document.documentElement.style.setProperty('--card-h', h + 'px');
-        grid.style.gap = gap + 'px';
-        grid.style.gridTemplateColumns = `repeat(${cfg.cols}, ${w}px)`;
-        grid.style.gridTemplateRows    = `repeat(${cfg.rows}, ${h}px)`;
-    }
-
-    // 화면 회전 시 재계산
-    window.addEventListener('resize', () => {
-        const cfg = currentStageConfig();
-        if (cfg) applyGridStyle(cfg);
-    });
-
-    function startTimer() {
-        startTime = Date.now();
-        timerInterval = setInterval(() => {
-            elapsedSeconds = (Date.now() - startTime) / 1000;
-            timerEl.textContent = `⏱ ${elapsedSeconds.toFixed(1)}s`;
-            timerEl.classList.toggle('warning', elapsedSeconds > 60);
-        }, 100);
-    }
-    function stopTimer() {
-        clearInterval(timerInterval); timerInterval = null;
-        elapsedSeconds = (Date.now() - startTime) / 1000;
-    }
-    function calcScore(wrong, secs, cfg) {
-        return Math.max(0, Math.round(cfg.baseScore - wrong * 20 - secs * 0.5));
-    }
-
-    function getRank(score) {
-        if      (score >= 2800) return { title:'👑 CEO',       color:'#f1c40f', msg:'전설의 회계 CEO! 완벽합니다!' };
-        else if (score >= 2400) return { title:'⭐ CEO급',     color:'#e67e22', msg:'CEO급 실력! 정말 훌륭합니다!' };
-        else if (score >= 2000) return { title:'🎖 전무/상무', color:'#3498db', msg:'임원급 실력! 대단합니다!' };
-        else if (score >= 1600) return { title:'🏅 이사',      color:'#2ecc71', msg:'이사급 실력! 잘했어요!' };
-        else if (score >= 1200) return { title:'📋 부장',      color:'#1abc9c', msg:'베테랑 부장! 좋습니다!' };
-        else if (score >= 800)  return { title:'🗂 차장',      color:'#9b59b6', msg:'믿음직한 차장! 조금만 더!' };
-        else if (score >= 500)  return { title:'📁 과장',      color:'#e74c3c', msg:'성장 중인 과장! 화이팅!' };
-        else if (score >= 250)  return { title:'📝 대리',      color:'#95a5a6', msg:'열심히 하는 대리! 다시 도전!' };
-        else                    return { title:'💼 사원',      color:'#7f8c8d', msg:'이제 시작! 다시 도전해봐요!' };
-    }
-
-    function quitGame() {
-        if (!timerInterval && elapsedSeconds === 0 && stage === 1) {
-            location.href = 'index.html'; return;
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function initAudio() { if (audioCtx.state === 'suspended') audioCtx.resume(); }
+        function playSound(type) {
+            try {
+                const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                const now = audioCtx.currentTime;
+                if (type === 'flip') {
+                    osc.type = 'sine'; osc.frequency.setValueAtTime(400, now);
+                    gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                    osc.start(now); osc.stop(now + 0.1);
+                } else if (type === 'match') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(600, now); osc.frequency.linearRampToValueAtTime(1200, now + 0.15);
+                    gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                    osc.start(now); osc.stop(now + 0.4);
+                } else if (type === 'wrong') {
+                    osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, now);
+                    gain.gain.setValueAtTime(0.15, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
+                    osc.start(now); osc.stop(now + 0.25);
+                } else if (type === 'clear') {
+                    [523, 659, 784].forEach((freq, i) => {
+                        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+                        o.connect(g); g.connect(audioCtx.destination); o.type = 'triangle';
+                        o.frequency.setValueAtTime(freq, now + i * 0.12);
+                        g.gain.setValueAtTime(0.2, now + i * 0.12);
+                        g.gain.exponentialRampToValueAtTime(0.01, now + i * 0.12 + 0.3);
+                        o.start(now + i * 0.12); o.stop(now + i * 0.12 + 0.3);
+                    });
+                }
+            } catch(e) {}
         }
-        stopTimer(); endGame(true);
-    }
 
-    function startGame() {
-        initAudio();
-        document.getElementById('start-screen').style.display = 'none';
-        document.getElementById('result-screen').style.display = 'none';
-        stage = 1; totalScore = 0; usedPairIds = new Set();
-        resetStage();
-    }
+        const allPairs = [
+            { id:1,  a:"현금",          b:"통화/동전/수표" },
+            { id:2,  a:"보통예금",       b:"입출금 자유" },
+            { id:3,  a:"당좌예금",       b:"당좌수표 발행용 예금" },
+            { id:4,  a:"단기매매증권",   b:"단기 시세차익 주식" },
+            { id:5,  a:"단기대여금",     b:"1년 내 빌려준 돈" },
+            { id:6,  a:"장기대여금",     b:"1년 초과 빌려준 돈" },
+            { id:7,  a:"외상매출금",     b:"상품 외상판매" },
+            { id:8,  a:"받을어음",       b:"약속어음 수령" },
+            { id:9,  a:"대손충당금",     b:"못 받을 채권 대비" },
+            { id:10, a:"미수금",         b:"상품 외 외상채권" },
+            { id:11, a:"선급금",         b:"계약금 지급" },
+            { id:12, a:"소모품",         b:"아직 안 쓴 소모품" },
+            { id:13, a:"가지급금",       b:"용도 불명 지출금" },
+            { id:14, a:"현금과부족",     b:"현금 장부·실물 차이" },
+            { id:15, a:"상품",           b:"판매 목적 재고자산" },
+            { id:16, a:"투자부동산",     b:"임대·투자용 부동산" },
+            { id:17, a:"토지",           b:"감가상각 안 하는 땅" },
+            { id:18, a:"건물",           b:"사무실/공장 건축물" },
+            { id:19, a:"구축물",         b:"담장/포장도로" },
+            { id:20, a:"기계장치",       b:"생산용 기계설비" },
+            { id:21, a:"차량운반구",     b:"트럭/승용차" },
+            { id:22, a:"비품",           b:"컴퓨터/책상" },
+            { id:23, a:"건설중인자산",   b:"완공 전 공사 원가" },
+            { id:24, a:"영업권",         b:"인수 시 초과지급액" },
+            { id:25, a:"개발비",         b:"제품 개발 지출액" },
+            { id:26, a:"임차보증금",     b:"건물 임차 보증금" },
+            { id:27, a:"외상매입금",     b:"상품 외상구매" },
+            { id:28, a:"지급어음",       b:"약속어음 발행" },
+            { id:29, a:"단기차입금",     b:"1년 내 갚을 대출" },
+            { id:30, a:"미지급금",       b:"법인카드 결제" },
+            { id:31, a:"선수금",         b:"계약금 받음" },
+            { id:32, a:"예수금",         b:"원천징수 보관금" },
+            { id:33, a:"가수금",         b:"용도 불명 입금액" },
+            { id:34, a:"임대보증금",     b:"세입자에게 받은 보증금" },
+            { id:35, a:"장기차입금",     b:"1년 초과 갚을 대출" },
+            { id:36, a:"자본금",         b:"출자한 원금" },
+            { id:37, a:"인출금",         b:"개인기업 사적 인출" },
+            { id:38, a:"상품매출",       b:"상품 판매 수익" },
+            { id:39, a:"이자수익",       b:"예금 이자 받음" },
+            { id:40, a:"배당금수익",     b:"주식 배당금 받음" },
+            { id:41, a:"임대료",         b:"건물 임대 수익" },
+            { id:42, a:"급여",           b:"직원 월급" },
+            { id:43, a:"복리후생비",     b:"직원 회식/식대" },
+            { id:44, a:"여비교통비",     b:"출장비/택시비" },
+            { id:45, a:"기업업무추진비", b:"거래처 선물/접대" },
+            { id:46, a:"통신비",         b:"전화/인터넷 요금" },
+            { id:47, a:"수도광열비",     b:"가스/전기요금" },
+            { id:48, a:"세금과공과",     b:"재산세/협회비" },
+            { id:49, a:"감가상각비",     b:"자산 가치 감소분" },
+            { id:50, a:"임차료",         b:"건물/장비 사용료" },
+            { id:51, a:"수선비",         b:"자산 수리·유지비" },
+            { id:52, a:"보험료",         b:"화재·자동차 보험" },
+            { id:53, a:"차량유지비",     b:"주유·차량 수리비" },
+            { id:54, a:"운반비",         b:"상품 배송·운송비" },
+            { id:55, a:"교육훈련비",     b:"직원 연수·교육비" },
+            { id:56, a:"도서인쇄비",     b:"책·인쇄물 구입비" },
+            { id:57, a:"소모품비",       b:"사용한 소모품 비용" },
+            { id:58, a:"수수료비용",     b:"은행·중개 수수료" },
+            { id:59, a:"광고선전비",     b:"광고·홍보 비용" },
+            { id:60, a:"이자비용",       b:"대출 이자 지급" },
+            { id:61, a:"기부금",         b:"무상으로 준 금품" },
+        ];
 
-    function resetStage() {
-        moves = 0; wrongCount = 0; matchedCount = 0; isLocked = false; flippedCards = [];
-        elapsedSeconds = 0;
-        movesEl.innerText = 0;
-        timerEl.textContent = '⏱ 0.0s'; timerEl.classList.remove('warning');
-        clearInterval(timerInterval); timerInterval = null;
-        const cfg = currentStageConfig();
-        matchesEl.innerText = 0;
-        document.getElementById('total-pairs').textContent = cfg.pairs;
-        document.getElementById('score-formula').textContent =
-            `Stage ${Math.min(stage, MAX_STAGE)} (${cfg.cols}×${cfg.rows}) — 기본${cfg.baseScore}점 | 오답×20 | 시간×0.5 | 누적: ${totalScore}점`;
-        setupBoard(cfg);
-    }
+        // ── 오답 카운트 수정: wrongCount는 두 장 뒤집었는데 틀렸을 때만 증가 ──
+        let flippedCards = [], matchedCount = 0, wrongCount = 0, isLocked = false;
+        let timerInterval = null, startTime = 0, elapsedSeconds = 0;
+        let stage = 1, totalScore = 0, usedPairIds = new Set();
 
-    function setupBoard(cfg) {
-        grid.innerHTML = '';
-        applyGridStyle(cfg); // ★ 카드 크기 동적 계산 적용
+        // ── 스마트폰 세로 배치 우선 스테이지 설정 ──
+        // cols × rows: 세로(rows)를 최대한 활용
+        // 모바일 320~430px 기준으로 설계
+        const STAGES = [
+            null,
+            { pairs:2,  cols:2, rows:2,  baseScore:200 },  // Stage 1: 2×2 = 4장
+            { pairs:3,  cols:2, rows:3,  baseScore:300 },  // Stage 2: 2×3 = 6장  ← 세로형
+            { pairs:4,  cols:2, rows:4,  baseScore:400 },  // Stage 3: 2×4 = 8장  ← 세로형
+            { pairs:5,  cols:2, rows:5,  baseScore:500 },  // Stage 4: 2×5 = 10장 ← 세로형
+            { pairs:6,  cols:3, rows:4,  baseScore:600 },  // Stage 5: 3×4 = 12장
+            { pairs:7,  cols:3, rows:5,  baseScore:700 },  // Stage 6: 3×5 = 14장(빈칸1)
+            { pairs:8,  cols:4, rows:4,  baseScore:800 },  // Stage 7: 4×4 = 16장
+        ];
+        const MAX_STAGE = 7;
 
-        let available = allPairs.filter(p => !usedPairIds.has(p.id));
-        if (available.length < cfg.pairs) { usedPairIds = new Set(); available = [...allPairs]; }
-        let selected = [...available].sort(() => 0.5 - Math.random()).slice(0, cfg.pairs);
-        selected.forEach(p => usedPairIds.add(p.id));
+        function currentStageConfig() { return STAGES[Math.min(stage, MAX_STAGE)]; }
 
-        let cardData = [];
-        selected.forEach(p => {
-            cardData.push({ id: p.id, text: p.a, type: 'account' });
-            cardData.push({ id: p.id, text: p.b, type: 'desc' });
-        });
-        cardData.sort(() => 0.5 - Math.random());
+        const grid      = document.getElementById('grid');
+        const movesEl   = document.getElementById('move-count');
+        const matchesEl = document.getElementById('match-count');
+        const timerEl   = document.getElementById('timer-display');
 
-        const totalSlots = cfg.cols * cfg.rows;
-        if (totalSlots > cardData.length) {
-            const blanks = totalSlots - cardData.length;
-            const blankPositions = new Set();
-            while (blankPositions.size < blanks) blankPositions.add(Math.floor(Math.random() * totalSlots));
-            let ci = 0;
-            for (let i = 0; i < totalSlots; i++) {
-                if (blankPositions.has(i)) {
-                    const blank = document.createElement('div');
-                    blank.style.visibility = 'hidden';
-                    grid.appendChild(blank);
+        // 카드 크기 계산 (모바일 세로 최적화)
+        function calcCardSize(cfg) {
+            const GAP = Math.max(8, Math.min(14, window.innerWidth * 0.025));
+            const sidePad = Math.max(16, window.innerWidth * 0.04);
+            const availW = Math.min(window.innerWidth, 600) - sidePad * 2;
+            const cardW  = Math.floor((availW - GAP * (cfg.cols - 1)) / cfg.cols);
+
+            // 세로: 헤더+상태바+여백 약 140px 제외, 광고 50px
+            const availH = window.innerHeight - 150;
+            const cardH  = Math.floor((availH - GAP * (cfg.rows - 1)) / cfg.rows);
+
+            return {
+                w: Math.max(80, Math.min(cardW, 180)),
+                h: Math.max(60, Math.min(cardH, 110)),
+                gap: GAP
+            };
+        }
+
+        function applyGridStyle(cfg) {
+            const { w, h, gap } = calcCardSize(cfg);
+            document.documentElement.style.setProperty('--card-w', w + 'px');
+            document.documentElement.style.setProperty('--card-h', h + 'px');
+            grid.style.gridTemplateColumns = `repeat(${cfg.cols}, ${w}px)`;
+            grid.style.gap = gap + 'px';
+            // 카드 폰트 크기도 너비에 맞게
+            const fs = Math.max(0.78, Math.min(w / 100, 1.4));
+            document.querySelectorAll('.card-front').forEach(el => {
+                el.style.fontSize = fs + 'rem';
+            });
+        }
+
+        function startTimer() {
+            startTime = Date.now();
+            timerInterval = setInterval(() => {
+                elapsedSeconds = (Date.now() - startTime) / 1000;
+                timerEl.textContent = `⏱ ${elapsedSeconds.toFixed(1)}s`;
+                timerEl.classList.toggle('warning', elapsedSeconds > 60);
+            }, 100);
+        }
+        function stopTimer() {
+            clearInterval(timerInterval); timerInterval = null;
+            elapsedSeconds = (Date.now() - startTime) / 1000;
+        }
+
+        function calcScore(wrong, secs, cfg) {
+            return Math.max(0, Math.round(cfg.baseScore - wrong * 20 - secs * 0.5));
+        }
+
+        function getRank(score) {
+            if      (score >= 2800) return { title:'👑 CEO',       color:'#f1c40f', msg:'전설의 회계 CEO! 완벽합니다!' };
+            else if (score >= 2400) return { title:'⭐ CEO급',     color:'#e67e22', msg:'CEO급 실력! 정말 훌륭합니다!' };
+            else if (score >= 2000) return { title:'🎖 전무/상무', color:'#3498db', msg:'임원급 실력! 대단합니다!' };
+            else if (score >= 1600) return { title:'🏅 이사',      color:'#2ecc71', msg:'이사급 실력! 잘했어요!' };
+            else if (score >= 1200) return { title:'📋 부장',      color:'#1abc9c', msg:'베테랑 부장! 좋습니다!' };
+            else if (score >= 800)  return { title:'🗂 차장',      color:'#9b59b6', msg:'믿음직한 차장! 조금만 더!' };
+            else if (score >= 500)  return { title:'📁 과장',      color:'#e74c3c', msg:'성장 중인 과장! 화이팅!' };
+            else if (score >= 250)  return { title:'📝 대리',      color:'#95a5a6', msg:'열심히 하는 대리! 다시 도전!' };
+            else                    return { title:'💼 사원',      color:'#7f8c8d', msg:'이제 시작! 다시 도전해봐요!' };
+        }
+
+        function quitGame() {
+            if (!timerInterval && elapsedSeconds === 0 && stage === 1) { location.href = 'index.html'; return; }
+            stopTimer(); endGame(true);
+        }
+
+        function startGame() {
+            initAudio();
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('result-screen').style.display = 'none';
+            stage = 1; totalScore = 0; usedPairIds = new Set();
+            resetStage();
+        }
+
+        function resetStage() {
+            wrongCount = 0; matchedCount = 0; isLocked = false; flippedCards = [];
+            elapsedSeconds = 0;
+            movesEl.innerText = 0;
+            timerEl.textContent = '⏱ 0.0s'; timerEl.classList.remove('warning');
+            clearInterval(timerInterval);
+            const cfg = currentStageConfig();
+            matchesEl.innerText = 0;
+            document.getElementById('total-pairs').textContent = cfg.pairs;
+            document.getElementById('score-formula').textContent =
+                `Stage ${Math.min(stage, MAX_STAGE)} (${cfg.cols}×${cfg.rows}) — 기본${cfg.baseScore}점 | 누적: ${totalScore}점`;
+            setupBoard(cfg);
+        }
+
+        function setupBoard(cfg) {
+            grid.innerHTML = '';
+
+            let available = allPairs.filter(p => !usedPairIds.has(p.id));
+            if (available.length < cfg.pairs) { usedPairIds = new Set(); available = [...allPairs]; }
+            let selected = [...available].sort(() => 0.5 - Math.random()).slice(0, cfg.pairs);
+            selected.forEach(p => usedPairIds.add(p.id));
+
+            let cardData = [];
+            selected.forEach(p => {
+                cardData.push({ id: p.id, text: p.a, type: 'account' });
+                cardData.push({ id: p.id, text: p.b, type: 'desc' });
+            });
+            cardData.sort(() => 0.5 - Math.random());
+
+            const totalSlots = cfg.cols * cfg.rows;
+            if (totalSlots > cardData.length) {
+                const blanks = totalSlots - cardData.length;
+                const blankPositions = new Set();
+                while (blankPositions.size < blanks) blankPositions.add(Math.floor(Math.random() * totalSlots));
+                let ci = 0;
+                for (let i = 0; i < totalSlots; i++) {
+                    if (blankPositions.has(i)) {
+                        const blank = document.createElement('div');
+                        blank.style.visibility = 'hidden';
+                        blank.style.width = 'var(--card-w, 140px)';
+                        blank.style.height = 'var(--card-h, 90px)';
+                        grid.appendChild(blank);
+                    } else { appendCard(cardData[ci++]); }
+                }
+            } else {
+                cardData.forEach(data => appendCard(data));
+            }
+
+            // 카드 크기 적용
+            applyGridStyle(cfg);
+        }
+
+        function appendCard(data) {
+            const card = document.createElement('div');
+            card.classList.add('card');
+            card.dataset.id = data.id;
+            card.innerHTML = `
+                <div class="card-inner">
+                    <div class="card-back">?</div>
+                    <div class="card-front" style="color:${data.type === 'account' ? '#2980b9' : '#c0392b'}">
+                        ${data.text}
+                    </div>
+                </div>`;
+            card.addEventListener('pointerdown', function(e) {
+                e.preventDefault();
+                if (!timerInterval) startTimer();
+                flipCard.call(this);
+            });
+            grid.appendChild(card);
+        }
+
+        function flipCard() {
+            if (isLocked) return;
+            if (this === flippedCards[0]) return;
+            if (this.classList.contains('flipped') || this.classList.contains('matched')) return;
+            playSound('flip');
+            this.classList.add('flipped');
+            flippedCards.push(this);
+            // ★ 두 장 다 뒤집혔을 때만 판정 (첫 번째 클릭은 오답 아님)
+            if (flippedCards.length === 2) {
+                checkForMatch();
+            }
+        }
+
+        function checkForMatch() {
+            isLocked = true;
+            const [c1, c2] = flippedCards;
+            const cfg = currentStageConfig();
+            if (c1.dataset.id === c2.dataset.id) {
+                // 정답
+                playSound('match');
+                setTimeout(() => {
+                    c1.classList.add('matched'); c2.classList.add('matched');
+                    matchedCount++; matchesEl.innerText = matchedCount;
+                    flippedCards = []; isLocked = false;
+                    if (matchedCount === cfg.pairs) endGame();
+                }, 400);
+            } else {
+                // ★ 오답: 두 장이 짝이 아닐 때만 wrongCount 증가
+                wrongCount++;
+                movesEl.innerText = wrongCount;
+                playSound('wrong');
+                c1.classList.add('wrong-flash'); c2.classList.add('wrong-flash');
+                setTimeout(() => {
+                    c1.classList.remove('flipped', 'wrong-flash');
+                    c2.classList.remove('flipped', 'wrong-flash');
+                    flippedCards = []; isLocked = false;
+                }, 900);
+            }
+        }
+
+        function endGame(quit = false) {
+            stopTimer();
+            const cfg = currentStageConfig();
+            const secs = Math.round(elapsedSeconds);
+            const stageScore = quit
+                ? Math.max(0, Math.round(cfg.baseScore * (matchedCount / cfg.pairs) - wrongCount * 20 - secs * 0.5))
+                : calcScore(wrongCount, secs, cfg);
+            const detail = quit
+                ? `포기(${matchedCount}/${cfg.pairs}쌍) — 기본${Math.round(cfg.baseScore*(matchedCount/cfg.pairs))} - 오답${wrongCount}×20 - ${secs}초×0.5 = ${Math.round(stageScore)}점`
+                : `기본${cfg.baseScore} - 오답${wrongCount}×20 - ${secs}초×0.5 = +${stageScore}점`;
+
+            if (quit) {
+                showResult(totalScore + Math.round(stageScore), true, detail);
+            } else {
+                playSound('clear');
+                totalScore += stageScore;
+                if (stage < MAX_STAGE) {
+                    document.querySelector('#result-screen h2').textContent = `Stage ${stage} CLEAR! 🎉`;
+                    document.getElementById('result-rank').textContent = `+${stageScore}점 획득!`;
+                    document.getElementById('result-rank').style.color = '#2ecc71';
+                    document.getElementById('result-msg').textContent = `누적 점수: ${totalScore}점 — 다음 스테이지로!`;
+                    document.getElementById('final-score').textContent = totalScore + '점';
+                    document.getElementById('score-detail').textContent = detail;
+                    document.querySelector('.name-row').style.display = 'none';
+                    document.getElementById('save-status').style.display = 'none';
+                    document.getElementById('result-screen').style.display = 'flex';
+                    document.getElementById('next-stage-btn').style.display = 'inline-block';
+                    document.getElementById('restart-btn').style.display = 'none';
                 } else {
-                    appendCard(cardData[ci++]);
+                    showResult(totalScore, false, `전 스테이지 완료! 마지막: ${detail}`);
                 }
             }
-            return;
         }
-        cardData.forEach(data => appendCard(data));
-    }
 
-    function appendCard(data) {
-        const card = document.createElement('div');
-        card.classList.add('card');
-        card.dataset.id = data.id;
-        card.innerHTML = `
-            <div class="card-inner">
-                <div class="card-back">?</div>
-                <div class="card-front" style="color:${data.type === 'account' ? '#2980b9' : '#c0392b'}">
-                    ${data.text}
-                </div>
-            </div>`;
-        // 터치 + 클릭 통합
-        card.addEventListener('pointerdown', function(e) {
-            e.preventDefault();
-            if (!timerInterval && elapsedSeconds === 0) startTimer();
-            flipCard.call(this);
+        function showResult(finalScore, quit, detail) {
+            const rank = getRank(finalScore);
+            document.querySelector('#result-screen h2').textContent = quit ? '포기... 😢' : 'ALL CLEAR! 🏆';
+            document.getElementById('result-rank').textContent = rank.title;
+            document.getElementById('result-rank').style.color = rank.color;
+            document.getElementById('result-msg').textContent = quit
+                ? `${rank.msg} — 지금까지의 점수로 랭킹 등록 가능!` : rank.msg;
+            document.getElementById('final-score').textContent = finalScore + '점';
+            document.getElementById('score-detail').textContent = detail;
+            document.getElementById('save-status').textContent = '';
+            document.getElementById('player-name').value = '';
+            document.querySelector('.name-row').style.display = 'flex';
+            document.getElementById('save-status').style.display = 'block';
+            document.getElementById('next-stage-btn').style.display = 'none';
+            document.getElementById('restart-btn').style.display = 'inline-block';
+            document.getElementById('result-screen').style.display = 'flex';
+            loadRanking();
+        }
+
+        function nextStage() {
+            stage++;
+            document.getElementById('result-screen').style.display = 'none';
+            resetStage();
+        }
+
+        // 화면 회전/리사이즈 시 재계산
+        window.addEventListener('resize', () => {
+            const cfg = currentStageConfig();
+            if (cfg) applyGridStyle(cfg);
         });
-        grid.appendChild(card);
-    }
 
-    function flipCard() {
-        if (isLocked) return;
-        if (this === flippedCards[0]) return;
-        if (this.classList.contains('flipped') || this.classList.contains('matched')) return;
-        playSound('flip');
-        this.classList.add('flipped');
-        flippedCards.push(this);
-        if (flippedCards.length === 2) { moves++; movesEl.innerText = wrongCount; checkForMatch(); }
-    }
-
-    function checkForMatch() {
-        isLocked = true;
-        const [c1, c2] = flippedCards;
-        const cfg = currentStageConfig();
-        if (c1.dataset.id === c2.dataset.id) {
-            playSound('match');
-            setTimeout(() => {
-                c1.classList.add('matched'); c2.classList.add('matched');
-                matchedCount++; matchesEl.innerText = matchedCount;
-                flippedCards = []; isLocked = false;
-                if (matchedCount === cfg.pairs) endGame();
-            }, 400);
-        } else {
-            wrongCount++; movesEl.innerText = wrongCount;
-            playSound('wrong');
-            c1.classList.add('wrong-flash'); c2.classList.add('wrong-flash');
-            setTimeout(() => {
-                c1.classList.remove('flipped', 'wrong-flash');
-                c2.classList.remove('flipped', 'wrong-flash');
-                flippedCards = []; isLocked = false;
-            }, 900);
+        function _lget() { return JSON.parse(localStorage.getItem('hub_memory') || '[]'); }
+        function _lsave(d) {
+            const l = _lget(); l.push(d);
+            l.sort((a, b) => b.score - a.score);
+            localStorage.setItem('hub_memory', JSON.stringify(l.slice(0, 20)));
         }
-    }
 
-    function endGame(quit = false) {
-        stopTimer();
-        const cfg = currentStageConfig();
-        const secs = Math.round(elapsedSeconds);
-        const stageScore = quit
-            ? Math.max(0, Math.round(cfg.baseScore * (matchedCount / cfg.pairs) - wrongCount * 20 - secs * 0.5))
-            : calcScore(wrongCount, secs, cfg);
-        const detail = quit
-            ? `포기(${matchedCount}/${cfg.pairs}쌍) — ${Math.round(stageScore)}점`
-            : `기본${cfg.baseScore} - 오답${wrongCount}×20 - ${secs}초×0.5 = +${stageScore}점`;
-
-        if (quit) {
-            showResult(totalScore + Math.round(stageScore), true, detail);
-        } else {
-            playSound('clear');
-            totalScore += stageScore;
-            if (stage < MAX_STAGE) {
-                document.querySelector('#result-screen h2').textContent = `Stage ${stage} CLEAR! 🎉`;
-                document.getElementById('result-rank').textContent = `+${stageScore}점 획득!`;
-                document.getElementById('result-rank').style.color = '#2ecc71';
-                document.getElementById('result-msg').textContent = `누적 점수: ${totalScore}점 — 다음 스테이지로!`;
-                document.getElementById('final-score').textContent = totalScore + '점';
-                document.getElementById('score-detail').textContent = detail;
-                document.querySelector('.name-row').style.display = 'none';
-                document.getElementById('save-status').style.display = 'none';
-                document.getElementById('result-screen').style.display = 'flex';
-                document.getElementById('next-stage-btn').style.display = 'inline-block';
-                document.getElementById('restart-btn').style.display = 'none';
-            } else {
-                showResult(totalScore, false, `전 스테이지 완료! 마지막: ${detail}`);
+        async function saveScore() {
+            const name = document.getElementById('player-name').value.trim();
+            if (!name) { showStatus('이름을 입력해주세요', 'err'); return; }
+            const secs  = Math.round(elapsedSeconds);
+            const score = parseInt(document.getElementById('final-score').textContent) || 0;
+            const today = new Date().toLocaleDateString('ko-KR', {month:'2-digit', day:'2-digit'});
+            const data  = { game: GAME_ID, name, score, combo: 0, correct: matchedCount, date: today };
+            _lsave(data);
+            showStatus('저장 중...', '');
+            try {
+                await fetch(SHEET_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
+                showStatus('✅ 등록 완료!', 'ok');
+                await new Promise(r => setTimeout(r, 800));
+                await loadRanking();
+            } catch(e) {
+                showStatus('✓ 로컬 저장 완료', 'ok');
+                renderRanking(_lget());
             }
         }
-    }
 
-    function showResult(finalScore, quit, detail) {
-        const rank = getRank(finalScore);
-        document.querySelector('#result-screen h2').textContent = quit ? '포기... 😢' : 'ALL CLEAR! 🏆';
-        document.getElementById('result-rank').textContent = rank.title;
-        document.getElementById('result-rank').style.color = rank.color;
-        document.getElementById('result-msg').textContent = quit ? `${rank.msg} — 지금까지의 점수로 랭킹 등록 가능!` : rank.msg;
-        document.getElementById('final-score').textContent = finalScore + '점';
-        document.getElementById('score-detail').textContent = detail;
-        document.getElementById('save-status').textContent = '';
-        document.getElementById('player-name').value = '';
-        document.querySelector('.name-row').style.display = 'flex';
-        document.getElementById('save-status').style.display = 'block';
-        document.getElementById('next-stage-btn').style.display = 'none';
-        document.getElementById('restart-btn').style.display = 'inline-block';
-        document.getElementById('result-screen').style.display = 'flex';
-        loadRanking();
-    }
-
-    function nextStage() {
-        stage++;
-        document.getElementById('result-screen').style.display = 'none';
-        resetStage();
-    }
-
-    // ── 랭킹 ──
-    function _lget() { return JSON.parse(localStorage.getItem('hub_memory') || '[]'); }
-    function _lsave(d) {
-        const l = _lget(); l.push(d);
-        l.sort((a, b) => b.score - a.score);
-        localStorage.setItem('hub_memory', JSON.stringify(l.slice(0, 20)));
-    }
-
-    async function saveScore() {
-        const name = document.getElementById('player-name').value.trim().toUpperCase();
-        if (!name) { showStatus('이름을 입력해주세요', 'err'); return; }
-        if (name.length < 2) { showStatus('2글자 이상 입력하세요', 'err'); return; }
-        const secs  = Math.round(elapsedSeconds);
-        const score = parseInt(document.getElementById('final-score').textContent) || 0;
-        const today = new Date().toLocaleDateString('ko-KR', { month:'2-digit', day:'2-digit' });
-        const data  = { game: GAME_ID, name, score, combo: 0, correct: matchedCount, date: today };
-        _lsave(data);
-        showStatus('저장 중...', '');
-        try {
-            await fetch(SHEET_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
-            showStatus('✅ 등록 완료!', 'ok');
-            await new Promise(r => setTimeout(r, 800));
-            await loadRanking();
-        } catch(e) {
-            showStatus('✓ 로컬 저장 완료', 'ok');
-            renderRanking(_lget());
+        async function loadRanking() {
+            const body = document.getElementById('rank-body');
+            body.innerHTML = '<div class="spinner"></div>';
+            try {
+                const res = await fetch(SHEET_URL + '?action=get&game=' + GAME_ID);
+                renderRanking(mergeRank(await res.json(), _lget()));
+            } catch(e) { renderRanking(_lget()); }
         }
-    }
 
-    async function loadRanking() {
-        const body = document.getElementById('rank-body');
-        body.innerHTML = '<div class="spinner"></div>';
-        try {
-            const res = await fetch(SHEET_URL + '?action=get&game=' + GAME_ID);
-            renderRanking(mergeRank(await res.json(), _lget()));
-        } catch(e) { renderRanking(_lget()); }
-    }
-
-    function mergeRank(remote, local) {
-        const map = new Map();
-        [...(Array.isArray(remote) ? remote : []), ...local].forEach(r => {
-            const k = r.name + '_' + r.score; if (!map.has(k)) map.set(k, r);
-        });
-        return [...map.values()].sort((a, b) => b.score - a.score).slice(0, 15);
-    }
-
-    function renderRanking(list) {
-        const body = document.getElementById('rank-body');
-        const me   = document.getElementById('player-name').value.trim().toUpperCase();
-        if (!list || list.length === 0) {
-            body.innerHTML = '<div style="color:rgba(255,255,255,0.4);text-align:center;padding:14px;font-size:0.9rem;">아직 기록이 없습니다</div>';
-            return;
+        function mergeRank(remote, local) {
+            const map = new Map();
+            [...(Array.isArray(remote) ? remote : []), ...local].forEach(r => {
+                const k = r.name + '_' + r.score; if (!map.has(k)) map.set(k, r);
+            });
+            return [...map.values()].sort((a, b) => b.score - a.score).slice(0, 15);
         }
-        const colors = ['gold', 'silver', 'bronze'];
-        body.innerHTML = list.slice(0, 15).map((r, i) => {
-            const rk = getRank(Number(r.score));
-            return `<div class="rank-row${r.name === me ? ' rank-me' : ''}">
-                <span class="rank-num ${colors[i] || ''}">${i + 1}위</span>
-                <span>${r.name}</span>
-                <span style="color:${rk.color};font-family:'Jua';font-size:0.85rem;">${rk.title}</span>
-                <span class="rank-score">${(r.score||0).toLocaleString()}점</span>
-            </div>`;
-        }).join('');
-    }
 
-    function showStatus(msg, type) {
-        const el = document.getElementById('save-status');
-        el.textContent = msg; el.className = 'status-msg ' + type;
-    }
+        function renderRanking(list) {
+            const body = document.getElementById('rank-body');
+            const me   = document.getElementById('player-name').value.trim();
+            if (!list || list.length === 0) {
+                body.innerHTML = '<div style="color:rgba(255,255,255,0.4);text-align:center;padding:14px;font-size:0.9rem;">아직 기록이 없습니다</div>';
+                return;
+            }
+            const colors = ['gold', 'silver', 'bronze'];
+            body.innerHTML = list.slice(0, 15).map((r, i) => {
+                const rk = getRank(Number(r.score));
+                return `<div class="rank-row${r.name === me ? ' rank-me' : ''}">
+                    <span class="rank-num ${colors[i] || ''}">${i + 1}위</span>
+                    <span>${r.name}</span>
+                    <span style="color:${rk.color};font-family:'Jua';font-size:0.85rem;">${rk.title}</span>
+                    <span class="rank-score">${(r.score||0).toLocaleString()}점</span>
+                </div>`;
+            }).join('');
+        }
 
-    // ── 안드로이드 WebView 광고 플레이스홀더 숨김 ──
-    function hideAdPlaceholder() {
-        const el = document.getElementById('adPlaceholder');
-        if (el) el.style.display = 'none';
-        document.body.style.paddingBottom = '0';
-    }
-</script>
+        function showStatus(msg, type) {
+            const el = document.getElementById('save-status');
+            el.textContent = msg; el.className = 'status-msg ' + type;
+        }
+    </script>
 </body>
 </html>
