@@ -45,7 +45,10 @@
             background: rgba(10,13,20,0.95); backdrop-filter: blur(8px);
             display: flex; flex-direction: column; align-items: center;
             justify-content: flex-start; overflow-y: auto;
-            padding: max(20px,env(safe-area-inset-top)) 16px 20px;
+            /* ★ 하단 패딩 = 광고 높이 + 여백 — 콘텐츠가 광고에 안 가려지게 */
+            padding: max(20px,env(safe-area-inset-top)) 16px calc(var(--ad-h) + 16px);
+            touch-action: pan-y;
+            overscroll-behavior: contain;
         }
         .overlay-inner {
             display: flex; flex-direction: column; align-items: center;
