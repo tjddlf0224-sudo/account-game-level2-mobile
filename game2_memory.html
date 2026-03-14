@@ -575,32 +575,38 @@
 
         function flipCard() {
             if (isLocked) return;
-            if (this === flippedCards[0]) return;
             if (this.classList.contains('flipped') || this.classList.contains('matched')) return;
+            // 같은 카드 두 번 클릭 방지
+            if (flippedCards.length === 1 && this === flippedCards[0]) return;
+            // 이미 두 장 뒤집혀 있으면 무시
+            if (flippedCards.length >= 2) return;
+
             playSound('flip');
             this.classList.add('flipped');
             flippedCards.push(this);
-            // ★ 두 장 다 뒤집혔을 때만 판정 (첫 번째 클릭은 오답 아님)
+
             if (flippedCards.length === 2) {
+                // ★ 즉시 잠금 — 판정 전에 추가 클릭 완전 차단
+                isLocked = true;
                 checkForMatch();
             }
         }
 
         function checkForMatch() {
-            isLocked = true;
             const [c1, c2] = flippedCards;
             const cfg = currentStageConfig();
             if (c1.dataset.id === c2.dataset.id) {
-                // 정답
+                // ✅ 정답 — 오답카운트 올리지 않음
                 playSound('match');
                 setTimeout(() => {
                     c1.classList.add('matched'); c2.classList.add('matched');
                     matchedCount++; matchesEl.innerText = matchedCount;
-                    flippedCards = []; isLocked = false;
+                    flippedCards = [];
+                    isLocked = false;
                     if (matchedCount === cfg.pairs) endGame();
                 }, 400);
             } else {
-                // ★ 오답: 두 장이 짝이 아닐 때만 wrongCount 증가
+                // ❌ 오답 — 두 번째 카드가 짝이 아닐 때만 카운트
                 wrongCount++;
                 movesEl.innerText = wrongCount;
                 playSound('wrong');
@@ -608,7 +614,8 @@
                 setTimeout(() => {
                     c1.classList.remove('flipped', 'wrong-flash');
                     c2.classList.remove('flipped', 'wrong-flash');
-                    flippedCards = []; isLocked = false;
+                    flippedCards = [];
+                    isLocked = false;
                 }, 900);
             }
         }
