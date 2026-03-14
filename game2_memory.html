@@ -144,6 +144,9 @@
             justify-content: flex-start; align-items: center;
             z-index: 100; padding: max(20px,env(safe-area-inset-top)) 20px 20px;
             overflow-y: auto;
+            /* ★ 오버레이 안에서 스크롤 허용 */
+            touch-action: pan-y;
+            overscroll-behavior: contain;
         }
         .overlay-inner {
             display: flex; flex-direction: column;
@@ -152,7 +155,7 @@
             margin: auto;
         }
         .overlay h2 { color: var(--accent); font-family: 'Jua'; font-size: clamp(1.6rem,5vw,2.6rem); margin-bottom: 4px; text-align: center; }
-        .overlay p  { font-size: clamp(0.95rem,3vw,1.2rem); color: #ecf0f1; text-align: center; line-height: 1.7; }
+        .overlay p  { font-size: clamp(0.95rem,3vw,1.2rem); color: #ecf0f1; text-align: center; line-height: 1.7; word-break: keep-all; }
 
         .btn {
             background: var(--accent); color: white; border: none;
@@ -181,7 +184,7 @@
         /* 이름 등록 */
         .name-row { display: flex; gap: 8px; width: 100%; }
         .name-row input {
-            flex: 1;
+            width: 0; flex: 1; min-width: 0; max-width: 180px;
             padding: 11px 14px; border-radius: 10px; border: 2px solid #5d6d7e;
             background: rgba(255,255,255,0.1); color: white;
             font-size: clamp(1rem,3vw,1.1rem); font-family: 'Noto Sans KR';
@@ -659,8 +662,8 @@
             document.querySelector('#result-screen h2').textContent = quit ? '포기... 😢' : 'ALL CLEAR! 🏆';
             document.getElementById('result-rank').textContent = rank.title;
             document.getElementById('result-rank').style.color = rank.color;
-            document.getElementById('result-msg').textContent = quit
-                ? `${rank.msg} — 지금까지의 점수로 랭킹 등록 가능!` : rank.msg;
+            document.getElementById('result-msg').innerHTML = quit
+                ? `${rank.msg}<br>지금까지의 점수로 랭킹 등록 가능!` : rank.msg;
             document.getElementById('final-score').textContent = finalScore + '점';
             document.getElementById('score-detail').textContent = detail;
             document.getElementById('save-status').textContent = '';
