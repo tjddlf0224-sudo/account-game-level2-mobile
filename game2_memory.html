@@ -407,6 +407,7 @@
 
         // ── 오답 카운트 수정: wrongCount는 두 장 뒤집었는데 틀렸을 때만 증가 ──
         let flippedCards = [], matchedCount = 0, wrongCount = 0, isLocked = false;
+        let seenCards = new Set(); // ★ 한 번이라도 뒤집힌 카드 추적
         let timerInterval = null, startTime = 0, elapsedSeconds = 0;
         let stage = 1, totalScore = 0, usedPairIds = new Set();
 
@@ -506,7 +507,7 @@
         }
 
         function resetStage() {
-            wrongCount = 0; matchedCount = 0; isLocked = false; flippedCards = [];
+            wrongCount = 0; matchedCount = 0; isLocked = false; flippedCards = []; seenCards = new Set();
             elapsedSeconds = 0;
             movesEl.innerText = 0;
             timerEl.textContent = '⏱ 0.0s'; timerEl.classList.remove('warning');
@@ -568,20 +569,24 @@
                         ${data.text}
                     </div>
                 </div>`;
+            // ★ pointerdown 한 번만 처리 — pointerup 전까지 재입력 차단
+            let pressing = false;
             card.addEventListener('pointerdown', function(e) {
+                if (pressing) return;
+                pressing = true;
                 e.preventDefault();
                 if (!timerInterval) startTimer();
                 flipCard.call(this);
             });
+            card.addEventListener('pointerup',   () => { pressing = false; });
+            card.addEventListener('pointercancel',() => { pressing = false; });
             grid.appendChild(card);
         }
 
         function flipCard() {
             if (isLocked) return;
             if (this.classList.contains('flipped') || this.classList.contains('matched')) return;
-            // 같은 카드 두 번 클릭 방지
             if (flippedCards.length === 1 && this === flippedCards[0]) return;
-            // 이미 두 장 뒤집혀 있으면 무시
             if (flippedCards.length >= 2) return;
 
             playSound('flip');
@@ -589,7 +594,6 @@
             flippedCards.push(this);
 
             if (flippedCards.length === 2) {
-                // ★ 즉시 잠금 — 판정 전에 추가 클릭 완전 차단
                 isLocked = true;
                 checkForMatch();
             }
@@ -598,20 +602,32 @@
         function checkForMatch() {
             const [c1, c2] = flippedCards;
             const cfg = currentStageConfig();
+
+            // ★ 두 카드 모두 이전에 본 적 있는지 확인
+            const c1Seen = seenCards.has(c1);
+            const c2Seen = seenCards.has(c2);
+            // 본 적 없는 카드는 이번에 처음 봤으니 seenCards에 추가
+            seenCards.add(c1);
+            seenCards.add(c2);
+
             if (c1.dataset.id === c2.dataset.id) {
                 // ✅ 정답 — 오답카운트 올리지 않음
                 playSound('match');
                 setTimeout(() => {
                     c1.classList.add('matched'); c2.classList.add('matched');
+                    // 매칭된 카드는 seenCards에서 제거 (더 이상 의미 없음)
+                    seenCards.delete(c1); seenCards.delete(c2);
                     matchedCount++; matchesEl.innerText = matchedCount;
                     flippedCards = [];
                     isLocked = false;
                     if (matchedCount === cfg.pairs) endGame();
                 }, 400);
             } else {
-                // ❌ 오답 — 두 번째 카드가 짝이 아닐 때만 카운트
-                wrongCount++;
-                movesEl.innerText = wrongCount;
+                // ❌ 오답 — 두 카드 모두 이전에 본 적 있을 때만 카운트
+                if (c1Seen && c2Seen) {
+                    wrongCount++;
+                    movesEl.innerText = wrongCount;
+                }
                 playSound('wrong');
                 c1.classList.add('wrong-flash'); c2.classList.add('wrong-flash');
                 setTimeout(() => {
@@ -648,6 +664,8 @@
                     document.getElementById('score-detail').textContent = detail;
                     document.querySelector('.name-row').style.display = 'none';
                     document.getElementById('save-status').style.display = 'none';
+                    // ★ 스테이지 클리어 시 랭킹 숨김 (스피너 안 돌게)
+                    document.querySelector('.rank-wrap').style.display = 'none';
                     document.getElementById('result-screen').style.display = 'flex';
                     document.getElementById('next-stage-btn').style.display = 'inline-block';
                     document.getElementById('restart-btn').style.display = 'none';
@@ -672,6 +690,8 @@
             document.getElementById('save-status').style.display = 'block';
             document.getElementById('next-stage-btn').style.display = 'none';
             document.getElementById('restart-btn').style.display = 'inline-block';
+            // ★ 최종 결과 시 랭킹 다시 표시
+            document.querySelector('.rank-wrap').style.display = '';
             document.getElementById('result-screen').style.display = 'flex';
             loadRanking();
         }
