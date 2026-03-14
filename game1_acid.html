@@ -55,20 +55,21 @@
         /* ── 헤더 ── */
         header {
             padding: 10px 12px;
-            text-align: center;
+            text-align: left;
             background: rgba(0,0,0,0.5);
             z-index: 10;
             position: relative;
             flex-shrink: 0;
-            /* 안전 영역(노치) 대응 */
             padding-top: max(10px, env(safe-area-inset-top));
         }
         h1 {
             margin: 0;
             font-family: 'Jua', sans-serif;
-            font-size: 1.3rem; /* 모바일: 1.8→1.3 */
+            font-size: 1.3rem;
             background: linear-gradient(to right, var(--neon-blue), var(--neon-green));
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            /* 오른쪽 버튼 영역 침범 안 하도록 여백 */
+            padding-right: 110px;
         }
 
         /* 헤더 버튼 — 모바일 터치 영역 확보 */
@@ -190,10 +191,12 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(10, 10, 20, 0.95);
             display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
+            align-items: center; justify-content: flex-start;
             z-index: 100; backdrop-filter: blur(10px);
-            padding: 20px;
-            overflow-y: auto; /* 내용 길면 스크롤 */
+            padding: 20px 20px calc(var(--ad-h) + 16px);
+            overflow-y: auto;
+            touch-action: pan-y;
+            overscroll-behavior: contain;
         }
         .overlay h2 {
             font-size: 2rem; margin: 0 0 16px 0;
@@ -312,8 +315,8 @@
 <header>
     <h1>💎 전산회계 2급 산성비</h1>
     <div class="header-btns">
-        <button class="pause-btn" onclick="quitGame()">🚪 그만</button>
-        <button class="pause-btn" onclick="location.href='index.html'">🏠 홈</button>
+        <button class="pause-btn" onclick="quitGame()">그만</button>
+        <button class="pause-btn" onclick="location.href='index.html'">홈</button>
     </div>
 </header>
 
