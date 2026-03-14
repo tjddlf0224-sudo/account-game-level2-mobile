@@ -216,9 +216,8 @@
         .result-container {
             width: 100%; max-width: 500px;
             display: flex; flex-direction: column; gap: 10px;
-            max-height: 40vh; overflow-y: auto;
         }
-        .review-box { background: rgba(255,255,255,0.1); border-radius: 10px; padding: 12px; text-align: left; }
+        .review-box { background: rgba(255,255,255,0.1); border-radius: 10px; padding: 12px; text-align: left; max-height: 120px; overflow-y: auto; }
         .review-item { display: inline-block; margin: 3px; padding: 3px 8px; border-radius: 5px; font-size: 0.85rem; }
         .review-miss { background: rgba(255,255,255,0.2); color: #ccc; }
         .review-trap { background: rgba(255,0,85,0.3); color: #ffadad; }
@@ -226,7 +225,7 @@
         /* 랭킹 */
         #rank-box {
             width: 100%; background: var(--panel); border: 1px solid var(--border);
-            border-radius: 16px; padding: 4px 0; overflow-y: auto; max-height: 220px;
+            border-radius: 16px; padding: 4px 0; overflow-y: auto; max-height: 300px;
         }
         #rank-box::-webkit-scrollbar { width: 4px; }
         #rank-box::-webkit-scrollbar-thumb { background: rgba(0,242,255,0.3); border-radius: 2px; }
@@ -346,7 +345,7 @@
     <div id="final-score">0점</div>
 
     <div class="save-row">
-        <input type="text" id="player-name" placeholder="이니셜(3글자)" maxlength="4"
+        <input type="text" id="player-name" placeholder="이름 입력"
                onkeydown="if(event.key==='Enter') saveScore()">
         <button id="save-btn" onclick="saveScore()">저장</button>
     </div>
