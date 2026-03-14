@@ -441,7 +441,7 @@ const Game={
     box.innerHTML='<div class="rkhdr">🏆 HALL OF FAME</div>'+list.map((r,i)=>{
       const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'위';
       return`<div class="rkrow ${r.name===me?'rkme':''}"><div class="rkn ${i<3?'top':''}">${medal}</div><div class="rknm">${r.name}</div><div class="rkgr">${r.grade||this._grade(r.score)}</div><div class="rksc">${(r.score||0).toLocaleString()}</div></div>`;
-    }).join(''),
+    }).join('');
   },
 
   drawShip(){
