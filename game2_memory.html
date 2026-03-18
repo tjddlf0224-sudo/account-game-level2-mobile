@@ -263,12 +263,35 @@
     <div id="start-screen" class="overlay">
         <div class="overlay-inner">
             <h2>기억력 테스트</h2>
-            <p>계정과목과 그 설명이 짝꿍입니다.<br>
+            <p style="margin-bottom:6px;">계정과목과 그 설명이 짝꿍입니다.<br>
                예: <b style="color:var(--blue)">접대비</b> ↔ <b style="color:var(--accent)">거래처 선물</b><br><br>
                <span style="font-size:0.92rem;color:rgba(255,255,255,0.6)">
-                 Stage 1→7 단계 클리어마다 점수 누적<br>최고 합산점수로 랭킹!
+                 Stage 1→6 단계 클리어마다 점수 누적<br>Stage 6 이후 3×5판 무한 반복 도전!<br>최고 합산점수로 랭킹!
                </span>
             </p>
+
+            <!-- 계급 기준표 -->
+            <div style="
+                background:rgba(0,0,0,0.3);
+                border:1px solid rgba(255,255,255,0.12);
+                border-radius:14px;
+                padding:12px 16px;
+                width:100%;
+                font-size:0.82rem;
+                line-height:2;
+            ">
+                <div style="text-align:center;color:#f39c12;font-family:'Jua';font-size:0.88rem;margin-bottom:4px;letter-spacing:2px;">📊 직급 기준 (누적 점수)</div>
+                <div style="display:flex;justify-content:space-between;"><span>👑 CEO</span>       <span style="color:#f1c40f">2,700점 이상</span></div>
+                <div style="display:flex;justify-content:space-between;"><span>⭐ CEO급</span>    <span style="color:#e67e22">2,300점 이상</span></div>
+                <div style="display:flex;justify-content:space-between;"><span>🎖 전무/상무</span><span style="color:#3498db">1,900점 이상</span></div>
+                <div style="display:flex;justify-content:space-between;"><span>🏅 이사</span>     <span style="color:#2ecc71">1,500점 이상</span></div>
+                <div style="display:flex;justify-content:space-between;"><span>📋 부장</span>     <span style="color:#1abc9c">1,100점 이상</span></div>
+                <div style="display:flex;justify-content:space-between;"><span>🗂 차장</span>     <span style="color:#9b59b6">700점 이상</span></div>
+                <div style="display:flex;justify-content:space-between;"><span>📁 과장</span>     <span style="color:#e74c3c">400점 이상</span></div>
+                <div style="display:flex;justify-content:space-between;"><span>📝 대리</span>     <span style="color:#95a5a6">200점 이상</span></div>
+                <div style="display:flex;justify-content:space-between;"><span>💼 사원</span>     <span style="color:rgba(255,255,255,0.35)">200점 미만</span></div>
+            </div>
+
             <button class="btn" onclick="startGame()">게임 시작 🚀</button>
         </div>
     </div>
@@ -421,12 +444,15 @@
             { pairs:4,  cols:2, rows:4,  baseScore:400 },  // Stage 3: 2×4 = 8장  ← 세로형
             { pairs:5,  cols:2, rows:5,  baseScore:500 },  // Stage 4: 2×5 = 10장 ← 세로형
             { pairs:6,  cols:3, rows:4,  baseScore:600 },  // Stage 5: 3×4 = 12장
-            { pairs:7,  cols:3, rows:5,  baseScore:700 },  // Stage 6: 3×5 = 14장(빈칸1)
-            { pairs:8,  cols:4, rows:4,  baseScore:800 },  // Stage 7: 4×4 = 16장
+            { pairs:7,  cols:3, rows:5,  baseScore:700 },  // Stage 6: 3×5 = 14장(빈칸1) — 최종 & 무한 반복
         ];
-        const MAX_STAGE = 7;
+        const MAX_STAGE = 6; // Stage 6 이후 3×5 무한 반복
 
-        function currentStageConfig() { return STAGES[Math.min(stage, MAX_STAGE)]; }
+        // Stage 6 이후에도 3×5 config 반환, 점수 계속 누적
+        function currentStageConfig() {
+            if (stage <= MAX_STAGE) return STAGES[stage];
+            return { pairs:7, cols:3, rows:5, baseScore:700 };
+        }
 
         const grid      = document.getElementById('grid');
         const movesEl   = document.getElementById('move-count');
@@ -482,14 +508,14 @@
         }
 
         function getRank(score) {
-            if      (score >= 2800) return { title:'👑 CEO',       color:'#f1c40f', msg:'전설의 회계 CEO! 완벽합니다!' };
-            else if (score >= 2400) return { title:'⭐ CEO급',     color:'#e67e22', msg:'CEO급 실력! 정말 훌륭합니다!' };
-            else if (score >= 2000) return { title:'🎖 전무/상무', color:'#3498db', msg:'임원급 실력! 대단합니다!' };
-            else if (score >= 1600) return { title:'🏅 이사',      color:'#2ecc71', msg:'이사급 실력! 잘했어요!' };
-            else if (score >= 1200) return { title:'📋 부장',      color:'#1abc9c', msg:'베테랑 부장! 좋습니다!' };
-            else if (score >= 800)  return { title:'🗂 차장',      color:'#9b59b6', msg:'믿음직한 차장! 조금만 더!' };
-            else if (score >= 500)  return { title:'📁 과장',      color:'#e74c3c', msg:'성장 중인 과장! 화이팅!' };
-            else if (score >= 250)  return { title:'📝 대리',      color:'#95a5a6', msg:'열심히 하는 대리! 다시 도전!' };
+            if      (score >= 2700) return { title:'👑 CEO',       color:'#f1c40f', msg:'전설의 회계 CEO! 6판 완벽 클리어!' };
+            else if (score >= 2300) return { title:'⭐ CEO급',     color:'#e67e22', msg:'CEO급 실력! 정말 훌륭합니다!' };
+            else if (score >= 1900) return { title:'🎖 전무/상무', color:'#3498db', msg:'임원급 실력! 대단합니다!' };
+            else if (score >= 1500) return { title:'🏅 이사',      color:'#2ecc71', msg:'이사급 실력! 잘했어요!' };
+            else if (score >= 1100) return { title:'📋 부장',      color:'#1abc9c', msg:'베테랑 부장! 좋습니다!' };
+            else if (score >= 700)  return { title:'🗂 차장',      color:'#9b59b6', msg:'믿음직한 차장! 조금만 더!' };
+            else if (score >= 400)  return { title:'📁 과장',      color:'#e74c3c', msg:'성장 중인 과장! 화이팅!' };
+            else if (score >= 200)  return { title:'📝 대리',      color:'#95a5a6', msg:'열심히 하는 대리! 다시 도전!' };
             else                    return { title:'💼 사원',      color:'#7f8c8d', msg:'이제 시작! 다시 도전해봐요!' };
         }
 
@@ -516,7 +542,7 @@
             matchesEl.innerText = 0;
             document.getElementById('total-pairs').textContent = cfg.pairs;
             document.getElementById('score-formula').textContent =
-                `Stage ${Math.min(stage, MAX_STAGE)} (${cfg.cols}×${cfg.rows}) — 기본${cfg.baseScore}점 | 누적: ${totalScore}점`;
+                `Stage ${stage} (${cfg.cols}×${cfg.rows}) — 기본${cfg.baseScore}점 | 누적: ${totalScore}점`;
             setupBoard(cfg);
         }
 
@@ -536,10 +562,15 @@
             cardData.sort(() => 0.5 - Math.random());
 
             const totalSlots = cfg.cols * cfg.rows;
-            if (totalSlots > cardData.length) {
-                const blanks = totalSlots - cardData.length;
-                const blankPositions = new Set();
-                while (blankPositions.size < blanks) blankPositions.add(Math.floor(Math.random() * totalSlots));
+            const blankCount = totalSlots - cardData.length;
+
+            if (blankCount > 0) {
+                // 3×5(15칸)에서 빈칸 1개: 정가운데(7번 인덱스, 3행 2열)에 고정
+                // 일반적으로도 가운데 슬롯에 빈칸 배치
+                const centerIdx = Math.floor(totalSlots / 2);
+                const blankPositions = new Set([centerIdx]);
+                // 빈칸이 2개 이상이면 나머지는 랜덤
+                while (blankPositions.size < blankCount) blankPositions.add(Math.floor(Math.random() * totalSlots));
                 let ci = 0;
                 for (let i = 0; i < totalSlots; i++) {
                     if (blankPositions.has(i)) {
@@ -655,23 +686,23 @@
             } else {
                 playSound('clear');
                 totalScore += stageScore;
-                if (stage < MAX_STAGE) {
-                    document.querySelector('#result-screen h2').textContent = `Stage ${stage} CLEAR! 🎉`;
-                    document.getElementById('result-rank').textContent = `+${stageScore}점 획득!`;
-                    document.getElementById('result-rank').style.color = '#2ecc71';
-                    document.getElementById('result-msg').textContent = `누적 점수: ${totalScore}점 — 다음 스테이지로!`;
-                    document.getElementById('final-score').textContent = totalScore + '점';
-                    document.getElementById('score-detail').textContent = detail;
-                    document.querySelector('.name-row').style.display = 'none';
-                    document.getElementById('save-status').style.display = 'none';
-                    // ★ 스테이지 클리어 시 랭킹 숨김 (스피너 안 돌게)
-                    document.querySelector('.rank-wrap').style.display = 'none';
-                    document.getElementById('result-screen').style.display = 'flex';
-                    document.getElementById('next-stage-btn').style.display = 'inline-block';
-                    document.getElementById('restart-btn').style.display = 'none';
-                } else {
-                    showResult(totalScore, false, `전 스테이지 완료! 마지막: ${detail}`);
-                }
+                // Stage 7 이후에도 계속 다음 스테이지 진행 (점수 누적 무한 반복)
+                document.querySelector('#result-screen h2').textContent = `Stage ${stage} CLEAR! 🎉`;
+                document.getElementById('result-rank').textContent = `+${stageScore}점 획득!`;
+                document.getElementById('result-rank').style.color = '#2ecc71';
+                const isEndless = stage >= MAX_STAGE;
+                document.getElementById('result-msg').textContent = isEndless
+                    ? `누적 점수: ${totalScore}점 — 계속 도전!`
+                    : `누적 점수: ${totalScore}점 — 다음 스테이지로!`;
+                document.getElementById('final-score').textContent = totalScore + '점';
+                document.getElementById('score-detail').textContent = detail;
+                document.querySelector('.name-row').style.display = 'none';
+                document.getElementById('save-status').style.display = 'none';
+                document.querySelector('.rank-wrap').style.display = 'none';
+                document.getElementById('result-screen').style.display = 'flex';
+                document.getElementById('next-stage-btn').style.display = 'inline-block';
+                document.getElementById('next-stage-btn').textContent = isEndless ? '계속 도전 ▶' : '다음 스테이지 ▶';
+                document.getElementById('restart-btn').style.display = 'none';
             }
         }
 
