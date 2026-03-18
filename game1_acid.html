@@ -191,9 +191,9 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(10, 10, 20, 0.95);
             display: flex; flex-direction: column;
-            align-items: center; justify-content: flex-start;
+            align-items: center; justify-content: center;
             z-index: 100; backdrop-filter: blur(10px);
-            padding: 20px 20px calc(var(--ad-h) + 16px);
+            padding: max(env(safe-area-inset-top), 20px) 20px calc(var(--ad-h) + max(env(safe-area-inset-bottom), 16px));
             overflow-y: auto;
             touch-action: pan-y;
             overscroll-behavior: contain;
@@ -338,6 +338,26 @@
         3콤보 달성 시 <strong style="color:var(--neon-purple)">FEVER 모드 (점수 2배)</strong><br>
         <span style="font-size:0.85rem; color:#aaa">💣폭탄 &nbsp; ❄️얼음 &nbsp; 💊회복 아이템 등장</span>
     </p>
+
+    <div style="
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 14px;
+        padding: 14px 20px;
+        margin-bottom: 20px;
+        width: 100%;
+        max-width: 320px;
+        font-size: 0.85rem;
+        line-height: 2;
+    ">
+        <div style="text-align:center; color:var(--neon-gold); font-family:'Jua'; font-size:0.9rem; margin-bottom:6px; letter-spacing:2px;">📊 파일럿 계급 기준</div>
+        <div style="display:flex; justify-content:space-between;"><span>👑 전설의 에이스</span><span style="color:var(--neon-gold)">10,000점 이상</span></div>
+        <div style="display:flex; justify-content:space-between;"><span>🥇 베테랑</span><span style="color:#ffd700">6,000점 이상</span></div>
+        <div style="display:flex; justify-content:space-between;"><span>🥈 숙련자</span><span style="color:#aaa">3,000점 이상</span></div>
+        <div style="display:flex; justify-content:space-between;"><span>🥉 정규 파일럿</span><span style="color:#cd7f32">1,000점 이상</span></div>
+        <div style="display:flex; justify-content:space-between;"><span>🛩 견습생</span><span style="color:rgba(255,255,255,0.4)">1,000점 미만</span></div>
+    </div>
+
     <button class="big-btn" onclick="startGame()">게임 시작 ▶</button>
 </div>
 
