@@ -309,10 +309,11 @@
             </div>
 
             <div class="name-row">
-                <input type="text" id="player-name" placeholder="이름 입력" maxlength="20">
+                <input type="text" id="player-name" placeholder="닉네임 입력" maxlength="20">
                 <button onclick="saveScore()">등록 📝</button>
             </div>
             <div class="status-msg" id="save-status"></div>
+            <div id="my-rank-badge" style="display:none; font-family:'Jua',sans-serif; font-size:0.95rem; color:var(--blue); background:rgba(52,152,219,0.12); border:1px solid rgba(52,152,219,0.3); border-radius:50px; padding:6px 18px; text-align:center;"></div>
 
             <div class="rank-wrap">
                 <div class="rank-header">
@@ -716,7 +717,8 @@
             document.getElementById('final-score').textContent = finalScore + '점';
             document.getElementById('score-detail').textContent = detail;
             document.getElementById('save-status').textContent = '';
-            document.getElementById('player-name').value = '';
+            document.getElementById('player-name').value = getMyName();
+            document.getElementById('my-rank-badge').style.display = 'none';
             document.querySelector('.name-row').style.display = 'flex';
             document.getElementById('save-status').style.display = 'block';
             document.getElementById('next-stage-btn').style.display = 'none';
@@ -745,25 +747,61 @@
             l.sort((a, b) => b.score - a.score);
             localStorage.setItem('hub_memory', JSON.stringify(l.slice(0, 20)));
         }
+        function saveMyName(n) { localStorage.setItem('hub_memory_myName', n); }
+        function getMyName()   { return localStorage.getItem('hub_memory_myName') || ''; }
 
         async function saveScore() {
             const name = document.getElementById('player-name').value.trim();
-            if (!name) { showStatus('이름을 입력해주세요', 'err'); return; }
-            const secs  = Math.round(elapsedSeconds);
+            if (!name) { showStatus('닉네임을 입력해주세요', 'err'); return; }
+            if (name.length < 2) { showStatus('2글자 이상 입력해주세요', 'err'); return; }
+            showStatus('확인 중...', '');
+
+            // 내 닉네임이면 중복 체크 스킵
+            const myStoredName = getMyName();
+            if (name !== myStoredName) {
+                let existingList = [];
+                try {
+                    if (SHEET_URL) {
+                        const res = await fetch(SHEET_URL + '?action=get&game=' + GAME_ID);
+                        existingList = await res.json();
+                    }
+                } catch(e) {}
+                existingList = mergeRank(existingList, _lget());
+                if (existingList.find(r => r.name === name)) {
+                    showStatus('⚠️ 이미 사용 중인 닉네임입니다. 다른 닉네임을 사용해주세요.', 'err');
+                    return;
+                }
+            }
+
             const score = parseInt(document.getElementById('final-score').textContent) || 0;
             const today = new Date().toLocaleDateString('ko-KR', {month:'2-digit', day:'2-digit'});
             const data  = { game: GAME_ID, name, score, combo: 0, correct: matchedCount, date: today };
             _lsave(data);
+            saveMyName(name);
             showStatus('저장 중...', '');
             try {
                 await fetch(SHEET_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
-                showStatus('✅ 등록 완료!', 'ok');
+                showStatus('✓ 등록 완료!', 'ok');
                 await new Promise(r => setTimeout(r, 800));
                 await loadRanking();
+                showMyRank(name);
             } catch(e) {
-                showStatus('✓ 로컬 저장 완료', 'ok');
+                showStatus('✓ 저장 완료!', 'ok');
                 renderRanking(_lget());
+                showMyRank(name);
             }
+        }
+
+        function showMyRank(name) {
+            const badge = document.getElementById('my-rank-badge');
+            const rows = document.querySelectorAll('#rank-body .rank-row');
+            let myIdx = -1;
+            rows.forEach((row, i) => {
+                const spans = row.querySelectorAll('span');
+                if (spans[1] && spans[1].textContent.trim() === name) myIdx = i;
+            });
+            if (myIdx >= 0) { badge.textContent = '🎯 내 순위: ' + (myIdx + 1) + '위'; badge.style.display = 'block'; }
+            else badge.style.display = 'none';
         }
 
         async function loadRanking() {
