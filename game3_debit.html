@@ -53,7 +53,7 @@
             align-items: center;
             justify-content: space-between;
             padding: 10px 16px;
-            padding-top: max(10px, env(safe-area-inset-top));
+            padding-top: calc(env(safe-area-inset-top) + 10px);
             border-bottom: 1px solid var(--border);
             background: rgba(0,0,0,0.3);
             backdrop-filter: blur(10px);
@@ -548,10 +548,11 @@
             최고 콤보 <span id="stat-combo">0</span>x
         </div>
         <div class="save-row">
-            <input type="text" class="name-input" id="player-name" placeholder="이니셜 (예: KMJ)" maxlength="4">
+            <input type="text" class="name-input" id="player-name" placeholder="닉네임 입력" maxlength="20">
             <button class="pill-btn pill-btn-blue" onclick="saveScore()" id="save-btn">💾 저장</button>
         </div>
         <div id="save-status"></div>
+        <div id="my-rank-badge" style="display:none; font-family:'Black Han Sans',sans-serif; font-size:1rem; color:var(--blue); background:rgba(0,194,255,0.12); border:1px solid rgba(0,194,255,0.3); border-radius:50px; padding:7px 20px; text-align:center;"></div>
         <div style="font-family:'Black Han Sans',sans-serif; font-size:0.95rem; color:rgba(255,255,255,0.35); letter-spacing:2px;">🏆 TOP 랭킹</div>
         <div class="rank-container" id="rank-container">
             <div class="loading" style="justify-content:center;padding:20px 0;">
@@ -882,7 +883,7 @@ function endGame() {
     else if (score >= 2500) rank = '🥇 회계 부장';
     else if (score >= 1000) rank = '🥈 회계 대리';
     document.getElementById('result-rank').textContent = '최종 계급: ' + rank;
-    document.getElementById('player-name').value = '';
+    document.getElementById('player-name').value = getMyName();
     document.getElementById('save-status').textContent = '';
     document.getElementById('save-btn').disabled = false;
     document.getElementById('result-screen').style.display = 'flex';
@@ -890,33 +891,82 @@ function endGame() {
 }
 
 async function saveScore() {
-    const name = document.getElementById('player-name').value.trim().toUpperCase();
-    if (!name) { alert('이니셜을 입력하세요 (예: KMJ)'); return; }
-    if (name.length < 2) { alert('2글자 이상 입력하세요'); return; }
+    const name = document.getElementById('player-name').value.trim();
+    if (!name) { showSaveStatus('닉네임을 입력해주세요', 'err'); return; }
+    if (name.length < 2) { showSaveStatus('2글자 이상 입력해주세요', 'err'); return; }
+
     const btn = document.getElementById('save-btn');
     const status = document.getElementById('save-status');
     btn.disabled = true;
-    status.textContent = '저장 중...';
-    status.style.color = 'rgba(255,255,255,0.4)';
+    showSaveStatus('확인 중...', '');
+
+    // 내 닉네임(로컬 저장)이면 중복 체크 없이 바로 저장
+    const myStoredName = getMyName();
+    if (name !== myStoredName) {
+        // 새 닉네임 — 중복 체크
+        let existingList = [];
+        try {
+            if (SHEET_URL && SHEET_URL !== "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE") {
+                const res = await fetch(SHEET_URL + '?action=get&game=' + GAME_ID);
+                existingList = await res.json();
+            }
+        } catch(e) {}
+        existingList = mergeRankings(existingList, getLocal());
+
+        const duplicate = existingList.find(r => r.name === name);
+        if (duplicate) {
+            showSaveStatus('⚠️ 이미 사용 중인 닉네임입니다. 다른 닉네임을 사용해주세요.', 'err');
+            btn.disabled = false;
+            return;
+        }
+    }
+
     const today = new Date().toLocaleDateString('ko-KR', { month:'2-digit', day:'2-digit' });
     const data = { game: GAME_ID, name, score, combo: maxCombo, correct: correctCount, date: today };
+
     if (!SHEET_URL || SHEET_URL === "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE") {
         saveLocal(data);
-        status.textContent = '✓ 로컬 저장 완료';
-        status.style.color = 'var(--gold)';
-        loadRanking(); return;
+        saveMyName(name);
+        showSaveStatus('✓ 저장 완료!', 'ok');
+        await loadRanking();
+        showMyRank(name);
+        return;
     }
     try {
         await fetch(SHEET_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
         saveLocal(data);
-        status.textContent = '✓ 저장 완료! 랭킹에 반영됩니다';
-        status.style.color = 'var(--green)';
+        saveMyName(name);
+        showSaveStatus('✓ 등록 완료!', 'ok');
         await loadRanking();
+        showMyRank(name);
     } catch(e) {
         saveLocal(data);
-        status.textContent = '✓ 로컬 저장 완료 (네트워크 오류)';
-        status.style.color = 'var(--gold)';
+        showSaveStatus('✓ 로컬 저장 완료 (네트워크 오류)', 'ok');
         loadRanking();
+        showMyRank(name);
+    }
+}
+
+function showSaveStatus(msg, type) {
+    const el = document.getElementById('save-status');
+    el.textContent = msg;
+    el.style.color = type === 'err' ? 'var(--red)' : type === 'ok' ? 'var(--green)' : 'rgba(255,255,255,0.4)';
+}
+
+function showMyRank(name) {
+    const badge = document.getElementById('my-rank-badge');
+    const container = document.getElementById('rank-container');
+    const rows = container.querySelectorAll('.rank-row');
+    let myIdx = -1;
+    rows.forEach((row, i) => {
+        const nameEl = row.querySelector('.rank-name');
+        if (nameEl && nameEl.textContent.trim() === name) myIdx = i;
+    });
+    if (myIdx >= 0) {
+        badge.textContent = `🎯 내 순위: ${myIdx + 1}위`;
+        badge.style.display = 'block';
+    } else {
+        badge.style.display = 'none';
     }
 }
 
@@ -926,6 +976,10 @@ function saveLocal(data) {
     localStorage.setItem('accGame_v3', JSON.stringify(list.slice(0, 20)));
 }
 function getLocal() { return JSON.parse(localStorage.getItem('accGame_v3') || '[]'); }
+
+// 내 닉네임 로컬 저장/로드
+function saveMyName(name) { localStorage.setItem('accGame_myName', name); }
+function getMyName() { return localStorage.getItem('accGame_myName') || ''; }
 
 async function loadRanking() {
     const container = document.getElementById('rank-container');
@@ -951,7 +1005,7 @@ function renderRankList(list) {
         container.innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.3);font-size:1rem;">아직 기록이 없습니다</div>';
         return;
     }
-    const me = document.getElementById('player-name').value.trim().toUpperCase();
+    const me = document.getElementById('player-name').value.trim();
     container.innerHTML = list.map((r, i) => {
         const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i+1) + '위';
         const grade = r.grade || getGrade(r.score);
