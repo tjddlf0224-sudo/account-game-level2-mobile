@@ -107,6 +107,23 @@
             white-space: nowrap;
             display: flex; align-items: center;
         }
+        /* 🎵 음소거 버튼 */
+        .mute-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid var(--border);
+            color: white;
+            padding: 0 10px;
+            height: 44px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            display: flex; align-items: center; justify-content: center;
+            transition: opacity 0.2s, border-color 0.2s;
+        }
+        .mute-btn.muted {
+            opacity: 0.4;
+            border-color: rgba(255,255,255,0.1);
+        }
 
         /* ── 게임 영역 ── */
         .game-area {
@@ -214,7 +231,7 @@
         .ans-btn {
             flex: 1;
             padding: clamp(16px, 4vw, 26px) 10px;
-            min-height: 80px; /* 모바일 터치 영역 충분히 */
+            min-height: 80px;
             border: none; border-radius: 16px;
             font-family: 'Black Han Sans', sans-serif;
             font-size: clamp(1.2rem, 4vw, 1.7rem);
@@ -334,7 +351,6 @@
             touch-action: pan-y;
             overscroll-behavior: contain;
         }
-        /* 오버레이 내용 세로 중앙 */
         .overlay-inner {
             display: flex; flex-direction: column;
             align-items: center;
@@ -445,7 +461,6 @@
         .rank-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
         .rank-row {
             display: grid;
-            /* 모바일: 날짜 열 제거하여 공간 확보 */
             grid-template-columns: 44px 1fr 90px 80px;
             padding: 9px 14px; border-bottom: 1px solid var(--border);
             font-size: clamp(0.8rem, 2.5vw, 1rem);
@@ -473,13 +488,9 @@
 
         /* ── 모바일 전용 조정 ── */
         @media (max-width: 480px) {
-            /* 키보드 힌트 숨김 */
             .key-hint { display: none; }
-            /* start-grid: 2열 유지하되 패딩 축소 */
             .start-grid { gap: 8px; }
-            /* 힌트 패널 폰트 더 작게 */
             .hint-box { font-size: 0.78rem; line-height: 1.7; }
-            /* 랭킹: 날짜 숨김 */
             .rank-date { display: none; }
         }
 
@@ -490,6 +501,9 @@
     </style>
 </head>
 <body>
+
+<!-- 🎵 BGM 오디오 엘리먼트 -->
+<audio id="bgm" src="bgm3_debit.mp3" loop preload="auto"></audio>
 
 <div class="ad-placeholder" id="adPlaceholder">AD</div>
 
@@ -582,6 +596,8 @@
         </div>
     </div>
     <div class="header-btns">
+        <!-- 🎵 음소거 버튼 -->
+        <button class="mute-btn" id="mute-btn" onclick="toggleMute()" title="BGM 음소거">🎵</button>
         <button class="hdr-btn" onclick="quitGame()">그만</button>
         <button class="hdr-btn" onclick="location.href='index.html'">홈</button>
     </div>
@@ -621,7 +637,6 @@
             </div>
         </div>
 
-        <!-- 키보드 힌트: 데스크탑에서만 표시 -->
         <div class="key-hint">
             <div class="kbd"><span>A</span> 차변</div>
             <div class="kbd"><span>L</span> 대변</div>
@@ -637,9 +652,57 @@
 const SHEET_URL = "https://script.google.com/macros/s/AKfycby-N01s4e5gHHCRZal52CODVHBNYPRPr9aWORp4mMsxsSnwOxQINcOCoHYuVlE2Y652/exec";
 const GAME_ID   = "debit";
 
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════
+// 🎵 BGM 관리
+// ══════════════════════════════════════
+const bgm = document.getElementById('bgm');
+bgm.volume = 0.5;
+
+// 음소거 상태: localStorage에 저장해서 다음 게임에도 유지
+let isMuted = localStorage.getItem('debit_muted') === 'true';
+applyMuteState();
+
+function applyMuteState() {
+    bgm.muted = isMuted;
+    const btn = document.getElementById('mute-btn');
+    if (btn) {
+        btn.textContent = isMuted ? '🔇' : '🎵';
+        btn.classList.toggle('muted', isMuted);
+    }
+}
+
+function toggleMute() {
+    isMuted = !isMuted;
+    localStorage.setItem('debit_muted', isMuted);
+    applyMuteState();
+}
+
+// BGM 재생 (브라우저 자동재생 정책 대응: 반드시 사용자 인터랙션 이후 호출)
+function bgmPlay() {
+    if (bgm.paused) {
+        bgm.play().catch(() => {});
+    }
+}
+
+// BGM 정지 (페이드 아웃)
+function bgmStop() {
+    if (bgm.paused) return;
+    const fadeInterval = setInterval(() => {
+        if (bgm.volume > 0.05) {
+            bgm.volume = Math.max(0, bgm.volume - 0.05);
+        } else {
+            bgm.volume = 0;
+            bgm.pause();
+            bgm.currentTime = 0;
+            bgm.volume = 0.5;
+            clearInterval(fadeInterval);
+        }
+    }, 50);
+}
+
+// ══════════════════════════════════════
 // 문제 데이터
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════
 const questions = [
     // ── 자산 증가 → 차변 ──
     { sentence: '상품을 현금으로 구입하다 → <b class="target-account">상품</b>', target: '상품', type: 'left', hint: '상품(자산) 증가 → 차변' },
@@ -714,9 +777,9 @@ const questions = [
     { sentence: '건물에 감가상각을 반영하다 → <b class="target-account">감가상각누계액</b>', target: '감가상각누계액', type: 'right', hint: '감가상각누계액(자산차감) 증가 → 대변' },
 ];
 
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════
 // 게임 상태
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════
 const GAME_TIME = 60;
 let score = 0, combo = 0, maxCombo = 0;
 let timeLeft = GAME_TIME;
@@ -758,6 +821,7 @@ function playSound(type) {
 
 function startGame() {
     getAudio();
+    bgmPlay(); // 🎵 게임 시작 시 BGM 재생
     document.getElementById('start-screen').style.display = 'none';
     document.getElementById('result-screen').style.display = 'none';
     score = 0; combo = 0; maxCombo = 0;
@@ -874,6 +938,7 @@ function showCombo(n) {
 function endGame() {
     isPlaying = false;
     clearInterval(timerInterval);
+    bgmStop(); // 🎵 게임 종료 시 BGM 페이드 아웃
     document.getElementById('result-score').textContent = score.toLocaleString() + '점';
     document.getElementById('stat-correct').textContent = correctCount;
     document.getElementById('stat-wrong').textContent = wrongCount;
@@ -896,14 +961,11 @@ async function saveScore() {
     if (name.length < 2) { showSaveStatus('2글자 이상 입력해주세요', 'err'); return; }
 
     const btn = document.getElementById('save-btn');
-    const status = document.getElementById('save-status');
     btn.disabled = true;
     showSaveStatus('확인 중...', '');
 
-    // 내 닉네임(로컬 저장)이면 중복 체크 없이 바로 저장
     const myStoredName = getMyName();
     if (name !== myStoredName) {
-        // 새 닉네임 — 중복 체크
         let existingList = [];
         try {
             if (SHEET_URL && SHEET_URL !== "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE") {
@@ -977,7 +1039,6 @@ function saveLocal(data) {
 }
 function getLocal() { return JSON.parse(localStorage.getItem('accGame_v3') || '[]'); }
 
-// 내 닉네임 로컬 저장/로드
 function saveMyName(name) { localStorage.setItem('accGame_myName', name); }
 function getMyName() { return localStorage.getItem('accGame_myName') || ''; }
 
