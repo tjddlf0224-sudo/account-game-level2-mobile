@@ -69,7 +69,7 @@
             background: linear-gradient(to right, var(--neon-blue), var(--neon-green));
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             /* 오른쪽 버튼 영역 침범 안 하도록 여백 */
-            padding-right: 110px;
+            padding-right: 150px;
         }
 
         /* 헤더 버튼 — 모바일 터치 영역 확보 */
@@ -89,6 +89,23 @@
             cursor: pointer;
             display: flex; align-items: center; justify-content: center;
             white-space: nowrap;
+        }
+        /* 🎵 음소거 버튼 */
+        .mute-btn {
+            background: none;
+            border: 1.5px solid rgba(255,255,255,0.3);
+            color: white;
+            border-radius: 20px;
+            padding: 0 10px;
+            height: 44px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: border-color 0.2s, opacity 0.2s;
+        }
+        .mute-btn.muted {
+            opacity: 0.45;
+            border-color: rgba(255,255,255,0.15);
         }
 
         /* ── 게임 보드 ── */
@@ -312,9 +329,14 @@
 <!-- AdMob 배너 자리 -->
 <div class="ad-placeholder" id="adPlaceholder">AD</div>
 
+<!-- 🎵 BGM 오디오 엘리먼트 -->
+<audio id="bgm" src="bgm1_acid.mp3" loop preload="auto"></audio>
+
 <header>
     <h1>💎 전산회계 2급 산성비</h1>
     <div class="header-btns">
+        <!-- 🎵 음소거 버튼 -->
+        <button class="mute-btn" id="mute-btn" onclick="toggleMute()" title="BGM 음소거">🎵</button>
         <button class="pause-btn" onclick="quitGame()">그만</button>
         <button class="pause-btn" onclick="location.href='index.html'">홈</button>
     </div>
@@ -386,9 +408,69 @@
 </div>
 
 <script>
-    // ── 오디오 ──
+    // ══════════════════════════════════════
+    // 🎵 BGM 관리
+    // ══════════════════════════════════════
+    const bgm = document.getElementById('bgm');
+    bgm.volume = 0.5;
+
+    // 음소거 상태: localStorage에 저장해서 다음 게임에도 유지
+    let isMuted = localStorage.getItem('acid_muted') === 'true';
+    applyMuteState();
+
+    function applyMuteState() {
+        bgm.muted = isMuted;
+        const btn = document.getElementById('mute-btn');
+        if (btn) {
+            btn.textContent = isMuted ? '🔇' : '🎵';
+            btn.classList.toggle('muted', isMuted);
+        }
+    }
+
+    function toggleMute() {
+        isMuted = !isMuted;
+        localStorage.setItem('acid_muted', isMuted);
+        applyMuteState();
+    }
+
+    // BGM 재생 (브라우저 자동재생 정책 대응: 반드시 사용자 인터랙션 이후 호출)
+    function bgmPlay() {
+        if (bgm.paused) {
+            bgm.play().catch(() => {
+                // 자동재생 차단 시 조용히 무시 (사용자가 다음에 터치하면 재개됨)
+            });
+        }
+    }
+
+    // BGM 정지 (페이드 아웃)
+    function bgmStop() {
+        if (bgm.paused) return;
+        const fadeInterval = setInterval(() => {
+            if (bgm.volume > 0.05) {
+                bgm.volume = Math.max(0, bgm.volume - 0.05);
+            } else {
+                bgm.volume = 0;
+                bgm.pause();
+                bgm.currentTime = 0;
+                bgm.volume = 0.5; // 다음 재생을 위해 볼륨 복원
+                clearInterval(fadeInterval);
+            }
+        }, 50);
+    }
+
+    // 피버 모드 시 재생 속도 변경
+    function bgmSetFever(on) {
+        bgm.playbackRate = on ? 1.25 : 1.0;
+    }
+
+    // ══════════════════════════════════════
+    // 🔊 오디오 (효과음)
+    // ══════════════════════════════════════
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    function initAudio() { if (audioCtx.state === 'suspended') audioCtx.resume(); }
+    function initAudio() {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        bgmPlay(); // 첫 인터랙션(게임 시작 버튼 클릭) 시 BGM 시작
+    }
 
     function playSound(type) {
         const osc = audioCtx.createOscillator();
@@ -469,13 +551,14 @@
     function quitGame() { if (isPlaying) endGame(); }
 
     function startGame() {
-        initAudio();
+        initAudio(); // ← AudioContext resume + BGM 시작
         els.start.style.display = 'none'; els.result.style.display = 'none';
         isPlaying = true; isPaused = false;
         score = 0; combo = 0; timeLeft = 30;
         activeWords = []; wrongLog = []; freezeTime = 0; isFever = false;
         document.body.classList.remove('danger-mode', 'fever-mode');
         els.board.classList.remove('frozen');
+        bgmSetFever(false); // 재시작 시 재생속도 초기화
         updateUI();
         gameLoopId = requestAnimationFrame(gameLoop);
         spawnTimerId = setInterval(spawnWord, 600);
@@ -598,7 +681,11 @@
         } else if (wordObj.type === 'account') {
             playSound('correct'); combo++;
             timeLeft += 1;
-            if (combo >= 3 && !isFever) { isFever = true; document.body.classList.add('fever-mode'); }
+            if (combo >= 3 && !isFever) {
+                isFever = true;
+                document.body.classList.add('fever-mode');
+                bgmSetFever(true); // 🔥 피버: BGM 빠르게
+            }
             let gain = 100 + combo * 20;
             if (isFever) gain *= 2;
             score += gain;
@@ -629,7 +716,11 @@
 
     function applyPenalty() {
         playSound('wrong'); combo = 0;
-        if (isFever) { isFever = false; document.body.classList.remove('fever-mode'); }
+        if (isFever) {
+            isFever = false;
+            document.body.classList.remove('fever-mode');
+            bgmSetFever(false); // 피버 해제: BGM 속도 원상복귀
+        }
         timeLeft = Math.max(0, timeLeft - 3);
         document.body.classList.add('shake');
         setTimeout(() => document.body.classList.remove('shake'), 400);
@@ -670,6 +761,7 @@
         activeWords.forEach(w => w.el.remove());
         document.body.classList.remove('danger-mode', 'fever-mode');
         els.board.classList.remove('frozen');
+        bgmStop(); // 🎵 게임 종료 시 BGM 페이드 아웃
 
         els.finalScore.innerText = score.toLocaleString() + "점";
         els.finalRank.innerText = "파일럿 등급: " + getGrade(score);
@@ -755,7 +847,6 @@
         const saveBtn = document.getElementById('save-btn');
         saveBtn.textContent = type === 'err' ? '저장' : (type === 'ok' ? '저장 완료 ✓' : '저장 중…');
         if (type !== 'ok') { saveBtn.disabled = false; els.input.disabled = false; }
-        // save-status 요소가 없으므로 saveBtn 텍스트 + alert로 에러 표시
         if (type === 'err') alert(msg);
     }
 
