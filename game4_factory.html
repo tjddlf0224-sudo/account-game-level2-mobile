@@ -45,7 +45,6 @@
             background: rgba(10,13,20,0.95); backdrop-filter: blur(8px);
             display: flex; flex-direction: column; align-items: center;
             justify-content: flex-start; overflow-y: auto;
-            /* ★ 하단 패딩 = 광고 높이 + 여백 — 콘텐츠가 광고에 안 가려지게 */
             padding: max(20px,env(safe-area-inset-top)) 16px calc(var(--ad-h) + 16px);
             touch-action: pan-y;
             overscroll-behavior: contain;
@@ -131,16 +130,30 @@
         .hdr-btn-stop { background: var(--red); }
         .hdr-btn-home { background: rgba(255,255,255,0.1); border: 1px solid var(--border); }
 
+        /* 🎵 음소거 버튼 */
+        .mute-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid var(--border);
+            color: white; height: 44px; padding: 0 10px;
+            border-radius: 8px; cursor: pointer;
+            font-size: 1.1rem;
+            display: flex; align-items: center; justify-content: center;
+            transition: opacity 0.2s, border-color 0.2s;
+        }
+        .mute-btn.muted {
+            opacity: 0.4;
+            border-color: rgba(255,255,255,0.1);
+        }
+
         /* ── 게임 메인 ── */
         .game-main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: clamp(8px,2vw,16px) clamp(10px,3vw,20px); overflow-y: auto; gap: clamp(8px,2vh,16px); }
 
-        /* ── 문제 카드 (글자 크게!) ── */
+        /* ── 문제 카드 ── */
         .q-card {
             background: var(--panel); border: 1px solid var(--border); border-radius: 16px;
             width: 100%; max-width: 700px;
             padding: clamp(18px,4vw,32px) clamp(16px,4vw,36px);
             text-align: center;
-            /* ★ 글자 크게 */
             font-size: clamp(1.05rem,3.5vw,1.55rem);
             line-height: 1.8; color: #e0e6ed;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3); position: relative;
@@ -148,7 +161,6 @@
         .q-card.shake { animation: shake 0.4s; border-color: var(--red); }
         @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
         .q-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--green); color: #000; padding: 3px 14px; border-radius: 20px; font-weight: 900; font-size: 0.85rem; letter-spacing: 1px; }
-        /* 힌트 텍스트 */
         #q-hint { display: none; margin-top: 10px; font-size: clamp(0.85rem,2.5vw,0.95rem); color: #ff6b6b; font-weight: bold; }
 
         /* ── 슬롯 ── */
@@ -177,7 +189,6 @@
             background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15);
             color: white; padding: clamp(10px,2.5vw,12px) clamp(14px,3vw,20px);
             border-radius: 10px;
-            /* ★ 보기 글자도 크게 */
             font-size: clamp(0.95rem,3.5vw,1.2rem);
             cursor: pointer; transition: all 0.15s; user-select: none; min-height: 48px;
         }
@@ -205,6 +216,9 @@
     </style>
 </head>
 <body>
+
+<!-- 🎵 BGM 오디오 엘리먼트 -->
+<audio id="bgm" src="bgm4_factory.mp3" loop preload="auto"></audio>
 
 <div class="ad-placeholder" id="adPlaceholder">AD</div>
 
@@ -256,6 +270,8 @@
         <div class="hud-stat"><div class="hud-label">COMBO</div><div class="hud-val" id="hud-combo">0x</div></div>
     </div>
     <div class="hdr-btns">
+        <!-- 🎵 음소거 버튼 -->
+        <button class="mute-btn" id="mute-btn" onclick="toggleMute()" title="BGM 음소거">🎵</button>
         <button class="hdr-btn hdr-btn-stop" onclick="if(isPlaying) endGame();">그만</button>
         <button class="hdr-btn hdr-btn-home" onclick="location.href='index.html'">홈</button>
     </div>
@@ -287,6 +303,54 @@
 const SHEET_URL = "https://script.google.com/macros/s/AKfycby-N01s4e5gHHCRZal52CODVHBNYPRPr9aWORp4mMsxsSnwOxQINcOCoHYuVlE2Y652/exec";
 const GAME_ID = "factory";
 
+// ══════════════════════════════════════
+// 🎵 BGM 관리
+// ══════════════════════════════════════
+const bgm = document.getElementById('bgm');
+bgm.volume = 0.5;
+
+let isMuted = localStorage.getItem('factory_muted') === 'true';
+applyMuteState();
+
+function applyMuteState() {
+    bgm.muted = isMuted;
+    const btn = document.getElementById('mute-btn');
+    if (btn) {
+        btn.textContent = isMuted ? '🔇' : '🎵';
+        btn.classList.toggle('muted', isMuted);
+    }
+}
+
+function toggleMute() {
+    isMuted = !isMuted;
+    localStorage.setItem('factory_muted', isMuted);
+    applyMuteState();
+}
+
+function bgmPlay() {
+    if (bgm.paused) {
+        bgm.play().catch(() => {});
+    }
+}
+
+function bgmStop() {
+    if (bgm.paused) return;
+    const fadeInterval = setInterval(() => {
+        if (bgm.volume > 0.05) {
+            bgm.volume = Math.max(0, bgm.volume - 0.05);
+        } else {
+            bgm.volume = 0;
+            bgm.pause();
+            bgm.currentTime = 0;
+            bgm.volume = 0.5;
+            clearInterval(fadeInterval);
+        }
+    }, 50);
+}
+
+// ══════════════════════════════════════
+// 문제 데이터
+// ══════════════════════════════════════
 const qBank = [
     {q:"당기에 지급한 보험료 중\n내년도분(미경과분)이 100,000원 있다.\n이를 결산 시 반영하시오.",                        hint:"자산증가(차변) / 비용감소(대변)", L:"선급비용",           R:"보험료",              fakes:["미지급비용","선수수익"]},
     {q:"결산 시점에 당기 임차료로 처리한 금액 중\n선급액이 50,000원 발견되었다.",                                       hint:"자산증가(차변) / 비용감소(대변)", L:"선급비용",           R:"임차료",              fakes:["미수수익","미지급비용"]},
@@ -343,6 +407,7 @@ let audioCtx;
 function initAudio() {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if (audioCtx.state === 'suspended') audioCtx.resume();
+    bgmPlay(); // 🎵 첫 인터랙션 시 BGM 시작
 }
 function playSound(type) {
     if (!audioCtx) return;
@@ -367,7 +432,7 @@ function playSound(type) {
 }
 
 function startGame() {
-    initAudio();
+    initAudio(); // ← AudioContext resume + BGM 시작
     els.screenStart.style.display = 'none';
     els.screenResult.style.display = 'none';
     score = 0; combo = 0; maxCombo = 0; matchCount = 0; wrongCount = 0;
@@ -394,7 +459,6 @@ function nextQuestion() {
     if (!isPlaying) return;
     currentQ = qBank[Math.floor(Math.random() * qBank.length)];
     els.qNum.textContent = 'Q.' + qIndex;
-    // ★ \n을 <br>로 변환해서 보기 좋게 줄바꿈
     els.qText.innerHTML = currentQ.q.replace(/\n/g, '<br>');
     selectedParts = { L: null, R: null }; activeSlot = 'L';
     renderSlots();
@@ -493,6 +557,7 @@ function getGrade(score) {
 
 function endGame() {
     isPlaying = false; clearInterval(timerInterval);
+    bgmStop(); // 🎵 게임 종료 시 BGM 페이드 아웃
     document.getElementById('res-score').textContent = score.toLocaleString() + '점';
     document.getElementById('res-rank').textContent  = '최종 직급: ' + getGrade(score);
     document.getElementById('stat-ok').textContent    = matchCount;
