@@ -32,6 +32,10 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 .hdb-quit{background:rgba(255,45,120,.15);border:1px solid var(--pk)!important;color:var(--pk)}
 .hdb-home{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2)!important;color:white}
 
+/* 🎵 음소거 버튼 */
+.mute-btn{height:44px;padding:0 10px;border-radius:8px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2)!important;transition:opacity .2s,border-color .2s}
+.mute-btn.muted{opacity:.4;border-color:rgba(255,255,255,.1)!important}
+
 #glayer{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:12;overflow:hidden}
 .gatel{position:absolute;left:0;width:100%;display:flex;flex-direction:column;align-items:center}
 .gbar{width:100%;height:clamp(14px,2.5vw,20px);background:linear-gradient(90deg,transparent 0%,rgba(15,25,100,.9) 18%,rgba(20,35,130,.95) 50%,rgba(15,25,100,.9) 82%,transparent 100%);border-top:1.5px solid rgba(0,242,255,.22);border-bottom:1.5px solid rgba(0,242,255,.22);box-shadow:0 0 20px rgba(0,242,255,.12)}
@@ -102,6 +106,10 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 </style>
 </head>
 <body>
+
+<!-- 🎵 BGM 오디오 엘리먼트 -->
+<audio id="bgm" src="bgm5_flight.mp3" loop preload="auto"></audio>
+
 <div class="ad-placeholder" id="adPlaceholder">AD</div>
 <div style="position:fixed;inset:0;background:var(--bg);z-index:-1;"></div>
 
@@ -153,6 +161,8 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
       <div class="hb"><div class="hl">COMBO</div><div class="hv" id="hv-combo">0x</div></div>
     </div>
     <div class="hud-btns">
+      <!-- 🎵 음소거 버튼 -->
+      <button class="mute-btn" id="mute-btn" onclick="BGM.toggleMute()" title="BGM 음소거">🎵</button>
       <button class="hdb hdb-quit" onclick="if(Game.state==='playing') Game.gameOver()">그만</button>
       <button class="hdb hdb-home" onclick="location.href='index.html'">홈</button>
     </div>
@@ -168,6 +178,60 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 <script>
 const SHEET_URL="https://script.google.com/macros/s/AKfycby-N01s4e5gHHCRZal52CODVHBNYPRPr9aWORp4mMsxsSnwOxQINcOCoHYuVlE2Y652/exec";
 const GAME_ID="flight";
+
+// ══════════════════════════════════════
+// 🎵 BGM 관리
+// ══════════════════════════════════════
+const BGM = {
+  el: document.getElementById('bgm'),
+  _muted: localStorage.getItem('flight_muted') === 'true',
+  _fadeTimer: null,
+
+  init() {
+    this.el.volume = 0.5;
+    this.el.muted = this._muted;
+    this._updateBtn();
+  },
+
+  _updateBtn() {
+    const btn = document.getElementById('mute-btn');
+    if (!btn) return;
+    btn.textContent = this._muted ? '🔇' : '🎵';
+    btn.classList.toggle('muted', this._muted);
+  },
+
+  toggleMute() {
+    this._muted = !this._muted;
+    localStorage.setItem('flight_muted', this._muted);
+    this.el.muted = this._muted;
+    this._updateBtn();
+  },
+
+  play() {
+    if (this._fadeTimer) { clearInterval(this._fadeTimer); this._fadeTimer = null; }
+    this.el.volume = 0.5;
+    if (this.el.paused) {
+      this.el.play().catch(() => {});
+    }
+  },
+
+  stop() {
+    if (this.el.paused) return;
+    if (this._fadeTimer) clearInterval(this._fadeTimer);
+    this._fadeTimer = setInterval(() => {
+      if (this.el.volume > 0.05) {
+        this.el.volume = Math.max(0, this.el.volume - 0.05);
+      } else {
+        this.el.volume = 0;
+        this.el.pause();
+        this.el.currentTime = 0;
+        this.el.volume = 0.5;
+        clearInterval(this._fadeTimer);
+        this._fadeTimer = null;
+      }
+    }, 50);
+  },
+};
 
 const Problems=[
   {q:"광주상사의 외상매출금 잔액은?",           key:"'광주상사' (거래처명)",    L:"거래처원장",   R:"총계정원장",    a:"L"},
@@ -210,8 +274,6 @@ const Game={
   player:{x:0,y:0,r:42,shield:false,magnet:false,magT:0},
   gates:[],items:[],parts:[],stars:[],
   shipImg:null,shipImgLoaded:false,
-
-  // ★ 터치 즉시 반응: 목표 X 보간
   targetX: 0,
   touchStartX: 0,
   playerStartX: 0,
@@ -220,19 +282,18 @@ const Game={
     this.canvas=document.getElementById('canvas');
     this.ctx=this.canvas.getContext('2d');
     this.hi=+localStorage.getItem('hub_flight_hi')||0;
+    BGM.init(); // 🎵 BGM 초기화
     this.resize();
     window.addEventListener('resize',()=>this.resize());
 
-    // ★ 마우스: 즉시 반영
     window.addEventListener('mousemove',e=>{
       if(this.state==='playing'){
         const rect=document.getElementById('canvas-wrap').getBoundingClientRect();
         const x=Math.max(55,Math.min(this.w-55,e.clientX-rect.left));
-        this.player.x=x; this.targetX=x; // 즉시 이동
+        this.player.x=x; this.targetX=x;
       }
     });
 
-    // ★ 터치: touchstart에서 기준점 저장, touchmove에서 즉시 delta 적용
     window.addEventListener('touchstart',e=>{
       if(this.state==='playing'){
         this.touchStartX=e.touches[0].clientX;
@@ -246,7 +307,6 @@ const Game={
       if(this.state==='playing'){
         const dx=e.touches[0].clientX-this.touchStartX;
         const newX=Math.max(55,Math.min(this.w-55,this.playerStartX+dx));
-        // ★ targetX와 player.x를 동시에 업데이트 → 딜레이 0
         this.player.x=newX;
         this.targetX=newX;
       }
@@ -277,8 +337,20 @@ const Game={
   },
 
   mkStar(init=false){return{x:Math.random()*this.w,y:init?Math.random()*this.h:-2,s:Math.random()*2+.3,v:Math.random()*14+4,c:Math.random()>.85?'#00f2ff':Math.random()>.7?'#b44fff':'#fff'}},
-  start(){SFX.init();document.getElementById('ss').style.display='none';this._reset()},
-  restart(){document.getElementById('gs').style.display='none';this._reset()},
+
+  start(){
+    SFX.init();
+    BGM.play(); // 🎵 게임 시작 시 BGM 재생
+    document.getElementById('ss').style.display='none';
+    this._reset();
+  },
+
+  restart(){
+    BGM.play(); // 🎵 다시 시작 시 BGM 재개
+    document.getElementById('gs').style.display='none';
+    this._reset();
+  },
+
   _reset(){
     this.state='playing';this.score=0;this.combo=0;this.maxCombo=0;this.okCount=0;
     this.speed=3.0;this.frame=0;this.gates=[];this.items=[];this.parts=[];
@@ -297,7 +369,6 @@ const Game={
   },
 
   loop(){
-    // ★ 보간 제거 — player.x = targetX 직접 동기화 (이미 touchmove에서 즉시 반영)
     this.update();this.draw();requestAnimationFrame(()=>this.loop())
   },
 
@@ -399,6 +470,7 @@ const Game={
 
   gameOver(){
     this.state='gameover';
+    BGM.stop(); // 🎵 게임 종료 시 BGM 페이드 아웃
     if(this.score>this.hi){this.hi=this.score;localStorage.setItem('hub_flight_hi',this.hi)}
     document.getElementById('glayer').innerHTML='';
     document.getElementById('go-score').textContent=this.score.toLocaleString()+'점';
