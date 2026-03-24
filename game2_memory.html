@@ -50,6 +50,25 @@
             display: flex; align-items: center;
         }
 
+        /* 🎵 음소거 버튼 */
+        .mute-btn {
+            background: none;
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            border-radius: 50px;
+            padding: 7px 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            min-height: 44px;
+            transition: opacity 0.2s, border-color 0.2s;
+            white-space: nowrap;
+        }
+        .mute-btn.muted {
+            opacity: 0.4;
+            border-color: rgba(255,255,255,0.15);
+        }
+
         /* 상단 상태바 */
         .status-bar {
             display: flex; gap: clamp(14px,4vw,28px);
@@ -88,7 +107,6 @@
             background-color: transparent;
             perspective: 1200px;
             cursor: pointer;
-            /* 크기는 JS에서 CSS 변수로 주입 */
             width: var(--card-w, 140px);
             height: var(--card-h, 90px);
         }
@@ -144,7 +162,6 @@
             justify-content: flex-start; align-items: center;
             z-index: 100; padding: max(20px,env(safe-area-inset-top)) 20px 20px;
             overflow-y: auto;
-            /* ★ 오버레이 안에서 스크롤 허용 */
             touch-action: pan-y;
             overscroll-behavior: contain;
         }
@@ -242,9 +259,14 @@
 </head>
 <body>
 
+    <!-- 🎵 BGM 오디오 엘리먼트 -->
+    <audio id="bgm" src="bgm2_memory.mp3" loop preload="auto"></audio>
+
     <header>
         <h1 style="flex:1;text-align:center;">🧩 기억의 전당 🧩</h1>
         <div style="display:flex;gap:6px;flex-shrink:0;">
+            <!-- 🎵 음소거 버튼 -->
+            <button class="mute-btn" id="mute-btn" onclick="toggleMute()" title="BGM 음소거">🎵</button>
             <button onclick="quitGame()" style="font-family:'Jua';font-size:0.9rem;color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.3);padding:7px 12px;border-radius:50px;background:rgba(0,0,0,0.2);cursor:pointer;min-height:44px;">그만</button>
             <a class="hub-link" href="index.html">홈</a>
         </div>
@@ -332,8 +354,65 @@
         const SHEET_URL = "https://script.google.com/macros/s/AKfycby-N01s4e5gHHCRZal52CODVHBNYPRPr9aWORp4mMsxsSnwOxQINcOCoHYuVlE2Y652/exec";
         const GAME_ID = "memory";
 
+        // ══════════════════════════════════════
+        // 🎵 BGM 관리
+        // ══════════════════════════════════════
+        const bgm = document.getElementById('bgm');
+        bgm.volume = 0.5;
+
+        // 음소거 상태: localStorage에 저장해서 다음 게임에도 유지
+        let isMuted = localStorage.getItem('memory_muted') === 'true';
+        applyMuteState();
+
+        function applyMuteState() {
+            bgm.muted = isMuted;
+            const btn = document.getElementById('mute-btn');
+            if (btn) {
+                btn.textContent = isMuted ? '🔇' : '🎵';
+                btn.classList.toggle('muted', isMuted);
+            }
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            localStorage.setItem('memory_muted', isMuted);
+            applyMuteState();
+        }
+
+        // BGM 재생 (브라우저 자동재생 정책 대응: 반드시 사용자 인터랙션 이후 호출)
+        function bgmPlay() {
+            if (bgm.paused) {
+                bgm.play().catch(() => {
+                    // 자동재생 차단 시 조용히 무시
+                });
+            }
+        }
+
+        // BGM 정지 (페이드 아웃)
+        function bgmStop() {
+            if (bgm.paused) return;
+            const fadeInterval = setInterval(() => {
+                if (bgm.volume > 0.05) {
+                    bgm.volume = Math.max(0, bgm.volume - 0.05);
+                } else {
+                    bgm.volume = 0;
+                    bgm.pause();
+                    bgm.currentTime = 0;
+                    bgm.volume = 0.5; // 다음 재생을 위해 볼륨 복원
+                    clearInterval(fadeInterval);
+                }
+            }, 50);
+        }
+
+        // ══════════════════════════════════════
+        // 🔊 오디오 (효과음)
+        // ══════════════════════════════════════
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function initAudio() { if (audioCtx.state === 'suspended') audioCtx.resume(); }
+        function initAudio() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            bgmPlay(); // 첫 인터랙션(게임 시작 버튼 클릭) 시 BGM 시작
+        }
+
         function playSound(type) {
             try {
                 const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
@@ -429,27 +508,22 @@
             { id:61, a:"기부금",         b:"무상으로 준 금품" },
         ];
 
-        // ── 오답 카운트 수정: wrongCount는 두 장 뒤집었는데 틀렸을 때만 증가 ──
         let flippedCards = [], matchedCount = 0, wrongCount = 0, isLocked = false;
-        let seenCards = new Set(); // ★ 한 번이라도 뒤집힌 카드 추적
+        let seenCards = new Set();
         let timerInterval = null, startTime = 0, elapsedSeconds = 0;
         let stage = 1, totalScore = 0, usedPairIds = new Set();
 
-        // ── 스마트폰 세로 배치 우선 스테이지 설정 ──
-        // cols × rows: 세로(rows)를 최대한 활용
-        // 모바일 320~430px 기준으로 설계
         const STAGES = [
             null,
-            { pairs:2,  cols:2, rows:2,  baseScore:200 },  // Stage 1: 2×2 = 4장
-            { pairs:3,  cols:2, rows:3,  baseScore:300 },  // Stage 2: 2×3 = 6장  ← 세로형
-            { pairs:4,  cols:2, rows:4,  baseScore:400 },  // Stage 3: 2×4 = 8장  ← 세로형
-            { pairs:5,  cols:2, rows:5,  baseScore:500 },  // Stage 4: 2×5 = 10장 ← 세로형
-            { pairs:6,  cols:3, rows:4,  baseScore:600 },  // Stage 5: 3×4 = 12장
-            { pairs:7,  cols:3, rows:5,  baseScore:700 },  // Stage 6: 3×5 = 14장(빈칸1) — 최종 & 무한 반복
+            { pairs:2,  cols:2, rows:2,  baseScore:200 },
+            { pairs:3,  cols:2, rows:3,  baseScore:300 },
+            { pairs:4,  cols:2, rows:4,  baseScore:400 },
+            { pairs:5,  cols:2, rows:5,  baseScore:500 },
+            { pairs:6,  cols:3, rows:4,  baseScore:600 },
+            { pairs:7,  cols:3, rows:5,  baseScore:700 },
         ];
-        const MAX_STAGE = 6; // Stage 6 이후 3×5 무한 반복
+        const MAX_STAGE = 6;
 
-        // Stage 6 이후에도 3×5 config 반환, 점수 계속 누적
         function currentStageConfig() {
             if (stage <= MAX_STAGE) return STAGES[stage];
             return { pairs:7, cols:3, rows:5, baseScore:700 };
@@ -460,17 +534,13 @@
         const matchesEl = document.getElementById('match-count');
         const timerEl   = document.getElementById('timer-display');
 
-        // 카드 크기 계산 (모바일 세로 최적화)
         function calcCardSize(cfg) {
             const GAP = Math.max(8, Math.min(14, window.innerWidth * 0.025));
             const sidePad = Math.max(16, window.innerWidth * 0.04);
             const availW = Math.min(window.innerWidth, 600) - sidePad * 2;
             const cardW  = Math.floor((availW - GAP * (cfg.cols - 1)) / cfg.cols);
-
-            // 세로: 헤더+상태바+여백 약 140px 제외, 광고 50px
             const availH = window.innerHeight - 150;
             const cardH  = Math.floor((availH - GAP * (cfg.rows - 1)) / cfg.rows);
-
             return {
                 w: Math.max(80, Math.min(cardW, 180)),
                 h: Math.max(60, Math.min(cardH, 110)),
@@ -484,7 +554,6 @@
             document.documentElement.style.setProperty('--card-h', h + 'px');
             grid.style.gridTemplateColumns = `repeat(${cfg.cols}, ${w}px)`;
             grid.style.gap = gap + 'px';
-            // 카드 폰트 크기도 너비에 맞게
             const fs = Math.max(0.78, Math.min(w / 100, 1.4));
             document.querySelectorAll('.card-front').forEach(el => {
                 el.style.fontSize = fs + 'rem';
@@ -526,7 +595,7 @@
         }
 
         function startGame() {
-            initAudio();
+            initAudio(); // ← AudioContext resume + BGM 시작
             document.getElementById('start-screen').style.display = 'none';
             document.getElementById('result-screen').style.display = 'none';
             stage = 1; totalScore = 0; usedPairIds = new Set();
@@ -566,11 +635,8 @@
             const blankCount = totalSlots - cardData.length;
 
             if (blankCount > 0) {
-                // 3×5(15칸)에서 빈칸 1개: 정가운데(7번 인덱스, 3행 2열)에 고정
-                // 일반적으로도 가운데 슬롯에 빈칸 배치
                 const centerIdx = Math.floor(totalSlots / 2);
                 const blankPositions = new Set([centerIdx]);
-                // 빈칸이 2개 이상이면 나머지는 랜덤
                 while (blankPositions.size < blankCount) blankPositions.add(Math.floor(Math.random() * totalSlots));
                 let ci = 0;
                 for (let i = 0; i < totalSlots; i++) {
@@ -586,7 +652,6 @@
                 cardData.forEach(data => appendCard(data));
             }
 
-            // 카드 크기 적용
             applyGridStyle(cfg);
         }
 
@@ -601,7 +666,6 @@
                         ${data.text}
                     </div>
                 </div>`;
-            // ★ pointerdown 한 번만 처리 — pointerup 전까지 재입력 차단
             let pressing = false;
             card.addEventListener('pointerdown', function(e) {
                 if (pressing) return;
@@ -635,19 +699,15 @@
             const [c1, c2] = flippedCards;
             const cfg = currentStageConfig();
 
-            // ★ 두 카드 모두 이전에 본 적 있는지 확인
             const c1Seen = seenCards.has(c1);
             const c2Seen = seenCards.has(c2);
-            // 본 적 없는 카드는 이번에 처음 봤으니 seenCards에 추가
             seenCards.add(c1);
             seenCards.add(c2);
 
             if (c1.dataset.id === c2.dataset.id) {
-                // ✅ 정답 — 오답카운트 올리지 않음
                 playSound('match');
                 setTimeout(() => {
                     c1.classList.add('matched'); c2.classList.add('matched');
-                    // 매칭된 카드는 seenCards에서 제거 (더 이상 의미 없음)
                     seenCards.delete(c1); seenCards.delete(c2);
                     matchedCount++; matchesEl.innerText = matchedCount;
                     flippedCards = [];
@@ -655,7 +715,6 @@
                     if (matchedCount === cfg.pairs) endGame();
                 }, 400);
             } else {
-                // ❌ 오답 — 두 카드 모두 이전에 본 적 있을 때만 카운트
                 if (c1Seen && c2Seen) {
                     wrongCount++;
                     movesEl.innerText = wrongCount;
@@ -673,6 +732,7 @@
 
         function endGame(quit = false) {
             stopTimer();
+            bgmStop(); // 🎵 게임 종료/포기 시 BGM 페이드 아웃
             const cfg = currentStageConfig();
             const secs = Math.round(elapsedSeconds);
             const stageScore = quit
@@ -687,7 +747,6 @@
             } else {
                 playSound('clear');
                 totalScore += stageScore;
-                // Stage 7 이후에도 계속 다음 스테이지 진행 (점수 누적 무한 반복)
                 document.querySelector('#result-screen h2').textContent = `Stage ${stage} CLEAR! 🎉`;
                 document.getElementById('result-rank').textContent = `+${stageScore}점 획득!`;
                 document.getElementById('result-rank').style.color = '#2ecc71';
@@ -723,7 +782,6 @@
             document.getElementById('save-status').style.display = 'block';
             document.getElementById('next-stage-btn').style.display = 'none';
             document.getElementById('restart-btn').style.display = 'inline-block';
-            // ★ 최종 결과 시 랭킹 다시 표시
             document.querySelector('.rank-wrap').style.display = '';
             document.getElementById('result-screen').style.display = 'flex';
             loadRanking();
@@ -732,10 +790,10 @@
         function nextStage() {
             stage++;
             document.getElementById('result-screen').style.display = 'none';
+            bgmPlay(); // 🎵 다음 스테이지 진행 시 BGM 재개
             resetStage();
         }
 
-        // 화면 회전/리사이즈 시 재계산
         window.addEventListener('resize', () => {
             const cfg = currentStageConfig();
             if (cfg) applyGridStyle(cfg);
@@ -756,7 +814,6 @@
             if (name.length < 2) { showStatus('2글자 이상 입력해주세요', 'err'); return; }
             showStatus('확인 중...', '');
 
-            // 내 닉네임이면 중복 체크 스킵
             const myStoredName = getMyName();
             if (name !== myStoredName) {
                 let existingList = [];
