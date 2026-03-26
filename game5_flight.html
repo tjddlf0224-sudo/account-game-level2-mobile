@@ -32,7 +32,6 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 .hdb-quit{background:rgba(255,45,120,.15);border:1px solid var(--pk)!important;color:var(--pk)}
 .hdb-home{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2)!important;color:white}
 
-/* 🎵 음소거 버튼 */
 .mute-btn{height:44px;padding:0 10px;border-radius:8px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2)!important;transition:opacity .2s,border-color .2s}
 .mute-btn.muted{opacity:.4;border-color:rgba(255,255,255,.1)!important}
 
@@ -59,8 +58,30 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 #cpop{position:absolute;top:28%;left:50%;transform:translate(-50%,-50%);font-family:'Orbitron';font-size:clamp(1.8rem,6vw,3rem);font-weight:900;color:var(--gd);pointer-events:none;z-index:50;display:none;text-shadow:0 0 20px var(--gd),2px 2px 0 #000}
 @keyframes cp{0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}40%{opacity:1;transform:translate(-50%,-68%) scale(1.3)}100%{opacity:0;transform:translate(-50%,-115%) scale(1)}}
 
-.ovl{position:absolute;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;overflow-y:auto;padding:max(20px,env(safe-area-inset-top)) 16px 20px;gap:clamp(10px,2vh,22px)}
-.ovl-inner{display:flex;flex-direction:column;align-items:center;gap:clamp(10px,2vh,18px);width:100%;max-width:760px;margin:auto}
+/* ── 오버레이 공통 ── */
+.ovl{
+  position:absolute;
+  inset:0;
+  z-index:100;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  /* ★ 스크롤 핵심 3가지 */
+  overflow-y:auto;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  padding:max(20px,env(safe-area-inset-top)) 16px calc(20px + var(--ad-h));
+}
+.ovl-inner{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:clamp(10px,2vh,18px);
+  width:100%;
+  max-width:760px;
+  /* ★ margin:auto 제거 → 스크롤 시 상단 잘림 방지 */
+  padding-bottom:8px;
+}
 
 #ss{background:radial-gradient(ellipse at 50% 38%,#071530 0%,#020912 65%)}
 .logo{font-family:'Orbitron',monospace;font-size:clamp(1.8rem,7vw,3.5rem);font-weight:900;color:var(--cy);letter-spacing:clamp(2px,1vw,5px);text-align:center;text-shadow:0 0 32px var(--cy),0 0 64px rgba(0,242,255,.22)}
@@ -73,7 +94,10 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 .sbtn:active{background:var(--cy);color:#000;text-shadow:none;animation:none}
 @keyframes sbP{0%,100%{box-shadow:0 0 26px rgba(0,242,255,.25),inset 0 0 20px rgba(0,242,255,.05)}50%{box-shadow:0 0 46px rgba(0,242,255,.45),inset 0 0 26px rgba(0,242,255,.1)}}
 
-#gs{background:rgba(2,8,20,.93);backdrop-filter:blur(10px);display:none}
+/* ★ 게임오버 화면 — touch-action 스크롤 허용 */
+#gs{background:rgba(2,8,20,.96);backdrop-filter:blur(10px);display:none;touch-action:pan-y}
+#gs .ovl-inner{touch-action:pan-y}
+
 .gtitle{font-family:'Orbitron';font-size:clamp(2rem,8vw,3.5rem);font-weight:900;color:var(--pk);letter-spacing:4px;text-shadow:0 0 30px var(--pk)}
 .gscore{font-family:'Orbitron';font-size:clamp(2.5rem,10vw,4.2rem);font-weight:900;color:var(--gd);text-shadow:0 0 22px var(--gd);line-height:1}
 .ggrade{font-family:'Black Han Sans';font-size:clamp(.95rem,3.5vw,1.2rem);color:var(--cy);background:rgba(0,242,255,.1);padding:8px 22px;border-radius:50px;border:1px solid rgba(0,242,255,.3);text-align:center}
@@ -107,7 +131,6 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 </head>
 <body>
 
-<!-- 🎵 BGM 오디오 엘리먼트 -->
 <audio id="bgm" src="bgm5_flight.mp3" loop preload="auto"></audio>
 
 <div class="ad-placeholder" id="adPlaceholder">AD</div>
@@ -161,7 +184,6 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
       <div class="hb"><div class="hl">COMBO</div><div class="hv" id="hv-combo">0x</div></div>
     </div>
     <div class="hud-btns">
-      <!-- 🎵 음소거 버튼 -->
       <button class="mute-btn" id="mute-btn" onclick="BGM.toggleMute()" title="BGM 음소거">🎵</button>
       <button class="hdb hdb-quit" onclick="if(Game.state==='playing') Game.gameOver()">그만</button>
       <button class="hdb hdb-home" onclick="location.href='index.html'">홈</button>
@@ -179,77 +201,34 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 const SHEET_URL="https://script.google.com/macros/s/AKfycby-N01s4e5gHHCRZal52CODVHBNYPRPr9aWORp4mMsxsSnwOxQINcOCoHYuVlE2Y652/exec";
 const GAME_ID="flight";
 
-// ══════════════════════════════════════
-// 🎵 BGM 관리
-// ══════════════════════════════════════
-const BGM = {
-  el: document.getElementById('bgm'),
-  _muted: localStorage.getItem('flight_muted') === 'true',
-  _fadeTimer: null,
-
-  init() {
-    this.el.volume = 0.5;
-    this.el.muted = this._muted;
-    this._updateBtn();
-  },
-
-  _updateBtn() {
-    const btn = document.getElementById('mute-btn');
-    if (!btn) return;
-    btn.textContent = this._muted ? '🔇' : '🎵';
-    btn.classList.toggle('muted', this._muted);
-  },
-
-  toggleMute() {
-    this._muted = !this._muted;
-    localStorage.setItem('flight_muted', this._muted);
-    this.el.muted = this._muted;
-    this._updateBtn();
-  },
-
-  play() {
-    if (this._fadeTimer) { clearInterval(this._fadeTimer); this._fadeTimer = null; }
-    this.el.volume = 0.5;
-    if (this.el.paused) {
-      this.el.play().catch(() => {});
-    }
-  },
-
-  stop() {
-    if (this.el.paused) return;
-    if (this._fadeTimer) clearInterval(this._fadeTimer);
-    this._fadeTimer = setInterval(() => {
-      if (this.el.volume > 0.05) {
-        this.el.volume = Math.max(0, this.el.volume - 0.05);
-      } else {
-        this.el.volume = 0;
-        this.el.pause();
-        this.el.currentTime = 0;
-        this.el.volume = 0.5;
-        clearInterval(this._fadeTimer);
-        this._fadeTimer = null;
-      }
-    }, 50);
-  },
+const BGM={
+  el:document.getElementById('bgm'),
+  _muted:localStorage.getItem('flight_muted')==='true',
+  _fadeTimer:null,
+  init(){this.el.volume=0.5;this.el.muted=this._muted;this._updateBtn()},
+  _updateBtn(){const btn=document.getElementById('mute-btn');if(!btn)return;btn.textContent=this._muted?'🔇':'🎵';btn.classList.toggle('muted',this._muted)},
+  toggleMute(){this._muted=!this._muted;localStorage.setItem('flight_muted',this._muted);this.el.muted=this._muted;this._updateBtn()},
+  play(){if(this._fadeTimer){clearInterval(this._fadeTimer);this._fadeTimer=null}this.el.volume=0.5;if(this.el.paused)this.el.play().catch(()=>{})},
+  stop(){if(this.el.paused)return;if(this._fadeTimer)clearInterval(this._fadeTimer);this._fadeTimer=setInterval(()=>{if(this.el.volume>0.05){this.el.volume=Math.max(0,this.el.volume-0.05)}else{this.el.volume=0;this.el.pause();this.el.currentTime=0;this.el.volume=0.5;clearInterval(this._fadeTimer);this._fadeTimer=null}},50)},
 };
 
 const Problems=[
-  {q:"광주상사의 외상매출금 잔액은?",           key:"'광주상사' (거래처명)",    L:"거래처원장",   R:"총계정원장",    a:"L"},
-  {q:"외상매입금 잔액이 가장 많은 거래처는?",    key:"거래처 비교",             L:"재무상태표",   R:"거래처원장",    a:"R"},
-  {q:"우리상사에 대한 받을어음 잔액은?",         key:"특정 거래처 잔액",         L:"거래처원장",   R:"현금출납장",    a:"L"},
-  {q:"선수금 잔액이 남아있는 거래처는?",         key:"거래처 확인",             L:"거래처원장",   R:"손익계산서",    a:"L"},
-  {q:"상반기 중 접대비가 가장 많은 월은?",       key:"가장 많은 '월'?",          L:"총계정원장",   R:"거래처원장",    a:"L"},
-  {q:"5월 중 제품매출 발생액은?",               key:"특정 '월' 발생액",         L:"재무상태표",   R:"총계정원장",    a:"R"},
-  {q:"1월~6월 외상매출금 회수총액?",            key:"월별 흐름/합계",           L:"일계표",       R:"총계정원장",    a:"R"},
-  {q:"판매관리비 중 '현금' 지출액은?",           key:"현금 vs 대체",            L:"월계표",       R:"현금출납장",    a:"L"},
-  {q:"5월 발생한 '대체' 전표 총액은?",           key:"대체 거래 확인",           L:"현금출납장",   R:"일계표",        a:"R"},
-  {q:"도서인쇄비 전액이 현금 지출인가?",          key:"현금/대체 구분",           L:"거래처원장",   R:"일계표",        a:"R"},
-  {q:"3월 25일 현재 현금 잔액은?",              key:"날짜별 현금 잔액",         L:"현금출납장",   R:"매입매출장",    a:"L"},
-  {q:"2월 중 현금 총 입금액은?",               key:"현금 입금 내역",           L:"현금출납장",   R:"부가가치세신고서",a:"L"},
-  {q:"12월말 현재 유동자산의 총액은?",           key:"자산 총액 (잔액)",         L:"재무상태표",   R:"손익계산서",    a:"L"},
-  {q:"상반기 당기순이익은 얼마인가?",            key:"이익/손실 확인",           L:"재무상태표",   R:"손익계산서",    a:"R"},
-  {q:"1기 확정 부가가치세 과세표준은?",           key:"부가세 신고액",            L:"부가세신고서", R:"세금계산서합계표",a:"L"},
-  {q:"보유 중인 받을어음의 만기일 조회",          key:"어음 만기일",              L:"받을어음현황", R:"총계정원장",    a:"L"},
+  {q:"광주상사의 외상매출금 잔액은?",key:"'광주상사' (거래처명)",L:"거래처원장",R:"총계정원장",a:"L"},
+  {q:"외상매입금 잔액이 가장 많은 거래처는?",key:"거래처 비교",L:"재무상태표",R:"거래처원장",a:"R"},
+  {q:"우리상사에 대한 받을어음 잔액은?",key:"특정 거래처 잔액",L:"거래처원장",R:"현금출납장",a:"L"},
+  {q:"선수금 잔액이 남아있는 거래처는?",key:"거래처 확인",L:"거래처원장",R:"손익계산서",a:"L"},
+  {q:"상반기 중 접대비가 가장 많은 월은?",key:"가장 많은 '월'?",L:"총계정원장",R:"거래처원장",a:"L"},
+  {q:"5월 중 제품매출 발생액은?",key:"특정 '월' 발생액",L:"재무상태표",R:"총계정원장",a:"R"},
+  {q:"1월~6월 외상매출금 회수총액?",key:"월별 흐름/합계",L:"일계표",R:"총계정원장",a:"R"},
+  {q:"판매관리비 중 '현금' 지출액은?",key:"현금 vs 대체",L:"월계표",R:"현금출납장",a:"L"},
+  {q:"5월 발생한 '대체' 전표 총액은?",key:"대체 거래 확인",L:"현금출납장",R:"일계표",a:"R"},
+  {q:"도서인쇄비 전액이 현금 지출인가?",key:"현금/대체 구분",L:"거래처원장",R:"일계표",a:"R"},
+  {q:"3월 25일 현재 현금 잔액은?",key:"날짜별 현금 잔액",L:"현금출납장",R:"매입매출장",a:"L"},
+  {q:"2월 중 현금 총 입금액은?",key:"현금 입금 내역",L:"현금출납장",R:"부가가치세신고서",a:"L"},
+  {q:"12월말 현재 유동자산의 총액은?",key:"자산 총액 (잔액)",L:"재무상태표",R:"손익계산서",a:"L"},
+  {q:"상반기 당기순이익은 얼마인가?",key:"이익/손실 확인",L:"재무상태표",R:"손익계산서",a:"R"},
+  {q:"1기 확정 부가가치세 과세표준은?",key:"부가세 신고액",L:"부가세신고서",R:"세금계산서합계표",a:"L"},
+  {q:"보유 중인 받을어음의 만기일 조회",key:"어음 만기일",L:"받을어음현황",R:"총계정원장",a:"L"},
 ];
 
 const SFX={
@@ -274,15 +253,13 @@ const Game={
   player:{x:0,y:0,r:42,shield:false,magnet:false,magT:0},
   gates:[],items:[],parts:[],stars:[],
   shipImg:null,shipImgLoaded:false,
-  targetX: 0,
-  touchStartX: 0,
-  playerStartX: 0,
+  targetX:0,touchStartX:0,playerStartX:0,
 
   init(){
     this.canvas=document.getElementById('canvas');
     this.ctx=this.canvas.getContext('2d');
     this.hi=+localStorage.getItem('hub_flight_hi')||0;
-    BGM.init(); // 🎵 BGM 초기화
+    BGM.init();
     this.resize();
     window.addEventListener('resize',()=>this.resize());
 
@@ -290,7 +267,7 @@ const Game={
       if(this.state==='playing'){
         const rect=document.getElementById('canvas-wrap').getBoundingClientRect();
         const x=Math.max(55,Math.min(this.w-55,e.clientX-rect.left));
-        this.player.x=x; this.targetX=x;
+        this.player.x=x;this.targetX=x;
       }
     });
 
@@ -303,19 +280,18 @@ const Game={
     },{passive:true});
 
     window.addEventListener('touchmove',e=>{
+      // ★ playing 상태가 아니면 기본 스크롤 동작 허용
+      if(this.state!=='playing') return;
       e.preventDefault();
-      if(this.state==='playing'){
-        const dx=e.touches[0].clientX-this.touchStartX;
-        const newX=Math.max(55,Math.min(this.w-55,this.playerStartX+dx));
-        this.player.x=newX;
-        this.targetX=newX;
-      }
+      const dx=e.touches[0].clientX-this.touchStartX;
+      const newX=Math.max(55,Math.min(this.w-55,this.playerStartX+dx));
+      this.player.x=newX;this.targetX=newX;
     },{passive:false});
 
     window.addEventListener('keydown',e=>{
       if(this.state==='playing'){
-        if(e.key==='ArrowLeft')  {this.player.x=Math.max(55,this.player.x-65);this.targetX=this.player.x}
-        if(e.key==='ArrowRight') {this.player.x=Math.min(this.w-55,this.player.x+65);this.targetX=this.player.x}
+        if(e.key==='ArrowLeft'){this.player.x=Math.max(55,this.player.x-65);this.targetX=this.player.x}
+        if(e.key==='ArrowRight'){this.player.x=Math.min(this.w-55,this.player.x+65);this.targetX=this.player.x}
       }
     });
 
@@ -338,18 +314,8 @@ const Game={
 
   mkStar(init=false){return{x:Math.random()*this.w,y:init?Math.random()*this.h:-2,s:Math.random()*2+.3,v:Math.random()*14+4,c:Math.random()>.85?'#00f2ff':Math.random()>.7?'#b44fff':'#fff'}},
 
-  start(){
-    SFX.init();
-    BGM.play(); // 🎵 게임 시작 시 BGM 재생
-    document.getElementById('ss').style.display='none';
-    this._reset();
-  },
-
-  restart(){
-    BGM.play(); // 🎵 다시 시작 시 BGM 재개
-    document.getElementById('gs').style.display='none';
-    this._reset();
-  },
+  start(){SFX.init();BGM.play();document.getElementById('ss').style.display='none';this._reset()},
+  restart(){BGM.play();document.getElementById('gs').style.display='none';this._reset()},
 
   _reset(){
     this.state='playing';this.score=0;this.combo=0;this.maxCombo=0;this.okCount=0;
@@ -368,9 +334,7 @@ const Game={
     this.updHUD();
   },
 
-  loop(){
-    this.update();this.draw();requestAnimationFrame(()=>this.loop())
-  },
+  loop(){this.update();this.draw();requestAnimationFrame(()=>this.loop())},
 
   spawnGate(){
     const p=Problems[Math.floor(Math.random()*Problems.length)];
@@ -401,7 +365,6 @@ const Game={
     if(this.frame%gI===0)this.spawnGate();
     if(this.frame%52===0)this.spawnItems();
     if(this.player.magnet){this.player.magT--;if(this.player.magT<=0){this.player.magnet=false;document.getElementById('ic-magnet').classList.remove('on')}}
-
     for(let i=this.gates.length-1;i>=0;i--){
       const g=this.gates[i];g.y+=this.speed*.82;
       if(g.domEl)g.domEl.style.top=(g.y-140)+'px';
@@ -465,12 +428,11 @@ const Game={
   doFlash(type){const el=document.getElementById('flash');el.className='';void el.offsetWidth;el.className=type;setTimeout(()=>el.className='',type==='ok'?400:560)},
   showCombo(n){const el=document.getElementById('cpop');el.textContent=n+'x COMBO! 🔥';el.style.display='block';el.style.animation='none';void el.offsetWidth;el.style.animation='cp .8s ease-out forwards';setTimeout(()=>el.style.display='none',800)},
   updHUD(){document.getElementById('hv-score').textContent=this.score.toLocaleString();document.getElementById('hv-combo').textContent=this.combo+'x'},
-
   _grade(score){if(score>=50000)return'👑 전설의 에이스';if(score>=30000)return'🥇 베테랑 파일럿';if(score>=15000)return'🥈 숙련 파일럿';if(score>=5000)return'🥉 정규 파일럿';return'🛩 견습 파일럿'},
 
   gameOver(){
     this.state='gameover';
-    BGM.stop(); // 🎵 게임 종료 시 BGM 페이드 아웃
+    BGM.stop();
     if(this.score>this.hi){this.hi=this.score;localStorage.setItem('hub_flight_hi',this.hi)}
     document.getElementById('glayer').innerHTML='';
     document.getElementById('go-score').textContent=this.score.toLocaleString()+'점';
@@ -478,7 +440,10 @@ const Game={
     document.getElementById('go-mc').textContent=this.maxCombo;
     document.getElementById('go-hi').textContent=this.hi.toLocaleString();
     document.getElementById('go-grade').textContent='파일럿 등급: '+this._grade(this.score);
-    document.getElementById('gs').style.display='flex';this.loadRanking();
+    const gs=document.getElementById('gs');
+    gs.style.display='flex';
+    gs.scrollTop=0; // ★ 열릴 때 상단으로 리셋
+    this.loadRanking();
   },
 
   async saveScore(){
