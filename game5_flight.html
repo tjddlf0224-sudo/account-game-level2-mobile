@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src 'self' data:; connect-src 'self' https://script.google.com https://script.googleusercontent.com; media-src 'self';">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
@@ -159,7 +160,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
       <div class="gstats">정답 <span id="go-ok">0</span>문항 &nbsp;|&nbsp; 최고 콤보 <span id="go-mc">0</span>x &nbsp;|&nbsp; 최고 기록 <span id="go-hi">0</span></div>
       <div id="savesec">
         <label>파일럿 이름을 입력하세요</label>
-        <input type="text" id="pname" placeholder="이름 입력" onkeydown="if(event.key==='Enter') Game.saveScore()">
+        <input type="text" id="pname" placeholder="이름 입력" maxlength="20" onkeydown="if(event.key==='Enter') Game.saveScore()">
         <div id="savemsg"></div>
         <div class="brow">
           <button class="pill cy" id="savebtn" onclick="Game.saveScore()">💾 랭킹 등록</button>
@@ -200,6 +201,10 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 <script>
 const SHEET_URL="https://script.google.com/macros/s/AKfycby-N01s4e5gHHCRZal52CODVHBNYPRPr9aWORp4mMsxsSnwOxQINcOCoHYuVlE2Y652/exec";
 const GAME_ID="flight";
+
+
+// XSS 방어
+function escapeHTML(str) { if (!str) return ''; return str.replace(/[&<>'"]/g, function(tag) { const chars = { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }; return chars[tag] || tag; }); }
 
 const BGM={
   el:document.getElementById('bgm'),
@@ -449,6 +454,7 @@ const Game={
   async saveScore(){
     const name=document.getElementById('pname').value.trim();
     if(!name){alert('이름을 입력하세요');return}
+    if(name.length<2){alert('2글자 이상 입력해주세요');return}
     const btn=document.getElementById('savebtn'),msg=document.getElementById('savemsg');
     btn.disabled=true;btn.style.opacity='.5';msg.textContent='저장 중...';msg.style.color='rgba(255,255,255,.4)';
     const today=new Date().toLocaleDateString('ko-KR',{month:'2-digit',day:'2-digit'});
@@ -477,7 +483,7 @@ const Game={
     const me=document.getElementById('pname').value.trim();
     box.innerHTML='<div class="rkhdr">🏆 HALL OF FAME</div>'+list.map((r,i)=>{
       const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'위';
-      return`<div class="rkrow ${r.name===me?'rkme':''}"><div class="rkn ${i<3?'top':''}">${medal}</div><div class="rknm">${r.name}</div><div class="rkgr">${r.grade||this._grade(r.score)}</div><div class="rksc">${(r.score||0).toLocaleString()}</div></div>`;
+      return`<div class="rkrow ${r.name===me?'rkme':''}"><div class="rkn ${i<3?'top':''}">${medal}</div><div class="rknm">${escapeHTML(r.name)}</div><div class="rkgr">${escapeHTML(r.grade||this._grade(r.score))}</div><div class="rksc">${(r.score||0).toLocaleString()}</div></div>`;
     }).join('');
   },
 
@@ -500,5 +506,6 @@ function hideAdPlaceholder(){
 
 window.addEventListener('load',()=>Game.init());
 </script>
+<script>document.addEventListener('contextmenu', e => e.preventDefault()); document.addEventListener('selectstart', e => e.preventDefault()); document.addEventListener('copy', e => e.preventDefault()); document.addEventListener('keydown', e => { if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) || (e.ctrlKey && e.keyCode === 85)) { e.preventDefault(); } });</script>
 </body>
 </html>
