@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src 'self' data:; connect-src 'self' https://script.google.com https://script.googleusercontent.com; media-src 'self';">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
@@ -878,6 +879,7 @@
             return [...map.values()].sort((a, b) => b.score - a.score).slice(0, 15);
         }
 
+        function escapeHTML(str) { if (!str) return ''; return str.replace(/[&<>'"]/g, function(tag) { const chars = { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }; return chars[tag] || tag; }); }
         function renderRanking(list) {
             const body = document.getElementById('rank-body');
             const me   = document.getElementById('player-name').value.trim();
@@ -890,8 +892,8 @@
                 const rk = getRank(Number(r.score));
                 return `<div class="rank-row${r.name === me ? ' rank-me' : ''}">
                     <span class="rank-num ${colors[i] || ''}">${i + 1}위</span>
-                    <span>${r.name}</span>
-                    <span style="color:${rk.color};font-family:'Jua';font-size:0.85rem;">${rk.title}</span>
+                    <span>${escapeHTML(r.name)}</span>
+                    <span style="color:${rk.color};font-family:'Jua';font-size:0.85rem;">${escapeHTML(rk.title)}</span>
                     <span class="rank-score">${(r.score||0).toLocaleString()}점</span>
                 </div>`;
             }).join('');
@@ -902,5 +904,6 @@
             el.textContent = msg; el.className = 'status-msg ' + type;
         }
     </script>
+<script>document.addEventListener('contextmenu', e => e.preventDefault()); document.addEventListener('selectstart', e => e.preventDefault()); document.addEventListener('copy', e => e.preventDefault()); document.addEventListener('keydown', e => { if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) || (e.ctrlKey && e.keyCode === 85)) { e.preventDefault(); } });</script>
 </body>
 </html>
