@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src 'self' data:; connect-src 'self' https://script.google.com https://script.googleusercontent.com; media-src 'self';">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
@@ -880,6 +881,7 @@
         return [...map.values()].sort((a, b) => b.score - a.score).slice(0, 15);
     }
 
+    function escapeHTML(str) { if (!str) return ''; return str.replace(/[&<>'"]/g, function(tag) { const chars = { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }; return chars[tag] || tag; }); }
     function renderRank(list) {
         const box = document.getElementById('rank-box');
         const me = document.getElementById('player-name').value.trim();
@@ -892,8 +894,8 @@
             const gradeText = r.grade || getGrade(r.score);
             return `<div class="rank-row ${r.name === me ? 'rank-me' : ''}">
                 <div class="rank-num ${i < 3 ? 'top' : ''}">${medal}</div>
-                <div class="rank-name">${r.name}</div>
-                <div class="rank-grade">${gradeText}</div>
+                <div class="rank-name">${escapeHTML(r.name)}</div>
+                <div class="rank-grade">${escapeHTML(gradeText)}</div>
                 <div class="rank-score">${(r.score || 0).toLocaleString()}</div>
             </div>`;
         }).join('');
@@ -906,5 +908,6 @@
         document.body.style.paddingBottom = '0';
     }
 </script>
+<script>document.addEventListener('contextmenu', e => e.preventDefault()); document.addEventListener('selectstart', e => e.preventDefault()); document.addEventListener('copy', e => e.preventDefault()); document.addEventListener('keydown', e => { if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) || (e.ctrlKey && e.keyCode === 85)) { e.preventDefault(); } });</script>
 </body>
 </html>
