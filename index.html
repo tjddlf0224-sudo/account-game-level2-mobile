@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="전산회계2급">
+<meta name="theme-color" content="#020810">
+
+<!-- ★ 앱 아이콘 연결 -->
+<!-- iOS 홈 화면 아이콘 -->
+<link rel="apple-touch-icon" href="icon.png">
+<!-- Android / PWA 아이콘 -->
+<link rel="icon" type="image/png" href="icon.png">
+<!-- PWA 매니페스트 -->
+<link rel="manifest" href="manifest.json">
+<title>전산회계 2급 마스터 — 5단계 훈련 허브</title>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cy: #00f2ff;
+  --pk: #ff2d78;
+  --gd: #ffd600;
+  --gn: #00e676;
+  --pu: #b44fff;
+  --bg: #020810;
+  --panel: rgba(255,255,255,0.04);
+  --border: rgba(255,255,255,0.10);
+
+  /* 광고 배너 높이 — 안드로이드 AdMob 배너 표준 50px */
+  --ad-banner-h: 50px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  width: 100%; height: 100%;
+  overscroll-behavior: none; /* 스크롤 바운스 방지 */
+}
+
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: var(--bg);
+  color: white;
+  min-height: 100vh;
+  min-height: 100dvh; /* dynamic viewport height (모바일 주소창 고려) */
+  overflow-x: hidden;
+  /* 하단 광고 공간 확보 */
+  padding-bottom: var(--ad-banner-h);
+  background-image:
+    radial-gradient(ellipse 60% 40% at 15% 20%, rgba(0,242,255,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 35% at 85% 80%, rgba(180,79,255,0.07) 0%, transparent 55%),
+    radial-gradient(ellipse 40% 30% at 50% 50%, rgba(255,45,120,0.04) 0%, transparent 60%);
+}
+
+/* ── 별 캔버스 ── */
+#starfield { position:fixed; inset:0; z-index:0; pointer-events:none; }
+
+/* ── AdMob 광고 자리 (하단 고정) ── */
+/* 실제 AdMob SDK는 안드로이드 레이아웃에서 처리.
+   WebView에서 테스트할 때 공간 확인용으로만 사용 */
+.ad-placeholder {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: var(--ad-banner-h);
+  background: rgba(0,0,0,0.6);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.6rem; letter-spacing: 2px;
+  color: rgba(255,255,255,0.2);
+}
+
+/* ── 레이아웃 ── */
+.wrap {
+  position: relative; z-index: 1;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 60px 40px 80px;
+}
+
+/* ── 헤더 ── */
+.hub-header { text-align:center; margin-bottom:64px; }
+.hub-badge {
+  display:inline-block;
+  font-family:'Orbitron', monospace;
+  font-size:0.72rem; letter-spacing:4px; color:rgba(0,242,255,0.6);
+  border:1px solid rgba(0,242,255,0.2);
+  padding:6px 20px; border-radius:50px;
+  margin-bottom:22px;
+  background:rgba(0,242,255,0.04);
+}
+.hub-title {
+  font-family:'Black Han Sans', sans-serif;
+  font-size:3.8rem;
+  line-height:1.1;
+  margin-bottom:14px;
+}
+.hub-title .t1 { color:#fff; }
+.hub-title .t2 {
+  background: linear-gradient(90deg, var(--cy), var(--pu));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+}
+.hub-desc {
+  font-size:1.05rem;
+  color:rgba(255,255,255,0.45);
+  letter-spacing:0.5px;
+}
+
+/* ── 경로 라인 ── */
+.path-line {
+  display:flex; align-items:center; justify-content:center;
+  gap:0; margin-bottom:48px; flex-wrap:wrap;
+}
+.path-step {
+  display:flex; align-items:center; gap:10px;
+  font-family:'Orbitron', monospace;
+  font-size:0.7rem; letter-spacing:2px;
+  color:rgba(255,255,255,0.25);
+  white-space:nowrap;
+}
+.path-step.active { color:var(--cy); }
+.path-dot {
+  width:8px; height:8px; border-radius:50%;
+  background:rgba(255,255,255,0.15);
+  flex-shrink:0;
+}
+.path-step.active .path-dot { background:var(--cy); box-shadow:0 0 10px var(--cy); }
+.path-arrow {
+  width:40px; height:1px;
+  background:linear-gradient(to right, rgba(255,255,255,0.1), rgba(255,255,255,0.2));
+  flex-shrink:0;
+}
+
+/* ── 게임 카드 그리드 ── */
+.games-grid {
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:16px;
+  margin-bottom:60px;
+}
+
+.game-card {
+  position:relative;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:28px 20px 24px;
+  text-decoration:none; color:white;
+  cursor:pointer;
+  transition:transform 0.22s, box-shadow 0.22s, border-color 0.22s, background 0.22s;
+  overflow:hidden;
+  display:flex; flex-direction:column; align-items:center; gap:14px;
+  /* 터치 영역 최소 보장 */
+  min-height: 44px;
+}
+.game-card::before {
+  content:'';
+  position:absolute; inset:0;
+  background:var(--card-glow, rgba(0,242,255,0.06));
+  opacity:0; transition:opacity 0.25s;
+  border-radius:inherit;
+}
+.game-card:hover { transform:translateY(-8px); border-color:var(--card-color, var(--cy)); }
+.game-card:hover::before { opacity:1; }
+.game-card:hover { box-shadow:0 20px 50px var(--card-shadow, rgba(0,242,255,0.2)); }
+
+/* 터치 활성 상태 (모바일 hover 대체) */
+.game-card:active {
+  transform: scale(0.97);
+  border-color: var(--card-color, var(--cy));
+}
+.game-card:active::before { opacity: 1; }
+
+/* 단계별 색상 */
+.card-1 { --card-color:var(--gn);  --card-glow:rgba(0,230,118,0.06);  --card-shadow:rgba(0,230,118,0.2);  }
+.card-2 { --card-color:var(--cy);  --card-glow:rgba(0,242,255,0.06);  --card-shadow:rgba(0,242,255,0.2);  }
+.card-3 { --card-color:var(--pu);  --card-glow:rgba(180,79,255,0.06); --card-shadow:rgba(180,79,255,0.2); }
+.card-4 { --card-color:var(--gd);  --card-glow:rgba(255,214,0,0.06);  --card-shadow:rgba(255,214,0,0.2);  }
+.card-5 { --card-color:var(--pk);  --card-glow:rgba(255,45,120,0.06); --card-shadow:rgba(255,45,120,0.2); }
+
+.card-stage {
+  font-family:'Orbitron', monospace;
+  font-size:0.85rem; letter-spacing:3px;
+  color:var(--card-color, var(--cy));
+  opacity:0.7;
+}
+.card-icon {
+  font-size:3.5rem;
+  filter:drop-shadow(0 0 12px var(--card-color, var(--cy)));
+  transition:transform 0.2s;
+}
+.game-card:hover .card-icon { transform:scale(1.15); }
+
+.card-title {
+  font-family:'Black Han Sans', sans-serif;
+  font-size:1.5rem; text-align:center;
+  color:#fff; line-height:1.35;
+}
+.card-desc {
+  font-size:1rem; color:rgba(255,255,255,0.4);
+  text-align:center; line-height:1.6;
+}
+.card-count {
+  font-family:'Orbitron', monospace;
+  font-size:0.85rem; color:var(--card-color, var(--cy));
+  background:rgba(255,255,255,0.04);
+  padding:4px 14px; border-radius:50px;
+  border:1px solid rgba(255,255,255,0.08);
+  white-space:nowrap;
+}
+.card-play {
+  display:flex; align-items:center; justify-content:center;
+  width:100%; padding:14px;
+  background:transparent;
+  border:1.5px solid var(--card-color, var(--cy));
+  border-radius:50px;
+  font-family:'Black Han Sans', sans-serif;
+  font-size:1.15rem; color:var(--card-color, var(--cy));
+  transition:background 0.18s, color 0.18s;
+  margin-top:4px;
+  /* 터치 최소 높이 */
+  min-height: 48px;
+}
+.game-card:hover .card-play,
+.game-card:active .card-play {
+  background:var(--card-color, var(--cy));
+  color:#000;
+}
+
+/* ── 푸터 ── */
+.hub-footer {
+  text-align:center;
+  padding-top:24px;
+  border-top:1px solid var(--border);
+}
+.hub-footer .footer-title {
+  font-family:'Orbitron', monospace;
+  font-size:0.88rem; letter-spacing:2px;
+  color:rgba(255,255,255,0.55);
+  margin-bottom:8px;
+}
+.hub-footer .footer-title span { color:var(--cy); }
+.hub-footer .footer-copy {
+  font-size:0.76rem;
+  color:rgba(255,255,255,0.2);
+  letter-spacing:0.5px;
+  line-height:1.8;
+}
+
+/* ── 애니메이션 ── */
+@keyframes fadeInUp {
+  from { opacity:0; transform:translateY(24px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.game-card { animation:fadeInUp 0.5s ease both; }
+.card-1 { animation-delay:0.05s; }
+.card-2 { animation-delay:0.12s; }
+.card-3 { animation-delay:0.19s; }
+.card-4 { animation-delay:0.26s; }
+.card-5 { animation-delay:0.33s; }
+
+/* ════════════════════════════════════════════
+   📱 모바일 반응형 (600px 이하 — 스마트폰)
+   ════════════════════════════════════════════ */
+@media (max-width: 600px) {
+
+  .wrap {
+    padding: 32px 16px 24px;
+  }
+
+  /* 헤더 */
+  .hub-header { margin-bottom: 32px; }
+  .hub-badge {
+    font-size: 0.6rem; letter-spacing: 2px;
+    padding: 5px 14px;
+    margin-bottom: 14px;
+  }
+  .hub-title { font-size: 2.2rem; margin-bottom: 10px; }
+  .hub-desc { font-size: 0.85rem; }
+
+  /* 경로 라인 — 모바일에서 압축 */
+  .path-line { margin-bottom: 28px; gap: 0; }
+  .path-step { font-size: 0.6rem; letter-spacing: 1px; gap: 5px; }
+  .path-dot { width: 6px; height: 6px; }
+  .path-arrow { width: 18px; }
+
+  /* 게임 카드 — 세로 1열로 전환 */
+  .games-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .game-card {
+    flex-direction: row;      /* 가로 배치 */
+    align-items: center;
+    padding: 16px 14px;
+    gap: 12px;
+    border-radius: 16px;
+    /* 애니메이션 비활성화 — 저사양 기기 배려 */
+    animation: none;
+    opacity: 1;
+    transform: none;
+    min-height: 80px;
+  }
+
+  /* 카드 내부 왼쪽: 아이콘+단계 */
+  .card-left {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 2px;
+    flex-shrink: 0;
+    width: 56px;
+  }
+  .card-stage { font-size: 0.6rem; letter-spacing: 1px; }
+  .card-icon  { font-size: 2.2rem; }
+
+  /* 카드 내부 중앙: 텍스트 */
+  .card-body {
+    flex: 1; display: flex; flex-direction: column; gap: 4px;
+    min-width: 0; /* 텍스트 넘침 방지 */
+  }
+  .card-title { font-size: clamp(0.88rem, 3.8vw, 1.1rem); text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card-desc  { font-size: 0.78rem; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card-count { font-size: 0.68rem; align-self: flex-start; white-space: nowrap; }
+
+  /* 카드 내부 오른쪽: 버튼 — 고정 너비로 전 카드 동일하게 */
+  .card-play {
+    width: 72px;
+    min-width: 72px;
+    padding: 0 8px;
+    font-size: 0.9rem;
+    border-radius: 12px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    min-height: 48px;
+    text-align: center;
+  }
+
+  /* hover 효과 제거 (모바일 불필요) */
+  .game-card:hover { transform: none; box-shadow: none; }
+  .game-card:hover .card-icon { transform: none; }
+
+  /* 푸터 */
+  .hub-footer { padding-top: 16px; }
+  .hub-footer .footer-title { font-size: 0.72rem; }
+  .hub-footer .footer-copy  { font-size: 0.65rem; }
+}
+
+/* ── 태블릿 (601px ~ 900px) — 2열 그리드 ── */
+@media (min-width: 601px) and (max-width: 900px) {
+  .wrap { padding: 40px 24px 60px; }
+  .hub-title { font-size: 2.8rem; }
+  .games-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+  /* 마지막 카드(5번) 중앙 정렬 */
+  .card-5 { grid-column: 1 / -1; max-width: 320px; margin: 0 auto; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="starfield"></canvas>
+
+<!-- AdMob 배너 자리 (안드로이드 레이아웃에서 실제 AdView로 교체됨) -->
+<div class="ad-placeholder" id="adPlaceholder">AD</div>
+
+<div class="wrap">
+
+  <header class="hub-header">
+    <div class="hub-title">
+      <div class="t1">5단계로 완성하는</div>
+      <div class="t2">전산회계 2급 마스터</div>
+    </div>
+    <div class="hub-desc">계정과목 암기부터 장부조회 실전까지<br>게임으로 반복, 시험으로 완성</div>
+  </header>
+
+  <div class="path-line">
+    <div class="path-step active"><div class="path-dot"></div>암기</div>
+    <div class="path-arrow"></div>
+    <div class="path-step active"><div class="path-dot"></div>연결</div>
+    <div class="path-arrow"></div>
+    <div class="path-step active"><div class="path-dot"></div>분개</div>
+    <div class="path-arrow"></div>
+    <div class="path-step active"><div class="path-dot"></div>결산</div>
+    <div class="path-arrow"></div>
+    <div class="path-step active"><div class="path-dot"></div>실전</div>
+  </div>
+
+  <div class="games-grid">
+
+    <a class="game-card card-1" href="game1_acid.html">
+      <!-- 모바일 가로 레이아웃용 래퍼 -->
+      <div class="card-left">
+        <div class="card-stage">STAGE 01</div>
+        <div class="card-icon">☁️</div>
+      </div>
+      <div class="card-body">
+        <div class="card-title">계정과목 산성비</div>
+        <div class="card-desc">떨어지는 단어 중 계정과목만 클릭!</div>
+        <div class="card-count">목표 : 🥇 베테랑</div>
+      </div>
+      <div class="card-play">▶ 시작</div>
+    </a>
+
+    <a class="game-card card-2" href="game2_memory.html">
+      <div class="card-left">
+        <div class="card-stage">STAGE 02</div>
+        <div class="card-icon">🧩</div>
+      </div>
+      <div class="card-body">
+        <div class="card-title">기억의 전당</div>
+        <div class="card-desc">계정과목과 뜻을 카드로 매칭!</div>
+        <div class="card-count">목표 : ⭐ CEO급</div>
+      </div>
+      <div class="card-play">▶ 시작</div>
+    </a>
+
+    <a class="game-card card-3" href="game3_debit.html">
+      <div class="card-left">
+        <div class="card-stage">STAGE 03</div>
+        <div class="card-icon">⚡</div>
+      </div>
+      <div class="card-body">
+        <div class="card-title">회계 차변대변</div>
+        <div class="card-desc">거래를 읽고 차변/대변 판별!</div>
+        <div class="card-count">목표 : 🥇 회계 부장</div>
+      </div>
+      <div class="card-play">▶ 시작</div>
+    </a>
+
+    <a class="game-card card-4" href="game4_factory.html">
+      <div class="card-left">
+        <div class="card-stage">STAGE 04</div>
+        <div class="card-icon">🏭</div>
+      </div>
+      <div class="card-body">
+        <div class="card-title">결산분개 조립공장</div>
+        <div class="card-desc">결산 거래의 차변·대변을 직접 조립!</div>
+        <div class="card-count">목표 : 🥇 숙련 경리</div>
+      </div>
+      <div class="card-play">▶ 시작</div>
+    </a>
+
+    <a class="game-card card-5" href="game5_flight.html">
+      <div class="card-left">
+        <div class="card-stage">STAGE 05</div>
+        <div class="card-icon">🛩</div>
+      </div>
+      <div class="card-body">
+        <div class="card-title">플라이트 장부조회</div>
+        <div class="card-desc">비행기를 조종해 올바른 장부 통과!</div>
+        <div class="card-count">목표 : 🥇 베테랑 파일럿</div>
+      </div>
+      <div class="card-play">▶ 시작</div>
+    </a>
+
+  </div>
+
+  <div class="hub-footer" style="margin-top:40px;">
+    <div class="footer-copy">
+      © 2025 All rights reserved.
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── 별 배경 ──
+const canvas = document.getElementById('starfield');
+const ctx = canvas.getContext('2d');
+let stars = [];
+
+// 저사양 기기 감지 — 별 수 줄임
+const isMobile = window.innerWidth <= 600;
+const STAR_COUNT = isMobile ? 80 : 160;
+
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+function mkStar() {
+  return {
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    r: Math.random() * 1.4 + 0.2,
+    v: Math.random() * 0.3 + 0.05,
+    o: Math.random() * 0.6 + 0.2,
+    c: Math.random() > 0.88 ? '#00f2ff' : Math.random() > 0.75 ? '#b44fff' : '#ffffff'
+  };
+}
+function initStars() {
+  stars = Array.from({length: STAR_COUNT}, mkStar);
+}
+function animStars() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  stars.forEach(s => {
+    s.y += s.v;
+    if (s.y > canvas.height) { s.y = -2; s.x = Math.random() * canvas.width; }
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = s.c;
+    ctx.globalAlpha = s.o;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  });
+  requestAnimationFrame(animStars);
+}
+resize();
+initStars();
+animStars();
+window.addEventListener('resize', () => { resize(); initStars(); });
+
+// ── 안드로이드 WebView에서 광고 플레이스홀더 숨김 처리 ──
+// 안드로이드 레이아웃에서 AdView를 직접 올리므로,
+// WebView 안에서는 이 div가 보일 필요 없음.
+// 안드로이드 앱에서 JS 브릿지로 아래를 호출:
+//   webView.evaluateJavascript("hideAdPlaceholder()", null);
+function hideAdPlaceholder() {
+  const el = document.getElementById('adPlaceholder');
+  if (el) el.style.display = 'none';
+  document.body.style.paddingBottom = '0';
+}
+</script>
+</body>
+</html>
