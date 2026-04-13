@@ -715,10 +715,8 @@ const questions = [
     { sentence: '매출 대금을 현금으로 받다 → <b class="target-account">현금</b>', target: '현금', type: 'left', hint: '현금(자산) 증가 → 차변' },
     { sentence: '비품을 매각하고 대금이 미수 처리되다 → <b class="target-account">미수금</b>', target: '미수금', type: 'left', hint: '미수금(자산) 증가 → 차변' },
     { sentence: '거래처에 계약금을 선지급하다 → <b class="target-account">선급금</b>', target: '선급금', type: 'left', hint: '선급금(자산) 증가 → 차변' },
-    { sentence: '보험료 중 차기분을 선급 처리하다 → <b class="target-account">선급비용</b>', target: '선급비용', type: 'left', hint: '선급비용(자산) 증가 → 차변' },
     { sentence: '상품 판매 후 받을어음을 받다 → <b class="target-account">받을어음</b>', target: '받을어음', type: 'left', hint: '받을어음(자산) 증가 → 차변' },
     { sentence: '급여를 보통예금 계좌로 받다 → <b class="target-account">보통예금</b>', target: '보통예금', type: 'left', hint: '보통예금(자산) 증가 → 차변' },
-    { sentence: '사무용 소모품을 현금으로 구입하다(자산 처리) → <b class="target-account">소모품</b>', target: '소모품', type: 'left', hint: '소모품(자산) 증가 → 차변' },
     { sentence: '단기매매 목적 주식을 취득하다 → <b class="target-account">단기매매증권</b>', target: '단기매매증권', type: 'left', hint: '단기매매증권(자산) 증가 → 차변' },
     // ── 부채 감소 → 차변 ──
     { sentence: '외상매입금을 현금으로 갚다 → <b class="target-account">외상매입금</b>', target: '외상매입금', type: 'left', hint: '외상매입금(부채) 감소 → 차변' },
@@ -728,7 +726,6 @@ const questions = [
     { sentence: '만기 도래한 지급어음을 결제하다 → <b class="target-account">지급어음</b>', target: '지급어음', type: 'left', hint: '지급어음(부채) 감소 → 차변' },
     { sentence: '원천징수한 예수금을 세무서에 납부하다 → <b class="target-account">예수금</b>', target: '예수금', type: 'left', hint: '예수금(부채) 감소 → 차변' },
     { sentence: '장기차입금을 조기 상환하다 → <b class="target-account">장기차입금</b>', target: '장기차입금', type: 'left', hint: '장기차입금(부채) 감소 → 차변' },
-    { sentence: '미지급비용(급여)을 지급하다 → <b class="target-account">미지급비용</b>', target: '미지급비용', type: 'left', hint: '미지급비용(부채) 감소 → 차변' },
     // ── 비용 발생 → 차변 ──
     { sentence: '직원 급여를 현금으로 지급하다 → <b class="target-account">급여</b>', target: '급여', type: 'left', hint: '급여(비용) 발생 → 차변' },
     { sentence: '사무실 임차료를 지급하다 → <b class="target-account">임차료</b>', target: '임차료', type: 'left', hint: '임차료(비용) 발생 → 차변' },
@@ -742,7 +739,6 @@ const questions = [
     { sentence: '재산세를 납부하다 → <b class="target-account">세금과공과</b>', target: '세금과공과', type: 'left', hint: '세금과공과(비용) 발생 → 차변' },
     { sentence: '출장 교통비를 지급하다 → <b class="target-account">여비교통비</b>', target: '여비교통비', type: 'left', hint: '여비교통비(비용) 발생 → 차변' },
     { sentence: '외상매출금 중 회수 불능액을 처리하다 → <b class="target-account">대손상각비</b>', target: '대손상각비', type: 'left', hint: '대손상각비(비용) 발생 → 차변' },
-    { sentence: '결산 시 소모품 사용분을 비용 처리하다 → <b class="target-account">소모품비</b>', target: '소모품비', type: 'left', hint: '소모품비(비용) 발생 → 차변' },
     // ── 부채 증가 → 대변 ──
     { sentence: '상품을 외상으로 구입하다 → <b class="target-account">외상매입금</b>', target: '외상매입금', type: 'right', hint: '외상매입금(부채) 증가 → 대변' },
     { sentence: '은행에서 단기로 자금을 빌리다 → <b class="target-account">단기차입금</b>', target: '단기차입금', type: 'right', hint: '단기차입금(부채) 증가 → 대변' },
@@ -751,12 +747,9 @@ const questions = [
     { sentence: '장기 시설자금을 은행에서 대출받다 → <b class="target-account">장기차입금</b>', target: '장기차입금', type: 'right', hint: '장기차입금(부채) 증가 → 대변' },
     { sentence: '상품 대금으로 어음을 발행하다 → <b class="target-account">지급어음</b>', target: '지급어음', type: 'right', hint: '지급어음(부채) 증가 → 대변' },
     { sentence: '직원 급여에서 소득세를 원천징수하다 → <b class="target-account">예수금</b>', target: '예수금', type: 'right', hint: '예수금(부채) 증가 → 대변' },
-    { sentence: '이자수익 중 차기분을 이연 처리하다 → <b class="target-account">선수수익</b>', target: '선수수익', type: 'right', hint: '선수수익(부채) 증가 → 대변' },
     { sentence: '기말 외상매입금 잔액에 대해 대손충당금 설정 → <b class="target-account">대손충당금</b>', target: '대손충당금', type: 'right', hint: '대손충당금(자산차감) 증가 → 대변' },
-    { sentence: '결산 시 급여 미지급액을 계상하다 → <b class="target-account">미지급비용</b>', target: '미지급비용', type: 'right', hint: '미지급비용(부채) 증가 → 대변' },
     // ── 자본 증가 → 대변 ──
     { sentence: '창업자가 현금을 출자하다 → <b class="target-account">자본금</b>', target: '자본금', type: 'right', hint: '자본금(자본) 증가 → 대변' },
-    { sentence: '당기순이익이 확정되어 이익잉여금에 적립하다 → <b class="target-account">이익잉여금</b>', target: '이익잉여금', type: 'right', hint: '이익잉여금(자본) 증가 → 대변' },
     { sentence: '유상증자로 주식을 발행하다 → <b class="target-account">자본금</b>', target: '자본금', type: 'right', hint: '자본금(자본) 증가 → 대변' },
     // ── 수익 발생 → 대변 ──
     { sentence: '상품을 현금으로 판매하다 → <b class="target-account">상품매출</b>', target: '상품매출', type: 'right', hint: '매출(수익) 발생 → 대변' },
