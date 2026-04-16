@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; img-src 'self' data:; connect-src 'self' https://pjagaulfivafamhhiveg.supabase.co; media-src 'self';">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>🏭 결산분개 조립 공장</title>
+    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --green:  #00e676;
+            --blue:   #00c2ff;
+            --yellow: #ffd600;
+            --red:    #ff2d55;
+            --bg:     #0a0d14;
+            --panel:  rgba(255,255,255,0.04);
+            --border: rgba(255,255,255,0.10);
+            --ad-h:   50px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+        html { height: 100%; }
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: var(--bg); color: white;
+            height: 100dvh; display: flex; flex-direction: column;
+            overflow: hidden; user-select: none;
+            padding-bottom: var(--ad-h);
+            background-image:
+                radial-gradient(ellipse 70% 50% at 15% 15%, rgba(0,230,118,0.03) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 85% 85%, rgba(0,194,255,0.03) 0%, transparent 60%);
+        }
+
+        /* AdMob */
+        .ad-placeholder {
+            position: fixed; bottom: 0; left: 0; right: 0; height: var(--ad-h);
+            background: rgba(0,0,0,0.6); border-top: 1px solid rgba(255,255,255,0.08);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 300; font-size: 0.6rem; letter-spacing: 2px; color: rgba(255,255,255,0.2);
+        }
+
+        /* ── 오버레이 ── */
+        .overlay {
+            position: fixed; inset: 0; z-index: 100;
+            background: rgba(10,13,20,0.95); backdrop-filter: blur(8px);
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: flex-start; overflow-y: auto;
+            padding: max(20px,env(safe-area-inset-top)) 16px calc(var(--ad-h) + 40px);
+            touch-action: pan-y;
+            overscroll-behavior: contain;
+        }
+        .overlay-inner {
+            display: flex; flex-direction: column; align-items: center;
+            gap: clamp(10px,2vh,16px); width: 100%; max-width: 600px; margin: 0 auto;
+        }
+        .ov-title {
+            font-family: 'Black Han Sans', sans-serif;
+            font-size: clamp(1.6rem,6vw,3rem); color: var(--green);
+            text-shadow: 0 0 20px rgba(0,230,118,0.3); text-align: center;
+        }
+        .ov-sub { font-size: clamp(0.8rem,3vw,1.1rem); color: rgba(255,255,255,0.5); letter-spacing: 1px; text-align: center; }
+
+        .start-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+        .scard {
+            background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+            padding: clamp(12px,3vw,16px); font-size: clamp(0.78rem,2.5vw,0.95rem);
+            color: rgba(255,255,255,0.7); line-height: 1.6;
+        }
+        .scard strong { display: block; color: white; margin-bottom: 4px; font-size: clamp(0.82rem,2.5vw,1.05rem); }
+
+        .pill {
+            border: none; border-radius: 50px; font-family: 'Black Han Sans', sans-serif;
+            font-size: clamp(1rem,3.5vw,1.2rem); cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s; min-height: 48px;
+        }
+        .pill:active { transform: scale(0.95); }
+        .pill-start {
+            padding: clamp(14px,3vw,18px) clamp(36px,8vw,50px);
+            background: transparent; color: var(--green); border: 2px solid var(--green);
+            box-shadow: 0 0 20px rgba(0,230,118,0.2);
+        }
+        .pill-start:active { background: var(--green); color: #000; }
+        .pill-blue  { padding: 10px 16px; background: var(--blue);  color: #000; white-space: nowrap; flex-shrink: 0; min-width: 72px; }
+        .pill-green { padding: 12px 28px; background: var(--green); color: #000; }
+        .pill-gray  { padding: 10px 22px; background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.75); border: 1px solid rgba(255,255,255,0.25); }
+
+        /* 결과 */
+        .res-score { font-family: 'Black Han Sans', sans-serif; font-size: clamp(2.5rem,10vw,4rem); color: white; text-shadow: 0 0 20px rgba(255,255,255,0.2); }
+        .res-rank { font-family: 'Black Han Sans', sans-serif; font-size: clamp(1rem,3.5vw,1.3rem); color: var(--yellow); padding: 5px 18px; border: 1px solid var(--yellow); border-radius: 50px; background: rgba(255,214,0,0.1); text-align: center; }
+        .res-stats { display: flex; gap: clamp(6px,3vw,16px); flex-wrap: nowrap; justify-content: center; background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 10px clamp(10px,3vw,24px); font-size: clamp(0.78rem,2.2vw,0.95rem); color: rgba(255,255,255,0.6); white-space: nowrap; }
+        .res-stats span { color: white; font-weight: bold; }
+
+        .save-row { display: flex; gap: 8px; width: 100%; max-width: 340px; align-items: center; }
+        .name-input { flex: 1; min-width: 0; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px; color: white; padding: 10px 14px; font-size: 1rem; text-align: center; outline: none; transition: border-color 0.2s; min-height: 48px; }
+        .name-input:focus { border-color: var(--blue); }
+        #save-status { font-size: 0.85rem; color: rgba(255,255,255,0.4); min-height: 16px; text-align: center; }
+
+        .rank-box { width: 100%; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; max-height: 190px; overflow-y: auto; padding: 5px 0; }
+        .rank-row { display: grid; grid-template-columns: 40px 1fr 90px 70px; padding: 9px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); align-items: center; font-size: clamp(0.8rem,2.5vw,0.95rem); }
+        .rank-row:last-child { border-bottom: none; }
+        .rank-num { font-weight: bold; color: rgba(255,255,255,0.3); }
+        .rank-num.top { color: var(--yellow); }
+        .rank-name { color: white; font-weight: bold; }
+        .rank-grade { color: var(--green); font-size: 0.8rem; text-align: center; }
+        .rank-score { color: var(--yellow); text-align: right; font-weight: bold; }
+        .rank-me { background: rgba(0,194,255,0.1); }
+        .loading-row { text-align: center; padding: 20px; color: rgba(255,255,255,0.4); display: flex; justify-content: center; align-items: center; gap: 10px; }
+        .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.1); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── 헤더 ── */
+        header {
+            display: flex; align-items: center;
+            padding: max(8px,env(safe-area-inset-top)) 12px 8px;
+            background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--border);
+            flex-shrink: 0; gap: 8px;
+        }
+        .logo { font-family: 'Black Han Sans', sans-serif; font-size: clamp(0.85rem,3.5vw,1.4rem); color: var(--green); flex-shrink: 0; }
+        .hud { display: flex; gap: clamp(6px,2vw,20px); align-items: center; flex: 1; justify-content: center; }
+        .hud-stat { display: flex; flex-direction: column; align-items: center; min-width: 40px; }
+        .hud-label { font-size: clamp(0.55rem,1.8vw,0.7rem); color: rgba(255,255,255,0.4); font-weight: bold; letter-spacing: 1px; }
+        .hud-val { font-family: 'Black Han Sans', sans-serif; font-size: clamp(1.1rem,3.5vw,1.6rem); color: white; line-height: 1; }
+        #hud-time  { color: var(--yellow); }
+        #hud-score { color: var(--blue); }
+        #hud-combo { color: var(--green); }
+        .timer-track { flex: 0 1 80px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
+        #timer-bar { height: 100%; background: var(--yellow); transition: width 0.1s linear, background-color 0.3s; }
+        .hdr-btns { display: flex; gap: 6px; flex-shrink: 0; }
+        .hdr-btn { border: 1.5px solid rgba(255,255,255,0.3); color: white; height: 44px; padding: 0 14px; border-radius: 50px; cursor: pointer; font-family: 'Black Han Sans', sans-serif; font-size: clamp(0.75rem,2.5vw,1rem); white-space: nowrap; display: flex; align-items: center; background: rgba(255,255,255,0.08); }
+        .hdr-btn-stop { background: var(--red); }
+        .hdr-btn-home { background: rgba(255,255,255,0.1); border: 1px solid var(--border); }
+
+        /* 🎵 음소거 버튼 */
+        .mute-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid var(--border);
+            color: white; height: 44px; padding: 0 10px;
+            border-radius: 8px; cursor: pointer;
+            font-size: 1.1rem;
+            display: flex; align-items: center; justify-content: center;
+            transition: opacity 0.2s, border-color 0.2s;
+        }
+        .mute-btn.muted {
+            opacity: 0.4;
+            border-color: rgba(255,255,255,0.1);
+        }
+
+        /* ── 게임 메인 ── */
+        .game-main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: clamp(8px,2vw,16px) clamp(10px,3vw,20px); overflow-y: auto; gap: clamp(8px,2vh,16px); }
+
+        /* ── 문제 카드 ── */
+        .q-card {
+            background: var(--panel); border: 1px solid var(--border); border-radius: 16px;
+            width: 100%; max-width: 700px;
+            padding: clamp(18px,4vw,32px) clamp(16px,4vw,36px);
+            text-align: center;
+            font-size: clamp(1.05rem,3.5vw,1.55rem);
+            line-height: 1.8; color: #e0e6ed;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); position: relative;
+        }
+        .q-card.shake { animation: shake 0.4s; border-color: var(--red); }
+        @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+        .q-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--green); color: #000; padding: 3px 14px; border-radius: 20px; font-weight: 900; font-size: 0.85rem; letter-spacing: 1px; }
+        #q-hint { display: none; margin-top: 10px; font-size: clamp(0.85rem,2.5vw,0.95rem); color: #ff6b6b; font-weight: bold; }
+
+        /* ── 슬롯 ── */
+        .slots-area { display: flex; gap: clamp(8px,3vw,20px); width: 100%; max-width: 600px; align-items: center; }
+        .slot-col { flex: 1; display: flex; flex-direction: column; gap: 6px; align-items: center; }
+        .slot-title { font-family: 'Black Han Sans', sans-serif; font-size: clamp(0.95rem,3.5vw,1.3rem); letter-spacing: 2px; }
+        .slot-title.L { color: var(--blue); }
+        .slot-title.R { color: var(--red); }
+        .slot-arrow { font-size: clamp(1rem,3vw,1.5rem); color: rgba(255,255,255,0.2); flex-shrink: 0; }
+        .slot-box {
+            width: 100%; height: clamp(54px,10vw,70px);
+            background: rgba(0,0,0,0.4); border: 2px dashed rgba(255,255,255,0.2);
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-size: clamp(0.9rem,3vw,1.15rem); font-weight: bold; color: rgba(255,255,255,0.5);
+            transition: all 0.2s; cursor: pointer;
+        }
+        .slot-box.filled { border-style: solid; color: white; font-size: clamp(0.95rem,3vw,1.2rem); }
+        .slot-box.filled.L { background: rgba(0,194,255,0.1); border-color: var(--blue); }
+        .slot-box.filled.R { background: rgba(255,45,85,0.1);  border-color: var(--red); }
+        .slot-box.error { border-color: var(--red)!important; background: rgba(255,0,0,0.2)!important; color: white!important; }
+        .slot-box.active { box-shadow: 0 0 0 3px white, 0 0 15px rgba(255,255,255,0.5); transform: scale(1.05); z-index: 10; border-color: white!important; }
+
+        /* ── 보기 버튼 ── */
+        .parts-area { display: flex; flex-wrap: wrap; gap: clamp(8px,2.5vw,12px); justify-content: center; width: 100%; max-width: 700px; }
+        .part-btn {
+            background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15);
+            color: white; padding: clamp(10px,2.5vw,12px) clamp(14px,3vw,20px);
+            border-radius: 10px;
+            font-size: clamp(0.95rem,3.5vw,1.2rem);
+            cursor: pointer; transition: all 0.15s; user-select: none; min-height: 48px;
+        }
+        .part-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.15); }
+        .part-btn.selected { opacity: 0; pointer-events: none; transform: scale(0.8); }
+
+        #flash-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 50; opacity: 0; transition: opacity 0.3s; }
+        #flash-overlay.ok  { background: rgba(0,230,118,0.15); opacity: 1; }
+        #flash-overlay.bad { background: rgba(255,45,85,0.2);  opacity: 1; }
+
+        .floating-text {
+            position: fixed; left: 50%; top: 45%;
+            font-family: 'Black Han Sans', sans-serif; font-size: clamp(1.5rem,6vw,2rem);
+            pointer-events: none; z-index: 60;
+            animation: floatUp 0.8s ease-out forwards;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.5); transform: translateX(-50%);
+        }
+        @keyframes floatUp {
+            0%   { opacity:1; transform:translateX(-50%) translateY(0) scale(0.8); }
+            50%  { transform:translateX(-50%) translateY(-30px) scale(1.1); }
+            100% { opacity:0; transform:translateX(-50%) translateY(-60px) scale(1); }
+        }
+
+        @media(max-width:380px) { .start-cards { grid-template-columns: 1fr; } }
+    
+        /* ── 공통 하단 버튼 ── */
+        .action-btns {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            max-width: 320px;
+            margin-top: 16px;
+        }
+        .btn-restart {
+            padding: 13px 28px;
+            border-radius: 50px;
+            border: 2px solid rgba(0,230,118,0.7);
+            background: rgba(0,230,118,0.12);
+            color: #00e676;
+            font-family: 'Black Han Sans', 'Jua', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.18s;
+            min-height: 48px;
+        }
+        .btn-restart:active { background: rgba(0,230,118,0.3); }
+        .btn-hub {
+            padding: 13px 28px;
+            border-radius: 50px;
+            border: 1.5px solid rgba(255,255,255,0.25);
+            background: rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.75);
+            font-family: 'Black Han Sans', 'Jua', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.18s;
+            min-height: 48px;
+        }
+        .btn-hub:active { background: rgba(255,255,255,0.18); }
+
+        </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<!-- 🎵 BGM 오디오 엘리먼트 -->
+<audio id="bgm" src="bgm4_factory.mp3" loop preload="auto"></audio>
+
+<div class="ad-placeholder" id="adPlaceholder">AD</div>
+
+<!-- 시작 화면 -->
+<div id="start-screen" class="overlay">
+    <div class="overlay-inner">
+        <div class="ov-title">🏭 결산분개 조립 공장</div>
+        <div class="ov-sub">전산회계 2급 · 결산정리분개 조립 게임</div>
+        <div class="start-cards">
+            <div class="scard"><strong>🔧 게임 방법</strong>거래 상황을 읽고<br><b style="color:var(--blue)">차변</b>→<b style="color:var(--red)">대변</b> 순서로 클릭!<br>틀리면 재도전 가능</div>
+            <div class="scard"><strong>⏱️ 규칙</strong>제한 시간 <strong style="color:var(--yellow)">60초</strong><br>정답 시 <strong style="color:var(--green)">+10초</strong><br>오답 시 <strong style="color:var(--red)">-5초</strong></div>
+            <div class="scard"><strong>💎 점수 체계</strong>기본 정답: <strong>150점</strong><br>콤보 보너스: +30점/연속</div>
+            <div class="scard"><strong>🏆 직급 체계</strong>📋 인턴 · 🥉 수습생 (500~)<br>🥈 견습 경리 (1,500~)<br>🥇 숙련 경리 (3,000~)<br>👑 결산 마스터 (5,000~)</div>
+        </div>
+        <button class="pill pill-start" onclick="startGame()">▶ 공장 가동 시작</button>
+        <div class="action-btns" style="align-items:center; margin-top:8px;">
+            <button class="btn-hub" onclick="location.href='index.html'">🏠 허브로 나가기</button>
+        </div>
+    </div>
+</div>
+
+<!-- 결과 화면 -->
+<div id="result-screen" class="overlay" style="display:none">
+    <div class="overlay-inner">
+        <div class="ov-title" style="color:var(--yellow);">공장 가동 중단 🏭</div>
+        <div id="res-rank" class="res-rank">최종 직급: 인턴</div>
+        <div id="res-score" class="res-score">0점</div>
+        <div class="res-stats">
+            정답 <span id="stat-ok">0</span>문항 &nbsp;|&nbsp;
+            오답 <span id="stat-no">0</span>회 &nbsp;|&nbsp;
+            최고 콤보 <span id="stat-combo">0</span>x
+        </div>
+        <div class="save-row">
+            <input type="text" id="player-name" class="name-input" placeholder="이름 입력" maxlength="20">
+            <button class="pill pill-blue" onclick="saveScore()" id="save-btn">💾 저장</button>
+        </div>
+        <div id="save-status"></div>
+        <div style="font-family:'Black Han Sans';font-size:0.95rem;color:rgba(255,255,255,0.28);letter-spacing:2px;">🏆 TOP 랭킹</div>
+        <div class="rank-box" id="rank-box"><div class="loading-row"><div class="spinner"></div>&nbsp;불러오는 중...</div></div>
+        <div class="action-btns" style="align-items:center;">
+            <button class="btn-restart" onclick="startGame()">↺ 다시 하기</button>
+            <button class="btn-hub" onclick="location.href='index.html'">🏠 허브로 나가기</button>
+        </div>
+    </div>
+</div>
+
+<!-- 헤더 -->
+<header>
+    <div class="logo">🏭 결산분개</div>
+    <div class="hud">
+        <div class="hud-stat"><div class="hud-label">TIME</div><div class="hud-val" id="hud-time">60</div></div>
+        <div class="timer-track"><div id="timer-bar" style="width:100%"></div></div>
+        <div class="hud-stat"><div class="hud-label">SCORE</div><div class="hud-val" id="hud-score">0</div></div>
+        <div class="hud-stat"><div class="hud-label">COMBO</div><div class="hud-val" id="hud-combo">0x</div></div>
+    </div>
+    <div class="hdr-btns">
+        <!-- 🎵 음소거 버튼 -->
+        <button class="mute-btn" id="mute-btn" onclick="toggleMute()" title="BGM 음소거">🎵</button>
+        <button class="hdr-btn hdr-btn-stop" onclick="if(isPlaying) endGame();">그만</button>
+        <button class="hdr-btn hdr-btn-home" onclick="location.href='index.html'">홈</button>
+    </div>
+</header>
+
+<!-- 게임 -->
+<div class="game-main">
+    <div class="q-card" id="q-card">
+        <div class="q-badge" id="q-num">Q.1</div>
+        <div id="q-text" style="word-break:keep-all;">문제가 여기에 표시됩니다.</div>
+        <div id="q-hint"></div>
+    </div>
+    <div class="slots-area">
+        <div class="slot-col">
+            <div class="slot-title L">👈 차변</div>
+            <div class="slot-box" id="slot-L" onclick="handleSlotClick('L')">차변 선택</div>
+        </div>
+        <div class="slot-arrow">▶</div>
+        <div class="slot-col">
+            <div class="slot-title R">대변 👉</div>
+            <div class="slot-box" id="slot-R" onclick="handleSlotClick('R')">대변 선택</div>
+        </div>
+    </div>
+    <div class="parts-area" id="parts-container"></div>
+</div>
+<div id="flash-overlay"></div>
+
+<script>
+const SUPABASE_URL = "https://pjagaulfivafamhhiveg.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_yck2tAKApEjVSJOJMVSXuQ_AGaNatuI";
+    const { createClient } = supabase;
+    const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+const GAME_ID = "factory";
+
+// ══════════════════════════════════════
+// 🎵 BGM 관리
+// ══════════════════════════════════════
+const bgm = document.getElementById('bgm');
+bgm.volume = 0.5;
+
+let isMuted = localStorage.getItem('factory_muted') === 'true';
+applyMuteState();
+
+function applyMuteState() {
+    bgm.muted = isMuted;
+    const btn = document.getElementById('mute-btn');
+    if (btn) {
+        btn.textContent = isMuted ? '🔇' : '🎵';
+        btn.classList.toggle('muted', isMuted);
+    }
+}
+
+function toggleMute() {
+    isMuted = !isMuted;
+    localStorage.setItem('factory_muted', isMuted);
+    applyMuteState();
+}
+
+function bgmPlay() {
+    if (bgm.paused) {
+        bgm.play().catch(() => {});
+    }
+}
+
+function bgmStop() {
+    if (bgm.paused) return;
+    const fadeInterval = setInterval(() => {
+        if (bgm.volume > 0.05) {
+            bgm.volume = Math.max(0, bgm.volume - 0.05);
+        } else {
+            bgm.volume = 0;
+            bgm.pause();
+            bgm.currentTime = 0;
+            bgm.volume = 0.5;
+            clearInterval(fadeInterval);
+        }
+    }, 50);
+}
+
+// ══════════════════════════════════════
+// 문제 데이터
+// ══════════════════════════════════════
+const qBank = [
+    {q:"당기에 지급한 보험료 중\n내년도분(미경과분)이 100,000원 있다.\n이를 결산 시 반영하시오.",                        hint:"자산증가(차변) / 비용감소(대변)", L:"선급비용",           R:"보험료",              fakes:["미지급비용","선수수익"]},
+    {q:"결산 시점에 당기 임차료로 처리한 금액 중\n선급액이 50,000원 발견되었다.",                                       hint:"자산증가(차변) / 비용감소(대변)", L:"선급비용",           R:"임차료",              fakes:["미수수익","미지급비용"]},
+    {q:"당기에 수령한 임대료 중 차기(내년)에 해당하는\n금액 200,000원을 이연 처리하다.",                                 hint:"수익감소(차변) / 부채발생(대변)", L:"임대료",             R:"선수수익",            fakes:["미수수익","선급비용"]},
+    {q:"이자수익으로 회계처리한 금액 중\n기간 미경과분 80,000원을 결산 시 계상하다.",                                    hint:"수익감소(차변) / 부채발생(대변)", L:"이자수익",           R:"선수수익",            fakes:["선급비용","미지급비용"]},
+    {q:"결산일 현재 은행 예금에 대한\n이자수익 발생분 30,000원을 계상하다.",                                            hint:"자산증가(차변) / 수익발생(대변)", L:"미수수익",           R:"이자수익",            fakes:["선수수익","미지급비용"]},
+    {q:"당기에 발생한 임대료 미수액 150,000원을\n결산 분개하다.",                                                       hint:"자산증가(차변) / 수익발생(대변)", L:"미수수익",           R:"임대료",              fakes:["선급비용","선수수익"]},
+    {q:"당기분 차입금 이자 미지급액 40,000원을\n결산일에 계상하다.",                                                     hint:"비용발생(차변) / 부채발생(대변)", L:"이자비용",           R:"미지급비용",          fakes:["선급비용","미수수익"]},
+    {q:"결산일 현재 12월분 임차료(월세) 300,000원이\n미지급된 상태이다.",                                                hint:"비용발생(차변) / 부채발생(대변)", L:"임차료",             R:"미지급비용",          fakes:["선수수익","선급비용"]},
+    {q:"결산일 현재 영업부 직원의 당월분 급여\n2,000,000원을 아직 지급하지 못했다.",                                      hint:"비용발생(차변) / 부채발생(대변)", L:"급여",               R:"미지급비용",          fakes:["예수금","미수수익"]},
+    {q:"결산 시 기중에 소모품(자산)으로 처리한 500,000원 중\n당기 사용액은 300,000원으로 판명되다.",                      hint:"비용발생(차변) / 자산감소(대변)", L:"소모품비",           R:"소모품",              fakes:["선급비용","미지급비용"]},
+    {q:"결산 시 기중에 소모품비(비용)로 처리한 400,000원 중\n미사용액 100,000원이 창고에 남아있다.",                      hint:"자산증가(차변) / 비용감소(대변)", L:"소모품",             R:"소모품비",            fakes:["선수수익","미수수익"]},
+    {q:"당기분 영업용 건물에 대한\n감가상각비 1,000,000원을 계상하다.",                                                  hint:"비용발생(차변) / 자산차감(대변)", L:"감가상각비",         R:"감가상각누계액",       fakes:["건물","대손상각비"]},
+    {q:"영업용 차량운반구에 대한\n당기 감가상각비 800,000원을 분개하시오.",                                               hint:"비용발생(차변) / 자산차감(대변)", L:"감가상각비",         R:"감가상각누계액",       fakes:["차량운반구","유형자산처분손실"]},
+    {q:"본사 비품에 대한\n당기 감가상각비 300,000원을 계상하다.",                                                        hint:"비용발생(차변) / 자산차감(대변)", L:"감가상각비",         R:"감가상각누계액",       fakes:["비품","기타의대손상각비"]},
+    {q:"기말 매출채권(외상매출금 등) 잔액에 대하여\n1%의 대손을 예상하여 추가 설정(보충법)하다.",                          hint:"비용발생(차변) / 자산차감(대변)", L:"대손상각비",         R:"대손충당금",          fakes:["기타의대손상각비","대손충당금환입"]},
+    {q:"기말 단기대여금 잔액에 대해\n대손예상액 50,000원을 추가로 설정하다.",                                             hint:"비용발생(차변) / 자산차감(대변)", L:"기타의대손상각비",   R:"대손충당금",          fakes:["대손상각비","대손충당금환입"]},
+    {q:"기말 미수금 잔액에 대하여\n대손충당금 20,000원을 설정하다.",                                                      hint:"비용발생(차변) / 자산차감(대변)", L:"기타의대손상각비",   R:"대손충당금",          fakes:["대손상각비","미수수익"]},
+    {q:"기말 외상매출금 잔액에 대한 1% 대손추산액보다\n대손충당금 잔액이 더 많아 그 차액을 환입하다.",                      hint:"자산차감 감소(차변) / 수익발생(대변)", L:"대손충당금",    R:"대손충당금환입",       fakes:["대손상각비","대손상각비환입"]},
+    {q:"보유 중인 단기매매증권의 기말 공정가치(시가)가\n장부가액보다 200,000원 상승하여 평가하다.",                         hint:"자산증가(차변) / 평가이익(대변)", L:"단기매매증권",       R:"단기매매증권평가이익", fakes:["단기매매증권처분이익","투자증권평가이익"]},
+    {q:"단기매매증권의 결산일 시가가\n장부가액보다 100,000원 하락하였다.",                                                 hint:"평가손실(차변) / 자산감소(대변)", L:"단기매매증권평가손실", R:"단기매매증권",       fakes:["단기매매증권처분손실","투자증권평가손실"]},
+    {q:"기중에 현금 부족액을 현금과부족으로 처리했던\n50,000원의 원인이 결산일까지 밝혀지지 않았다.",                       hint:"잡손실(차변) / 현금과부족 제거(대변)",  L:"잡손실",      R:"현금과부족",          fakes:["현금","잡이익"]},
+    {q:"기중에 현금 초과액을 현금과부족으로 처리했던\n30,000원의 원인이 기말까지 파악되지 않았다.",                         hint:"현금과부족 제거(차변) / 잡이익(대변)",  L:"현금과부족",  R:"잡이익",              fakes:["잡손실","현금"]},
+    {q:"결산일 현재 실제 현금이 장부보다 10,000원 부족함을\n발견하였으나 원인을 알 수 없다.\n(기중 현금과부족 처리 안함)",    hint:"잡손실(차변) / 현금 감소(대변)",        L:"잡손실",      R:"현금",                fakes:["현금과부족","잡이익"]},
+    {q:"결산일 현재 실제 현금이 장부보다 20,000원 많은 것을\n발견하였으나 원인을 알 수 없다.\n(기중 현금과부족 처리 안함)",   hint:"현금 증가(차변) / 잡이익(대변)",        L:"현금",        R:"잡이익",              fakes:["현금과부족","잡손실"]},
+    {q:"기중에 여비교통비로 처리하기 모호하여 가지급금으로 둔\n80,000원이 결산 시 영업부 직원 출장비로 최종 판명되다.",      hint:"비용확정(차변) / 가지급금 제거(대변)",  L:"여비교통비",  R:"가지급금",            fakes:["미수금","선급비용"]},
+    {q:"내역을 알 수 없어 가수금으로 처리했던 150,000원이\n결산 시 외상매출금 회수액으로 밝혀지다.",                        hint:"부채제거(차변) / 자산감소(대변)",       L:"가수금",      R:"외상매출금",          fakes:["미수금","선수금"]},
+    {q:"은행에서 빌린 장기차입금 5,000,000원의 만기가\n내년 5월로 도래하여 유동성 대체를 실시하다.",                        hint:"장기부채 감소(차변) / 유동부채 증가(대변)", L:"장기차입금", R:"유동성장기부채",     fakes:["단기차입금","미지급금"]},
+];
+
+let currentQ = null, qIndex = 0;
+let score = 0, combo = 0, maxCombo = 0;
+let matchCount = 0, wrongCount = 0;
+let timeLeft = 60, isPlaying = false, timerInterval = null;
+let selectedParts = { L: null, R: null }, activeSlot = 'L';
+
+const els = {
+    screenStart:    document.getElementById('start-screen'),
+    screenResult:   document.getElementById('result-screen'),
+    qNum:           document.getElementById('q-num'),
+    qText:          document.getElementById('q-text'),
+    slotL:          document.getElementById('slot-L'),
+    slotR:          document.getElementById('slot-R'),
+    partsContainer: document.getElementById('parts-container'),
+    time:           document.getElementById('hud-time'),
+    bar:            document.getElementById('timer-bar'),
+    score:          document.getElementById('hud-score'),
+    combo:          document.getElementById('hud-combo'),
+    flash:          document.getElementById('flash-overlay'),
+    qCard:          document.getElementById('q-card')
+};
+
+let audioCtx;
+function initAudio() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    bgmPlay(); // 🎵 첫 인터랙션 시 BGM 시작
+}
+function playSound(type) {
+    if (!audioCtx) return;
+    const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    const now = audioCtx.currentTime;
+    if (type === 'select') {
+        osc.type = 'sine'; osc.frequency.setValueAtTime(800, now);
+        gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+        osc.start(now); osc.stop(now + 0.1);
+    } else if (type === 'ok') {
+        osc.type = 'square'; osc.frequency.setValueAtTime(400, now);
+        osc.frequency.setValueAtTime(600, now + 0.1);
+        gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        osc.start(now); osc.stop(now + 0.3);
+    } else if (type === 'bad') {
+        osc.type = 'sawtooth'; osc.frequency.setValueAtTime(200, now);
+        osc.frequency.linearRampToValueAtTime(100, now + 0.3);
+        gain.gain.setValueAtTime(0.15, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
+        osc.start(now); osc.stop(now + 0.3);
+    }
+}
+
+function startGame() {
+    initAudio(); // ← AudioContext resume + BGM 시작
+    hideAdPlaceholder();
+    els.screenStart.style.display = 'none';
+    els.screenResult.style.display = 'none';
+    score = 0; combo = 0; maxCombo = 0; matchCount = 0; wrongCount = 0;
+    timeLeft = 60; qIndex = 1; isPlaying = true;
+    updateHUD(); nextQuestion();
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        if (!isPlaying) return;
+        timeLeft--; updateHUD();
+        if (timeLeft <= 0) endGame();
+    }, 1000);
+}
+
+function updateHUD() {
+    els.time.textContent  = timeLeft;
+    els.score.textContent = score.toLocaleString();
+    els.combo.textContent = combo + 'x';
+    const pct = Math.max(0, Math.min(100, (timeLeft / 60) * 100));
+    els.bar.style.width = pct + '%';
+    els.bar.style.backgroundColor = timeLeft <= 10 ? 'var(--red)' : 'var(--yellow)';
+}
+
+function nextQuestion() {
+    if (!isPlaying) return;
+    currentQ = qBank[Math.floor(Math.random() * qBank.length)];
+    els.qNum.textContent = 'Q.' + qIndex;
+    els.qText.innerHTML = currentQ.q.replace(/\n/g, '<br>');
+    selectedParts = { L: null, R: null }; activeSlot = 'L';
+    renderSlots();
+    let options = [currentQ.L, currentQ.R, ...currentQ.fakes];
+    options = options.sort(() => Math.random() - 0.5);
+    els.partsContainer.innerHTML = '';
+    options.forEach(opt => {
+        const btn = document.createElement('div');
+        btn.className = 'part-btn'; btn.textContent = opt;
+        btn.addEventListener('pointerdown', (e) => { e.preventDefault(); handlePartClick(opt, btn); });
+        els.partsContainer.appendChild(btn);
+    });
+    const hintEl = document.getElementById('q-hint');
+    hintEl.style.display = 'none'; hintEl.textContent = '';
+}
+
+function renderSlots() {
+    if (selectedParts.L) {
+        els.slotL.textContent = selectedParts.L.text;
+        els.slotL.className = 'slot-box filled L' + (activeSlot === 'L' ? ' active' : '');
+    } else {
+        els.slotL.textContent = '차변 선택';
+        els.slotL.className = 'slot-box' + (activeSlot === 'L' ? ' active' : '');
+    }
+    if (selectedParts.R) {
+        els.slotR.textContent = selectedParts.R.text;
+        els.slotR.className = 'slot-box filled R' + (activeSlot === 'R' ? ' active' : '');
+    } else {
+        els.slotR.textContent = '대변 선택';
+        els.slotR.className = 'slot-box' + (activeSlot === 'R' ? ' active' : '');
+    }
+}
+
+function handleSlotClick(side) {
+    if (!isPlaying) return;
+    playSound('select');
+    if (selectedParts[side]) { selectedParts[side].el.classList.remove('selected'); selectedParts[side] = null; }
+    activeSlot = side; renderSlots();
+}
+
+function handlePartClick(text, btnEl) {
+    if (!isPlaying) return;
+    playSound('select');
+    if (selectedParts[activeSlot]) selectedParts[activeSlot].el.classList.remove('selected');
+    selectedParts[activeSlot] = { text, el: btnEl };
+    btnEl.classList.add('selected');
+    if (activeSlot === 'L' && !selectedParts.R) activeSlot = 'R';
+    else if (activeSlot === 'R' && !selectedParts.L) activeSlot = 'L';
+    renderSlots();
+    if (selectedParts.L && selectedParts.R) setTimeout(checkAnswer, 200);
+}
+
+function showFloatingText(text, color) {
+    const el = document.createElement('div');
+    el.className = 'floating-text'; el.textContent = text; el.style.color = color;
+    document.body.appendChild(el); setTimeout(() => el.remove(), 800);
+}
+
+function flashEffect(isOk) {
+    els.flash.className = isOk ? 'ok' : 'bad';
+    setTimeout(() => els.flash.className = '', 300);
+}
+
+function checkAnswer() {
+    if (selectedParts.L.text === currentQ.L && selectedParts.R.text === currentQ.R) {
+        playSound('ok'); flashEffect(true);
+        combo++; if (combo > maxCombo) maxCombo = combo; matchCount++;
+        const gain = 150 + (combo * 30); score += gain; timeLeft += 10;
+        showFloatingText(`+${gain}점!`, 'var(--green)'); updateHUD(); qIndex++;
+        setTimeout(nextQuestion, 500);
+    } else {
+        playSound('bad'); flashEffect(false);
+        combo = 0; wrongCount++; timeLeft = Math.max(0, timeLeft - 5);
+        els.qCard.classList.remove('shake'); void els.qCard.offsetWidth; els.qCard.classList.add('shake');
+        els.slotL.classList.add('error'); els.slotR.classList.add('error');
+        showFloatingText('-5초', 'var(--red)');
+        const hintEl = document.getElementById('q-hint');
+        if (currentQ.hint) { hintEl.textContent = '💡 ' + currentQ.hint; hintEl.style.display = 'block'; }
+        updateHUD();
+        setTimeout(() => {
+            if (selectedParts.L) selectedParts.L.el.classList.remove('selected');
+            if (selectedParts.R) selectedParts.R.el.classList.remove('selected');
+            selectedParts = { L: null, R: null }; activeSlot = 'L';
+            hintEl.style.display = 'none'; renderSlots();
+        }, 600);
+    }
+}
+
+function getGrade(score) {
+    if (score >= 5000) return '👑 결산 마스터';
+    if (score >= 3000) return '🥇 숙련 경리';
+    if (score >= 1500) return '🥈 견습 경리';
+    if (score >= 500)  return '🥉 수습생';
+    return '📋 인턴';
+}
+
+function endGame() {
+    isPlaying = false; clearInterval(timerInterval);
+    bgmStop(); // 🎵 게임 종료 시 BGM 페이드 아웃
+    document.getElementById('res-score').textContent = score.toLocaleString() + '점';
+    document.getElementById('res-rank').textContent  = '최종 직급: ' + getGrade(score);
+    document.getElementById('stat-ok').textContent    = matchCount;
+    document.getElementById('stat-no').textContent    = wrongCount;
+    document.getElementById('stat-combo').textContent = maxCombo;
+    document.getElementById('player-name').value = '';
+    document.getElementById('save-btn').disabled = false;
+    document.getElementById('save-status').textContent = '';
+    els.screenResult.style.display = 'flex';
+    showAdPlaceholder();
+    loadRanking();
+}
+
+function getLocal() { return JSON.parse(localStorage.getItem('hub_factory') || '[]'); }
+
+async function saveScore() {
+    const pName = document.getElementById('player-name').value.trim();
+    if (!pName) { alert('이름을 입력하세요!'); return; }
+    if (pName.length < 2) { alert('2글자 이상 입력해주세요!'); return; }
+    const btn = document.getElementById('save-btn'), st = document.getElementById('save-status');
+    btn.disabled = true; st.textContent = '저장 중...'; st.style.color = 'rgba(255,255,255,0.5)';
+    const payload = { game: GAME_ID, name: pName, score, combo: maxCombo, correct: matchCount, date: new Date().toLocaleDateString('ko-KR',{month:'2-digit',day:'2-digit'}) };
+    const loc = getLocal(); loc.push(payload); loc.sort((a,b)=>b.score-a.score);
+    localStorage.setItem('hub_factory', JSON.stringify(loc.slice(0,15)));
+    if (false) {
+        st.textContent = '✓ 로컬 저장 완료'; st.style.color = 'var(--yellow)'; renderRankList(getLocal()); return;
+    }
+    try {
+        await supabaseSaveScore(payload.name, payload.score, payload.combo||0, payload.correct||0, GAME_ID);
+        st.textContent = '✓ 랭킹 등록 완료!'; st.style.color = 'var(--green)';
+        await new Promise(r=>setTimeout(r,800)); await loadRanking();
+    } catch(e) { st.textContent = '✓ 로컬 저장 완료'; st.style.color = 'var(--yellow)'; renderRankList(getLocal()); }
+}
+
+async function loadRanking() {
+    const box = document.getElementById('rank-box');
+    if (false) { renderRankList(getLocal()); return; }
+    box.innerHTML = '<div class="loading-row"><div class="spinner"></div>&nbsp;불러오는 중...</div>';
+    try { const res = { json: async () => await supabaseFetchRanking(GAME_ID) }; renderRankList(mergeRank(await res.json(), getLocal())); }
+    catch(e) { renderRankList(getLocal()); }
+}
+
+function mergeRank(remote, local) {
+    const map = new Map();
+    [...(Array.isArray(remote)?remote:[]),...local].forEach(r=>{const k=r.name+'_'+r.score;if(!map.has(k))map.set(k,r)});
+    return [...map.values()].sort((a,b)=>b.score-a.score).slice(0,15);
+}
+
+function escapeHTML(str) { if (!str) return ''; return str.replace(/[&<>'"]/g, function(tag) { const chars = { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }; return chars[tag] || tag; }); }
+function renderRankList(list) {
+    const box = document.getElementById('rank-box');
+    if (!list||!list.length) { box.innerHTML='<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.3)">아직 기록이 없습니다</div>'; return; }
+    const me = document.getElementById('player-name').value.trim();
+    box.innerHTML = list.map((r,i)=>{
+        const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'위';
+        return `<div class="rank-row ${escapeHTML(r.name)===escapeHTML(me)?'rank-me':''}"><div class="rank-num ${i<3?'top':''}">${medal}</div><div class="rank-name">${escapeHTML(r.name)}</div><div class="rank-grade">${escapeHTML(r.grade||getGrade(r.score))}</div><div class="rank-score">${(r.score||0).toLocaleString()}점</div></div>`;
+    }).join('');
+}
+
+function hideAdPlaceholder() {
+    const el = document.getElementById('adPlaceholder');
+    if (el) el.style.display = 'none';
+    document.body.style.paddingBottom = '0';
+}
+function showAdPlaceholder() {
+    const el = document.getElementById('adPlaceholder');
+    if (el) el.style.display = 'flex';
+    document.body.style.paddingBottom = 'var(--ad-h)';
+}
+
+    // ── Supabase 유틸 ──
+    function getGradeForSupabase(gameId, score) {
+        const scales = {
+            acid:    [[10000,"👑 전설의 에이스"],[6000,"🥇 베테랑"],[3000,"🥈 숙련자"],[1000,"🥉 정규 파일럿"],[0,"🛩 견습생"]],
+            memory:  [[950,"👑 CEO"],[850,"⭐ CEO급"],[750,"🎖 전무/상무"],[650,"🏅 이사"],[550,"📋 부장"],[450,"🗂 차장"],[350,"📁 과장"],[250,"📝 대리"],[0,"💼 사원"]],
+            debit:   [[4500,"👑 전설의 CFO"],[2500,"🥇 회계 부장"],[1000,"🥈 회계 대리"],[500,"🥉 신입 사원"],[0,"📋 수습 직원"]],
+            factory: [[5000,"👑 결산 마스터"],[3000,"🥇 숙련 경리"],[1500,"🥈 견습 경리"],[500,"🥉 수습생"],[0,"📋 인턴"]],
+            flight:  [[50000,"👑 전설의 에이스"],[30000,"🥇 베테랑 파일럿"],[15000,"🥈 숙련 파일럿"],[5000,"🥉 정규 파일럿"],[0,"🛩 견습 파일럿"]]
+        };
+        const tiers = scales[gameId] || scales.flight;
+        return (tiers.find(([min]) => score >= min) || tiers[tiers.length-1])[1];
+    }
+
+    async function supabaseSaveScore(name, score, combo, correct, gameId) {
+        const maxScore = {acid:30000,memory:3000,debit:15000,factory:15000,flight:300000};
+        const safeScore = Math.min(Math.max(score,0), maxScore[gameId]||999999);
+        const safeName = String(name).replace(/<[^>]*>/g,'').substring(0,30).trim();
+        if (!safeName) return;
+        const today = new Date().toISOString().split('T')[0];
+        await db.rpc('upsert_score', {
+            p_game_id: gameId,
+            p_name:    safeName,
+            p_score:   safeScore,
+            p_grade:   getGradeForSupabase(gameId, safeScore),
+            p_combo:   Math.max(0, combo||0),
+            p_correct: Math.max(0, correct||0),
+            p_date:    today
+        });
+    }
+
+    async function supabaseFetchRanking(gameId) {
+        const { data, error } = await db
+            .from('scores')
+            .select()
+            .eq('game_id', gameId)
+            .order('score', { ascending: false })
+            .limit(20);
+        if (error) throw error;
+        return data;
+    }
+
+</script>
+<script>document.addEventListener('contextmenu', e => e.preventDefault()); document.addEventListener('selectstart', e => e.preventDefault()); document.addEventListener('copy', e => e.preventDefault()); document.addEventListener('keydown', e => { if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) || (e.ctrlKey && e.keyCode === 85)) { e.preventDefault(); } });</script>
+</body>
+</html>

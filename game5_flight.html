@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; img-src 'self' data:; connect-src 'self' https://pjagaulfivafamhhiveg.supabase.co; media-src 'self';">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>🛩 회계 플라이트 — 장부조회 마스터</title>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--cy:#00f2ff;--pk:#ff2d78;--gd:#ffd600;--gn:#39ff14;--pu:#b44fff;--bg:#020810;--ad-h:50px}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{height:100%}
+body{background:var(--bg);font-family:'Noto Sans KR',sans-serif;overflow:hidden;user-select:none;touch-action:none;height:100dvh;padding-bottom:var(--ad-h)}
+canvas{display:block;position:absolute;top:0;left:0;z-index:1}
+
+.ad-placeholder{position:fixed;bottom:0;left:0;right:0;height:var(--ad-h);background:rgba(0,0,0,.7);border-top:1px solid rgba(0,242,255,.15);display:flex;align-items:center;justify-content:center;z-index:300;font-size:.6rem;letter-spacing:2px;color:rgba(255,255,255,.2)}
+
+#hud{position:absolute;top:0;left:0;width:100%;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:max(10px,env(safe-area-inset-top)) 14px 10px;pointer-events:none;background:linear-gradient(to bottom,rgba(2,8,16,.7) 0%,transparent 100%)}
+.hud-left{display:flex;gap:clamp(12px,4vw,30px);align-items:center}
+.hb{display:flex;flex-direction:column;align-items:center;gap:2px}
+.hl{font-family:'Orbitron',monospace;font-size:clamp(.55rem,.18vw+.5rem,.72rem);color:rgba(0,242,255,.5);letter-spacing:2px;text-transform:uppercase}
+.hv{font-family:'Orbitron',monospace;font-size:clamp(1.3rem,4.5vw,2.1rem);font-weight:900;color:#fff;text-shadow:0 0 14px var(--cy);line-height:1}
+#hv-score{color:var(--gd);text-shadow:0 0 14px var(--gd)}
+#hv-combo{color:var(--gn);text-shadow:0 0 14px var(--gn)}
+.irow{display:flex;gap:clamp(8px,3vw,18px);align-items:center}
+.iic{font-size:clamp(1rem,4vw,1.45rem);opacity:0;transition:opacity .3s;filter:drop-shadow(0 0 8px #fff)}
+.iic.on{opacity:1;animation:icP .55s infinite alternate}
+@keyframes icP{from{transform:scale(.9)}to{transform:scale(1.2)}}
+.hud-btns{display:flex;gap:6px;pointer-events:auto}
+.hdb{height:44px;padding:0 14px;border-radius:50px;cursor:pointer;font-family:'Black Han Sans';font-size:clamp(.75rem,2.8vw,1rem);white-space:nowrap;display:flex;align-items:center;border:1.5px solid rgba(255,255,255,0.3)!important}
+.hdb-quit{background:rgba(255,45,120,.15);border:1px solid var(--pk)!important;color:var(--pk)}
+.hdb-home{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2)!important;color:white}
+
+.mute-btn{height:44px;padding:0 10px;border-radius:8px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2)!important;transition:opacity .2s,border-color .2s}
+.mute-btn.muted{opacity:.4;border-color:rgba(255,255,255,.1)!important}
+
+#glayer{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:12;overflow:hidden}
+.gatel{position:absolute;left:0;width:100%;display:flex;flex-direction:column;align-items:center}
+.gbar{width:100%;height:clamp(14px,2.5vw,20px);background:linear-gradient(90deg,transparent 0%,rgba(15,25,100,.9) 18%,rgba(20,35,130,.95) 50%,rgba(15,25,100,.9) 82%,transparent 100%);border-top:1.5px solid rgba(0,242,255,.22);border-bottom:1.5px solid rgba(0,242,255,.22);box-shadow:0 0 20px rgba(0,242,255,.12)}
+.ginfo{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 0 0}
+.gq{font-size:clamp(.85rem,3vw,1.4rem);font-weight:900;color:#eef0ff;text-align:center;text-shadow:0 2px 10px rgba(0,0,0,.95),0 0 6px rgba(0,0,0,.8);max-width:90vw;line-height:1.4;background:rgba(2,8,20,.82);padding:8px clamp(12px,4vw,30px);border-radius:12px;border:1px solid rgba(255,255,255,.1)}
+.gk{font-family:'Black Han Sans',sans-serif;font-size:clamp(.78rem,2.5vw,1.1rem);color:var(--gd);text-shadow:0 0 14px rgba(255,214,0,.75),0 2px 8px rgba(0,0,0,.9);animation:kP 1s infinite alternate}
+@keyframes kP{from{transform:scale(1)}to{transform:scale(1.05)}}
+.gchoices{position:relative;display:flex;justify-content:space-between;width:100%;padding:0 clamp(14px,5vw,80px);top:clamp(-60px,-8vw,-40px)}
+.gchoice{font-family:'Black Han Sans',sans-serif;font-size:clamp(.9rem,3.5vw,1.4rem);padding:clamp(7px,2vw,11px) clamp(16px,4vw,34px);border-radius:50px;border:2.5px solid;backdrop-filter:blur(4px)}
+.gchoice.left{color:var(--pk);border-color:var(--pk);background:rgba(255,45,120,.1);text-shadow:0 0 10px var(--pk);box-shadow:0 0 18px rgba(255,45,120,.2)}
+.gchoice.right{color:var(--gn);border-color:var(--gn);background:rgba(57,255,20,.07);text-shadow:0 0 10px var(--gn);box-shadow:0 0 18px rgba(57,255,20,.14)}
+
+#judge-pop{position:absolute;left:50%;transform:translateX(-50%);z-index:40;pointer-events:none;display:none;font-family:'Black Han Sans',sans-serif;font-size:clamp(1.3rem,5vw,2.2rem);padding:10px clamp(20px,6vw,44px);border-radius:50px;white-space:nowrap}
+#judge-pop.ok{background:rgba(57,255,20,.18);border:2px solid #39ff14;color:#39ff14}
+#judge-pop.bad{background:rgba(255,45,120,.18);border:2px solid #ff2d78;color:#ff2d78}
+@keyframes judgeAnim{0%{opacity:0;transform:translateX(-50%) scale(.7)}20%{opacity:1;transform:translateX(-50%) scale(1.08)}70%{opacity:1;transform:translateX(-50%) scale(1)}100%{opacity:0;transform:translateX(-50%) scale(.9)}}
+#flash{position:absolute;inset:0;z-index:30;pointer-events:none;opacity:0}
+#flash.ok{background:rgba(57,255,20,.1);animation:fl .4s ease-out forwards}
+#flash.bad{background:rgba(255,45,120,.2);animation:fl .55s ease-out forwards}
+@keyframes fl{0%{opacity:1}100%{opacity:0}}
+#cpop{position:absolute;top:28%;left:50%;transform:translate(-50%,-50%);font-family:'Orbitron';font-size:clamp(1.8rem,6vw,3rem);font-weight:900;color:var(--gd);pointer-events:none;z-index:50;display:none;text-shadow:0 0 20px var(--gd),2px 2px 0 #000}
+@keyframes cp{0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}40%{opacity:1;transform:translate(-50%,-68%) scale(1.3)}100%{opacity:0;transform:translate(-50%,-115%) scale(1)}}
+
+/* ── 오버레이 공통 ── */
+.ovl{
+  position:absolute;
+  inset:0;
+  z-index:100;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  /* ★ 스크롤 핵심 3가지 */
+  overflow-y:auto;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  padding:max(20px,env(safe-area-inset-top)) 16px calc(20px + var(--ad-h));
+}
+.ovl-inner{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:clamp(10px,2vh,18px);
+  width:100%;
+  max-width:760px;
+  /* ★ margin:auto 제거 → 스크롤 시 상단 잘림 방지 */
+  padding-bottom:8px;
+}
+
+#ss{background:radial-gradient(ellipse at 50% 38%,#071530 0%,#020912 65%)}
+.logo{font-family:'Orbitron',monospace;font-size:clamp(1.8rem,7vw,3.5rem);font-weight:900;color:var(--cy);letter-spacing:clamp(2px,1vw,5px);text-align:center;text-shadow:0 0 32px var(--cy),0 0 64px rgba(0,242,255,.22)}
+.sub{font-family:'Black Han Sans';font-size:clamp(.85rem,3vw,1.15rem);color:rgba(255,255,255,.42);letter-spacing:3px;text-align:center}
+.ggrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%}
+.gc{background:rgba(255,255,255,.04);border:1px solid rgba(0,242,255,.18);border-radius:14px;padding:clamp(10px,3vw,16px) clamp(12px,3vw,20px);font-size:clamp(.75rem,2.5vw,.95rem);color:rgba(255,255,255,.65);line-height:1.6}
+.gc strong{color:#fff;display:block;font-size:clamp(.78rem,2.5vw,1.02rem);margin-bottom:4px}
+.gc.a{border-left:3px solid var(--cy)}.gc.b{border-left:3px solid var(--pk)}.gc.c{border-left:3px solid var(--gd)}
+.sbtn{padding:clamp(12px,3vw,16px) clamp(36px,8vw,60px);background:transparent;border:3px solid var(--cy);border-radius:50px;cursor:pointer;font-family:'Black Han Sans';font-size:clamp(1.2rem,5vw,1.6rem);color:var(--cy);letter-spacing:2px;text-shadow:0 0 12px var(--cy);box-shadow:0 0 30px rgba(0,242,255,.25),inset 0 0 20px rgba(0,242,255,.05);transition:all .2s;animation:sbP 2s infinite;min-height:52px}
+.sbtn:active{background:var(--cy);color:#000;text-shadow:none;animation:none}
+@keyframes sbP{0%,100%{box-shadow:0 0 26px rgba(0,242,255,.25),inset 0 0 20px rgba(0,242,255,.05)}50%{box-shadow:0 0 46px rgba(0,242,255,.45),inset 0 0 26px rgba(0,242,255,.1)}}
+
+/* ★ 게임오버 화면 — touch-action 스크롤 허용 */
+#gs{background:rgba(2,8,20,.96);backdrop-filter:blur(10px);display:none;touch-action:pan-y}
+#gs .ovl-inner{touch-action:pan-y}
+
+.gtitle{font-family:'Orbitron';font-size:clamp(2rem,8vw,3.5rem);font-weight:900;color:var(--pk);letter-spacing:4px;text-shadow:0 0 30px var(--pk)}
+.gscore{font-family:'Orbitron';font-size:clamp(2.5rem,10vw,4.2rem);font-weight:900;color:var(--gd);text-shadow:0 0 22px var(--gd);line-height:1}
+.ggrade{font-family:'Black Han Sans';font-size:clamp(.95rem,3.5vw,1.2rem);color:var(--cy);background:rgba(0,242,255,.1);padding:8px 22px;border-radius:50px;border:1px solid rgba(0,242,255,.3);text-align:center}
+.gstats{display:flex;gap:clamp(12px,4vw,32px);flex-wrap:wrap;justify-content:center;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:12px clamp(16px,4vw,32px);font-size:clamp(.8rem,2.5vw,.95rem);color:rgba(255,255,255,.5)}
+.gstats span{color:#fff;font-weight:700}
+#savesec{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%;max-width:340px}
+#savesec label{font-size:.9rem;color:rgba(0,242,255,.7);letter-spacing:1px}
+#pname{padding:10px 18px;background:rgba(0,242,255,.07);border:2px solid rgba(0,242,255,.35);border-radius:12px;color:#fff;font-size:1rem;text-align:center;font-family:'Noto Sans KR';width:100%;outline:none;transition:border-color .2s;min-height:48px}
+#pname:focus{border-color:var(--cy);box-shadow:0 0 14px rgba(0,242,255,.3)}
+#pname::placeholder{color:rgba(255,255,255,.28)}
+#savemsg{font-size:.85rem;color:rgba(255,255,255,.4);min-height:16px;text-align:center}
+#rkbox{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(0,242,255,.2);border-radius:16px;padding:4px 0;max-height:200px;overflow-y:auto;display:none}
+#rkbox::-webkit-scrollbar{width:4px}
+#rkbox::-webkit-scrollbar-thumb{background:rgba(0,242,255,.3);border-radius:2px}
+.rkhdr{text-align:center;padding:10px 0 6px;font-family:'Orbitron';font-size:.75rem;color:rgba(0,242,255,.42);letter-spacing:3px}
+.rkrow{display:grid;grid-template-columns:44px 1fr 100px 70px;padding:9px 14px;gap:6px;border-bottom:1px solid rgba(255,255,255,.06);align-items:center;font-size:clamp(.75rem,2.5vw,.9rem)}
+.rkrow:last-child{border-bottom:none}
+.rkn{font-family:'Orbitron';font-size:.82rem;color:rgba(255,255,255,.3)}
+.rkn.top{color:var(--gd)}.rknm{font-weight:700;color:#fff}.rkgr{font-size:.78rem;color:var(--gn);text-align:center}.rksc{color:var(--gd);font-weight:700;text-align:right;font-family:'Orbitron';font-size:.8rem}.rkme{background:rgba(0,242,255,.07)}
+.spinrow{display:flex;align-items:center;justify-content:center;gap:10px;padding:20px;color:rgba(255,255,255,.3);font-size:.9rem}
+.spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.12);border-top-color:var(--cy);border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.brow{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.pill{padding:clamp(10px,2.5vw,12px) clamp(24px,5vw,36px);border:2px solid;border-radius:50px;font-family:'Black Han Sans';font-size:clamp(.95rem,3.5vw,1.1rem);cursor:pointer;transition:all .18s;min-height:48px}
+.pill.cy{color:var(--cy);border-color:var(--cy);background:transparent}.pill.cy:active{background:var(--cy);color:#000}
+.pill.gn{color:var(--gn);border-color:var(--gn);background:transparent}.pill.gn:active{background:var(--gn);color:#000}
+.pill.wh{color:rgba(255,255,255,.75);border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.08)}.pill.wh:active{background:rgba(255,255,255,.2)}
+
+@media(max-width:480px){.ggrid{grid-template-columns:1fr}}
+
+        /* ── 공통 하단 버튼 ── */
+        .action-btns {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            max-width: 320px;
+            margin-top: 16px;
+        }
+        .btn-restart {
+            padding: 13px 28px;
+            border-radius: 50px;
+            border: 2px solid rgba(0,230,118,0.7);
+            background: rgba(0,230,118,0.12);
+            color: #00e676;
+            font-family: 'Black Han Sans', 'Jua', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.18s;
+            min-height: 48px;
+        }
+        .btn-restart:active { background: rgba(0,230,118,0.3); }
+        .btn-hub {
+            padding: 13px 28px;
+            border-radius: 50px;
+            border: 1.5px solid rgba(255,255,255,0.25);
+            background: rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.75);
+            font-family: 'Black Han Sans', 'Jua', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.18s;
+            min-height: 48px;
+        }
+        .btn-hub:active { background: rgba(255,255,255,0.18); }
+
+        </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<audio id="bgm" src="bgm5_flight.mp3" loop preload="auto"></audio>
+
+<div class="ad-placeholder" id="adPlaceholder">AD</div>
+<div style="position:fixed;inset:0;background:var(--bg);z-index:-1;"></div>
+
+<div id="canvas-wrap" style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:850px;height:100%;overflow:hidden;background:rgba(0,0,0,.6);">
+
+  <div class="ovl" id="ss">
+    <div class="ovl-inner">
+      <div class="logo">🛩 LEDGER FLIGHT</div>
+      <div class="sub">전산회계 2급 · 장부조회 마스터</div>
+      <div class="ggrid">
+        <div class="gc a"><strong>🎮 조작법</strong>화면을 좌우로 터치/드래그<br>← → 화살표 키도 사용 가능<br>올바른 장부 방향으로 통과!</div>
+        <div class="gc b"><strong>⚡ 특수 아이템</strong>🛡️ 방어막 — 오답 1회 보호<br>🧲 자석 — 코인 자동 흡입<br>💰 코인 — +100점</div>
+        <div class="gc c"><strong>🏆 점수 체계</strong>정답 통과: <b style="color:var(--gd)">+500점</b><br>콤보 보너스: +50점/연속<br>오답 → 방어막 없으면 종료!</div>
+      </div>
+      <div class="brow"><button class="sbtn" onclick="Game.start()">▶ 비행 시작</button></div>
+    </div>
+  </div>
+
+  <div class="ovl" id="gs">
+    <div class="ovl-inner">
+      <div class="gtitle">GAME OVER</div>
+      <div class="gscore" id="go-score">0점</div>
+      <div class="ggrade" id="go-grade">파일럿 등급: 견습생</div>
+      <div class="gstats">정답 <span id="go-ok">0</span>문항 &nbsp;|&nbsp; 최고 콤보 <span id="go-mc">0</span>x &nbsp;|&nbsp; 최고 기록 <span id="go-hi">0</span></div>
+      <div id="savesec">
+        <label>파일럿 이름을 입력하세요</label>
+        <input type="text" id="pname" placeholder="이름 입력" maxlength="20" onkeydown="if(event.key==='Enter') Game.saveScore()">
+        <div id="savemsg"></div>
+        <div class="brow">
+          <button class="pill cy" id="savebtn" onclick="Game.saveScore()">💾 랭킹 등록</button>
+        </div>
+      </div>
+      <div style="font-family:'Orbitron';font-size:.75rem;color:rgba(0,242,255,.38);letter-spacing:3px">🏆 HALL OF FAME</div>
+      <div id="rkbox"></div>
+      <div class="brow">
+        <div class="action-btns" style="align-items:center;">
+            <button class="btn-restart" onclick="Game.restart()">↺ 다시 하기</button>
+            <button class="btn-hub" onclick="location.href='index.html'">🏠 허브로 나가기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="hud">
+    <div class="hud-left">
+      <div class="hb"><div class="hl">SCORE</div><div class="hv" id="hv-score">0</div></div>
+      <div class="hb" style="gap:4px">
+        <div class="irow"><div class="iic" id="ic-shield">🛡️</div><div class="iic" id="ic-magnet">🧲</div></div>
+        <div style="font-family:'Orbitron';font-size:.6rem;color:rgba(255,255,255,.2);letter-spacing:1px">ITEMS</div>
+      </div>
+      <div class="hb"><div class="hl">COMBO</div><div class="hv" id="hv-combo">0x</div></div>
+    </div>
+    <div class="hud-btns">
+      <button class="mute-btn" id="mute-btn" onclick="BGM.toggleMute()" title="BGM 음소거">🎵</button>
+      <button class="hdb hdb-quit" onclick="if(Game.state==='playing') Game.gameOver()">그만</button>
+      <button class="hdb hdb-home" onclick="location.href='index.html'">홈</button>
+    </div>
+  </div>
+
+  <div id="glayer"></div>
+  <div id="judge-pop"></div>
+  <div id="flash"></div>
+  <div id="cpop"></div>
+  <canvas id="canvas"></canvas>
+</div>
+
+<script>
+const SUPABASE_URL="https://pjagaulfivafamhhiveg.supabase.co";
+const SUPABASE_KEY="sb_publishable_yck2tAKApEjVSJOJMVSXuQ_AGaNatuI";
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+const GAME_ID="flight";
+
+
+// XSS 방어
+function escapeHTML(str) { if (!str) return ''; return str.replace(/[&<>'"]/g, function(tag) { const chars = { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }; return chars[tag] || tag; }); }
+
+const BGM={
+  el:document.getElementById('bgm'),
+  _muted:localStorage.getItem('flight_muted')==='true',
+  _fadeTimer:null,
+  init(){this.el.volume=0.5;this.el.muted=this._muted;this._updateBtn()},
+  _updateBtn(){const btn=document.getElementById('mute-btn');if(!btn)return;btn.textContent=this._muted?'🔇':'🎵';btn.classList.toggle('muted',this._muted)},
+  toggleMute(){this._muted=!this._muted;localStorage.setItem('flight_muted',this._muted);this.el.muted=this._muted;this._updateBtn()},
+  play(){if(this._fadeTimer){clearInterval(this._fadeTimer);this._fadeTimer=null}this.el.volume=0.5;if(this.el.paused)this.el.play().catch(()=>{})},
+  stop(){if(this.el.paused)return;if(this._fadeTimer)clearInterval(this._fadeTimer);this._fadeTimer=setInterval(()=>{if(this.el.volume>0.05){this.el.volume=Math.max(0,this.el.volume-0.05)}else{this.el.volume=0;this.el.pause();this.el.currentTime=0;this.el.volume=0.5;clearInterval(this._fadeTimer);this._fadeTimer=null}},50)},
+};
+
+const Problems=[
+  {q:"00상사의 외상매출금 잔액은?",key:"'00상사' (거래처명)",L:"거래처원장",R:"총계정원장",a:"L"},
+  {q:"외상매입금 잔액이 가장 많은 거래처는?",key:"거래처 비교",L:"재무상태표",R:"거래처원장",a:"R"},
+  {q:"00상사에 대한 받을어음 잔액은?",key:"특정 거래처 잔액",L:"거래처원장",R:"현금출납장",a:"L"},
+  {q:"선수금 잔액이 남아있는 거래처는?",key:"거래처 확인",L:"손익계산서",R:"거래처원장",a:"R"},
+  {q:"상반기 중 기업업무추진비가 가장 많은 월은?",key:"가장 많은 '월'?",L:"총계정원장",R:"거래처원장",a:"L"},
+  {q:"상반기 중 받을어음 금액이 가장 큰 월은?",key:"가장 큰 '월'?",L:"월계표",R:"총계정원장",a:"R"},
+  {q:"하반기 중 복리후생비가 가장 많은 월은?",key:"가장 많은 '월'?",L:"총계정원장",R:"손익계산서",a:"L"},
+  {q:"하반기 중 외상매입금 월말 잔액이 가장 큰 달은?",key:"가장 큰 '달'?",L:"거래처원장",R:"총계정원장",a:"R"},
+  {q:"3월 말 현재 건물의 장부가액은?",key:"현재 '건물' 장부가액",L:"재무상태표",R:"총계정원장",a:"L"},
+  {q:"4월 말 현재 자산총계는?",key:"현재 '자산' 총계",L:"월계표",R:"재무상태표",a:"R"},
+  {q:"5월 말 현재 유동자산 금액은?",key:"현재 '유동자산' ",L:"재무상태표",R:"거래처원장",a:"L"},
+  {q:"6월 말 현재 당좌자산 금액은?",key:"현재 '유동자산' ",L:"현금출납장",R:"재무상태표",a:"R"},
+  {q:"1월~3월 외상매출금 회수총액?",key:"기간 + 계정과목",L:"월계표",R:"총계정원장",a:"L"},
+  {q:"판매관리비 중 '현금' 지출액은?",key:"현금/대체 + 계정과목",L:"현금출납장",R:"월계표",a:"R"},
+  {q:"4월 중 발생한 상품매입 거래 건수는?",key:"기간 + 계정과목",L:"월계표",R:"총계정원장",a:"L"},
+  {q:"5월 중 외상매입금 결제 지급 금액은?",key:"기간 + 계정과목",L:"거래처원장",R:"월계표",a:"R"},
+    
+  // [1] 거래처원장 관련 (특정 거래처의 잔액 및 증감, 거래처 비교)
+  {q:"XX물산의 미수금 잔액은?",key:"'XX물산' (거래처명)",L:"거래처원장",R:"총계정원장",a:"L"},
+  {q:"미지급금 잔액이 가장 적은 거래처는?",key:"거래처 비교",L:"재무상태표",R:"거래처원장",a:"R"},
+  {q:"대한상사에 대한 지급어음 잔액은?",key:"특정 거래처 잔액",L:"거래처원장",R:"현금출납장",a:"L"},
+  {q:"선급금 잔액이 남아있는 거래처는?",key:"거래처 확인",L:"손익계산서",R:"거래처원장",a:"R"},
+  {q:"우주상사로부터 회수한 외상매출금액은?",key:"거래처별 회수액",L:"거래처원장",R:"월계표",a:"L"},
+  {q:"민국실업에 지급한 외상매입금 총액은?",key:"거래처별 지급액",L:"현금출납장",R:"거래처원장",a:"R"},
+  {q:"YY기업의 선수금 잔액은?",key:"'YY기업' (거래처명)",L:"거래처원장",R:"재무상태표",a:"L"},
+  {q:"미수금 잔액이 가장 많은 거래처는?",key:"거래처 비교",L:"손익계산서",R:"거래처원장",a:"R"},
+  {q:"지구물산에 대한 선수금 감소액은?",key:"특정 거래처 증감",L:"거래처원장",R:"월계표",a:"L"},
+
+  // [2] 총계정원장 관련 (특정 계정과목이 가장 크거나 작은 월/달)
+  {q:"1분기 중 여비교통비가 가장 많이 발생한 월은?",key:"가장 많은 '월'?",L:"총계정원장",R:"거래처원장",a:"L"},
+  {q:"상반기 중 지급어음 발생액이 가장 큰 월은?",key:"가장 큰 '월'?",L:"월계표",R:"총계정원장",a:"R"},
+  {q:"하반기 중 통신비가 가장 적게 발생한 월은?",key:"가장 적은 '월'?",L:"총계정원장",R:"손익계산서",a:"L"},
+  {q:"1월~6월 중 제품매출액이 가장 큰 달은?",key:"가장 큰 '달'?",L:"거래처원장",R:"총계정원장",a:"R"},
+  {q:"3분기 중 임차료 지출이 가장 많았던 월은?",key:"가장 많은 '월'?",L:"총계정원장",R:"현금출납장",a:"L"},
+  {q:"하반기 중 이자수익이 가장 크게 발생한 월은?",key:"가장 큰 '월'?",L:"재무상태표",R:"총계정원장",a:"R"},
+  {q:"2분기 중 수도광열비가 가장 많이 발생한 달은?",key:"가장 많은 '달'?",L:"총계정원장",R:"거래처원장",a:"L"},
+  {q:"하반기 중 수수료비용이 가장 적은 월은?",key:"가장 적은 '월'?",L:"일계표",R:"총계정원장",a:"R"},
+
+  // [3] 재무상태표 관련 (특정 시점의 자산, 부채, 자본의 잔액 및 총계)
+  {q:"6월 말 현재 비품의 장부가액은?",key:"현재 '비품' 장부가액",L:"재무상태표",R:"총계정원장",a:"L"},
+  {q:"12월 말 현재 부채총계는?",key:"현재 '부채' 총계",L:"월계표",R:"재무상태표",a:"R"},
+  {q:"3월 말 현재 비유동자산 금액은?",key:"현재 '비유동자산'",L:"재무상태표",R:"거래처원장",a:"L"},
+  {q:"9월 말 현재 자본금 잔액은?",key:"현재 '자본금'",L:"현금출납장",R:"재무상태표",a:"R"},
+  {q:"4월 말 현재 차량운반구의 감가상각누계액은?",key:"현재 '감가상각누계액'",L:"재무상태표",R:"월계표",a:"L"},
+  {q:"5월 말 현재 투자자산 총액은?",key:"현재 '투자자산'",L:"손익계산서",R:"재무상태표",a:"R"},
+  {q:"10월 말 현재 유동부채 총액은?",key:"현재 '유동부채'",L:"재무상태표",R:"현금출납장",a:"L"},
+  {q:"11월 말 현재 기계장치의 장부가액은?",key:"현재 '기계장치' 장부가액",L:"월계표",R:"재무상태표",a:"R"},
+
+  // [4] 일계표 및 월계표 관련 (특정 기간의 계정과목 건수, 현금/대체 지출 및 유입액)
+  {q:"2월~4월 미수금 회수 총액은?",key:"기간 + 계정과목",L:"월계표",R:"총계정원장",a:"L"},
+  {q:"5월 중 발생한 제품매출 거래 건수는?",key:"기간 + 거래 건수",L:"월계표",R:"총계정원장",a:"L"},
+  {q:"1분기 중 현금으로 지급된 복리후생비는?",key:"기간 + 현금 지출액",L:"거래처원장",R:"월계표",a:"R"},
+  {q:"4월~6월 중 소모품비로 '대체'된 금액은?",key:"대체 + 계정과목",L:"월계표",R:"재무상태표",a:"L"},
+  {q:"상반기 동안 현금으로 지출된 보험료 총액은?",key:"기간 + 현금 지출액",L:"총계정원장",R:"월계표",a:"R"},
+  {q:"3월 중 현금으로 수취한 이자수익 금액은?",key:"현금/대체 + 계정과목",L:"월계표",R:"손익계산서",a:"L"},
+  {q:"1월~6월 중 차량유지비 현금 지출액은?",key:"기간 + 현금 지출액",L:"거래처원장",R:"월계표",a:"R"},
+  {q:"7월 중 외상매출금 현금 회수 금액은?",key:"현금/대체 + 계정과목",L:"월계표",R:"총계정원장",a:"L"}
+];
+
+const SFX={
+  ctx:null,
+  init(){if(!this.ctx)this.ctx=new(window.AudioContext||window.webkitAudioContext)();if(this.ctx.state==='suspended')this.ctx.resume()},
+  tone(f,t,d,v=0.12){if(!this.ctx)return;const o=this.ctx.createOscillator(),g=this.ctx.createGain();o.type=t;o.frequency.setValueAtTime(f,this.ctx.currentTime);g.gain.setValueAtTime(v,this.ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,this.ctx.currentTime+d);o.connect(g);g.connect(this.ctx.destination);o.start();o.stop(this.ctx.currentTime+d)},
+  ok(){this.tone(660,'sine',.08,.2);setTimeout(()=>this.tone(990,'sine',.15,.2),60)},
+  bad(){this.tone(140,'sawtooth',.45,.4)},
+  coin(){this.tone(1200+Math.random()*400,'triangle',.05,.06)},
+  item(){this.tone(600,'square',.08,.1);setTimeout(()=>this.tone(1200,'square',.15,.1),90)},
+};
+
+class Particle{
+  constructor(x,y,col){this.x=x;this.y=y;this.col=col;const a=Math.random()*Math.PI*2,s=3+Math.random()*10;this.vx=Math.cos(a)*s;this.vy=Math.sin(a)*s;this.life=1;this.fade=.025+Math.random()*.04}
+  update(){this.x+=this.vx;this.y+=this.vy;this.vy+=.18;this.life-=this.fade}
+  draw(ctx){ctx.globalAlpha=Math.max(0,this.life);ctx.fillStyle=this.col;ctx.beginPath();ctx.arc(this.x,this.y,3,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1}
+}
+
+const Game={
+  canvas:null,ctx:null,w:0,h:0,
+  state:'idle',score:0,hi:0,combo:0,maxCombo:0,okCount:0,speed:0,frame:0,
+  player:{x:0,y:0,r:42,shield:false,magnet:false,magT:0},
+  gates:[],items:[],parts:[],stars:[],
+  shipImg:null,shipImgLoaded:false,
+  targetX:0,touchStartX:0,playerStartX:0,
+
+  init(){
+    this.canvas=document.getElementById('canvas');
+    this.ctx=this.canvas.getContext('2d');
+    this.hi=+localStorage.getItem('hub_flight_hi')||0;
+    BGM.init();
+    this.resize();
+    window.addEventListener('resize',()=>this.resize());
+
+    window.addEventListener('mousemove',e=>{
+      if(this.state==='playing'){
+        const rect=document.getElementById('canvas-wrap').getBoundingClientRect();
+        const x=Math.max(55,Math.min(this.w-55,e.clientX-rect.left));
+        this.player.x=x;this.targetX=x;
+      }
+    });
+
+    window.addEventListener('touchstart',e=>{
+      if(this.state==='playing'){
+        this.touchStartX=e.touches[0].clientX;
+        this.playerStartX=this.player.x;
+        this.targetX=this.player.x;
+      }
+    },{passive:true});
+
+    window.addEventListener('touchmove',e=>{
+      // ★ playing 상태가 아니면 기본 스크롤 동작 허용
+      if(this.state!=='playing') return;
+      e.preventDefault();
+      const dx=e.touches[0].clientX-this.touchStartX;
+      const newX=Math.max(55,Math.min(this.w-55,this.playerStartX+dx));
+      this.player.x=newX;this.targetX=newX;
+    },{passive:false});
+
+    window.addEventListener('keydown',e=>{
+      if(this.state==='playing'){
+        if(e.key==='ArrowLeft'){this.player.x=Math.max(55,this.player.x-65);this.targetX=this.player.x}
+        if(e.key==='ArrowRight'){this.player.x=Math.min(this.w-55,this.player.x+65);this.targetX=this.player.x}
+      }
+    });
+
+    this.shipImg=new Image();
+    this.shipImg.src="airplane.png";
+    this.shipImg.onload=()=>{this.shipImgLoaded=true};
+    for(let i=0;i<100;i++)this.stars.push(this.mkStar(true));
+    this.loop();
+  },
+
+  resize(){
+    const wrap=document.getElementById('canvas-wrap');
+    const adH=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--ad-h'))||50;
+    this.w=this.canvas.width=wrap.clientWidth;
+    this.h=this.canvas.height=window.innerHeight-adH;
+    wrap.style.height=this.h+'px';
+    this.player.y=this.h-140;
+    if(this.state==='idle'){this.player.x=this.w/2;this.targetX=this.w/2}
+  },
+
+  mkStar(init=false){return{x:Math.random()*this.w,y:init?Math.random()*this.h:-2,s:Math.random()*2+.3,v:Math.random()*14+4,c:Math.random()>.85?'#00f2ff':Math.random()>.7?'#b44fff':'#fff'}},
+
+  start(){SFX.init();BGM.play();hideAdPlaceholder();document.getElementById('ss').style.display='none';this._reset()},
+  restart(){BGM.play();hideAdPlaceholder();document.getElementById('gs').style.display='none';this._reset()},
+
+  _reset(){
+    this.state='playing';this.score=0;this.combo=0;this.maxCombo=0;this.okCount=0;
+    this.speed=3.0;this.frame=0;this.gates=[];this.items=[];this.parts=[];
+    this.player.shield=false;this.player.magnet=false;this.player.magT=0;
+    this.player.x=this.w/2;this.targetX=this.w/2;
+    document.getElementById('ic-shield').classList.remove('on');
+    document.getElementById('ic-magnet').classList.remove('on');
+    document.getElementById('glayer').innerHTML='';
+    document.getElementById('savesec').style.display='flex';
+    document.getElementById('rkbox').style.display='none';
+    document.getElementById('rkbox').innerHTML='';
+    document.getElementById('pname').value='';
+    document.getElementById('savemsg').textContent='';
+    const sb=document.getElementById('savebtn');sb.disabled=false;sb.style.opacity='1';
+    this.updHUD();
+  },
+
+  loop(){this.update();this.draw();requestAnimationFrame(()=>this.loop())},
+
+  spawnGate(){
+    const p=Problems[Math.floor(Math.random()*Problems.length)];
+    const id='g'+Date.now()+'_'+Math.random().toString(36).slice(2);
+    const g={id,y:-430,q:p.q,k:p.key,lText:p.L,rText:p.R,ans:p.a,passed:false,domEl:null};
+    const layer=document.getElementById('glayer');
+    const el=document.createElement('div');
+    el.id=id;el.className='gatel';el.style.top='-600px';
+    el.innerHTML=`<div class="gbar"></div><div class="ginfo"><div class="gq">${p.q}</div><div class="gk">💡 ${p.key}</div></div><div class="gchoices"><div class="gchoice left">${p.L}</div><div class="gchoice right">${p.R}</div></div>`;
+    layer.appendChild(el);g.domEl=el;this.gates.push(g);
+  },
+  spawnItems(){
+    const pat=Math.floor(Math.random()*5),sx=80+Math.random()*(this.w-160);
+    if(pat===0)for(let i=0;i<5;i++)this.mkItem(sx+(i-2)*55,-60,'coin');
+    else if(pat===1)for(let i=0;i<5;i++)this.mkItem(sx,-60-i*68,'coin');
+    else if(pat===2){this.mkItem(sx,-60,'coin');this.mkItem(sx-55,-130,'coin');this.mkItem(sx+55,-130,'coin')}
+    else if(pat===3)for(let i=0;i<3;i++)this.mkItem(sx+(i-1)*80,-60,'coin');
+    else this.mkItem(50+Math.random()*(this.w-100),-60,Math.random()>.5?'shield':'magnet');
+  },
+  mkItem(x,y,type){this.items.push({x,y,type,r:type==='coin'?20:28})},
+
+  update(){
+    if(this.state!=='playing')return;
+    this.frame++;
+    this.speed=Math.min(8.5,3.0+this.frame*.0009);
+    this.stars.forEach(s=>{s.y+=s.v*(this.speed*.17);if(s.y>this.h)Object.assign(s,this.mkStar())});
+    const gI=Math.max(65,Math.floor(1500/this.speed));
+    if(this.frame%gI===0)this.spawnGate();
+    if(this.frame%52===0)this.spawnItems();
+    if(this.player.magnet){this.player.magT--;if(this.player.magT<=0){this.player.magnet=false;document.getElementById('ic-magnet').classList.remove('on')}}
+    for(let i=this.gates.length-1;i>=0;i--){
+      const g=this.gates[i];g.y+=this.speed*.82;
+      if(g.domEl)g.domEl.style.top=(g.y-140)+'px';
+      if(!g.passed&&g.y>=this.player.y-10){
+        const side=this.player.x<this.w/2?'L':'R';g.passed=true;
+        if(g.domEl)g.domEl.style.opacity='.15';
+        if(side===g.ans){
+          this.combo++;if(this.combo>this.maxCombo)this.maxCombo=this.combo;
+          this.score+=500+(this.combo-1)*50;this.okCount++;SFX.ok();
+          this.burst(this.player.x,this.player.y,'#00f2ff',18);this.burst(this.player.x,this.player.y,'#fff',8);
+          if(this.combo>=2)this.showCombo(this.combo);this.doFlash('ok');
+          this.showJudge(true,this.combo>=2?`✓ ${this.combo} COMBO!`:'✓ 정답!');
+        } else {
+          if(this.player.shield){
+            this.player.shield=false;document.getElementById('ic-shield').classList.remove('on');SFX.item();
+            this.burst(this.player.x,this.player.y,'#00f2ff',14);this.showJudge(false,'🛡️ 방어막 발동!');
+          } else {
+            SFX.bad();this.doFlash('bad');this.burst(this.player.x,this.player.y,'#ff2d78',28);
+            this.showJudge(false,'✗ 오답!');this.state='dying';setTimeout(()=>this.gameOver(),420);
+          }
+          this.combo=0;
+        }
+        this.updHUD();
+      }
+    }
+    for(let i=this.items.length-1;i>=0;i--){
+      const it=this.items[i];it.y+=this.speed*1.12;
+      if(this.player.magnet&&it.type==='coin'){const dx=this.player.x-it.x,dy=this.player.y-it.y;if(Math.sqrt(dx*dx+dy*dy)<290){it.x+=dx*.13;it.y+=dy*.13}}
+      const dx=this.player.x-it.x,dy=this.player.y-it.y;
+      if(Math.sqrt(dx*dx+dy*dy)<this.player.r+it.r){
+        if(it.type==='coin'){this.score+=100;SFX.coin();this.burst(it.x,it.y,'#ffd600',5)}
+        else if(it.type==='shield'){this.player.shield=true;SFX.item();document.getElementById('ic-shield').classList.add('on');this.burst(it.x,it.y,'#00f2ff',10)}
+        else{this.player.magnet=true;this.player.magT=480;SFX.item();document.getElementById('ic-magnet').classList.add('on');this.burst(it.x,it.y,'#ff0055',10)}
+        this.items.splice(i,1);this.updHUD();
+      } else if(it.y>this.h+60)this.items.splice(i,1);
+    }
+    for(let i=this.parts.length-1;i>=0;i--){this.parts[i].update();if(this.parts[i].life<=0)this.parts.splice(i,1)}
+  },
+
+  draw(){
+    const ctx=this.ctx;
+    ctx.fillStyle='#020810';ctx.fillRect(0,0,this.w,this.h);
+    this.stars.forEach(s=>{ctx.fillStyle=s.c;ctx.globalAlpha=0.7;ctx.beginPath();ctx.arc(s.x,s.y,s.s,0,Math.PI*2);ctx.fill()});ctx.globalAlpha=1;
+    ctx.strokeStyle='rgba(0,242,255,.08)';ctx.lineWidth=1.5;ctx.setLineDash([24,24]);
+    const dOff=(this.frame*this.speed*.7)%48;
+    ctx.beginPath();ctx.moveTo(this.w/2,-dOff);ctx.lineTo(this.w/2,this.h);ctx.stroke();ctx.setLineDash([]);
+    this.items.forEach(it=>{
+      if(it.type==='coin'){
+        ctx.save();ctx.translate(it.x,it.y);ctx.scale(Math.abs(Math.cos(this.frame*.08)),1);
+        ctx.beginPath();ctx.arc(0,0,18,0,Math.PI*2);ctx.fillStyle='#FFD700';ctx.fill();
+        ctx.strokeStyle='#b8860b';ctx.lineWidth=2;ctx.stroke();
+        ctx.fillStyle='#7a5000';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('₩',0,1);
+        ctx.restore();
+      } else {ctx.font='28px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(it.type==='shield'?'🛡️':'🧲',it.x,it.y)}
+    });
+    this.parts.forEach(p=>p.draw(ctx));this.drawShip();
+  },
+
+  burst(x,y,col,n){for(let i=0;i<n;i++)this.parts.push(new Particle(x,y,col))},
+  showJudge(isOk,msg){const el=document.getElementById('judge-pop');el.textContent=msg;el.className=isOk?'ok':'bad';el.style.top=(this.player.y-80)+'px';el.style.display='block';el.style.animation='none';void el.offsetWidth;el.style.animation='judgeAnim .9s ease-out forwards';setTimeout(()=>el.style.display='none',900)},
+  doFlash(type){const el=document.getElementById('flash');el.className='';void el.offsetWidth;el.className=type;setTimeout(()=>el.className='',type==='ok'?400:560)},
+  showCombo(n){const el=document.getElementById('cpop');el.textContent=n+'x COMBO! 🔥';el.style.display='block';el.style.animation='none';void el.offsetWidth;el.style.animation='cp .8s ease-out forwards';setTimeout(()=>el.style.display='none',800)},
+  updHUD(){document.getElementById('hv-score').textContent=this.score.toLocaleString();document.getElementById('hv-combo').textContent=this.combo+'x'},
+  _grade(score){if(score>=50000)return'👑 전설의 에이스';if(score>=30000)return'🥇 베테랑 파일럿';if(score>=15000)return'🥈 숙련 파일럿';if(score>=5000)return'🥉 정규 파일럿';return'🛩 견습 파일럿'},
+
+  gameOver(){
+    this.state='gameover';
+    BGM.stop();
+    if(this.score>this.hi){this.hi=this.score;localStorage.setItem('hub_flight_hi',this.hi)}
+    document.getElementById('glayer').innerHTML='';
+    document.getElementById('go-score').textContent=this.score.toLocaleString()+'점';
+    document.getElementById('go-ok').textContent=this.okCount;
+    document.getElementById('go-mc').textContent=this.maxCombo;
+    document.getElementById('go-hi').textContent=this.hi.toLocaleString();
+    document.getElementById('go-grade').textContent='파일럿 등급: '+this._grade(this.score);
+    const gs=document.getElementById('gs');
+    gs.style.display='flex';
+    gs.scrollTop=0; // ★ 열릴 때 상단으로 리셋
+    showAdPlaceholder();
+    this.loadRanking();
+  },
+
+  async saveScore(){
+    const name=document.getElementById('pname').value.trim();
+    if(!name){alert('이름을 입력하세요');return}
+    if(name.length<2){alert('2글자 이상 입력해주세요');return}
+    const btn=document.getElementById('savebtn'),msg=document.getElementById('savemsg');
+    btn.disabled=true;btn.style.opacity='.5';msg.textContent='저장 중...';msg.style.color='rgba(255,255,255,.4)';
+    const today=new Date().toLocaleDateString('ko-KR',{month:'2-digit',day:'2-digit'});
+    const data={name,score:this.score,combo:this.maxCombo,correct:this.okCount,date:today,game:GAME_ID,grade:this._grade(this.score)};
+    if(false){this._lsave(data);msg.textContent='✓ 로컬 저장 완료';msg.style.color='var(--gd)';this.loadRanking();return}
+    try{
+      await supabaseSaveScore(data.name, data.score, data.combo||0, data.correct||0, GAME_ID);
+      this._lsave(data);msg.textContent='✓ 저장 완료! 랭킹에 반영됩니다';msg.style.color='#39ff14';
+      await new Promise(r=>setTimeout(r,800));await this.loadRanking();
+    }catch(e){this._lsave(data);msg.textContent='✓ 로컬 저장 완료 (네트워크 오류)';msg.style.color='var(--gd)';this.loadRanking()}
+  },
+  _lsave(d){const l=this._lget();l.push(d);l.sort((a,b)=>b.score-a.score);localStorage.setItem('hub_flight_rank',JSON.stringify(l.slice(0,15)))},
+  _lget(){return JSON.parse(localStorage.getItem('hub_flight_rank')||'[]')},
+
+  async loadRanking(){
+    const box=document.getElementById('rkbox');box.style.display='block';
+    if(false){this._render(this._lget());return}
+    box.innerHTML='<div class="spinrow"><div class="spinner"></div>&nbsp;불러오는 중...</div>';
+    try{const res=await supabaseFetchRanking(GAME_ID);this._render(this._merge(res,this._lget()))}
+    catch(e){this._render(this._lget())}
+  },
+  _merge(remote,local){const map=new Map();[...(Array.isArray(remote)?remote:[]),...local].forEach(r=>{const k=r.name+'_'+r.score;if(!map.has(k))map.set(k,r)});return[...map.values()].sort((a,b)=>b.score-a.score).slice(0,15)},
+  _render(list){
+    const box=document.getElementById('rkbox');
+    if(!list||!list.length){box.innerHTML='<div style="text-align:center;padding:20px;color:rgba(255,255,255,.3)">아직 기록이 없습니다</div>';return}
+    const me=document.getElementById('pname').value.trim();
+    box.innerHTML='<div class="rkhdr">🏆 HALL OF FAME</div>'+list.map((r,i)=>{
+      const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'위';
+      return`<div class="rkrow ${escapeHTML(r.name)===escapeHTML(me)?'rkme':''}"><div class="rkn ${i<3?'top':''}">${medal}</div><div class="rknm">${escapeHTML(r.name)}</div><div class="rkgr">${escapeHTML(r.grade||this._grade(r.score))}</div><div class="rksc">${(r.score||0).toLocaleString()}</div></div>`;
+    }).join('');
+  },
+
+  drawShip(){
+    const ctx=this.ctx,px=this.player.x,py=this.player.y;
+    ctx.save();ctx.translate(px,py);
+    if(this.player.magnet){ctx.beginPath();ctx.arc(0,0,290,0,Math.PI*2);ctx.strokeStyle=`rgba(255,0,85,${.08+Math.sin(this.frame*.14)*.04})`;ctx.lineWidth=2;ctx.stroke()}
+    const hv=Math.sin(this.frame*.08)*4;ctx.translate(0,hv);
+    if(this.shipImgLoaded){ctx.drawImage(this.shipImg,-50,-50,100,100)}
+    else{ctx.fillStyle='#00f2ff';ctx.beginPath();ctx.moveTo(0,-38);ctx.lineTo(16,20);ctx.lineTo(0,8);ctx.lineTo(-16,20);ctx.closePath();ctx.fill()}
+    if(this.player.shield){ctx.strokeStyle=`rgba(0,242,255,${.65+Math.sin(this.frame*.1)*.3})`;ctx.lineWidth=3;ctx.beginPath();for(let i=0;i<6;i++){const ang=Math.PI/3*i+this.frame*.04,r=76;i===0?ctx.moveTo(r*Math.cos(ang),r*Math.sin(ang)):ctx.lineTo(r*Math.cos(ang),r*Math.sin(ang))}ctx.closePath();ctx.stroke()}
+    ctx.restore();
+  },
+};
+
+function hideAdPlaceholder(){
+  const el=document.getElementById('adPlaceholder');if(el)el.style.display='none';
+  document.documentElement.style.setProperty('--ad-h','0px');Game.resize();
+}
+function showAdPlaceholder(){
+  const el=document.getElementById('adPlaceholder');if(el)el.style.display='flex';
+  document.documentElement.style.setProperty('--ad-h','50px');Game.resize();
+}
+
+window.addEventListener('load',()=>Game.init());
+
+    // ── Supabase 유틸 ──
+    function getGradeForSupabase(gameId, score) {
+        const scales = {
+            acid:    [[10000,"👑 전설의 에이스"],[6000,"🥇 베테랑"],[3000,"🥈 숙련자"],[1000,"🥉 정규 파일럿"],[0,"🛩 견습생"]],
+            memory:  [[950,"👑 CEO"],[850,"⭐ CEO급"],[750,"🎖 전무/상무"],[650,"🏅 이사"],[550,"📋 부장"],[450,"🗂 차장"],[350,"📁 과장"],[250,"📝 대리"],[0,"💼 사원"]],
+            debit:   [[4500,"👑 전설의 CFO"],[2500,"🥇 회계 부장"],[1000,"🥈 회계 대리"],[500,"🥉 신입 사원"],[0,"📋 수습 직원"]],
+            factory: [[5000,"👑 결산 마스터"],[3000,"🥇 숙련 경리"],[1500,"🥈 견습 경리"],[500,"🥉 수습생"],[0,"📋 인턴"]],
+            flight:  [[50000,"👑 전설의 에이스"],[30000,"🥇 베테랑 파일럿"],[15000,"🥈 숙련 파일럿"],[5000,"🥉 정규 파일럿"],[0,"🛩 견습 파일럿"]]
+        };
+        const tiers = scales[gameId] || scales.flight;
+        return (tiers.find(([min]) => score >= min) || tiers[tiers.length-1])[1];
+    }
+
+    async function supabaseSaveScore(name, score, combo, correct, gameId) {
+        const maxScore = {acid:30000,memory:3000,debit:15000,factory:15000,flight:300000};
+        const safeScore = Math.min(Math.max(score,0), maxScore[gameId]||999999);
+        const safeName = String(name).replace(/<[^>]*>/g,'').substring(0,30).trim();
+        if (!safeName) return;
+        const today = new Date().toISOString().split('T')[0];
+        await db.rpc('upsert_score', {
+            p_game_id: gameId,
+            p_name:    safeName,
+            p_score:   safeScore,
+            p_grade:   getGradeForSupabase(gameId, safeScore),
+            p_combo:   Math.max(0, combo||0),
+            p_correct: Math.max(0, correct||0),
+            p_date:    today
+        });
+    }
+
+    async function supabaseFetchRanking(gameId) {
+        const { data, error } = await db
+            .from('scores')
+            .select()
+            .eq('game_id', gameId)
+            .order('score', { ascending: false })
+            .limit(20);
+        if (error) throw error;
+        return data;
+    }
+
+</script>
+<script>document.addEventListener('contextmenu', e => e.preventDefault()); document.addEventListener('selectstart', e => e.preventDefault()); document.addEventListener('copy', e => e.preventDefault()); document.addEventListener('keydown', e => { if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) || (e.ctrlKey && e.keyCode === 85)) { e.preventDefault(); } });</script>
+</body>
+</html>

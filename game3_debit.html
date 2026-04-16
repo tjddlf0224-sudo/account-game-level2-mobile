@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; img-src 'self' data:; connect-src 'self' https://pjagaulfivafamhhiveg.supabase.co; media-src 'self';">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>⚡ 전산회계 마스터 ⚡</title>
+    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --blue:   #00c2ff;
+            --red:    #ff2d55;
+            --gold:   #ffd600;
+            --green:  #00e676;
+            --bg:     #0d0d1a;
+            --panel:  rgba(255,255,255,0.05);
+            --border: rgba(255,255,255,0.12);
+            --ad-h:   50px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+
+        html { height: 100%; }
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: var(--bg);
+            color: white;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            user-select: none;
+            padding-bottom: var(--ad-h);
+            background-image:
+                radial-gradient(ellipse 80% 50% at 20% 20%, rgba(0,194,255,0.07) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 40% at 80% 80%, rgba(255,45,85,0.07) 0%, transparent 60%);
+        }
+
+        /* ── AdMob 광고 자리 ── */
+        .ad-placeholder {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            height: var(--ad-h);
+            background: rgba(0,0,0,0.6);
+            border-top: 1px solid rgba(255,255,255,0.08);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 300; font-size: 0.6rem; letter-spacing: 2px;
+            color: rgba(255,255,255,0.2);
+        }
+
+        /* ── 헤더 ── */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 16px;
+            padding-top: calc(env(safe-area-inset-top) + 10px);
+            border-bottom: 1px solid var(--border);
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            flex-shrink: 0;
+            gap: 10px;
+        }
+        .logo {
+            font-family: 'Black Han Sans', sans-serif;
+            font-size: clamp(1rem, 4vw, 1.6rem);
+            background: linear-gradient(to right, var(--blue), var(--red));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+            flex-shrink: 0;
+        }
+
+        /* 헤더 중앙 상태바 */
+        .status-bar {
+            display: flex; gap: clamp(8px, 3vw, 30px);
+            align-items: center; flex: 1;
+            justify-content: center;
+        }
+        .stat { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+        .stat-label { font-size: clamp(0.6rem, 2vw, 0.9rem); opacity: 0.5; text-transform: uppercase; letter-spacing: 1px; }
+        .stat-value { font-family: 'Black Han Sans', sans-serif; font-size: clamp(1.1rem, 4vw, 1.6rem); }
+        #timer-val { color: var(--red); }
+        #score-val { color: var(--gold); }
+        #combo-val { color: var(--green); }
+
+        .timer-bar-wrap {
+            flex: 1; max-width: 120px; height: 6px;
+            background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;
+        }
+        #timer-bar {
+            height: 100%; width: 100%;
+            background: linear-gradient(to right, var(--green), var(--gold), var(--red));
+            border-radius: 4px; transition: width 1s linear;
+        }
+
+        /* 헤더 우측 버튼 */
+        .header-btns { display: flex; gap: 6px; flex-shrink: 0; }
+        .hdr-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1.5px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 0 14px;
+            height: 44px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Black Han Sans', sans-serif;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            display: flex; align-items: center;
+        }
+        /* 🎵 음소거 버튼 */
+        .mute-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid var(--border);
+            color: white;
+            padding: 0 10px;
+            height: 44px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            display: flex; align-items: center; justify-content: center;
+            transition: opacity 0.2s, border-color 0.2s;
+        }
+        .mute-btn.muted {
+            opacity: 0.4;
+            border-color: rgba(255,255,255,0.1);
+        }
+
+        /* ── 게임 영역 ── */
+        .game-area {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(12px, 3vw, 30px) clamp(12px, 4vw, 60px);
+            overflow: hidden;
+        }
+
+        /* 중앙 영역 */
+        .center-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: clamp(10px, 2.5vh, 24px);
+            width: 100%;
+            max-width: 780px;
+        }
+
+        /* ── 문제 카드 ── */
+        .question-card {
+            width: 100%;
+            background: white;
+            color: #1a1a2e;
+            border-radius: 20px;
+            padding: clamp(18px, 4vw, 44px) clamp(16px, 4vw, 48px);
+            min-height: clamp(120px, 22vh, 190px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            border: 3px solid transparent;
+            transition: border-color 0.15s, background 0.15s;
+            position: relative;
+        }
+        .question-card.correct { border-color: var(--blue); box-shadow: 0 0 40px rgba(0,194,255,0.4); }
+        .question-card.wrong   { background: #ffe0e0; border-color: var(--red); }
+
+        .q-label {
+            font-size: clamp(0.75rem, 2.5vw, 1rem);
+            font-weight: 700; color: #bbb;
+            letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px;
+        }
+
+        /* 거래 문장 */
+        .q-sentence {
+            font-size: clamp(1rem, 3.5vw, 1.7rem);
+            font-weight: 700;
+            color: #2a2a3e;
+            line-height: 1.7;
+            word-break: keep-all;
+        }
+
+        /* 강조 계정과목 */
+        .target-account {
+            display: inline-block;
+            font-weight: 900;
+            font-size: clamp(1rem, 3.8vw, 1.9rem);
+            color: #fff;
+            background: linear-gradient(135deg, #1a1aff, #7700ff);
+            padding: 2px 12px 4px;
+            border-radius: 10px;
+            margin: 0 3px;
+            box-shadow: 0 3px 12px rgba(100,0,255,0.45);
+            position: relative;
+            letter-spacing: -0.3px;
+        }
+        .target-account::after {
+            content: '▼';
+            position: absolute;
+            bottom: -18px; left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8rem; color: #9966ff;
+            animation: arrowBlink 0.9s ease-in-out infinite;
+        }
+        @keyframes arrowBlink {
+            0%, 100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            50%       { opacity: 0.3; transform: translateX(-50%) translateY(3px); }
+        }
+
+        .q-ask {
+            margin-top: clamp(16px, 3vw, 26px);
+            font-size: clamp(0.8rem, 2.5vw, 1rem);
+            color: #888;
+            background: rgba(0,0,0,0.06);
+            padding: 4px 14px;
+            border-radius: 20px;
+        }
+        .q-ask b { color: #555; }
+
+        .q-hint {
+            margin-top: 8px;
+            font-size: clamp(0.9rem, 2.5vw, 1.15rem);
+            color: #c0392b;
+            font-weight: 700;
+        }
+
+        /* ── 답변 버튼 ── */
+        .answer-buttons { display: flex; gap: clamp(10px, 3vw, 20px); width: 100%; }
+        .ans-btn {
+            flex: 1;
+            padding: clamp(16px, 4vw, 26px) 10px;
+            min-height: 80px;
+            border: none; border-radius: 16px;
+            font-family: 'Black Han Sans', sans-serif;
+            font-size: clamp(1.2rem, 4vw, 1.7rem);
+            color: white; cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.1s;
+            position: relative; overflow: hidden;
+        }
+        .ans-btn::before {
+            content: ''; position: absolute; inset: 0;
+            background: rgba(255,255,255,0.15); opacity: 0; transition: opacity 0.2s;
+        }
+        .ans-btn:active::before { opacity: 1; }
+        .ans-btn-left {
+            background: linear-gradient(135deg, #00aaff, #0055ff);
+            box-shadow: 0 6px 0 #0033aa, 0 10px 30px rgba(0,100,255,0.4);
+        }
+        .ans-btn-right {
+            background: linear-gradient(135deg, #ff2d55, #ff00aa);
+            box-shadow: 0 6px 0 #aa0033, 0 10px 30px rgba(255,0,80,0.4);
+        }
+        .ans-btn:active { transform: translateY(4px); box-shadow: none !important; }
+        .ans-sub {
+            display: block;
+            font-size: clamp(0.65rem, 2vw, 1rem);
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 500; opacity: 0.9; margin-top: 4px;
+        }
+
+        /* 키보드 힌트 — 모바일에서 숨김 */
+        .key-hint {
+            display: flex; justify-content: center; gap: 30px;
+        }
+        .kbd {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 0.9rem; color: rgba(255,255,255,0.3);
+        }
+        .kbd span {
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 5px; padding: 2px 8px; font-family: monospace;
+        }
+
+        /* ── 힌트 패널 ── */
+        .hint-toggle-btn {
+            background: rgba(255,214,0,0.15);
+            border: 1px solid rgba(255,214,0,0.4);
+            color: var(--gold);
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-family: 'Black Han Sans', sans-serif;
+            font-size: clamp(0.85rem, 2.5vw, 1rem);
+            cursor: pointer; min-height: 44px;
+            transition: background 0.2s;
+        }
+        .hint-toggle-btn:active { background: rgba(255,214,0,0.25); }
+
+        .hint-panel {
+            display: none;
+            width: 100%;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 16px;
+            padding: clamp(12px, 3vw, 20px) clamp(14px, 3vw, 28px);
+        }
+        .hint-panel.open { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .hint-box {
+            border-radius: 12px;
+            padding: clamp(10px, 2vw, 14px) clamp(12px, 2vw, 18px);
+            font-size: clamp(0.8rem, 2.5vw, 1.05rem);
+            line-height: 1.9;
+        }
+        .hint-box-left  { background: rgba(0,194,255,0.1);  border-left: 4px solid var(--blue); }
+        .hint-box-right { background: rgba(255,45,85,0.1);   border-left: 4px solid var(--red); }
+        .hint-box strong { display: block; font-size: clamp(0.85rem, 2.5vw, 1.1rem); margin-bottom: 4px; }
+
+        /* ── 팝업 ── */
+        .combo-popup {
+            position: fixed; top: 30%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Black Han Sans', sans-serif;
+            font-size: clamp(2rem, 8vw, 3.5rem);
+            color: var(--gold); text-shadow: 0 0 20px rgba(255,214,0,0.8), 2px 2px 0 #000;
+            pointer-events: none; z-index: 50; display: none;
+            animation: comboPop 0.7s ease-out forwards;
+        }
+        @keyframes comboPop {
+            0%   { opacity: 0; transform: translate(-50%,-50%) scale(0.5); }
+            40%  { opacity: 1; transform: translate(-50%,-70%) scale(1.3); }
+            100% { opacity: 0; transform: translate(-50%,-120%) scale(1); }
+        }
+        .feedback-popup {
+            position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Black Han Sans', sans-serif;
+            font-size: clamp(1.4rem, 5vw, 2rem);
+            padding: 14px 32px; border-radius: 50px;
+            pointer-events: none; z-index: 50; display: none;
+        }
+        .feedback-popup.ok { background: rgba(0,194,255,0.9); color: white; animation: feedPop 0.4s ease-out forwards; }
+        .feedback-popup.no { background: rgba(255,45,85,0.9);  color: white; animation: feedPop 0.4s ease-out forwards; }
+        @keyframes feedPop {
+            0%   { opacity: 0; transform: translate(-50%,-50%) scale(0.6); }
+            50%  { opacity: 1; transform: translate(-50%,-50%) scale(1.1); }
+            100% { opacity: 0; transform: translate(-50%,-50%) scale(1); }
+        }
+
+        /* ── 오버레이 ── */
+        .overlay {
+            position: fixed; inset: 0;
+            background: rgba(10,10,20,0.92);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: flex-start;
+            z-index: 200; backdrop-filter: blur(16px);
+            gap: clamp(10px, 2vh, 16px);
+            overflow-y: auto;
+            padding: 20px 16px calc(var(--ad-h) + 16px);
+            padding-top: max(20px, env(safe-area-inset-top));
+            touch-action: pan-y;
+            overscroll-behavior: contain;
+        }
+        .overlay-inner {
+            display: flex; flex-direction: column;
+            align-items: center;
+            gap: clamp(10px, 2vh, 16px);
+            width: 100%; max-width: 600px;
+            margin: auto;
+        }
+        .overlay-title {
+            font-family: 'Black Han Sans', sans-serif;
+            font-size: clamp(1.8rem, 7vw, 3rem);
+            background: linear-gradient(to right, var(--blue), var(--gold));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            text-align: center;
+        }
+        .overlay-sub { font-size: clamp(0.8rem, 3vw, 1rem); color: rgba(255,255,255,0.5); text-align: center; }
+
+        /* 시작 화면 정보 그리드 */
+        .start-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            width: 100%;
+        }
+        .info-card {
+            background: var(--panel); border: 1px solid var(--border);
+            border-radius: 14px; padding: clamp(12px, 2vw, 16px) clamp(12px, 2vw, 20px);
+            font-size: clamp(0.8rem, 2.5vw, 1rem);
+            color: rgba(255,255,255,0.7); line-height: 1.75;
+        }
+        .info-card strong { color: white; display: block; margin-bottom: 4px; font-size: clamp(0.85rem, 2.5vw, 1.05rem); }
+
+        /* 예시 카드 */
+        .example-card {
+            width: 100%;
+            background: white; color: #1a1a2e;
+            border-radius: 14px; padding: clamp(14px, 3vw, 18px) clamp(16px, 3vw, 28px);
+            text-align: center;
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
+            font-weight: 700;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+        }
+        .example-card .ex-label { font-size: 0.82rem; color: #aaa; letter-spacing: 2px; margin-bottom: 6px; }
+        .example-card .ex-ask   { font-size: clamp(0.78rem, 2vw, 0.95rem); color: #888; margin-top: 8px; }
+
+        /* 결과 화면 */
+        .result-rank {
+            font-family: 'Black Han Sans', sans-serif;
+            font-size: clamp(1rem, 3.5vw, 1.3rem);
+            color: var(--blue); background: rgba(0,194,255,0.1);
+            padding: 8px 22px; border-radius: 50px;
+            border: 1px solid rgba(0,194,255,0.3);
+            text-align: center;
+        }
+        .result-score {
+            font-family: 'Black Han Sans', sans-serif;
+            font-size: clamp(2.5rem, 10vw, 4rem);
+            color: var(--gold); text-shadow: 0 0 30px rgba(255,214,0,0.5);
+        }
+        .result-stats {
+            display: flex; gap: clamp(12px, 4vw, 30px); flex-wrap: wrap; justify-content: center;
+            background: var(--panel); border: 1px solid var(--border);
+            border-radius: 14px; padding: 14px clamp(16px, 4vw, 30px);
+            font-size: clamp(0.85rem, 2.5vw, 1rem);
+            color: rgba(255,255,255,0.6);
+        }
+        .result-stats span { color: white; font-weight: 700; }
+        .save-row { display: flex; gap: 8px; align-items: center; width: 100%; max-width: 360px; }
+        .name-input {
+            width: 0; flex: 1; min-width: 0; max-width: 180px;
+            padding: 12px 16px; background: rgba(255,255,255,0.1);
+            border: 2px solid var(--border); border-radius: 12px;
+            color: white; font-size: 1rem; text-align: center;
+            font-family: 'Noto Sans KR', sans-serif; outline: none;
+            transition: border-color 0.2s; min-height: 48px;
+        }
+        .name-input:focus { border-color: var(--blue); }
+        .name-input::placeholder { color: rgba(255,255,255,0.3); }
+
+        .pill-btn {
+            padding: 12px 24px; border: none; border-radius: 50px;
+            font-family: 'Black Han Sans', sans-serif;
+            font-size: clamp(0.9rem, 3vw, 1.05rem);
+            cursor: pointer; transition: transform 0.1s, box-shadow 0.1s;
+            min-height: 48px; white-space: nowrap;
+        }
+        .pill-btn:active { transform: translateY(1px); }
+        .pill-btn-blue  { background: var(--blue);  color: #000; box-shadow: 0 4px 20px rgba(0,194,255,0.5); }
+        .pill-btn-gold  {
+            background: var(--gold); color: #000;
+            box-shadow: 0 4px 20px rgba(255,214,0,0.5);
+            font-size: clamp(1.1rem, 4vw, 1.3rem);
+            padding: 14px 48px;
+            animation: pulse 1.8s infinite;
+        }
+        .pill-btn-green { background: var(--green); color: #000; box-shadow: 0 4px 20px rgba(0,230,118,0.4); }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1);    box-shadow: 0 4px 20px rgba(255,214,0,0.4); }
+            50%       { transform: scale(1.04); box-shadow: 0 6px 30px rgba(255,214,0,0.7); }
+        }
+
+        /* 랭킹 */
+        .rank-container {
+            width: 100%; max-height: 200px; overflow-y: auto;
+            background: var(--panel); border: 1px solid var(--border);
+            border-radius: 16px; padding: 6px 0;
+        }
+        .rank-container::-webkit-scrollbar { width: 4px; }
+        .rank-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
+        .rank-row {
+            display: grid;
+            grid-template-columns: 44px 1fr 90px 80px;
+            padding: 9px 14px; border-bottom: 1px solid var(--border);
+            font-size: clamp(0.8rem, 2.5vw, 1rem);
+            align-items: center; gap: 6px;
+        }
+        .rank-grade { font-size: 0.82rem; color: rgba(255,255,255,0.55); }
+        .rank-row:last-child { border-bottom: none; }
+        .rank-num { font-family: 'Black Han Sans', sans-serif; color: rgba(255,255,255,0.4); }
+        .rank-num.top { color: var(--gold); }
+        .rank-name { font-weight: 700; }
+        .rank-score { color: var(--gold); font-weight: 700; text-align: right; }
+        .rank-me { background: rgba(0,194,255,0.08); }
+
+        .loading { display: flex; align-items: center; gap: 10px; color: rgba(255,255,255,0.4); font-size: 0.85rem; }
+        .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.2); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        #save-status { font-size: 0.9rem; color: rgba(255,255,255,0.4); min-height: 17px; text-align: center; }
+
+        .shake { animation: shake 0.35s; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%  { transform: translateX(-6px); }
+            60%  { transform: translateX(6px); }
+        }
+
+        /* ── 모바일 전용 조정 ── */
+        @media (max-width: 480px) {
+            .key-hint { display: none; }
+            .start-grid { gap: 8px; }
+            .hint-box { font-size: 0.78rem; line-height: 1.7; }
+            .rank-date { display: none; }
+        }
+
+        /* 태블릿: 원본 크기 복원 */
+        @media (min-width: 601px) {
+            .timer-bar-wrap { max-width: 200px; }
+        }
+    
+        /* ── 공통 하단 버튼 ── */
+        .action-btns {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            max-width: 320px;
+            margin-top: 16px;
+        }
+        .btn-restart {
+            padding: 13px 28px;
+            border-radius: 50px;
+            border: 2px solid rgba(0,230,118,0.7);
+            background: rgba(0,230,118,0.12);
+            color: #00e676;
+            font-family: 'Black Han Sans', 'Jua', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.18s;
+            min-height: 48px;
+        }
+        .btn-restart:active { background: rgba(0,230,118,0.3); }
+        .btn-hub {
+            padding: 13px 28px;
+            border-radius: 50px;
+            border: 1.5px solid rgba(255,255,255,0.25);
+            background: rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.75);
+            font-family: 'Black Han Sans', 'Jua', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.18s;
+            min-height: 48px;
+        }
+        .btn-hub:active { background: rgba(255,255,255,0.18); }
+
+        </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<!-- 🎵 BGM 오디오 엘리먼트 -->
+<audio id="bgm" src="bgm3_debit.mp3" loop preload="auto"></audio>
+
+<div class="ad-placeholder" id="adPlaceholder">AD</div>
+
+<!-- ── 시작 화면 ── -->
+<div id="start-screen" class="overlay">
+    <div class="overlay-inner">
+        <div class="overlay-title">⚡ 차변대변</div>
+        <div class="overlay-sub">전산회계 2급 · 계정과목 차변/대변 위치 판단 게임</div>
+
+        <div class="example-card">
+            <div class="ex-label">📌 문제 예시</div>
+            <span>상품을 현금으로 구입하다 → </span>
+            <span class="target-account" style="font-size:1rem; padding:1px 10px 2px;">상품</span>
+            <span>은(는) 어느 쪽?</span>
+            <div class="ex-ask">↑ 강조된 계정과목이 차변인지 대변인지 클릭!</div>
+        </div>
+
+        <div class="start-grid">
+            <div class="info-card">
+                <strong>🎮 게임 방법</strong>
+                <b style="color:#b388ff">보라색 강조</b>된<br>
+                계정과목이 차변/대변<br>
+                버튼을 클릭하세요!
+            </div>
+            <div class="info-card">
+                <strong>⏱️ 규칙</strong>
+                제한 시간 <strong style="color:var(--gold)">60초</strong><br>
+                오답 시 <strong style="color:var(--red)">-5초</strong><br>
+                콤보 보너스!
+            </div>
+            <div class="info-card">
+                <strong>💡 차변 계정</strong>
+                자산 <b style="color:var(--blue)">증가</b> · 부채 <b style="color:var(--red)">감소</b><br>
+                자본 <b style="color:var(--red)">감소</b> · 비용 <b style="color:var(--blue)">발생</b>
+            </div>
+            <div class="info-card">
+                <strong>💡 대변 계정</strong>
+                자산 <b style="color:var(--red)">감소</b> · 부채 <b style="color:var(--blue)">증가</b><br>
+                자본 <b style="color:var(--blue)">증가</b> · 수익 <b style="color:var(--blue)">발생</b>
+            </div>
+        </div>
+
+        <button class="pill-btn pill-btn-gold" onclick="startGame()">▶ 게임 시작</button>
+        <div class="action-btns" style="align-items:center; margin-top:8px;">
+            <button class="btn-hub" onclick="location.href='index.html'">🏠 허브로 나가기</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── 결과 화면 ── -->
+<div id="result-screen" class="overlay" style="display:none">
+    <div class="overlay-inner">
+        <div class="overlay-title">GAME OVER</div>
+        <div id="result-rank" class="result-rank">최종 계급: 신입 사원</div>
+        <div id="result-score" class="result-score">0점</div>
+        <div class="result-stats">
+            정답 <span id="stat-correct">0</span>개 &nbsp;|&nbsp;
+            오답 <span id="stat-wrong">0</span>개 &nbsp;|&nbsp;
+            최고 콤보 <span id="stat-combo">0</span>x
+        </div>
+        <div class="save-row">
+            <input type="text" class="name-input" id="player-name" placeholder="닉네임 입력" maxlength="20">
+            <button class="pill-btn pill-btn-blue" onclick="saveScore()" id="save-btn">💾 저장</button>
+        </div>
+        <div id="save-status"></div>
+        <div id="my-rank-badge" style="display:none; font-family:'Black Han Sans',sans-serif; font-size:1rem; color:var(--blue); background:rgba(0,194,255,0.12); border:1px solid rgba(0,194,255,0.3); border-radius:50px; padding:7px 20px; text-align:center;"></div>
+        <div style="font-family:'Black Han Sans',sans-serif; font-size:0.95rem; color:rgba(255,255,255,0.35); letter-spacing:2px;">🏆 TOP 랭킹</div>
+        <div class="rank-container" id="rank-container">
+            <div class="loading" style="justify-content:center;padding:20px 0;">
+                <div class="spinner"></div>&nbsp;랭킹 불러오는 중...
+            </div>
+        </div>
+        <div class="action-btns" style="align-items:center;">
+            <button class="btn-restart" onclick="startGame()">↺ 다시 하기</button>
+            <button class="btn-hub" onclick="location.href='index.html'">🏠 허브로 나가기</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── 헤더 ── -->
+<header>
+    <div class="logo" style="display:none">⚡ 차변대변</div>
+    <div class="status-bar">
+        <div class="stat">
+            <div class="stat-label">TIME</div>
+            <div class="stat-value" id="timer-val">60</div>
+        </div>
+        <div class="timer-bar-wrap"><div id="timer-bar"></div></div>
+        <div class="stat">
+            <div class="stat-label">SCORE</div>
+            <div class="stat-value" id="score-val">0</div>
+        </div>
+        <div class="stat">
+            <div class="stat-label">COMBO</div>
+            <div class="stat-value" id="combo-val">0x</div>
+        </div>
+    </div>
+    <div class="header-btns">
+        <!-- 🎵 음소거 버튼 -->
+        <button class="mute-btn" id="mute-btn" onclick="toggleMute()" title="BGM 음소거">🎵</button>
+        <button class="hdr-btn" onclick="quitGame()">그만</button>
+        <button class="hdr-btn" onclick="location.href='index.html'">홈</button>
+    </div>
+</header>
+
+<!-- ── 게임 영역 ── -->
+<div class="game-area">
+    <div class="center-area">
+        <div id="question-card" class="question-card">
+            <div class="q-label">강조된 계정과목은 어느 쪽?</div>
+            <div class="q-sentence" id="q-sentence">게임을 시작해보세요!</div>
+            <div class="q-ask" id="q-ask"></div>
+            <div class="q-hint" id="q-hint"></div>
+        </div>
+
+        <div class="answer-buttons">
+            <button class="ans-btn ans-btn-left" onclick="handleAnswer('left')">
+                👈 차변
+                <span class="ans-sub">자산증가 · 비용발생 · 부채·자본감소</span>
+            </button>
+            <button class="ans-btn ans-btn-right" onclick="handleAnswer('right')">
+                대변 👉
+                <span class="ans-sub">부채·자본증가 · 수익발생 · 자산감소</span>
+            </button>
+        </div>
+
+        <button class="hint-toggle-btn" onclick="toggleHint()">💡 차변·대변 참고표 보기</button>
+
+        <div class="hint-panel" id="hint-panel">
+            <div class="hint-box hint-box-left">
+                <strong>👈 차변에 기입</strong>
+                자산 증가 ↑<br>부채 감소 ↓<br>자본 감소 ↓<br>비용 발생 ↑
+            </div>
+            <div class="hint-box hint-box-right">
+                <strong>👉 대변에 기입</strong>
+                부채 증가 ↑<br>자본 증가 ↑<br>자산 감소 ↓<br>수익 발생 ↑
+            </div>
+        </div>
+
+        <div class="key-hint">
+            <div class="kbd"><span>A</span> 차변</div>
+            <div class="kbd"><span>L</span> 대변</div>
+        </div>
+    </div>
+</div>
+
+<!-- 팝업 -->
+<div id="combo-popup"    class="combo-popup"></div>
+<div id="feedback-popup" class="feedback-popup"></div>
+
+<script>
+const SUPABASE_URL = "https://pjagaulfivafamhhiveg.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_yck2tAKApEjVSJOJMVSXuQ_AGaNatuI";
+    const { createClient } = supabase;
+    const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+const GAME_ID   = "debit";
+
+// ══════════════════════════════════════
+// 🎵 BGM 관리
+// ══════════════════════════════════════
+const bgm = document.getElementById('bgm');
+bgm.volume = 0.5;
+
+// 음소거 상태: localStorage에 저장해서 다음 게임에도 유지
+let isMuted = localStorage.getItem('debit_muted') === 'true';
+applyMuteState();
+
+function applyMuteState() {
+    bgm.muted = isMuted;
+    const btn = document.getElementById('mute-btn');
+    if (btn) {
+        btn.textContent = isMuted ? '🔇' : '🎵';
+        btn.classList.toggle('muted', isMuted);
+    }
+}
+
+function toggleMute() {
+    isMuted = !isMuted;
+    localStorage.setItem('debit_muted', isMuted);
+    applyMuteState();
+}
+
+// BGM 재생 (브라우저 자동재생 정책 대응: 반드시 사용자 인터랙션 이후 호출)
+function bgmPlay() {
+    if (bgm.paused) {
+        bgm.play().catch(() => {});
+    }
+}
+
+// BGM 정지 (페이드 아웃)
+function bgmStop() {
+    if (bgm.paused) return;
+    const fadeInterval = setInterval(() => {
+        if (bgm.volume > 0.05) {
+            bgm.volume = Math.max(0, bgm.volume - 0.05);
+        } else {
+            bgm.volume = 0;
+            bgm.pause();
+            bgm.currentTime = 0;
+            bgm.volume = 0.5;
+            clearInterval(fadeInterval);
+        }
+    }, 50);
+}
+
+// ══════════════════════════════════════
+// 문제 데이터
+// ══════════════════════════════════════
+const questions = [
+    // ── 자산 증가 → 차변 ──
+    { sentence: '상품을 현금으로 구입하다 → <b class="target-account">상품</b>', target: '상품', type: 'left', hint: '상품(자산) 증가 → 차변' },
+    { sentence: '건물을 현금으로 취득하다 → <b class="target-account">건물</b>', target: '건물', type: 'left', hint: '건물(자산) 증가 → 차변' },
+    { sentence: '상품을 외상으로 판매하다 → <b class="target-account">외상매출금</b>', target: '외상매출금', type: 'left', hint: '외상매출금(자산) 증가 → 차변' },
+    { sentence: '거래처에 단기대여금을 지급하다 → <b class="target-account">단기대여금</b>', target: '단기대여금', type: 'left', hint: '단기대여금(자산) 증가 → 차변' },
+    { sentence: '컴퓨터(비품)를 구입하다 → <b class="target-account">비품</b>', target: '비품', type: 'left', hint: '비품(자산) 증가 → 차변' },
+    { sentence: '업무용 차량을 구입하다 → <b class="target-account">차량운반구</b>', target: '차량운반구', type: 'left', hint: '차량운반구(자산) 증가 → 차변' },
+    { sentence: '매출 대금을 현금으로 받다 → <b class="target-account">현금</b>', target: '현금', type: 'left', hint: '현금(자산) 증가 → 차변' },
+    { sentence: '비품을 매각하고 대금이 미수 처리되다 → <b class="target-account">미수금</b>', target: '미수금', type: 'left', hint: '미수금(자산) 증가 → 차변' },
+    { sentence: '거래처에 계약금을 선지급하다 → <b class="target-account">선급금</b>', target: '선급금', type: 'left', hint: '선급금(자산) 증가 → 차변' },
+    { sentence: '상품 판매 후 받을어음을 받다 → <b class="target-account">받을어음</b>', target: '받을어음', type: 'left', hint: '받을어음(자산) 증가 → 차변' },
+    { sentence: '급여를 보통예금 계좌로 받다 → <b class="target-account">보통예금</b>', target: '보통예금', type: 'left', hint: '보통예금(자산) 증가 → 차변' },
+    { sentence: '단기매매 목적 주식을 취득하다 → <b class="target-account">단기매매증권</b>', target: '단기매매증권', type: 'left', hint: '단기매매증권(자산) 증가 → 차변' },
+    // ── 부채 감소 → 차변 ──
+    { sentence: '외상매입금을 현금으로 갚다 → <b class="target-account">외상매입금</b>', target: '외상매입금', type: 'left', hint: '외상매입금(부채) 감소 → 차변' },
+    { sentence: '단기차입금을 은행에 상환하다 → <b class="target-account">단기차입금</b>', target: '단기차입금', type: 'left', hint: '단기차입금(부채) 감소 → 차변' },
+    { sentence: '비품 미지급 대금을 현금 지급하다 → <b class="target-account">미지급금</b>', target: '미지급금', type: 'left', hint: '미지급금(부채) 감소 → 차변' },
+    { sentence: '받은 계약금(선수금)으로 상품을 납품하다 → <b class="target-account">선수금</b>', target: '선수금', type: 'left', hint: '선수금(부채) 감소 → 차변 (의무 이행)' },
+    { sentence: '만기 도래한 지급어음을 결제하다 → <b class="target-account">지급어음</b>', target: '지급어음', type: 'left', hint: '지급어음(부채) 감소 → 차변' },
+    { sentence: '원천징수한 예수금을 세무서에 납부하다 → <b class="target-account">예수금</b>', target: '예수금', type: 'left', hint: '예수금(부채) 감소 → 차변' },
+    { sentence: '장기차입금을 조기 상환하다 → <b class="target-account">장기차입금</b>', target: '장기차입금', type: 'left', hint: '장기차입금(부채) 감소 → 차변' },
+    // ── 비용 발생 → 차변 ──
+    { sentence: '직원 급여를 현금으로 지급하다 → <b class="target-account">급여</b>', target: '급여', type: 'left', hint: '급여(비용) 발생 → 차변' },
+    { sentence: '사무실 임차료를 지급하다 → <b class="target-account">임차료</b>', target: '임차료', type: 'left', hint: '임차료(비용) 발생 → 차변' },
+    { sentence: '거래처 접대비를 현금으로 지출하다 → <b class="target-account">접대비</b>', target: '접대비', type: 'left', hint: '접대비(비용) 발생 → 차변' },
+    { sentence: 'TV 광고 비용을 지급하다 → <b class="target-account">광고선전비</b>', target: '광고선전비', type: 'left', hint: '광고선전비(비용) 발생 → 차변' },
+    { sentence: '차입금에 대한 이자를 지급하다 → <b class="target-account">이자비용</b>', target: '이자비용', type: 'left', hint: '이자비용(비용) 발생 → 차변' },
+    { sentence: '직원 복리후생비를 지출하다 → <b class="target-account">복리후생비</b>', target: '복리후생비', type: 'left', hint: '복리후생비(비용) 발생 → 차변' },
+    { sentence: '회사 통신비를 납부하다 → <b class="target-account">통신비</b>', target: '통신비', type: 'left', hint: '통신비(비용) 발생 → 차변' },
+    { sentence: '건물 감가상각비를 계상하다 → <b class="target-account">감가상각비</b>', target: '감가상각비', type: 'left', hint: '감가상각비(비용) 발생 → 차변' },
+    { sentence: '화재보험료를 납부하다 → <b class="target-account">보험료</b>', target: '보험료', type: 'left', hint: '보험료(비용) 발생 → 차변' },
+    { sentence: '재산세를 납부하다 → <b class="target-account">세금과공과</b>', target: '세금과공과', type: 'left', hint: '세금과공과(비용) 발생 → 차변' },
+    { sentence: '출장 교통비를 지급하다 → <b class="target-account">여비교통비</b>', target: '여비교통비', type: 'left', hint: '여비교통비(비용) 발생 → 차변' },
+    { sentence: '외상매출금 중 회수 불능액을 처리하다 → <b class="target-account">대손상각비</b>', target: '대손상각비', type: 'left', hint: '대손상각비(비용) 발생 → 차변' },
+    // ── 부채 증가 → 대변 ──
+    { sentence: '상품을 외상으로 구입하다 → <b class="target-account">외상매입금</b>', target: '외상매입금', type: 'right', hint: '외상매입금(부채) 증가 → 대변' },
+    { sentence: '은행에서 단기로 자금을 빌리다 → <b class="target-account">단기차입금</b>', target: '단기차입금', type: 'right', hint: '단기차입금(부채) 증가 → 대변' },
+    { sentence: '비품을 구입하고 대금을 다음 달 지급하기로 하다 → <b class="target-account">미지급금</b>', target: '미지급금', type: 'right', hint: '미지급금(부채) 증가 → 대변' },
+    { sentence: '고객으로부터 상품 계약금을 미리 받다 → <b class="target-account">선수금</b>', target: '선수금', type: 'right', hint: '선수금(부채) 증가 → 대변' },
+    { sentence: '장기 시설자금을 은행에서 대출받다 → <b class="target-account">장기차입금</b>', target: '장기차입금', type: 'right', hint: '장기차입금(부채) 증가 → 대변' },
+    { sentence: '상품 대금으로 어음을 발행하다 → <b class="target-account">지급어음</b>', target: '지급어음', type: 'right', hint: '지급어음(부채) 증가 → 대변' },
+    { sentence: '직원 급여에서 소득세를 원천징수하다 → <b class="target-account">예수금</b>', target: '예수금', type: 'right', hint: '예수금(부채) 증가 → 대변' },
+    { sentence: '기말 외상매입금 잔액에 대해 대손충당금 설정 → <b class="target-account">대손충당금</b>', target: '대손충당금', type: 'right', hint: '대손충당금(자산차감) 증가 → 대변' },
+    // ── 자본 증가 → 대변 ──
+    { sentence: '창업자가 현금을 출자하다 → <b class="target-account">자본금</b>', target: '자본금', type: 'right', hint: '자본금(자본) 증가 → 대변' },
+    { sentence: '유상증자로 주식을 발행하다 → <b class="target-account">자본금</b>', target: '자본금', type: 'right', hint: '자본금(자본) 증가 → 대변' },
+    // ── 수익 발생 → 대변 ──
+    { sentence: '상품을 현금으로 판매하다 → <b class="target-account">상품매출</b>', target: '상품매출', type: 'right', hint: '매출(수익) 발생 → 대변' },
+    { sentence: '상품을 외상으로 판매하다 → <b class="target-account">상품매출</b>', target: '상품매출', type: 'right', hint: '매출(수익) 발생 → 대변' },
+    { sentence: '은행 예금에 이자가 입금되다 → <b class="target-account">이자수익</b>', target: '이자수익', type: 'right', hint: '이자수익(수익) 발생 → 대변' },
+    { sentence: '건물을 타사에 임대하고 임대료를 받다 → <b class="target-account">임대료</b>', target: '임대료', type: 'right', hint: '임대료(수익) 발생 → 대변' },
+    { sentence: '업무용 차량을 처분하고 처분이익 발생 → <b class="target-account">유형자산처분이익</b>', target: '유형자산처분이익', type: 'right', hint: '유형자산처분이익(수익) 발생 → 대변' },
+    { sentence: '보유 주식에서 배당금을 받다 → <b class="target-account">배당금수익</b>', target: '배당금수익', type: 'right', hint: '배당금수익(수익) 발생 → 대변' },
+    { sentence: '원인 불명 현금 초과액을 잡이익 처리하다 → <b class="target-account">잡이익</b>', target: '잡이익', type: 'right', hint: '잡이익(수익) 발생 → 대변' },
+    { sentence: '단기대여금에 대한 이자 입금 → <b class="target-account">이자수익</b>', target: '이자수익', type: 'right', hint: '이자수익(수익) 발생 → 대변' },
+    // ── 자산 감소 → 대변 ──
+    { sentence: '보통예금 계좌에서 급여를 이체하다 → <b class="target-account">보통예금</b>', target: '보통예금', type: 'right', hint: '보통예금(자산) 감소 → 대변' },
+    { sentence: '현금으로 상품을 구입하다 → <b class="target-account">현금</b>', target: '현금', type: 'right', hint: '현금(자산) 감소 → 대변' },
+    { sentence: '외상매출금을 현금으로 회수하다 → <b class="target-account">외상매출금</b>', target: '외상매출금', type: 'right', hint: '외상매출금(자산) 감소 → 대변' },
+    { sentence: '대여금이 만기 회수되다 → <b class="target-account">단기대여금</b>', target: '단기대여금', type: 'right', hint: '단기대여금(자산) 감소 → 대변' },
+    { sentence: '사무용 소모품을 사용하다(자산 처리된 것) → <b class="target-account">소모품</b>', target: '소모품', type: 'right', hint: '소모품(자산) 감소 → 대변' },
+    { sentence: '받을어음이 만기가 되어 당좌예금으로 입금 → <b class="target-account">받을어음</b>', target: '받을어음', type: 'right', hint: '받을어음(자산) 감소 → 대변' },
+    { sentence: '건물에 감가상각을 반영하다 → <b class="target-account">감가상각누계액</b>', target: '감가상각누계액', type: 'right', hint: '감가상각누계액(자산차감) 증가 → 대변' },
+];
+
+// ══════════════════════════════════════
+// 게임 상태
+// ══════════════════════════════════════
+const GAME_TIME = 60;
+let score = 0, combo = 0, maxCombo = 0;
+let timeLeft = GAME_TIME;
+let timerInterval = null;
+let currentQ = null;
+let isPlaying = false;
+let correctCount = 0, wrongCount = 0;
+let lastInput = 0;
+
+let audioCtx;
+function getAudio() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+}
+function playSound(type) {
+    try {
+        const ctx = getAudio();
+        const osc = ctx.createOscillator(), gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        const now = ctx.currentTime;
+        if (type === 'correct') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(600 + combo * 40, now);
+            osc.frequency.linearRampToValueAtTime(900 + combo * 40, now + 0.15);
+            gain.gain.setValueAtTime(0.25, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+            osc.start(now); osc.stop(now + 0.2);
+        } else {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(200, now);
+            osc.frequency.linearRampToValueAtTime(80, now + 0.3);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
+            osc.start(now); osc.stop(now + 0.3);
+        }
+    } catch(e) {}
+}
+
+function startGame() {
+    hideAdPlaceholder();
+    getAudio();
+    bgmPlay(); // 🎵 게임 시작 시 BGM 재생
+    document.getElementById('start-screen').style.display = 'none';
+    document.getElementById('result-screen').style.display = 'none';
+    score = 0; combo = 0; maxCombo = 0;
+    timeLeft = GAME_TIME; correctCount = 0; wrongCount = 0;
+    isPlaying = true;
+    updateHUD();
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(tick, 1000);
+    nextQuestion();
+}
+
+function tick() {
+    timeLeft--;
+    updateHUD();
+    if (timeLeft <= 0) endGame();
+}
+
+function updateHUD() {
+    document.getElementById('timer-val').textContent = timeLeft;
+    document.getElementById('score-val').textContent = score.toLocaleString();
+    document.getElementById('combo-val').textContent = combo + 'x';
+    document.getElementById('timer-bar').style.width = (timeLeft / GAME_TIME * 100) + '%';
+    document.getElementById('timer-val').style.color =
+        timeLeft <= 10 ? '#ff2d55' : timeLeft <= 20 ? '#ffd600' : 'var(--red)';
+}
+
+function nextQuestion() {
+    if (!isPlaying) return;
+    let q;
+    do { q = questions[Math.floor(Math.random() * questions.length)]; }
+    while (q === currentQ);
+    currentQ = q;
+    document.getElementById('q-sentence').innerHTML = q.sentence;
+    document.getElementById('q-ask').innerHTML = `<b>${q.target}</b> 은(는) 차변? 대변?`;
+    document.getElementById('q-hint').textContent = '';
+    document.getElementById('question-card').className = 'question-card';
+}
+
+// 키보드 (데스크탑)
+document.addEventListener('keydown', e => {
+    if (!isPlaying) return;
+    if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft')  handleAnswer('left');
+    if (e.key === 'l' || e.key === 'L' || e.key === 'ArrowRight') handleAnswer('right');
+});
+
+// ★ 스와이프 지원 (모바일)
+let touchStartX = 0;
+document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+document.addEventListener('touchend', e => {
+    if (!isPlaying) return;
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) > 60) handleAnswer(dx < 0 ? 'right' : 'left');
+}, { passive: true });
+
+function handleAnswer(side) {
+    const now = Date.now();
+    if (now - lastInput < 120) return;
+    lastInput = now;
+    checkAnswer(side);
+}
+
+function checkAnswer(side) {
+    if (!isPlaying) return;
+    const card = document.getElementById('question-card');
+
+    if (side === currentQ.type) {
+        playSound('correct');
+        combo++;
+        if (combo > maxCombo) maxCombo = combo;
+        score += 100 + Math.floor(combo * 10);
+        correctCount++;
+        card.classList.add('correct');
+        showFeedback('ok', combo >= 3 ? `✓ ${combo} COMBO!` : '✓ 정답!');
+        if (combo >= 2) showCombo(combo);
+        updateHUD();
+        setTimeout(() => { card.classList.remove('correct'); nextQuestion(); }, 130);
+    } else {
+        playSound('wrong');
+        combo = 0;
+        timeLeft = Math.max(0, timeLeft - 5);
+        wrongCount++;
+        card.classList.add('wrong');
+        document.getElementById('q-hint').textContent = '💡 ' + currentQ.hint;
+        document.body.classList.add('shake');
+        showFeedback('no', '✗ 오답 (-5초)');
+        updateHUD();
+        setTimeout(() => {
+            card.classList.remove('wrong');
+            document.getElementById('q-hint').textContent = '';
+            document.body.classList.remove('shake');
+            nextQuestion();
+        }, 700);
+    }
+}
+
+function showFeedback(type, text) {
+    const el = document.getElementById('feedback-popup');
+    el.className = 'feedback-popup ' + type;
+    el.textContent = text;
+    el.style.display = 'block';
+    setTimeout(() => el.style.display = 'none', 450);
+}
+
+function showCombo(n) {
+    const el = document.getElementById('combo-popup');
+    el.textContent = n + ' COMBO! 🔥';
+    el.style.display = 'block';
+    el.style.animation = 'none';
+    void el.offsetHeight;
+    el.style.animation = 'comboPop 0.7s ease-out forwards';
+    setTimeout(() => el.style.display = 'none', 700);
+}
+
+function endGame() {
+    isPlaying = false;
+    clearInterval(timerInterval);
+    bgmStop(); // 🎵 게임 종료 시 BGM 페이드 아웃
+    document.getElementById('result-score').textContent = score.toLocaleString() + '점';
+    document.getElementById('stat-correct').textContent = correctCount;
+    document.getElementById('stat-wrong').textContent = wrongCount;
+    document.getElementById('stat-combo').textContent = maxCombo;
+    let rank = '🥉 신입 사원';
+    if      (score >= 4500) rank = '👑 전설의 CFO';
+    else if (score >= 2500) rank = '🥇 회계 부장';
+    else if (score >= 1000) rank = '🥈 회계 대리';
+    document.getElementById('result-rank').textContent = '최종 계급: ' + rank;
+    document.getElementById('player-name').value = getMyName();
+    document.getElementById('save-status').textContent = '';
+    document.getElementById('save-btn').disabled = false;
+    document.getElementById('result-screen').style.display = 'flex';
+    showAdPlaceholder();
+    loadRanking();
+}
+
+async function saveScore() {
+    const name = document.getElementById('player-name').value.trim();
+    if (!name) { showSaveStatus('닉네임을 입력해주세요', 'err'); return; }
+    if (name.length < 2) { showSaveStatus('2글자 이상 입력해주세요', 'err'); return; }
+
+    const btn = document.getElementById('save-btn');
+    btn.disabled = true;
+    showSaveStatus('확인 중...', '');
+
+    const myStoredName = getMyName();
+    if (name !== myStoredName) {
+        let existingList = [];
+        try {
+            if (true) {
+                const res = { json: async () => await supabaseFetchRanking(GAME_ID) };
+                existingList = await res.json();
+            }
+        } catch(e) {}
+        existingList = mergeRankings(existingList, getLocal());
+
+        const duplicate = existingList.find(r => r.name === name);
+        if (duplicate) {
+            showSaveStatus('⚠️ 이미 사용 중인 닉네임입니다. 다른 닉네임을 사용해주세요.', 'err');
+            btn.disabled = false;
+            return;
+        }
+    }
+
+    const today = new Date().toLocaleDateString('ko-KR', { month:'2-digit', day:'2-digit' });
+    const data = { game: GAME_ID, name, score, combo: maxCombo, correct: correctCount, date: today };
+
+    if (false) {
+        saveLocal(data);
+        saveMyName(name);
+        showSaveStatus('✓ 저장 완료!', 'ok');
+        await loadRanking();
+        showMyRank(name);
+        return;
+    }
+    try {
+        await supabaseSaveScore(data.name, data.score, data.combo||0, data.correct||0, GAME_ID);
+        saveLocal(data);
+        saveMyName(name);
+        showSaveStatus('✓ 등록 완료!', 'ok');
+        await loadRanking();
+        showMyRank(name);
+    } catch(e) {
+        saveLocal(data);
+        showSaveStatus('✓ 로컬 저장 완료 (네트워크 오류)', 'ok');
+        loadRanking();
+        showMyRank(name);
+    }
+}
+
+function showSaveStatus(msg, type) {
+    const el = document.getElementById('save-status');
+    el.textContent = msg;
+    el.style.color = type === 'err' ? 'var(--red)' : type === 'ok' ? 'var(--green)' : 'rgba(255,255,255,0.4)';
+}
+
+function showMyRank(name) {
+    const badge = document.getElementById('my-rank-badge');
+    const container = document.getElementById('rank-container');
+    const rows = container.querySelectorAll('.rank-row');
+    let myIdx = -1;
+    rows.forEach((row, i) => {
+        const nameEl = row.querySelector('.rank-name');
+        if (nameEl && nameEl.textContent.trim() === name) myIdx = i;
+    });
+    if (myIdx >= 0) {
+        badge.textContent = `🎯 내 순위: ${myIdx + 1}위`;
+        badge.style.display = 'block';
+    } else {
+        badge.style.display = 'none';
+    }
+}
+
+function saveLocal(data) {
+    const list = getLocal(); list.push(data);
+    list.sort((a, b) => b.score - a.score);
+    localStorage.setItem('accGame_v3', JSON.stringify(list.slice(0, 20)));
+}
+function getLocal() { return JSON.parse(localStorage.getItem('accGame_v3') || '[]'); }
+
+function saveMyName(name) { localStorage.setItem('accGame_myName', name); }
+function getMyName() { return localStorage.getItem('accGame_myName') || ''; }
+
+async function loadRanking() {
+    const container = document.getElementById('rank-container');
+    if (false) { renderRankList(getLocal()); return; }
+    container.innerHTML = '<div class="loading" style="justify-content:center;padding:20px 0;"><div class="spinner"></div>&nbsp;불러오는 중...</div>';
+    try {
+        const res = { json: async () => await supabaseFetchRanking(GAME_ID) };
+        renderRankList(mergeRankings(await res.json(), getLocal()));
+    } catch(e) { renderRankList(getLocal()); }
+}
+
+function mergeRankings(remote, local) {
+    const map = new Map();
+    [...(Array.isArray(remote) ? remote : []), ...local].forEach(r => {
+        const key = r.name + '_' + r.score; if (!map.has(key)) map.set(key, r);
+    });
+    return [...map.values()].sort((a, b) => b.score - a.score).slice(0, 15);
+}
+
+function escapeHTML(str) { if (!str) return ''; return str.replace(/[&<>'"]/g, function(tag) { const chars = { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }; return chars[tag] || tag; }); }
+function renderRankList(list) {
+    const container = document.getElementById('rank-container');
+    if (!list || list.length === 0) {
+        container.innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.3);font-size:1rem;">아직 기록이 없습니다</div>';
+        return;
+    }
+    const me = document.getElementById('player-name').value.trim();
+    container.innerHTML = list.map((r, i) => {
+        const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i+1) + '위';
+        const grade = r.grade || getGrade(r.score);
+        return `<div class="rank-row ${escapeHTML(r.name) === escapeHTML(me) ? 'rank-me' : ''}">
+            <div class="rank-num ${i < 3 ? 'top' : ''}">${medal}</div>
+            <div class="rank-name">${escapeHTML(r.name)}</div>
+            <div class="rank-grade">${escapeHTML(grade)}</div>
+            <div class="rank-score">${(r.score||0).toLocaleString()}점</div>
+        </div>`;
+    }).join('');
+}
+
+function quitGame() { if (isPlaying) endGame(); }
+
+function toggleHint() {
+    const panel = document.getElementById('hint-panel');
+    const btn = document.querySelector('.hint-toggle-btn');
+    panel.classList.toggle('open');
+    btn.textContent = panel.classList.contains('open') ? '💡 참고표 닫기' : '💡 차변·대변 참고표 보기';
+}
+
+function getGrade(score) {
+    if (score >= 4500) return '👑 전설의 CFO';
+    if (score >= 2500) return '🥇 회계 부장';
+    if (score >= 1000) return '🥈 회계 대리';
+    if (score >=  500) return '🥉 신입 사원';
+    return '📋 수습 직원';
+}
+
+function hideAdPlaceholder() {
+    const el = document.getElementById('adPlaceholder');
+    if (el) el.style.display = 'none';
+    document.body.style.paddingBottom = '0';
+}
+function showAdPlaceholder() {
+    const el = document.getElementById('adPlaceholder');
+    if (el) el.style.display = 'flex';
+    document.body.style.paddingBottom = 'var(--ad-h)';
+}
+
+    // ── Supabase 유틸 ──
+    function getGradeForSupabase(gameId, score) {
+        const scales = {
+            acid:    [[10000,"👑 전설의 에이스"],[6000,"🥇 베테랑"],[3000,"🥈 숙련자"],[1000,"🥉 정규 파일럿"],[0,"🛩 견습생"]],
+            memory:  [[950,"👑 CEO"],[850,"⭐ CEO급"],[750,"🎖 전무/상무"],[650,"🏅 이사"],[550,"📋 부장"],[450,"🗂 차장"],[350,"📁 과장"],[250,"📝 대리"],[0,"💼 사원"]],
+            debit:   [[4500,"👑 전설의 CFO"],[2500,"🥇 회계 부장"],[1000,"🥈 회계 대리"],[500,"🥉 신입 사원"],[0,"📋 수습 직원"]],
+            factory: [[5000,"👑 결산 마스터"],[3000,"🥇 숙련 경리"],[1500,"🥈 견습 경리"],[500,"🥉 수습생"],[0,"📋 인턴"]],
+            flight:  [[50000,"👑 전설의 에이스"],[30000,"🥇 베테랑 파일럿"],[15000,"🥈 숙련 파일럿"],[5000,"🥉 정규 파일럿"],[0,"🛩 견습 파일럿"]]
+        };
+        const tiers = scales[gameId] || scales.flight;
+        return (tiers.find(([min]) => score >= min) || tiers[tiers.length-1])[1];
+    }
+
+    async function supabaseSaveScore(name, score, combo, correct, gameId) {
+        const maxScore = {acid:30000,memory:3000,debit:15000,factory:15000,flight:300000};
+        const safeScore = Math.min(Math.max(score,0), maxScore[gameId]||999999);
+        const safeName = String(name).replace(/<[^>]*>/g,'').substring(0,30).trim();
+        if (!safeName) return;
+        const today = new Date().toISOString().split('T')[0];
+        await db.rpc('upsert_score', {
+            p_game_id: gameId,
+            p_name:    safeName,
+            p_score:   safeScore,
+            p_grade:   getGradeForSupabase(gameId, safeScore),
+            p_combo:   Math.max(0, combo||0),
+            p_correct: Math.max(0, correct||0),
+            p_date:    today
+        });
+    }
+
+    async function supabaseFetchRanking(gameId) {
+        const { data, error } = await db
+            .from('scores')
+            .select()
+            .eq('game_id', gameId)
+            .order('score', { ascending: false })
+            .limit(20);
+        if (error) throw error;
+        return data;
+    }
+
+</script>
+<script>document.addEventListener('contextmenu', e => e.preventDefault()); document.addEventListener('selectstart', e => e.preventDefault()); document.addEventListener('copy', e => e.preventDefault()); document.addEventListener('keydown', e => { if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) || (e.ctrlKey && e.keyCode === 85)) { e.preventDefault(); } });</script>
+</body>
+</html>
