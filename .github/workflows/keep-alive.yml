@@ -1,0 +1,48 @@
+name: Supabase Keep Alive
+
+on:
+  schedule:
+    - cron: '0 0 */6 * *'   # 6일마다 자정(UTC) 실행
+  workflow_dispatch:          # 수동 실행 버튼도 제공
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Supabase 더미 데이터 insert 후 즉시 삭제
+        run: |
+          # 1. 더미 점수 INSERT (upsert_score 함수 호출)
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X POST \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/rpc/upsert_score" \
+            -H "apikey: ${{ secrets.SUPABASE_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "p_game_id":  "acid",
+              "p_name":     "__keepalive__",
+              "p_score":    1,
+              "p_grade":    "keepalive",
+              "p_combo":    0,
+              "p_correct":  0,
+              "p_date":     "2000-01-01"
+            }')
+
+          echo "INSERT 응답 코드: $RESPONSE"
+
+          # 2. 더미 데이터 즉시 삭제
+          DELETE_RES=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X DELETE \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/scores?name=eq.__keepalive__" \
+            -H "apikey: ${{ secrets.SUPABASE_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_KEY }}")
+
+          echo "DELETE 응답 코드: $DELETE_RES"
+
+          # 3. 응답 코드 확인
+          if [ "$RESPONSE" = "200" ] || [ "$RESPONSE" = "204" ]; then
+            echo "✅ Supabase Keep-Alive 성공!"
+          else
+            echo "⚠️ 응답 코드가 예상과 다릅니다: $RESPONSE"
+            exit 1
+          fi
