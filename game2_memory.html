@@ -191,6 +191,90 @@
         }
         .btn-secondary:active { background: rgba(255,255,255,0.22); }
 
+
+        /* ── 스테이지 클리어 직급 미리보기 ── */
+        .rank-preview-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 14px;
+            padding: 12px 20px;
+            width: 100%;
+            max-width: 340px;
+            margin: 4px auto;
+        }
+        .rank-preview-title {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.35);
+            font-family: 'Jua', sans-serif;
+            letter-spacing: 2px;
+        }
+        .rank-preview-grade {
+            font-family: 'Jua', sans-serif;
+            font-size: clamp(1.1rem, 4vw, 1.5rem);
+            font-weight: bold;
+            text-align: center;
+        }
+        .rank-preview-next {
+            font-size: 0.78rem;
+            color: rgba(255,255,255,0.4);
+            text-align: center;
+            line-height: 1.5;
+        }
+        .rank-preview-bar-wrap {
+            width: 100%;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50px;
+            height: 6px;
+            overflow: hidden;
+        }
+        .rank-preview-bar {
+            height: 100%;
+            border-radius: 50px;
+            transition: width 0.6s ease;
+        }
+
+
+        /* ── 스테이지 클리어 미니 랭킹 ── */
+        .mini-rank-wrap {
+            width: 100%;
+            max-width: 340px;
+            margin: 4px auto 0;
+        }
+        .mini-rank-title {
+            font-size: 0.72rem;
+            color: rgba(255,255,255,0.3);
+            font-family: 'Jua', sans-serif;
+            letter-spacing: 2px;
+            text-align: center;
+            margin-bottom: 4px;
+        }
+        .mini-rank-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            margin-bottom: 2px;
+            background: rgba(255,255,255,0.03);
+        }
+        .mini-rank-row.mini-me {
+            background: rgba(52,152,219,0.18);
+            border: 1px solid rgba(52,152,219,0.35);
+        }
+        .mini-rank-row.mini-me-projected {
+            background: rgba(46,204,113,0.15);
+            border: 1px solid rgba(46,204,113,0.4);
+        }
+        .mini-rank-num { font-family:'Jua'; width: 28px; text-align:center; flex-shrink:0; }
+        .mini-rank-name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:rgba(255,255,255,0.8); }
+        .mini-rank-score { font-family:'Jua'; color:#f1c40f; white-space:nowrap; font-size:0.8rem; }
+        .mini-rank-loading { text-align:center; padding:8px; color:rgba(255,255,255,0.3); font-size:0.8rem; }
+
         /* 결과 점수 */
         .result-score-box {
             background: rgba(0,0,0,0.3); border-radius: 16px;
@@ -386,6 +470,15 @@
             <div class="result-score-box">
                 <div class="big-score" id="final-score">0점</div>
                 <div class="score-detail" id="score-detail">0점</div>
+            </div>
+
+            <!-- 스테이지 클리어 직급 미리보기 -->
+            <div id="rank-preview-box" class="rank-preview-box" style="display:none;"></div>
+
+            <!-- 스테이지 클리어 미니 랭킹 -->
+            <div class="mini-rank-wrap" id="mini-rank-wrap" style="display:none;">
+                <div class="mini-rank-title">🏆 현재 랭킹</div>
+                <div id="mini-rank-body"><div class="mini-rank-loading">불러오는 중...</div></div>
             </div>
 
             <div class="name-row">
@@ -640,6 +733,128 @@
             return Math.max(0, Math.round(cfg.baseScore - wrong * 20 - secs * 0.5));
         }
 
+
+
+        // ── 스테이지 클리어 미니 랭킹 ──
+        async function loadMiniRanking(myScore) {
+            const wrap = document.getElementById('mini-rank-wrap');
+            const body = document.getElementById('mini-rank-body');
+            if (!wrap || !body) return;
+
+            wrap.style.display = 'block';
+            body.innerHTML = '<div class="mini-rank-loading">🔄 랭킹 확인 중...</div>';
+
+            try {
+                const list = await supabaseFetchRanking(GAME_ID);
+                renderMiniRanking(list, myScore);
+            } catch(e) {
+                body.innerHTML = '<div class="mini-rank-loading">랭킹 불러오기 실패</div>';
+            }
+        }
+
+        function renderMiniRanking(list, myScore) {
+            const body = document.getElementById('mini-rank-body');
+            if (!body) return;
+
+            // 현재 내 점수가 몇 위인지 계산
+            const myRank = list.filter(r => (r.score || 0) > myScore).length + 1;
+            const myName = document.getElementById('player-name').value.trim();
+
+            // 내 순위 기준 앞뒤 2명씩 슬라이싱
+            const startIdx = Math.max(0, myRank - 3);
+            const endIdx   = Math.min(list.length, myRank + 2);
+            const slice    = list.slice(startIdx, endIdx);
+
+            // 내 점수가 목록에 없는 경우 (아직 저장 전) 임시 삽입
+            const myInList = list.some(r => r.name === myName && r.score >= myScore);
+
+            let rows = '';
+
+            // 1위가 보이지 않으면 1위 먼저 표시
+            if (startIdx > 0) {
+                const top = list[0];
+                const rk = getRank(top.score);
+                rows += `<div class="mini-rank-row">
+                    <span class="mini-rank-num">🥇</span>
+                    <span class="mini-rank-name">${escapeHTML(top.name)}</span>
+                    <span class="mini-rank-score">${(top.score||0).toLocaleString()}점</span>
+                </div>
+                <div style="text-align:center;font-size:0.7rem;color:rgba(255,255,255,0.2);padding:2px 0;">···</div>`;
+            }
+
+            // 슬라이스 범위 표시
+            slice.forEach((r, si) => {
+                const globalIdx = startIdx + si;
+                const medal = globalIdx === 0 ? '🥇' : globalIdx === 1 ? '🥈' : globalIdx === 2 ? '🥉' : (globalIdx+1)+'위';
+                const isMe = r.name === myName;
+                rows += `<div class="mini-rank-row${isMe ? ' mini-me' : ''}">
+                    <span class="mini-rank-num">${medal}</span>
+                    <span class="mini-rank-name">${escapeHTML(r.name)}${isMe ? ' 👈' : ''}</span>
+                    <span class="mini-rank-score">${(r.score||0).toLocaleString()}점</span>
+                </div>`;
+            });
+
+            // 내 점수가 목록에 없으면 예상 순위로 표시
+            if (!myInList) {
+                const medal = myRank <= 3 ? ['🥇','🥈','🥉'][myRank-1] : myRank+'위';
+                rows += `<div class="mini-rank-row mini-me-projected">
+                    <span class="mini-rank-num">${medal}</span>
+                    <span class="mini-rank-name">나 (현재) 👈</span>
+                    <span class="mini-rank-score">${myScore.toLocaleString()}점 <span style="font-size:0.7rem;color:rgba(255,255,255,0.4)">미저장</span></span>
+                </div>`;
+            }
+
+            // 순위 요약
+            const totalCount = list.length;
+            const summaryMsg = myRank === 1
+                ? '🏆 현재 <b style="color:#f1c40f">1위</b>예요!'
+                : `현재 <b style="color:#00e676">${myRank}위</b> / ${totalCount}명`;
+
+            body.innerHTML = `<div style="text-align:center;font-size:0.82rem;margin-bottom:6px;color:rgba(255,255,255,0.7);">${summaryMsg}</div>` + rows;
+        }
+
+        // ── 스테이지 클리어 직급 미리보기 ──
+        function getRankPreviewInfo(score) {
+            const tiers = [
+                { min:2700, title:'👑 CEO',       color:'#f1c40f', next: null,       nextMin: null },
+                { min:2300, title:'⭐ CEO급',     color:'#e67e22', next:'👑 CEO',       nextMin:2700 },
+                { min:1900, title:'🎖 전무/상무', color:'#3498db', next:'⭐ CEO급',     nextMin:2300 },
+                { min:1500, title:'🏅 이사',      color:'#2ecc71', next:'🎖 전무/상무', nextMin:1900 },
+                { min:1100, title:'📋 부장',      color:'#1abc9c', next:'🏅 이사',      nextMin:1500 },
+                { min:700,  title:'🗂 차장',      color:'#9b59b6', next:'📋 부장',      nextMin:1100 },
+                { min:400,  title:'📁 과장',      color:'#e74c3c', next:'🗂 차장',      nextMin:700  },
+                { min:200,  title:'📝 대리',      color:'#95a5a6', next:'📁 과장',      nextMin:400  },
+                { min:0,    title:'💼 사원',      color:'#7f8c8d', next:'📝 대리',      nextMin:200  },
+            ];
+            const cur = tiers.find(t => score >= t.min) || tiers[tiers.length-1];
+            const curIdx = tiers.indexOf(cur);
+            const prevTier = curIdx > 0 ? tiers[curIdx-1] : null;
+            const progress = prevTier
+                ? Math.min(100, Math.round((score - cur.min) / (prevTier.min - cur.min) * 100))
+                : 100;
+            return { cur, progress };
+        }
+
+        function updateRankPreview(score) {
+            const box = document.getElementById('rank-preview-box');
+            if (!box) return;
+            // 미니 랭킹도 함께 로드
+            loadMiniRanking(score);
+            const { cur, progress } = getRankPreviewInfo(score);
+            const nextMsg = cur.next
+                ? `다음 직급 <b style="color:${cur.color}">${cur.next}</b>까지 ${cur.nextMin - score}점 더!`
+                : '최고 직급 달성! 🎉';
+            box.innerHTML = `
+                <div class="rank-preview-title">📊 현재 누적 직급</div>
+                <div class="rank-preview-grade" style="color:${cur.color}">${cur.title}</div>
+                <div class="rank-preview-bar-wrap">
+                    <div class="rank-preview-bar" style="width:${progress}%;background:${cur.color};"></div>
+                </div>
+                <div class="rank-preview-next">${nextMsg}</div>
+            `;
+            box.style.display = 'flex';
+        }
+
         function getRank(score) {
             if      (score >= 2700) return { title:'👑 CEO',       color:'#f1c40f', msg:'전설의 회계 CEO! 6판 완벽 클리어!' };
             else if (score >= 2300) return { title:'⭐ CEO급',     color:'#e67e22', msg:'CEO급 실력! 정말 훌륭합니다!' };
@@ -820,6 +1035,7 @@
                     : `누적 점수: ${totalScore}점 — 다음 스테이지로!`;
                 document.getElementById('final-score').textContent = totalScore + '점';
                 document.getElementById('score-detail').textContent = detail;
+                updateRankPreview(totalScore);
                 document.querySelector('.name-row').style.display = 'none';
                 document.getElementById('save-status').style.display = 'none';
                 document.querySelector('.rank-wrap').style.display = 'none';
@@ -831,6 +1047,8 @@
         }
 
         function showResult(finalScore, quit, detail) {
+            const box = document.getElementById('rank-preview-box'); if(box) box.style.display='none';
+            const mw = document.getElementById('mini-rank-wrap'); if(mw) mw.style.display='none';
             const rank = getRank(finalScore);
             document.querySelector('#result-screen h2').textContent = quit ? '포기... 😢' : 'ALL CLEAR! 🏆';
             document.getElementById('result-rank').textContent = rank.title;
