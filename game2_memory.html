@@ -441,16 +441,12 @@
                 font-size:0.82rem;
                 line-height:2;
             ">
-                <div style="text-align:center;color:#f39c12;font-family:'Jua';font-size:0.88rem;margin-bottom:4px;letter-spacing:2px;">📊 직급 기준 (누적 점수)</div>
-                <div style="display:flex;justify-content:space-between;"><span>👑 CEO</span>       <span style="color:#f1c40f">2,700점 이상</span></div>
-                <div style="display:flex;justify-content:space-between;"><span>⭐ CEO급</span>    <span style="color:#e67e22">2,300점 이상</span></div>
-                <div style="display:flex;justify-content:space-between;"><span>🎖 전무/상무</span><span style="color:#3498db">1,900점 이상</span></div>
-                <div style="display:flex;justify-content:space-between;"><span>🏅 이사</span>     <span style="color:#2ecc71">1,500점 이상</span></div>
-                <div style="display:flex;justify-content:space-between;"><span>📋 부장</span>     <span style="color:#1abc9c">1,100점 이상</span></div>
-                <div style="display:flex;justify-content:space-between;"><span>🗂 차장</span>     <span style="color:#9b59b6">700점 이상</span></div>
-                <div style="display:flex;justify-content:space-between;"><span>📁 과장</span>     <span style="color:#e74c3c">400점 이상</span></div>
-                <div style="display:flex;justify-content:space-between;"><span>📝 대리</span>     <span style="color:#95a5a6">200점 이상</span></div>
-                <div style="display:flex;justify-content:space-between;"><span>💼 사원</span>     <span style="color:rgba(255,255,255,0.35)">200점 미만</span></div>
+                <div style="text-align:center;color:#f39c12;font-family:'Jua';font-size:0.88rem;margin-bottom:4px;letter-spacing:2px;">직급 기준 (누적 점수)</div>
+                <div style="display:flex;justify-content:space-between;"><span>👑 CEO</span>         <span style="color:#f1c40f">2,000점 이상</span></div>
+                <div style="display:flex;justify-content:space-between;"><span>🥇 임원</span>        <span style="color:#e67e22">1,400점 이상</span></div>
+                <div style="display:flex;justify-content:space-between;"><span>🥈 관리자</span>      <span style="color:#3498db">800점 이상</span></div>
+                <div style="display:flex;justify-content:space-between;"><span>🥉 직원</span>        <span style="color:#95a5a6">300점 이상</span></div>
+                <div style="display:flex;justify-content:space-between;"><span>인턴</span>           <span style="color:rgba(255,255,255,0.35)">300점 미만</span></div>
             </div>
 
             <button class="btn" onclick="startGame()">게임 시작 🚀</button>
@@ -477,7 +473,7 @@
 
             <!-- 스테이지 클리어 미니 랭킹 -->
             <div class="mini-rank-wrap" id="mini-rank-wrap" style="display:none;">
-                <div class="mini-rank-title">🏆 현재 랭킹</div>
+                <div class="mini-rank-title">현재 랭킹</div>
                 <div id="mini-rank-body"><div class="mini-rank-loading">불러오는 중...</div></div>
             </div>
 
@@ -742,7 +738,7 @@
             if (!wrap || !body) return;
 
             wrap.style.display = 'block';
-            body.innerHTML = '<div class="mini-rank-loading">🔄 랭킹 확인 중...</div>';
+            body.innerHTML = '<div class="mini-rank-loading">랭킹 확인 중...</div>';
 
             try {
                 const list = await supabaseFetchRanking(GAME_ID);
@@ -816,15 +812,11 @@
         // ── 스테이지 클리어 직급 미리보기 ──
         function getRankPreviewInfo(score) {
             const tiers = [
-                { min:2700, title:'👑 CEO',       color:'#f1c40f', next: null,       nextMin: null },
-                { min:2300, title:'⭐ CEO급',     color:'#e67e22', next:'👑 CEO',       nextMin:2700 },
-                { min:1900, title:'🎖 전무/상무', color:'#3498db', next:'⭐ CEO급',     nextMin:2300 },
-                { min:1500, title:'🏅 이사',      color:'#2ecc71', next:'🎖 전무/상무', nextMin:1900 },
-                { min:1100, title:'📋 부장',      color:'#1abc9c', next:'🏅 이사',      nextMin:1500 },
-                { min:700,  title:'🗂 차장',      color:'#9b59b6', next:'📋 부장',      nextMin:1100 },
-                { min:400,  title:'📁 과장',      color:'#e74c3c', next:'🗂 차장',      nextMin:700  },
-                { min:200,  title:'📝 대리',      color:'#95a5a6', next:'📁 과장',      nextMin:400  },
-                { min:0,    title:'💼 사원',      color:'#7f8c8d', next:'📝 대리',      nextMin:200  },
+                { min:2000, title:'👑 CEO',    color:'#f1c40f', next: null,       nextMin: null },
+                { min:1400, title:'🥇 임원',   color:'#e67e22', next:'👑 CEO',    nextMin:2000 },
+                { min:800,  title:'🥈 관리자', color:'#3498db', next:'🥇 임원',   nextMin:1400 },
+                { min:300,  title:'🥉 직원',   color:'#95a5a6', next:'🥈 관리자', nextMin:800  },
+                { min:0,    title:'인턴',      color:'#7f8c8d', next:'🥉 직원',   nextMin:300  },
             ];
             const cur = tiers.find(t => score >= t.min) || tiers[tiers.length-1];
             const curIdx = tiers.indexOf(cur);
@@ -843,9 +835,9 @@
             const { cur, progress } = getRankPreviewInfo(score);
             const nextMsg = cur.next
                 ? `다음 직급 <b style="color:${cur.color}">${cur.next}</b>까지 ${cur.nextMin - score}점 더!`
-                : '최고 직급 달성! 🎉';
+                : '최고 직급 달성!';
             box.innerHTML = `
-                <div class="rank-preview-title">📊 현재 누적 직급</div>
+                <div class="rank-preview-title">현재 누적 직급</div>
                 <div class="rank-preview-grade" style="color:${cur.color}">${cur.title}</div>
                 <div class="rank-preview-bar-wrap">
                     <div class="rank-preview-bar" style="width:${progress}%;background:${cur.color};"></div>
@@ -856,15 +848,11 @@
         }
 
         function getRank(score) {
-            if      (score >= 2700) return { title:'👑 CEO',       color:'#f1c40f', msg:'전설의 회계 CEO! 6판 완벽 클리어!' };
-            else if (score >= 2300) return { title:'⭐ CEO급',     color:'#e67e22', msg:'CEO급 실력! 정말 훌륭합니다!' };
-            else if (score >= 1900) return { title:'🎖 전무/상무', color:'#3498db', msg:'임원급 실력! 대단합니다!' };
-            else if (score >= 1500) return { title:'🏅 이사',      color:'#2ecc71', msg:'이사급 실력! 잘했어요!' };
-            else if (score >= 1100) return { title:'📋 부장',      color:'#1abc9c', msg:'베테랑 부장! 좋습니다!' };
-            else if (score >= 700)  return { title:'🗂 차장',      color:'#9b59b6', msg:'믿음직한 차장! 조금만 더!' };
-            else if (score >= 400)  return { title:'📁 과장',      color:'#e74c3c', msg:'성장 중인 과장! 화이팅!' };
-            else if (score >= 200)  return { title:'📝 대리',      color:'#95a5a6', msg:'열심히 하는 대리! 다시 도전!' };
-            else                    return { title:'💼 사원',      color:'#7f8c8d', msg:'이제 시작! 다시 도전해봐요!' };
+            if      (score >= 2000) return { title:'👑 CEO',    color:'#f1c40f', msg:'전설의 회계 CEO! 완벽한 기억력!' };
+            else if (score >= 1400) return { title:'🥇 임원',   color:'#e67e22', msg:'임원급 실력! 정말 훌륭합니다!' };
+            else if (score >= 800)  return { title:'🥈 관리자', color:'#3498db', msg:'관리자급! 잘하고 있어요!' };
+            else if (score >= 300)  return { title:'🥉 직원',   color:'#95a5a6', msg:'직원 수준! 조금만 더 도전!' };
+            else                    return { title:'인턴',      color:'#7f8c8d', msg:'이제 시작! 다시 도전해봐요!' };
         }
 
         function quitGame() {
@@ -1200,7 +1188,7 @@
     function getGradeForSupabase(gameId, score) {
         const scales = {
             acid:    [[10000,"👑 전설의 에이스"],[6000,"🥇 베테랑"],[3000,"🥈 숙련자"],[1000,"🥉 정규 파일럿"],[0,"🛩 견습생"]],
-            memory:  [[950,"👑 CEO"],[850,"⭐ CEO급"],[750,"🎖 전무/상무"],[650,"🏅 이사"],[550,"📋 부장"],[450,"🗂 차장"],[350,"📁 과장"],[250,"📝 대리"],[0,"💼 사원"]],
+            memory:  [[2000,"👑 CEO"],[1400,"🥇 임원"],[800,"🥈 관리자"],[300,"🥉 직원"],[0,"인턴"]],
             debit:   [[4500,"👑 전설의 CFO"],[2500,"🥇 회계 부장"],[1000,"🥈 회계 대리"],[500,"🥉 신입 사원"],[0,"📋 수습 직원"]],
             factory: [[5000,"👑 결산 마스터"],[3000,"🥇 숙련 경리"],[1500,"🥈 견습 경리"],[500,"🥉 수습생"],[0,"📋 인턴"]],
             flight:  [[50000,"👑 전설의 에이스"],[30000,"🥇 베테랑 파일럿"],[15000,"🥈 숙련 파일럿"],[5000,"🥉 정규 파일럿"],[0,"🛩 견습 파일럿"]]
