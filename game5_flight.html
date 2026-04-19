@@ -40,11 +40,11 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 .gatel{position:absolute;left:0;width:100%;display:flex;flex-direction:column;align-items:center}
 .gbar{width:100%;height:clamp(14px,2.5vw,20px);background:linear-gradient(90deg,transparent 0%,rgba(15,25,100,.9) 18%,rgba(20,35,130,.95) 50%,rgba(15,25,100,.9) 82%,transparent 100%);border-top:1.5px solid rgba(0,242,255,.22);border-bottom:1.5px solid rgba(0,242,255,.22);box-shadow:0 0 20px rgba(0,242,255,.12)}
 .ginfo{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 0 0}
-.gq{font-size:clamp(.85rem,3vw,1.4rem);font-weight:900;color:#eef0ff;text-align:center;text-shadow:0 2px 10px rgba(0,0,0,.95),0 0 6px rgba(0,0,0,.8);max-width:90vw;line-height:1.4;background:rgba(2,8,20,.82);padding:8px clamp(12px,4vw,30px);border-radius:12px;border:1px solid rgba(255,255,255,.1)}
+.gq{font-size:clamp(1.05rem,3.8vw,1.7rem);font-weight:900;color:#eef0ff;text-align:center;text-shadow:0 2px 10px rgba(0,0,0,.95),0 0 6px rgba(0,0,0,.8);max-width:90vw;line-height:1.5;background:rgba(2,8,20,.88);padding:10px clamp(14px,4vw,32px);border-radius:14px;border:1px solid rgba(255,255,255,.15)}
 .gk{font-family:'Black Han Sans',sans-serif;font-size:clamp(.78rem,2.5vw,1.1rem);color:var(--gd);text-shadow:0 0 14px rgba(255,214,0,.75),0 2px 8px rgba(0,0,0,.9);animation:kP 1s infinite alternate}
 @keyframes kP{from{transform:scale(1)}to{transform:scale(1.05)}}
 .gchoices{position:relative;display:flex;justify-content:space-between;width:100%;padding:0 clamp(14px,5vw,80px);top:clamp(-60px,-8vw,-40px)}
-.gchoice{font-family:'Black Han Sans',sans-serif;font-size:clamp(.9rem,3.5vw,1.4rem);padding:clamp(7px,2vw,11px) clamp(16px,4vw,34px);border-radius:50px;border:2.5px solid;backdrop-filter:blur(4px)}
+.gchoice{font-family:'Black Han Sans',sans-serif;font-size:clamp(1rem,3.8vw,1.55rem);padding:clamp(8px,2vw,13px) clamp(18px,4vw,38px);border-radius:50px;border:2.5px solid;backdrop-filter:blur(4px)}
 .gchoice.left{color:var(--pk);border-color:var(--pk);background:rgba(255,45,120,.1);text-shadow:0 0 10px var(--pk);box-shadow:0 0 18px rgba(255,45,120,.2)}
 .gchoice.right{color:var(--gn);border-color:var(--gn);background:rgba(57,255,20,.07);text-shadow:0 0 10px var(--gn);box-shadow:0 0 18px rgba(57,255,20,.14)}
 
@@ -67,7 +67,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
   display:flex;
   flex-direction:column;
   align-items:center;
-  /* ★ 스크롤 핵심 3가지 */
+  justify-content:center;
   overflow-y:auto;
   overflow-x:hidden;
   -webkit-overflow-scrolling:touch;
@@ -80,7 +80,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
   gap:clamp(10px,2vh,18px);
   width:100%;
   max-width:760px;
-  /* ★ margin:auto 제거 → 스크롤 시 상단 잘림 방지 */
+  margin:auto;
   padding-bottom:8px;
 }
 
@@ -187,6 +187,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
         <div class="gc c"><strong>🏆 점수 체계</strong>정답 통과: <b style="color:var(--gd)">+500점</b><br>콤보 보너스: +50점/연속<br>오답 → 방어막 없으면 종료!</div>
       </div>
       <div class="brow"><button class="sbtn" onclick="Game.start()">▶ 비행 시작</button></div>
+      <div class="brow" style="margin-top:4px;"><button class="btn-hub" onclick="location.href='index.html'">🏠 허브로 나가기</button></div>
     </div>
   </div>
 
@@ -428,10 +429,10 @@ const Game={
   spawnGate(){
     const p=Problems[Math.floor(Math.random()*Problems.length)];
     const id='g'+Date.now()+'_'+Math.random().toString(36).slice(2);
-    const g={id,y:-430,q:p.q,k:p.key,lText:p.L,rText:p.R,ans:p.a,passed:false,domEl:null};
+    const g={id,y:-500,q:p.q,k:p.key,lText:p.L,rText:p.R,ans:p.a,passed:false,domEl:null};
     const layer=document.getElementById('glayer');
     const el=document.createElement('div');
-    el.id=id;el.className='gatel';el.style.top='-600px';
+    el.id=id;el.className='gatel';el.style.top='-680px';
     el.innerHTML=`<div class="gbar"></div><div class="ginfo"><div class="gq">${p.q}</div><div class="gk">💡 ${p.key}</div></div><div class="gchoices"><div class="gchoice left">${p.L}</div><div class="gchoice right">${p.R}</div></div>`;
     layer.appendChild(el);g.domEl=el;this.gates.push(g);
   },
@@ -450,12 +451,12 @@ const Game={
     this.frame++;
     this.speed=Math.min(8.5,3.0+this.frame*.0009);
     this.stars.forEach(s=>{s.y+=s.v*(this.speed*.17);if(s.y>this.h)Object.assign(s,this.mkStar())});
-    const gI=Math.max(65,Math.floor(1500/this.speed));
+    const gI=Math.max(80,Math.floor(1900/this.speed));
     if(this.frame%gI===0)this.spawnGate();
     if(this.frame%52===0)this.spawnItems();
     if(this.player.magnet){this.player.magT--;if(this.player.magT<=0){this.player.magnet=false;document.getElementById('ic-magnet').classList.remove('on')}}
     for(let i=this.gates.length-1;i>=0;i--){
-      const g=this.gates[i];g.y+=this.speed*.82;
+      const g=this.gates[i];g.y+=this.speed*.48;
       if(g.domEl)g.domEl.style.top=(g.y-140)+'px';
       if(!g.passed&&g.y>=this.player.y-10){
         const side=this.player.x<this.w/2?'L':'R';g.passed=true;
