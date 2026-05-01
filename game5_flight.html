@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; img-src 'self' data:; connect-src 'self' https://pjagaulfivafamhhiveg.supabase.co; media-src 'self';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; img-src 'self' data:; connect-src 'self' https://pjagaulfivafamhhiveg.supabase.co https://cdn.jsdelivr.net; media-src 'self';">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
@@ -9,15 +9,14 @@
 <title>🛩 회계 플라이트 — 장부조회 마스터</title>
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-:root{--cy:#00f2ff;--pk:#ff2d78;--gd:#ffd600;--gn:#39ff14;--pu:#b44fff;--bg:#020810;--ad-h:50px}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--cy:#00f2ff;--pk:#ff2d78;--gd:#ffd600;--gn:#39ff14;--pu:#b44fff;--bg:#020810;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{height:100%}
-body{background:var(--bg);font-family:'Noto Sans KR',sans-serif;overflow:hidden;user-select:none;touch-action:none;height:100dvh;padding-bottom:var(--ad-h)}
+body{background:var(--bg);font-family:'Noto Sans KR',sans-serif;overflow:hidden;user-select:none;touch-action:none;height:100dvh;}
 canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 
-.ad-placeholder{position:fixed;bottom:0;left:0;right:0;height:var(--ad-h);background:rgba(0,0,0,.7);border-top:1px solid rgba(0,242,255,.15);display:flex;align-items:center;justify-content:center;z-index:300;font-size:.6rem;letter-spacing:2px;color:rgba(255,255,255,.2)}
 
-#hud{position:absolute;top:0;left:0;width:100%;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:max(10px,env(safe-area-inset-top)) 14px 10px;pointer-events:none;background:linear-gradient(to bottom,rgba(2,8,16,.7) 0%,transparent 100%)}
+
+#hud{position:absolute;top:0;left:0;width:100%;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:max(10px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 10px max(14px,env(safe-area-inset-left));pointer-events:none;background:linear-gradient(to bottom,rgba(2,8,16,.7) 0%,transparent 100%)}
 .hud-left{display:flex;gap:clamp(12px,4vw,30px);align-items:center}
 .hb{display:flex;flex-direction:column;align-items:center;gap:2px}
 .hl{font-family:'Orbitron',monospace;font-size:clamp(.55rem,.18vw+.5rem,.72rem);color:rgba(0,242,255,.5);letter-spacing:2px;text-transform:uppercase}
@@ -28,7 +27,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 .iic{font-size:clamp(1rem,4vw,1.45rem);opacity:0;transition:opacity .3s;filter:drop-shadow(0 0 8px #fff)}
 .iic.on{opacity:1;animation:icP .55s infinite alternate}
 @keyframes icP{from{transform:scale(.9)}to{transform:scale(1.2)}}
-.hud-btns{display:flex;gap:6px;pointer-events:auto}
+.hud-btns{display:flex;gap:6px;pointer-events:auto;padding-right:2px}
 .hdb{height:44px;padding:0 14px;border-radius:50px;cursor:pointer;font-family:'Black Han Sans';font-size:clamp(.75rem,2.8vw,1rem);white-space:nowrap;display:flex;align-items:center;border:1.5px solid rgba(255,255,255,0.3)!important}
 .hdb-quit{background:rgba(255,45,120,.15);border:1px solid var(--pk)!important;color:var(--pk)}
 .hdb-home{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2)!important;color:white}
@@ -40,11 +39,11 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 .gatel{position:absolute;left:0;width:100%;display:flex;flex-direction:column;align-items:center}
 .gbar{width:100%;height:clamp(14px,2.5vw,20px);background:linear-gradient(90deg,transparent 0%,rgba(15,25,100,.9) 18%,rgba(20,35,130,.95) 50%,rgba(15,25,100,.9) 82%,transparent 100%);border-top:1.5px solid rgba(0,242,255,.22);border-bottom:1.5px solid rgba(0,242,255,.22);box-shadow:0 0 20px rgba(0,242,255,.12)}
 .ginfo{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 0 0}
-.gq{font-size:clamp(1.05rem,3.8vw,1.7rem);font-weight:900;color:#eef0ff;text-align:center;text-shadow:0 2px 10px rgba(0,0,0,.95),0 0 6px rgba(0,0,0,.8);max-width:90vw;line-height:1.5;background:rgba(2,8,20,.88);padding:10px clamp(14px,4vw,32px);border-radius:14px;border:1px solid rgba(255,255,255,.15)}
+.gq{font-size:clamp(.85rem,3vw,1.4rem);font-weight:900;color:#eef0ff;text-align:center;text-shadow:0 2px 10px rgba(0,0,0,.95),0 0 6px rgba(0,0,0,.8);max-width:90vw;line-height:1.4;background:rgba(2,8,20,.82);padding:8px clamp(12px,4vw,30px);border-radius:12px;border:1px solid rgba(255,255,255,.1)}
 .gk{font-family:'Black Han Sans',sans-serif;font-size:clamp(.78rem,2.5vw,1.1rem);color:var(--gd);text-shadow:0 0 14px rgba(255,214,0,.75),0 2px 8px rgba(0,0,0,.9);animation:kP 1s infinite alternate}
 @keyframes kP{from{transform:scale(1)}to{transform:scale(1.05)}}
 .gchoices{position:relative;display:flex;justify-content:space-between;width:100%;padding:0 clamp(14px,5vw,80px);top:clamp(-60px,-8vw,-40px)}
-.gchoice{font-family:'Black Han Sans',sans-serif;font-size:clamp(1rem,3.8vw,1.55rem);padding:clamp(8px,2vw,13px) clamp(18px,4vw,38px);border-radius:50px;border:2.5px solid;backdrop-filter:blur(4px)}
+.gchoice{font-family:'Black Han Sans',sans-serif;font-size:clamp(.9rem,3.5vw,1.4rem);padding:clamp(7px,2vw,11px) clamp(16px,4vw,34px);border-radius:50px;border:2.5px solid;backdrop-filter:blur(4px)}
 .gchoice.left{color:var(--pk);border-color:var(--pk);background:rgba(255,45,120,.1);text-shadow:0 0 10px var(--pk);box-shadow:0 0 18px rgba(255,45,120,.2)}
 .gchoice.right{color:var(--gn);border-color:var(--gn);background:rgba(57,255,20,.07);text-shadow:0 0 10px var(--gn);box-shadow:0 0 18px rgba(57,255,20,.14)}
 
@@ -67,11 +66,11 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
   display:flex;
   flex-direction:column;
   align-items:center;
-  justify-content:center;
+  /* ★ 스크롤 핵심 3가지 */
   overflow-y:auto;
   overflow-x:hidden;
   -webkit-overflow-scrolling:touch;
-  padding:max(20px,env(safe-area-inset-top)) 16px calc(20px + var(--ad-h));
+  padding:max(20px,env(safe-area-inset-top)) 16px 20px ;
 }
 .ovl-inner{
   display:flex;
@@ -80,7 +79,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
   gap:clamp(10px,2vh,18px);
   width:100%;
   max-width:760px;
-  margin:auto;
+  /* ★ margin:auto 제거 → 스크롤 시 상단 잘림 방지 */
   padding-bottom:8px;
 }
 
@@ -165,6 +164,74 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
         }
         .btn-hub:active { background: rgba(255,255,255,0.18); }
 
+        
+        /* ── 목표달성 팡파레 오버레이 ── */
+        #fanfare-overlay {
+            display: none; position: fixed; inset: 0; z-index: 9999;
+            align-items: center; justify-content: center;
+            pointer-events: none;
+        }
+        #fanfare-overlay.show { display: flex; }
+        #fanfare-box {
+            background: linear-gradient(135deg, rgba(10,15,30,0.97), rgba(5,10,20,0.97));
+            border: 2px solid gold;
+            border-radius: 24px;
+            padding: 36px 32px 28px;
+            text-align: center;
+            max-width: 320px; width: 88%;
+            box-shadow: 0 0 60px rgba(255,215,0,0.4), 0 24px 60px rgba(0,0,0,0.7);
+            animation: fanfareIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+            pointer-events: auto;
+            position: relative;
+            overflow: hidden;
+        }
+        @keyframes fanfareIn {
+            from { opacity:0; transform: scale(0.6) translateY(30px); }
+            to   { opacity:1; transform: scale(1) translateY(0); }
+        }
+        #fanfare-box::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: radial-gradient(ellipse at 50% 0%, rgba(255,215,0,0.12) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .fanfare-emoji { font-size: 3.2rem; margin-bottom: 10px; animation: bounce 0.6s ease infinite alternate; }
+        @keyframes bounce { from { transform:translateY(0) } to { transform:translateY(-8px) } }
+        .fanfare-title {
+            font-family: 'Jua', 'Black Han Sans', sans-serif;
+            font-size: 1.7rem; color: gold;
+            text-shadow: 0 0 20px rgba(255,215,0,0.8);
+            margin-bottom: 6px; line-height: 1.2;
+        }
+        .fanfare-grade {
+            font-size: 1.1rem; color: #fff;
+            margin-bottom: 10px; font-weight: 700;
+        }
+        .fanfare-sub {
+            font-size: 0.82rem; color: rgba(255,255,255,0.5);
+            line-height: 1.6; margin-bottom: 20px;
+        }
+        .fanfare-close-btn {
+            background: linear-gradient(135deg, gold, #f39c12);
+            border: none; border-radius: 50px;
+            padding: 12px 32px;
+            font-family: 'Jua', sans-serif; font-size: 1rem;
+            color: #000; cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+            box-shadow: 0 4px 16px rgba(255,215,0,0.4);
+        }
+        .fanfare-close-btn:active { transform: scale(0.96); }
+        /* 별 파티클 */
+        .fanfare-stars { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+        .fstar {
+            position: absolute; width: 6px; height: 6px;
+            border-radius: 50%; opacity: 0;
+            animation: fstarAnim var(--dur) var(--delay) ease-out forwards;
+        }
+        @keyframes fstarAnim {
+            0%   { opacity:1; transform: translate(0,0) scale(1); }
+            100% { opacity:0; transform: translate(var(--tx), var(--ty)) scale(0); }
+        }
         </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -172,7 +239,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 
 <audio id="bgm" src="bgm5_flight.mp3" loop preload="auto"></audio>
 
-<div class="ad-placeholder" id="adPlaceholder">AD</div>
+
 <div style="position:fixed;inset:0;background:var(--bg);z-index:-1;"></div>
 
 <div id="canvas-wrap" style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:850px;height:100%;overflow:hidden;background:rgba(0,0,0,.6);">
@@ -187,7 +254,6 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
         <div class="gc c"><strong>🏆 점수 체계</strong>정답 통과: <b style="color:var(--gd)">+500점</b><br>콤보 보너스: +50점/연속<br>오답 → 방어막 없으면 종료!</div>
       </div>
       <div class="brow"><button class="sbtn" onclick="Game.start()">▶ 비행 시작</button></div>
-      <div class="brow" style="margin-top:4px;"><button class="btn-hub" onclick="location.href='index.html'">🏠 허브로 나가기</button></div>
     </div>
   </div>
 
@@ -394,7 +460,7 @@ const Game={
 
   resize(){
     const wrap=document.getElementById('canvas-wrap');
-    const adH=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--ad-h'))||50;
+    const adH=0;
     this.w=this.canvas.width=wrap.clientWidth;
     this.h=this.canvas.height=window.innerHeight-adH;
     wrap.style.height=this.h+'px';
@@ -418,7 +484,7 @@ const Game={
     document.getElementById('savesec').style.display='flex';
     document.getElementById('rkbox').style.display='none';
     document.getElementById('rkbox').innerHTML='';
-    document.getElementById('pname').value='';
+    document.getElementById('pname').value = localStorage.getItem('hub_nickname') || '';
     document.getElementById('savemsg').textContent='';
     const sb=document.getElementById('savebtn');sb.disabled=false;sb.style.opacity='1';
     this.updHUD();
@@ -429,10 +495,10 @@ const Game={
   spawnGate(){
     const p=Problems[Math.floor(Math.random()*Problems.length)];
     const id='g'+Date.now()+'_'+Math.random().toString(36).slice(2);
-    const g={id,y:-500,q:p.q,k:p.key,lText:p.L,rText:p.R,ans:p.a,passed:false,domEl:null};
+    const g={id,y:-430,q:p.q,k:p.key,lText:p.L,rText:p.R,ans:p.a,passed:false,domEl:null};
     const layer=document.getElementById('glayer');
     const el=document.createElement('div');
-    el.id=id;el.className='gatel';el.style.top='-680px';
+    el.id=id;el.className='gatel';el.style.top='-600px';
     el.innerHTML=`<div class="gbar"></div><div class="ginfo"><div class="gq">${p.q}</div><div class="gk">💡 ${p.key}</div></div><div class="gchoices"><div class="gchoice left">${p.L}</div><div class="gchoice right">${p.R}</div></div>`;
     layer.appendChild(el);g.domEl=el;this.gates.push(g);
   },
@@ -451,12 +517,12 @@ const Game={
     this.frame++;
     this.speed=Math.min(8.5,3.0+this.frame*.0009);
     this.stars.forEach(s=>{s.y+=s.v*(this.speed*.17);if(s.y>this.h)Object.assign(s,this.mkStar())});
-    const gI=Math.max(80,Math.floor(1900/this.speed));
+    const gI=Math.max(65,Math.floor(1500/this.speed));
     if(this.frame%gI===0)this.spawnGate();
     if(this.frame%52===0)this.spawnItems();
     if(this.player.magnet){this.player.magT--;if(this.player.magT<=0){this.player.magnet=false;document.getElementById('ic-magnet').classList.remove('on')}}
     for(let i=this.gates.length-1;i>=0;i--){
-      const g=this.gates[i];g.y+=this.speed*.48;
+      const g=this.gates[i];g.y+=this.speed*.82;
       if(g.domEl)g.domEl.style.top=(g.y-140)+'px';
       if(!g.passed&&g.y>=this.player.y-10){
         const side=this.player.x<this.w/2?'L':'R';g.passed=true;
@@ -533,6 +599,7 @@ const Game={
     const gs=document.getElementById('gs');
     gs.style.display='flex';
     gs.scrollTop=0; // ★ 열릴 때 상단으로 리셋
+    checkAndShowFanfare(this.score, this._grade(this.score));
     showAdPlaceholder();
     this.loadRanking();
   },
@@ -585,13 +652,10 @@ const Game={
   },
 };
 
-function hideAdPlaceholder(){
-  const el=document.getElementById('adPlaceholder');if(el)el.style.display='none';
-  document.documentElement.style.setProperty('--ad-h','0px');Game.resize();
-}
+function hideAdPlaceholder() {}
 function showAdPlaceholder(){
-  const el=document.getElementById('adPlaceholder');if(el)el.style.display='flex';
-  document.documentElement.style.setProperty('--ad-h','50px');Game.resize();
+  
+  Game.resize();
 }
 
 window.addEventListener('load',()=>Game.init());
@@ -615,7 +679,8 @@ window.addEventListener('load',()=>Game.init());
         const safeName = String(name).replace(/<[^>]*>/g,'').substring(0,30).trim();
         if (!safeName) return;
         const today = new Date().toISOString().split('T')[0];
-        await db.rpc('upsert_score', {
+        const groupId = localStorage.getItem('hub_group_id') || null;
+        const rpcParams = {
             p_game_id: gameId,
             p_name:    safeName,
             p_score:   safeScore,
@@ -623,21 +688,120 @@ window.addEventListener('load',()=>Game.init());
             p_combo:   Math.max(0, combo||0),
             p_correct: Math.max(0, correct||0),
             p_date:    today
-        });
+        };
+        if (groupId) rpcParams.p_group_id = groupId;
+        await db.rpc('upsert_score', rpcParams);
     }
 
     async function supabaseFetchRanking(gameId) {
-        const { data, error } = await db
+        const groupId = localStorage.getItem('hub_group_id') || null;
+        let query = db
             .from('scores')
             .select()
             .eq('game_id', gameId)
             .order('score', { ascending: false })
             .limit(20);
+        if (groupId) query = query.eq('group_id', groupId);
+        const { data, error } = await query;
         if (error) throw error;
         return data;
     }
 
 </script>
-<script>document.addEventListener('contextmenu', e => e.preventDefault()); document.addEventListener('selectstart', e => e.preventDefault()); document.addEventListener('copy', e => e.preventDefault()); document.addEventListener('keydown', e => { if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) || (e.ctrlKey && e.keyCode === 85)) { e.preventDefault(); } });</script>
+
+<script>
+    // ── 팡파레 시스템 ──
+    const FANFARE_TARGET_SCORE = 30000;
+    const FANFARE_TARGET_LABEL = '베테랑 파일럿';
+
+    function checkAndShowFanfare(currentScore, gradeFn) {
+        const grade = typeof gradeFn === 'function' ? gradeFn(currentScore) : gradeFn;
+        const alreadyShown = sessionStorage.getItem('fanfare_shown_game5_flight');
+        if (currentScore >= FANFARE_TARGET_SCORE && !alreadyShown) {
+            sessionStorage.setItem('fanfare_shown_game5_flight', '1');
+            setTimeout(() => showFanfare(grade), 600);
+        }
+    }
+
+    function showFanfare(grade) {
+        document.getElementById('fanfare-grade-text').textContent = grade || ('🥇 ' + FANFARE_TARGET_LABEL);
+        document.getElementById('fanfare-sub-text').textContent =
+            '목표 랭크 [' + FANFARE_TARGET_LABEL + ']를 달성했어요!\n전산회계 2급 합격에 한 걸음 더 가까워졌습니다 🎯';
+        spawnFanfareStars();
+        playFanfareSound();
+        document.getElementById('fanfare-overlay').classList.add('show');
+    }
+
+    function closeFanfare() {
+        document.getElementById('fanfare-overlay').classList.remove('show');
+    }
+
+    function spawnFanfareStars() {
+        const container = document.getElementById('fanfare-stars');
+        container.innerHTML = '';
+        const colors = ['gold','#ff2d78','#00f2ff','#00e676','#b44fff','#fff'];
+        for (let i = 0; i < 28; i++) {
+            const s = document.createElement('div');
+            s.className = 'fstar';
+            const angle = Math.random() * Math.PI * 2;
+            const dist = 80 + Math.random() * 120;
+            s.style.cssText = `
+                left:${40 + Math.random()*20}%;
+                top:${30 + Math.random()*20}%;
+                background:${colors[Math.floor(Math.random()*colors.length)]};
+                --tx:${Math.cos(angle)*dist}px;
+                --ty:${Math.sin(angle)*dist}px;
+                --dur:${0.6 + Math.random()*0.8}s;
+                --delay:${Math.random()*0.3}s;
+                width:${4+Math.random()*6}px;
+                height:${4+Math.random()*6}px;
+            `;
+            container.appendChild(s);
+        }
+    }
+
+    function playFanfareSound() {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            // 팡파레 멜로디: C E G C(high)
+            const notes = [523, 659, 784, 1047];
+            notes.forEach((freq, i) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.frequency.value = freq;
+                osc.type = 'sine';
+                const t = ctx.currentTime + i * 0.18;
+                gain.gain.setValueAtTime(0, t);
+                gain.gain.linearRampToValueAtTime(0.25, t + 0.05);
+                gain.gain.linearRampToValueAtTime(0, t + 0.3);
+                osc.start(t); osc.stop(t + 0.35);
+            });
+            // 마지막에 짧은 트릴
+            const trill = ctx.createOscillator();
+            const tGain = ctx.createGain();
+            trill.connect(tGain); tGain.connect(ctx.destination);
+            trill.frequency.value = 1047;
+            tGain.gain.setValueAtTime(0.3, ctx.currentTime + 0.85);
+            tGain.gain.linearRampToValueAtTime(0, ctx.currentTime + 1.3);
+            trill.start(ctx.currentTime + 0.85);
+            trill.stop(ctx.currentTime + 1.3);
+        } catch(e) {}
+    }
+</script>
+
+    <script>document.addEventListener('contextmenu', e => e.preventDefault()); document.addEventListener('selectstart', e => e.preventDefault()); document.addEventListener('copy', e => e.preventDefault()); document.addEventListener('keydown', e => { if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) || (e.ctrlKey && e.keyCode === 85)) { e.preventDefault(); } });</script>
+
+<!-- 목표달성 팡파레 -->
+<div id="fanfare-overlay">
+  <div id="fanfare-box">
+    <div class="fanfare-stars" id="fanfare-stars"></div>
+    <div class="fanfare-emoji">🏆</div>
+    <div class="fanfare-title">목표 달성!</div>
+    <div class="fanfare-grade" id="fanfare-grade-text">—</div>
+    <div class="fanfare-sub" id="fanfare-sub-text">—</div>
+    <button class="fanfare-close-btn" onclick="closeFanfare()">계속하기 🎮</button>
+  </div>
+</div>
 </body>
 </html>
