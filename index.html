@@ -30,7 +30,7 @@
   --border: rgba(255,255,255,0.10);
 
   /* 광고 배너 높이 — 안드로이드 AdMob 배너 표준 50px */
-  --ad-banner-h: 50px;
+
 }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
@@ -47,7 +47,7 @@ body {
   min-height: 100dvh; /* dynamic viewport height (모바일 주소창 고려) */
   overflow-x: hidden;
   /* 하단 광고 공간 확보 */
-  padding-bottom: var(--ad-banner-h);
+
   background-image:
     radial-gradient(ellipse 60% 40% at 15% 20%, rgba(0,242,255,0.07) 0%, transparent 60%),
     radial-gradient(ellipse 50% 35% at 85% 80%, rgba(180,79,255,0.07) 0%, transparent 55%),
@@ -60,18 +60,7 @@ body {
 /* ── AdMob 광고 자리 (하단 고정) ── */
 /* 실제 AdMob SDK는 안드로이드 레이아웃에서 처리.
    WebView에서 테스트할 때 공간 확인용으로만 사용 */
-.ad-placeholder {
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
-  height: var(--ad-banner-h);
-  background: rgba(0,0,0,0.6);
-  border-top: 1px solid rgba(255,255,255,0.08);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 100;
-  font-family: 'Orbitron', monospace;
-  font-size: 0.6rem; letter-spacing: 2px;
-  color: rgba(255,255,255,0.2);
-}
+
 
 /* ── 레이아웃 ── */
 .wrap {
@@ -357,8 +346,80 @@ body {
     grid-template-columns: repeat(2, 1fr);
     gap: 14px;
   }
-  /* 마지막 카드(5번) 중앙 정렬 */
   .card-5 { grid-column: 1 / -1; max-width: 320px; margin: 0 auto; }
+}
+
+/* ── 상단 유저바 ── */
+.user-bar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 200;
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 20px;
+  background: rgba(2,8,16,0.82);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.user-bar .ub-nick {
+  display: flex; align-items: center; gap: 7px;
+  flex: 1; min-width: 0;
+}
+.user-bar .ub-nick .ub-label {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.58rem; letter-spacing: 2px;
+  color: rgba(0,242,255,0.5); flex-shrink: 0;
+}
+.user-bar .ub-nick .ub-name {
+  font-weight: 700; font-size: 0.92rem;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  color: rgba(255,255,255,0.88);
+}
+.user-bar .ub-group {
+  display: none;
+  align-items: center; gap: 6px;
+  padding: 4px 12px;
+  background: rgba(180,79,255,0.09);
+  border: 1px solid rgba(180,79,255,0.22);
+  border-radius: 50px;
+  font-size: 0.75rem; color: rgba(180,79,255,0.85);
+  white-space: nowrap;
+  max-width: 160px; overflow: hidden; text-overflow: ellipsis;
+  flex-shrink: 0;
+}
+.user-bar .ub-group.show { display: flex; }
+.user-bar .ub-group .ug-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--pu); flex-shrink: 0;
+  animation: blink 2s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1}50%{opacity:0.3} }
+
+.group-mode-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 16px;
+  background: rgba(180,79,255,0.09);
+  border: 1px solid rgba(180,79,255,0.28);
+  border-radius: 50px;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.62rem; letter-spacing: 1.5px;
+  color: var(--pu);
+  cursor: pointer; text-decoration: none;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+  white-space: nowrap; flex-shrink: 0;
+}
+.group-mode-btn:hover, .group-mode-btn:active {
+  background: rgba(180,79,255,0.18);
+  border-color: var(--pu);
+  box-shadow: 0 0 14px rgba(180,79,255,0.22);
+}
+
+/* 유저바 공간 확보용 패딩 */
+.wrap { padding-top: 96px !important; }
+@media (max-width: 600px) {
+  .user-bar { padding: 10px 14px; }
+  .group-mode-btn { font-size: 0.58rem; padding: 7px 12px; }
+  .wrap { padding-top: 80px !important; }
+  .user-bar .ub-group { max-width: 100px; font-size: 0.68rem; }
 }
 </style>
 </head>
@@ -366,8 +427,22 @@ body {
 
 <canvas id="starfield"></canvas>
 
-<!-- AdMob 배너 자리 (안드로이드 레이아웃에서 실제 AdView로 교체됨) -->
-<div class="ad-placeholder" id="adPlaceholder">AD</div>
+<!-- ── 상단 유저바 ── -->
+<div class="user-bar" id="user-bar">
+  <div class="ub-nick">
+    <span class="ub-label">PLAYER</span>
+    <span class="ub-name" id="ub-name-el">—</span>
+  </div>
+  <!-- 그룹 소속 시 표시 -->
+  <div class="ub-group" id="ub-group-el">
+    <div class="ug-dot"></div>
+    <span id="ub-group-name">—</span>
+  </div>
+  <!-- 그룹 모드 버튼 -->
+  <a class="group-mode-btn" href="group.html">👥 그룹 모드</a>
+</div>
+
+
 
 <div class="wrap">
 
@@ -470,6 +545,25 @@ body {
 </div>
 
 <script>
+// ── 로그인 체크 & 유저바 초기화 ──
+(function() {
+  const nick = localStorage.getItem('hub_nickname');
+  if (!nick) {
+    // 닉네임 없으면 로그인 페이지로 (hash/pathname 무관하게 안전하게 이동)
+    const base = location.pathname.replace(/[^/]*$/, '');
+    window.location.replace(base + 'login.html');
+    return;
+  }
+  // 닉네임 표시
+  document.getElementById('ub-name-el').textContent = nick;
+  // 그룹 표시
+  const gname = localStorage.getItem('hub_group_name');
+  if (gname) {
+    document.getElementById('ub-group-name').textContent = gname;
+    document.getElementById('ub-group-el').classList.add('show');
+  }
+})();
+
 // ── 별 배경 ──
 const canvas = document.getElementById('starfield');
 const ctx = canvas.getContext('2d');
@@ -520,11 +614,7 @@ window.addEventListener('resize', () => { resize(); initStars(); });
 // WebView 안에서는 이 div가 보일 필요 없음.
 // 안드로이드 앱에서 JS 브릿지로 아래를 호출:
 //   webView.evaluateJavascript("hideAdPlaceholder()", null);
-function hideAdPlaceholder() {
-  const el = document.getElementById('adPlaceholder');
-  if (el) el.style.display = 'none';
-  document.body.style.paddingBottom = '0';
-}
+function hideAdPlaceholder() {}
 </script>
 </body>
 </html>
