@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; img-src 'self' data:; connect-src 'self' https://pjagaulfivafamhhiveg.supabase.co; media-src 'self';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; img-src 'self' data:; connect-src 'self' https://pjagaulfivafamhhiveg.supabase.co https://cdn.jsdelivr.net; media-src 'self';">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
@@ -16,7 +16,6 @@
             --panel: rgba(255,255,255,0.04);
             --border: rgba(255,255,255,0.10);
             /* 광고 배너 높이 */
-            --ad-h: 50px;
         }
         * {
             box-sizing: border-box;
@@ -35,7 +34,7 @@
             display: flex; flex-direction: column;
             transition: background 0.5s, box-shadow 0.3s;
             /* 하단 광고 공간 확보 */
-            padding-bottom: var(--ad-h);
+            
         }
 
         /* 🚨 위기 모드 */
@@ -211,7 +210,7 @@
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
             z-index: 100; backdrop-filter: blur(10px);
-            padding: max(env(safe-area-inset-top), 20px) 20px calc(var(--ad-h) + max(env(safe-area-inset-bottom), 16px));
+            padding: max(env(safe-area-inset-top), 20px) 20px max(env(safe-area-inset-bottom, 16px));
             overflow-y: auto;
             touch-action: pan-y;
             overscroll-behavior: contain;
@@ -238,10 +237,74 @@
             width: 100%; max-width: 500px;
             display: flex; flex-direction: column; gap: 10px;
         }
-        .review-box { background: rgba(255,255,255,0.1); border-radius: 10px; padding: 12px; text-align: left; max-height: 120px; overflow-y: auto; }
-        .review-item { display: inline-block; margin: 3px; padding: 3px 8px; border-radius: 5px; font-size: 0.85rem; }
+        .review-box { background: rgba(255,255,255,0.1); border-radius: 10px; padding: 12px; text-align: left; max-height: 160px; overflow-y: auto; }
+        .review-item {
+            display: inline-block; margin: 3px; padding: 5px 11px;
+            border-radius: 5px; font-size: 0.85rem;
+            cursor: pointer; transition: transform 0.12s, box-shadow 0.12s;
+            user-select: none;
+        }
+        .review-item:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        .review-item:active { transform: scale(0.95); }
         .review-miss { background: rgba(255,255,255,0.2); color: #ccc; }
         .review-trap { background: rgba(255,0,85,0.3); color: #ffadad; }
+        .review-hint { font-size: 0.68rem; color: rgba(255,255,255,0.3); margin-top: 6px; letter-spacing: 0.5px; }
+
+        /* 계정과목 설명 팝업 */
+        #acct-popup-overlay {
+            display: none; position: fixed; inset: 0; z-index: 500;
+            background: rgba(0,0,0,0.65); backdrop-filter: blur(4px);
+            align-items: center; justify-content: center; padding: 24px;
+        }
+        #acct-popup-overlay.open { display: flex; animation: popFadeIn 0.18s ease; }
+        @keyframes popFadeIn { from { opacity:0 } to { opacity:1 } }
+        #acct-popup {
+            background: #0a1525; border-radius: 20px; width: 100%; max-width: 360px;
+            border: 1px solid rgba(255,255,255,0.12);
+            box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+            animation: popSlideUp 0.2s ease;
+            overflow: hidden;
+        }
+        @keyframes popSlideUp { from { opacity:0; transform:translateY(16px) } to { opacity:1; transform:translateY(0) } }
+        #acct-popup .pop-header {
+            padding: 18px 20px 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        #acct-popup .pop-word {
+            font-family: 'Jua', sans-serif; font-size: 1.5rem; color: #fff;
+        }
+        #acct-popup .pop-type-badge {
+            font-size: 0.72rem; padding: 4px 12px; border-radius: 50px;
+            font-weight: 700; letter-spacing: 1px;
+        }
+        #acct-popup .pop-close {
+            background: none; border: none; color: rgba(255,255,255,0.3);
+            font-size: 1.3rem; cursor: pointer; padding: 2px 6px; line-height: 1;
+            transition: color 0.15s;
+        }
+        #acct-popup .pop-close:hover { color: #fff; }
+        #acct-popup .pop-body { padding: 18px 20px 22px; }
+        #acct-popup .pop-desc {
+            font-size: 0.92rem; line-height: 1.75;
+            color: rgba(255,255,255,0.8); margin-bottom: 14px;
+        }
+        #acct-popup .pop-example {
+            background: rgba(255,255,255,0.05); border-radius: 10px;
+            padding: 12px 14px; border-left: 3px solid;
+        }
+        #acct-popup .pop-example-label {
+            font-size: 0.65rem; letter-spacing: 2px; opacity: 0.5;
+            margin-bottom: 5px;
+        }
+        #acct-popup .pop-example-text {
+            font-size: 0.82rem; color: rgba(255,255,255,0.7); line-height: 1.6;
+        }
+        #acct-popup .pop-miss-note {
+            margin-top: 12px; padding: 8px 12px; border-radius: 8px;
+            font-size: 0.78rem; color: #ffadad;
+            background: rgba(255,0,85,0.1); border: 1px solid rgba(255,0,85,0.2);
+        }
 
         /* 랭킹 */
         #rank-box {
@@ -291,17 +354,7 @@
             color: var(--neon-gold); font-family: 'Jua';
         }
 
-        /* ── AdMob 광고 자리 ── */
-        .ad-placeholder {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            height: var(--ad-h);
-            background: rgba(0,0,0,0.6);
-            border-top: 1px solid rgba(255,255,255,0.08);
-            display: flex; align-items: center; justify-content: center;
-            z-index: 200;
-            font-size: 0.6rem; letter-spacing: 2px;
-            color: rgba(255,255,255,0.2);
-        }
+        
 
         /* ── 공통 애니메이션 ── */
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
@@ -360,13 +413,80 @@
         }
         .btn-hub:active { background: rgba(255,255,255,0.18); }
 
+        
+        /* ── 목표달성 팡파레 오버레이 ── */
+        #fanfare-overlay {
+            display: none; position: fixed; inset: 0; z-index: 9999;
+            align-items: center; justify-content: center;
+            pointer-events: none;
+        }
+        #fanfare-overlay.show { display: flex; }
+        #fanfare-box {
+            background: linear-gradient(135deg, rgba(10,15,30,0.97), rgba(5,10,20,0.97));
+            border: 2px solid gold;
+            border-radius: 24px;
+            padding: 36px 32px 28px;
+            text-align: center;
+            max-width: 320px; width: 88%;
+            box-shadow: 0 0 60px rgba(255,215,0,0.4), 0 24px 60px rgba(0,0,0,0.7);
+            animation: fanfareIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+            pointer-events: auto;
+            position: relative;
+            overflow: hidden;
+        }
+        @keyframes fanfareIn {
+            from { opacity:0; transform: scale(0.6) translateY(30px); }
+            to   { opacity:1; transform: scale(1) translateY(0); }
+        }
+        #fanfare-box::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: radial-gradient(ellipse at 50% 0%, rgba(255,215,0,0.12) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .fanfare-emoji { font-size: 3.2rem; margin-bottom: 10px; animation: bounce 0.6s ease infinite alternate; }
+        @keyframes bounce { from { transform:translateY(0) } to { transform:translateY(-8px) } }
+        .fanfare-title {
+            font-family: 'Jua', 'Black Han Sans', sans-serif;
+            font-size: 1.7rem; color: gold;
+            text-shadow: 0 0 20px rgba(255,215,0,0.8);
+            margin-bottom: 6px; line-height: 1.2;
+        }
+        .fanfare-grade {
+            font-size: 1.1rem; color: #fff;
+            margin-bottom: 10px; font-weight: 700;
+        }
+        .fanfare-sub {
+            font-size: 0.82rem; color: rgba(255,255,255,0.5);
+            line-height: 1.6; margin-bottom: 20px;
+        }
+        .fanfare-close-btn {
+            background: linear-gradient(135deg, gold, #f39c12);
+            border: none; border-radius: 50px;
+            padding: 12px 32px;
+            font-family: 'Jua', sans-serif; font-size: 1rem;
+            color: #000; cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+            box-shadow: 0 4px 16px rgba(255,215,0,0.4);
+        }
+        .fanfare-close-btn:active { transform: scale(0.96); }
+        /* 별 파티클 */
+        .fanfare-stars { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+        .fstar {
+            position: absolute; width: 6px; height: 6px;
+            border-radius: 50%; opacity: 0;
+            animation: fstarAnim var(--dur) var(--delay) ease-out forwards;
+        }
+        @keyframes fstarAnim {
+            0%   { opacity:1; transform: translate(0,0) scale(1); }
+            100% { opacity:0; transform: translate(var(--tx), var(--ty)) scale(0); }
+        }
         </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-<!-- AdMob 배너 자리 -->
-<div class="ad-placeholder" id="adPlaceholder">AD</div>
+
 
 <!-- 🎵 BGM 오디오 엘리먼트 -->
 <audio id="bgm" src="bgm1_acid.mp3" loop preload="auto"></audio>
@@ -411,7 +531,7 @@
         font-size: 0.85rem;
         line-height: 2;
     ">
-        <div style="text-align:center; color:var(--neon-gold); font-family:'Jua'; font-size:0.9rem; margin-bottom:6px; letter-spacing:2px;">파일럿 계급 기준</div>
+        <div style="text-align:center; color:var(--neon-gold); font-family:'Jua'; font-size:0.9rem; margin-bottom:6px; letter-spacing:2px;">📊 파일럿 계급 기준</div>
         <div style="display:flex; justify-content:space-between;"><span>👑 전설의 에이스</span><span style="color:var(--neon-gold)">10,000점 이상</span></div>
         <div style="display:flex; justify-content:space-between;"><span>🥇 베테랑</span><span style="color:#ffd700">6,000점 이상</span></div>
         <div style="display:flex; justify-content:space-between;"><span>🥈 숙련자</span><span style="color:#aaa">3,000점 이상</span></div>
@@ -811,26 +931,144 @@
 
         if (wrongLog.length > 0) {
             els.reviewBox.style.display = 'block';
-            els.reviewBox.innerHTML = "<strong style='color:var(--neon-gold); display:block; margin-bottom:8px;'>📝 오답 노트</strong>" +
+            els.reviewBox.innerHTML =
+                "<strong style='color:var(--neon-gold); display:block; margin-bottom:8px;'>📝 오답 노트</strong>" +
                 wrongLog.map(item =>
                     item.type === 'missed'
-                        ? `<span class="review-item review-miss">놓침: ${item.word}</span>`
-                        : `<span class="review-item review-trap">함정: ${item.word}</span>`
-                ).join('');
+                        ? `<span class="review-item review-miss" onclick="openAcctPopup('${item.word}','missed')">놓침: ${item.word}</span>`
+                        : `<span class="review-item review-trap" onclick="openAcctPopup('${item.word}','trap')">함정: ${item.word}</span>`
+                ).join('') +
+                "<div class='review-hint'>👆 단어를 누르면 설명을 볼 수 있어요</div>";
         } else {
             els.reviewBox.style.display = 'none';
         }
 
-        els.input.disabled = false; els.input.value = getMyName();
+        els.input.disabled = false; els.input.value = localStorage.getItem('hub_nickname') || getMyName();
         document.getElementById('my-rank-badge').style.display = 'none';
         const saveBtn = document.getElementById('save-btn');
         saveBtn.textContent = '저장'; saveBtn.disabled = false;
         els.result.style.display = 'flex';
-        showAdPlaceholder();
+        checkAndShowFanfare(score, getGrade);
         loadRanking();
     }
 
-    // ── 랭킹 시스템 ──
+    // ══════════════════════════════════════════
+    // 계정과목 설명 데이터베이스
+    // ══════════════════════════════════════════
+    const ACCT_INFO = {
+        // ── 자산 ──
+        "현금":           { type:"자산", color:"#00b4d8", desc:"지폐·동전 등 즉시 사용 가능한 돈. 가장 유동성이 높은 자산.", ex:"현금 10만원을 지급 → (차)비용 / (대)현금" },
+        "당좌예금":       { type:"자산", color:"#00b4d8", desc:"수표·어음 발행에 쓰이는 은행 예금. 이자는 없고 수표를 발행해 결제할 때 사용.", ex:"당좌수표 발행 → (차)외상매입금 / (대)당좌예금" },
+        "보통예금":       { type:"자산", color:"#00b4d8", desc:"일반 통장 예금. 입출금이 자유롭고 이자도 조금 붙음.", ex:"급여 이체 → (차)급여 / (대)보통예금" },
+        "단기매매증권":   { type:"자산", color:"#00b4d8", desc:"단기간 매매 목적으로 보유하는 주식·채권. 1년 이내 처분 예정.", ex:"주식 매입 → (차)단기매매증권 / (대)현금" },
+        "외상매출금":     { type:"자산", color:"#00b4d8", desc:"상품을 외상(나중에 받기로 하고)으로 판매했을 때 나중에 받을 돈. 채권.", ex:"외상 판매 → (차)외상매출금 / (대)상품매출" },
+        "받을어음":       { type:"자산", color:"#00b4d8", desc:"상대방이 나중에 돈을 주겠다고 써준 어음. 채권의 일종.", ex:"어음 수취 → (차)받을어음 / (대)상품매출" },
+        "미수금":         { type:"자산", color:"#00b4d8", desc:"상품 이외의 것(비품, 토지 등)을 팔고 아직 못 받은 돈.", ex:"비품 외상 처분 → (차)미수금 / (대)비품" },
+        "선급금":         { type:"자산", color:"#00b4d8", desc:"상품·서비스를 받기 전에 미리 지급한 계약금·착수금.", ex:"계약금 지급 → (차)선급금 / (대)현금" },
+        "가지급금":       { type:"자산", color:"#00b4d8", desc:"용도가 아직 확정되지 않은 채 미리 지출한 돈. 나중에 정산.", ex:"출장비 개산 지급 → (차)가지급금 / (대)현금" },
+        "상품":           { type:"자산", color:"#00b4d8", desc:"판매 목적으로 구입한 물건. 팔리면 '상품매출' 수익 발생.", ex:"상품 구입 → (차)상품 / (대)현금" },
+        "차량운반구":     { type:"자산", color:"#00b4d8", desc:"업무용 자동차·트럭 등. 감가상각 대상 유형자산.", ex:"업무용 차량 구입 → (차)차량운반구 / (대)현금" },
+        "비품":           { type:"자산", color:"#00b4d8", desc:"책상·컴퓨터·냉장고 등 사무용 집기. 감가상각 대상 유형자산.", ex:"컴퓨터 구입 → (차)비품 / (대)현금" },
+        "토지":           { type:"자산", color:"#00b4d8", desc:"회사가 소유한 땅. 감가상각 안 함 (가치 감소 없음).", ex:"토지 취득 → (차)토지 / (대)보통예금" },
+        "건물":           { type:"자산", color:"#00b4d8", desc:"회사 소유 건축물. 감가상각 대상.", ex:"건물 취득 → (차)건물 / (대)현금" },
+        // ── 부채 ──
+        "외상매입금":     { type:"부채", color:"#e07a5f", desc:"상품을 외상(나중에 주기로 하고)으로 구입했을 때 나중에 줄 돈. 채무.", ex:"외상 구입 → (차)상품 / (대)외상매입금" },
+        "지급어음":       { type:"부채", color:"#e07a5f", desc:"상대방에게 내가 발행해 준 어음. 나중에 돈을 줘야 하는 채무.", ex:"어음 발행 → (차)상품 / (대)지급어음" },
+        "미지급금":       { type:"부채", color:"#e07a5f", desc:"상품 이외의 것(비품 등)을 사고 아직 안 준 돈.", ex:"비품 외상 구입 → (차)비품 / (대)미지급금" },
+        "선수금":         { type:"부채", color:"#e07a5f", desc:"상품·서비스를 주기 전에 미리 받은 계약금. 나중에 이행해야 할 의무.", ex:"계약금 수령 → (차)현금 / (대)선수금" },
+        "예수금":         { type:"부채", color:"#e07a5f", desc:"소득세·4대보험료 등을 직원 급여에서 원천징수해 잠시 보관 중인 돈.", ex:"급여 지급 시 → (차)급여 / (대)보통예금·예수금" },
+        "가수금":         { type:"부채", color:"#e07a5f", desc:"용도가 불명확한 채 임시로 받은 돈. 나중에 정산.", ex:"원인 불명 입금 → (차)현금 / (대)가수금" },
+        "단기차입금":     { type:"부채", color:"#e07a5f", desc:"1년 이내에 갚아야 하는 빌린 돈(은행 대출 등).", ex:"은행 단기 대출 → (차)보통예금 / (대)단기차입금" },
+        // ── 자본 ──
+        "자본금":         { type:"자본", color:"#9b5de5", desc:"사업주가 사업에 투자한 원금. 자본의 핵심.", ex:"창업 투자 → (차)현금 / (대)자본금" },
+        "인출금":         { type:"자본", color:"#9b5de5", desc:"개인기업 사업주가 사업 자금을 개인 용도로 빼간 금액. 자본을 줄임.", ex:"사업주 생활비 인출 → (차)인출금 / (대)현금" },
+        // ── 수익 ──
+        "상품매출":       { type:"수익", color:"#00e676", desc:"상품을 팔아서 생긴 주된 영업 수익.", ex:"상품 판매 → (차)현금 / (대)상품매출" },
+        "이자수익":       { type:"수익", color:"#00e676", desc:"예금·대여금 등에서 받은 이자.", ex:"예금 이자 수령 → (차)현금 / (대)이자수익" },
+        "수수료수익":     { type:"수익", color:"#00e676", desc:"용역(서비스)을 제공하고 받은 수수료.", ex:"서비스 제공 → (차)현금 / (대)수수료수익" },
+        "임대료":         { type:"수익", color:"#00e676", desc:"건물·토지 등을 빌려주고 받는 돈.", ex:"건물 임대 → (차)현금 / (대)임대료" },
+        "유형자산처분이익":{ type:"수익", color:"#00e676", desc:"차량·비품 등 유형자산을 장부가보다 비싸게 팔았을 때 생기는 이익.", ex:"장부가 100만, 150만에 처분 → 처분이익 50만" },
+        // ── 비용 ──
+        "급여":           { type:"비용", color:"#ff2d78", desc:"직원에게 지급하는 월급·상여금 등.", ex:"급여 지급 → (차)급여 / (대)보통예금" },
+        "복리후생비":     { type:"비용", color:"#ff2d78", desc:"직원 식대·의료비·경조사비 등 복지 관련 지출.", ex:"직원 식대 → (차)복리후생비 / (대)현금" },
+        "여비교통비":     { type:"비용", color:"#ff2d78", desc:"출장비·교통비·주차비 등.", ex:"출장비 지급 → (차)여비교통비 / (대)현금" },
+        "기업업무추진비": { type:"비용", color:"#ff2d78", desc:"거래처 접대·선물·식사 등 영업 목적 지출. 과거 '접대비'.", ex:"거래처 식사 → (차)기업업무추진비 / (대)현금" },
+        "통신비":         { type:"비용", color:"#ff2d78", desc:"전화·인터넷·우편 요금 등.", ex:"전화요금 → (차)통신비 / (대)현금" },
+        "수도광열비":     { type:"비용", color:"#ff2d78", desc:"수도·전기·가스 요금 등.", ex:"전기요금 → (차)수도광열비 / (대)현금" },
+        "세금과공과":     { type:"비용", color:"#ff2d78", desc:"재산세·자동차세·상공회의소 회비 등 세금과 공적 부담금.", ex:"재산세 납부 → (차)세금과공과 / (대)현금" },
+        "감가상각비":     { type:"비용", color:"#ff2d78", desc:"건물·차량·비품 등 유형자산의 가치 감소분을 비용으로 인식.", ex:"연간 감가상각 → (차)감가상각비 / (대)감가상각누계액" },
+        "임차료":         { type:"비용", color:"#ff2d78", desc:"건물·토지 등을 빌려 쓰고 내는 돈.", ex:"사무실 임차료 → (차)임차료 / (대)현금" },
+        "수선비":         { type:"비용", color:"#ff2d78", desc:"건물·기계 등의 유지·수리 비용.", ex:"건물 수리 → (차)수선비 / (대)현금" },
+        "보험료":         { type:"비용", color:"#ff2d78", desc:"화재보험·자동차보험 등 보험 가입 비용.", ex:"보험료 납부 → (차)보험료 / (대)현금" },
+        "차량유지비":     { type:"비용", color:"#ff2d78", desc:"업무용 차량의 주유비·세차비·정기점검 비용 등.", ex:"주유비 → (차)차량유지비 / (대)현금" },
+        "운반비":         { type:"비용", color:"#ff2d78", desc:"상품·물건 운송에 드는 택배비·화물비.", ex:"택배비 → (차)운반비 / (대)현금" },
+        "도서인쇄비":     { type:"비용", color:"#ff2d78", desc:"업무용 서적 구입비·명함·서류 인쇄비 등.", ex:"명함 인쇄 → (차)도서인쇄비 / (대)현금" },
+        "소모품비":       { type:"비용", color:"#ff2d78", desc:"복사용지·볼펜 등 사무용 소모품 구입 비용.", ex:"사무용품 구입 → (차)소모품비 / (대)현금" },
+        "수수료비용":     { type:"비용", color:"#ff2d78", desc:"은행 송금 수수료·부동산 중개 수수료 등 지급 수수료.", ex:"송금 수수료 → (차)수수료비용 / (대)현금" },
+        "대손상각비":     { type:"비용", color:"#ff2d78", desc:"외상매출금·받을어음 중 못 받을 것 같은 금액을 비용으로 처리.", ex:"외상값 회수 불능 → (차)대손상각비 / (대)외상매출금" },
+        "이자비용":       { type:"비용", color:"#ff2d78", desc:"차입금에 대해 지급하는 이자.", ex:"대출 이자 납부 → (차)이자비용 / (대)현금" },
+        "기부금":         { type:"비용", color:"#ff2d78", desc:"사회단체·재해지역 등에 무상으로 기증하는 금액.", ex:"기부 → (차)기부금 / (대)현금" },
+        "잡손실":         { type:"비용", color:"#ff2d78", desc:"금액이 소액이거나 분류하기 애매한 기타 손실.", ex:"현금 분실 → (차)잡손실 / (대)현금" },
+    };
+
+    const TYPE_LABEL = { "자산":"💰 자산", "부채":"📋 부채", "자본":"👑 자본", "수익":"📈 수익", "비용":"📉 비용" };
+
+    function openAcctPopup(word, missType) {
+        const info = ACCT_INFO[word];
+        const isTrap = missType === 'trap';
+
+        // 함정 단어: ACCT_INFO에 없으므로 별도 팝업 표시
+        if (!info && isTrap) {
+            document.getElementById('pop-word').textContent = word;
+            const badge = document.getElementById('pop-type-badge');
+            badge.textContent = '⚠️ 함정';
+            badge.style.background = 'rgba(255,45,120,0.15)';
+            badge.style.color = '#ff2d78';
+            badge.style.border = '1px solid rgba(255,45,120,0.4)';
+            document.getElementById('pop-desc').textContent =
+                '이 단어는 회계 계정과목이 아닙니다. 실제 회계 장부에는 등장하지 않는 일상 용어예요.';
+            const exBox = document.getElementById('pop-example');
+            exBox.style.borderLeftColor = '#ff2d78';
+            document.getElementById('pop-example-text').textContent =
+                '계정과목은 자산·부채·자본·수익·비용으로 분류된 공식 항목만 해당됩니다.';
+            const missNote = document.getElementById('pop-miss-note');
+            missNote.textContent = '⚠️ 함정 단어: 계정과목이 아닌 단어를 클릭했어요. 이 단어는 회계 장부에 직접 쓰이지 않아요.';
+            missNote.style.display = 'block';
+            document.getElementById('acct-popup-overlay').classList.add('open');
+            return;
+        }
+
+        if (!info) return;
+
+        document.getElementById('pop-word').textContent = word;
+
+        const badge = document.getElementById('pop-type-badge');
+        badge.textContent = TYPE_LABEL[info.type] || info.type;
+        badge.style.background = info.color + '22';
+        badge.style.color = info.color;
+        badge.style.border = '1px solid ' + info.color + '55';
+
+        document.getElementById('pop-desc').textContent = info.desc;
+
+        const exBox = document.getElementById('pop-example');
+        exBox.style.borderLeftColor = info.color;
+        document.getElementById('pop-example-text').textContent = info.ex;
+
+        const missNote = document.getElementById('pop-miss-note');
+        if (missType === 'missed') {
+            missNote.textContent = '⏰ 놓침: 계정과목인데 클릭하지 못했어요. 다음엔 빠르게 선택해보세요!';
+            missNote.style.display = 'block';
+        } else {
+            missNote.style.display = 'none';
+        }
+
+        document.getElementById('acct-popup-overlay').classList.add('open');
+    }
+
+    function closeAcctPopup(e) {
+        if (e && e.target !== document.getElementById('acct-popup-overlay')) return;
+        document.getElementById('acct-popup-overlay').classList.remove('open');
+    }
     const SUPABASE_URL = "https://pjagaulfivafamhhiveg.supabase.co";
     const SUPABASE_KEY = "sb_publishable_yck2tAKApEjVSJOJMVSXuQ_AGaNatuI";
     const { createClient } = supabase;
@@ -967,7 +1205,8 @@
         const safeName = String(name).replace(/<[^>]*>/g,'').substring(0,30).trim();
         if (!safeName) return;
         const today = new Date().toISOString().split('T')[0];
-        await db.rpc('upsert_score', {
+        const groupId = localStorage.getItem('hub_group_id') || null;
+        const rpcParams = {
             p_game_id: gameId,
             p_name:    safeName,
             p_score:   safeScore,
@@ -975,32 +1214,136 @@
             p_combo:   Math.max(0, combo||0),
             p_correct: Math.max(0, correct||0),
             p_date:    today
-        });
+        };
+        if (groupId) rpcParams.p_group_id = groupId;
+        await db.rpc('upsert_score', rpcParams);
     }
 
     async function supabaseFetchRanking(gameId) {
-        const { data, error } = await db
+        const groupId = localStorage.getItem('hub_group_id') || null;
+        let query = db
             .from('scores')
             .select()
             .eq('game_id', gameId)
             .order('score', { ascending: false })
             .limit(20);
+        if (groupId) query = query.eq('group_id', groupId);
+        const { data, error } = await query;
         if (error) throw error;
         return data;
     }
 
     // ── 안드로이드 WebView 광고 플레이스홀더 숨김 ──
-    function hideAdPlaceholder() {
-        const el = document.getElementById('adPlaceholder');
-        if (el) el.style.display = 'none';
-        document.body.style.paddingBottom = '0';
-    }
+    function hideAdPlaceholder() {}
     function showAdPlaceholder() {
-        const el = document.getElementById('adPlaceholder');
-        if (el) el.style.display = 'flex';
-        document.body.style.paddingBottom = 'var(--ad-h)';
+    const el = document.getElementById('ad-placeholder');
+    if (el) el.style.display = 'flex';
+    document.body.style.paddingBottom = '0px';
+}
+</script>
+
+<script>
+    // ── 팡파레 시스템 ──
+    const FANFARE_TARGET_SCORE = 6000;
+    const FANFARE_TARGET_LABEL = '베테랑';
+
+    function checkAndShowFanfare(currentScore, gradeFn) {
+        const grade = typeof gradeFn === 'function' ? gradeFn(currentScore) : gradeFn;
+        const alreadyShown = sessionStorage.getItem('fanfare_shown_game1_acid');
+        if (currentScore >= FANFARE_TARGET_SCORE && !alreadyShown) {
+            sessionStorage.setItem('fanfare_shown_game1_acid', '1');
+            setTimeout(() => showFanfare(grade), 600);
+        }
+    }
+
+    function showFanfare(grade) {
+        document.getElementById('fanfare-grade-text').textContent = grade || ('🥇 ' + FANFARE_TARGET_LABEL);
+        document.getElementById('fanfare-sub-text').textContent =
+            '목표 랭크 [' + FANFARE_TARGET_LABEL + ']를 달성했어요!\n전산회계 2급 합격에 한 걸음 더 가까워졌습니다 🎯';
+        spawnFanfareStars();
+        playFanfareSound();
+        document.getElementById('fanfare-overlay').classList.add('show');
+    }
+
+    function closeFanfare() {
+        document.getElementById('fanfare-overlay').classList.remove('show');
+    }
+
+    function spawnFanfareStars() {
+        const container = document.getElementById('fanfare-stars');
+        container.innerHTML = '';
+        const colors = ['gold','#ff2d78','#00f2ff','#00e676','#b44fff','#fff'];
+        for (let i = 0; i < 28; i++) {
+            const s = document.createElement('div');
+            s.className = 'fstar';
+            const angle = Math.random() * Math.PI * 2;
+            const dist = 80 + Math.random() * 120;
+            s.style.cssText = `
+                left:${40 + Math.random()*20}%;
+                top:${30 + Math.random()*20}%;
+                background:${colors[Math.floor(Math.random()*colors.length)]};
+                --tx:${Math.cos(angle)*dist}px;
+                --ty:${Math.sin(angle)*dist}px;
+                --dur:${0.6 + Math.random()*0.8}s;
+                --delay:${Math.random()*0.3}s;
+                width:${4+Math.random()*6}px;
+                height:${4+Math.random()*6}px;
+            `;
+            container.appendChild(s);
+        }
+    }
+
+    function playFanfareSound() {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            // 팡파레 멜로디: C E G C(high)
+            const notes = [523, 659, 784, 1047];
+            notes.forEach((freq, i) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.frequency.value = freq;
+                osc.type = 'sine';
+                const t = ctx.currentTime + i * 0.18;
+                gain.gain.setValueAtTime(0, t);
+                gain.gain.linearRampToValueAtTime(0.25, t + 0.05);
+                gain.gain.linearRampToValueAtTime(0, t + 0.3);
+                osc.start(t); osc.stop(t + 0.35);
+            });
+            // 마지막에 짧은 트릴
+            const trill = ctx.createOscillator();
+            const tGain = ctx.createGain();
+            trill.connect(tGain); tGain.connect(ctx.destination);
+            trill.frequency.value = 1047;
+            tGain.gain.setValueAtTime(0.3, ctx.currentTime + 0.85);
+            tGain.gain.linearRampToValueAtTime(0, ctx.currentTime + 1.3);
+            trill.start(ctx.currentTime + 0.85);
+            trill.stop(ctx.currentTime + 1.3);
+        } catch(e) {}
     }
 </script>
-<script>document.addEventListener('contextmenu', e => e.preventDefault()); document.addEventListener('selectstart', e => e.preventDefault()); document.addEventListener('copy', e => e.preventDefault()); document.addEventListener('keydown', e => { if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) || (e.ctrlKey && e.keyCode === 85)) { e.preventDefault(); } });</script>
-</body>
+
+    <script>document.addEventListener('contextmenu', e => e.preventDefault()); document.addEventListener('selectstart', e => e.preventDefault()); document.addEventListener('copy', e => e.preventDefault()); document.addEventListener('keydown', e => { if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) || (e.ctrlKey && e.keyCode === 85)) { e.preventDefault(); } });</script>
+<!-- 계정과목 설명 팝업 -->
+<div id="acct-popup-overlay" onclick="closeAcctPopup(event)">
+  <div id="acct-popup">
+    <div class="pop-header">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="pop-word" id="pop-word">—</div>
+        <div class="pop-type-badge" id="pop-type-badge">—</div>
+      </div>
+      <button class="pop-close" onclick="closeAcctPopup()">✕</button>
+    </div>
+    <div class="pop-body">
+      <div class="pop-desc" id="pop-desc">—</div>
+      <div class="pop-example" id="pop-example">
+        <div class="pop-example-label">EXAMPLE</div>
+        <div class="pop-example-text" id="pop-example-text">—</div>
+      </div>
+      <div class="pop-miss-note" id="pop-miss-note" style="display:none"></div>
+    </div>
+  </div>
+</div>
+
+
 </html>
