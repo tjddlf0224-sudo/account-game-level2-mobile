@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#020810">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" type="image/png" href="icon.png">
+<title>그룹 모드 — 전산회계 2급</title>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --cy: #00f2ff;
+  --pk: #ff2d78;
+  --gd: #ffd600;
+  --gn: #00e676;
+  --pu: #b44fff;
+  --bg: #020810;
+  --panel: rgba(255,255,255,0.04);
+  --border: rgba(255,255,255,0.10);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { width: 100%; min-height: 100%; }
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: var(--bg);
+  color: white;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  background-image:
+    radial-gradient(ellipse 60% 40% at 15% 20%, rgba(0,242,255,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 35% at 85% 80%, rgba(180,79,255,0.06) 0%, transparent 55%);
+}
+#starfield { position:fixed; inset:0; z-index:0; pointer-events:none; }
+
+/* ── 헤더 ── */
+.top-bar {
+  position: relative; z-index: 10;
+  display: flex; align-items: center;
+  padding: 18px 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  background: rgba(2,8,16,0.7);
+  backdrop-filter: blur(12px);
+}
+.back-btn {
+  display: flex; align-items: center; gap: 7px;
+  background: none; border: none;
+  color: rgba(255,255,255,0.5);
+  font-family: 'Orbitron', monospace;
+  font-size: 0.68rem; letter-spacing: 2px;
+  cursor: pointer; padding: 8px 0;
+  transition: color 0.2s;
+  text-decoration: none;
+}
+.back-btn:hover { color: var(--cy); }
+.back-btn svg { width:16px; height:16px; flex-shrink:0; }
+.top-title {
+  flex: 1; text-align: center;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.88rem; letter-spacing: 3px;
+  color: rgba(255,255,255,0.7);
+}
+.top-spacer { width: 80px; }
+
+/* ── 메인 영역 ── */
+.page-wrap {
+  position: relative; z-index: 1;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 36px 24px 60px;
+}
+
+/* 내 닉네임 표시 */
+.my-nick-bar {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 32px;
+  padding: 14px 18px;
+  background: rgba(0,242,255,0.05);
+  border: 1px solid rgba(0,242,255,0.12);
+  border-radius: 12px;
+}
+.my-nick-bar .label {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.6rem; letter-spacing: 2px;
+  color: rgba(0,242,255,0.5);
+}
+.my-nick-bar .nick {
+  font-weight: 700; font-size: 1rem;
+  color: rgba(255,255,255,0.9);
+}
+.my-nick-bar .no-nick {
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.3);
+}
+.my-nick-bar a {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: var(--cy);
+  text-decoration: none;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+.my-nick-bar a:hover { opacity: 1; }
+
+/* 현재 소속 그룹 배너 */
+.current-group-bar {
+  display: none;
+  align-items: center; gap: 12px;
+  margin-bottom: 28px;
+  padding: 16px 20px;
+  background: rgba(180,79,255,0.08);
+  border: 1px solid rgba(180,79,255,0.25);
+  border-radius: 14px;
+  animation: fadeIn 0.3s ease;
+}
+.current-group-bar.show { display: flex; }
+.current-group-bar .cg-icon { font-size: 1.4rem; }
+.current-group-bar .cg-info { flex: 1; }
+.current-group-bar .cg-label {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.6rem; letter-spacing: 2px;
+  color: rgba(180,79,255,0.6); margin-bottom: 3px;
+}
+.current-group-bar .cg-name { font-weight: 700; font-size: 1rem; }
+.current-group-bar .cg-leave {
+  background: none; border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 8px; padding: 6px 12px;
+  color: rgba(255,255,255,0.4); font-size: 0.75rem;
+  cursor: pointer; transition: all 0.2s; white-space: nowrap;
+}
+.current-group-bar .cg-leave:hover { border-color: var(--pk); color: var(--pk); }
+
+/* 섹션 탭 */
+.mode-tabs {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 12px; margin-bottom: 32px;
+}
+.mode-tab {
+  padding: 20px 16px;
+  background: var(--panel);
+  border: 1.5px solid var(--border);
+  border-radius: 18px;
+  cursor: pointer;
+  transition: all 0.22s;
+  text-align: center;
+}
+.mode-tab:hover { border-color: rgba(255,255,255,0.25); transform: translateY(-2px); }
+.mode-tab.active.create { border-color: var(--gn); background: rgba(0,230,118,0.07); }
+.mode-tab.active.join   { border-color: var(--cy); background: rgba(0,242,255,0.07); }
+.mode-tab .tab-icon { font-size: 2rem; margin-bottom: 8px; }
+.mode-tab .tab-name {
+  font-family: 'Black Han Sans', sans-serif;
+  font-size: 1.1rem; margin-bottom: 4px;
+}
+.mode-tab.active.create .tab-name { color: var(--gn); }
+.mode-tab.active.join   .tab-name { color: var(--cy); }
+.mode-tab .tab-desc { font-size: 0.78rem; color: rgba(255,255,255,0.35); }
+
+/* 패널 */
+.panel { display: none; animation: fadeInUp 0.3s ease; }
+.panel.active { display: block; }
+@keyframes fadeInUp {
+  from { opacity:0; transform:translateY(14px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity:0; } to { opacity:1; }
+}
+
+/* ── 그룹 생성 패널 ── */
+.create-card {
+  background: rgba(0,230,118,0.04);
+  border: 1px solid rgba(0,230,118,0.12);
+  border-radius: 20px;
+  padding: 28px 26px;
+}
+.field-label {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.62rem; letter-spacing: 3px;
+  color: rgba(255,255,255,0.35);
+  margin-bottom: 10px; display: block;
+}
+.text-input {
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  padding: 14px 18px;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 1rem; font-weight: 700;
+  color: #fff; outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  margin-bottom: 20px;
+  -webkit-appearance: none;
+}
+.text-input::placeholder { color: rgba(255,255,255,0.2); font-weight: 400; }
+.text-input:focus { border-color: var(--gn); box-shadow: 0 0 0 3px rgba(0,230,118,0.12); }
+
+.create-btn {
+  width: 100%; padding: 16px;
+  background: linear-gradient(135deg, var(--gn), #00b894);
+  border: none; border-radius: 12px;
+  font-family: 'Black Han Sans', sans-serif;
+  font-size: 1.1rem; color: #000;
+  cursor: pointer; transition: opacity 0.2s, transform 0.15s;
+  min-height: 52px;
+}
+.create-btn:hover::before { opacity: 1; }
+.create-btn:active { transform: scale(0.98); }
+.create-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* 생성 완료 결과 */
+.create-result {
+  display: none;
+  margin-top: 20px;
+  padding: 22px;
+  background: rgba(0,230,118,0.08);
+  border: 1px solid rgba(0,230,118,0.25);
+  border-radius: 14px;
+  text-align: center;
+  animation: fadeIn 0.3s ease;
+}
+.create-result.show { display: block; }
+.create-result .result-label {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.6rem; letter-spacing: 3px;
+  color: rgba(0,230,118,0.6); margin-bottom: 10px;
+}
+.create-result .result-code {
+  font-family: 'Orbitron', monospace;
+  font-size: 2.2rem; font-weight: 900;
+  color: var(--gn); letter-spacing: 6px;
+  margin-bottom: 8px;
+}
+.create-result .result-name {
+  font-size: 1rem; color: rgba(255,255,255,0.7);
+  margin-bottom: 14px;
+}
+.create-result .result-hint {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.35);
+  line-height: 1.6;
+}
+.copy-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: 14px;
+  padding: 9px 20px;
+  background: rgba(0,230,118,0.12);
+  border: 1px solid rgba(0,230,118,0.3);
+  border-radius: 50px;
+  font-size: 0.82rem; color: var(--gn);
+  cursor: pointer; transition: all 0.2s;
+}
+.copy-btn:hover { background: rgba(0,230,118,0.2); }
+
+/* ── 그룹 참여 패널 ── */
+.join-card {
+  background: rgba(0,242,255,0.03);
+  border: 1px solid rgba(0,242,255,0.10);
+  border-radius: 20px;
+  padding: 24px 22px;
+}
+
+/* 검색창 */
+.search-wrap {
+  position: relative; margin-bottom: 16px;
+}
+.search-icon {
+  position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+  color: rgba(0,242,255,0.4); font-size: 1rem; pointer-events: none;
+}
+.search-input {
+  width: 100%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(0,242,255,0.18);
+  border-radius: 12px;
+  padding: 14px 18px 14px 44px;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 0.95rem; color: #fff;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none;
+}
+.search-input::placeholder { color: rgba(255,255,255,0.2); }
+.search-input:focus {
+  border-color: var(--cy);
+  box-shadow: 0 0 0 3px rgba(0,242,255,0.10);
+}
+
+/* 리스트 헤더 */
+.list-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px;
+}
+.list-count {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.6rem; letter-spacing: 2px;
+  color: rgba(255,255,255,0.3);
+}
+.list-refresh {
+  background: none; border: none;
+  color: rgba(255,255,255,0.25); font-size: 0.85rem;
+  cursor: pointer; transition: color 0.2s, transform 0.3s; padding: 4px;
+}
+.list-refresh:hover { color: var(--cy); transform: rotate(180deg); }
+
+/* 그룹 리스트 */
+.group-list {
+  max-height: 360px;
+  overflow-y: auto;
+  border-radius: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,242,255,0.2) transparent;
+}
+.group-list::-webkit-scrollbar { width: 4px; }
+.group-list::-webkit-scrollbar-track { background: transparent; }
+.group-list::-webkit-scrollbar-thumb { background: rgba(0,242,255,0.2); border-radius: 2px; }
+
+.group-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px 16px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.group-item:hover, .group-item:active {
+  background: rgba(0,242,255,0.07);
+  border-color: rgba(0,242,255,0.25);
+  transform: translateX(3px);
+}
+.group-item.selected {
+  background: rgba(0,242,255,0.10);
+  border-color: var(--cy);
+}
+.group-item .gi-icon {
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,242,255,0.08);
+  border-radius: 10px;
+  font-size: 1.2rem; flex-shrink: 0;
+}
+.group-item .gi-info { flex: 1; min-width: 0; }
+.group-item .gi-name {
+  font-weight: 700; font-size: 0.95rem;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin-bottom: 3px;
+}
+.group-item .gi-meta {
+  font-size: 0.76rem; color: rgba(255,255,255,0.35);
+}
+.group-item .gi-meta span { margin-right: 10px; }
+.group-item .gi-badge {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.6rem; letter-spacing: 1px;
+  color: rgba(0,242,255,0.5);
+  background: rgba(0,242,255,0.07);
+  border: 1px solid rgba(0,242,255,0.15);
+  padding: 3px 9px; border-radius: 50px;
+  white-space: nowrap; flex-shrink: 0;
+}
+
+/* 로딩/빈 상태 */
+.list-loading {
+  text-align: center; padding: 40px 20px;
+  color: rgba(255,255,255,0.3); font-size: 0.9rem;
+}
+.list-loading .spinner {
+  width: 28px; height: 28px;
+  border: 2px solid rgba(0,242,255,0.15);
+  border-top-color: var(--cy);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 12px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.list-empty {
+  text-align: center; padding: 40px 20px;
+  color: rgba(255,255,255,0.25); font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+/* 참여 버튼 */
+.join-btn {
+  width: 100%; padding: 16px; margin-top: 16px;
+  background: linear-gradient(135deg, var(--cy), #0099aa);
+  border: none; border-radius: 12px;
+  font-family: 'Black Han Sans', sans-serif;
+  font-size: 1.1rem; color: #000;
+  cursor: pointer; transition: opacity 0.2s, transform 0.15s;
+  min-height: 52px; display: none;
+}
+.join-btn.show { display: block; }
+.join-btn:active { transform: scale(0.98); }
+.join-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* 에러/상태 메시지 */
+.status-msg {
+  margin-top: 14px; padding: 12px 16px;
+  border-radius: 10px; font-size: 0.82rem;
+  display: none;
+  animation: fadeIn 0.2s ease;
+}
+.status-msg.show { display: block; }
+.status-msg.err { background: rgba(255,45,120,0.1); border: 1px solid rgba(255,45,120,0.25); color: var(--pk); }
+.status-msg.ok  { background: rgba(0,230,118,0.1);  border: 1px solid rgba(0,230,118,0.25);  color: var(--gn); }
+
+.admin-link-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin-top: 20px; padding: 14px;
+  background: rgba(0,242,255,0.05);
+  border: 1px dashed rgba(0,242,255,0.2);
+  border-radius: 12px;
+  font-size: 0.85rem; color: rgba(0,242,255,0.6);
+  text-decoration: none; transition: all 0.2s;
+}
+.admin-link-btn:hover { background: rgba(0,242,255,0.1); border-color: rgba(0,242,255,0.4); color: var(--cy); }
+
+@media (max-width: 480px) {
+  .page-wrap { padding: 24px 16px 48px; }
+  .top-bar { padding: 14px 16px; }
+  .mode-tab { padding: 16px 12px; }
+  .mode-tab .tab-icon { font-size: 1.6rem; }
+  .create-card, .join-card { padding: 20px 16px; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="starfield"></canvas>
+
+<!-- 상단 바 -->
+<div class="top-bar">
+  <a class="back-btn" href="javascript:history.back()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M19 12H5M12 5l-7 7 7 7"/>
+    </svg>
+    BACK
+  </a>
+  <div class="top-title">GROUP MODE</div>
+  <div class="top-spacer"></div>
+</div>
+
+<div class="page-wrap">
+
+  <!-- 내 닉네임 표시 -->
+  <div class="my-nick-bar">
+    <div class="label">MY NICK</div>
+    <div class="nick" id="my-nick-display">—</div>
+    <a href="login.html" id="nick-change-link" style="display:none">변경 →</a>
+  </div>
+
+  <!-- 현재 소속 그룹 -->
+  <div class="current-group-bar" id="current-group-bar">
+    <div class="cg-icon">👥</div>
+    <div class="cg-info">
+      <div class="cg-label">CURRENT GROUP</div>
+      <div class="cg-name" id="current-group-name">—</div>
+    </div>
+    <button class="cg-leave" onclick="leaveGroup()">나가기</button>
+  </div>
+
+  <!-- 모드 선택 탭 -->
+  <div class="mode-tabs">
+    <div class="mode-tab create" id="tab-create" onclick="switchTab('create')">
+      <div class="tab-icon">➕</div>
+      <div class="tab-name">그룹 생성</div>
+      <div class="tab-desc">교수자 · 새 그룹 만들기</div>
+    </div>
+    <div class="mode-tab join" id="tab-join" onclick="switchTab('join')">
+      <div class="tab-icon">🔍</div>
+      <div class="tab-name">그룹 참여</div>
+      <div class="tab-desc">학생 · 그룹 검색 후 입장</div>
+    </div>
+  </div>
+
+  <!-- ── 그룹 생성 패널 ── -->
+  <div class="panel" id="panel-create">
+    <div class="create-card">
+      <label class="field-label" for="group-name-input">그룹명</label>
+      <input
+        class="text-input"
+        type="text"
+        id="group-name-input"
+        placeholder="예: 2반 1조, 방과후반A"
+        maxlength="20"
+        autocomplete="off"
+      >
+
+      <label class="field-label" for="teacher-name-input">교수자 이름 (선택)</label>
+      <input
+        class="text-input"
+        type="text"
+        id="teacher-name-input"
+        placeholder="예: 김선생님"
+        maxlength="15"
+        autocomplete="off"
+        style="margin-bottom:0;"
+      >
+
+      <div class="status-msg" id="create-status"></div>
+
+      <button class="create-btn" id="create-btn" onclick="createGroup()" style="margin-top:20px;">
+        ✨ 그룹 생성하기
+      </button>
+
+      <!-- 생성 완료 결과 -->
+      <div class="create-result" id="create-result">
+        <div class="result-label">GROUP CODE</div>
+        <div class="result-code" id="result-code">———</div>
+        <div class="result-name" id="result-name">—</div>
+        <div class="result-hint">
+          학생들에게 이 코드를 알려주거나<br>
+          그룹 참여에서 그룹명을 검색해 입장하게 하세요
+        </div>
+        <button class="copy-btn" onclick="copyCode()">
+          📋 코드 복사
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 그룹 참여 패널 ── -->
+  <div class="panel" id="panel-join">
+    <div class="join-card">
+      <!-- 검색창 -->
+      <div class="search-wrap">
+        <div class="search-icon">🔍</div>
+        <input
+          class="search-input"
+          type="text"
+          id="search-input"
+          placeholder="그룹명 또는 교수자명 검색..."
+          autocomplete="off"
+          oninput="onSearch(this.value)"
+        >
+      </div>
+
+      <!-- 리스트 헤더 -->
+      <div class="list-header">
+        <div class="list-count" id="list-count">— 개 그룹</div>
+        <button class="list-refresh" onclick="loadGroups()" title="새로고침">↻</button>
+      </div>
+
+      <!-- 그룹 리스트 -->
+      <div class="group-list" id="group-list">
+        <div class="list-loading">
+          <div class="spinner"></div>
+          그룹 목록 불러오는 중...
+        </div>
+      </div>
+
+      <!-- 참여 버튼 -->
+      <button class="join-btn" id="join-btn" onclick="joinGroup()">
+        👥 이 그룹에 참여하기
+      </button>
+
+      <div class="status-msg" id="join-status"></div>
+    </div>
+
+    <!-- 교수자 대시보드 링크 -->
+    <a class="admin-link-btn" href="admin.html">
+      📊 교수자 대시보드로 이동 →
+    </a>
+  </div>
+
+</div>
+
+<script>
+/* ═══════════════════════════════════════
+   Supabase 설정
+═══════════════════════════════════════ */
+const SUPABASE_URL = "https://pjagaulfivafamhhiveg.supabase.co";
+const SUPABASE_KEY = "sb_publishable_yck2tAKApEjVSJOJMVSXuQ_AGaNatuI";
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* ═══════════════════════════════════════
+   별 배경
+═══════════════════════════════════════ */
+const canvas = document.getElementById('starfield');
+const ctx = canvas.getContext('2d');
+let stars = [];
+const isMobile = window.innerWidth <= 600;
+function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+function mkStar() {
+  return { x: Math.random()*canvas.width, y: Math.random()*canvas.height,
+    r: Math.random()*1.4+0.2, v: Math.random()*0.3+0.05,
+    o: Math.random()*0.6+0.2,
+    c: Math.random()>0.88?'#00f2ff':Math.random()>0.75?'#b44fff':'#ffffff' };
+}
+function initStars() { stars = Array.from({length: isMobile?80:160}, mkStar); }
+function animStars() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  stars.forEach(s => {
+    s.y+=s.v; if(s.y>canvas.height){s.y=-2;s.x=Math.random()*canvas.width;}
+    ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    ctx.fillStyle=s.c;ctx.globalAlpha=s.o;ctx.fill();ctx.globalAlpha=1;
+  });
+  requestAnimationFrame(animStars);
+}
+resize();initStars();animStars();
+window.addEventListener('resize',()=>{resize();initStars();});
+
+/* ═══════════════════════════════════════
+   초기화
+═══════════════════════════════════════ */
+let allGroups = [];
+let selectedGroupId = null;
+let selectedGroupName = null;
+
+window.addEventListener('DOMContentLoaded', () => {
+  // 닉네임 표시
+  const nick = localStorage.getItem('hub_nickname');
+  const nickEl = document.getElementById('my-nick-display');
+  if (nick) {
+    nickEl.textContent = nick;
+  } else {
+    nickEl.textContent = '—';
+    nickEl.style.color = 'rgba(255,255,255,0.3)';
+    document.getElementById('nick-change-link').style.display = 'inline';
+  }
+
+  // 현재 그룹 표시
+  const gid = localStorage.getItem('hub_group_id');
+  const gname = localStorage.getItem('hub_group_name');
+  if (gid && gname) {
+    document.getElementById('current-group-name').textContent = gname;
+    document.getElementById('current-group-bar').classList.add('show');
+  }
+
+  // 기본 탭: 참여
+  switchTab('join');
+});
+
+/* ═══════════════════════════════════════
+   탭 전환
+═══════════════════════════════════════ */
+function switchTab(mode) {
+  document.getElementById('tab-create').classList.toggle('active', mode === 'create');
+  document.getElementById('tab-join').classList.toggle('active', mode === 'join');
+  document.getElementById('panel-create').classList.toggle('active', mode === 'create');
+  document.getElementById('panel-join').classList.toggle('active', mode === 'join');
+  if (mode === 'join' && allGroups.length === 0) loadGroups();
+}
+
+/* ═══════════════════════════════════════
+   그룹 생성
+═══════════════════════════════════════ */
+function genCode() {
+  // 6자리 영숫자 코드 (헷갈리는 문자 제외)
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  return Array.from({length:6}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
+}
+
+async function createGroup() {
+  const groupName = document.getElementById('group-name-input').value.trim();
+  const teacherName = document.getElementById('teacher-name-input').value.trim()
+    || localStorage.getItem('hub_nickname') || '교수자';
+
+  if (!groupName) { showStatus('create-status', '그룹명을 입력해주세요', 'err'); return; }
+  if (groupName.length < 2) { showStatus('create-status', '2글자 이상 입력해주세요', 'err'); return; }
+
+  const btn = document.getElementById('create-btn');
+  btn.disabled = true; btn.textContent = '생성 중...';
+
+  try {
+    const code = genCode();
+    const { error } = await db.from('groups').insert({
+      id: code,
+      name: groupName,
+      teacher_name: teacherName,
+      member_count: 0
+    });
+
+    if (error) {
+      // 코드 충돌 시 재시도
+      if (error.code === '23505') {
+        btn.disabled = false; btn.textContent = '✨ 그룹 생성하기';
+        showStatus('create-status', '잠시 후 다시 시도해주세요', 'err'); return;
+      }
+      throw error;
+    }
+
+    // 생성 성공 — 자동으로 이 그룹에 참여
+    localStorage.setItem('hub_group_id', code);
+    localStorage.setItem('hub_group_name', groupName);
+    document.getElementById('current-group-name').textContent = groupName;
+    document.getElementById('current-group-bar').classList.add('show');
+
+    // 결과 표시
+    document.getElementById('result-code').textContent = code;
+    document.getElementById('result-name').textContent = `"${groupName}" · ${teacherName}`;
+    document.getElementById('create-result').classList.add('show');
+    showStatus('create-status', '✓ 그룹이 생성되었습니다! 코드를 학생들에게 공유하세요.', 'ok');
+    window._createdCode = code;
+
+  } catch(e) {
+    showStatus('create-status', '오류가 발생했습니다. 다시 시도해주세요.', 'err');
+    console.error(e);
+  } finally {
+    btn.disabled = false; btn.textContent = '✨ 그룹 생성하기';
+  }
+}
+
+function copyCode() {
+  const code = window._createdCode;
+  if (!code) return;
+  navigator.clipboard.writeText(code).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = '✓ 복사 완료!';
+    setTimeout(() => btn.textContent = '📋 코드 복사', 2000);
+  }).catch(() => {
+    // 클립보드 API 미지원 대비
+    alert('그룹 코드: ' + code);
+  });
+}
+
+/* ═══════════════════════════════════════
+   그룹 목록 로드 (Supabase)
+═══════════════════════════════════════ */
+async function loadGroups() {
+  const listEl = document.getElementById('group-list');
+  listEl.innerHTML = '<div class="list-loading"><div class="spinner"></div>불러오는 중...</div>';
+  selectedGroupId = null; selectedGroupName = null;
+  document.getElementById('join-btn').classList.remove('show');
+
+  try {
+    const { data, error } = await db
+      .from('groups')
+      .select('id, name, teacher_name, member_count, created_at')
+      .order('created_at', { ascending: false })
+      .limit(200);
+
+    if (error) throw error;
+    allGroups = data || [];
+    renderGroups(allGroups);
+  } catch(e) {
+    listEl.innerHTML = '<div class="list-empty">⚠️ 목록을 불러올 수 없습니다.<br>네트워크를 확인해주세요.</div>';
+    console.error(e);
+  }
+}
+
+function renderGroups(list) {
+  const listEl = document.getElementById('group-list');
+  const countEl = document.getElementById('list-count');
+  countEl.textContent = list.length + '개 그룹';
+
+  if (!list.length) {
+    listEl.innerHTML = '<div class="list-empty">아직 생성된 그룹이 없습니다.<br>교수자에게 그룹 생성을 요청하세요.</div>';
+    return;
+  }
+
+  const currentGid = localStorage.getItem('hub_group_id');
+  listEl.innerHTML = list.map(g => {
+    const isSelected = selectedGroupId === g.id;
+    const isCurrent = currentGid === g.id;
+    const date = new Date(g.created_at).toLocaleDateString('ko-KR', {month:'numeric',day:'numeric'});
+    return `<div class="group-item${isSelected?' selected':''}" onclick="selectGroup('${escapeAttr(g.id)}','${escapeAttr(g.name)}',this)">
+      <div class="gi-icon">👥</div>
+      <div class="gi-info">
+        <div class="gi-name">${escapeHTML(g.name)}${isCurrent?' ✓':''}</div>
+        <div class="gi-meta">
+          <span>👤 ${escapeHTML(g.teacher_name||'—')}</span>
+          <span>👥 ${g.member_count||0}명</span>
+          <span>📅 ${date}</span>
+        </div>
+      </div>
+      <div class="gi-badge">${escapeHTML(g.id)}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════
+   실시간 검색
+═══════════════════════════════════════ */
+let searchTimer = null;
+function onSearch(val) {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    const q = val.trim().toLowerCase();
+    if (!q) { renderGroups(allGroups); return; }
+    const filtered = allGroups.filter(g =>
+      g.name.toLowerCase().includes(q) ||
+      (g.teacher_name||'').toLowerCase().includes(q) ||
+      g.id.toLowerCase().includes(q)
+    );
+    renderGroups(filtered);
+    // 검색 후 선택 초기화
+    selectedGroupId = null; selectedGroupName = null;
+    document.getElementById('join-btn').classList.remove('show');
+  }, 120); // 120ms debounce — 거의 실시간
+}
+
+/* ═══════════════════════════════════════
+   그룹 선택 & 참여
+═══════════════════════════════════════ */
+function selectGroup(id, name, el) {
+  selectedGroupId = id;
+  selectedGroupName = name;
+  // 선택 시각 피드백
+  document.querySelectorAll('.group-item').forEach(el => el.classList.remove('selected'));
+  el.classList.add('selected');
+  // 참여 버튼 노출
+  const joinBtn = document.getElementById('join-btn');
+  joinBtn.textContent = `👥 "${name}" 에 참여하기`;
+  joinBtn.classList.add('show');
+}
+
+async function joinGroup() {
+  if (!selectedGroupId) return;
+  const nick = localStorage.getItem('hub_nickname');
+  if (!nick) {
+    showStatus('join-status', '먼저 닉네임을 설정해주세요.', 'err');
+    return;
+  }
+
+  const btn = document.getElementById('join-btn');
+  btn.disabled = true; btn.textContent = '참여 중...';
+
+  try {
+    // 그룹 존재 확인
+    const { data, error } = await db
+      .from('groups').select('id,name').eq('id', selectedGroupId).single();
+    if (error || !data) throw new Error('그룹을 찾을 수 없습니다');
+
+    // localStorage에 저장
+    localStorage.setItem('hub_group_id', selectedGroupId);
+    localStorage.setItem('hub_group_name', selectedGroupName);
+
+    // 현재 그룹 배너 갱신
+    document.getElementById('current-group-name').textContent = selectedGroupName;
+    document.getElementById('current-group-bar').classList.add('show');
+
+    showStatus('join-status', `✓ "${selectedGroupName}" 그룹에 참여했습니다! 게임을 시작하세요.`, 'ok');
+
+    // 2초 후 허브로 이동
+    setTimeout(() => { window.location.href = 'index.html'; }, 1800);
+
+  } catch(e) {
+    showStatus('join-status', '참여에 실패했습니다. 다시 시도해주세요.', 'err');
+    btn.disabled = false; btn.textContent = `👥 "${selectedGroupName}" 에 참여하기`;
+  }
+}
+
+function leaveGroup() {
+  if (!confirm('그룹에서 나가시겠습니까?')) return;
+  localStorage.removeItem('hub_group_id');
+  localStorage.removeItem('hub_group_name');
+  document.getElementById('current-group-bar').classList.remove('show');
+  selectedGroupId = null; selectedGroupName = null;
+  document.getElementById('join-btn').classList.remove('show');
+  // 리스트 새로고침해서 ✓ 마크 제거
+  if (allGroups.length) renderGroups(
+    document.getElementById('search-input').value.trim()
+      ? allGroups.filter(g => g.name.toLowerCase().includes(document.getElementById('search-input').value.trim().toLowerCase()))
+      : allGroups
+  );
+}
+
+/* ═══════════════════════════════════════
+   유틸
+═══════════════════════════════════════ */
+function showStatus(id, msg, type) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.className = 'status-msg show ' + type;
+}
+function escapeHTML(s) {
+  if (!s) return '';
+  return String(s).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+}
+function escapeAttr(s) {
+  return String(s||'').replace(/'/g, "\\'");
+}
+function hideAdPlaceholder() {}
+</script>
+</body>
+</html>

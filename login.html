@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#020810">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="manifest" href="manifest.json">
+<title>전산회계 2급 마스터 — 로그인</title>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --cy: #00f2ff;
+  --pk: #ff2d78;
+  --gd: #ffd600;
+  --gn: #00e676;
+  --pu: #b44fff;
+  --bg: #020810;
+  --panel: rgba(255,255,255,0.04);
+  --border: rgba(255,255,255,0.10);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { width: 100%; height: 100%; }
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: var(--bg);
+  color: white;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-image:
+    radial-gradient(ellipse 60% 40% at 15% 20%, rgba(0,242,255,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 35% at 85% 80%, rgba(180,79,255,0.07) 0%, transparent 55%),
+    radial-gradient(ellipse 40% 30% at 50% 50%, rgba(255,45,120,0.04) 0%, transparent 60%);
+}
+
+/* ── 별 캔버스 ── */
+#starfield { position:fixed; inset:0; z-index:0; pointer-events:none; }
+
+/* ── 그룹 모드 버튼 (우측 상단) ── */
+.group-mode-btn {
+  position: fixed;
+  top: 20px; right: 20px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 18px;
+  background: rgba(180,79,255,0.10);
+  border: 1px solid rgba(180,79,255,0.35);
+  border-radius: 50px;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 1.5px;
+  color: var(--pu);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.group-mode-btn:hover, .group-mode-btn:active {
+  background: rgba(180,79,255,0.2);
+  border-color: var(--pu);
+  box-shadow: 0 0 18px rgba(180,79,255,0.25);
+}
+.group-mode-btn .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--pu);
+  box-shadow: 0 0 8px var(--pu);
+  animation: blink 2s ease-in-out infinite;
+}
+@keyframes blink {
+  0%,100% { opacity:1; } 50% { opacity:0.3; }
+}
+
+/* ── 메인 카드 ── */
+.login-wrap {
+  position: relative; z-index: 1;
+  width: 100%;
+  max-width: 420px;
+  padding: 0 24px;
+  animation: fadeInUp 0.6s ease both;
+}
+
+@keyframes fadeInUp {
+  from { opacity:0; transform:translateY(28px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* 로고/타이틀 */
+.login-logo {
+  text-align: center;
+  margin-bottom: 44px;
+}
+.login-badge {
+  display: inline-block;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.65rem; letter-spacing: 4px;
+  color: rgba(0,242,255,0.6);
+  border: 1px solid rgba(0,242,255,0.2);
+  padding: 5px 18px; border-radius: 50px;
+  margin-bottom: 20px;
+  background: rgba(0,242,255,0.04);
+}
+.login-title {
+  font-family: 'Black Han Sans', sans-serif;
+  font-size: 2.6rem;
+  line-height: 1.15;
+  margin-bottom: 10px;
+}
+.login-title .t1 { color: #fff; }
+.login-title .t2 {
+  background: linear-gradient(90deg, var(--cy), var(--pu));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.login-sub {
+  font-size: 0.88rem;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 0.3px;
+}
+
+/* 입력 카드 */
+.login-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 24px;
+  padding: 36px 32px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.4);
+}
+
+.field-label {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 3px;
+  color: rgba(255,255,255,0.35);
+  margin-bottom: 12px;
+  display: block;
+}
+
+.nickname-input {
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 14px;
+  padding: 16px 20px;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  margin-bottom: 8px;
+  -webkit-appearance: none;
+}
+.nickname-input::placeholder {
+  color: rgba(255,255,255,0.2);
+  font-weight: 400;
+}
+.nickname-input:focus {
+  border-color: var(--cy);
+  box-shadow: 0 0 0 3px rgba(0,242,255,0.12);
+}
+
+.input-hint {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.25);
+  margin-bottom: 28px;
+  padding-left: 4px;
+}
+
+/* 에러 메시지 */
+.err-msg {
+  font-size: 0.8rem;
+  color: var(--pk);
+  margin-bottom: 16px;
+  padding-left: 4px;
+  min-height: 18px;
+  display: none;
+}
+.err-msg.show { display: block; }
+
+/* 시작 버튼 */
+.start-btn {
+  width: 100%;
+  padding: 18px;
+  background: linear-gradient(135deg, var(--cy), var(--pu));
+  border: none;
+  border-radius: 14px;
+  font-family: 'Black Han Sans', sans-serif;
+  font-size: 1.2rem;
+  color: #fff;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+  letter-spacing: 1px;
+  min-height: 58px;
+  box-shadow: 0 8px 28px rgba(0,242,255,0.2);
+  position: relative;
+  overflow: hidden;
+}
+.start-btn::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.start-btn:hover::before, .start-btn:active::before { opacity: 1; }
+.start-btn:active { transform: scale(0.98); }
+.start-btn:disabled {
+  opacity: 0.5; cursor: not-allowed; transform: none;
+}
+
+/* 그룹 상태 표시 (이미 그룹에 있는 경우) */
+.group-status {
+  margin-top: 20px;
+  padding: 14px 18px;
+  background: rgba(180,79,255,0.08);
+  border: 1px solid rgba(180,79,255,0.2);
+  border-radius: 12px;
+  display: none;
+  align-items: center;
+  gap: 10px;
+}
+.group-status.show { display: flex; }
+.group-status .gs-icon { font-size: 1.2rem; }
+.group-status .gs-info { flex: 1; }
+.group-status .gs-label {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 2px;
+  color: rgba(180,79,255,0.7);
+  margin-bottom: 2px;
+}
+.group-status .gs-name {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.85);
+}
+.group-status .gs-clear {
+  background: none; border: none;
+  color: rgba(255,255,255,0.3);
+  cursor: pointer; font-size: 1rem;
+  padding: 4px; line-height: 1;
+  transition: color 0.2s;
+}
+.group-status .gs-clear:hover { color: var(--pk); }
+
+/* 모바일 */
+@media (max-width: 480px) {
+  .login-title { font-size: 2.1rem; }
+  .login-card { padding: 28px 22px; border-radius: 20px; }
+  .group-mode-btn { top: 14px; right: 14px; font-size: 0.62rem; padding: 8px 14px; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="starfield"></canvas>
+
+<!-- 우측 상단 그룹 모드 버튼 -->
+<a class="group-mode-btn" href="group.html">
+  <div class="dot"></div>
+  그룹 모드
+</a>
+
+<div class="login-wrap">
+  <!-- 로고 -->
+  <div class="login-logo">
+    <div class="login-badge">전산회계 2급 마스터</div>
+    <div class="login-title">
+      <div class="t1">게임으로 완성하는</div>
+      <div class="t2">회계 마스터</div>
+    </div>
+    <div class="login-sub">닉네임을 입력하고 훈련을 시작하세요</div>
+  </div>
+
+  <!-- 입력 카드 -->
+  <div class="login-card">
+    <label class="field-label" for="nickname">NICKNAME</label>
+    <input
+      class="nickname-input"
+      type="text"
+      id="nickname"
+      placeholder="나만의 닉네임 입력"
+      maxlength="12"
+      autocomplete="off"
+      autocorrect="off"
+      spellcheck="false"
+    >
+    <div class="input-hint">2~12자 · 나중에 랭킹에 표시됩니다</div>
+    <div class="err-msg" id="err-msg"></div>
+
+    <button class="start-btn" id="start-btn" onclick="doLogin()">
+      🚀 훈련 시작
+    </button>
+
+    <!-- 이미 그룹에 속한 경우 표시 -->
+    <div class="group-status" id="group-status">
+      <div class="gs-icon">👥</div>
+      <div class="gs-info">
+        <div class="gs-label">CURRENT GROUP</div>
+        <div class="gs-name" id="gs-name-el">—</div>
+      </div>
+      <button class="gs-clear" onclick="clearGroup()" title="그룹 나가기">✕</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── 별 배경 ── */
+const canvas = document.getElementById('starfield');
+const ctx = canvas.getContext('2d');
+let stars = [];
+const isMobile = window.innerWidth <= 600;
+const STAR_COUNT = isMobile ? 80 : 160;
+function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+function mkStar() {
+  return {
+    x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+    r: Math.random() * 1.4 + 0.2, v: Math.random() * 0.3 + 0.05,
+    o: Math.random() * 0.6 + 0.2,
+    c: Math.random() > 0.88 ? '#00f2ff' : Math.random() > 0.75 ? '#b44fff' : '#ffffff'
+  };
+}
+function initStars() { stars = Array.from({length: STAR_COUNT}, mkStar); }
+function animStars() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  stars.forEach(s => {
+    s.y += s.v;
+    if (s.y > canvas.height) { s.y = -2; s.x = Math.random() * canvas.width; }
+    ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = s.c; ctx.globalAlpha = s.o; ctx.fill(); ctx.globalAlpha = 1;
+  });
+  requestAnimationFrame(animStars);
+}
+resize(); initStars(); animStars();
+window.addEventListener('resize', () => { resize(); initStars(); });
+
+/* ── 로그인 로직 ── */
+const input = document.getElementById('nickname');
+const errMsg = document.getElementById('err-msg');
+
+// 이미 저장된 닉네임이 있으면 채워넣기
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('hub_nickname');
+  if (saved) input.value = saved;
+
+  // 그룹 상태 표시
+  const gid = localStorage.getItem('hub_group_id');
+  const gname = localStorage.getItem('hub_group_name');
+  if (gid && gname) {
+    document.getElementById('gs-name-el').textContent = gname;
+    document.getElementById('group-status').classList.add('show');
+  }
+});
+
+input.addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+  errMsg.classList.remove('show');
+});
+input.addEventListener('input', () => errMsg.classList.remove('show'));
+
+function showErr(msg) {
+  errMsg.textContent = msg;
+  errMsg.classList.add('show');
+  input.focus();
+}
+
+function doLogin() {
+  const name = input.value.trim();
+  if (!name) { showErr('닉네임을 입력해주세요'); return; }
+  if (name.length < 2) { showErr('2글자 이상 입력해주세요'); return; }
+  if (name.length > 12) { showErr('12글자 이하로 입력해주세요'); return; }
+
+  // localStorage에 닉네임 저장
+  localStorage.setItem('hub_nickname', name);
+  // 게임별 기존 myName도 동기화
+  ['acid','memory','debit','factory'].forEach(g =>
+    localStorage.setItem(`hub_${g}_myName`, name)
+  );
+
+  const btn = document.getElementById('start-btn');
+  btn.disabled = true;
+  btn.textContent = '이동 중...';
+  window.location.href = 'index.html';
+}
+
+function clearGroup() {
+  localStorage.removeItem('hub_group_id');
+  localStorage.removeItem('hub_group_name');
+  document.getElementById('group-status').classList.remove('show');
+}
+
+// 안드로이드 WebView
+function hideAdPlaceholder() {}
+</script>
+</body>
+</html>

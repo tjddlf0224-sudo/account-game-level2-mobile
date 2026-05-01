@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#020810">
+<title>교수자 대시보드 — 전산회계 2급</title>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --cy:#00f2ff; --pk:#ff2d78; --gd:#ffd600; --gn:#00e676; --pu:#b44fff;
+  --bg:#020810; --surface:rgba(255,255,255,0.04); --border:rgba(255,255,255,0.09);
+  --game1:#00e676; --game2:#00f2ff; --game3:#b44fff; --game4:#ffd600; --game5:#ff2d78;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;min-height:100%}
+body{
+  font-family:'Noto Sans KR',sans-serif;
+  background:var(--bg);color:#fff;
+  min-height:100vh;overflow-x:hidden;
+  background-image:
+    radial-gradient(ellipse 55% 35% at 10% 15%,rgba(0,242,255,0.06) 0%,transparent 60%),
+    radial-gradient(ellipse 45% 30% at 90% 85%,rgba(180,79,255,0.06) 0%,transparent 55%);
+}
+#starfield{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* ══ 사이드바 레이아웃 ══ */
+.layout{display:flex;min-height:100vh}
+.sidebar{
+  position:fixed;top:0;left:0;bottom:0;
+  width:260px;z-index:50;
+  background:rgba(2,8,16,0.9);
+  border-right:1px solid var(--border);
+  backdrop-filter:blur(20px);
+  display:flex;flex-direction:column;
+  transition:transform 0.3s ease;
+  overflow-y:auto;
+}
+.main{margin-left:260px;flex:1;position:relative;z-index:1}
+
+/* ── 사이드바 내부 ── */
+.sb-header{padding:28px 22px 20px}
+.sb-badge{
+  font-family:'Orbitron',monospace;font-size:0.58rem;letter-spacing:3px;
+  color:rgba(0,242,255,0.5);margin-bottom:12px;display:block;
+}
+.sb-title{
+  font-family:'Black Han Sans',sans-serif;font-size:1.2rem;
+  line-height:1.3;color:#fff;margin-bottom:4px;
+}
+.sb-title span{
+  background:linear-gradient(90deg,var(--cy),var(--pu));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.sb-nick{
+  font-size:0.78rem;color:rgba(255,255,255,0.35);margin-top:6px;
+}
+
+.sb-divider{height:1px;background:var(--border);margin:0 22px 16px}
+
+/* 그룹 선택 영역 */
+.sb-section-label{
+  font-family:'Orbitron',monospace;font-size:0.58rem;letter-spacing:2.5px;
+  color:rgba(255,255,255,0.25);padding:0 22px;margin-bottom:8px;
+}
+.group-search-wrap{padding:0 14px;margin-bottom:10px}
+.group-search{
+  width:100%;background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.1);border-radius:10px;
+  padding:9px 14px;font-size:0.82rem;color:#fff;outline:none;
+  font-family:'Noto Sans KR',sans-serif;
+  transition:border-color 0.2s;-webkit-appearance:none;
+}
+.group-search::placeholder{color:rgba(255,255,255,0.2)}
+.group-search:focus{border-color:var(--cy)}
+
+.group-nav{flex:1;overflow-y:auto;padding-bottom:16px}
+.group-nav::-webkit-scrollbar{width:3px}
+.group-nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:2px}
+
+.group-nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:11px 22px;cursor:pointer;
+  transition:background 0.15s;
+  border-left:3px solid transparent;
+}
+.group-nav-item:hover{background:rgba(255,255,255,0.04)}
+.group-nav-item.active{
+  background:rgba(0,242,255,0.07);
+  border-left-color:var(--cy);
+}
+.gni-icon{
+  width:32px;height:32px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1rem;flex-shrink:0;
+  background:rgba(255,255,255,0.05);
+}
+.group-nav-item.active .gni-icon{background:rgba(0,242,255,0.1)}
+.gni-info{flex:1;min-width:0}
+.gni-name{font-size:0.88rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gni-meta{font-size:0.7rem;color:rgba(255,255,255,0.3);margin-top:1px}
+
+.sb-nav-loading{padding:20px 22px;text-align:center;color:rgba(255,255,255,0.25);font-size:0.82rem}
+.sb-nav-empty{padding:20px 22px;color:rgba(255,255,255,0.25);font-size:0.8rem;line-height:1.6}
+
+/* 사이드바 하단 */
+.sb-footer{padding:16px 22px;border-top:1px solid var(--border)}
+.sb-back-btn{
+  display:flex;align-items:center;gap:7px;
+  background:none;border:1px solid rgba(255,255,255,0.1);
+  border-radius:10px;padding:10px 14px;width:100%;
+  color:rgba(255,255,255,0.4);font-size:0.78rem;cursor:pointer;
+  transition:all 0.2s;text-decoration:none;
+}
+.sb-back-btn:hover{border-color:rgba(255,255,255,0.25);color:rgba(255,255,255,0.7)}
+
+/* ══ 메인 콘텐츠 ══ */
+.content-wrap{padding:36px 36px 60px}
+
+/* 콘텐츠 헤더 */
+.content-header{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  margin-bottom:32px;gap:16px;flex-wrap:wrap;
+}
+.content-header .ch-left{}
+.content-header .ch-group-name{
+  font-family:'Black Han Sans',sans-serif;
+  font-size:2rem;color:#fff;margin-bottom:4px;
+}
+.content-header .ch-meta{
+  font-size:0.82rem;color:rgba(255,255,255,0.35);
+}
+.refresh-btn{
+  display:flex;align-items:center;gap:6px;
+  padding:10px 18px;background:rgba(0,242,255,0.07);
+  border:1px solid rgba(0,242,255,0.2);border-radius:50px;
+  font-family:'Orbitron',monospace;font-size:0.62rem;letter-spacing:1.5px;
+  color:var(--cy);cursor:pointer;transition:all 0.2s;white-space:nowrap;
+}
+.refresh-btn:hover{background:rgba(0,242,255,0.15)}
+.refresh-btn.spin .ri{animation:spin 0.6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* 빈 상태 */
+.empty-state{
+  text-align:center;padding:80px 20px;
+  color:rgba(255,255,255,0.2);
+}
+.empty-state .es-icon{font-size:3rem;margin-bottom:16px}
+.empty-state .es-title{font-size:1.1rem;margin-bottom:8px;color:rgba(255,255,255,0.35)}
+.empty-state .es-desc{font-size:0.82rem;line-height:1.7}
+
+/* ── 요약 카드 ── */
+.summary-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:14px;margin-bottom:32px;
+}
+.sum-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;padding:20px 18px;
+  transition:border-color 0.2s;
+}
+.sum-card:hover{border-color:rgba(255,255,255,0.18)}
+.sum-card .sc-label{
+  font-family:'Orbitron',monospace;font-size:0.58rem;
+  letter-spacing:2.5px;color:rgba(255,255,255,0.3);margin-bottom:10px;
+}
+.sum-card .sc-val{
+  font-family:'Black Han Sans',sans-serif;font-size:2rem;
+  line-height:1;margin-bottom:4px;
+}
+.sum-card .sc-sub{font-size:0.75rem;color:rgba(255,255,255,0.3)}
+.sum-card.c-cy .sc-val{color:var(--cy)}
+.sum-card.c-gn .sc-val{color:var(--gn)}
+.sum-card.c-gd .sc-val{color:var(--gd)}
+.sum-card.c-pk .sc-val{color:var(--pk)}
+
+/* ── 두 컬럼 레이아웃 ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px}
+.one-col{margin-bottom:24px}
+
+/* ── 패널 공통 ── */
+.panel{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:18px;overflow:hidden;
+}
+.panel-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 22px 14px;border-bottom:1px solid var(--border);
+}
+.panel-title{
+  font-family:'Orbitron',monospace;font-size:0.72rem;
+  letter-spacing:2px;color:rgba(255,255,255,0.6);
+  display:flex;align-items:center;gap:8px;
+}
+.panel-title .pt-dot{
+  width:6px;height:6px;border-radius:50%;background:var(--cy);
+  box-shadow:0 0 8px var(--cy);
+}
+.panel-body{padding:16px 20px}
+
+/* ── 그룹 랭킹 테이블 ── */
+.rank-table{width:100%;border-collapse:collapse}
+.rank-table th{
+  font-family:'Orbitron',monospace;font-size:0.58rem;
+  letter-spacing:2px;color:rgba(255,255,255,0.25);
+  text-align:left;padding:8px 12px 12px;border-bottom:1px solid var(--border);
+}
+.rank-table td{
+  padding:13px 12px;border-bottom:1px solid rgba(255,255,255,0.05);
+  font-size:0.88rem;vertical-align:middle;
+}
+.rank-table tr:last-child td{border-bottom:none}
+.rank-table tr:hover td{background:rgba(255,255,255,0.02)}
+
+.rank-no{
+  font-family:'Orbitron',monospace;font-size:0.72rem;
+  font-weight:900;width:36px;
+}
+.rank-no.gold{color:var(--gd)}
+.rank-no.silver{color:#c0c0c0}
+.rank-no.bronze{color:#cd7f32}
+.rank-no.other{color:rgba(255,255,255,0.3)}
+
+.rank-name{font-weight:700;color:#fff}
+.rank-score{
+  font-family:'Orbitron',monospace;font-size:0.82rem;
+  color:var(--cy);text-align:right;
+}
+.rank-grade{
+  font-size:0.72rem;color:rgba(255,255,255,0.4);text-align:center;
+  white-space:nowrap;
+}
+
+/* ── 게임별 참여율 바 ── */
+.game-bar-list{display:flex;flex-direction:column;gap:14px}
+.game-bar-item{}
+.gbi-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:7px;
+}
+.gbi-name{
+  display:flex;align-items:center;gap:8px;
+  font-size:0.85rem;font-weight:700;
+}
+.gbi-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.gbi-count{font-size:0.75rem;color:rgba(255,255,255,0.35)}
+.gbi-track{
+  height:8px;background:rgba(255,255,255,0.06);
+  border-radius:50px;overflow:hidden;
+}
+.gbi-fill{
+  height:100%;border-radius:50px;
+  transition:width 0.6s cubic-bezier(0.4,0,0.2,1);
+  width:0;
+}
+
+/* ── 학생 상세 분석 테이블 ── */
+.student-table{width:100%;border-collapse:collapse}
+.student-table th{
+  font-family:'Orbitron',monospace;font-size:0.55rem;
+  letter-spacing:1.5px;color:rgba(255,255,255,0.25);
+  text-align:center;padding:8px 8px 12px;border-bottom:1px solid var(--border);
+}
+.student-table th:first-child{text-align:left}
+.student-table td{
+  padding:11px 8px;border-bottom:1px solid rgba(255,255,255,0.04);
+  font-size:0.82rem;text-align:center;vertical-align:middle;
+}
+.student-table td:first-child{text-align:left;font-weight:700}
+.student-table tr:last-child td{border-bottom:none}
+.student-table tr:hover td{background:rgba(255,255,255,0.02)}
+
+/* 게임 점수 셀 */
+.score-cell{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:64px;padding:4px 10px;border-radius:8px;
+  font-family:'Orbitron',monospace;font-size:0.7rem;
+  font-weight:700;
+}
+.sc-none{color:rgba(255,255,255,0.15);background:none;font-family:'Noto Sans KR',sans-serif;font-size:0.75rem}
+.sc-high{background:rgba(0,230,118,0.1);color:var(--gn);border:1px solid rgba(0,230,118,0.2)}
+.sc-mid {background:rgba(255,214,0,0.08);color:var(--gd);border:1px solid rgba(255,214,0,0.18)}
+.sc-low {background:rgba(255,45,120,0.1);color:var(--pk);border:1px solid rgba(255,45,120,0.2)}
+
+/* 약점 태그 */
+.weak-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.weak-tag{
+  font-size:0.68rem;padding:3px 9px;border-radius:50px;
+  background:rgba(255,45,120,0.1);border:1px solid rgba(255,45,120,0.2);
+  color:var(--pk);white-space:nowrap;
+}
+.student-table .student-name-wrap{display:flex;flex-direction:column;gap:2px}
+
+/* 총점 / 레벨 */
+.total-score{font-family:'Orbitron',monospace;font-size:0.8rem;color:var(--cy)}
+.student-level{
+  font-size:0.68rem;color:rgba(255,255,255,0.35);
+  white-space:nowrap;
+}
+
+/* 개인 상세 모달 */
+.modal-overlay{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);
+  display:none;align-items:center;justify-content:center;padding:20px;
+}
+.modal-overlay.open{display:flex;animation:fadeIn 0.2s ease}
+.modal{
+  background:#0a1020;border:1px solid rgba(255,255,255,0.12);
+  border-radius:22px;width:100%;max-width:560px;
+  max-height:90vh;overflow-y:auto;
+  animation:slideUp 0.25s ease;
+}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.modal-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:24px 26px 18px;border-bottom:1px solid var(--border);
+  position:sticky;top:0;background:#0a1020;z-index:1;
+}
+.modal-title{font-family:'Black Han Sans',sans-serif;font-size:1.4rem}
+.modal-close{
+  background:none;border:none;color:rgba(255,255,255,0.3);
+  font-size:1.4rem;cursor:pointer;line-height:1;padding:4px;
+  transition:color 0.2s;
+}
+.modal-close:hover{color:#fff}
+.modal-body{padding:22px 26px 28px}
+
+/* 모달 내 레이더 차트 대체: 5각형 바 */
+.radar-wrap{margin-bottom:24px}
+.radar-title{
+  font-family:'Orbitron',monospace;font-size:0.62rem;letter-spacing:2px;
+  color:rgba(255,255,255,0.3);margin-bottom:14px;
+}
+.radar-bars{display:flex;flex-direction:column;gap:10px}
+.rb-item{}
+.rb-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:5px;
+}
+.rb-name{font-size:0.82rem;font-weight:700;display:flex;align-items:center;gap:7px}
+.rb-pct{
+  font-family:'Orbitron',monospace;font-size:0.7rem;
+  color:rgba(255,255,255,0.5);
+}
+.rb-track{
+  height:10px;background:rgba(255,255,255,0.06);
+  border-radius:50px;overflow:hidden;
+}
+.rb-fill{height:100%;border-radius:50px;transition:width 0.7s cubic-bezier(0.4,0,0.2,1)}
+
+/* 모달 진단 코멘트 */
+.diagnosis-box{
+  background:rgba(0,242,255,0.04);border:1px solid rgba(0,242,255,0.12);
+  border-radius:14px;padding:18px 20px;margin-bottom:20px;
+}
+.diag-label{
+  font-family:'Orbitron',monospace;font-size:0.58rem;letter-spacing:2.5px;
+  color:rgba(0,242,255,0.5);margin-bottom:10px;
+}
+.diag-text{font-size:0.88rem;line-height:1.75;color:rgba(255,255,255,0.75)}
+.diag-text strong{color:#fff}
+
+/* 모달 게임별 점수 카드 */
+.modal-score-grid{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:8px;
+}
+.msg-card{
+  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);
+  border-radius:12px;padding:12px 8px;text-align:center;
+}
+.msg-game{font-size:0.7rem;color:rgba(255,255,255,0.3);margin-bottom:6px}
+.msg-score{
+  font-family:'Orbitron',monospace;font-size:0.9rem;font-weight:900;
+  margin-bottom:4px;
+}
+.msg-grade{font-size:0.65rem;color:rgba(255,255,255,0.3)}
+
+/* ── 로딩 ── */
+.loading-cover{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:60px 20px;gap:16px;color:rgba(255,255,255,0.3);
+}
+.spinner{
+  width:32px;height:32px;
+  border:2px solid rgba(0,242,255,0.15);
+  border-top-color:var(--cy);border-radius:50%;
+  animation:spin 0.8s linear infinite;
+}
+
+/* ── 모바일 햄버거 ── */
+.menu-toggle{
+  display:none;position:fixed;top:14px;left:14px;z-index:300;
+  background:rgba(2,8,16,0.9);border:1px solid rgba(255,255,255,0.12);
+  border-radius:10px;padding:10px;cursor:pointer;color:#fff;
+  font-size:1.2rem;line-height:1;
+}
+.sidebar-overlay{
+  display:none;position:fixed;inset:0;z-index:40;
+  background:rgba(0,0,0,0.6);
+}
+
+/* ── 반응형 ── */
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .sidebar-overlay.open{display:block}
+  .main{margin-left:0}
+  .menu-toggle{display:flex}
+  .content-wrap{padding:24px 16px 48px}
+  .summary-grid{grid-template-columns:repeat(2,1fr)}
+  .two-col{grid-template-columns:1fr}
+  .modal-score-grid{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:480px){
+  .summary-grid{grid-template-columns:1fr 1fr;gap:10px}
+  .sum-card{padding:14px 12px}
+  .sum-card .sc-val{font-size:1.5rem}
+  .content-header .ch-group-name{font-size:1.5rem}
+}
+</style>
+</head>
+<body>
+
+<canvas id="starfield"></canvas>
+
+<!-- 모바일 햄버거 -->
+<button class="menu-toggle" id="menu-toggle" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" id="sb-overlay" onclick="toggleSidebar()"></div>
+
+<!-- 사이드바 -->
+<div class="sidebar" id="sidebar">
+  <div class="sb-header">
+    <span class="sb-badge">ADMIN PANEL</span>
+    <div class="sb-title">교수자<br><span>대시보드</span></div>
+    <div class="sb-nick" id="sb-nick">—</div>
+  </div>
+  <div class="sb-divider"></div>
+
+  <div class="sb-section-label">MY GROUPS</div>
+  <div class="group-search-wrap">
+    <input class="group-search" type="text" placeholder="그룹 검색..." oninput="filterSidebarGroups(this.value)" autocomplete="off">
+  </div>
+  <nav class="group-nav" id="group-nav">
+    <div class="sb-nav-loading"><div class="spinner" style="margin:0 auto 8px;width:20px;height:20px;border-width:2px"></div>불러오는 중...</div>
+  </nav>
+
+  <div class="sb-footer">
+    <a class="sb-back-btn" href="index.html">
+      ← 허브로 돌아가기
+    </a>
+  </div>
+</div>
+
+<!-- 메인 -->
+<div class="main">
+  <div class="content-wrap" id="content-wrap">
+
+    <!-- 초기 선택 안내 -->
+    <div class="empty-state" id="empty-state">
+      <div class="es-icon">📊</div>
+      <div class="es-title">그룹을 선택하세요</div>
+      <div class="es-desc">좌측 사이드바에서 분석할 그룹을 선택하면<br>학생별 상세 분석이 표시됩니다</div>
+    </div>
+
+    <!-- 대시보드 콘텐츠 (그룹 선택 후 표시) -->
+    <div id="dashboard" style="display:none">
+
+      <!-- 헤더 -->
+      <div class="content-header">
+        <div class="ch-left">
+          <div class="content-header .ch-group-name" id="ch-group-name" style="font-family:'Black Han Sans',sans-serif;font-size:2rem;margin-bottom:4px">—</div>
+          <div class="ch-meta" id="ch-meta">교수자: — · 학생 —명 · 코드: —</div>
+        </div>
+        <button class="refresh-btn" id="refresh-btn" onclick="loadDashboard()">
+          <span class="ri">↻</span> 새로고침
+        </button>
+      </div>
+
+      <!-- 요약 카드 -->
+      <div class="summary-grid">
+        <div class="sum-card c-cy">
+          <div class="sc-label">STUDENTS</div>
+          <div class="sc-val" id="sum-students">0</div>
+          <div class="sc-sub">참여 학생</div>
+        </div>
+        <div class="sum-card c-gn">
+          <div class="sc-label">TOTAL PLAYS</div>
+          <div class="sc-val" id="sum-plays">0</div>
+          <div class="sc-sub">전체 게임 기록</div>
+        </div>
+        <div class="sum-card c-gd">
+          <div class="sc-label">AVG SCORE</div>
+          <div class="sc-val" id="sum-avg">0</div>
+          <div class="sc-sub">게임별 평균점수</div>
+        </div>
+        <div class="sum-card c-pk">
+          <div class="sc-label">WEAK GAME</div>
+          <div class="sc-val" id="sum-weak" style="font-size:1.1rem;padding-top:6px">—</div>
+          <div class="sc-sub">가장 약한 스테이지</div>
+        </div>
+      </div>
+
+      <!-- 2컬럼: 그룹 랭킹 + 게임별 참여율 -->
+      <div class="two-col">
+
+        <!-- 그룹 종합 랭킹 -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><div class="pt-dot"></div>그룹 종합 랭킹</div>
+          </div>
+          <div class="panel-body">
+            <table class="rank-table" id="group-rank-table">
+              <thead><tr>
+                <th>#</th><th>학생</th><th style="text-align:right">총점</th><th style="text-align:center">클리어</th>
+              </tr></thead>
+              <tbody id="group-rank-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 게임별 참여율 -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><div class="pt-dot" style="background:var(--gn);box-shadow:0 0 8px var(--gn)"></div>게임별 참여율</div>
+          </div>
+          <div class="panel-body">
+            <div class="game-bar-list" id="game-bar-list"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 학생 상세 분석 테이블 -->
+      <div class="one-col">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <div class="pt-dot" style="background:var(--pu);box-shadow:0 0 8px var(--pu)"></div>
+              학생별 상세 분석
+            </div>
+            <span style="font-size:0.72rem;color:rgba(255,255,255,0.25)">클릭 → 개인 진단</span>
+          </div>
+          <div class="panel-body" style="overflow-x:auto;padding:0">
+            <table class="student-table" id="student-table">
+              <thead><tr>
+                <th style="padding-left:20px">학생</th>
+                <th>☁️ 산성비</th>
+                <th>🧩 기억의전당</th>
+                <th>⚡ 차변대변</th>
+                <th>🏭 조립공장</th>
+                <th>🛩 플라이트</th>
+                <th>종합</th>
+              </tr></thead>
+              <tbody id="student-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /dashboard -->
+  </div>
+</div>
+
+<!-- 학생 개인 상세 모달 -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-name">—</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- 게임별 점수 카드 -->
+      <div class="modal-score-grid" id="modal-score-grid" style="margin-bottom:22px"></div>
+
+      <!-- 역량 바 -->
+      <div class="radar-wrap">
+        <div class="radar-title">COMPETENCY ANALYSIS</div>
+        <div class="radar-bars" id="radar-bars"></div>
+      </div>
+
+      <!-- AI 진단 -->
+      <div class="diagnosis-box">
+        <div class="diag-label">📋 학습 진단 & 권장 방향</div>
+        <div class="diag-text" id="diag-text">분석 중...</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════
+   Supabase
+══════════════════════════════════════════ */
+const SUPABASE_URL = "https://pjagaulfivafamhhiveg.supabase.co";
+const SUPABASE_KEY = "sb_publishable_yck2tAKApEjVSJOJMVSXuQ_AGaNatuI";
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* ══════════════════════════════════════════
+   별 배경
+══════════════════════════════════════════ */
+const canvas = document.getElementById('starfield');
+const ctx = canvas.getContext('2d');
+let stars=[];
+const isMobile=window.innerWidth<=600;
+function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight}
+function mkStar(){return{x:Math.random()*canvas.width,y:Math.random()*canvas.height,
+  r:Math.random()*1.4+0.2,v:Math.random()*0.3+0.05,o:Math.random()*0.6+0.2,
+  c:Math.random()>.88?'#00f2ff':Math.random()>.75?'#b44fff':'#fff'}}
+function initStars(){stars=Array.from({length:isMobile?60:120},mkStar)}
+function animStars(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  stars.forEach(s=>{s.y+=s.v;if(s.y>canvas.height){s.y=-2;s.x=Math.random()*canvas.width}
+    ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    ctx.fillStyle=s.c;ctx.globalAlpha=s.o;ctx.fill();ctx.globalAlpha=1});
+  requestAnimationFrame(animStars);
+}
+resize();initStars();animStars();
+window.addEventListener('resize',()=>{resize();initStars()});
+
+/* ══════════════════════════════════════════
+   상수
+══════════════════════════════════════════ */
+const GAMES = [
+  { id:'acid',    name:'산성비',    icon:'☁️', color:'var(--game1)', max:30000  },
+  { id:'memory',  name:'기억의전당', icon:'🧩', color:'var(--game2)', max:3000   },
+  { id:'debit',   name:'차변대변',  icon:'⚡', color:'var(--game3)', max:15000  },
+  { id:'factory', name:'조립공장',  icon:'🏭', color:'var(--game4)', max:15000  },
+  { id:'flight',  name:'플라이트',  icon:'🛩', color:'var(--game5)', max:300000 },
+];
+
+/* ══════════════════════════════════════════
+   전역 상태
+══════════════════════════════════════════ */
+let allGroups   = [];
+let currentGid  = null;
+let currentGroup = null;
+let dashData    = null; // 현재 그룹 scores 배열
+
+/* ══════════════════════════════════════════
+   초기화
+══════════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', async () => {
+  // 닉네임 표시
+  const nick = localStorage.getItem('hub_nickname');
+  document.getElementById('sb-nick').textContent = nick ? `👤 ${nick}` : '게스트';
+
+  // 그룹 목록 로드
+  await loadGroupNav();
+
+  // URL hash로 그룹 자동 선택
+  const hash = location.hash.replace('#','');
+  if (hash && allGroups.find(g=>g.id===hash)) {
+    selectGroup(hash);
+  }
+});
+
+/* ══════════════════════════════════════════
+   사이드바 그룹 목록
+══════════════════════════════════════════ */
+async function loadGroupNav() {
+  const navEl = document.getElementById('group-nav');
+  try {
+    const { data, error } = await db
+      .from('groups')
+      .select('id,name,teacher_name,member_count,created_at')
+      .order('created_at', { ascending: false })
+      .limit(200);
+    if (error) throw error;
+    allGroups = data || [];
+    renderGroupNav(allGroups);
+  } catch(e) {
+    navEl.innerHTML = '<div class="sb-nav-empty">⚠️ 목록을 불러올 수 없습니다</div>';
+  }
+}
+
+function renderGroupNav(list) {
+  const navEl = document.getElementById('group-nav');
+  if (!list.length) {
+    navEl.innerHTML = '<div class="sb-nav-empty">그룹이 없습니다.<br>group.html에서 먼저 생성하세요.</div>';
+    return;
+  }
+  navEl.innerHTML = list.map(g => `
+    <div class="group-nav-item${g.id===currentGid?' active':''}" onclick="selectGroup('${esc(g.id)}')">
+      <div class="gni-icon">👥</div>
+      <div class="gni-info">
+        <div class="gni-name">${escHTML(g.name)}</div>
+        <div class="gni-meta">${escHTML(g.teacher_name||'—')} · ${g.member_count||0}명</div>
+      </div>
+    </div>`).join('');
+}
+
+function filterSidebarGroups(q) {
+  const filtered = q.trim()
+    ? allGroups.filter(g =>
+        g.name.toLowerCase().includes(q.toLowerCase()) ||
+        (g.teacher_name||'').toLowerCase().includes(q.toLowerCase()))
+    : allGroups;
+  renderGroupNav(filtered);
+}
+
+/* ══════════════════════════════════════════
+   그룹 선택 → 대시보드 로드
+══════════════════════════════════════════ */
+async function selectGroup(gid) {
+  currentGid = gid;
+  currentGroup = allGroups.find(g=>g.id===gid) || { id:gid, name:gid, teacher_name:'—', member_count:0 };
+  location.hash = gid;
+
+  // 사이드바 active 갱신
+  document.querySelectorAll('.group-nav-item').forEach(el => {
+    el.classList.toggle('active', el.getAttribute('onclick')?.includes(`'${gid}'`));
+  });
+
+  // 모바일: 사이드바 닫기
+  if (window.innerWidth <= 900) closeSidebar();
+
+  // 대시보드 표시
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+
+  await loadDashboard();
+}
+
+async function loadDashboard() {
+  if (!currentGid) return;
+  const btn = document.getElementById('refresh-btn');
+  btn.classList.add('spin'); btn.disabled = true;
+
+  // 헤더 설정
+  document.getElementById('ch-group-name').textContent = currentGroup.name;
+  document.getElementById('ch-meta').textContent =
+    `교수자: ${currentGroup.teacher_name||'—'} · 코드: ${currentGroup.id}`;
+
+  // 로딩 표시
+  ['group-rank-body','student-table-body','game-bar-list'].forEach(id =>
+    document.getElementById(id).innerHTML =
+      '<tr><td colspan="10" style="text-align:center;padding:30px;color:rgba(255,255,255,0.2)"><div class="spinner" style="margin:0 auto"></div></td></tr>'
+  );
+
+  try {
+    const { data, error } = await db
+      .from('scores')
+      .select('*')
+      .eq('group_id', currentGid);
+    if (error) throw error;
+    dashData = data || [];
+    renderDashboard(dashData);
+  } catch(e) {
+    console.error(e);
+  } finally {
+    btn.classList.remove('spin'); btn.disabled = false;
+  }
+}
+
+/* ══════════════════════════════════════════
+   대시보드 렌더링
+══════════════════════════════════════════ */
+function renderDashboard(scores) {
+  // 학생별로 집계
+  const students = {}; // name → { acid, memory, debit, factory, flight }
+  scores.forEach(s => {
+    if (!students[s.name]) students[s.name] = {};
+    const cur = students[s.name][s.game_id];
+    if (!cur || s.score > cur.score) students[s.name][s.game_id] = s;
+  });
+  const studentNames = Object.keys(students);
+  const studentCount = studentNames.length;
+
+  // 요약 카드
+  document.getElementById('sum-students').textContent = studentCount;
+  document.getElementById('sum-plays').textContent = scores.length;
+
+  // 게임별 평균 점수 (참여자 기준)
+  let avgScores = [];
+  GAMES.forEach(g => {
+    const plays = scores.filter(s=>s.game_id===g.id);
+    if (plays.length) avgScores.push(plays.reduce((a,b)=>a+b.score,0)/plays.length/g.max*100);
+  });
+  const avgPct = avgScores.length ? Math.round(avgScores.reduce((a,b)=>a+b,0)/avgScores.length) : 0;
+  document.getElementById('sum-avg').textContent = avgPct + '%';
+
+  // 가장 약한 게임
+  let weakGame = null, weakPct = 101;
+  GAMES.forEach(g => {
+    const plays = scores.filter(s=>s.game_id===g.id);
+    if (plays.length) {
+      const pct = plays.reduce((a,b)=>a+b.score,0)/plays.length/g.max*100;
+      if (pct < weakPct) { weakPct=pct; weakGame=g; }
+    }
+  });
+  document.getElementById('sum-weak').textContent = weakGame ? `${weakGame.icon} ${weakGame.name}` : '—';
+
+  // 인원수 업데이트
+  document.getElementById('ch-meta').textContent =
+    `교수자: ${currentGroup.teacher_name||'—'} · 학생 ${studentCount}명 · 코드: ${currentGroup.id}`;
+
+  // ── 그룹 종합 랭킹 ──
+  const ranked = studentNames.map(name => {
+    const s = students[name];
+    const total = GAMES.reduce((sum,g) => sum+(s[g.id]?.score||0), 0);
+    const cleared = GAMES.filter(g=>s[g.id]).length;
+    return { name, total, cleared, scores: s };
+  }).sort((a,b)=>b.total-a.total);
+
+  const rankBody = document.getElementById('group-rank-body');
+  if (!ranked.length) {
+    rankBody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:30px;color:rgba(255,255,255,0.2)">아직 데이터가 없습니다</td></tr>';
+  } else {
+    rankBody.innerHTML = ranked.slice(0,20).map((r,i) => {
+      const cls = i===0?'gold':i===1?'silver':i===2?'bronze':'other';
+      const medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
+      return `<tr>
+        <td class="rank-no ${cls}">${medal||('#'+(i+1))}</td>
+        <td class="rank-name" style="cursor:pointer" onclick="openModal('${escAttr(r.name)}')">
+          ${escHTML(r.name)} <span style="font-size:0.7rem;color:rgba(255,255,255,0.3)">↗</span>
+        </td>
+        <td class="rank-score">${r.total.toLocaleString()}</td>
+        <td class="rank-grade">${r.cleared}/5 ✓</td>
+      </tr>`;
+    }).join('');
+  }
+
+  // ── 게임별 참여율 바 ──
+  const barEl = document.getElementById('game-bar-list');
+  barEl.innerHTML = GAMES.map(g => {
+    const cnt = new Set(scores.filter(s=>s.game_id===g.id).map(s=>s.name)).size;
+    const pct = studentCount ? Math.round(cnt/studentCount*100) : 0;
+    return `<div class="game-bar-item">
+      <div class="gbi-header">
+        <div class="gbi-name">
+          <div class="gbi-dot" style="background:${g.color}"></div>
+          ${g.icon} ${g.name}
+        </div>
+        <div class="gbi-count">${cnt}/${studentCount}명 (${pct}%)</div>
+      </div>
+      <div class="gbi-track">
+        <div class="gbi-fill" style="background:${g.color};width:0"
+          data-w="${pct}"></div>
+      </div>
+    </div>`;
+  }).join('');
+  // 바 애니메이션
+  setTimeout(() => {
+    document.querySelectorAll('.gbi-fill').forEach(el => {
+      el.style.width = el.dataset.w + '%';
+    });
+  }, 50);
+
+  // ── 학생 상세 분석 테이블 ──
+  const tbody = document.getElementById('student-table-body');
+  if (!ranked.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:rgba(255,255,255,0.2)">아직 데이터가 없습니다</td></tr>';
+  } else {
+    tbody.innerHTML = ranked.map((r,i) => {
+      const gameCells = GAMES.map(g => {
+        const s = r.scores[g.id];
+        if (!s) return `<td><span class="score-cell sc-none">미참여</span></td>`;
+        const pct = s.score/g.max*100;
+        const cls = pct>=70?'sc-high':pct>=40?'sc-mid':'sc-low';
+        return `<td><span class="score-cell ${cls}">${s.score.toLocaleString()}</span></td>`;
+      }).join('');
+
+      // 약점 파악
+      const weakList = GAMES.filter(g => {
+        const s = r.scores[g.id];
+        if (!s) return true;
+        return s.score/g.max*100 < 40;
+      }).map(g=>g.name);
+
+      const totalPct = GAMES.reduce((sum,g)=>sum+(r.scores[g.id]?.score||0),0)
+        / GAMES.reduce((sum,g)=>sum+g.max,0)*100;
+      const level = totalPct>=70?'상':totalPct>=40?'중':'하';
+      const levelColor = totalPct>=70?'var(--gn)':totalPct>=40?'var(--gd)':'var(--pk)';
+
+      return `<tr style="cursor:pointer" onclick="openModal('${escAttr(r.name)}')">
+        <td style="padding-left:20px">
+          <div class="student-name-wrap">
+            <span>${i<3?['🥇','🥈','🥉'][i]+' ':''}<strong>${escHTML(r.name)}</strong></span>
+            ${weakList.length ? `<div class="weak-tags">${weakList.slice(0,3).map(w=>`<span class="weak-tag">⚠ ${w}</span>`).join('')}</div>` : ''}
+          </div>
+        </td>
+        ${gameCells}
+        <td>
+          <div class="total-score">${r.total.toLocaleString()}</div>
+          <div class="student-level" style="color:${levelColor}">종합 ${level}</div>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  // 점수 바 초기 애니메이션 (모달 열릴 때 적용)
+  window._ranked = ranked;
+}
+
+/* ══════════════════════════════════════════
+   개인 상세 모달
+══════════════════════════════════════════ */
+function openModal(name) {
+  if (!window._ranked) return;
+  const student = window._ranked.find(r=>r.name===name);
+  if (!student) return;
+
+  document.getElementById('modal-name').textContent = `📊 ${name}`;
+
+  // 게임별 점수 카드
+  const scoreGrid = document.getElementById('modal-score-grid');
+  scoreGrid.innerHTML = GAMES.map(g => {
+    const s = student.scores[g.id];
+    const pct = s ? s.score/g.max*100 : 0;
+    const col = !s?'rgba(255,255,255,0.2)':pct>=70?'var(--gn)':pct>=40?'var(--gd)':'var(--pk)';
+    return `<div class="msg-card">
+      <div class="msg-game">${g.icon} ${g.name}</div>
+      <div class="msg-score" style="color:${col}">${s?s.score.toLocaleString():'—'}</div>
+      <div class="msg-grade">${s?s.grade||'—':'미참여'}</div>
+    </div>`;
+  }).join('');
+
+  // 역량 바
+  const radars = document.getElementById('radar-bars');
+  radars.innerHTML = GAMES.map(g => {
+    const s = student.scores[g.id];
+    const pct = s ? Math.min(100, Math.round(s.score/g.max*100)) : 0;
+    const col = !s?'rgba(255,255,255,0.1)':pct>=70?'var(--gn)':pct>=40?'var(--gd)':'var(--pk)';
+    return `<div class="rb-item">
+      <div class="rb-header">
+        <div class="rb-name" style="color:${col}">
+          <span style="background:${col};width:8px;height:8px;border-radius:50%;display:inline-block"></span>
+          ${g.icon} ${g.name}
+        </div>
+        <div class="rb-pct">${pct}%</div>
+      </div>
+      <div class="rb-track">
+        <div class="rb-fill" style="background:${col};width:0" data-w="${pct}"></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // 모달 열기
+  document.getElementById('modal-overlay').classList.add('open');
+
+  // 바 애니메이션
+  setTimeout(() => {
+    document.querySelectorAll('.rb-fill').forEach(el => {
+      el.style.width = el.dataset.w + '%';
+    });
+  }, 50);
+
+  // 진단 텍스트 생성
+  document.getElementById('diag-text').innerHTML = generateDiagnosis(name, student);
+}
+
+function generateDiagnosis(name, student) {
+  const scores = student.scores;
+  const missing = GAMES.filter(g=>!scores[g.id]);
+  const weakGames = GAMES.filter(g=>{
+    const s=scores[g.id]; return s && s.score/g.max*100 < 40;
+  });
+  const strongGames = GAMES.filter(g=>{
+    const s=scores[g.id]; return s && s.score/g.max*100 >= 70;
+  });
+
+  const totalPct = GAMES.reduce((sum,g)=>sum+(scores[g.id]?.score||0),0)
+    / GAMES.reduce((sum,g)=>sum+g.max,0)*100;
+
+  let lines = [];
+
+  // 총평
+  if (totalPct >= 70) {
+    lines.push(`<strong>${name}</strong> 학생은 전반적으로 높은 성취도를 보이고 있습니다. 🎉`);
+  } else if (totalPct >= 40) {
+    lines.push(`<strong>${name}</strong> 학생은 기초가 잡혀 있으나 일부 영역 보완이 필요합니다.`);
+  } else {
+    lines.push(`<strong>${name}</strong> 학생은 전반적인 개념 보강이 필요한 상태입니다.`);
+  }
+
+  // 미참여
+  if (missing.length) {
+    lines.push(`<br><br>📌 <strong>미참여 스테이지:</strong> ${missing.map(g=>g.icon+' '+g.name).join(', ')} — 해당 영역 학습을 시작하도록 독려하세요.`);
+  }
+
+  // 약점
+  if (weakGames.length) {
+    const advice = {
+      acid:    '계정과목 암기 반복이 필요합니다. 산성비 게임을 더 플레이하게 하세요.',
+      memory:  '계정과목과 의미 연결이 부족합니다. 기억의 전당으로 매핑 훈련을 권장합니다.',
+      debit:   '차변·대변 구분 원리가 아직 불안정합니다. 분개 이론을 복습한 뒤 재도전을 권장합니다.',
+      factory: '결산분개 조립이 약합니다. 결산 항목별 차·대변 규칙을 표로 정리해 주세요.',
+      flight:  '장부조회 실전 감각이 부족합니다. 시험 기출문제와 병행 학습을 권장합니다.',
+    };
+    lines.push(`<br><br>⚠️ <strong>집중 보완 필요:</strong><br>${weakGames.map(g=>`• ${g.icon} <strong>${g.name}</strong>: ${advice[g.id]}`).join('<br>')}`);
+  }
+
+  // 강점
+  if (strongGames.length) {
+    lines.push(`<br><br>✅ <strong>강점 영역:</strong> ${strongGames.map(g=>g.icon+' '+g.name).join(', ')} — 해당 부분은 잘 유지되고 있습니다.`);
+  }
+
+  // 전산회계 2급 진단
+  const readiness = missing.length===0 && weakGames.length===0 ? '합격 가능성 높음 🟢'
+    : missing.length===0 && weakGames.length<=1 ? '조금 더 보완 필요 🟡'
+    : '추가 학습 필요 🔴';
+  lines.push(`<br><br>🎯 <strong>전산회계 2급 취득 준비도:</strong> ${readiness}`);
+
+  return lines.join('');
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modal-overlay')) return;
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+/* ══════════════════════════════════════════
+   사이드바 토글 (모바일)
+══════════════════════════════════════════ */
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sb-overlay').classList.toggle('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sb-overlay').classList.remove('open');
+}
+
+/* ══════════════════════════════════════════
+   유틸
+══════════════════════════════════════════ */
+function escHTML(s){ return String(s||'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+function escAttr(s){ return String(s||'').replace(/'/g,"\\'"); }
+function esc(s){ return String(s||'').replace(/'/g,"\\'"); }
+function hideAdPlaceholder(){}
+</script>
+</body>
+</html>
