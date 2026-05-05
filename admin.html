@@ -423,6 +423,56 @@ body{
   .sum-card .sc-val{font-size:1.5rem}
   .content-header .ch-group-name{font-size:1.5rem}
 }
+
+/* ── 비밀번호 확인 팝업 ── */
+#pass-overlay {
+  display: none; position: fixed; inset: 0; z-index: 9999;
+  background: rgba(2,8,16,0.85); backdrop-filter: blur(8px);
+  align-items: center; justify-content: center;
+}
+#pass-overlay.open { display: flex; }
+#pass-box {
+  background: #0d1520; border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 20px; padding: 36px 32px; width: 100%; max-width: 360px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+  animation: fadeInUp 0.25s ease both;
+}
+#pass-box .pb-title {
+  font-family: 'Orbitron', monospace; font-size: 0.7rem;
+  letter-spacing: 3px; color: rgba(0,242,255,0.7); margin-bottom: 6px;
+}
+#pass-box .pb-name {
+  font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 20px;
+}
+#pass-input {
+  width: 100%; background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12); border-radius: 12px;
+  padding: 14px 18px; font-size: 1rem; color: #fff; outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s; margin-bottom: 8px;
+  -webkit-appearance: none;
+}
+#pass-input:focus { border-color: var(--cy); box-shadow: 0 0 0 3px rgba(0,242,255,0.12); }
+#pass-err {
+  font-size: 0.78rem; color: var(--pk); min-height: 18px;
+  margin-bottom: 16px; padding-left: 2px; display: none;
+}
+#pass-err.show { display: block; }
+.pb-btns { display: flex; gap: 10px; }
+.pb-btn-cancel {
+  flex: 1; padding: 13px; background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12); border-radius: 12px;
+  color: rgba(255,255,255,0.5); font-size: 0.95rem; cursor: pointer;
+  transition: background 0.2s;
+}
+.pb-btn-cancel:hover { background: rgba(255,255,255,0.1); }
+.pb-btn-ok {
+  flex: 2; padding: 13px;
+  background: linear-gradient(135deg, var(--cy), var(--pu));
+  border: none; border-radius: 12px; color: #fff;
+  font-family: 'Black Han Sans', sans-serif; font-size: 1rem;
+  cursor: pointer; transition: opacity 0.2s;
+}
+.pb-btn-ok:hover { opacity: 0.85; }
 </style>
 </head>
 <body>
@@ -710,9 +760,63 @@ function filterSidebarGroups(q) {
 /* ══════════════════════════════════════════
    그룹 선택 → 대시보드 로드
 ══════════════════════════════════════════ */
+// 비밀번호 확인 중인 그룹 임시 저장
+let pendingGid = null;
+
 async function selectGroup(gid) {
+  const group = allGroups.find(g=>g.id===gid) || { id:gid, name:gid, teacher_name:'—', member_count:0 };
+
+  // 이미 인증된 그룹이면 바로 진입
+  const verified = sessionStorage.getItem('verified_group');
+  if (verified === gid) {
+    enterGroup(gid, group);
+    return;
+  }
+
+  // 비밀번호 팝업 열기
+  pendingGid = gid;
+  document.getElementById('pass-group-name').textContent = group.name;
+  document.getElementById('pass-input').value = '';
+  document.getElementById('pass-err').classList.remove('show');
+  document.getElementById('pass-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('pass-input').focus(), 100);
+}
+
+async function confirmPass() {
+  const input = document.getElementById('pass-input').value.trim();
+  const errEl = document.getElementById('pass-err');
+  if (!input) { errEl.textContent = '비밀번호를 입력해주세요'; errEl.classList.add('show'); return; }
+
+  // DB에서 비밀번호 확인
+  try {
+    const { data, error } = await db.from('groups').select('teacher_pass').eq('id', pendingGid).single();
+    if (error) throw error;
+    if (data.teacher_pass !== input) {
+      errEl.textContent = '비밀번호가 틀렸습니다';
+      errEl.classList.add('show');
+      document.getElementById('pass-input').value = '';
+      document.getElementById('pass-input').focus();
+      return;
+    }
+    // 인증 성공 — 세션에 저장 (탭 닫으면 초기화)
+    sessionStorage.setItem('verified_group', pendingGid);
+    closePassPopup();
+    const group = allGroups.find(g=>g.id===pendingGid) || { id:pendingGid, name:pendingGid, teacher_name:'—' };
+    enterGroup(pendingGid, group);
+  } catch(e) {
+    errEl.textContent = '오류가 발생했습니다. 다시 시도해주세요';
+    errEl.classList.add('show');
+  }
+}
+
+function closePassPopup() {
+  document.getElementById('pass-overlay').classList.remove('open');
+  pendingGid = null;
+}
+
+function enterGroup(gid, group) {
   currentGid = gid;
-  currentGroup = allGroups.find(g=>g.id===gid) || { id:gid, name:gid, teacher_name:'—', member_count:0 };
+  currentGroup = group;
   location.hash = gid;
 
   // 사이드바 active 갱신
@@ -727,7 +831,7 @@ async function selectGroup(gid) {
   document.getElementById('empty-state').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
 
-  await loadDashboard();
+  loadDashboard();
 }
 
 async function loadDashboard() {
@@ -1038,5 +1142,22 @@ function escAttr(s){ return String(s||'').replace(/'/g,"\\'"); }
 function esc(s){ return String(s||'').replace(/'/g,"\\'"); }
 function hideAdPlaceholder(){}
 </script>
+
+<!-- 비밀번호 확인 팝업 -->
+<div id="pass-overlay">
+  <div id="pass-box">
+    <div class="pb-title">DASHBOARD ACCESS</div>
+    <div class="pb-name" id="pass-group-name">—</div>
+    <input type="password" id="pass-input" placeholder="대시보드 비밀번호 입력"
+      maxlength="20" autocomplete="off"
+      onkeydown="if(event.key==='Enter') confirmPass()"
+    >
+    <div id="pass-err"></div>
+    <div class="pb-btns">
+      <button class="pb-btn-cancel" onclick="closePassPopup()">취소</button>
+      <button class="pb-btn-ok" onclick="confirmPass()">🔓 확인</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
