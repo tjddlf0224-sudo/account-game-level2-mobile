@@ -16,7 +16,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 
 
 
-#hud{position:absolute;top:0;left:0;width:100%;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:max(10px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 10px max(14px,env(safe-area-inset-left));pointer-events:none;background:linear-gradient(to bottom,rgba(2,8,16,.7) 0%,transparent 100%)}
+#hud{position:absolute;top:0;left:0;width:100%;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:max(10px,env(safe-area-inset-top)) max(20px,env(safe-area-inset-right)) 10px max(14px,env(safe-area-inset-left));pointer-events:none;background:linear-gradient(to bottom,rgba(2,8,16,.7) 0%,transparent 100%)}
 .hud-left{display:flex;gap:clamp(12px,4vw,30px);align-items:center}
 .hb{display:flex;flex-direction:column;align-items:center;gap:2px}
 .hl{font-family:'Orbitron',monospace;font-size:clamp(.55rem,.18vw+.5rem,.72rem);color:rgba(0,242,255,.5);letter-spacing:2px;text-transform:uppercase}
@@ -27,7 +27,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 .iic{font-size:clamp(1rem,4vw,1.45rem);opacity:0;transition:opacity .3s;filter:drop-shadow(0 0 8px #fff)}
 .iic.on{opacity:1;animation:icP .55s infinite alternate}
 @keyframes icP{from{transform:scale(.9)}to{transform:scale(1.2)}}
-.hud-btns{display:flex;gap:6px;pointer-events:auto;padding-right:2px}
+.hud-btns{display:flex;gap:6px;pointer-events:auto;padding-right:2px;flex-shrink:0}
 .hdb{height:44px;padding:0 14px;border-radius:50px;cursor:pointer;font-family:'Black Han Sans';font-size:clamp(.75rem,2.8vw,1rem);white-space:nowrap;display:flex;align-items:center;border:1.5px solid rgba(255,255,255,0.3)!important}
 .hdb-quit{background:rgba(255,45,120,.15);border:1px solid var(--pk)!important;color:var(--pk)}
 .hdb-home{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2)!important;color:white}
@@ -242,7 +242,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 
 <div style="position:fixed;inset:0;background:var(--bg);z-index:-1;"></div>
 
-<div id="canvas-wrap" style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:850px;height:100%;overflow:hidden;background:rgba(0,0,0,.6);">
+<div id="canvas-wrap" style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:850px;height:100%;background:rgba(0,0,0,.6);">
 
   <div class="ovl" id="ss">
     <div class="ovl-inner">
