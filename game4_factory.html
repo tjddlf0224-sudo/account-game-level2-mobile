@@ -551,6 +551,7 @@ function startGame() {
     timerInterval = setInterval(() => {
         if (!isPlaying) return;
         timeLeft--; updateHUD();
+        if (timeLeft <= 15 && timeLeft > 0) showRewardedBtn();
         if (timeLeft <= 0) endGame();
     }, 1000);
 }
@@ -675,10 +676,12 @@ function endGame() {
     document.getElementById('player-name').value = localStorage.getItem('hub_nickname') || '';
     document.getElementById('save-btn').disabled = false;
     document.getElementById('save-status').textContent = '';
-    els.screenResult.style.display = 'flex';
-    checkAndShowFanfare(score, getGrade);
-    showAdPlaceholder();
-    loadRanking();
+    requestInterstitialIfNeeded(function() {
+        els.screenResult.style.display = 'flex';
+        checkAndShowFanfare(score, getGrade);
+        showAdPlaceholder();
+        loadRanking();
+    });
 }
 
 function getLocal() { return JSON.parse(localStorage.getItem('hub_factory') || '[]'); }
@@ -727,11 +730,72 @@ function renderRankList(list) {
     }).join('');
 }
 
-function hideAdPlaceholder() {}
+
+    // ══════════════════════════════════════
+    // 광고 시스템
+    // ══════════════════════════════════════
+    const AD_GAME_COUNT_KEY = 'hub_ad_game_count';
+    const AD_INTERSTITIAL_EVERY = 10; // N번마다 전면 광고
+
+    function getGameCount() {
+        return parseInt(localStorage.getItem(AD_GAME_COUNT_KEY) || '0');
+    }
+    function incrementGameCount() {
+        const n = getGameCount() + 1;
+        localStorage.setItem(AD_GAME_COUNT_KEY, String(n));
+        return n;
+    }
+
+    // 전면 광고 요청 — 게임 종료 시 호출
+    // 광고 닫히면 onInterstitialClosed() 가 Kotlin에서 호출됨
+    function requestInterstitialIfNeeded(afterFn) {
+        window._adAfterFn = afterFn;
+        const count = incrementGameCount();
+        if (count % AD_INTERSTITIAL_EVERY === 0 && window.AdBridge) {
+            AdBridge.showInterstitial();
+            // onInterstitialClosed() 에서 afterFn 실행
+        } else {
+            afterFn && afterFn();
+        }
+    }
+    // Kotlin → JS 콜백
+    function onInterstitialClosed() {
+        if (window._adAfterFn) { window._adAfterFn(); window._adAfterFn = null; }
+    }
+
+    // 보상형 광고 — 시간 부족 시 버튼 클릭으로 호출
+    function requestRewarded() {
+        if (window.AdBridge && AdBridge.isRewardedReady()) {
+            AdBridge.showRewarded();
+        } else {
+            alert('광고를 불러오는 중이에요. 잠시 후 다시 눌러주세요!');
+        }
+    }
+    // Kotlin → JS 콜백: 보상 지급
+    function onRewardGranted() {
+        timeLeft += 15;
+        hideRewardedBtn();
+    }
+    let _rewardBtnShown = false;
+    function showRewardedBtn() {
+        if (_rewardBtnShown) return; _rewardBtnShown = true;
+        const btn = document.getElementById('rewarded-btn');
+        if (btn) btn.style.display = 'flex';
+    }
+    function hideRewardedBtn() {
+        _rewardBtnShown = false;
+        const btn = document.getElementById('rewarded-btn');
+        if (btn) btn.style.display = 'none';
+    }
+    function onRewardedFailed() {
+        alert('광고를 불러올 수 없어요. 잠시 후 다시 시도해주세요.');
+    }
+
+    function hideAdPlaceholder() {
+    if (window.AdBridge) AdBridge.hide();
+}
 function showAdPlaceholder() {
-    const el = document.getElementById('ad-placeholder');
-    if (el) el.style.display = 'flex';
-    document.body.style.paddingBottom = '0px';
+    if (window.AdBridge) AdBridge.show();
 }
 
     // ── Supabase 유틸 ──
