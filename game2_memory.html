@@ -1296,11 +1296,11 @@
     }
 
     function hideAdPlaceholder() {
-    if (window.AdBridge) AdBridge.hide();
-}
-        function showAdPlaceholder() {
-    if (window.AdBridge) AdBridge.show();
-}
+        if (window.AdBridge) AdBridge.hide();
+    }
+    function showAdPlaceholder() {
+        if (window.AdBridge) AdBridge.show();
+    }
     
     // ── Supabase 유틸 ──
     function getGradeForSupabase(gameId, score) {
