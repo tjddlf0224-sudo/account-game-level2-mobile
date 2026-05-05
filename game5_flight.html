@@ -596,12 +596,15 @@ const Game={
     document.getElementById('go-mc').textContent=this.maxCombo;
     document.getElementById('go-hi').textContent=this.hi.toLocaleString();
     document.getElementById('go-grade').textContent='파일럿 등급: '+this._grade(this.score);
-    const gs=document.getElementById('gs');
-    gs.style.display='flex';
-    gs.scrollTop=0; // ★ 열릴 때 상단으로 리셋
     checkAndShowFanfare(this.score, this._grade(this.score));
-    showAdPlaceholder();
-    this.loadRanking();
+    const self = this;
+    requestInterstitialIfNeeded(function() {
+        const gs=document.getElementById('gs');
+        gs.style.display='flex';
+        gs.scrollTop=0;
+        showAdPlaceholder();
+        self.loadRanking();
+    });
   },
 
   async saveScore(){
@@ -652,10 +655,61 @@ const Game={
   },
 };
 
-function hideAdPlaceholder() {}
+
+    // ══════════════════════════════════════
+    // 광고 시스템
+    // ══════════════════════════════════════
+    const AD_GAME_COUNT_KEY = 'hub_ad_game_count';
+    const AD_INTERSTITIAL_EVERY = 10; // N번마다 전면 광고
+
+    function getGameCount() {
+        return parseInt(localStorage.getItem(AD_GAME_COUNT_KEY) || '0');
+    }
+    function incrementGameCount() {
+        const n = getGameCount() + 1;
+        localStorage.setItem(AD_GAME_COUNT_KEY, String(n));
+        return n;
+    }
+
+    // 전면 광고 요청 — 게임 종료 시 호출
+    // 광고 닫히면 onInterstitialClosed() 가 Kotlin에서 호출됨
+    function requestInterstitialIfNeeded(afterFn) {
+        window._adAfterFn = afterFn;
+        const count = incrementGameCount();
+        if (count % AD_INTERSTITIAL_EVERY === 0 && window.AdBridge) {
+            AdBridge.showInterstitial();
+            // onInterstitialClosed() 에서 afterFn 실행
+        } else {
+            afterFn && afterFn();
+        }
+    }
+    // Kotlin → JS 콜백
+    function onInterstitialClosed() {
+        if (window._adAfterFn) { window._adAfterFn(); window._adAfterFn = null; }
+    }
+
+    // 보상형 광고 — 시간 부족 시 버튼 클릭으로 호출
+    function requestRewarded() {
+        if (window.AdBridge && AdBridge.isRewardedReady()) {
+            AdBridge.showRewarded();
+        } else {
+            alert('광고를 불러오는 중이에요. 잠시 후 다시 눌러주세요!');
+        }
+    }
+    // Kotlin → JS 콜백: 보상 지급
+    function onRewardGranted() {
+        // 각 게임 파일에서 오버라이드
+    }
+    function onRewardedFailed() {
+        alert('광고를 불러올 수 없어요. 잠시 후 다시 시도해주세요.');
+    }
+
+    function hideAdPlaceholder() {
+    if (window.AdBridge) AdBridge.hide();
+}
 function showAdPlaceholder(){
-  
-  Game.resize();
+    if (window.AdBridge) AdBridge.show();
+    Game.resize();
 }
 
 window.addEventListener('load',()=>Game.init());
