@@ -503,8 +503,22 @@ body {
         placeholder="예: 김선생님"
         maxlength="15"
         autocomplete="off"
+        style="margin-bottom:16px;"
+      >
+
+      <label class="field-label" for="teacher-pass-input">대시보드 비밀번호 <span style="color:var(--pk)">*</span></label>
+      <input
+        class="text-input"
+        type="password"
+        id="teacher-pass-input"
+        placeholder="대시보드 접근 비밀번호 설정"
+        maxlength="20"
+        autocomplete="off"
         style="margin-bottom:0;"
       >
+      <div style="font-size:0.75rem;color:rgba(255,255,255,0.3);margin-bottom:0;padding-left:4px;margin-top:6px;">
+        교수자 대시보드에서 이 그룹 데이터를 볼 때 필요합니다
+      </div>
 
       <div class="status-msg" id="create-status"></div>
 
@@ -665,9 +679,12 @@ async function createGroup() {
   const groupName = document.getElementById('group-name-input').value.trim();
   const teacherName = document.getElementById('teacher-name-input').value.trim()
     || localStorage.getItem('hub_nickname') || '교수자';
+  const teacherPass = document.getElementById('teacher-pass-input').value.trim();
 
   if (!groupName) { showStatus('create-status', '그룹명을 입력해주세요', 'err'); return; }
   if (groupName.length < 2) { showStatus('create-status', '2글자 이상 입력해주세요', 'err'); return; }
+  if (!teacherPass) { showStatus('create-status', '대시보드 비밀번호를 설정해주세요', 'err'); return; }
+  if (teacherPass.length < 4) { showStatus('create-status', '비밀번호는 4자 이상으로 설정해주세요', 'err'); return; }
 
   const btn = document.getElementById('create-btn');
   btn.disabled = true; btn.textContent = '생성 중...';
@@ -678,6 +695,7 @@ async function createGroup() {
       id: code,
       name: groupName,
       teacher_name: teacherName,
+      teacher_pass: teacherPass,
       member_count: 0
     });
 
