@@ -238,6 +238,27 @@ body {
   letter-spacing:0.5px;
   line-height:1.8;
 }
+.logout-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  background: rgba(255,45,120,0.08);
+  border: 1px solid rgba(255,45,120,0.25);
+  border-radius: 50px;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 2px;
+  color: rgba(255,45,120,0.7);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  margin-top: 8px;
+}
+.logout-btn:hover, .logout-btn:active {
+  background: rgba(255,45,120,0.18);
+  border-color: rgba(255,45,120,0.6);
+  color: #ff2d78;
+}
 
 /* ── 애니메이션 ── */
 @keyframes fadeInUp {
@@ -537,9 +558,7 @@ body {
   </div>
 
   <div class="hub-footer" style="margin-top:40px;">
-    <div class="footer-copy">
-      © 2025 All rights reserved.
-    </div>
+    <button class="logout-btn" onclick="doLogout()">⏻ &nbsp;로그아웃</button>
   </div>
 
 </div>
@@ -549,9 +568,8 @@ body {
 (function() {
   const nick = localStorage.getItem('hub_nickname');
   if (!nick) {
-    // 닉네임 없으면 로그인 페이지로 (hash/pathname 무관하게 안전하게 이동)
-    const base = location.pathname.replace(/[^/]*$/, '');
-    window.location.replace(base + 'login.html');
+    // 닉네임 없으면 로그인 페이지로
+    window.location.replace('login.html');
     return;
   }
   // 닉네임 표시
@@ -615,6 +633,19 @@ window.addEventListener('resize', () => { resize(); initStars(); });
 // 안드로이드 앱에서 JS 브릿지로 아래를 호출:
 //   webView.evaluateJavascript("hideAdPlaceholder()", null);
 function hideAdPlaceholder() {}
+
+// ── 로그아웃 ──
+function doLogout() {
+  if (!confirm('로그아웃 하시겠습니까?\n닉네임과 그룹 정보가 초기화됩니다.')) return;
+  localStorage.removeItem('hub_nickname');
+  localStorage.removeItem('hub_group_id');
+  localStorage.removeItem('hub_group_name');
+  ['acid','memory','debit','factory','flight'].forEach(g =>
+    localStorage.removeItem('hub_' + g + '_myName')
+  );
+  const base = location.pathname.replace(/[^/]*$/, '');
+  window.location.replace(base + 'login.html');
+}
 </script>
 </body>
 </html>
