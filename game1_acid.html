@@ -953,6 +953,7 @@
 
     function endGame() {
         isPlaying = false;
+        hideRewardedBtn(); // 결과화면에서 광고 버튼 숨기기
         cancelAnimationFrame(gameLoopId);
         clearInterval(spawnTimerId);
         clearInterval(countdownTimerId);
@@ -1308,6 +1309,9 @@
     // 보상형 광고 — 시간 부족 시 버튼 클릭으로 호출
     function requestRewarded() {
         if (window.AdBridge && AdBridge.isRewardedReady()) {
+            // 광고 보는 동안 게임 일시정지
+            isPaused = true;
+            clearInterval(countdownTimerId);
             AdBridge.showRewarded();
         } else {
             alert('광고를 불러오는 중이에요. 잠시 후 다시 눌러주세요!');
@@ -1322,6 +1326,15 @@
             window.innerWidth / 2, window.innerHeight / 2,
             '🎁 +15초 획득!', '#ffd600'
         );
+        // 게임 재개
+        isPaused = false;
+        countdownTimerId = setInterval(function() {
+            if (!isPlaying || isPaused) return;
+            timeLeft--;
+            updateUI();
+            if (timeLeft <= 10) showRewardedBtn();
+            if (timeLeft <= 0) endGame();
+        }, 1000);
     }
     let _rewardBtnShown = false;
     function showRewardedBtn() {
