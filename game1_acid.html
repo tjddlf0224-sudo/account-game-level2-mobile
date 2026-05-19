@@ -1310,10 +1310,11 @@
     // 보상형 광고 — 시간 부족 시 버튼 클릭으로 호출
     function requestRewarded() {
         if (window.AdBridge && AdBridge.isRewardedReady()) {
-            // isPaused 플래그로 게임 정지 (루프는 유지, 내부에서 isPaused 체크)
             isPaused = true;
             clearInterval(countdownTimerId);
             countdownTimerId = null;
+            clearInterval(spawnTimerId);
+            spawnTimerId = null;
             AdBridge.showRewarded();
         } else {
             alert('광고를 불러오는 중이에요. 잠시 후 다시 눌러주세요!');
@@ -1328,9 +1329,13 @@
             window.innerWidth / 2, window.innerHeight / 2,
             '🎁 +15초 획득!', '#ffd600'
         );
-        // isPaused 해제 → gameLoop/spawnWord 자동 재개
+        // 1. isPaused 해제 (gameLoop가 다시 단어 이동 시작)
         isPaused = false;
-        // 카운트다운 타이머만 재시작
+        // 2. 단어 생성 재시작
+        if (!spawnTimerId) {
+            spawnTimerId = setInterval(spawnWord, 600);
+        }
+        // 3. 카운트다운 재시작
         if (!countdownTimerId) {
             countdownTimerId = setInterval(function() {
                 if (!isPlaying || isPaused) return;
