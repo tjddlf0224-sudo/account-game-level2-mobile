@@ -341,7 +341,7 @@
         }
         </style>
 <!-- 보상형 광고 버튼 -->
-<button id="rewarded-btn" onclick="requestRewarded()">⏱ +15초 광고 보기</button>
+<button id="rewarded-btn" onclick="requestRewarded()">⏱ +30초 광고 보기</button>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -806,7 +806,7 @@ function renderRankList(list) {
     }
     // Kotlin → JS 콜백: 보상 지급
     function onRewardGranted() {
-        timeLeft += 15;
+        timeLeft += 30;
         hideRewardedBtn();
         // 타이머 재시작
         if (isPlaying && !timerInterval) {
