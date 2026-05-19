@@ -275,6 +275,33 @@
         .mini-rank-loading { text-align:center; padding:8px; color:rgba(255,255,255,0.3); font-size:0.8rem; }
 
         /* 결과 점수 */
+        
+        /* ── 보상형 광고 버튼 ── */
+        #rewarded-btn {
+            display: none;
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 999;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: rgba(255,214,0,0.15);
+            border: 2px solid #ffd600;
+            border-radius: 50px;
+            color: #ffd600;
+            font-family: 'Black Han Sans', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            animation: rewardPulse 1s ease-in-out infinite;
+            white-space: nowrap;
+        }
+        @keyframes rewardPulse {
+            0%,100% { box-shadow: 0 0 12px rgba(255,214,0,0.4); }
+            50%      { box-shadow: 0 0 28px rgba(255,214,0,0.8); }
+        }
+
         .result-score-box {
             background: rgba(0,0,0,0.3); border-radius: 16px;
             padding: 14px 36px;
@@ -343,6 +370,23 @@
         }
     
         
+
+
+        /* ── 부활 광고 버튼 ── */
+        .revive-btn {
+            width: 100%;
+            max-width: 320px;
+            padding: 14px;
+            background: rgba(255,214,0,0.12);
+            border: 2px solid #ffd600;
+            border-radius: 50px;
+            color: #ffd600;
+            font-family: 'Jua', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            animation: rewardPulse 1s ease-in-out infinite;
+            margin-bottom: 8px;
+        }
 
         /* ── 공통 하단 버튼 ── */
         .action-btns {
@@ -449,6 +493,8 @@
             100% { opacity:0; transform: translate(var(--tx), var(--ty)) scale(0); }
         }
         </style>
+<!-- 보상형 광고 버튼 -->
+<button id="rewarded-btn" onclick="requestRewarded()">⏱ +15초 광고 보기</button>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -549,6 +595,7 @@
             </div>
 
             <button class="btn" id="next-stage-btn" onclick="nextStage()" style="display:none;background:var(--accent2);">다음 스테이지 ▶</button>
+            <button class="revive-btn" id="revive-btn" style="display:none;" onclick="requestReviveAd()">📺 광고 보고 이어하기</button>
             <div class="action-btns" style="align-items:center;">
                 <button class="btn-restart" id="restart-btn" onclick="startGame()">↺ 다시 하기</button>
                 <button class="btn-hub" onclick="location.href='index.html'">🏠 허브로 나가기</button>
@@ -1075,6 +1122,9 @@
             if (quit) {
                 requestInterstitialIfNeeded(function() {
                     showResult(totalScore + Math.round(stageScore), true, detail);
+                    // 부활 버튼 표시 (stage 6 ALL CLEAR 아닐 때만)
+                    const rb = document.getElementById('revive-btn');
+                    if (rb && stage <= MAX_STAGE) rb.style.display = 'block';
                 });
             } else {
                 playSound('clear');
@@ -1273,6 +1323,34 @@
     }
 
     // 보상형 광고 — 시간 부족 시 버튼 클릭으로 호출
+
+    function showRewardedBtn() {
+        const btn = document.getElementById('rewarded-btn');
+        if (btn) btn.style.display = 'flex';
+    }
+    function hideRewardedBtn() {
+        const btn = document.getElementById('rewarded-btn');
+        if (btn) btn.style.display = 'none';
+    }
+
+
+    // ── 부활 광고 (포기 시) ──
+    let _reviveStage = 0;
+    function requestReviveAd() {
+        if (window.AdBridge && AdBridge.isRewardedReady()) {
+            AdBridge.showRewarded();
+        } else {
+            alert('광고를 불러오는 중이에요. 잠시 후 다시 눌러주세요!');
+        }
+    }
+    function onRewardGranted() {
+        // 부활: 현재 스테이지 재시작 (totalScore 유지)
+        const reviveBtn = document.getElementById('revive-btn');
+        if (reviveBtn) reviveBtn.style.display = 'none';
+        document.getElementById('result-screen').style.display = 'none';
+        resetStage();
+    }
+
     function requestRewarded() {
         if (window.AdBridge && AdBridge.isRewardedReady()) {
             AdBridge.showRewarded();
