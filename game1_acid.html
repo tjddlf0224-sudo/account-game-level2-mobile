@@ -1309,8 +1309,10 @@
     // 보상형 광고 — 시간 부족 시 버튼 클릭으로 호출
     function requestRewarded() {
         if (window.AdBridge && AdBridge.isRewardedReady()) {
-            // 광고 보는 동안 게임 일시정지
+            // 게임 완전 일시정지
             isPaused = true;
+            cancelAnimationFrame(gameLoopId);
+            clearInterval(spawnTimerId);
             clearInterval(countdownTimerId);
             AdBridge.showRewarded();
         } else {
@@ -1326,8 +1328,10 @@
             window.innerWidth / 2, window.innerHeight / 2,
             '🎁 +15초 획득!', '#ffd600'
         );
-        // 게임 재개
+        // 게임 완전 재개
         isPaused = false;
+        gameLoopId = requestAnimationFrame(gameLoop);
+        spawnTimerId = setInterval(spawnWord, 600);
         countdownTimerId = setInterval(function() {
             if (!isPlaying || isPaused) return;
             timeLeft--;
