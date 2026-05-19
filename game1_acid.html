@@ -819,7 +819,8 @@
     }
 
     function gameLoop() {
-        if (!isPlaying || isPaused) return;
+        if (!isPlaying) return;
+        if (isPaused) { gameLoopId = requestAnimationFrame(gameLoop); return; }
         const bh = getBoardHeight(); // 매 프레임 동적 계산
 
         if (freezeTime > 0) {
