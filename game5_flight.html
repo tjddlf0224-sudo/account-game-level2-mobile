@@ -39,7 +39,34 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 .gatel{position:absolute;left:0;width:100%;display:flex;flex-direction:column;align-items:center}
 .gbar{width:100%;height:clamp(14px,2.5vw,20px);background:linear-gradient(90deg,transparent 0%,rgba(15,25,100,.9) 18%,rgba(20,35,130,.95) 50%,rgba(15,25,100,.9) 82%,transparent 100%);border-top:1.5px solid rgba(0,242,255,.22);border-bottom:1.5px solid rgba(0,242,255,.22);box-shadow:0 0 20px rgba(0,242,255,.12)}
 .ginfo{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 0 0}
-.gq{font-size:clamp(.85rem,3vw,1.4rem);font-weight:900;color:#eef0ff;text-align:center;text-shadow:0 2px 10px rgba(0,0,0,.95),0 0 6px rgba(0,0,0,.8);max-width:90vw;line-height:1.4;background:rgba(2,8,20,.82);padding:8px clamp(12px,4vw,30px);border-radius:12px;border:1px solid rgba(255,255,255,.1)}
+
+        /* ── 보상형 광고 버튼 ── */
+        #rewarded-btn {
+            display: none;
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 999;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: rgba(255,214,0,0.15);
+            border: 2px solid #ffd600;
+            border-radius: 50px;
+            color: #ffd600;
+            font-family: 'Black Han Sans', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            animation: rewardPulse 1s ease-in-out infinite;
+            white-space: nowrap;
+        }
+        @keyframes rewardPulse {
+            0%,100% { box-shadow: 0 0 12px rgba(255,214,0,0.4); }
+            50%      { box-shadow: 0 0 28px rgba(255,214,0,0.8); }
+        }
+
+        .gq{font-size:clamp(.85rem,3vw,1.4rem);font-weight:900;color:#eef0ff;text-align:center;text-shadow:0 2px 10px rgba(0,0,0,.95),0 0 6px rgba(0,0,0,.8);max-width:90vw;line-height:1.4;background:rgba(2,8,20,.82);padding:8px clamp(12px,4vw,30px);border-radius:12px;border:1px solid rgba(255,255,255,.1)}
 .gk{font-family:'Black Han Sans',sans-serif;font-size:clamp(.78rem,2.5vw,1.1rem);color:var(--gd);text-shadow:0 0 14px rgba(255,214,0,.75),0 2px 8px rgba(0,0,0,.9);animation:kP 1s infinite alternate}
 @keyframes kP{from{transform:scale(1)}to{transform:scale(1.05)}}
 .gchoices{position:relative;display:flex;justify-content:space-between;width:100%;padding:0 clamp(14px,5vw,80px);top:clamp(-60px,-8vw,-40px)}
@@ -165,6 +192,23 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
         .btn-hub:active { background: rgba(255,255,255,0.18); }
 
         
+
+        /* ── 부활 광고 버튼 ── */
+        .revive-btn {
+            width: 100%;
+            padding: 14px;
+            background: rgba(255,214,0,0.12);
+            border: 2px solid #ffd600;
+            border-radius: 50px;
+            color: #ffd600;
+            font-family: 'Black Han Sans', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            animation: rewardPulse 1s ease-in-out infinite;
+            margin-bottom: 4px;
+            display: none;
+        }
+
         /* ── 목표달성 팡파레 오버레이 ── */
         #fanfare-overlay {
             display: none; position: fixed; inset: 0; z-index: 9999;
@@ -233,6 +277,8 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
             100% { opacity:0; transform: translate(var(--tx), var(--ty)) scale(0); }
         }
         </style>
+<!-- 보상형 광고 버튼 -->
+<button id="rewarded-btn" onclick="requestRewarded()">⏱ +15초 광고 보기</button>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -274,6 +320,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
       <div style="font-family:'Orbitron';font-size:.75rem;color:rgba(0,242,255,.38);letter-spacing:3px">🏆 HALL OF FAME</div>
       <div id="rkbox"></div>
       <div class="brow">
+        <button class="revive-btn" id="revive-btn" onclick="Game.requestReviveAd()">📺 광고 보고 부활하기</button>
         <div class="action-btns" style="align-items:center;">
             <button class="btn-restart" onclick="Game.restart()">↺ 다시 하기</button>
             <button class="btn-hub" onclick="location.href='index.html'">🏠 허브로 나가기</button>
@@ -471,6 +518,18 @@ const Game={
   mkStar(init=false){return{x:Math.random()*this.w,y:init?Math.random()*this.h:-2,s:Math.random()*2+.3,v:Math.random()*14+4,c:Math.random()>.85?'#00f2ff':Math.random()>.7?'#b44fff':'#fff'}},
 
   start(){SFX.init();BGM.play();hideAdPlaceholder();document.getElementById('ss').style.display='none';this._reset()},
+  revive(){
+    this.state='playing';
+    BGM.play();
+    this._loop();
+  },
+  requestReviveAd(){
+    if (window.AdBridge && AdBridge.isRewardedReady()) {
+      AdBridge.showRewarded();
+    } else {
+      alert('광고를 불러오는 중이에요. 잠시 후 다시 눌러주세요!');
+    }
+  },
   restart(){BGM.play();hideAdPlaceholder();document.getElementById('gs').style.display='none';this._reset()},
 
   _reset(){
@@ -604,6 +663,9 @@ const Game={
         gs.scrollTop=0;
         showAdPlaceholder();
         self.loadRanking();
+        // 부활 버튼 표시
+        const rb=document.getElementById('revive-btn');
+        if(rb) rb.style.display='block';
     });
   },
 
@@ -689,6 +751,16 @@ const Game={
     }
 
     // 보상형 광고 — 시간 부족 시 버튼 클릭으로 호출
+
+    function showRewardedBtn() {
+        const btn = document.getElementById('rewarded-btn');
+        if (btn) btn.style.display = 'flex';
+    }
+    function hideRewardedBtn() {
+        const btn = document.getElementById('rewarded-btn');
+        if (btn) btn.style.display = 'none';
+    }
+
     function requestRewarded() {
         if (window.AdBridge && AdBridge.isRewardedReady()) {
             AdBridge.showRewarded();
@@ -698,7 +770,12 @@ const Game={
     }
     // Kotlin → JS 콜백: 보상 지급
     function onRewardGranted() {
-        // 각 게임 파일에서 오버라이드
+        // 부활: 게임오버 화면 숨기고 게임 재시작 (이전 점수 유지)
+        const rb = document.getElementById('revive-btn');
+        if (rb) rb.style.display = 'none';
+        const gs = document.getElementById('gs');
+        if (gs) gs.style.display = 'none';
+        Game.revive();
     }
     function onRewardedFailed() {
         alert('광고를 불러올 수 없어요. 잠시 후 다시 시도해주세요.');
