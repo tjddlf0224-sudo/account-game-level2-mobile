@@ -1067,6 +1067,7 @@ function showCombo(n) {
 function endGame() {
     isPlaying = false;
     clearInterval(timerInterval);
+    hideRewardedBtn();
     bgmStop(); // 🎵 게임 종료 시 BGM 페이드 아웃
     document.getElementById('result-score').textContent = score.toLocaleString() + '점';
     document.getElementById('stat-correct').textContent = correctCount;
@@ -1266,6 +1267,9 @@ function getGrade(score) {
     // 보상형 광고 — 시간 부족 시 버튼 클릭으로 호출
     function requestRewarded() {
         if (window.AdBridge && AdBridge.isRewardedReady()) {
+            // 광고 보는 동안 타이머 일시정지
+            clearInterval(timerInterval);
+            timerInterval = null;
             AdBridge.showRewarded();
         } else {
             alert('광고를 불러오는 중이에요. 잠시 후 다시 눌러주세요!');
@@ -1276,6 +1280,10 @@ function getGrade(score) {
         timeLeft += 15;
         document.getElementById('timer-val').textContent = timeLeft;
         hideRewardedBtn();
+        // 타이머 재시작
+        if (isPlaying && !timerInterval) {
+            timerInterval = setInterval(tick, 1000);
+        }
     }
     let _rewardBtnShown = false;
     function showRewardedBtn() {
