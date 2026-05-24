@@ -954,6 +954,7 @@
 
     function endGame() {
         isPlaying = false;
+        hideRewardedBtn();
         cancelAnimationFrame(gameLoopId);
         clearInterval(spawnTimerId);
         clearInterval(countdownTimerId);
