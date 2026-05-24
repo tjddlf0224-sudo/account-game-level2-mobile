@@ -486,7 +486,35 @@
             0%   { opacity:1; transform: translate(0,0) scale(1); }
             100% { opacity:0; transform: translate(var(--tx), var(--ty)) scale(0); }
         }
-        </style>
+        
+        /* ── 보상형 광고 버튼 ── */
+        #rewarded-btn {
+            display: none;
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 999;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: rgba(255,214,0,0.15);
+            border: 2px solid #ffd600;
+            border-radius: 50px;
+            color: #ffd600;
+            font-family: 'Black Han Sans', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            animation: rewardPulse 1s ease-in-out infinite;
+            white-space: nowrap;
+        }
+        @keyframes rewardPulse {
+            0%,100% { box-shadow: 0 0 12px rgba(255,214,0,0.4); }
+            50%      { box-shadow: 0 0 28px rgba(255,214,0,0.8); }
+        }
+</style>
+
+<button id="rewarded-btn" onclick="requestRewarded()">⏱ +15초 광고 보기</button>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
