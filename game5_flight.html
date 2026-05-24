@@ -21,23 +21,23 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 
 
 
-#hud{position:absolute;top:0;left:0;width:100%;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:max(10px,env(safe-area-inset-top)) max(24px,env(safe-area-inset-right)) 10px max(14px,env(safe-area-inset-left));pointer-events:none;background:linear-gradient(to bottom,rgba(2,8,16,.7) 0%,transparent 100%)}
+#hud{position:absolute;top:0;left:0;width:100%;z-index:20;display:flex;justify-content:flex-start;align-items:center;gap:8px;padding:max(10px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 10px max(14px,env(safe-area-inset-left));pointer-events:none;background:linear-gradient(to bottom,rgba(2,8,16,.7) 0%,transparent 100%)}
 .hud-left{display:flex;gap:clamp(12px,4vw,30px);align-items:center}
 .hb{display:flex;flex-direction:column;align-items:center;gap:2px}
-.hl{font-family:'Orbitron',monospace;font-size:clamp(.55rem,.18vw+.5rem,.72rem);color:rgba(0,242,255,.5);letter-spacing:2px;text-transform:uppercase}
-.hv{font-family:'Orbitron',monospace;font-size:clamp(1.3rem,4.5vw,2.1rem);font-weight:900;color:#fff;text-shadow:0 0 14px var(--cy);line-height:1}
+.hl{font-family:'Orbitron',monospace;font-size:clamp(.38rem,.12vw+.34rem,.48rem);color:rgba(0,242,255,.5);letter-spacing:1px;text-transform:uppercase}
+.hv{font-family:'Orbitron',monospace;font-size:clamp(.8rem,2.8vw,1.1rem);font-weight:900;color:#fff;text-shadow:0 0 14px var(--cy);line-height:1}
 #hv-score{color:var(--gd);text-shadow:0 0 14px var(--gd)}
 #hv-combo{color:var(--gn);text-shadow:0 0 14px var(--gn)}
 .irow{display:flex;gap:clamp(8px,3vw,18px);align-items:center}
 .iic{font-size:clamp(1rem,4vw,1.45rem);opacity:0;transition:opacity .3s;filter:drop-shadow(0 0 8px #fff)}
 .iic.on{opacity:1;animation:icP .55s infinite alternate}
 @keyframes icP{from{transform:scale(.9)}to{transform:scale(1.2)}}
-.hud-btns{display:flex;gap:6px;pointer-events:auto;padding-right:2px;flex-shrink:0}
-.hdb{height:44px;padding:0 14px;border-radius:50px;cursor:pointer;font-family:'Black Han Sans';font-size:clamp(.75rem,2.8vw,1rem);white-space:nowrap;display:flex;align-items:center;border:1.5px solid rgba(255,255,255,0.3)!important}
+.hud-btns{display:flex;gap:6px;pointer-events:auto;padding-right:2px;flex-shrink:0;margin-left:auto}
+.hdb{height:36px;padding:0 10px;border-radius:50px;cursor:pointer;font-family:'Black Han Sans';font-size:clamp(.7rem,2.5vw,.85rem);white-space:nowrap;display:flex;align-items:center;border:1.5px solid rgba(255,255,255,0.3)!important}
 .hdb-quit{background:rgba(255,45,120,.15);border:1px solid var(--pk)!important;color:var(--pk)}
 .hdb-home{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2)!important;color:white}
 
-.mute-btn{height:44px;padding:0 10px;border-radius:8px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2)!important;transition:opacity .2s,border-color .2s}
+.mute-btn{height:36px;padding:0 8px;border-radius:8px;cursor:pointer;font-size:.95rem;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2)!important;transition:opacity .2s,border-color .2s}
 .mute-btn.muted{opacity:.4;border-color:rgba(255,255,255,.1)!important}
 
 #glayer{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:12;overflow:hidden}
@@ -292,7 +292,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
       <div class="hb"><div class="hl">SCORE</div><div class="hv" id="hv-score">0</div></div>
       <div class="hb" style="gap:4px">
         <div class="irow"><div class="iic" id="ic-shield">🛡️</div><div class="iic" id="ic-magnet">🧲</div></div>
-        <div style="font-family:'Orbitron';font-size:.6rem;color:rgba(255,255,255,.2);letter-spacing:1px">ITEMS</div>
+        <div style="font-family:'Orbitron';font-size:.5rem;color:rgba(255,255,255,.2);letter-spacing:1px">ITEMS</div>
       </div>
       <div class="hb"><div class="hl">COMBO</div><div class="hv" id="hv-combo">0x</div></div>
     </div>
