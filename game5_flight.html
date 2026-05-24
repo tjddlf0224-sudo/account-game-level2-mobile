@@ -21,23 +21,23 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 
 
 
-#hud{position:absolute;top:0;left:0;width:100%;z-index:20;display:flex;justify-content:flex-start;align-items:center;gap:8px;padding:max(10px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 10px max(14px,env(safe-area-inset-left));pointer-events:none;background:linear-gradient(to bottom,rgba(2,8,16,.7) 0%,transparent 100%)}
+#hud{position:absolute;top:0;left:0;width:100%;z-index:20;display:flex;justify-content:flex-start;align-items:center;gap:6px;padding:max(10px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 10px max(14px,env(safe-area-inset-left));pointer-events:none;background:linear-gradient(to bottom,rgba(2,8,16,.7) 0%,transparent 100%)}
 .hud-left{display:flex;gap:clamp(12px,4vw,30px);align-items:center}
 .hb{display:flex;flex-direction:column;align-items:center;gap:2px}
-.hl{font-family:'Orbitron',monospace;font-size:clamp(.38rem,.12vw+.34rem,.48rem);color:rgba(0,242,255,.5);letter-spacing:1px;text-transform:uppercase}
-.hv{font-family:'Orbitron',monospace;font-size:clamp(.8rem,2.8vw,1.1rem);font-weight:900;color:#fff;text-shadow:0 0 14px var(--cy);line-height:1}
+.hl{font-family:'Orbitron',monospace;font-size:clamp(.55rem,.18vw+.5rem,.72rem);color:rgba(0,242,255,.5);letter-spacing:2px;text-transform:uppercase}
+.hv{font-family:'Orbitron',monospace;font-size:clamp(1.1rem,3.8vw,1.8rem);font-weight:900;color:#fff;text-shadow:0 0 14px var(--cy);line-height:1}
 #hv-score{color:var(--gd);text-shadow:0 0 14px var(--gd)}
 #hv-combo{color:var(--gn);text-shadow:0 0 14px var(--gn)}
 .irow{display:flex;gap:clamp(8px,3vw,18px);align-items:center}
 .iic{font-size:clamp(1rem,4vw,1.45rem);opacity:0;transition:opacity .3s;filter:drop-shadow(0 0 8px #fff)}
 .iic.on{opacity:1;animation:icP .55s infinite alternate}
 @keyframes icP{from{transform:scale(.9)}to{transform:scale(1.2)}}
-.hud-btns{display:flex;gap:6px;pointer-events:auto;padding-right:2px;flex-shrink:0;margin-left:auto}
-.hdb{height:36px;padding:0 10px;border-radius:50px;cursor:pointer;font-family:'Black Han Sans';font-size:clamp(.7rem,2.5vw,.85rem);white-space:nowrap;display:flex;align-items:center;border:1.5px solid rgba(255,255,255,0.3)!important}
+.hud-btns{display:flex;gap:4px;pointer-events:auto;padding-right:2px;flex-shrink:0}
+.hdb{height:36px;padding:0 12px;border-radius:50px;cursor:pointer;font-family:'Black Han Sans';font-size:clamp(.75rem,2.5vw,1rem);white-space:nowrap;display:flex;align-items:center;border:1.5px solid rgba(255,255,255,0.3)!important}
 .hdb-quit{background:rgba(255,45,120,.15);border:1px solid var(--pk)!important;color:var(--pk)}
 .hdb-home{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2)!important;color:white}
 
-.mute-btn{height:36px;padding:0 8px;border-radius:8px;cursor:pointer;font-size:.95rem;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2)!important;transition:opacity .2s,border-color .2s}
+.mute-btn{height:36px;padding:0 10px;border-radius:8px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2)!important;transition:opacity .2s,border-color .2s}
 .mute-btn.muted{opacity:.4;border-color:rgba(255,255,255,.1)!important}
 
 #glayer{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:12;overflow:hidden}
@@ -299,7 +299,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
     <div class="hud-btns">
       <button class="mute-btn" id="mute-btn" onclick="BGM.toggleMute()" title="BGM 음소거">🎵</button>
       <button class="hdb hdb-quit" onclick="if(Game.state==='playing') Game.gameOver()">그만</button>
-      <button class="hdb hdb-home" onclick="if(typeof isPlaying!=='undefined'&&isPlaying){if(!confirm('게임을 종료하고 허브로 나가시겠어요?'))return;}location.href='index.html'">홈</button>
+      <button class="hdb hdb-home" onclick="if(Game.state==='playing'){if(!confirm('게임을 종료하고 허브로 나가시겠어요?'))return;}location.href='index.html'">홈</button>
     </div>
   </div>
 
@@ -885,5 +885,7 @@ window.addEventListener('load',()=>Game.init());
     <button class="fanfare-close-btn" onclick="closeFanfare()">계속하기 🎮</button>
   </div>
 </div>
+
+
 </body>
 </html>
