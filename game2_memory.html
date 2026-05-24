@@ -453,6 +453,10 @@
             0%   { opacity:1; transform: translate(0,0) scale(1); }
             100% { opacity:0; transform: translate(var(--tx), var(--ty)) scale(0); }
         }
+        
+            50%      { box-shadow: 0 0 28px rgba(255,214,0,0.8); }
+        }
+
         </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -1302,6 +1306,8 @@
     }
 
     // 보상형 광고 — 시간 부족 시 버튼 클릭으로 호출
+
+
     function requestRewarded() {
         if (window.AdBridge && AdBridge.isRewardedReady()) {
             AdBridge.showRewarded();
