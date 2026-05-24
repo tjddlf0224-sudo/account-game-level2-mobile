@@ -7,6 +7,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>🛩 회계 플라이트 — 장부조회 마스터</title>
+<meta name="description" content="비행기를 조종해 올바른 장부 통과! 전산회계 2급 게임으로 공부하기">
+<meta name="theme-color" content="#020810">
+<meta property="og:title" content="플라이트 장부조회 | 전산회계 2급 마스터">
+<meta property="og:description" content="비행기를 조종해 올바른 장부 통과! 전산회계 2급 게임으로 공부하기">
+<meta property="og:type" content="website">
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
 :root{--cy:#00f2ff;--pk:#ff2d78;--gd:#ffd600;--gn:#39ff14;--pu:#b44fff;--bg:#020810;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -16,7 +21,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 
 
 
-#hud{position:absolute;top:0;left:0;width:100%;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:max(10px,env(safe-area-inset-top)) max(20px,env(safe-area-inset-right)) 10px max(14px,env(safe-area-inset-left));pointer-events:none;background:linear-gradient(to bottom,rgba(2,8,16,.7) 0%,transparent 100%)}
+#hud{position:absolute;top:0;left:0;width:100%;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:max(10px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 10px max(14px,env(safe-area-inset-left));pointer-events:none;background:linear-gradient(to bottom,rgba(2,8,16,.7) 0%,transparent 100%)}
 .hud-left{display:flex;gap:clamp(12px,4vw,30px);align-items:center}
 .hb{display:flex;flex-direction:column;align-items:center;gap:2px}
 .hl{font-family:'Orbitron',monospace;font-size:clamp(.55rem,.18vw+.5rem,.72rem);color:rgba(0,242,255,.5);letter-spacing:2px;text-transform:uppercase}
@@ -27,7 +32,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 .iic{font-size:clamp(1rem,4vw,1.45rem);opacity:0;transition:opacity .3s;filter:drop-shadow(0 0 8px #fff)}
 .iic.on{opacity:1;animation:icP .55s infinite alternate}
 @keyframes icP{from{transform:scale(.9)}to{transform:scale(1.2)}}
-.hud-btns{display:flex;gap:6px;pointer-events:auto;padding-right:2px;flex-shrink:0}
+.hud-btns{display:flex;gap:6px;pointer-events:auto;padding-right:2px}
 .hdb{height:44px;padding:0 14px;border-radius:50px;cursor:pointer;font-family:'Black Han Sans';font-size:clamp(.75rem,2.8vw,1rem);white-space:nowrap;display:flex;align-items:center;border:1.5px solid rgba(255,255,255,0.3)!important}
 .hdb-quit{background:rgba(255,45,120,.15);border:1px solid var(--pk)!important;color:var(--pk)}
 .hdb-home{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2)!important;color:white}
@@ -39,34 +44,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 .gatel{position:absolute;left:0;width:100%;display:flex;flex-direction:column;align-items:center}
 .gbar{width:100%;height:clamp(14px,2.5vw,20px);background:linear-gradient(90deg,transparent 0%,rgba(15,25,100,.9) 18%,rgba(20,35,130,.95) 50%,rgba(15,25,100,.9) 82%,transparent 100%);border-top:1.5px solid rgba(0,242,255,.22);border-bottom:1.5px solid rgba(0,242,255,.22);box-shadow:0 0 20px rgba(0,242,255,.12)}
 .ginfo{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 0 0}
-
-        /* ── 보상형 광고 버튼 ── */
-        #rewarded-btn {
-            display: none;
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 999;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 24px;
-            background: rgba(255,214,0,0.15);
-            border: 2px solid #ffd600;
-            border-radius: 50px;
-            color: #ffd600;
-            font-family: 'Black Han Sans', sans-serif;
-            font-size: 1rem;
-            cursor: pointer;
-            animation: rewardPulse 1s ease-in-out infinite;
-            white-space: nowrap;
-        }
-        @keyframes rewardPulse {
-            0%,100% { box-shadow: 0 0 12px rgba(255,214,0,0.4); }
-            50%      { box-shadow: 0 0 28px rgba(255,214,0,0.8); }
-        }
-
-        .gq{font-size:clamp(.85rem,3vw,1.4rem);font-weight:900;color:#eef0ff;text-align:center;text-shadow:0 2px 10px rgba(0,0,0,.95),0 0 6px rgba(0,0,0,.8);max-width:90vw;line-height:1.4;background:rgba(2,8,20,.82);padding:8px clamp(12px,4vw,30px);border-radius:12px;border:1px solid rgba(255,255,255,.1)}
+.gq{font-size:clamp(.85rem,3vw,1.4rem);font-weight:900;color:#eef0ff;text-align:center;text-shadow:0 2px 10px rgba(0,0,0,.95),0 0 6px rgba(0,0,0,.8);max-width:90vw;line-height:1.4;background:rgba(2,8,20,.82);padding:8px clamp(12px,4vw,30px);border-radius:12px;border:1px solid rgba(255,255,255,.1)}
 .gk{font-family:'Black Han Sans',sans-serif;font-size:clamp(.78rem,2.5vw,1.1rem);color:var(--gd);text-shadow:0 0 14px rgba(255,214,0,.75),0 2px 8px rgba(0,0,0,.9);animation:kP 1s infinite alternate}
 @keyframes kP{from{transform:scale(1)}to{transform:scale(1.05)}}
 .gchoices{position:relative;display:flex;justify-content:space-between;width:100%;padding:0 clamp(14px,5vw,80px);top:clamp(-60px,-8vw,-40px)}
@@ -192,23 +170,6 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
         .btn-hub:active { background: rgba(255,255,255,0.18); }
 
         
-
-        /* ── 부활 광고 버튼 ── */
-        .revive-btn {
-            width: 100%;
-            padding: 14px;
-            background: rgba(255,214,0,0.12);
-            border: 2px solid #ffd600;
-            border-radius: 50px;
-            color: #ffd600;
-            font-family: 'Black Han Sans', sans-serif;
-            font-size: 1rem;
-            cursor: pointer;
-            animation: rewardPulse 1s ease-in-out infinite;
-            margin-bottom: 4px;
-            display: none;
-        }
-
         /* ── 목표달성 팡파레 오버레이 ── */
         #fanfare-overlay {
             display: none; position: fixed; inset: 0; z-index: 9999;
@@ -277,8 +238,6 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
             100% { opacity:0; transform: translate(var(--tx), var(--ty)) scale(0); }
         }
         </style>
-<!-- 보상형 광고 버튼 -->
-<button id="rewarded-btn" onclick="requestRewarded()">⏱ +15초 광고 보기</button>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -288,7 +247,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 
 <div style="position:fixed;inset:0;background:var(--bg);z-index:-1;"></div>
 
-<div id="canvas-wrap" style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:850px;height:100%;background:rgba(0,0,0,.6);">
+<div id="canvas-wrap" style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:850px;height:100%;overflow:hidden;background:rgba(0,0,0,.6);">
 
   <div class="ovl" id="ss">
     <div class="ovl-inner">
@@ -320,7 +279,6 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
       <div style="font-family:'Orbitron';font-size:.75rem;color:rgba(0,242,255,.38);letter-spacing:3px">🏆 HALL OF FAME</div>
       <div id="rkbox"></div>
       <div class="brow">
-        <button class="revive-btn" id="revive-btn" onclick="Game.requestReviveAd()">📺 광고 보고 부활하기</button>
         <div class="action-btns" style="align-items:center;">
             <button class="btn-restart" onclick="Game.restart()">↺ 다시 하기</button>
             <button class="btn-hub" onclick="location.href='index.html'">🏠 허브로 나가기</button>
@@ -341,7 +299,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
     <div class="hud-btns">
       <button class="mute-btn" id="mute-btn" onclick="BGM.toggleMute()" title="BGM 음소거">🎵</button>
       <button class="hdb hdb-quit" onclick="if(Game.state==='playing') Game.gameOver()">그만</button>
-      <button class="hdb hdb-home" onclick="location.href='index.html'">홈</button>
+      <button class="hdb hdb-home" onclick="if(typeof isPlaying!=='undefined'&&isPlaying){if(!confirm('게임을 종료하고 허브로 나가시겠어요?'))return;}location.href='index.html'">홈</button>
     </div>
   </div>
 
@@ -518,18 +476,6 @@ const Game={
   mkStar(init=false){return{x:Math.random()*this.w,y:init?Math.random()*this.h:-2,s:Math.random()*2+.3,v:Math.random()*14+4,c:Math.random()>.85?'#00f2ff':Math.random()>.7?'#b44fff':'#fff'}},
 
   start(){SFX.init();BGM.play();hideAdPlaceholder();document.getElementById('ss').style.display='none';this._reset()},
-  revive(){
-    this.state='playing';
-    BGM.play();
-    this._loop();
-  },
-  requestReviveAd(){
-    if (window.AdBridge && AdBridge.isRewardedReady()) {
-      AdBridge.showRewarded();
-    } else {
-      alert('광고를 불러오는 중이에요. 잠시 후 다시 눌러주세요!');
-    }
-  },
   restart(){BGM.play();hideAdPlaceholder();document.getElementById('gs').style.display='none';this._reset()},
 
   _reset(){
@@ -663,9 +609,6 @@ const Game={
         gs.scrollTop=0;
         showAdPlaceholder();
         self.loadRanking();
-        // 부활 버튼 표시
-        const rb=document.getElementById('revive-btn');
-        if(rb) rb.style.display='block';
     });
   },
 
@@ -736,6 +679,11 @@ const Game={
     // 전면 광고 요청 — 게임 종료 시 호출
     // 광고 닫히면 onInterstitialClosed() 가 Kotlin에서 호출됨
     function requestInterstitialIfNeeded(afterFn) {
+        // 광고 제거 구매 시 광고 스킵
+        if (window.AdBridge && typeof AdBridge.isAdsRemoved === 'function' && AdBridge.isAdsRemoved()) {
+            afterFn && afterFn();
+            return;
+        }
         window._adAfterFn = afterFn;
         const count = incrementGameCount();
         if (count % AD_INTERSTITIAL_EVERY === 0 && window.AdBridge) {
@@ -745,22 +693,22 @@ const Game={
             afterFn && afterFn();
         }
     }
+
+    // 광고 제거 완료 콜백 (Kotlin에서 호출)
+    function onAdsRemoved() {
+        // 보상형 광고 버튼 숨기기
+        const rewardBtn = document.getElementById('rewarded-btn');
+        if (rewardBtn) rewardBtn.style.display = 'none';
+        // 부활 버튼 숨기기
+        const reviveBtn = document.getElementById('revive-btn');
+        if (reviveBtn) reviveBtn.style.display = 'none';
+    }
     // Kotlin → JS 콜백
     function onInterstitialClosed() {
         if (window._adAfterFn) { window._adAfterFn(); window._adAfterFn = null; }
     }
 
     // 보상형 광고 — 시간 부족 시 버튼 클릭으로 호출
-
-    function showRewardedBtn() {
-        const btn = document.getElementById('rewarded-btn');
-        if (btn) btn.style.display = 'flex';
-    }
-    function hideRewardedBtn() {
-        const btn = document.getElementById('rewarded-btn');
-        if (btn) btn.style.display = 'none';
-    }
-
     function requestRewarded() {
         if (window.AdBridge && AdBridge.isRewardedReady()) {
             AdBridge.showRewarded();
@@ -770,16 +718,19 @@ const Game={
     }
     // Kotlin → JS 콜백: 보상 지급
     function onRewardGranted() {
-        // 부활: 게임오버 화면 숨기고 게임 재시작 (이전 점수 유지)
-        const rb = document.getElementById('revive-btn');
-        if (rb) rb.style.display = 'none';
-        const gs = document.getElementById('gs');
-        if (gs) gs.style.display = 'none';
-        Game.revive();
+        // 각 게임 파일에서 오버라이드
     }
     function onRewardedFailed() {
         alert('광고를 불러올 수 없어요. 잠시 후 다시 시도해주세요.');
     }
+
+
+    // 앱 시작 시 광고 제거 여부 확인
+    (function() {
+        if (window.AdBridge && typeof AdBridge.isAdsRemoved === 'function' && AdBridge.isAdsRemoved()) {
+            onAdsRemoved();
+        }
+    })();
 
     function hideAdPlaceholder() {
     if (window.AdBridge) AdBridge.hide();
@@ -804,7 +755,7 @@ window.addEventListener('load',()=>Game.init());
         return (tiers.find(([min]) => score >= min) || tiers[tiers.length-1])[1];
     }
 
-    async function supabaseSaveScore(name, score, combo, correct, gameId) {
+    async function supabaseSaveScore(name, score, combo, correct, gameId, retry = 0) {
         const maxScore = {acid:30000,memory:3000,debit:15000,factory:15000,flight:300000};
         const safeScore = Math.min(Math.max(score,0), maxScore[gameId]||999999);
         const safeName = String(name).replace(/<[^>]*>/g,'').substring(0,30).trim();
