@@ -237,7 +237,48 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
             0%   { opacity:1; transform: translate(0,0) scale(1); }
             100% { opacity:0; transform: translate(var(--tx), var(--ty)) scale(0); }
         }
-        </style>
+        
+        #rewarded-btn {
+            display: none;
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 999;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: rgba(255,214,0,0.15);
+            border: 2px solid #ffd600;
+            border-radius: 50px;
+            color: #ffd600;
+            font-family: 'Black Han Sans', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            animation: rewardPulse 1s ease-in-out infinite;
+            white-space: nowrap;
+        }
+        @keyframes rewardPulse {
+            0%,100% { box-shadow: 0 0 12px rgba(255,214,0,0.4); }
+            50%      { box-shadow: 0 0 28px rgba(255,214,0,0.8); }
+        }
+        .revive-btn {
+            display: none;
+            width: 100%;
+            max-width: 320px;
+            padding: 14px;
+            background: rgba(255,214,0,0.12);
+            border: 2px solid #ffd600;
+            border-radius: 50px;
+            color: #ffd600;
+            font-family: 'Black Han Sans', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            animation: rewardPulse 1s ease-in-out infinite;
+            margin-bottom: 4px;
+        }
+
+</style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -279,6 +320,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
       <div style="font-family:'Orbitron';font-size:.75rem;color:rgba(0,242,255,.38);letter-spacing:3px">🏆 HALL OF FAME</div>
       <div id="rkbox"></div>
       <div class="brow">
+        <button class="revive-btn" id="revive-btn" onclick="Game.requestReviveAd()" style="display:none;">📺 광고 보고 부활하기</button>
         <div class="action-btns" style="align-items:center;">
             <button class="btn-restart" onclick="Game.restart()">↺ 다시 하기</button>
             <button class="btn-hub" onclick="location.href='index.html'">🏠 허브로 나가기</button>
@@ -709,6 +751,17 @@ const Game={
     }
 
     // 보상형 광고 — 시간 부족 시 버튼 클릭으로 호출
+
+    function showRewardedBtn() {
+        if (window.AdBridge && typeof AdBridge.isAdsRemoved === 'function' && AdBridge.isAdsRemoved()) return;
+        const btn = document.getElementById('rewarded-btn');
+        if (btn) btn.style.display = 'flex';
+    }
+    function hideRewardedBtn() {
+        const btn = document.getElementById('rewarded-btn');
+        if (btn) btn.style.display = 'none';
+    }
+
     function requestRewarded() {
         if (window.AdBridge && AdBridge.isRewardedReady()) {
             AdBridge.showRewarded();
