@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>전산회계 오락실 — 고객 지원</title>
+<meta name="description" content="전산회계 오락실 회계 교육 게임 앱의 고객 지원 및 문의 페이지입니다.">
+<style>
+  :root{
+    --bg:#0f1226; --card:#1a1f3a; --accent:#5b8cff; --accent2:#7af2c8;
+    --text:#eef1ff; --muted:#a8b0d8; --line:#2a3157;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",Roboto,sans-serif;
+    background:linear-gradient(160deg,#0f1226 0%,#161a35 100%);
+    color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:48px 20px 80px}
+  header{text-align:center;margin-bottom:40px}
+  .badge{
+    display:inline-block;font-size:13px;color:var(--accent2);
+    border:1px solid var(--line);border-radius:999px;padding:6px 14px;margin-bottom:18px;
+    letter-spacing:.5px;
+  }
+  h1{font-size:30px;font-weight:800;margin-bottom:10px;letter-spacing:-.5px}
+  .sub{color:var(--muted);font-size:16px}
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:18px;
+    padding:28px 26px;margin-bottom:20px;
+  }
+  .card h2{font-size:19px;margin-bottom:14px;display:flex;align-items:center;gap:9px}
+  .card h2 .dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+  .card p{color:var(--muted);margin-bottom:10px}
+  ul{list-style:none;margin-top:8px}
+  ul li{color:var(--muted);padding:7px 0 7px 26px;position:relative}
+  ul li::before{content:"▸";position:absolute;left:6px;color:var(--accent)}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .contact{
+    display:flex;align-items:center;gap:12px;background:#11152e;
+    border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-top:6px;
+  }
+  .contact .label{color:var(--muted);font-size:14px}
+  .contact .val{font-size:17px;font-weight:700}
+  .faq{border-top:1px solid var(--line);padding:16px 0}
+  .faq:first-of-type{border-top:none;padding-top:4px}
+  .faq .q{font-weight:700;margin-bottom:6px}
+  .faq .a{color:var(--muted)}
+  footer{text-align:center;color:var(--muted);font-size:13px;margin-top:34px;line-height:1.9}
+  footer a{color:var(--muted);text-decoration:underline}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <span class="badge">고객 지원 · Customer Support</span>
+      <h1>전산회계 오락실</h1>
+      <p class="sub">게임으로 배우는 전산회계 교육 앱</p>
+    </header>
+
+    <div class="card">
+      <h2><span class="dot"></span>앱 소개</h2>
+      <p>‘전산회계 오락실’은 분개·계정과목·재무제표 등 전산회계의 핵심 개념을
+         퀴즈와 게임 형식으로 즐겁게 익힐 수 있도록 만든 회계 교육용 앱입니다.
+         시험 준비와 개념 복습을 게임처럼 반복 학습할 수 있습니다.</p>
+      <ul>
+        <li>분개 연습 및 계정과목 학습</li>
+        <li>난이도별 회계 퀴즈와 점수 시스템</li>
+        <li>반복 학습으로 자연스럽게 익히는 회계 기초</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2><span class="dot"></span>문의하기</h2>
+      <p>이용 중 불편한 점, 버그 제보, 건의사항이 있으시면 아래 이메일로 연락 주세요.
+         영업일 기준 2~3일 이내에 답변드리겠습니다.</p>
+      <div class="contact">
+        <span class="label">이메일</span>
+        <a class="val" href="mailto:tjddlf0224@gmail.com">tjddlf0224@gmail.com</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="dot"></span>자주 묻는 질문</h2>
+      <div class="faq">
+        <div class="q">Q. 앱이 무료인가요?</div>
+        <div class="a">네, 무료로 이용하실 수 있으며 일부 광고가 포함되어 있습니다.</div>
+      </div>
+      <div class="faq">
+        <div class="q">Q. 학습 기록이 사라졌어요.</div>
+        <div class="a">앱 삭제 시 기기에 저장된 기록이 함께 삭제될 수 있습니다.
+          문제가 지속되면 기기 모델과 함께 위 이메일로 문의해 주세요.</div>
+      </div>
+      <div class="faq">
+        <div class="q">Q. 광고를 제거할 수 있나요?</div>
+        <div class="a">광고 수익은 앱을 무료로 운영하고 지속적으로 업데이트하는 데 사용됩니다.
+          관련 의견은 언제든 환영합니다.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="dot"></span>개인정보 처리방침</h2>
+      <p>본 앱은 회원가입 없이 이용 가능하며, 이름·연락처 등 개인을 식별하는 정보를
+         서버에 별도로 수집·저장하지 않습니다. 단, 광고 제공(Google AdMob)을 위해
+         광고 식별자(IDFA 등) 및 기기 정보가 광고 파트너에 의해 처리될 수 있습니다.
+         자세한 내용은 Google의
+         <a href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener">광고 정책</a>을
+         참고해 주세요.</p>
+    </div>
+
+    <footer>
+      © 2026 전산회계 오락실 · 개발자 Yun<br>
+      문의: <a href="mailto:tjddlf0224@gmail.com">tjddlf0224@gmail.com</a>
+    </footer>
+  </div>
+</body>
+</html>
