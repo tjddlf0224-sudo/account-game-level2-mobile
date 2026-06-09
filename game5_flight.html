@@ -574,7 +574,7 @@ const Game={
   spawnGate(){
     const p=Problems[Math.floor(Math.random()*Problems.length)];
     const id='g'+Date.now()+'_'+Math.random().toString(36).slice(2);
-    const g={id,y:-430,q:p.q,k:p.key,lText:p.L,rText:p.R,ans:p.a,passed:false,domEl:null};
+    const g={id,y:-430,q:p.q,k:p.key,lText:p.L,rText:p.R,ans:p.a,passed:false,domEl:null,pauseT:0,pauseDone:false};
     const layer=document.getElementById('glayer');
     const el=document.createElement('div');
     el.id=id;el.className='gatel';el.style.top='-600px';
@@ -601,7 +601,18 @@ const Game={
     if(this.frame%52===0)this.spawnItems();
     if(this.player.magnet){this.player.magT--;if(this.player.magT<=0){this.player.magnet=false;document.getElementById('ic-magnet').classList.remove('on')}}
     for(let i=this.gates.length-1;i>=0;i--){
-      const g=this.gates[i];g.y+=this.speed*.82;
+      const g=this.gates[i];
+      // ▼ 문제를 읽을 수 있도록 화면 중앙 부근에서 한 번만 잠깐 정지
+      //   (배경 별·코인은 계속 흐르므로 속도감은 그대로 유지)
+      if(g.pauseDone){
+        g.y+=this.speed*.82;
+      } else if(g.pauseT>0){
+        if(--g.pauseT===0)g.pauseDone=true;   // 정지 중에는 멈춰 있음
+      } else if(g.y>=this.h*0.40){
+        g.pauseT=80;                            // 약 1.3초 정지 (숫자를 키우면 더 오래 멈춤)
+      } else {
+        g.y+=this.speed*.82;
+      }
       if(g.domEl)g.domEl.style.top=(g.y-140)+'px';
       if(!g.passed&&g.y>=this.player.y-10){
         const side=this.player.x<this.w/2?'L':'R';g.passed=true;
