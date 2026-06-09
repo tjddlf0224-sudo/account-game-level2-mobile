@@ -906,6 +906,37 @@ const questions = [
     { sentence: '사무용 소모품을 사용하다(자산 처리된 것) → <b class="target-account">소모품</b>', target: '소모품', type: 'right', hint: '소모품(자산) 감소 → 대변' },
     { sentence: '받을어음이 만기가 되어 당좌예금으로 입금 → <b class="target-account">받을어음</b>', target: '받을어음', type: 'right', hint: '받을어음(자산) 감소 → 대변' },
     { sentence: '건물에 감가상각을 반영하다 → <b class="target-account">감가상각누계액</b>', target: '감가상각누계액', type: 'right', hint: '감가상각누계액(자산차감) 증가 → 대변' },
+    // ── 추가: 자산 증가 → 차변 ──
+    { sentence: '현금을 당좌예금에 예입하다 → <b class="target-account">당좌예금</b>', target: '당좌예금', type: 'left', hint: '당좌예금(자산) 증가 → 차변' },
+    { sentence: '영업용 토지를 현금으로 구입하다 → <b class="target-account">토지</b>', target: '토지', type: 'left', hint: '토지(자산) 증가 → 차변' },
+    { sentence: '생산용 기계장치를 구입하다 → <b class="target-account">기계장치</b>', target: '기계장치', type: 'left', hint: '기계장치(자산) 증가 → 차변' },
+    { sentence: '사무용 소모품을 구입하고 자산 처리하다 → <b class="target-account">소모품</b>', target: '소모품', type: 'left', hint: '소모품(자산) 증가 → 차변' },
+    { sentence: '내년분 보험료를 미리 지급하다 → <b class="target-account">선급비용</b>', target: '선급비용', type: 'left', hint: '선급비용(자산) 증가 → 차변' },
+    // ── 추가: 부채 감소 → 차변 ──
+    { sentence: '내용이 확정되어 가수금을 해당 계정으로 대체하다 → <b class="target-account">가수금</b>', target: '가수금', type: 'left', hint: '가수금(부채) 감소 → 차변' },
+    { sentence: '전기에 계상한 미지급 이자를 지급하다 → <b class="target-account">미지급비용</b>', target: '미지급비용', type: 'left', hint: '미지급비용(부채) 감소 → 차변' },
+    // ── 추가: 비용 발생 → 차변 ──
+    { sentence: '거래 중개 수수료를 현금으로 지급하다 → <b class="target-account">수수료비용</b>', target: '수수료비용', type: 'left', hint: '수수료비용(비용) 발생 → 차변' },
+    { sentence: '상품 매입 시 운반비를 현금 지급하다 → <b class="target-account">운반비</b>', target: '운반비', type: 'left', hint: '운반비(비용) 발생 → 차변' },
+    { sentence: '사무실 전기·수도요금을 납부하다 → <b class="target-account">수도광열비</b>', target: '수도광열비', type: 'left', hint: '수도광열비(비용) 발생 → 차변' },
+    { sentence: '업무용 차량 주유비를 지급하다 → <b class="target-account">차량유지비</b>', target: '차량유지비', type: 'left', hint: '차량유지비(비용) 발생 → 차변' },
+    { sentence: '건물 수선비를 현금으로 지급하다 → <b class="target-account">수선비</b>', target: '수선비', type: 'left', hint: '수선비(비용) 발생 → 차변' },
+    { sentence: '명함·서식 인쇄비를 지급하다 → <b class="target-account">도서인쇄비</b>', target: '도서인쇄비', type: 'left', hint: '도서인쇄비(비용) 발생 → 차변' },
+    { sentence: '수재의연금을 현금으로 기부하다 → <b class="target-account">기부금</b>', target: '기부금', type: 'left', hint: '기부금(비용) 발생 → 차변' },
+    { sentence: '원인 불명 현금 부족액을 잡손실로 처리하다 → <b class="target-account">잡손실</b>', target: '잡손실', type: 'left', hint: '잡손실(비용) 발생 → 차변' },
+    { sentence: '소액 잡비를 현금으로 지출하다 → <b class="target-account">잡비</b>', target: '잡비', type: 'left', hint: '잡비(비용) 발생 → 차변' },
+    // ── 추가: 부채 증가 → 대변 ──
+    { sentence: '결산 시 당기분 미지급 이자를 계상하다 → <b class="target-account">미지급비용</b>', target: '미지급비용', type: 'right', hint: '미지급비용(부채) 증가 → 대변' },
+    { sentence: '차기분 임대료를 미리 받아 계상하다 → <b class="target-account">선수수익</b>', target: '선수수익', type: 'right', hint: '선수수익(부채) 증가 → 대변' },
+    // ── 추가: 자본(개인기업) ──
+    { sentence: '사업주가 개인 용도로 현금을 인출하다 → <b class="target-account">인출금</b>', target: '인출금', type: 'left', hint: '인출금(자본 차감) 증가 → 차변' },
+    // ── 추가: 수익 발생 → 대변 ──
+    { sentence: '용역 제공 수수료를 현금으로 받다 → <b class="target-account">수수료수익</b>', target: '수수료수익', type: 'right', hint: '수수료수익(수익) 발생 → 대변' },
+    { sentence: '단기매매증권을 장부가보다 비싸게 처분하다 → <b class="target-account">단기매매증권처분이익</b>', target: '단기매매증권처분이익', type: 'right', hint: '단기매매증권처분이익(수익) 발생 → 대변' },
+    // ── 추가: 자산 감소 → 대변 ──
+    { sentence: '당좌예금에서 외상매입금을 결제하다 → <b class="target-account">당좌예금</b>', target: '당좌예금', type: 'right', hint: '당좌예금(자산) 감소 → 대변' },
+    { sentence: '보유 단기매매증권을 처분하다 → <b class="target-account">단기매매증권</b>', target: '단기매매증권', type: 'right', hint: '단기매매증권(자산) 감소 → 대변' },
+    { sentence: '비품 매각 미수금을 현금으로 회수하다 → <b class="target-account">미수금</b>', target: '미수금', type: 'right', hint: '미수금(자산) 감소 → 대변' },
 ];
 
 // ══════════════════════════════════════
