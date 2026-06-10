@@ -852,7 +852,7 @@ window.addEventListener('load',()=>Game.init());
     }
 
     async function supabaseSaveScore(name, score, combo, correct, gameId, retry = 0) {
-        const maxScore = {acid:30000,memory:3000,debit:15000,factory:15000,flight:300000};
+        const maxScore = {acid:99999999,memory:99999999,debit:99999999,factory:99999999,flight:99999999};
         const safeScore = Math.min(Math.max(score,0), maxScore[gameId]||999999);
         const safeName = String(name).replace(/<[^>]*>/g,'').substring(0,30).trim();
         if (!safeName) return;
