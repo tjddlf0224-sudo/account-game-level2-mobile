@@ -674,7 +674,7 @@ const Game={
   doFlash(type){const el=document.getElementById('flash');el.className='';void el.offsetWidth;el.className=type;setTimeout(()=>el.className='',type==='ok'?400:560)},
   showCombo(n){const el=document.getElementById('cpop');el.textContent=n+'x COMBO! 🔥';el.style.display='block';el.style.animation='none';void el.offsetWidth;el.style.animation='cp .8s ease-out forwards';setTimeout(()=>el.style.display='none',800)},
   updHUD(){document.getElementById('hv-score').textContent=this.score.toLocaleString();document.getElementById('hv-combo').textContent=this.combo+'x'},
-  _grade(score){if(score>=50000)return'👑 전설의 에이스';if(score>=30000)return'🥇 베테랑 파일럿';if(score>=15000)return'🥈 숙련 파일럿';if(score>=5000)return'🥉 정규 파일럿';return'🛩 견습 파일럿'},
+  _grade(score){if(score>=55000)return'👑 전설의 에이스';if(score>=40000)return'🥇 베테랑 파일럿';if(score>=30000)return'🥈 숙련 파일럿';if(score>=18000)return'🥉 정규 파일럿';return'🛩 견습 파일럿'},
 
   gameOver(){
     this.state='gameover';
@@ -845,7 +845,7 @@ window.addEventListener('load',()=>Game.init());
             memory:  [[950,"👑 CEO"],[850,"⭐ CEO급"],[750,"🎖 전무/상무"],[650,"🏅 이사"],[550,"📋 부장"],[450,"🗂 차장"],[350,"📁 과장"],[250,"📝 대리"],[0,"💼 사원"]],
             debit:   [[4500,"👑 전설의 CFO"],[2500,"🥇 회계 부장"],[1000,"🥈 회계 대리"],[500,"🥉 신입 사원"],[0,"📋 수습 직원"]],
             factory: [[5000,"👑 결산 마스터"],[3000,"🥇 숙련 경리"],[1500,"🥈 견습 경리"],[500,"🥉 수습생"],[0,"📋 인턴"]],
-            flight:  [[50000,"👑 전설의 에이스"],[30000,"🥇 베테랑 파일럿"],[15000,"🥈 숙련 파일럿"],[5000,"🥉 정규 파일럿"],[0,"🛩 견습 파일럿"]]
+            flight:  [[55000,"👑 전설의 에이스"],[40000,"🥇 베테랑 파일럿"],[30000,"🥈 숙련 파일럿"],[18000,"🥉 정규 파일럿"],[0,"🛩 견습 파일럿"]]
         };
         const tiers = scales[gameId] || scales.flight;
         return (tiers.find(([min]) => score >= min) || tiers[tiers.length-1])[1];

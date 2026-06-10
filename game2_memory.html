@@ -882,15 +882,15 @@
         // ── 스테이지 클리어 직급 미리보기 ──
         function getRankPreviewInfo(score) {
             const tiers = [
-                { min:2700, title:'👑 CEO',       color:'#f1c40f', next: null,       nextMin: null },
-                { min:2300, title:'⭐ CEO급',     color:'#e67e22', next:'👑 CEO',       nextMin:2700 },
-                { min:1900, title:'🎖 전무/상무', color:'#3498db', next:'⭐ CEO급',     nextMin:2300 },
-                { min:1500, title:'🏅 이사',      color:'#2ecc71', next:'🎖 전무/상무', nextMin:1900 },
-                { min:1100, title:'📋 부장',      color:'#1abc9c', next:'🏅 이사',      nextMin:1500 },
-                { min:700,  title:'🗂 차장',      color:'#9b59b6', next:'📋 부장',      nextMin:1100 },
-                { min:400,  title:'📁 과장',      color:'#e74c3c', next:'🗂 차장',      nextMin:700  },
-                { min:200,  title:'📝 대리',      color:'#95a5a6', next:'📁 과장',      nextMin:400  },
-                { min:0,    title:'💼 사원',      color:'#7f8c8d', next:'📝 대리',      nextMin:200  },
+                { min:5000, title:'👑 CEO',       color:'#f1c40f', next: null,       nextMin: null },
+                { min:4000, title:'⭐ CEO급',     color:'#e67e22', next:'👑 CEO',       nextMin:5000 },
+                { min:3000, title:'🎖 전무/상무', color:'#3498db', next:'⭐ CEO급',     nextMin:4000 },
+                { min:2200, title:'🏅 이사',      color:'#2ecc71', next:'🎖 전무/상무', nextMin:3000 },
+                { min:1500, title:'📋 부장',      color:'#1abc9c', next:'🏅 이사',      nextMin:2200 },
+                { min:900,  title:'🗂 차장',      color:'#9b59b6', next:'📋 부장',      nextMin:1500 },
+                { min:500,  title:'📁 과장',      color:'#e74c3c', next:'🗂 차장',      nextMin:900  },
+                { min:250,  title:'📝 대리',      color:'#95a5a6', next:'📁 과장',      nextMin:500  },
+                { min:0,    title:'💼 사원',      color:'#7f8c8d', next:'📝 대리',      nextMin:250  },
             ];
             const cur = tiers.find(t => score >= t.min) || tiers[tiers.length-1];
             const curIdx = tiers.indexOf(cur);
@@ -922,14 +922,14 @@
         }
 
         function getRank(score) {
-            if      (score >= 2700) return { title:'👑 CEO',       color:'#f1c40f', msg:'전설의 회계 CEO! 6판 완벽 클리어!' };
-            else if (score >= 2300) return { title:'⭐ CEO급',     color:'#e67e22', msg:'CEO급 실력! 정말 훌륭합니다!' };
-            else if (score >= 1900) return { title:'🎖 전무/상무', color:'#3498db', msg:'임원급 실력! 대단합니다!' };
-            else if (score >= 1500) return { title:'🏅 이사',      color:'#2ecc71', msg:'이사급 실력! 잘했어요!' };
-            else if (score >= 1100) return { title:'📋 부장',      color:'#1abc9c', msg:'베테랑 부장! 좋습니다!' };
-            else if (score >= 700)  return { title:'🗂 차장',      color:'#9b59b6', msg:'믿음직한 차장! 조금만 더!' };
-            else if (score >= 400)  return { title:'📁 과장',      color:'#e74c3c', msg:'성장 중인 과장! 화이팅!' };
-            else if (score >= 200)  return { title:'📝 대리',      color:'#95a5a6', msg:'열심히 하는 대리! 다시 도전!' };
+            if      (score >= 5000) return { title:'👑 CEO',       color:'#f1c40f', msg:'전설의 회계 CEO! 압도적인 실력!' };
+            else if (score >= 4000) return { title:'⭐ CEO급',     color:'#e67e22', msg:'CEO급 실력! 정말 훌륭합니다!' };
+            else if (score >= 3000) return { title:'🎖 전무/상무', color:'#3498db', msg:'임원급 실력! 대단합니다!' };
+            else if (score >= 2200) return { title:'🏅 이사',      color:'#2ecc71', msg:'이사급 실력! 잘했어요!' };
+            else if (score >= 1500) return { title:'📋 부장',      color:'#1abc9c', msg:'베테랑 부장! 좋습니다!' };
+            else if (score >= 900)  return { title:'🗂 차장',      color:'#9b59b6', msg:'믿음직한 차장! 조금만 더!' };
+            else if (score >= 500)  return { title:'📁 과장',      color:'#e74c3c', msg:'성장 중인 과장! 화이팅!' };
+            else if (score >= 250)  return { title:'📝 대리',      color:'#95a5a6', msg:'열심히 하는 대리! 다시 도전!' };
             else                    return { title:'💼 사원',      color:'#7f8c8d', msg:'이제 시작! 다시 도전해봐요!' };
         }
 
@@ -1184,7 +1184,7 @@
 
             const score = parseInt(document.getElementById('final-score').textContent) || 0;
             const today = new Date().toLocaleDateString('ko-KR', {month:'2-digit', day:'2-digit'});
-            const data  = { game: GAME_ID, name, score, combo: 0, correct: matchedCount, date: today };
+            const data  = { game: GAME_ID, name, score, combo: stage, correct: matchedCount, date: today };
             _lsave(data);
             saveMyName(name);
             showStatus('저장 중...', '');
@@ -1342,7 +1342,7 @@
     function getGradeForSupabase(gameId, score) {
         const scales = {
             acid:    [[10000,"👑 전설의 에이스"],[6000,"🥇 베테랑"],[3000,"🥈 숙련자"],[1000,"🥉 정규 파일럿"],[0,"🛩 견습생"]],
-            memory:  [[950,"👑 CEO"],[850,"⭐ CEO급"],[750,"🎖 전무/상무"],[650,"🏅 이사"],[550,"📋 부장"],[450,"🗂 차장"],[350,"📁 과장"],[250,"📝 대리"],[0,"💼 사원"]],
+            memory:  [[5000,"👑 CEO"],[4000,"⭐ CEO급"],[3000,"🎖 전무/상무"],[2200,"🏅 이사"],[1500,"📋 부장"],[900,"🗂 차장"],[500,"📁 과장"],[250,"📝 대리"],[0,"💼 사원"]],
             debit:   [[4500,"👑 전설의 CFO"],[2500,"🥇 회계 부장"],[1000,"🥈 회계 대리"],[500,"🥉 신입 사원"],[0,"📋 수습 직원"]],
             factory: [[5000,"👑 결산 마스터"],[3000,"🥇 숙련 경리"],[1500,"🥈 견습 경리"],[500,"🥉 수습생"],[0,"📋 인턴"]],
             flight:  [[50000,"👑 전설의 에이스"],[30000,"🥇 베테랑 파일럿"],[15000,"🥈 숙련 파일럿"],[5000,"🥉 정규 파일럿"],[0,"🛩 견습 파일럿"]]
