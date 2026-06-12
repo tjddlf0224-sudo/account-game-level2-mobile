@@ -1009,7 +1009,7 @@ function updateHUD() {
     document.getElementById('timer-val').textContent = timeLeft;
     document.getElementById('score-val').textContent = score.toLocaleString();
     document.getElementById('combo-val').textContent = combo + 'x';
-    document.getElementById('timer-bar').style.width = (timeLeft / GAME_TIME * 100) + '%';
+    document.getElementById('timer-bar').style.width = Math.min(100, timeLeft / GAME_TIME * 100) + '%';
     document.getElementById('timer-val').style.color =
         timeLeft <= 10 ? '#ff2d55' : timeLeft <= 20 ? '#ffd600' : 'var(--red)';
 }
@@ -1369,11 +1369,11 @@ function getGrade(score) {
     // ── Supabase 유틸 ──
     function getGradeForSupabase(gameId, score) {
         const scales = {
-            acid:    [[10000,"👑 전설의 에이스"],[6000,"🥇 베테랑"],[3000,"🥈 숙련자"],[1000,"🥉 정규 파일럿"],[0,"🛩 견습생"]],
-            memory:  [[950,"👑 CEO"],[850,"⭐ CEO급"],[750,"🎖 전무/상무"],[650,"🏅 이사"],[550,"📋 부장"],[450,"🗂 차장"],[350,"📁 과장"],[250,"📝 대리"],[0,"💼 사원"]],
+            acid:    [[15000,"👑 전설의 에이스"],[11000,"🥇 베테랑"],[7000,"🥈 숙련자"],[3000,"🥉 정규 파일럿"],[0,"🛩 견습생"]],
+            memory:  [[5000,"👑 CEO"],[4000,"⭐ CEO급"],[3000,"🎖 전무/상무"],[2200,"🏅 이사"],[1500,"📋 부장"],[900,"🗂 차장"],[500,"📁 과장"],[250,"📝 대리"],[0,"💼 사원"]],
             debit:   [[3300,"👑 전설의 CFO"],[2800,"🥇 회계 부장"],[1800,"🥈 회계 대리"],[800,"🥉 신입 사원"],[0,"📋 수습 직원"]],
-            factory: [[5000,"👑 결산 마스터"],[3000,"🥇 숙련 경리"],[1500,"🥈 견습 경리"],[500,"🥉 수습생"],[0,"📋 인턴"]],
-            flight:  [[50000,"👑 전설의 에이스"],[30000,"🥇 베테랑 파일럿"],[15000,"🥈 숙련 파일럿"],[5000,"🥉 정규 파일럿"],[0,"🛩 견습 파일럿"]]
+            factory: [[12000,"👑 결산 마스터"],[7000,"🥇 숙련 경리"],[4000,"🥈 견습 경리"],[1500,"🥉 수습생"],[0,"📋 인턴"]],
+            flight:  [[55000,"👑 전설의 에이스"],[40000,"🥇 베테랑 파일럿"],[30000,"🥈 숙련 파일럿"],[18000,"🥉 정규 파일럿"],[0,"🛩 견습 파일럿"]]
         };
         const tiers = scales[gameId] || scales.flight;
         return (tiers.find(([min]) => score >= min) || tiers[tiers.length-1])[1];
