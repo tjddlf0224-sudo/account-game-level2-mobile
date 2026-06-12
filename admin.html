@@ -679,12 +679,14 @@ window.addEventListener('resize',()=>{resize();initStars()});
 /* ══════════════════════════════════════════
    상수
 ══════════════════════════════════════════ */
+// max = 각 게임 '최고 직위' 점수(만점/숙달 기준). 진단 백분율(score/max)의 분모로 쓰임.
+// 등급 기준(getGradeForSupabase)의 최고 등급 점수와 일치시킬 것.
 const GAMES = [
-  { id:'acid',    name:'산성비',    icon:'☁️', color:'var(--game1)', max:30000  },
-  { id:'memory',  name:'기억의전당', icon:'🧩', color:'var(--game2)', max:3000   },
-  { id:'debit',   name:'차변대변',  icon:'⚡', color:'var(--game3)', max:15000  },
-  { id:'factory', name:'조립공장',  icon:'🏭', color:'var(--game4)', max:15000  },
-  { id:'flight',  name:'플라이트',  icon:'🛩', color:'var(--game5)', max:300000 },
+  { id:'acid',    name:'산성비',    icon:'☁️', color:'var(--game1)', max:15000 },  // 👑 전설의 에이스
+  { id:'memory',  name:'기억의전당', icon:'🧩', color:'var(--game2)', max:5000  },  // 👑 CEO
+  { id:'debit',   name:'차변대변',  icon:'⚡', color:'var(--game3)', max:3300  },  // 👑 전설의 CFO
+  { id:'factory', name:'조립공장',  icon:'🏭', color:'var(--game4)', max:12000 },  // 👑 결산 마스터
+  { id:'flight',  name:'플라이트',  icon:'🛩', color:'var(--game5)', max:55000 },  // 👑 전설의 에이스
 ];
 
 /* ══════════════════════════════════════════
