@@ -996,7 +996,9 @@ function startGame() {
     nextQuestion();
 }
 
+let adPaused = false; // 광고 시청 중 타이머 일시정지 플래그
 function tick() {
+    if (adPaused) return; // 광고 보는 동안 시간 멈춤
     timeLeft--;
     updateHUD();
     if (timeLeft <= 15 && timeLeft > 0) showRewardedBtn();
@@ -1320,6 +1322,7 @@ function getGrade(score) {
     // 보상형 광고 — 시간 부족 시 버튼 클릭으로 호출
     function requestRewarded() {
         if (window.AdBridge && AdBridge.isRewardedReady()) {
+            adPaused = true; // 광고 보는 동안 게임 타이머 일시정지
             AdBridge.showRewarded();
         } else {
             alert('광고를 불러오는 중이에요. 잠시 후 다시 눌러주세요!');
@@ -1327,6 +1330,7 @@ function getGrade(score) {
     }
     // Kotlin → JS 콜백: 보상 지급
     function onRewardGranted() {
+        adPaused = false; // 광고 종료 → 타이머 재개
         timeLeft += 15;
         document.getElementById('timer-val').textContent = timeLeft;
         hideRewardedBtn();
@@ -1343,6 +1347,7 @@ function getGrade(score) {
         if (btn) btn.style.display = 'none';
     }
     function onRewardedFailed() {
+        adPaused = false; // 광고 실패/취소 → 타이머 재개
         alert('광고를 불러올 수 없어요. 잠시 후 다시 시도해주세요.');
     }
 
