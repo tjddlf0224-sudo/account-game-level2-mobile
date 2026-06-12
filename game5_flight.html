@@ -555,6 +555,7 @@ const Game={
   _reset(){
     this.state='playing';this.score=0;this.combo=0;this.maxCombo=0;this.okCount=0;
     this.speed=3.0;this.frame=0;this.gates=[];this.items=[];this.parts=[];
+    this.reviveUsed=false;this.pendingRevive=false;
     this.player.shield=false;this.player.magnet=false;this.player.magT=0;
     this.player.x=this.w/2;this.targetX=this.w/2;
     document.getElementById('ic-shield').classList.remove('on');
@@ -693,8 +694,39 @@ const Game={
         gs.style.display='flex';
         gs.scrollTop=0;
         showAdPlaceholder();
+        // 부활 버튼: 아직 부활을 안 썼고, 광고 제거 안 한 경우에만 노출
+        const rb=document.getElementById('revive-btn');
+        if(rb) rb.style.display = (!self.reviveUsed && !(window.AdBridge && typeof AdBridge.isAdsRemoved==='function' && AdBridge.isAdsRemoved())) ? 'flex' : 'none';
         self.loadRanking();
     });
+  },
+
+  // 📺 광고 보고 부활하기 (게임당 1회)
+  requestReviveAd(){
+    if(this.reviveUsed) return;
+    if(window.AdBridge && AdBridge.isRewardedReady()){
+      this.pendingRevive=true;          // 이 광고의 보상은 '부활'임을 표시
+      AdBridge.showRewarded();
+    } else {
+      alert('광고를 불러오는 중이에요. 잠시 후 다시 눌러주세요!');
+    }
+  },
+
+  // 보상 지급 시 호출: 점수 유지한 채 부활
+  doRevive(){
+    if(this.reviveUsed) return;
+    this.reviveUsed=true; this.pendingRevive=false;
+    document.getElementById('gs').style.display='none';
+    const rb=document.getElementById('revive-btn'); if(rb) rb.style.display='none';
+    hideAdPlaceholder();
+    // 화면 장애물 정리 + 플레이어 가운데로 (부활 직후 즉사 방지)
+    this.gates=[]; this.items=[]; this.parts=[];
+    document.getElementById('glayer').innerHTML='';
+    this.player.x=this.w/2; this.targetX=this.w/2;
+    this.combo=0;
+    // 즉사 방지용 방어막 1회 지급
+    this.player.shield=true; document.getElementById('ic-shield').classList.add('on');
+    this.state='playing'; BGM.play(); this.updHUD();
   },
 
   async saveScore(){
@@ -812,11 +844,12 @@ const Game={
             alert('광고를 불러오는 중이에요. 잠시 후 다시 눌러주세요!');
         }
     }
-    // Kotlin → JS 콜백: 보상 지급
+    // Kotlin → JS 콜백: 보상 지급 → 부활 처리
     function onRewardGranted() {
-        // 각 게임 파일에서 오버라이드
+        if (typeof Game !== 'undefined' && Game.pendingRevive) { Game.doRevive(); return; }
     }
     function onRewardedFailed() {
+        if (typeof Game !== 'undefined') Game.pendingRevive = false;
         alert('광고를 불러올 수 없어요. 잠시 후 다시 시도해주세요.');
     }
 
