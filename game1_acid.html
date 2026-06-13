@@ -1340,7 +1340,6 @@
     }
     // Kotlin → JS 콜백: 보상 지급
     function onRewardGranted() {
-        isPaused = false; // 광고 종료 → 타이머 재개
         timeLeft += 15;
         updateUI();
         hideRewardedBtn();
@@ -1348,6 +1347,16 @@
             window.innerWidth / 2, window.innerHeight / 2,
             '🎁 +15초 획득!', '#ffd600'
         );
+        resumeAfterAd(); // 광고 종료 → 1초 '준비' 후 재개
+    }
+    // 광고에서 돌아온 직후 바로 진행하지 않고 1초 뒤 재개 (플레이어 적응 시간)
+    function resumeAfterAd() {
+        if (window._resumeTimer) clearTimeout(window._resumeTimer);
+        showFloatingText(window.innerWidth / 2, window.innerHeight / 2 + 70, '곧 시작!', '#7cf');
+        window._resumeTimer = setTimeout(() => {
+            isPaused = false;
+            if (isPlaying) { cancelAnimationFrame(gameLoopId); gameLoopId = requestAnimationFrame(gameLoop); }
+        }, 1000);
     }
     let _rewardBtnShown = false;
     function showRewardedBtn() {
@@ -1362,8 +1371,9 @@
         if (btn) btn.style.display = 'none';
     }
     function onRewardedFailed() {
-        isPaused = false; // 광고 실패/취소 → 타이머 재개
         alert('광고를 불러올 수 없어요. 잠시 후 다시 시도해주세요.');
+        isPaused = false; // 광고 실패/취소 → 타이머 재개
+        if (isPlaying) { cancelAnimationFrame(gameLoopId); gameLoopId = requestAnimationFrame(gameLoop); } // 멈춘 애니메이션 루프 재가동
     }
 
 

@@ -1330,10 +1330,28 @@ function getGrade(score) {
     }
     // Kotlin → JS 콜백: 보상 지급
     function onRewardGranted() {
-        adPaused = false; // 광고 종료 → 타이머 재개
         timeLeft += 15;
         document.getElementById('timer-val').textContent = timeLeft;
         hideRewardedBtn();
+        resumeAfterAd(); // 광고 종료 → 1초 '준비' 후 재개
+    }
+    // 광고에서 돌아온 직후 바로 진행하지 않고 1초 뒤 재개 (플레이어 적응 시간)
+    function resumeAfterAd() {
+        if (window._resumeTimer) clearTimeout(window._resumeTimer);
+        showResumeFlash();
+        window._resumeTimer = setTimeout(() => { adPaused = false; }, 1000);
+    }
+    function showResumeFlash() {
+        let el = document.getElementById('resume-flash');
+        if (!el) {
+            el = document.createElement('div');
+            el.id = 'resume-flash';
+            el.textContent = '곧 시작!';
+            el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:42px;font-weight:900;color:#7cf;text-shadow:0 2px 12px rgba(0,0,0,.6);z-index:9999;pointer-events:none;';
+            document.body.appendChild(el);
+        }
+        el.style.display = 'block';
+        setTimeout(() => { if (el) el.style.display = 'none'; }, 950);
     }
     let _rewardBtnShown = false;
     function showRewardedBtn() {
