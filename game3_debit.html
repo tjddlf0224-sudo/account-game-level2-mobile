@@ -1330,7 +1330,7 @@ function getGrade(score) {
     }
     // Kotlin → JS 콜백: 보상 지급
     function onRewardGranted() {
-        timeLeft += 15;
+        timeLeft += 30;
         document.getElementById('timer-val').textContent = timeLeft;
         hideRewardedBtn();
         resumeAfterAd(); // 광고 종료 → 1초 '준비' 후 재개
