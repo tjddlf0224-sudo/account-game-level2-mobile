@@ -1323,24 +1323,38 @@ function getGrade(score) {
     function requestRewarded() {
         if (window.AdBridge && AdBridge.isRewardedReady()) {
             adPaused = true; // 광고 보는 동안 게임 타이머 일시정지
+            armResumeOnReturn(); // 광고 닫고 게임으로 '돌아왔을 때' 재개 예약
             AdBridge.showRewarded();
         } else {
             alert('광고를 불러오는 중이에요. 잠시 후 다시 눌러주세요!');
         }
     }
-    // Kotlin → JS 콜백: 보상 지급
+    // Kotlin → JS 콜백: 보상 지급 (※ 광고가 아직 떠 있는 도중에 호출됨 → 여기서 재개 X)
     function onRewardGranted() {
         timeLeft += 30;
         document.getElementById('timer-val').textContent = timeLeft;
         hideRewardedBtn();
-        resumeAfterAd(); // 광고 종료 → 1초 '준비' 후 재개
+        // 재개는 광고를 닫고 게임 화면으로 돌아온 순간(visibilitychange/focus)에 처리
     }
-    // 광고에서 돌아온 직후 바로 진행하지 않고 1초 뒤 재개 (플레이어 적응 시간)
-    function resumeAfterAd() {
+    // ── 광고를 닫고 게임 화면으로 '돌아왔을 때'만 1초 뒤 재개 ──
+    let _wantResume = false;
+    function armResumeOnReturn() {
+        _wantResume = true;
+        if (window._resumeSafety) clearTimeout(window._resumeSafety);
+        window._resumeSafety = setTimeout(() => {
+            if (_wantResume && document.visibilityState === 'visible') doResumeAfterAd();
+        }, 25000);
+    }
+    function doResumeAfterAd() {
+        if (!_wantResume) return;
+        _wantResume = false;
+        if (window._resumeSafety) clearTimeout(window._resumeSafety);
         if (window._resumeTimer) clearTimeout(window._resumeTimer);
         showResumeFlash();
         window._resumeTimer = setTimeout(() => { adPaused = false; }, 1000);
     }
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') doResumeAfterAd(); });
+    window.addEventListener('focus', doResumeAfterAd);
     function showResumeFlash() {
         let el = document.getElementById('resume-flash');
         if (!el) {
@@ -1365,7 +1379,10 @@ function getGrade(score) {
         if (btn) btn.style.display = 'none';
     }
     function onRewardedFailed() {
-        adPaused = false; // 광고 실패/취소 → 타이머 재개
+        // 광고가 뜨지도 않은 경우 → 복귀 이벤트가 안 오므로 즉시 재개
+        _wantResume = false;
+        if (window._resumeSafety) clearTimeout(window._resumeSafety);
+        adPaused = false;
         alert('광고를 불러올 수 없어요. 잠시 후 다시 시도해주세요.');
     }
 
