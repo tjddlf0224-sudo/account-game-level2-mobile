@@ -622,9 +622,19 @@ function updateHUD() {
     els.bar.style.backgroundColor = timeLeft <= 10 ? 'var(--red)' : 'var(--yellow)';
 }
 
+// 셔플 백: 전체 문제를 섞어 하나씩 소진, 다 나오면 재셔플(직전 문제 연속 방지)
+let _qBag = [];
+function _drawQ(arr, last) {
+    if (_qBag.length === 0) {
+        _qBag = arr.map((_, i) => i);
+        for (let i = _qBag.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [_qBag[i], _qBag[j]] = [_qBag[j], _qBag[i]]; }
+        if (_qBag.length > 1 && arr[_qBag[0]] === last) { [_qBag[0], _qBag[1]] = [_qBag[1], _qBag[0]]; }
+    }
+    return arr[_qBag.shift()];
+}
 function nextQuestion() {
     if (!isPlaying) return;
-    currentQ = qBank[Math.floor(Math.random() * qBank.length)];
+    currentQ = _drawQ(qBank, currentQ);
     els.qNum.textContent = 'Q.' + qIndex;
     els.qText.innerHTML = currentQ.q.replace(/\n/g, '<br>');
     selectedParts = { L: null, R: null }; activeSlot = 'L';

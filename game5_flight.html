@@ -434,6 +434,19 @@ const Problems=[
   {q:"7월 중 외상매출금 현금 회수 금액은?",key:"현금/대체 + 계정과목",L:"월계표",R:"총계정원장",a:"L"}
 ];
 
+// 셔플 백: 전체 문제를 섞어 하나씩 소진, 다 나오면 재셔플(직전 문제 연속 방지)
+let _pBag=[], _pLast=null;
+function _drawP(arr){
+  if(_pBag.length===0){
+    _pBag=arr.map((_,i)=>i);
+    for(let i=_pBag.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[_pBag[i],_pBag[j]]=[_pBag[j],_pBag[i]];}
+    if(_pBag.length>1 && arr[_pBag[0]]===_pLast){[_pBag[0],_pBag[1]]=[_pBag[1],_pBag[0]];}
+  }
+  const item=arr[_pBag.shift()];
+  _pLast=item;
+  return item;
+}
+
 const SFX={
   ctx:null,
   init(){if(!this.ctx)this.ctx=new(window.AudioContext||window.webkitAudioContext)();if(this.ctx.state==='suspended')this.ctx.resume()},
@@ -541,7 +554,7 @@ const Game={
   loop(){this.update();this.draw();requestAnimationFrame(()=>this.loop())},
 
   spawnGate(){
-    const p=Problems[Math.floor(Math.random()*Problems.length)];
+    const p=_drawP(Problems);
     const id='g'+Date.now()+'_'+Math.random().toString(36).slice(2);
     const g={id,y:-430,q:p.q,k:p.key,lText:p.L,rText:p.R,ans:p.a,passed:false,domEl:null,pauseT:0,pauseDone:false};
     const layer=document.getElementById('glayer');
