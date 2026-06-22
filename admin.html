@@ -530,6 +530,10 @@ body{
         <button class="refresh-btn" id="refresh-btn" onclick="loadDashboard()">
           <span class="ri">↻</span> 새로고침
         </button>
+        <button class="refresh-btn" id="delete-group-btn" onclick="deleteGroup()"
+          style="background:rgba(255,70,70,0.12);color:#ff7b7b;margin-left:8px">
+          <span>🗑</span> 그룹 삭제
+        </button>
       </div>
 
       <!-- 요약 카드 -->
@@ -814,6 +818,45 @@ async function confirmPass() {
 function closePassPopup() {
   document.getElementById('pass-overlay').classList.remove('open');
   pendingGid = null;
+}
+
+/* ══════════════════════════════════════════
+   그룹 삭제 (교수자 전용 — 이미 비밀번호 인증된 상태)
+   그룹과 연결된 모든 학생 점수까지 함께 영구 삭제한다.
+══════════════════════════════════════════ */
+async function deleteGroup() {
+  if (!currentGid) return;
+  const name = (currentGroup && currentGroup.name) || currentGid;
+
+  // 1차 확인
+  if (!confirm(`정말 "${name}" 그룹을 삭제할까요?\n\n⚠️ 이 그룹의 모든 학생 점수도 함께 영구 삭제되며, 되돌릴 수 없습니다.`)) return;
+  // 2차 확인: 그룹 이름 정확히 입력
+  const typed = prompt(`삭제를 확정하려면 아래 그룹 이름을 정확히 입력하세요:\n\n${name}`);
+  if (typed === null) return;
+  if (typed.trim() !== name) { alert('그룹 이름이 일치하지 않아 삭제를 취소했습니다.'); return; }
+
+  const btn = document.getElementById('delete-group-btn');
+  btn.disabled = true; btn.textContent = '삭제 중...';
+  try {
+    // 1) 연결된 점수 먼저 삭제 (group_id 기준)
+    const { error: e1 } = await db.from('scores').delete().eq('group_id', currentGid);
+    if (e1) throw e1;
+    // 2) 그룹 삭제
+    const { error: e2 } = await db.from('groups').delete().eq('id', currentGid);
+    if (e2) throw e2;
+
+    // 세션/화면 정리
+    sessionStorage.removeItem('verified_group');
+    alert(`"${name}" 그룹이 삭제되었습니다.`);
+    currentGid = null; currentGroup = null; location.hash = '';
+    document.getElementById('dashboard').style.display = 'none';
+    document.getElementById('empty-state').style.display = '';
+    loadGroupNav(); // 사이드바 목록 새로고침
+  } catch(e) {
+    console.error(e);
+    alert('삭제에 실패했습니다.\n권한(RLS) 설정 또는 네트워크 문제일 수 있습니다.');
+    btn.disabled = false; btn.innerHTML = '<span>🗑</span> 그룹 삭제';
+  }
 }
 
 function enterGroup(gid, group) {
