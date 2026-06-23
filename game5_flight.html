@@ -126,6 +126,10 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 .spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.12);border-top-color:var(--cy);border-radius:50%;animation:sp .7s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 .brow{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+/* 시작화면: 세로 가운데 정렬 + 버튼 크기 통일 (비행시작·사용방법·메인으로 나가기) */
+#ss{justify-content:safe center}
+#ss .brow{flex-direction:column;align-items:stretch;gap:10px;width:100%;max-width:340px;margin:0 auto}
+#ss .brow > button{width:100%;box-sizing:border-box;padding:14px 20px;min-height:56px;font-size:1.15rem}
 .pill{padding:clamp(10px,2.5vw,12px) clamp(24px,5vw,36px);border:2px solid;border-radius:50px;font-family:'Black Han Sans';font-size:clamp(.95rem,3.5vw,1.1rem);cursor:pointer;transition:all .18s;min-height:48px}
 .pill.cy{color:var(--cy);border-color:var(--cy);background:transparent}.pill.cy:active{background:var(--cy);color:#000}
 .pill.gn{color:var(--gn);border-color:var(--gn);background:transparent}.pill.gn:active{background:var(--gn);color:#000}
@@ -278,6 +282,53 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
             margin-bottom: 4px;
         }
 
+        /* ── 사용방법 안내 오버레이 ── */
+        .guide-overlay {
+            display: none; position: fixed; inset: 0; z-index: 9999;
+            background: rgba(2,8,16,0.88); backdrop-filter: blur(6px);
+            align-items: center; justify-content: center; padding: 16px;
+        }
+        .guide-overlay.show { display: flex; }
+        .guide-card {
+            width: 100%; max-width: 380px; max-height: 92vh;
+            background: linear-gradient(180deg,#0d1830,#0a1120);
+            border: 1px solid rgba(0,242,255,0.25); border-radius: 20px;
+            box-shadow: 0 0 40px rgba(0,242,255,0.18);
+            display: flex; flex-direction: column; overflow: hidden;
+            animation: guidePop .25s ease;
+        }
+        @keyframes guidePop { from{transform:scale(.92);opacity:0} to{transform:scale(1);opacity:1} }
+        .guide-head {
+            display: flex; align-items: center; gap: 8px;
+            padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .guide-title { font-family:'Jua',sans-serif; font-size: 1.1rem; color:#00f2ff; flex: 1; }
+        .guide-count { font-size: .85rem; color:#8aa; font-weight:700; }
+        .guide-x {
+            background: rgba(255,255,255,0.08); border: none; color:#fff;
+            width: 30px; height: 30px; border-radius: 50%; font-size: .9rem; cursor: pointer;
+        }
+        .guide-body { padding: 16px; overflow-y: auto; text-align: center; }
+        .guide-img {
+            width: 100%; max-height: 44vh; object-fit: contain;
+            border-radius: 14px; border: 1px solid rgba(255,255,255,0.1);
+            background:#060c14; display:block; margin: 0 auto 14px;
+        }
+        .guide-step-title { font-family:'Jua',sans-serif; font-size: 1.15rem; color:#ffd700; margin-bottom: 8px; }
+        .guide-step-desc { font-size: .95rem; line-height: 1.65; color:#dfe7ef; word-break: keep-all; }
+        .guide-step-desc b { color:#00f2ff; }
+        .guide-dots { display:flex; gap:7px; justify-content:center; padding: 4px 0 2px; }
+        .guide-dots .dot { width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,0.22); transition:.2s; }
+        .guide-dots .dot.on { background:#00f2ff; width:20px; border-radius:5px; }
+        .guide-nav { display:flex; gap:10px; padding: 12px 16px 16px; }
+        .guide-btn {
+            flex:1; padding: 13px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.06); color:#fff; font-size: 1rem; font-weight:700; cursor:pointer;
+        }
+        .guide-btn:disabled { opacity:.35; }
+        .guide-btn-next {
+            background: linear-gradient(135deg,#00f2ff,#0084ff); border:none; color:#021018;
+        }
 </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -299,7 +350,32 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
         <div class="gc b"><strong>⚡ 특수 아이템</strong>🛡️ 방어막 — 오답 1회 보호<br>🧲 자석 — 코인 자동 흡입<br>💰 코인 — +100점</div>
         <div class="gc c"><strong>🏆 점수 체계</strong>정답 통과: <b style="color:var(--gd)">+500점</b><br>콤보 보너스: +50점/연속<br>오답 → 방어막 없으면 종료!</div>
       </div>
-      <div class="brow"><button class="sbtn" onclick="Game.start()">▶ 비행 시작</button></div>
+      <div class="brow">
+        <button class="sbtn" onclick="Game.start()">▶ 비행 시작</button>
+        <button class="btn-hub" onclick="openGuide()">📖 사용방법</button>
+        <button class="btn-hub" onclick="location.href='index.html'">🏠 메인으로 나가기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 사용방법 안내 오버레이 ── -->
+  <div id="guide-overlay" class="guide-overlay" onclick="if(event.target===this)closeGuide()">
+    <div class="guide-card">
+      <div class="guide-head">
+        <span class="guide-title">📖 게임 방법</span>
+        <span class="guide-count"><span id="guide-cur">1</span>/<span id="guide-total">5</span></span>
+        <button class="guide-x" onclick="closeGuide()">✕</button>
+      </div>
+      <div class="guide-body" id="guide-body">
+        <img id="guide-img" class="guide-img" alt="게임 화면">
+        <div class="guide-step-title" id="guide-step-title"></div>
+        <div class="guide-step-desc" id="guide-step-desc"></div>
+      </div>
+      <div class="guide-dots" id="guide-dots"></div>
+      <div class="guide-nav">
+        <button class="guide-btn" id="guide-prev" onclick="guideGo(-1)">◀ 이전</button>
+        <button class="guide-btn guide-btn-next" id="guide-next" onclick="guideNext()">다음 ▶</button>
+      </div>
     </div>
   </div>
 
@@ -323,7 +399,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
         <button class="revive-btn" id="revive-btn" onclick="Game.requestReviveAd()" style="display:none;">📺 광고 보고 부활하기</button>
         <div class="action-btns" style="align-items:center;">
             <button class="btn-restart" onclick="Game.restart()">↺ 다시 하기</button>
-            <button class="btn-hub" onclick="location.href='index.html'">🏠 허브로 나가기</button>
+            <button class="btn-hub" onclick="location.href='index.html'">🏠 메인으로 나가기</button>
         </div>
       </div>
     </div>
@@ -341,7 +417,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
     <div class="hud-btns">
       <button class="mute-btn" id="mute-btn" onclick="BGM.toggleMute()" title="BGM 음소거">🎵</button>
       <button class="hdb hdb-quit" onclick="if(Game.state==='playing') Game.gameOver()">그만</button>
-      <button class="hdb hdb-home" onclick="if(Game.state==='playing'){if(!confirm('게임을 종료하고 허브로 나가시겠어요?'))return;}location.href='index.html'">홈</button>
+      <button class="hdb hdb-home" onclick="if(Game.state==='playing'){if(!confirm('게임을 종료하고 메인으로 나가시겠어요?'))return;}location.href='index.html'">홈</button>
     </div>
   </div>
 
@@ -999,6 +1075,96 @@ window.addEventListener('load',()=>Game.init());
   </div>
 </div>
 
+
+<script>
+/* ── 사용방법 안내 ── */
+const GUIDE_STEPS = [
+  {
+    img: 'guide/g5_1_goal.png',
+    title: '🎯 장부조회 문제 게이트를 통과!',
+    desc: '위에서 <b>장부조회 문제</b>가 적힌 게이트가 내려옵니다. 문제를 보고 답을 찾을 수 있는 <b>올바른 장부</b>가 어느 쪽(왼쪽/오른쪽)인지 판단하세요. 게이트는 화면 중앙쯤에서 <b>약 1.3초간 잠깐 멈춰</b> 문제를 읽을 시간을 줍니다. 💡 힌트도 함께 표시돼요.'
+  },
+  {
+    img: 'guide/g5_2_select.png',
+    title: '🕹 비행기를 정답 방향으로!',
+    desc: '화면을 <b>좌우로 터치·드래그</b>하거나 <b>← → 화살표 키</b>로 비행기를 움직여요. 비행기가 게이트에 닿는 순간, 비행기가 <b>왼쪽에 있으면 왼쪽 장부</b>를, <b>오른쪽에 있으면 오른쪽 장부</b>를 선택한 것으로 판정됩니다. 정답 쪽에 맞춰 비행하세요!'
+  },
+  {
+    img: 'guide/g5_3_combo.png',
+    title: '🔥 정답 통과 = 점수 + 콤보',
+    desc: '정답으로 통과하면 <b>+500점</b>! 연속으로 맞힐수록 <b>콤보</b>가 쌓이고, 콤보 1회마다 <b>+50점 보너스</b>가 더 붙어요. 콤보가 끊기지 않게 집중하면 점수가 쑥쑥 올라갑니다.'
+  },
+  {
+    img: 'guide/g5_4_shield.png',
+    title: '⚡ 코인 & 특수 아이템',
+    desc: '비행 중 떠다니는 아이템을 먹어요.<br><b>💰 코인</b> — 먹으면 +100점.<br><b>🛡️ 방어막</b> — <b>오답 1회</b>를 막아줘요(없으면 오답 즉시 게임 종료!).<br><b>🧲 자석</b> — 잠시 동안 주변 코인을 <b>자동으로 빨아들여요</b>.'
+  },
+  {
+    img: 'guide/g5_5_result.png',
+    title: '🏆 결과 & 랭킹 등록',
+    desc: '게임이 끝나면 점수에 따라 <b>파일럿 등급</b>이 매겨져요. 방어막이 없을 땐 <b>📺 광고를 보고 부활</b>해 이어갈 수도 있어요(게임당 1회). 마지막엔 <b>닉네임으로 점수를 등록</b>해 명예의 전당(HALL OF FAME) 랭킹에 도전하세요!'
+  }
+];
+let guideIdx = 0;
+
+function openGuide() {
+  guideIdx = 0;
+  document.getElementById('guide-total').textContent = GUIDE_STEPS.length;
+  buildGuideDots();
+  renderGuide();
+  document.getElementById('guide-overlay').classList.add('show');
+}
+function closeGuide() {
+  document.getElementById('guide-overlay').classList.remove('show');
+}
+function buildGuideDots() {
+  const wrap = document.getElementById('guide-dots');
+  wrap.innerHTML = '';
+  GUIDE_STEPS.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' on' : '');
+    wrap.appendChild(d);
+  });
+}
+function renderGuide() {
+  const s = GUIDE_STEPS[guideIdx];
+  document.getElementById('guide-img').src = s.img;
+  document.getElementById('guide-step-title').innerHTML = s.title;
+  document.getElementById('guide-step-desc').innerHTML = s.desc;
+  document.getElementById('guide-cur').textContent = guideIdx + 1;
+  document.getElementById('guide-body').scrollTop = 0;
+  document.querySelectorAll('#guide-dots .dot').forEach((d, i) => d.classList.toggle('on', i === guideIdx));
+  document.getElementById('guide-prev').disabled = (guideIdx === 0);
+  const next = document.getElementById('guide-next');
+  next.textContent = (guideIdx === GUIDE_STEPS.length - 1) ? '비행 시작 ▶' : '다음 ▶';
+}
+function guideGo(delta) {
+  const n = guideIdx + delta;
+  if (n < 0 || n >= GUIDE_STEPS.length) return;
+  guideIdx = n;
+  renderGuide();
+}
+function guideNext() {
+  if (guideIdx === GUIDE_STEPS.length - 1) {
+    closeGuide();
+    if (window.Game && typeof Game.start === 'function') Game.start();
+  } else {
+    guideGo(1);
+  }
+}
+// 스와이프(모바일) 지원
+(function() {
+  let x0 = null;
+  const ov = document.getElementById('guide-overlay');
+  ov.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
+  ov.addEventListener('touchend', e => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 45) guideGo(dx < 0 ? 1 : -1);
+    x0 = null;
+  }, { passive: true });
+})();
+</script>
 
 </body>
 </html>

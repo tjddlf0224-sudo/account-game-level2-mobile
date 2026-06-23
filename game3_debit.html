@@ -530,6 +530,11 @@
             min-height: 48px;
         }
         .btn-hub:active { background: rgba(255,255,255,0.18); }
+        /* 시작화면 버튼 크기 통일 (게임시작·사용방법·메인으로 나가기) */
+        #start-screen .action-btns > button {
+            width: 100%; box-sizing: border-box;
+            padding: 14px 20px; min-height: 56px; font-size: 1.15rem;
+        }
 
         
         /* ── 목표달성 팡파레 오버레이 ── */
@@ -625,6 +630,54 @@
             0%,100% { box-shadow: 0 0 12px rgba(255,214,0,0.4); }
             50%      { box-shadow: 0 0 28px rgba(255,214,0,0.8); }
         }
+
+        /* ── 사용방법 안내 오버레이 ── */
+        .guide-overlay {
+            display: none; position: fixed; inset: 0; z-index: 9999;
+            background: rgba(2,8,16,0.88); backdrop-filter: blur(6px);
+            align-items: center; justify-content: center; padding: 16px;
+        }
+        .guide-overlay.show { display: flex; }
+        .guide-card {
+            width: 100%; max-width: 380px; max-height: 92vh;
+            background: linear-gradient(180deg,#0d1830,#0a1120);
+            border: 1px solid rgba(0,242,255,0.25); border-radius: 20px;
+            box-shadow: 0 0 40px rgba(0,242,255,0.18);
+            display: flex; flex-direction: column; overflow: hidden;
+            animation: guidePop .25s ease;
+        }
+        @keyframes guidePop { from{transform:scale(.92);opacity:0} to{transform:scale(1);opacity:1} }
+        .guide-head {
+            display: flex; align-items: center; gap: 8px;
+            padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .guide-title { font-family:'Black Han Sans','Jua',sans-serif; font-size: 1.1rem; color:#00f2ff; flex: 1; }
+        .guide-count { font-size: .85rem; color:#8aa; font-weight:700; }
+        .guide-x {
+            background: rgba(255,255,255,0.08); border: none; color:#fff;
+            width: 30px; height: 30px; border-radius: 50%; font-size: .9rem; cursor: pointer;
+        }
+        .guide-body { padding: 16px; overflow-y: auto; text-align: center; }
+        .guide-img {
+            width: 100%; max-height: 44vh; object-fit: contain;
+            border-radius: 14px; border: 1px solid rgba(255,255,255,0.1);
+            background:#060c14; display:block; margin: 0 auto 14px;
+        }
+        .guide-step-title { font-family:'Black Han Sans','Jua',sans-serif; font-size: 1.15rem; color:#ffd700; margin-bottom: 8px; }
+        .guide-step-desc { font-size: .95rem; line-height: 1.65; color:#dfe7ef; word-break: keep-all; }
+        .guide-step-desc b { color:#00f2ff; }
+        .guide-dots { display:flex; gap:7px; justify-content:center; padding: 4px 0 2px; }
+        .guide-dots .dot { width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,0.22); transition:.2s; }
+        .guide-dots .dot.on { background:#00f2ff; width:20px; border-radius:5px; }
+        .guide-nav { display:flex; gap:10px; padding: 12px 16px 16px; }
+        .guide-btn {
+            flex:1; padding: 13px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.06); color:#fff; font-size: 1rem; font-weight:700; cursor:pointer;
+        }
+        .guide-btn:disabled { opacity:.35; }
+        .guide-btn-next {
+            background: linear-gradient(135deg,#00f2ff,#0084ff); border:none; color:#021018;
+        }
 </style>
 
 <button id="rewarded-btn" onclick="requestRewarded()">⏱ +30초 광고 보기</button>
@@ -676,9 +729,10 @@
             </div>
         </div>
 
-        <button class="pill-btn pill-btn-gold" onclick="startGame()">▶ 게임 시작</button>
-        <div class="action-btns" style="align-items:center; margin-top:8px;">
-            <button class="btn-hub" onclick="location.href='index.html'">🏠 허브로 나가기</button>
+        <div class="action-btns" style="align-items:stretch; margin-top:20px; gap:10px;">
+            <button class="pill-btn pill-btn-gold" onclick="startGame()">▶ 게임 시작</button>
+            <button class="btn-hub" onclick="openGuide()">📖 사용방법</button>
+            <button class="btn-hub" onclick="location.href='index.html'">🏠 메인으로 나가기</button>
         </div>
     </div>
 </div>
@@ -708,9 +762,30 @@
         </div>
         <div class="action-btns" style="align-items:center;">
             <button class="btn-restart" onclick="startGame()">↺ 다시 하기</button>
-            <button class="btn-hub" onclick="location.href='index.html'">🏠 허브로 나가기</button>
+            <button class="btn-hub" onclick="location.href='index.html'">🏠 메인으로 나가기</button>
         </div>
     </div>
+</div>
+
+<!-- ── 사용방법 안내 오버레이 ── -->
+<div id="guide-overlay" class="guide-overlay" onclick="if(event.target===this)closeGuide()">
+  <div class="guide-card">
+    <div class="guide-head">
+      <span class="guide-title">📖 게임 방법</span>
+      <span class="guide-count"><span id="guide-cur">1</span>/<span id="guide-total">5</span></span>
+      <button class="guide-x" onclick="closeGuide()">✕</button>
+    </div>
+    <div class="guide-body" id="guide-body">
+      <img id="guide-img" class="guide-img" alt="게임 화면">
+      <div class="guide-step-title" id="guide-step-title"></div>
+      <div class="guide-step-desc" id="guide-step-desc"></div>
+    </div>
+    <div class="guide-dots" id="guide-dots"></div>
+    <div class="guide-nav">
+      <button class="guide-btn" id="guide-prev" onclick="guideGo(-1)">◀ 이전</button>
+      <button class="guide-btn guide-btn-next" id="guide-next" onclick="guideNext()">다음 ▶</button>
+    </div>
+  </div>
 </div>
 
 <!-- ── 헤더 ── -->
@@ -735,7 +810,7 @@
         <!-- 🎵 음소거 버튼 -->
         <button class="mute-btn" id="mute-btn" onclick="toggleMute()" title="BGM 음소거">🎵</button>
         <button class="hdr-btn" onclick="quitGame()">그만</button>
-        <button class="hdr-btn" onclick="if(typeof isPlaying!=='undefined'&&isPlaying){if(!confirm('게임을 종료하고 허브로 나가시겠어요?'))return;}location.href='index.html'">홈</button>
+        <button class="hdr-btn" onclick="if(typeof isPlaying!=='undefined'&&isPlaying){if(!confirm('게임을 종료하고 메인으로 나가시겠어요?'))return;}location.href='index.html'">홈</button>
     </div>
 </header>
 
@@ -1521,5 +1596,96 @@ function getGrade(score) {
     <button class="fanfare-close-btn" onclick="closeFanfare()">계속하기 🎮</button>
   </div>
 </div>
+
+<script>
+/* ── 사용방법 안내 ── */
+const GUIDE_STEPS = [
+  {
+    img: 'guide/g3_1_goal.png',
+    title: '🎯 강조된 계정과목, 차변? 대변?',
+    desc: '거래 문장이 나오고 <b>보라색으로 강조된 계정과목</b>이 보여요. 그 계정과목이 <b>차변(왼쪽)</b>에 적히는지 <b>대변(오른쪽)</b>에 적히는지 판단해 아래 버튼을 누르면 돼요.<br>예) “상품을 외상으로 판매하다 → <b>외상매출금</b>”은 자산이 늘었으니 <b>차변</b>!'
+  },
+  {
+    img: 'guide/g3_2_correct.png',
+    title: '✅ 정답을 맞히면',
+    desc: '<b>👈 차변</b> 또는 <b>대변 👉</b> 버튼을 탭하세요. 정답이면 카드가 파랗게 빛나며 <b>점수가 올라가요</b>. 키보드는 <b>A=차변, L=대변</b>, 화면을 좌우로 <b>스와이프</b>해도 답할 수 있어요.<br>판단 기준: <b>차변</b>=자산↑·부채↓·자본↓·비용 발생 / <b>대변</b>=자산↓·부채↑·자본↑·수익 발생.'
+  },
+  {
+    img: 'guide/g3_3_combo.png',
+    title: '🔥 콤보로 점수 폭발',
+    desc: '연속으로 정답을 맞히면 <b>콤보</b>가 쌓여요. 콤보가 높을수록 한 문제당 <b>추가 점수</b>가 붙어 점수가 쑥쑥 올라갑니다. 끊기지 않게 침착하게 이어가 보세요!'
+  },
+  {
+    img: 'guide/g3_4_rule.png',
+    title: '⏱ 시간 규칙 & 보너스',
+    desc: '제한 시간은 <b>60초</b>. <b>오답이면 -5초</b>가 깎이고 정답 위치 힌트가 떠요. 시간이 부족하면 화면 아래 <b>+30초 광고 보기</b> 버튼으로 시간을 더 받을 수 있어요.'
+  },
+  {
+    img: 'guide/g3_5_result.png',
+    title: '🏆 결과 & 랭킹 등록',
+    desc: '게임이 끝나면 <b>점수·계급·정답/오답·최고 콤보</b>가 나와요. <b>닉네임을 입력하고 저장</b>하면 <b>TOP 랭킹</b>에 등록돼요. 다시 도전해서 더 높은 점수를 노려보세요!'
+  }
+];
+let guideIdx = 0;
+
+function openGuide() {
+  guideIdx = 0;
+  document.getElementById('guide-total').textContent = GUIDE_STEPS.length;
+  buildGuideDots();
+  renderGuide();
+  document.getElementById('guide-overlay').classList.add('show');
+}
+function closeGuide() {
+  document.getElementById('guide-overlay').classList.remove('show');
+}
+function buildGuideDots() {
+  const wrap = document.getElementById('guide-dots');
+  wrap.innerHTML = '';
+  GUIDE_STEPS.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' on' : '');
+    wrap.appendChild(d);
+  });
+}
+function renderGuide() {
+  const s = GUIDE_STEPS[guideIdx];
+  document.getElementById('guide-img').src = s.img;
+  document.getElementById('guide-step-title').innerHTML = s.title;
+  document.getElementById('guide-step-desc').innerHTML = s.desc;
+  document.getElementById('guide-cur').textContent = guideIdx + 1;
+  document.getElementById('guide-body').scrollTop = 0;
+  document.querySelectorAll('#guide-dots .dot').forEach((d, i) => d.classList.toggle('on', i === guideIdx));
+  document.getElementById('guide-prev').disabled = (guideIdx === 0);
+  const next = document.getElementById('guide-next');
+  next.textContent = (guideIdx === GUIDE_STEPS.length - 1) ? '게임 시작 ▶' : '다음 ▶';
+}
+function guideGo(delta) {
+  const n = guideIdx + delta;
+  if (n < 0 || n >= GUIDE_STEPS.length) return;
+  guideIdx = n;
+  renderGuide();
+}
+function guideNext() {
+  if (guideIdx === GUIDE_STEPS.length - 1) {
+    closeGuide();
+    if (window.startGame) startGame();
+  } else {
+    guideGo(1);
+  }
+}
+// 스와이프(모바일) 지원
+(function() {
+  let x0 = null;
+  const ov = document.getElementById('guide-overlay');
+  ov.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
+  ov.addEventListener('touchend', e => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 45) guideGo(dx < 0 ? 1 : -1);
+    x0 = null;
+  }, { passive: true });
+})();
+</script>
+
 </body>
 </html>

@@ -417,6 +417,11 @@
             min-height: 48px;
         }
         .btn-hub:active { background: rgba(255,255,255,0.18); }
+        /* 시작화면 버튼 크기 통일 (게임시작·사용방법·메인으로 나가기) */
+        #start-screen .action-btns > button {
+            width: 100%; box-sizing: border-box;
+            padding: 14px 20px; min-height: 56px; font-size: 1.15rem;
+        }
 
         
         /* ── 목표달성 팡파레 오버레이 ── */
@@ -512,6 +517,54 @@
             0%,100% { box-shadow: 0 0 12px rgba(255,214,0,0.4); }
             50%      { box-shadow: 0 0 28px rgba(255,214,0,0.8); }
         }
+
+        /* ── 사용방법 안내 오버레이 ── */
+        .guide-overlay {
+            display: none; position: fixed; inset: 0; z-index: 9999;
+            background: rgba(2,8,16,0.88); backdrop-filter: blur(6px);
+            align-items: center; justify-content: center; padding: 16px;
+        }
+        .guide-overlay.show { display: flex; }
+        .guide-card {
+            width: 100%; max-width: 380px; max-height: 92vh;
+            background: linear-gradient(180deg,#0d1830,#0a1120);
+            border: 1px solid rgba(0,242,255,0.25); border-radius: 20px;
+            box-shadow: 0 0 40px rgba(0,242,255,0.18);
+            display: flex; flex-direction: column; overflow: hidden;
+            animation: guidePop .25s ease;
+        }
+        @keyframes guidePop { from{transform:scale(.92);opacity:0} to{transform:scale(1);opacity:1} }
+        .guide-head {
+            display: flex; align-items: center; gap: 8px;
+            padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .guide-title { font-family:'Jua',sans-serif; font-size: 1.1rem; color:#00f2ff; flex: 1; }
+        .guide-count { font-size: .85rem; color:#8aa; font-weight:700; }
+        .guide-x {
+            background: rgba(255,255,255,0.08); border: none; color:#fff;
+            width: 30px; height: 30px; border-radius: 50%; font-size: .9rem; cursor: pointer;
+        }
+        .guide-body { padding: 16px; overflow-y: auto; text-align: center; }
+        .guide-img {
+            width: 100%; max-height: 44vh; object-fit: contain;
+            border-radius: 14px; border: 1px solid rgba(255,255,255,0.1);
+            background:#060c14; display:block; margin: 0 auto 14px;
+        }
+        .guide-step-title { font-family:'Jua',sans-serif; font-size: 1.15rem; color:#ffd700; margin-bottom: 8px; }
+        .guide-step-desc { font-size: .95rem; line-height: 1.65; color:#dfe7ef; word-break: keep-all; }
+        .guide-step-desc b { color:#00f2ff; }
+        .guide-dots { display:flex; gap:7px; justify-content:center; padding: 4px 0 2px; }
+        .guide-dots .dot { width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,0.22); transition:.2s; }
+        .guide-dots .dot.on { background:#00f2ff; width:20px; border-radius:5px; }
+        .guide-nav { display:flex; gap:10px; padding: 12px 16px 16px; }
+        .guide-btn {
+            flex:1; padding: 13px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.06); color:#fff; font-size: 1rem; font-weight:700; cursor:pointer;
+        }
+        .guide-btn:disabled { opacity:.35; }
+        .guide-btn-next {
+            background: linear-gradient(135deg,#00f2ff,#0084ff); border:none; color:#021018;
+        }
 </style>
 
 <button id="rewarded-btn" onclick="requestRewarded()">⏱ +15초 광고 보기</button>
@@ -530,7 +583,7 @@
         <!-- 🎵 음소거 버튼 -->
         <button class="mute-btn" id="mute-btn" onclick="toggleMute()" title="BGM 음소거">🎵</button>
         <button class="pause-btn" onclick="quitGame()">그만</button>
-        <button class="pause-btn" onclick="if(typeof isPlaying!=='undefined'&&isPlaying){if(!confirm('게임을 종료하고 허브로 나가시겠어요?'))return;}location.href='index.html'">홈</button>
+        <button class="pause-btn" onclick="if(typeof isPlaying!=='undefined'&&isPlaying){if(!confirm('게임을 종료하고 메인으로 나가시겠어요?'))return;}location.href='index.html'">홈</button>
     </div>
 </header>
 
@@ -572,10 +625,32 @@
         <div style="display:flex; justify-content:space-between;"><span>🛩 견습생</span><span style="color:rgba(255,255,255,0.4)">1,000점 미만</span></div>
     </div>
 
-    <button class="big-btn" onclick="startGame()">게임 시작 ▶</button>
-    <div class="action-btns" style="align-items:center; margin-top:8px;">
-        <button class="btn-hub" onclick="location.href='index.html'">🏠 허브로 나가기</button>
+    <div class="action-btns" style="align-items:stretch; margin-top:20px; gap:10px;">
+        <button class="big-btn" onclick="startGame()">게임 시작 ▶</button>
+        <button class="btn-hub" onclick="openGuide()">📖 사용방법</button>
+        <button class="btn-hub" onclick="location.href='index.html'">🏠 메인으로 나가기</button>
     </div>
+</div>
+
+<!-- ── 사용방법 안내 오버레이 ── -->
+<div id="guide-overlay" class="guide-overlay" onclick="if(event.target===this)closeGuide()">
+  <div class="guide-card">
+    <div class="guide-head">
+      <span class="guide-title">📖 게임 방법</span>
+      <span class="guide-count"><span id="guide-cur">1</span>/<span id="guide-total">5</span></span>
+      <button class="guide-x" onclick="closeGuide()">✕</button>
+    </div>
+    <div class="guide-body" id="guide-body">
+      <img id="guide-img" class="guide-img" alt="게임 화면">
+      <div class="guide-step-title" id="guide-step-title"></div>
+      <div class="guide-step-desc" id="guide-step-desc"></div>
+    </div>
+    <div class="guide-dots" id="guide-dots"></div>
+    <div class="guide-nav">
+      <button class="guide-btn" id="guide-prev" onclick="guideGo(-1)">◀ 이전</button>
+      <button class="guide-btn guide-btn-next" id="guide-next" onclick="guideNext()">다음 ▶</button>
+    </div>
+  </div>
 </div>
 
 <!-- 결과 화면 -->
@@ -598,7 +673,7 @@
 
     <div class="action-btns" style="align-items:center;">
         <button class="btn-restart" onclick="location.reload()">↺ 다시 하기</button>
-        <button class="btn-hub" onclick="location.href='index.html'">🏠 허브로 나가기</button>
+        <button class="btn-hub" onclick="location.href='index.html'">🏠 메인으로 나가기</button>
     </div>
 </div>
 
@@ -1513,5 +1588,94 @@
   </div>
 </div>
 
+<script>
+/* ── 사용방법 안내 ── */
+const GUIDE_STEPS = [
+  {
+    img: 'guide/g1_1_goal.png',
+    title: '🎯 떨어지는 [계정과목]을 탭!',
+    desc: '<b>현금·외상매출금·보통예금</b>처럼 진짜 계정과목 단어가 위에서 내려와요. 손가락으로 탭하면 정답! <br>단, <b>회식비·월급·교통비</b>처럼 계정과목이 <u>아닌</u> 함정 단어는 누르면 시간이 깎여요. 단어를 놓쳐도 시간이 줄어듭니다.'
+  },
+  {
+    img: 'guide/g1_2_combo.png',
+    title: '🔥 연속 정답 = 콤보!',
+    desc: '정답을 연달아 맞히면 <b>콤보</b>가 쌓이고 점수가 점점 커져요. 맞힐 때마다 <b>시간도 +1초</b> 늘어나니, 쉬지 말고 빠르게 탭하세요.'
+  },
+  {
+    img: 'guide/g1_3_fever.png',
+    title: '⚡ 3콤보 → FEVER 모드',
+    desc: '3콤보를 달성하면 화면이 보라색으로 바뀌며 <b>FEVER 모드</b>! 이때는 <b>점수가 2배</b>로 들어와요. 콤보가 끊기지 않게 집중!'
+  },
+  {
+    img: 'guide/g1_4_item.png',
+    title: '🎁 특수 아이템',
+    desc: '<b>💣 폭탄</b> — 화면의 단어를 한 번에 정리하고 보너스 점수!<br><b>❄️ 얼음</b> — 5초간 단어가 멈춰 여유가 생겨요.<br><b>💊 회복</b> — 시간을 10초 늘려줍니다.'
+  },
+  {
+    img: 'guide/g1_5_reward.png',
+    title: '⏱ 시간 관리 & 점수 등록',
+    desc: '시간이 부족하면 <b>+15초 광고 보기</b> 버튼으로 시간을 더 받을 수 있어요. 게임이 끝나면 <b>닉네임으로 점수를 등록</b>해 랭킹에 도전하세요!'
+  }
+];
+let guideIdx = 0;
+
+function openGuide() {
+  guideIdx = 0;
+  document.getElementById('guide-total').textContent = GUIDE_STEPS.length;
+  buildGuideDots();
+  renderGuide();
+  document.getElementById('guide-overlay').classList.add('show');
+}
+function closeGuide() {
+  document.getElementById('guide-overlay').classList.remove('show');
+}
+function buildGuideDots() {
+  const wrap = document.getElementById('guide-dots');
+  wrap.innerHTML = '';
+  GUIDE_STEPS.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' on' : '');
+    wrap.appendChild(d);
+  });
+}
+function renderGuide() {
+  const s = GUIDE_STEPS[guideIdx];
+  document.getElementById('guide-img').src = s.img;
+  document.getElementById('guide-step-title').innerHTML = s.title;
+  document.getElementById('guide-step-desc').innerHTML = s.desc;
+  document.getElementById('guide-cur').textContent = guideIdx + 1;
+  document.getElementById('guide-body').scrollTop = 0;
+  document.querySelectorAll('#guide-dots .dot').forEach((d, i) => d.classList.toggle('on', i === guideIdx));
+  document.getElementById('guide-prev').disabled = (guideIdx === 0);
+  const next = document.getElementById('guide-next');
+  next.textContent = (guideIdx === GUIDE_STEPS.length - 1) ? '게임 시작 ▶' : '다음 ▶';
+}
+function guideGo(delta) {
+  const n = guideIdx + delta;
+  if (n < 0 || n >= GUIDE_STEPS.length) return;
+  guideIdx = n;
+  renderGuide();
+}
+function guideNext() {
+  if (guideIdx === GUIDE_STEPS.length - 1) {
+    closeGuide();
+    if (window.startGame) startGame();
+  } else {
+    guideGo(1);
+  }
+}
+// 스와이프(모바일) 지원
+(function() {
+  let x0 = null;
+  const ov = document.getElementById('guide-overlay');
+  ov.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
+  ov.addEventListener('touchend', e => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 45) guideGo(dx < 0 ? 1 : -1);
+    x0 = null;
+  }, { passive: true });
+})();
+</script>
 
 </html>
