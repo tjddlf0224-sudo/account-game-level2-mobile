@@ -400,6 +400,7 @@
 
 <button id="rewarded-btn" onclick="requestRewarded()">⏱ +30초 광고 보기</button>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="wrongnote.js"></script>
 </head>
 <body>
 
@@ -678,6 +679,7 @@ function startGame() {
     els.screenResult.style.display = 'none';
     score = 0; combo = 0; maxCombo = 0; matchCount = 0; wrongCount = 0;
     timeLeft = 60; qIndex = 1; isPlaying = true;
+    if (window.WrongNote) WrongNote.reset();
     updateHUD(); nextQuestion();
     clearInterval(timerInterval);
     timerInterval = setInterval(() => {
@@ -784,6 +786,11 @@ function checkAnswer() {
     } else {
         playSound('bad'); flashEffect(false);
         combo = 0; wrongCount++; timeLeft = Math.max(0, timeLeft - 5);
+        if (window.WrongNote) WrongNote.add({ game:'factory', key:currentQ.q,
+            q:currentQ.q.replace(/\n/g,'<br>'),
+            correct:'(차) '+currentQ.L+' / (대) '+currentQ.R,
+            wrong:'(차) '+(selectedParts.L?selectedParts.L.text:'?')+' / (대) '+(selectedParts.R?selectedParts.R.text:'?'),
+            type:'결산정리분개' });
         els.qCard.classList.remove('shake'); void els.qCard.offsetWidth; els.qCard.classList.add('shake');
         els.slotL.classList.add('error'); els.slotR.classList.add('error');
         showFloatingText('-5초', 'var(--red)');
@@ -809,6 +816,7 @@ function getGrade(score) {
 
 function endGame() {
     isPlaying = false; clearInterval(timerInterval);
+    if (window.WrongNote) WrongNote.flush('factory');
     hideRewardedBtn();
     bgmStop(); // 🎵 게임 종료 시 BGM 페이드 아웃
     document.getElementById('res-score').textContent = score.toLocaleString() + '점';

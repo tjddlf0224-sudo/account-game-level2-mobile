@@ -569,6 +569,7 @@
 
 <button id="rewarded-btn" onclick="requestRewarded()">⏱ +15초 광고 보기</button>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="wrongnote.js"></script>
 </head>
 <body>
 
@@ -827,6 +828,7 @@
         isPlaying = true; isPaused = false;
         score = 0; combo = 0; timeLeft = 30;
         activeWords = []; wrongLog = []; freezeTime = 0; isFever = false;
+        if (window.WrongNote) WrongNote.reset();
         document.body.classList.remove('danger-mode', 'fever-mode');
         els.board.classList.remove('frozen');
         bgmSetFever(false); // 재시작 시 재생속도 초기화
@@ -922,6 +924,9 @@
                     applyPenalty();
                     showFloatingText(parseFloat(wordObj.el.style.left), bh - 80, "-3초", "#ff0055");
                     wrongLog.push({ word: wordObj.el.innerText, type: 'missed' });
+                    if (window.WrongNote) WrongNote.add({ game:'acid', key:wordObj.el.innerText,
+                        q:'다음은 계정과목일까요? → <b class="target-account">'+wordObj.el.innerText+'</b>',
+                        correct:'계정과목이 맞다', wrong:'계정과목이 아니다', type:'계정과목 구분(놓침)' });
                 }
             }
         });
@@ -973,6 +978,9 @@
             wordObj.el.classList.add('word-wrong');
             setTimeout(() => wordObj.el.remove(), 200);
             wrongLog.push({ word: wordObj.el.innerText, type: 'trap' });
+            if (window.WrongNote) WrongNote.add({ game:'acid', key:wordObj.el.innerText,
+                q:'다음은 계정과목일까요? → <b class="target-account">'+wordObj.el.innerText+'</b>',
+                correct:'계정과목이 아니다', wrong:'계정과목이 맞다', type:'계정과목 구분(함정)' });
             applyPenalty();
         }
         updateUI();
@@ -1029,6 +1037,7 @@
 
     function endGame() {
         isPlaying = false;
+        if (window.WrongNote) WrongNote.flush('acid');
         hideRewardedBtn();
         cancelAnimationFrame(gameLoopId);
         clearInterval(spawnTimerId);

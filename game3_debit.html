@@ -682,6 +682,7 @@
 
 <button id="rewarded-btn" onclick="requestRewarded()">⏱ +30초 광고 보기</button>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="wrongnote.js"></script>
 </head>
 <body>
 
@@ -1034,6 +1035,7 @@ function startGame() {
     score = 0; combo = 0; maxCombo = 0;
     timeLeft = GAME_TIME; correctCount = 0; wrongCount = 0;
     isPlaying = true;
+    if (window.WrongNote) WrongNote.reset();
     updateHUD();
     if (timerInterval) clearInterval(timerInterval);
     timerInterval = setInterval(tick, 1000);
@@ -1121,6 +1123,10 @@ function checkAnswer(side) {
         combo = 0;
         timeLeft = Math.max(0, timeLeft - 5);
         wrongCount++;
+        if (window.WrongNote) WrongNote.add({ game:'debit', key:currentQ.target+'｜'+currentQ.sentence,
+            q:currentQ.sentence,
+            correct:currentQ.target+' → '+(currentQ.type==='left'?'차변':'대변'),
+            wrong:currentQ.target+' → '+(side==='left'?'차변':'대변'), type:'차변/대변 판단' });
         card.classList.add('wrong');
         document.getElementById('q-hint').textContent = '💡 ' + currentQ.hint;
         document.body.classList.add('shake');
@@ -1155,6 +1161,7 @@ function showCombo(n) {
 
 function endGame() {
     isPlaying = false;
+    if (window.WrongNote) WrongNote.flush('debit');
     clearInterval(timerInterval);
     hideRewardedBtn();
     bgmStop(); // 🎵 게임 종료 시 BGM 페이드 아웃

@@ -331,6 +331,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
         }
 </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="wrongnote.js"></script>
 </head>
 <body>
 
@@ -610,6 +611,7 @@ const Game={
   restart(){BGM.play();hideAdPlaceholder();document.getElementById('gs').style.display='none';this._reset()},
 
   _reset(){
+    if(window.WrongNote)WrongNote.reset();
     this.state='playing';this.score=0;this.combo=0;this.maxCombo=0;this.okCount=0;
     this.speed=3.0;this.frame=0;this.gates=[];this.items=[];this.parts=[];
     this.reviveUsed=false;this.pendingRevive=false;
@@ -682,6 +684,9 @@ const Game={
           if(this.combo>=2)this.showCombo(this.combo);this.doFlash('ok');
           this.showJudge(true,this.combo>=2?`✓ ${this.combo} COMBO!`:'✓ 정답!');
         } else {
+          if(window.WrongNote)WrongNote.add({game:'flight',key:g.q,q:g.q,
+            correct:(g.ans==='L'?g.lText:g.rText),
+            wrong:(side==='L'?g.lText:g.rText),type:'장부 선택'});
           if(this.player.shield){
             this.player.shield=false;document.getElementById('ic-shield').classList.remove('on');SFX.item();
             this.burst(this.player.x,this.player.y,'#00f2ff',14);this.showJudge(false,'🛡️ 방어막 발동!');
@@ -736,6 +741,7 @@ const Game={
 
   gameOver(){
     this.state='gameover';
+    if(window.WrongNote)WrongNote.flush('flight');
     BGM.stop();
     if(this.score>this.hi){this.hi=this.score;localStorage.setItem('hub_flight_hi',this.hi)}
     document.getElementById('glayer').innerHTML='';

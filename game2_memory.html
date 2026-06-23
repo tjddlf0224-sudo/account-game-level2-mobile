@@ -508,6 +508,7 @@
         }
         </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="wrongnote.js"></script>
 </head>
 <body>
 
@@ -1015,6 +1016,7 @@
             document.getElementById('start-screen').style.display = 'none';
             document.getElementById('result-screen').style.display = 'none';
             stage = 1; totalScore = 0; usedPairIds = new Set();
+            if (window.WrongNote) WrongNote.reset();
             resetStage();
         }
 
@@ -1134,6 +1136,14 @@
                 if (c1Seen && c2Seen) {
                     wrongCount++;
                     movesEl.innerText = wrongCount;
+                    if (window.WrongNote) {
+                        [c1, c2].forEach(function(c){
+                            var p = allPairs.find(function(x){ return String(x.id) === String(c.dataset.id); });
+                            if (p) WrongNote.add({ game:'memory', key:p.a,
+                                q:'"<b class="target-account">'+p.a+'</b>" 의 뜻은?',
+                                correct:p.b, wrong:null, type:'계정과목 뜻' });
+                        });
+                    }
                 }
                 playSound('wrong');
                 c1.classList.add('wrong-flash'); c2.classList.add('wrong-flash');
@@ -1148,6 +1158,7 @@
 
         function endGame(quit = false) {
             stopTimer();
+            if (window.WrongNote) WrongNote.flush('memory');
             bgmStop(); // 🎵 게임 종료/포기 시 BGM 페이드 아웃
             const cfg = currentStageConfig();
             const secs = Math.round(elapsedSeconds);

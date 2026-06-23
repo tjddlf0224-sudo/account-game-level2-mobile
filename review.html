@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>오답노트 · 약점복습 | 전산회계 2급</title>
+<meta name="description" content="틀린 문제만 모아 다시 풀고 약점을 잡는 오답노트">
+<style>
+  :root{
+    --bg:#020810; --card:#0c1626; --card2:#11203a; --line:rgba(255,255,255,.08);
+    --blue:#00f2ff; --purple:#b44fff; --green:#2ecc71; --red:#ff2d78; --gold:#ffd24a;
+    --txt:#eaf2ff; --dim:rgba(234,242,255,.55);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{margin:0;background:var(--bg);color:var(--txt);
+       font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+       padding:0 0 60px;}
+  .wrap{max-width:640px;margin:0 auto;padding:18px 16px;}
+  .top{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+  .back{background:var(--card);border:1px solid var(--line);color:var(--txt);
+        border-radius:12px;padding:9px 13px;font-size:.92rem;text-decoration:none;}
+  h1{font-size:1.25rem;margin:0;letter-spacing:-.3px;}
+  h1 .sub{display:block;font-size:.72rem;color:var(--dim);font-weight:500;margin-top:3px;}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;
+         padding:16px;margin-bottom:14px;}
+  .panel h2{font-size:.95rem;margin:0 0 12px;color:var(--blue);}
+  .bigstat{display:flex;align-items:baseline;gap:8px;margin-bottom:4px;}
+  .bigstat b{font-size:2rem;color:var(--gold);}
+  .bar-row{display:flex;align-items:center;gap:8px;margin:7px 0;font-size:.82rem;}
+  .bar-label{width:108px;flex:none;color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .bar-track{flex:1;height:14px;background:rgba(255,255,255,.06);border-radius:8px;overflow:hidden;}
+  .bar-fill{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--purple),var(--red));}
+  .bar-num{width:34px;flex:none;text-align:right;color:var(--txt);font-variant-numeric:tabular-nums;}
+  .cta{display:block;width:100%;border:none;border-radius:14px;padding:15px;
+       font-size:1.02rem;font-weight:700;color:#021;cursor:pointer;
+       background:linear-gradient(90deg,var(--blue),var(--green));margin-top:6px;}
+  .cta:disabled{opacity:.4;}
+  .grp-title{font-size:.8rem;color:var(--dim);margin:16px 2px 6px;}
+  .item{background:var(--card2);border:1px solid var(--line);border-radius:12px;
+        padding:12px 13px;margin-bottom:8px;}
+  .item .q{font-size:.9rem;line-height:1.45;margin-bottom:7px;}
+  .item .meta{display:flex;flex-wrap:wrap;gap:6px;font-size:.76rem;}
+  .pill{border-radius:20px;padding:3px 9px;background:rgba(255,255,255,.06);}
+  .pill.ok{color:var(--green);background:rgba(46,204,113,.12);}
+  .pill.no{color:var(--red);background:rgba(255,45,120,.12);}
+  .pill.cnt{color:var(--gold);background:rgba(255,210,74,.12);}
+  .target-account{color:var(--gold);}
+  .empty{text-align:center;color:var(--dim);padding:46px 10px;line-height:1.6;}
+  .empty .em{font-size:2.4rem;display:block;margin-bottom:10px;}
+  .clear-link{display:block;text-align:center;color:var(--dim);font-size:.78rem;
+              margin-top:22px;text-decoration:underline;cursor:pointer;}
+
+  /* 다시풀기 모드 */
+  #quiz{display:none;}
+  .quiz-progress{font-size:.8rem;color:var(--dim);text-align:center;margin-bottom:10px;}
+  .quiz-card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 18px;}
+  .quiz-tag{font-size:.74rem;color:var(--blue);margin-bottom:10px;}
+  .quiz-q{font-size:1.08rem;line-height:1.55;margin-bottom:20px;}
+  .choice{display:block;width:100%;text-align:left;border:1.5px solid var(--line);
+          background:var(--card2);color:var(--txt);border-radius:13px;padding:14px 15px;
+          font-size:.98rem;margin-bottom:10px;cursor:pointer;transition:.15s;}
+  .choice:active{transform:scale(.98);}
+  .choice.correct{border-color:var(--green);background:rgba(46,204,113,.16);}
+  .choice.wrong{border-color:var(--red);background:rgba(255,45,120,.16);}
+  .flashcard .reveal{margin-top:14px;padding:14px;border-radius:13px;
+                     background:rgba(0,242,255,.08);border:1px solid rgba(0,242,255,.25);
+                     font-size:1rem;display:none;}
+  .quiz-next{margin-top:14px;display:none;}
+  .quiz-foot{display:flex;gap:10px;margin-top:14px;}
+  .quiz-foot button{flex:1;border-radius:13px;padding:13px;font-size:.95rem;font-weight:600;
+                    border:1px solid var(--line);background:var(--card2);color:var(--txt);cursor:pointer;}
+  .quiz-foot .keep{color:var(--gold);}
+  .quiz-done{text-align:center;padding:40px 12px;}
+  .quiz-done .em{font-size:3rem;display:block;margin-bottom:12px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <a class="back" href="index.html">←</a>
+    <h1>📝 오답노트
+      <span class="sub" id="who">불러오는 중…</span>
+    </h1>
+  </div>
+
+  <!-- 목록/약점 화면 -->
+  <div id="home">
+    <div id="content"><div class="empty">불러오는 중…</div></div>
+  </div>
+
+  <!-- 다시풀기 화면 -->
+  <div id="quiz">
+    <div class="quiz-progress" id="quiz-progress"></div>
+    <div id="quiz-body"></div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="wrongnote.js"></script>
+<script>
+// 로그인 체크
+(function(){
+  var nick = (localStorage.getItem('hub_nickname')||'').trim();
+  if(!nick){ location.replace('login.html'); return; }
+  document.getElementById('who').textContent = nick + ' 님의 틀린 문제';
+})();
+
+var ITEMS = [];
+
+function esc(s){ return (s==null?'':String(s)).replace(/[&<>"']/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
+function gameName(g){ return (WrongNote.GAME_NAMES[g]||g); }
+
+async function load(){
+  ITEMS = await WrongNote.list();
+  render();
+}
+
+function render(){
+  var box = document.getElementById('content');
+  if(!ITEMS.length){
+    box.innerHTML = '<div class="empty"><span class="em">🎉</span>'+
+      '저장된 오답이 없어요!<br>게임에서 문제를 틀리면 여기에 자동으로 모입니다.</div>';
+    return;
+  }
+  var s = WrongNote.summarize(ITEMS);
+
+  // 약점 패널 (게임별 + 유형별 빈도 막대)
+  var maxG = Math.max.apply(null, Object.values(s.byGame));
+  var gameBars = Object.keys(s.byGame).sort(function(a,b){return s.byGame[b]-s.byGame[a];})
+    .map(function(g){ return bar(gameName(g), s.byGame[g], maxG); }).join('');
+
+  var typeKeys = Object.keys(s.byType).sort(function(a,b){return s.byType[b]-s.byType[a];}).slice(0,8);
+  var maxT = typeKeys.length ? Math.max.apply(null, typeKeys.map(function(t){return s.byType[t];})) : 1;
+  var typeBars = typeKeys.map(function(t){ return bar(t, s.byType[t], maxT); }).join('');
+
+  var html =
+    '<div class="panel">'+
+      '<div class="bigstat"><b>'+s.total+'</b> 회 틀림 · '+ITEMS.length+'문제</div>'+
+      '<button class="cta" onclick="startQuiz()">▶ 틀린 문제만 다시 풀기</button>'+
+    '</div>'+
+    '<div class="panel"><h2>🎯 게임별 약점</h2>'+gameBars+'</div>'+
+    (typeBars ? '<div class="panel"><h2>🔍 유형별 약점</h2>'+typeBars+'</div>' : '');
+
+  // 게임별 목록
+  var byGame = {};
+  ITEMS.forEach(function(r){ (byGame[r.game]=byGame[r.game]||[]).push(r); });
+  Object.keys(byGame).forEach(function(g){
+    html += '<div class="grp-title">'+esc(gameName(g))+' · '+byGame[g].length+'문제</div>';
+    byGame[g].forEach(function(r){
+      html +=
+        '<div class="item">'+
+          '<div class="q">'+r.q /* 게임에서 만든 안전한 HTML(태그 강조 포함) */ +'</div>'+
+          '<div class="meta">'+
+            '<span class="pill ok">정답: '+esc(r.correct)+'</span>'+
+            (r.wrong ? '<span class="pill no">내 답: '+esc(r.wrong)+'</span>' : '')+
+            (r.count>1 ? '<span class="pill cnt">'+r.count+'회</span>' : '')+
+          '</div>'+
+        '</div>';
+    });
+  });
+
+  html += '<span class="clear-link" onclick="wipe()">오답노트 전체 비우기</span>';
+  box.innerHTML = html;
+}
+
+function bar(label, val, max){
+  var pct = max>0 ? Math.round(val/max*100) : 0;
+  return '<div class="bar-row"><div class="bar-label">'+esc(label)+'</div>'+
+         '<div class="bar-track"><div class="bar-fill" style="width:'+pct+'%"></div></div>'+
+         '<div class="bar-num">'+val+'</div></div>';
+}
+
+async function wipe(){
+  if(!confirm('오답노트를 전부 비울까요? 되돌릴 수 없습니다.')) return;
+  await WrongNote.clearAll();
+  await load();
+}
+
+/* ───────── 다시풀기 모드 ───────── */
+var QUEUE=[], qi=0, solved=0;
+
+function startQuiz(){
+  QUEUE = ITEMS.slice();
+  // 섞기
+  for(var i=QUEUE.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=QUEUE[i];QUEUE[i]=QUEUE[j];QUEUE[j]=t; }
+  qi=0; solved=0;
+  document.getElementById('home').style.display='none';
+  document.getElementById('quiz').style.display='block';
+  showQ();
+}
+
+function exitQuiz(){
+  document.getElementById('quiz').style.display='none';
+  document.getElementById('home').style.display='block';
+  load();
+}
+
+function showQ(){
+  var prog = document.getElementById('quiz-progress');
+  var body = document.getElementById('quiz-body');
+  if(qi >= QUEUE.length){
+    prog.textContent='';
+    body.innerHTML = '<div class="quiz-card quiz-done"><span class="em">🏁</span>'+
+      '<div style="font-size:1.1rem;margin-bottom:6px;">복습 완료!</div>'+
+      '<div style="color:var(--dim);font-size:.9rem;">'+solved+'문제를 맞혀서 오답노트에서 지웠어요.</div>'+
+      '<button class="cta" style="margin-top:20px;" onclick="exitQuiz()">오답노트로 돌아가기</button></div>';
+    return;
+  }
+  var r = QUEUE[qi];
+  prog.textContent = (qi+1)+' / '+QUEUE.length;
+
+  if(r.wrong){
+    // 2지선다: 정답 vs 내가 고른 오답
+    var opts = Math.random()<0.5 ? [r.correct, r.wrong] : [r.wrong, r.correct];
+    body.innerHTML =
+      '<div class="quiz-card">'+
+        '<div class="quiz-tag">'+esc(gameName(r.game))+(r.type?' · '+esc(r.type):'')+'</div>'+
+        '<div class="quiz-q">'+r.q+'</div>'+
+        '<button class="choice" data-v="'+esc(opts[0])+'">'+esc(opts[0])+'</button>'+
+        '<button class="choice" data-v="'+esc(opts[1])+'">'+esc(opts[1])+'</button>'+
+        '<div class="quiz-next"><button class="cta" onclick="nextQ()">다음 →</button></div>'+
+      '</div>';
+    var btns = body.querySelectorAll('.choice');
+    btns.forEach(function(b){ b.onclick = function(){ pick(b, r, btns); }; });
+  } else {
+    // 플래시카드(메모리 등): 뜻 보여주고 외웠으면 완료
+    body.innerHTML =
+      '<div class="quiz-card flashcard">'+
+        '<div class="quiz-tag">'+esc(gameName(r.game))+(r.type?' · '+esc(r.type):'')+'</div>'+
+        '<div class="quiz-q">'+r.q+'</div>'+
+        '<button class="choice" onclick="this.nextElementSibling.style.display=\'block\';this.style.display=\'none\'">👀 정답 보기</button>'+
+        '<div class="reveal">'+esc(r.correct)+'</div>'+
+        '<div class="quiz-foot">'+
+          '<button class="keep" onclick="nextQ()">아직 헷갈려요</button>'+
+          '<button onclick="solveCard(\''+r.game+'\',\''+esc(r.key).replace(/'/g,"\\'")+'\')">외웠어요 ✓</button>'+
+        '</div>'+
+      '</div>';
+  }
+}
+
+async function pick(btn, r, btns){
+  btns.forEach(function(b){ b.disabled=true; });
+  var chosen = btn.getAttribute('data-v');
+  if(chosen === String(r.correct)){
+    btn.classList.add('correct');
+    solved++;
+    await WrongNote.resolve(r.game, r.key);   // 맞히면 오답노트에서 제거
+  } else {
+    btn.classList.add('wrong');
+    btns.forEach(function(b){ if(b.getAttribute('data-v')===String(r.correct)) b.classList.add('correct'); });
+  }
+  document.querySelector('.quiz-next').style.display='block';
+}
+
+async function solveCard(game, key){
+  solved++;
+  await WrongNote.resolve(game, key);
+  nextQ();
+}
+
+function nextQ(){ qi++; showQ(); }
+
+load();
+</script>
+</body>
+</html>
