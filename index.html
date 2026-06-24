@@ -136,6 +136,11 @@ body {
 .review-entry .re-title { font-weight:700; font-size:1.02rem; letter-spacing:-.2px; }
 .review-entry .re-desc { font-size:.78rem; color:rgba(234,242,255,.6); margin-top:3px; }
 .review-entry .re-go { font-size:1.1rem; color:#00f2ff; flex:none; }
+.theory-entry {
+  background:linear-gradient(100deg, rgba(0,242,255,.16), rgba(46,204,113,.12));
+  border-color:rgba(46,204,113,.32); margin-bottom:12px;
+}
+.theory-entry .re-go { color:#2ecc71; }
 
 /* ── 게임 카드 그리드 ── */
 .games-grid {
@@ -528,8 +533,17 @@ body {
     <div class="path-step active"><div class="path-dot"></div>실전</div>
   </div>
 
-  <a class="review-entry" href="review.html">
+  <a class="review-entry theory-entry" href="theory.html">
     <div class="re-icon">📝</div>
+    <div class="re-body">
+      <div class="re-title">이론 객관식 (필기 30%)</div>
+      <div class="re-desc">기출유형 원작문항 · 주제별로 풀고 해설까지</div>
+    </div>
+    <div class="re-go">▶</div>
+  </a>
+
+  <a class="review-entry" href="review.html">
+    <div class="re-icon">🗂️</div>
     <div class="re-body">
       <div class="re-title">오답노트 · 약점복습</div>
       <div class="re-desc" id="re-desc">틀린 문제만 모아 다시 풀기</div>

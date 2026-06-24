@@ -198,7 +198,7 @@
     list: list, resolve: resolve, clearAll: clearAll, summarize: summarize,
     user: user, GAME_NAMES: {
       acid: '계정과목 산성비', memory: '계정·뜻 메모리', debit: '분개 차·대변',
-      factory: '결산분개 조립', flight: '플라이트 장부조회'
+      factory: '결산분개 조립', flight: '플라이트 장부조회', theory: '이론 객관식'
     }
   };
 })(window);

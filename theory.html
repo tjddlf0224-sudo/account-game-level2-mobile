@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data:; connect-src 'self' https://pjagaulfivafamhhiveg.supabase.co https://cdn.jsdelivr.net;">
+<title>이론 객관식 | 전산회계 2급</title>
+<meta name="description" content="전산회계 2급 이론(필기) 기출 객관식을 풀고 오답을 복습">
+<style>
+  :root{
+    --bg:#020810; --card:#0c1626; --card2:#11203a; --line:rgba(255,255,255,.08);
+    --blue:#00f2ff; --purple:#b44fff; --green:#2ecc71; --red:#ff2d78; --gold:#ffd24a;
+    --txt:#eaf2ff; --dim:rgba(234,242,255,.55);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{margin:0;background:var(--bg);color:var(--txt);
+       font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+       padding:0 0 40px;}
+  .wrap{max-width:640px;margin:0 auto;padding:16px;}
+  .top{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+  .back{background:var(--card);border:1px solid var(--line);color:var(--txt);
+        border-radius:12px;padding:9px 13px;font-size:.92rem;text-decoration:none;}
+  h1{font-size:1.2rem;margin:0;}
+  h1 .sub{display:block;font-size:.72rem;color:var(--dim);font-weight:500;margin-top:3px;}
+
+  /* 시작 화면 */
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px;}
+  .panel h2{font-size:.92rem;margin:0 0 12px;color:var(--blue);}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;}
+  .chip{border:1.5px solid var(--line);background:var(--card2);color:var(--txt);
+        border-radius:20px;padding:8px 14px;font-size:.86rem;cursor:pointer;transition:.15s;}
+  .chip.on{border-color:var(--blue);background:rgba(0,242,255,.14);color:var(--blue);}
+  .chip .cnt{opacity:.5;font-size:.78rem;margin-left:4px;}
+  .lens{display:flex;gap:8px;margin-top:10px;}
+  .lens .chip{flex:1;text-align:center;}
+  .cta{display:block;width:100%;border:none;border-radius:14px;padding:15px;
+       font-size:1.05rem;font-weight:700;color:#021;cursor:pointer;
+       background:linear-gradient(90deg,var(--blue),var(--green));margin-top:8px;}
+  .cta:disabled{opacity:.45;}
+  .mini{font-size:.78rem;color:var(--dim);margin-top:10px;line-height:1.5;}
+
+  /* 퀴즈 화면 */
+  #quiz{display:none;}
+  .hud{display:flex;justify-content:space-between;align-items:center;font-size:.82rem;color:var(--dim);margin-bottom:10px;}
+  .hud b{color:var(--gold);}
+  .progress-track{height:6px;background:rgba(255,255,255,.07);border-radius:6px;overflow:hidden;margin-bottom:14px;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--purple));transition:width .3s;}
+  .qcard{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;}
+  .qtag{font-size:.72rem;color:var(--blue);margin-bottom:8px;}
+  .qtag .fmt{color:var(--gold);margin-left:6px;}
+  .qstem{font-size:1.04rem;line-height:1.6;margin-bottom:18px;white-space:pre-wrap;}
+  .choice{display:flex;gap:10px;width:100%;text-align:left;border:1.5px solid var(--line);
+          background:var(--card2);color:var(--txt);border-radius:13px;padding:13px 14px;
+          font-size:.97rem;line-height:1.45;margin-bottom:9px;cursor:pointer;transition:.12s;}
+  .choice .no{flex:none;width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.1);
+              display:flex;align-items:center;justify-content:center;font-size:.8rem;}
+  .choice:active{transform:scale(.99);}
+  .choice.correct{border-color:var(--green);background:rgba(46,204,113,.16);}
+  .choice.correct .no{background:var(--green);color:#021;}
+  .choice.wrong{border-color:var(--red);background:rgba(255,45,120,.16);}
+  .choice.wrong .no{background:var(--red);color:#fff;}
+  .choice[disabled]{cursor:default;}
+  .expl{margin-top:12px;padding:13px;border-radius:13px;background:rgba(0,242,255,.07);
+        border:1px solid rgba(0,242,255,.22);font-size:.9rem;line-height:1.55;display:none;}
+  .expl .verdict{font-weight:700;margin-bottom:5px;}
+  .next-wrap{margin-top:14px;display:none;}
+
+  /* 결과 화면 */
+  #result{display:none;text-align:center;}
+  #result .em{font-size:3rem;display:block;margin:8px 0;}
+  #result .score{font-size:2.4rem;color:var(--gold);font-weight:800;}
+  #result .grade{font-size:1.1rem;margin:6px 0 2px;}
+  .res-row{display:flex;justify-content:space-around;margin:18px 0;font-size:.9rem;}
+  .res-row .v{font-size:1.4rem;font-weight:700;display:block;}
+  .res-note{font-size:.82rem;color:var(--dim);margin-bottom:18px;}
+  .btn-row{display:flex;gap:10px;}
+  .btn-row a,.btn-row button{flex:1;border-radius:13px;padding:13px;font-size:.92rem;font-weight:600;
+      border:1px solid var(--line);background:var(--card2);color:var(--txt);cursor:pointer;text-decoration:none;text-align:center;}
+  .btn-row .primary{border:none;background:linear-gradient(90deg,var(--blue),var(--green));color:#021;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="back" href="index.html">←</a>
+    <h1>📝 이론 객관식 <span class="sub">전산회계 2급 필기(이론 30%) · 기출유형 원작문항</span></h1>
+  </div>
+
+  <!-- 시작 -->
+  <div id="home">
+    <div class="panel">
+      <h2>① 주제 선택</h2>
+      <div class="chips" id="topic-chips"></div>
+    </div>
+    <div class="panel">
+      <h2>② 문항 수</h2>
+      <div class="lens" id="len-chips">
+        <div class="chip on" data-len="10">10문항</div>
+        <div class="chip" data-len="20">20문항</div>
+        <div class="chip" data-len="0">전체</div>
+      </div>
+      <button class="cta" id="start-btn">▶ 시작</button>
+      <div class="mini" id="pool-info"></div>
+    </div>
+  </div>
+
+  <!-- 퀴즈 -->
+  <div id="quiz">
+    <div class="hud">
+      <span id="hud-prog">1 / 10</span>
+      <span>점수 <b id="hud-score">0</b> · 연속 <b id="hud-combo">0</b></span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+    <div id="quiz-body"></div>
+  </div>
+
+  <!-- 결과 -->
+  <div id="result"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="wrongnote.js"></script>
+<script>
+// 로그인 체크
+(function(){ if(!(localStorage.getItem('hub_nickname')||'').trim()){ location.replace('login.html'); } })();
+
+const TOPIC_ORDER=['T1','T2','T3','T4','T5','T6','T7'];
+let BANK=[], META=null, POOL=[], SEL_TOPIC='ALL', SEL_LEN=10;
+
+function esc(s){return (s==null?'':String(s)).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+async function load(){
+  try{
+    const r=await fetch('theory_bank.json');
+    const d=await r.json();
+    BANK=d.questions; META=d.meta;
+  }catch(e){ document.getElementById('pool-info').textContent='문제 데이터를 불러오지 못했습니다.'; return; }
+  renderTopics();
+  bindStart();
+  updatePool();
+}
+
+function renderTopics(){
+  const box=document.getElementById('topic-chips');
+  const counts={}; BANK.forEach(q=>counts[q.topic]=(counts[q.topic]||0)+1);
+  const calcN=BANK.filter(q=>q.format.includes('계산')).length;
+  let html=`<div class="chip on" data-topic="ALL">전체<span class="cnt">${BANK.length}</span></div>`;
+  TOPIC_ORDER.forEach(t=>{
+    html+=`<div class="chip" data-topic="${t}">${esc(META.topics[t])}<span class="cnt">${counts[t]||0}</span></div>`;
+  });
+  html+=`<div class="chip" data-topic="CALC">🧮 계산형<span class="cnt">${calcN}</span></div>`;
+  box.innerHTML=html;
+  box.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{
+    box.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));
+    c.classList.add('on'); SEL_TOPIC=c.dataset.topic; updatePool();
+  });
+  const lb=document.getElementById('len-chips');
+  lb.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{
+    lb.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));
+    c.classList.add('on'); SEL_LEN=parseInt(c.dataset.len); updatePool();
+  });
+}
+
+function poolFor(){
+  if(SEL_TOPIC==='ALL') return BANK.slice();
+  if(SEL_TOPIC==='CALC') return BANK.filter(q=>q.format.includes('계산'));
+  return BANK.filter(q=>q.topic===SEL_TOPIC);
+}
+function updatePool(){
+  POOL=poolFor();
+  const n=SEL_LEN===0?POOL.length:Math.min(SEL_LEN,POOL.length);
+  document.getElementById('pool-info').textContent=`선택 범위 ${POOL.length}문항 중 ${n}문항 출제 · 틀린 문제는 오답노트에 자동 저장돼요.`;
+  document.getElementById('start-btn').disabled=POOL.length===0;
+}
+
+function bindStart(){ document.getElementById('start-btn').onclick=startQuiz; }
+
+// ── 퀴즈 진행 ──
+let QUEUE=[], qi=0, score=0, combo=0, correctCnt=0;
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function startQuiz(){
+  const pool=shuffle(poolFor());
+  const n=SEL_LEN===0?pool.length:Math.min(SEL_LEN,pool.length);
+  QUEUE=pool.slice(0,n);
+  qi=0;score=0;combo=0;correctCnt=0;
+  if(window.WrongNote) WrongNote.reset();
+  document.getElementById('home').style.display='none';
+  document.getElementById('result').style.display='none';
+  document.getElementById('quiz').style.display='block';
+  showQ();
+}
+
+function showQ(){
+  const q=QUEUE[qi];
+  document.getElementById('hud-prog').textContent=`${qi+1} / ${QUEUE.length}`;
+  document.getElementById('hud-score').textContent=score.toLocaleString();
+  document.getElementById('hud-combo').textContent=combo;
+  document.getElementById('prog-fill').style.width=(qi/QUEUE.length*100)+'%';
+  const fmt=q.format&&q.format.length?`<span class="fmt">${q.format.map(esc).join('·')}</span>`:'';
+  let html=`<div class="qcard">
+    <div class="qtag">${esc(q.topicName)}${fmt}</div>
+    <div class="qstem">${esc(q.stem)}</div>`;
+  q.options.forEach((o,i)=>{
+    html+=`<button class="choice" data-i="${i+1}"><span class="no">${i+1}</span><span>${esc(o)}</span></button>`;
+  });
+  html+=`<div class="expl" id="expl"></div>
+    <div class="next-wrap" id="next-wrap"><button class="cta" id="next-btn">${qi+1>=QUEUE.length?'결과 보기 🏁':'다음 문제 →'}</button></div>
+  </div>`;
+  document.getElementById('quiz-body').innerHTML=html;
+  document.querySelectorAll('.choice').forEach(b=>b.onclick=()=>pick(parseInt(b.dataset.i),q));
+}
+
+function pick(choice,q){
+  document.querySelectorAll('.choice').forEach(b=>{
+    b.disabled=true;
+    const i=parseInt(b.dataset.i);
+    if(i===q.answer) b.classList.add('correct');
+    else if(i===choice) b.classList.add('wrong');
+  });
+  const ok=choice===q.answer;
+  const expl=document.getElementById('expl');
+  if(ok){
+    combo++; correctCnt++;
+    score+=100+(combo-1)*20;
+    expl.innerHTML=`<div class="verdict" style="color:var(--green)">✓ 정답!</div>${esc(q.explanation)||''}`;
+  }else{
+    combo=0;
+    expl.innerHTML=`<div class="verdict" style="color:var(--red)">✗ 오답 — 정답은 ${q.answer}번</div>${esc(q.explanation)||''}`;
+    if(window.WrongNote) WrongNote.add({
+      game:'theory', key:q.id, q:q.stem,
+      correct:q.answerText, wrong:q.options[choice-1]||'',
+      type:q.topicName
+    });
+  }
+  document.getElementById('hud-score').textContent=score.toLocaleString();
+  document.getElementById('hud-combo').textContent=combo;
+  expl.style.display='block';
+  document.getElementById('next-wrap').style.display='block';
+  document.getElementById('next-btn').onclick=()=>{ qi++; qi>=QUEUE.length?endQuiz():showQ(); };
+  expl.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function grade(rate){
+  if(rate>=0.9) return '👑 회계 마스터';
+  if(rate>=0.75) return '🥇 합격 안정권';
+  if(rate>=0.6) return '🥈 합격 가시권';
+  if(rate>=0.4) return '🥉 분발 필요';
+  return '📋 기초 다지기';
+}
+
+async function endQuiz(){
+  if(window.WrongNote) await WrongNote.flush('theory');
+  // 다른 게임들과 동일하게 N판마다 전면광고 후 결과 표시
+  requestInterstitialIfNeeded(renderResult);
+}
+function renderResult(){
+  const total=QUEUE.length, wrong=total-correctCnt;
+  const rate=total?correctCnt/total:0;
+  document.getElementById('quiz').style.display='none';
+  const box=document.getElementById('result');
+  box.style.display='block';
+  box.innerHTML=`
+    <span class="em">${rate>=0.6?'🎉':'💪'}</span>
+    <div class="score">${score.toLocaleString()}점</div>
+    <div class="grade">${grade(rate)}</div>
+    <div class="res-row">
+      <div>정답률<span class="v" style="color:var(--blue)">${Math.round(rate*100)}%</span></div>
+      <div>맞힘<span class="v" style="color:var(--green)">${correctCnt}</span></div>
+      <div>틀림<span class="v" style="color:var(--red)">${wrong}</span></div>
+    </div>
+    <div class="res-note">${wrong>0?`틀린 ${wrong}문제가 <b style="color:var(--gold)">오답노트</b>에 저장됐어요.`:'전부 맞혔어요! 완벽합니다 👏'}</div>
+    <div class="btn-row">
+      <button class="primary" onclick="location.reload()">다시 풀기</button>
+      ${wrong>0?'<a href="review.html">오답노트 →</a>':'<a href="index.html">메인 →</a>'}
+    </div>`;
+  box.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ── 광고(전면) — 다른 게임들과 공유 카운터, N판마다 표시 ──
+const AD_GAME_COUNT_KEY='hub_ad_game_count';
+const AD_INTERSTITIAL_EVERY=10;
+function incrementGameCount(){
+  const n=parseInt(localStorage.getItem(AD_GAME_COUNT_KEY)||'0')+1;
+  localStorage.setItem(AD_GAME_COUNT_KEY,String(n)); return n;
+}
+function requestInterstitialIfNeeded(afterFn){
+  if(window.AdBridge && typeof AdBridge.isAdsRemoved==='function' && AdBridge.isAdsRemoved()){ afterFn&&afterFn(); return; }
+  window._adAfterFn=afterFn;
+  const count=incrementGameCount();
+  if(count%AD_INTERSTITIAL_EVERY===0 && window.AdBridge && typeof AdBridge.showInterstitial==='function'){
+    AdBridge.showInterstitial(); // 닫히면 onInterstitialClosed()에서 afterFn 실행
+  } else { afterFn&&afterFn(); }
+}
+function onInterstitialClosed(){ if(window._adAfterFn){ const f=window._adAfterFn; window._adAfterFn=null; f(); } }
+function onAdsRemoved(){}
+function hideAdPlaceholder(){ if(window.AdBridge && typeof AdBridge.hide==='function') AdBridge.hide(); }
+
+load();
+</script>
+</body>
+</html>
