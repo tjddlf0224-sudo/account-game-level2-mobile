@@ -622,6 +622,7 @@ body {
   </div>
 
   <div class="hub-footer" style="margin-top:40px;">
+    <button class="logout-btn" onclick="changeNickname()" style="margin-right:8px;">✏️ &nbsp;닉네임 변경</button>
     <button class="logout-btn" onclick="doLogout()">⏻ &nbsp;로그아웃</button>
   </div>
 
@@ -709,6 +710,46 @@ function doLogout() {
   );
   const base = location.pathname.replace(/[^/]*$/, '');
   window.location.replace(base + 'login.html');
+}
+
+// ── 닉네임 변경 (점수·오답노트도 새 이름으로 이전) ──
+const _SB_URL = "https://pjagaulfivafamhhiveg.supabase.co";
+const _SB_KEY = "sb_publishable_yck2tAKApEjVSJOJMVSXuQ_AGaNatuI";
+function _sbClient() {
+  try { return (window.supabase && supabase.createClient) ? supabase.createClient(_SB_URL, _SB_KEY) : null; }
+  catch (e) { return null; }
+}
+async function changeNickname() {
+  const oldName = (localStorage.getItem('hub_nickname') || '').trim();
+  const input = prompt('새 닉네임을 입력하세요 (2~12글자)', oldName);
+  if (input === null) return;                 // 취소
+  const name = input.trim();
+  if (name.length < 2) { alert('2글자 이상 입력해주세요'); return; }
+  if (name.length > 12) { alert('12글자 이하로 입력해주세요'); return; }
+  if (name === oldName) return;
+
+  const db = _sbClient();
+  // 중복 확인(서버에 같은 닉네임의 기록이 있으면 차단)
+  if (db) {
+    try {
+      const { data } = await db.from('scores').select('name').eq('name', name).limit(1);
+      if (data && data.length) { alert('⚠️ 이미 사용 중인 닉네임입니다. 다른 닉네임을 입력해주세요.'); return; }
+    } catch (e) { /* 오프라인이면 검사 생략 */ }
+  }
+
+  // 1) 서버 점수(랭킹) 이름 변경
+  if (db) { try { await db.from('scores').update({ name: name }).eq('name', oldName); } catch (e) {} }
+  // 2) 오답노트(로컬+서버) 이전
+  if (window.WrongNote && WrongNote.rename) { try { await WrongNote.rename(oldName, name); } catch (e) {} }
+  // 3) 로컬 닉네임/이름 키 갱신
+  localStorage.setItem('hub_nickname', name);
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.endsWith('_myName') && localStorage.getItem(k) === oldName) localStorage.setItem(k, name);
+  }
+  const el = document.getElementById('ub-name-el');
+  if (el) el.textContent = name;
+  alert('✅ 닉네임이 "' + name + '"(으)로 변경되었어요.\n기존 점수와 오답노트도 함께 이동했습니다.');
 }
 </script>
 

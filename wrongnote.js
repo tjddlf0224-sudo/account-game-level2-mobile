@@ -173,6 +173,37 @@
     }
   }
 
+  // ── 닉네임 변경: 오답노트(로컬+Supabase)를 새 이름으로 이전 ──
+  async function rename(oldName, newName) {
+    oldName = (oldName || '').trim() || '게스트';
+    newName = (newName || '').trim();
+    if (!newName || newName === oldName) return;
+    // localStorage 버킷 이동(병합)
+    var obj = _all();
+    if (obj[oldName]) {
+      obj[newName] = Object.assign(obj[newName] || {}, obj[oldName]);
+      delete obj[oldName];
+      _saveAll(obj);
+    }
+    // Supabase: 기존행 조회 → 새 이름으로 재삽입 → 기존행 삭제 (update 정책 없이 처리)
+    var db = client();
+    if (db) {
+      try {
+        var res = await db.from(TABLE).select().eq('user_name', oldName);
+        if (res && res.data && res.data.length) {
+          var rows = res.data.map(function (r) {
+            var o = { user_name: newName, game_id: r.game_id, q_key: r.q_key,
+                      q_text: r.q_text, correct: r.correct, wrong: r.wrong, q_type: r.q_type };
+            if (r.group_id) o.group_id = r.group_id;
+            return o;
+          });
+          await db.from(TABLE).insert(rows);
+          await db.from(TABLE).delete().eq('user_name', oldName);
+        }
+      } catch (e) { /* 무시 → 로컬만 이전 */ }
+    }
+  }
+
   async function clearAll() {
     var u = user() || '게스트';
     var obj = _all();
@@ -195,7 +226,7 @@
 
   global.WrongNote = {
     reset: reset, add: add, flush: flush,
-    list: list, resolve: resolve, clearAll: clearAll, summarize: summarize,
+    list: list, resolve: resolve, clearAll: clearAll, rename: rename, summarize: summarize,
     user: user, GAME_NAMES: {
       acid: '계정과목 산성비', memory: '계정·뜻 메모리', debit: '분개 차·대변',
       factory: '결산분개 조립', flight: '플라이트 장부조회', theory: '이론 객관식'
