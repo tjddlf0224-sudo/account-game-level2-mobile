@@ -48,10 +48,11 @@
   .qcard{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;}
   .qtag{font-size:.72rem;color:var(--blue);margin-bottom:8px;}
   .qtag .fmt{color:var(--gold);margin-left:6px;}
-  .qstem{font-size:1.04rem;line-height:1.6;margin-bottom:18px;white-space:pre-wrap;}
+  .qstem{font-size:1.04rem;line-height:1.65;margin-bottom:18px;white-space:pre-wrap;word-break:keep-all;overflow-wrap:break-word;}
+  .qstem .data{display:block;margin-top:4px;padding-left:2px;color:#cfe0f5;font-size:.98rem;}
   .choice{display:flex;gap:10px;width:100%;text-align:left;border:1.5px solid var(--line);
           background:var(--card2);color:var(--txt);border-radius:13px;padding:13px 14px;
-          font-size:.97rem;line-height:1.45;margin-bottom:9px;cursor:pointer;transition:.12s;}
+          font-size:.97rem;line-height:1.45;margin-bottom:9px;cursor:pointer;transition:.12s;word-break:keep-all;overflow-wrap:break-word;}
   .choice .no{flex:none;width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.1);
               display:flex;align-items:center;justify-content:center;font-size:.8rem;}
   .choice:active{transform:scale(.99);}
@@ -128,6 +129,15 @@ const TOPIC_ORDER=['T1','T2','T3','T4','T5','T6','T7'];
 let BANK=[], META=null, POOL=[], SEL_TOPIC='ALL', SEL_LEN=10;
 
 function esc(s){return (s==null?'':String(s)).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+// 문제 본문: 'ㆍ'로 구분된 자료 항목을 각각 줄바꿈해 가독성 향상
+function fmtStem(s){
+  const e=esc(s);
+  const idx=e.indexOf('ㆍ');
+  if(idx<0) return e;
+  const head=e.slice(0,idx).trim();
+  const items=e.slice(idx).split('ㆍ').map(x=>x.trim()).filter(Boolean);
+  return head + items.map(it=>`<span class="data">· ${it}</span>`).join('');
+}
 
 async function load(){
   try{
@@ -200,7 +210,7 @@ function showQ(){
   const fmt=q.format&&q.format.length?`<span class="fmt">${q.format.map(esc).join('·')}</span>`:'';
   let html=`<div class="qcard">
     <div class="qtag">${esc(q.topicName)}${fmt}</div>
-    <div class="qstem">${esc(q.stem)}</div>`;
+    <div class="qstem">${fmtStem(q.stem)}</div>`;
   q.options.forEach((o,i)=>{
     html+=`<button class="choice" data-i="${i+1}"><span class="no">${i+1}</span><span>${esc(o)}</span></button>`;
   });
