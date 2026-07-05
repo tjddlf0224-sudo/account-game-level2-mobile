@@ -453,6 +453,42 @@ body {
   box-shadow: 0 0 14px rgba(180,79,255,0.22);
 }
 
+/* ── 성장 그래프 버튼(헤더 우측) ── */
+.graph-btn {
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px; flex-shrink: 0;
+  background: rgba(0,242,255,0.09);
+  border: 1px solid rgba(0,242,255,0.28);
+  border-radius: 12px;
+  color: var(--cy); text-decoration: none;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+.graph-btn:hover, .graph-btn:active {
+  background: rgba(0,242,255,0.18);
+  border-color: var(--cy);
+  box-shadow: 0 0 14px rgba(0,242,255,0.25);
+}
+.graph-btn svg { display: block; }
+.graph-btn .gdot {
+  position: absolute; top: -3px; right: -3px;
+  width: 9px; height: 9px; border-radius: 50%;
+  background: #2ecc71; border: 1.5px solid #020810;
+  display: none; box-shadow: 0 0 6px rgba(46,204,113,0.85);
+}
+.graph-btn .gdot.show { display: block; }
+
+.hub-mute-btn {
+  font-family: inherit;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+.hub-mute-btn.muted {
+  background: rgba(255,45,120,0.09);
+  border-color: rgba(255,45,120,0.32);
+  color: var(--pk);
+}
+
 /* 유저바 공간 확보용 패딩 */
 .wrap { padding-top: 96px !important; }
 @media (max-width: 600px) {
@@ -460,6 +496,74 @@ body {
   .group-mode-btn { font-size: 0.58rem; padding: 7px 12px; }
   .wrap { padding-top: 80px !important; }
   .user-bar .ub-group { max-width: 100px; font-size: 0.68rem; }
+}
+
+/* ── D-day 카운터 ── */
+.examday-box {
+  max-width: 640px;
+  margin: 0 auto 32px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 16px 20px;
+  display: flex; align-items: center; gap: 16px;
+  flex-wrap: wrap;
+}
+.examday-box .ed-dday {
+  font-family: 'Orbitron', monospace;
+  font-weight: 900;
+  font-size: 1.5rem;
+  color: var(--gd);
+  letter-spacing: 1px;
+  flex-shrink: 0;
+}
+.examday-box .ed-body {
+  flex: 1; min-width: 160px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.examday-box .ed-date {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.45);
+}
+.examday-box .ed-goal {
+  display: flex; align-items: center; gap: 8px;
+}
+.examday-box .ed-goal-bar {
+  flex: 1; height: 8px; border-radius: 50px;
+  background: rgba(255,255,255,0.08);
+  overflow: hidden;
+}
+.examday-box .ed-goal-fill {
+  height: 100%; border-radius: 50px;
+  background: linear-gradient(90deg, var(--cy), var(--gn));
+  transition: width 0.3s;
+  width: 0%;
+}
+.examday-box .ed-goal-txt {
+  font-size: 0.74rem; color: rgba(255,255,255,0.55);
+  white-space: nowrap; flex-shrink: 0;
+}
+.examday-box .ed-set-btn {
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid rgba(255,214,0,0.3);
+  color: var(--gd);
+  border-radius: 50px;
+  padding: 8px 16px;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.62rem; letter-spacing: 1.5px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.examday-box .ed-set-btn:active,
+.examday-box .ed-set-btn:hover {
+  background: rgba(255,214,0,0.12);
+  border-color: var(--gd);
+}
+@media (max-width: 600px) {
+  .examday-box { padding: 12px 14px; margin-bottom: 20px; gap: 10px; }
+  .examday-box .ed-dday { font-size: 1.15rem; }
+  .examday-box .ed-set-btn { padding: 7px 12px; font-size: 0.56rem; }
 }
 
 /* ── 광고 제거 버튼 ── */
@@ -507,6 +611,17 @@ body {
   </div>
   <!-- 그룹 모드 버튼 -->
   <a class="group-mode-btn" href="group.html">👥 그룹 모드</a>
+  <!-- 전역 음소거 토글: 켜면 각 게임 로드 시 hub_muted 참조(게임별 기존 설정 있으면 그게 우선) -->
+  <button class="graph-btn hub-mute-btn" id="hub-mute-btn" onclick="toggleHubMute()" title="전체 음소거" aria-label="전체 음소거">🎵</button>
+  <!-- 성장 그래프 버튼 -->
+  <a class="graph-btn" href="growth.html" title="내 성장 그래프" aria-label="내 성장 그래프">
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+      <polyline points="17 6 23 6 23 12"></polyline>
+    </svg>
+    <span class="gdot" id="growth-dot"></span>
+  </a>
 </div>
 
 
@@ -520,6 +635,19 @@ body {
     </div>
     <div class="hub-desc">계정과목 암기부터 장부조회 실전까지<br>게임으로 반복, 시험으로 완성</div>
   </header>
+
+  <!-- ── D-day 카운터 ── -->
+  <div class="examday-box" id="examday-box" style="display:none;">
+    <div class="ed-dday" id="ed-dday">D-0</div>
+    <div class="ed-body">
+      <div class="ed-date" id="ed-date">시험일 미설정</div>
+      <div class="ed-goal">
+        <div class="ed-goal-bar"><div class="ed-goal-fill" id="ed-goal-fill"></div></div>
+        <div class="ed-goal-txt" id="ed-goal-txt">오늘 0/3판</div>
+      </div>
+    </div>
+    <button class="ed-set-btn" id="ed-set-btn" onclick="setExamDate()">📅 시험일 설정</button>
+  </div>
 
   <div class="path-line">
     <div class="path-step active"><div class="path-dot"></div>암기</div>
@@ -647,6 +775,25 @@ body {
   }
 })();
 
+// ── 전역 음소거 토글(hub_muted): 게임별 *_muted 키는 유지, 없을 때만 이 값을 참조 ──
+(function() {
+  const btn = document.getElementById('hub-mute-btn');
+  if (!btn) return;
+  const isHubMuted = localStorage.getItem('hub_muted') === 'true';
+  btn.textContent = isHubMuted ? '🔇' : '🎵';
+  btn.classList.toggle('muted', isHubMuted);
+})();
+function toggleHubMute() {
+  const muted = localStorage.getItem('hub_muted') === 'true';
+  const next = !muted;
+  localStorage.setItem('hub_muted', next);
+  const btn = document.getElementById('hub-mute-btn');
+  if (btn) {
+    btn.textContent = next ? '🔇' : '🎵';
+    btn.classList.toggle('muted', next);
+  }
+}
+
 // ── 별 배경 ──
 const canvas = document.getElementById('starfield');
 const ctx = canvas.getContext('2d');
@@ -737,10 +884,18 @@ async function changeNickname() {
     } catch (e) { /* 오프라인이면 검사 생략 */ }
   }
 
-  // 1) 서버 점수(랭킹) 이름 변경
-  if (db) { try { await db.from('scores').update({ name: name }).eq('name', oldName); } catch (e) {} }
+  // 1) 서버 점수(랭킹) 이름 변경 — RPC 우선(supabase_security_migration.sql 적용 후),
+  //    미적용 DB면 기존 직접 update 폴백
+  if (db) {
+    try {
+      const { error } = await db.rpc('rename_player', { p_old: oldName, p_new: name });
+      if (error) await db.from('scores').update({ name: name }).eq('name', oldName);
+    } catch (e) {}
+  }
   // 2) 오답노트(로컬+서버) 이전
   if (window.WrongNote && WrongNote.rename) { try { await WrongNote.rename(oldName, name); } catch (e) {} }
+  // 2-1) 성장 이력(로컬+서버) 이전
+  if (window.Growth && Growth.rename) { try { await Growth.rename(oldName, name); } catch (e) {} }
   // 3) 로컬 닉네임/이름 키 갱신
   localStorage.setItem('hub_nickname', name);
   for (let i = 0; i < localStorage.length; i++) {
@@ -810,6 +965,7 @@ window.addEventListener('DOMContentLoaded', function() {
 <!-- ── 오답노트: 미니 요약(틀린 문제 수) 표시 ── -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="wrongnote.js"></script>
+<script src="growth.js"></script>
 <script>
 (async function(){
   try {
@@ -822,6 +978,118 @@ window.addEventListener('DOMContentLoaded', function() {
     }
   } catch(e) {}
 })();
+
+// ── 삭제된 그룹 정리: 서버에 그룹이 없으면 로컬 그룹 정보 제거 ──
+// (그룹 삭제 후 hub_group_id 잔존 → 점수 저장 FK 실패 방지.
+//  조회가 성공했는데 그룹이 없을 때만 정리 — 네트워크 오류 시엔 유지)
+(async function(){
+  try {
+    var gid = localStorage.getItem('hub_group_id');
+    if (!gid) return;
+    var db = _sbClient();
+    if (!db) return;
+    var res = await db.from('groups').select('id').eq('id', gid).maybeSingle();
+    if (res && !res.error && !res.data) {
+      localStorage.removeItem('hub_group_id');
+      localStorage.removeItem('hub_group_name');
+      var el = document.getElementById('ub-group-el');
+      if (el) el.classList.remove('show');
+    }
+  } catch(e) {}
+})();
+
+// ── 성장 그래프 버튼: 기록 있으면 초록 점 + 툴팁 요약 ──
+(async function(){
+  try {
+    var data = await Growth.series();
+    var dot = document.getElementById('growth-dot');
+    var btn = document.querySelector('.graph-btn');
+    if (!dot || !data) return;
+    var totalPlays = 0, bestGrow = 0;
+    Object.keys(data).forEach(function(g){
+      var arr = data[g] || []; totalPlays += arr.length;
+      if (arr.length >= 2){
+        var first = arr[0].score;
+        var best = Math.max.apply(null, arr.map(function(p){return p.score;}));
+        if (best - first > bestGrow) bestGrow = best - first;
+      }
+    });
+    if (totalPlays > 0){
+      dot.classList.add('show');
+      if (btn) btn.title = '내 성장 그래프 · 총 ' + totalPlays + '판' +
+        (bestGrow > 0 ? ' (최고 +' + bestGrow.toLocaleString() + '점 성장)' : '');
+    }
+  } catch(e) {}
+})();
+
+// ── 시험 D-day 카운터 (순수 클라이언트, localStorage 'hub_examdate') ──
+const DAILY_GOAL_PLAYS = 3; // 목표: 오늘 3판
+function fmtExamDate(d) {
+  return d.getFullYear() + '.' + String(d.getMonth()+1).padStart(2,'0') + '.' + String(d.getDate()).padStart(2,'0');
+}
+async function todayPlayCount() {
+  // growth.js가 기록한 로컬 이력에서 '오늘' 자정 이후 판수를 센다 (game1~5 공용)
+  try {
+    if (!window.Growth || !Growth.series) return 0;
+    var data = await Growth.series();
+    if (!data) return 0;
+    var startOfDay = new Date(); startOfDay.setHours(0,0,0,0);
+    var cnt = 0;
+    Object.keys(data).forEach(function(g){
+      (data[g] || []).forEach(function(p){ if ((p.ts||0) >= startOfDay.getTime()) cnt++; });
+    });
+    return cnt;
+  } catch(e) { return 0; }
+}
+async function renderExamDay() {
+  var box = document.getElementById('examday-box');
+  if (!box) return;
+  var saved = localStorage.getItem('hub_examdate'); // 'YYYY-MM-DD'
+  var ddayEl = document.getElementById('ed-dday');
+  var dateEl = document.getElementById('ed-date');
+  var setBtn = document.getElementById('ed-set-btn');
+  box.style.display = 'flex';
+
+  if (saved) {
+    var target = new Date(saved + 'T00:00:00');
+    if (!isNaN(target.getTime())) {
+      var today = new Date(); today.setHours(0,0,0,0);
+      var diffDays = Math.round((target.getTime() - today.getTime()) / 86400000);
+      ddayEl.textContent = diffDays > 0 ? ('D-' + diffDays) : (diffDays === 0 ? 'D-DAY' : 'D+' + Math.abs(diffDays));
+      dateEl.textContent = '시험일 ' + fmtExamDate(target);
+      setBtn.textContent = '✏️ 변경';
+    } else {
+      ddayEl.textContent = 'D-?';
+      dateEl.textContent = '시험일 미설정';
+      setBtn.textContent = '📅 시험일 설정';
+    }
+  } else {
+    ddayEl.textContent = 'D-?';
+    dateEl.textContent = '시험일을 설정하고 목표를 관리해보세요';
+    setBtn.textContent = '📅 시험일 설정';
+  }
+
+  var played = await todayPlayCount();
+  var goalFill = document.getElementById('ed-goal-fill');
+  var goalTxt = document.getElementById('ed-goal-txt');
+  var pct = Math.min(100, Math.round((played / DAILY_GOAL_PLAYS) * 100));
+  if (goalFill) goalFill.style.width = pct + '%';
+  if (goalTxt) goalTxt.textContent = (played >= DAILY_GOAL_PLAYS ? '🎉 ' : '') + '오늘 ' + played + '/' + DAILY_GOAL_PLAYS + '판';
+}
+function setExamDate() {
+  var cur = localStorage.getItem('hub_examdate') || '';
+  var input = prompt('전산회계 2급 시험일을 입력하세요 (예: 2026-08-15)', cur);
+  if (input === null) return; // 취소
+  var v = input.trim();
+  if (!v) { localStorage.removeItem('hub_examdate'); renderExamDay(); return; }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(v) || isNaN(new Date(v + 'T00:00:00').getTime())) {
+    alert('날짜 형식이 올바르지 않아요. 예: 2026-08-15');
+    return;
+  }
+  localStorage.setItem('hub_examdate', v);
+  renderExamDay();
+}
+renderExamDay();
 </script>
 
 </body>

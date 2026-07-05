@@ -570,6 +570,7 @@
 <button id="rewarded-btn" onclick="requestRewarded()">⏱ +15초 광고 보기</button>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="wrongnote.js"></script>
+    <script src="growth.js"></script>
 </head>
 <body>
 
@@ -619,11 +620,8 @@
         line-height: 2;
     ">
         <div style="text-align:center; color:var(--neon-gold); font-family:'Jua'; font-size:0.9rem; margin-bottom:6px; letter-spacing:2px;">📊 파일럿 계급 기준</div>
-        <div style="display:flex; justify-content:space-between;"><span>👑 전설의 에이스</span><span style="color:var(--neon-gold)">10,000점 이상</span></div>
-        <div style="display:flex; justify-content:space-between;"><span>🥇 베테랑</span><span style="color:#ffd700">6,000점 이상</span></div>
-        <div style="display:flex; justify-content:space-between;"><span>🥈 숙련자</span><span style="color:#aaa">3,000점 이상</span></div>
-        <div style="display:flex; justify-content:space-between;"><span>🥉 정규 파일럿</span><span style="color:#cd7f32">1,000점 이상</span></div>
-        <div style="display:flex; justify-content:space-between;"><span>🛩 견습생</span><span style="color:rgba(255,255,255,0.4)">1,000점 미만</span></div>
+        <!-- GRADE_TIERS(단일 소스)에서 렌더링 -->
+        <div id="grade-table"></div>
     </div>
 
     <div class="action-btns" style="align-items:stretch; margin-top:20px; gap:10px;">
@@ -686,7 +684,10 @@
     bgm.volume = 0.5;
 
     // 음소거 상태: localStorage에 저장해서 다음 게임에도 유지
-    let isMuted = localStorage.getItem('acid_muted') === 'true';
+    // 게임별 키(acid_muted)가 있으면 우선, 없으면 허브 전역 토글(hub_muted) 참조
+    let isMuted = localStorage.getItem('acid_muted') !== null
+        ? localStorage.getItem('acid_muted') === 'true'
+        : localStorage.getItem('hub_muted') === 'true';
     applyMuteState();
 
     function applyMuteState() {
@@ -703,6 +704,10 @@
         localStorage.setItem('acid_muted', isMuted);
         applyMuteState();
     }
+
+    // ── 정답/오답 햅틱 (모바일 WebView에서 navigator.vibrate 지원 시에만) ──
+    function hapticCorrect() { if (navigator.vibrate) navigator.vibrate(15); }
+    function hapticWrong() { if (navigator.vibrate) navigator.vibrate([30, 40, 30]); }
 
     // BGM 재생 (브라우저 자동재생 정책 대응: 반드시 사용자 인터랙션 이후 호출)
     function bgmPlay() {
@@ -797,7 +802,7 @@
     ];
 
     // ── 게임 상태 ──
-    let score = 0, combo = 0, timeLeft = 30;
+    let score = 0, combo = 0, maxCombo = 0, correctCount = 0, timeLeft = 30;
     let gameLoopId = null, spawnTimerId = null, countdownTimerId = null;
     let activeWords = [], isPlaying = false, isPaused = false;
     let isFever = false, wrongLog = [], freezeTime = 0;
@@ -826,7 +831,7 @@
         hideAdPlaceholder();
         els.start.style.display = 'none'; els.result.style.display = 'none';
         isPlaying = true; isPaused = false;
-        score = 0; combo = 0; timeLeft = 30;
+        score = 0; combo = 0; maxCombo = 0; correctCount = 0; timeLeft = 30;
         activeWords = []; wrongLog = []; freezeTime = 0; isFever = false;
         if (window.WrongNote) WrongNote.reset();
         document.body.classList.remove('danger-mode', 'fever-mode');
@@ -959,6 +964,8 @@
             showFloatingText(x, y, "💊 HP +10", "#2ecc71"); wordObj.el.remove();
         } else if (wordObj.type === 'account') {
             playSound('correct'); combo++;
+            if (combo > maxCombo) maxCombo = combo;
+            correctCount++;
             timeLeft += 1;
             if (combo >= 3 && !isFever) {
                 isFever = true;
@@ -973,6 +980,7 @@
             if (combo > 0 && combo % 10 === 0) { timeLeft += 3; showFloatingText(x, y - 40, "+3초⏱️", "#2ecc71"); }
             wordObj.el.classList.add('word-correct', 'hit-effect');
             setTimeout(() => wordObj.el.remove(), 400);
+            hapticCorrect();
         } else if (wordObj.type === 'fake') {
             showFloatingText(x, y, "-3초", "#ff0055");
             wordObj.el.classList.add('word-wrong');
@@ -982,6 +990,7 @@
                 q:'다음은 계정과목일까요? → <b class="target-account">'+wordObj.el.innerText+'</b>',
                 correct:'계정과목이 아니다', wrong:'계정과목이 맞다', type:'계정과목 구분(함정)' });
             applyPenalty();
+            hapticWrong();
         }
         updateUI();
     }
@@ -1027,13 +1036,30 @@
         }
     }
 
+    // ── 등급 기준 단일 소스: getGrade·시작화면 기준표·팡파레 목표 공용 ──
+    const GRADE_TIERS = [
+        { min: 15000, label: '👑 전설의 에이스', color: 'var(--neon-gold)' },
+        { min: 11000, label: '🥇 베테랑',        color: '#ffd700' },
+        { min: 7000,  label: '🥈 숙련자',        color: '#aaa' },
+        { min: 3000,  label: '🥉 정규 파일럿',   color: '#cd7f32' },
+        { min: 0,     label: '🛩 견습생',        color: 'rgba(255,255,255,0.4)' }
+    ];
+
     function getGrade(score) {
-        if (score >= 15000) return '👑 전설의 에이스';
-        if (score >= 11000) return '🥇 베테랑';
-        if (score >= 7000)  return '🥈 숙련자';
-        if (score >= 3000)  return '🥉 정규 파일럿';
-        return '🛩 견습생';
+        return (GRADE_TIERS.find(t => score >= t.min) || GRADE_TIERS[GRADE_TIERS.length - 1]).label;
     }
+
+    // 시작화면 계급 기준표 렌더링 (GRADE_TIERS 단일 소스)
+    (function renderGradeTable() {
+        const box = document.getElementById('grade-table');
+        if (!box) return;
+        box.innerHTML = GRADE_TIERS.map((t, i) => {
+            const req = i < GRADE_TIERS.length - 1
+                ? t.min.toLocaleString() + '점 이상'
+                : GRADE_TIERS[i - 1].min.toLocaleString() + '점 미만';
+            return `<div style="display:flex; justify-content:space-between;"><span>${t.label}</span><span style="color:${t.color}">${req}</span></div>`;
+        }).join('');
+    })();
 
     function endGame() {
         isPlaying = false;
@@ -1072,6 +1098,7 @@
         requestInterstitialIfNeeded(function() {
             els.result.style.display = 'flex';
             checkAndShowFanfare(score, getGrade);
+            showAdPlaceholder();
             loadRanking();
         });
     }
@@ -1229,7 +1256,7 @@
             }
         }
 
-        const newRecord = { name, score, game: GAME_ID, grade: getGrade(score) };
+        const newRecord = { name, score, game: GAME_ID, grade: getGrade(score), combo: maxCombo, correct: correctCount };
         const localScores = getLocalScores();
         localScores.push(newRecord);
         localScores.sort((a, b) => b.score - a.score);
@@ -1348,6 +1375,8 @@
         };
         if (groupId) rpcParams.p_group_id = groupId;
         await db.rpc('upsert_score', rpcParams);
+        // 성장 그래프용 — 매 판 점수 이력 누적(이중저장, 예외 안 던짐)
+        if (window.Growth) Growth.record({ game: gameId, name: safeName, score: safeScore, grade: rpcParams.p_grade, combo: rpcParams.p_combo, correct: rpcParams.p_correct });
     }
 
     async function supabaseFetchRanking(gameId) {
@@ -1496,8 +1525,9 @@
 
 <script>
     // ── 팡파레 시스템 ──
-    const FANFARE_TARGET_SCORE = 6000;
     const FANFARE_TARGET_LABEL = '베테랑';
+    // 목표 점수는 GRADE_TIERS(단일 소스)에서 해당 계급의 최소 점수로 산출 (= 11000)
+    const FANFARE_TARGET_SCORE = (GRADE_TIERS.find(t => t.label.includes(FANFARE_TARGET_LABEL)) || GRADE_TIERS[0]).min;
 
     function checkAndShowFanfare(currentScore, gradeFn) {
         const grade = typeof gradeFn === 'function' ? gradeFn(currentScore) : gradeFn;

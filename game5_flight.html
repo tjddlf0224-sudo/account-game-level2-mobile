@@ -332,6 +332,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="wrongnote.js"></script>
+    <script src="growth.js"></script>
 </head>
 <body>
 
@@ -442,7 +443,8 @@ function escapeHTML(str) { if (!str) return ''; return str.replace(/[&<>'"]/g, f
 
 const BGM={
   el:document.getElementById('bgm'),
-  _muted:localStorage.getItem('flight_muted')==='true',
+  // 게임별 키(flight_muted)가 있으면 우선, 없으면 허브 전역 토글(hub_muted) 참조
+  _muted:localStorage.getItem('flight_muted')!==null?localStorage.getItem('flight_muted')==='true':localStorage.getItem('hub_muted')==='true',
   _fadeTimer:null,
   init(){this.el.volume=0.5;this.el.muted=this._muted;this._updateBtn()},
   _updateBtn(){const btn=document.getElementById('mute-btn');if(!btn)return;btn.textContent=this._muted?'🔇':'🎵';btn.classList.toggle('muted',this._muted)},
@@ -533,6 +535,10 @@ const SFX={
   coin(){this.tone(1200+Math.random()*400,'triangle',.05,.06)},
   item(){this.tone(600,'square',.08,.1);setTimeout(()=>this.tone(1200,'square',.15,.1),90)},
 };
+
+// ── 정답/오답 햅틱 (모바일 WebView에서 navigator.vibrate 지원 시에만) ──
+function hapticCorrect(){if(navigator.vibrate)navigator.vibrate(15)}
+function hapticWrong(){if(navigator.vibrate)navigator.vibrate([30,40,30])}
 
 class Particle{
   constructor(x,y,col){this.x=x;this.y=y;this.col=col;const a=Math.random()*Math.PI*2,s=3+Math.random()*10;this.vx=Math.cos(a)*s;this.vy=Math.sin(a)*s;this.life=1;this.fade=.025+Math.random()*.04}
@@ -683,6 +689,7 @@ const Game={
           this.burst(this.player.x,this.player.y,'#00f2ff',18);this.burst(this.player.x,this.player.y,'#fff',8);
           if(this.combo>=2)this.showCombo(this.combo);this.doFlash('ok');
           this.showJudge(true,this.combo>=2?`✓ ${this.combo} COMBO!`:'✓ 정답!');
+          hapticCorrect();
         } else {
           if(window.WrongNote)WrongNote.add({game:'flight',key:g.q,q:g.q,
             correct:(g.ans==='L'?g.lText:g.rText),
@@ -695,6 +702,7 @@ const Game={
             this.showJudge(false,'✗ 오답!');this.state='dying';setTimeout(()=>this.gameOver(),420);
           }
           this.combo=0;
+          hapticWrong();
         }
         this.updHUD();
       }
@@ -737,7 +745,7 @@ const Game={
   doFlash(type){const el=document.getElementById('flash');el.className='';void el.offsetWidth;el.className=type;setTimeout(()=>el.className='',type==='ok'?400:560)},
   showCombo(n){const el=document.getElementById('cpop');el.textContent=n+'x COMBO! 🔥';el.style.display='block';el.style.animation='none';void el.offsetWidth;el.style.animation='cp .8s ease-out forwards';setTimeout(()=>el.style.display='none',800)},
   updHUD(){document.getElementById('hv-score').textContent=this.score.toLocaleString();document.getElementById('hv-combo').textContent=this.combo+'x'},
-  _grade(score){if(score>=55000)return'👑 전설의 에이스';if(score>=40000)return'🥇 베테랑 파일럿';if(score>=30000)return'🥈 숙련 파일럿';if(score>=18000)return'🥉 정규 파일럿';return'🛩 견습 파일럿'},
+  _grade(score){const t=GRADE_TIERS.find(t=>score>=t.min)||GRADE_TIERS[GRADE_TIERS.length-1];return t.label},
 
   gameOver(){
     this.state='gameover';
@@ -937,6 +945,15 @@ function showAdPlaceholder(){
 
 window.addEventListener('load',()=>Game.init());
 
+// ── 등급 기준 단일 소스: _grade·팡파레 목표 공용 ──
+const GRADE_TIERS = [
+  { min: 55000, label: '👑 전설의 에이스' },
+  { min: 40000, label: '🥇 베테랑 파일럿' },
+  { min: 30000, label: '🥈 숙련 파일럿' },
+  { min: 18000, label: '🥉 정규 파일럿' },
+  { min: 0,     label: '🛩 견습 파일럿' }
+];
+
     // ── Supabase 유틸 ──
     function getGradeForSupabase(gameId, score) {
         const scales = {
@@ -968,6 +985,8 @@ window.addEventListener('load',()=>Game.init());
         };
         if (groupId) rpcParams.p_group_id = groupId;
         await db.rpc('upsert_score', rpcParams);
+        // 성장 그래프용 — 매 판 점수 이력 누적(이중저장, 예외 안 던짐)
+        if (window.Growth) Growth.record({ game: gameId, name: safeName, score: safeScore, grade: rpcParams.p_grade, combo: rpcParams.p_combo, correct: rpcParams.p_correct });
     }
 
     async function supabaseFetchRanking(gameId) {
@@ -988,8 +1007,9 @@ window.addEventListener('load',()=>Game.init());
 
 <script>
     // ── 팡파레 시스템 ──
-    const FANFARE_TARGET_SCORE = 30000;
     const FANFARE_TARGET_LABEL = '베테랑 파일럿';
+    // 목표 점수는 GRADE_TIERS(단일 소스)에서 해당 등급의 최소 점수로 산출 (= 40000)
+    const FANFARE_TARGET_SCORE = (GRADE_TIERS.find(t => t.label.includes(FANFARE_TARGET_LABEL)) || GRADE_TIERS[0]).min;
 
     function checkAndShowFanfare(currentScore, gradeFn) {
         const grade = typeof gradeFn === 'function' ? gradeFn(currentScore) : gradeFn;

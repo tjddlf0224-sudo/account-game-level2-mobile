@@ -411,11 +411,37 @@ function showErr(msg) {
   input.focus();
 }
 
-function doLogin() {
+const _SB_URL = "https://pjagaulfivafamhhiveg.supabase.co";
+const _SB_KEY = "sb_publishable_yck2tAKApEjVSJOJMVSXuQ_AGaNatuI";
+
+async function doLogin() {
   const name = input.value.trim();
   if (!name) { showErr('닉네임을 입력해주세요'); return; }
   if (name.length < 2) { showErr('2글자 이상 입력해주세요'); return; }
   if (name.length > 12) { showErr('12글자 이하로 입력해주세요'); return; }
+
+  const btn = document.getElementById('start-btn');
+  btn.disabled = true;
+  btn.textContent = '확인 중...';
+
+  // 서버 닉네임 중복 확인 — 동명이인의 점수가 한 기록으로 병합되는 것 방지
+  // (이 기기에서 쓰던 닉네임 그대로면 본인이므로 통과, 오프라인이면 검사 생략)
+  const saved = (localStorage.getItem('hub_nickname') || '').trim();
+  if (name !== saved) {
+    try {
+      const db = (window.supabase && supabase.createClient)
+        ? supabase.createClient(_SB_URL, _SB_KEY) : null;
+      if (db) {
+        const { data, error } = await db.from('scores').select('name').eq('name', name).limit(1);
+        if (!error && data && data.length) {
+          btn.disabled = false;
+          btn.textContent = '🚀 훈련 시작';
+          showErr('이미 사용 중인 닉네임입니다. 다른 닉네임을 입력해주세요');
+          return;
+        }
+      }
+    } catch (e) { /* 오프라인이면 검사 생략 */ }
+  }
 
   // localStorage에 닉네임 저장
   localStorage.setItem('hub_nickname', name);
@@ -424,8 +450,6 @@ function doLogin() {
     localStorage.setItem(`hub_${g}_myName`, name)
   );
 
-  const btn = document.getElementById('start-btn');
-  btn.disabled = true;
   btn.textContent = '이동 중...';
   window.location.href = 'index.html';
 }

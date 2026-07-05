@@ -509,6 +509,7 @@
         </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="wrongnote.js"></script>
+    <script src="growth.js"></script>
 </head>
 <body>
 
@@ -558,15 +559,8 @@
                 line-height:2;
             ">
                 <div style="text-align:center;color:#f39c12;font-family:'Jua';font-size:0.88rem;margin-bottom:4px;letter-spacing:2px;">📊 직급 기준 (누적 점수)</div>
-                <div style="display:flex;justify-content:space-between;"><span>👑 CEO</span>       <span style="color:#f1c40f">2,700점 이상</span></div>
-                <div style="display:flex;justify-content:space-between;"><span>⭐ CEO급</span>    <span style="color:#e67e22">2,300점 이상</span></div>
-                <div style="display:flex;justify-content:space-between;"><span>🎖 전무/상무</span><span style="color:#3498db">1,900점 이상</span></div>
-                <div style="display:flex;justify-content:space-between;"><span>🏅 이사</span>     <span style="color:#2ecc71">1,500점 이상</span></div>
-                <div style="display:flex;justify-content:space-between;"><span>📋 부장</span>     <span style="color:#1abc9c">1,100점 이상</span></div>
-                <div style="display:flex;justify-content:space-between;"><span>🗂 차장</span>     <span style="color:#9b59b6">700점 이상</span></div>
-                <div style="display:flex;justify-content:space-between;"><span>📁 과장</span>     <span style="color:#e74c3c">400점 이상</span></div>
-                <div style="display:flex;justify-content:space-between;"><span>📝 대리</span>     <span style="color:#95a5a6">200점 이상</span></div>
-                <div style="display:flex;justify-content:space-between;"><span>💼 사원</span>     <span style="color:rgba(255,255,255,0.35)">200점 미만</span></div>
+                <!-- RANK_TIERS(단일 소스)에서 렌더링 -->
+                <div id="grade-table"></div>
             </div>
 
             <div class="action-btns" style="align-items:stretch; margin-top:20px; gap:10px;">
@@ -621,7 +615,7 @@
 
             <div class="name-row">
                 <input type="text" id="player-name" placeholder="닉네임 입력" maxlength="20">
-                <button onclick="saveScore()">등록 📝</button>
+                <button id="save-btn" onclick="saveScore()">등록 📝</button>
             </div>
             <div class="status-msg" id="save-status"></div>
             <div id="my-rank-badge" style="display:none; font-family:'Jua',sans-serif; font-size:0.95rem; color:var(--blue); background:rgba(52,152,219,0.12); border:1px solid rgba(52,152,219,0.3); border-radius:50px; padding:6px 18px; text-align:center;"></div>
@@ -655,7 +649,10 @@
         bgm.volume = 0.5;
 
         // 음소거 상태: localStorage에 저장해서 다음 게임에도 유지
-        let isMuted = localStorage.getItem('memory_muted') === 'true';
+        // 게임별 키(memory_muted)가 있으면 우선, 없으면 허브 전역 토글(hub_muted) 참조
+        let isMuted = localStorage.getItem('memory_muted') !== null
+            ? localStorage.getItem('memory_muted') === 'true'
+            : localStorage.getItem('hub_muted') === 'true';
         applyMuteState();
 
         function applyMuteState() {
@@ -673,8 +670,15 @@
             applyMuteState();
         }
 
+        // ── 정답/오답 햅틱 (모바일 WebView에서 navigator.vibrate 지원 시에만) ──
+        function hapticCorrect() { if (navigator.vibrate) navigator.vibrate(15); }
+        function hapticWrong() { if (navigator.vibrate) navigator.vibrate([30, 40, 30]); }
+
         // BGM 재생 (브라우저 자동재생 정책 대응: 반드시 사용자 인터랙션 이후 호출)
+        let bgmFadeInterval = null; // 진행 중인 페이드아웃(bgmStop) 있으면 재생 시작 시 정리 — '다시 하기' 연타 시 무음 시작 방지
         function bgmPlay() {
+            if (bgmFadeInterval) { clearInterval(bgmFadeInterval); bgmFadeInterval = null; }
+            bgm.volume = 0.5;
             if (bgm.paused) {
                 bgm.play().catch(() => {
                     // 자동재생 차단 시 조용히 무시
@@ -685,7 +689,8 @@
         // BGM 정지 (페이드 아웃)
         function bgmStop() {
             if (bgm.paused) return;
-            const fadeInterval = setInterval(() => {
+            if (bgmFadeInterval) clearInterval(bgmFadeInterval);
+            bgmFadeInterval = setInterval(() => {
                 if (bgm.volume > 0.05) {
                     bgm.volume = Math.max(0, bgm.volume - 0.05);
                 } else {
@@ -693,7 +698,8 @@
                     bgm.pause();
                     bgm.currentTime = 0;
                     bgm.volume = 0.5; // 다음 재생을 위해 볼륨 복원
-                    clearInterval(fadeInterval);
+                    clearInterval(bgmFadeInterval);
+                    bgmFadeInterval = null;
                 }
             }, 50);
         }
@@ -951,22 +957,41 @@
             body.innerHTML = `<div style="text-align:center;font-size:0.82rem;margin-bottom:6px;color:rgba(255,255,255,0.7);">${summaryMsg}</div>` + rows;
         }
 
+        // ── 직급 기준 단일 소스: getRank·미리보기·시작화면 기준표·팡파레 목표 공용 ──
+        const RANK_TIERS = [
+            { min:5000, title:'👑 CEO',       color:'#f1c40f', msg:'전설의 회계 CEO! 압도적인 실력!' },
+            { min:4000, title:'⭐ CEO급',     color:'#e67e22', msg:'CEO급 실력! 정말 훌륭합니다!' },
+            { min:3000, title:'🎖 전무/상무', color:'#3498db', msg:'임원급 실력! 대단합니다!' },
+            { min:2200, title:'🏅 이사',      color:'#2ecc71', msg:'이사급 실력! 잘했어요!' },
+            { min:1500, title:'📋 부장',      color:'#1abc9c', msg:'베테랑 부장! 좋습니다!' },
+            { min:900,  title:'🗂 차장',      color:'#9b59b6', msg:'믿음직한 차장! 조금만 더!' },
+            { min:500,  title:'📁 과장',      color:'#e74c3c', msg:'성장 중인 과장! 화이팅!' },
+            { min:250,  title:'📝 대리',      color:'#95a5a6', msg:'열심히 하는 대리! 다시 도전!' },
+            { min:0,    title:'💼 사원',      color:'#7f8c8d', msg:'이제 시작! 다시 도전해봐요!' },
+        ];
+
+        // 시작화면 직급 기준표 렌더링 (RANK_TIERS 단일 소스)
+        (function renderGradeTable() {
+            const box = document.getElementById('grade-table');
+            if (!box) return;
+            box.innerHTML = RANK_TIERS.map((t, i) => {
+                const req = i < RANK_TIERS.length - 1
+                    ? t.min.toLocaleString() + '점 이상'
+                    : RANK_TIERS[i - 1].min.toLocaleString() + '점 미만';
+                return `<div style="display:flex;justify-content:space-between;"><span>${t.title}</span><span style="color:${t.color}">${req}</span></div>`;
+            }).join('');
+        })();
+
         // ── 스테이지 클리어 직급 미리보기 ──
         function getRankPreviewInfo(score) {
-            const tiers = [
-                { min:5000, title:'👑 CEO',       color:'#f1c40f', next: null,       nextMin: null },
-                { min:4000, title:'⭐ CEO급',     color:'#e67e22', next:'👑 CEO',       nextMin:5000 },
-                { min:3000, title:'🎖 전무/상무', color:'#3498db', next:'⭐ CEO급',     nextMin:4000 },
-                { min:2200, title:'🏅 이사',      color:'#2ecc71', next:'🎖 전무/상무', nextMin:3000 },
-                { min:1500, title:'📋 부장',      color:'#1abc9c', next:'🏅 이사',      nextMin:2200 },
-                { min:900,  title:'🗂 차장',      color:'#9b59b6', next:'📋 부장',      nextMin:1500 },
-                { min:500,  title:'📁 과장',      color:'#e74c3c', next:'🗂 차장',      nextMin:900  },
-                { min:250,  title:'📝 대리',      color:'#95a5a6', next:'📁 과장',      nextMin:500  },
-                { min:0,    title:'💼 사원',      color:'#7f8c8d', next:'📝 대리',      nextMin:250  },
-            ];
-            const cur = tiers.find(t => score >= t.min) || tiers[tiers.length-1];
-            const curIdx = tiers.indexOf(cur);
+            const tiers = RANK_TIERS;
+            const base = tiers.find(t => score >= t.min) || tiers[tiers.length-1];
+            const curIdx = tiers.indexOf(base);
             const prevTier = curIdx > 0 ? tiers[curIdx-1] : null;
+            const cur = Object.assign({}, base, {
+                next:    prevTier ? prevTier.title : null,
+                nextMin: prevTier ? prevTier.min   : null
+            });
             const progress = prevTier
                 ? Math.min(100, Math.round((score - cur.min) / (prevTier.min - cur.min) * 100))
                 : 100;
@@ -994,15 +1019,7 @@
         }
 
         function getRank(score) {
-            if      (score >= 5000) return { title:'👑 CEO',       color:'#f1c40f', msg:'전설의 회계 CEO! 압도적인 실력!' };
-            else if (score >= 4000) return { title:'⭐ CEO급',     color:'#e67e22', msg:'CEO급 실력! 정말 훌륭합니다!' };
-            else if (score >= 3000) return { title:'🎖 전무/상무', color:'#3498db', msg:'임원급 실력! 대단합니다!' };
-            else if (score >= 2200) return { title:'🏅 이사',      color:'#2ecc71', msg:'이사급 실력! 잘했어요!' };
-            else if (score >= 1500) return { title:'📋 부장',      color:'#1abc9c', msg:'베테랑 부장! 좋습니다!' };
-            else if (score >= 900)  return { title:'🗂 차장',      color:'#9b59b6', msg:'믿음직한 차장! 조금만 더!' };
-            else if (score >= 500)  return { title:'📁 과장',      color:'#e74c3c', msg:'성장 중인 과장! 화이팅!' };
-            else if (score >= 250)  return { title:'📝 대리',      color:'#95a5a6', msg:'열심히 하는 대리! 다시 도전!' };
-            else                    return { title:'💼 사원',      color:'#7f8c8d', msg:'이제 시작! 다시 도전해봐요!' };
+            return RANK_TIERS.find(t => score >= t.min) || RANK_TIERS[RANK_TIERS.length-1];
         }
 
         function quitGame() {
@@ -1124,6 +1141,7 @@
 
             if (c1.dataset.id === c2.dataset.id) {
                 playSound('match');
+                hapticCorrect();
                 setTimeout(() => {
                     c1.classList.add('matched'); c2.classList.add('matched');
                     seenCards.delete(c1); seenCards.delete(c2);
@@ -1146,6 +1164,7 @@
                     }
                 }
                 playSound('wrong');
+                hapticWrong();
                 c1.classList.add('wrong-flash'); c2.classList.add('wrong-flash');
                 setTimeout(() => {
                     c1.classList.remove('flipped', 'wrong-flash');
@@ -1209,6 +1228,8 @@
             document.getElementById('score-detail').textContent = detail;
             document.getElementById('save-status').textContent = '';
             document.getElementById('player-name').value = localStorage.getItem('hub_nickname') || getMyName();
+            const saveBtn = document.getElementById('save-btn');
+            if (saveBtn) saveBtn.disabled = false;
             document.getElementById('my-rank-badge').style.display = 'none';
             document.querySelector('.name-row').style.display = 'flex';
             document.getElementById('save-status').style.display = 'block';
@@ -1246,6 +1267,8 @@
             const name = document.getElementById('player-name').value.trim();
             if (!name) { showStatus('닉네임을 입력해주세요', 'err'); return; }
             if (name.length < 2) { showStatus('2글자 이상 입력해주세요', 'err'); return; }
+            const saveBtn = document.getElementById('save-btn');
+            if (saveBtn) saveBtn.disabled = true; // 저장 중 연타로 인한 중복 저장 방지
             showStatus('확인 중...', '');
 
             const myStoredName = getMyName();
@@ -1260,6 +1283,7 @@
                 existingList = mergeRank(existingList, _lget());
                 if (existingList.find(r => r.name === name)) {
                     showStatus('⚠️ 이미 사용 중인 닉네임입니다. 다른 닉네임을 사용해주세요.', 'err');
+                    if (saveBtn) saveBtn.disabled = false;
                     return;
                 }
             }
@@ -1451,6 +1475,8 @@
         };
         if (groupId) rpcParams.p_group_id = groupId;
         await db.rpc('upsert_score', rpcParams);
+        // 성장 그래프용 — 매 판 점수 이력 누적(이중저장, 예외 안 던짐)
+        if (window.Growth) Growth.record({ game: gameId, name: safeName, score: safeScore, grade: rpcParams.p_grade, combo: rpcParams.p_combo, correct: rpcParams.p_correct });
     }
 
     async function supabaseFetchRanking(gameId) {
@@ -1471,8 +1497,9 @@
 
 <script>
     // ── 팡파레 시스템 ──
-    const FANFARE_TARGET_SCORE = 2300;
     const FANFARE_TARGET_LABEL = 'CEO급';
+    // 목표 점수는 RANK_TIERS(단일 소스)에서 해당 직급의 최소 점수로 산출 (= 4000)
+    const FANFARE_TARGET_SCORE = (RANK_TIERS.find(t => t.title.includes(FANFARE_TARGET_LABEL)) || RANK_TIERS[0]).min;
 
     function checkAndShowFanfare(currentScore, gradeFn) {
         const grade = typeof gradeFn === 'function' ? gradeFn(currentScore) : gradeFn;

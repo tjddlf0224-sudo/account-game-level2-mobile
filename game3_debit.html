@@ -683,6 +683,7 @@
 <button id="rewarded-btn" onclick="requestRewarded()">⏱ +30초 광고 보기</button>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="wrongnote.js"></script>
+    <script src="growth.js"></script>
 </head>
 <body>
 
@@ -874,7 +875,10 @@ const bgm = document.getElementById('bgm');
 bgm.volume = 0.5;
 
 // 음소거 상태: localStorage에 저장해서 다음 게임에도 유지
-let isMuted = localStorage.getItem('debit_muted') === 'true';
+// 게임별 키(debit_muted)가 있으면 우선, 없으면 허브 전역 토글(hub_muted) 참조
+let isMuted = localStorage.getItem('debit_muted') !== null
+    ? localStorage.getItem('debit_muted') === 'true'
+    : localStorage.getItem('hub_muted') === 'true';
 applyMuteState();
 
 function applyMuteState() {
@@ -892,8 +896,15 @@ function toggleMute() {
     applyMuteState();
 }
 
+// ── 정답/오답 햅틱 (모바일 WebView에서 navigator.vibrate 지원 시에만) ──
+function hapticCorrect() { if (navigator.vibrate) navigator.vibrate(15); }
+function hapticWrong() { if (navigator.vibrate) navigator.vibrate([30, 40, 30]); }
+
 // BGM 재생 (브라우저 자동재생 정책 대응: 반드시 사용자 인터랙션 이후 호출)
+let bgmFadeInterval = null; // 진행 중인 페이드아웃(bgmStop) 있으면 재생 시작 시 정리 — '다시 하기' 연타 시 무음 시작 방지
 function bgmPlay() {
+    if (bgmFadeInterval) { clearInterval(bgmFadeInterval); bgmFadeInterval = null; }
+    bgm.volume = 0.5;
     if (bgm.paused) {
         bgm.play().catch(() => {});
     }
@@ -902,7 +913,8 @@ function bgmPlay() {
 // BGM 정지 (페이드 아웃)
 function bgmStop() {
     if (bgm.paused) return;
-    const fadeInterval = setInterval(() => {
+    if (bgmFadeInterval) clearInterval(bgmFadeInterval);
+    bgmFadeInterval = setInterval(() => {
         if (bgm.volume > 0.05) {
             bgm.volume = Math.max(0, bgm.volume - 0.05);
         } else {
@@ -910,7 +922,8 @@ function bgmStop() {
             bgm.pause();
             bgm.currentTime = 0;
             bgm.volume = 0.5;
-            clearInterval(fadeInterval);
+            clearInterval(bgmFadeInterval);
+            bgmFadeInterval = null;
         }
     }, 50);
 }
@@ -995,6 +1008,8 @@ let currentQ = null;
 let isPlaying = false;
 let correctCount = 0, wrongCount = 0;
 let lastInput = 0;
+let isLocked = false;      // 판정~다음 문제 사이 입력 잠금 (이중 채점 방지)
+let nextQTimer = null;     // 예약된 nextQuestion 타임아웃 핸들
 
 let audioCtx;
 function getAudio() {
@@ -1035,6 +1050,8 @@ function startGame() {
     score = 0; combo = 0; maxCombo = 0;
     timeLeft = GAME_TIME; correctCount = 0; wrongCount = 0;
     isPlaying = true;
+    isLocked = false;
+    if (nextQTimer) { clearTimeout(nextQTimer); nextQTimer = null; }
     if (window.WrongNote) WrongNote.reset();
     updateHUD();
     if (timerInterval) clearInterval(timerInterval);
@@ -1072,6 +1089,8 @@ function _drawQ(arr, last) {
 }
 function nextQuestion() {
     if (!isPlaying) return;
+    nextQTimer = null;
+    isLocked = false;
     currentQ = _drawQ(questions, currentQ);
     let q = currentQ;
     document.getElementById('q-sentence').innerHTML = q.sentence;
@@ -1104,7 +1123,8 @@ function handleAnswer(side) {
 }
 
 function checkAnswer(side) {
-    if (!isPlaying) return;
+    if (!isPlaying || isLocked) return;
+    isLocked = true;
     const card = document.getElementById('question-card');
 
     if (side === currentQ.type) {
@@ -1117,7 +1137,8 @@ function checkAnswer(side) {
         showFeedback('ok', combo >= 3 ? `✓ ${combo} COMBO!` : '✓ 정답!');
         if (combo >= 2) showCombo(combo);
         updateHUD();
-        setTimeout(() => { card.classList.remove('correct'); nextQuestion(); }, 130);
+        hapticCorrect();
+        nextQTimer = setTimeout(() => { card.classList.remove('correct'); nextQuestion(); }, 130);
     } else {
         playSound('wrong');
         combo = 0;
@@ -1132,7 +1153,8 @@ function checkAnswer(side) {
         document.body.classList.add('shake');
         showFeedback('no', '✗ 오답 (-5초)');
         updateHUD();
-        setTimeout(() => {
+        hapticWrong();
+        nextQTimer = setTimeout(() => {
             card.classList.remove('wrong');
             document.getElementById('q-hint').textContent = '';
             document.body.classList.remove('shake');
@@ -1169,11 +1191,7 @@ function endGame() {
     document.getElementById('stat-correct').textContent = correctCount;
     document.getElementById('stat-wrong').textContent = wrongCount;
     document.getElementById('stat-combo').textContent = maxCombo;
-    let rank = '🥉 신입 사원';
-    if      (score >= 4500) rank = '👑 전설의 CFO';
-    else if (score >= 2500) rank = '🥇 회계 부장';
-    else if (score >= 1000) rank = '🥈 회계 대리';
-    document.getElementById('result-rank').textContent = '최종 계급: ' + rank;
+    document.getElementById('result-rank').textContent = '최종 계급: ' + getGrade(score);
     document.getElementById('player-name').value = localStorage.getItem('hub_nickname') || getMyName();
     document.getElementById('save-status').textContent = '';
     document.getElementById('save-btn').disabled = false;
@@ -1322,12 +1340,17 @@ function toggleHint() {
     btn.textContent = panel.classList.contains('open') ? '💡 참고표 닫기' : '💡 차변·대변 참고표 보기';
 }
 
+// ── 등급 기준 단일 소스: getGrade·결과화면 계급·팡파레 목표 공용 ──
+const GRADE_TIERS = [
+    { min: 3300, label: '👑 전설의 CFO' },
+    { min: 2800, label: '🥇 회계 부장' },
+    { min: 1800, label: '🥈 회계 대리' },
+    { min:  800, label: '🥉 신입 사원' },
+    { min:    0, label: '📋 수습 직원' }
+];
+
 function getGrade(score) {
-    if (score >= 3300) return '👑 전설의 CFO';
-    if (score >= 2800) return '🥇 회계 부장';
-    if (score >= 1800) return '🥈 회계 대리';
-    if (score >=  800) return '🥉 신입 사원';
-    return '📋 수습 직원';
+    return (GRADE_TIERS.find(t => score >= t.min) || GRADE_TIERS[GRADE_TIERS.length - 1]).label;
 }
 
 
@@ -1491,6 +1514,8 @@ function getGrade(score) {
         };
         if (groupId) rpcParams.p_group_id = groupId;
         await db.rpc('upsert_score', rpcParams);
+        // 성장 그래프용 — 매 판 점수 이력 누적(이중저장, 예외 안 던짐)
+        if (window.Growth) Growth.record({ game: gameId, name: safeName, score: safeScore, grade: rpcParams.p_grade, combo: rpcParams.p_combo, correct: rpcParams.p_correct });
     }
 
     async function supabaseFetchRanking(gameId) {
@@ -1511,8 +1536,9 @@ function getGrade(score) {
 
 <script>
     // ── 팡파레 시스템 ──
-    const FANFARE_TARGET_SCORE = 2500;
     const FANFARE_TARGET_LABEL = '회계 부장';
+    // 목표 점수는 GRADE_TIERS(단일 소스)에서 해당 계급의 최소 점수로 산출 (= 2800)
+    const FANFARE_TARGET_SCORE = (GRADE_TIERS.find(t => t.label.includes(FANFARE_TARGET_LABEL)) || GRADE_TIERS[0]).min;
 
     function checkAndShowFanfare(currentScore, gradeFn) {
         const grade = typeof gradeFn === 'function' ? gradeFn(currentScore) : gradeFn;

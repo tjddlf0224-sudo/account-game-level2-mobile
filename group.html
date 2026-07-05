@@ -649,6 +649,15 @@ window.addEventListener('DOMContentLoaded', () => {
   if (gid && gname) {
     document.getElementById('current-group-name').textContent = gname;
     document.getElementById('current-group-bar').classList.add('show');
+    // 서버에서 삭제된 그룹이면 로컬 그룹 정보 정리
+    // (조회가 성공했는데 그룹이 없을 때만 — 네트워크 오류 시엔 유지)
+    db.from('groups').select('id').eq('id', gid).maybeSingle().then(res => {
+      if (res && !res.error && !res.data) {
+        localStorage.removeItem('hub_group_id');
+        localStorage.removeItem('hub_group_name');
+        document.getElementById('current-group-bar').classList.remove('show');
+      }
+    }, () => {});
   }
 
   // 기본 탭: 참여
@@ -691,13 +700,24 @@ async function createGroup() {
 
   try {
     const code = genCode();
-    const { error } = await db.from('groups').insert({
-      id: code,
-      name: groupName,
-      teacher_name: teacherName,
-      teacher_pass: teacherPass,
-      member_count: 0
+    // 서버 저장 RPC 우선 — 비밀번호는 서버에서 해시로만 저장
+    // (supabase_security_migration.sql 적용 후)
+    let { error } = await db.rpc('create_group', {
+      p_id: code,
+      p_name: groupName,
+      p_teacher_name: teacherName,
+      p_pass: teacherPass
     });
+    if (error && error.code === 'PGRST202') {
+      // 폴백: 마이그레이션 이전 DB(RPC 없음) — 기존 직접 insert
+      ({ error } = await db.from('groups').insert({
+        id: code,
+        name: groupName,
+        teacher_name: teacherName,
+        teacher_pass: teacherPass,
+        member_count: 0
+      }));
+    }
 
     if (error) {
       // 코드 충돌 시 재시도
@@ -897,7 +917,9 @@ function escapeHTML(s) {
   return String(s).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 }
 function escapeAttr(s) {
-  return String(s||'').replace(/'/g, "\\'");
+  // onclick="fn('...')" 같은 HTML 속성 안 JS 문자열용:
+  // JS 이스케이프(\, ') 후 HTML 엔티티 처리 — 큰따옴표로 인한 속성 브레이크아웃(XSS) 방지
+  return escapeHTML(String(s||'').replace(/\\/g, '\\\\').replace(/'/g, "\\'"));
 }
 function hideAdPlaceholder() {}
 </script>

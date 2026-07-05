@@ -121,6 +121,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="wrongnote.js"></script>
+<script src="growth.js"></script>
 <script>
 // 로그인 체크
 (function(){ if(!(localStorage.getItem('hub_nickname')||'').trim()){ location.replace('login.html'); } })();
@@ -261,6 +262,9 @@ function grade(rate){
 
 async function endQuiz(){
   if(window.WrongNote) await WrongNote.flush('theory');
+  // 성장 그래프용 — 이번 판 결과를 이력에 기록 (다른 게임들과 동일)
+  const rate=QUEUE.length?correctCnt/QUEUE.length:0;
+  if(window.Growth) Growth.record({game:'theory', score:score, grade:grade(rate), combo:combo, correct:correctCnt});
   // 다른 게임들과 동일하게 N판마다 전면광고 후 결과 표시
   requestInterstitialIfNeeded(renderResult);
 }

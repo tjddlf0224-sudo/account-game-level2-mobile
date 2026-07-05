@@ -401,6 +401,7 @@
 <button id="rewarded-btn" onclick="requestRewarded()">⏱ +30초 광고 보기</button>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="wrongnote.js"></script>
+    <script src="growth.js"></script>
 </head>
 <body>
 
@@ -418,7 +419,7 @@
             <div class="scard"><strong>🔧 게임 방법</strong>거래 상황을 읽고<br><b style="color:var(--blue)">차변</b>→<b style="color:var(--red)">대변</b> 순서로 클릭!<br>틀리면 재도전 가능</div>
             <div class="scard"><strong>⏱️ 규칙</strong>제한 시간 <strong style="color:var(--yellow)">60초</strong><br>정답 시 <strong style="color:var(--green)">+10초</strong><br>오답 시 <strong style="color:var(--red)">-5초</strong></div>
             <div class="scard"><strong>💎 점수 체계</strong>기본 정답: <strong>150점</strong><br>콤보 보너스: +30점/연속</div>
-            <div class="scard"><strong>🏆 직급 체계</strong>📋 인턴 · 🥉 수습생 (500~)<br>🥈 견습 경리 (1,500~)<br>🥇 숙련 경리 (3,000~)<br>👑 결산 마스터 (5,000~)</div>
+            <div class="scard"><strong>🏆 직급 체계</strong><span id="grade-table"><!-- GRADE_TIERS(단일 소스)에서 렌더링 --></span></div>
         </div>
         <div class="action-btns" style="align-items:stretch; margin-top:20px; gap:10px;">
             <button class="pill pill-start" onclick="startGame()">▶ 공장 가동 시작</button>
@@ -526,7 +527,10 @@ const GAME_ID = "factory";
 const bgm = document.getElementById('bgm');
 bgm.volume = 0.5;
 
-let isMuted = localStorage.getItem('factory_muted') === 'true';
+// 게임별 키(factory_muted)가 있으면 우선, 없으면 허브 전역 토글(hub_muted) 참조
+let isMuted = localStorage.getItem('factory_muted') !== null
+    ? localStorage.getItem('factory_muted') === 'true'
+    : localStorage.getItem('hub_muted') === 'true';
 applyMuteState();
 
 function applyMuteState() {
@@ -544,7 +548,14 @@ function toggleMute() {
     applyMuteState();
 }
 
+// ── 정답/오답 햅틱 (모바일 WebView에서 navigator.vibrate 지원 시에만) ──
+function hapticCorrect() { if (navigator.vibrate) navigator.vibrate(15); }
+function hapticWrong() { if (navigator.vibrate) navigator.vibrate([30, 40, 30]); }
+
+let bgmFadeInterval = null; // 진행 중인 페이드아웃(bgmStop) 있으면 재생 시작 시 정리 — '다시 하기' 연타 시 무음 시작 방지
 function bgmPlay() {
+    if (bgmFadeInterval) { clearInterval(bgmFadeInterval); bgmFadeInterval = null; }
+    bgm.volume = 0.5;
     if (bgm.paused) {
         bgm.play().catch(() => {});
     }
@@ -552,7 +563,8 @@ function bgmPlay() {
 
 function bgmStop() {
     if (bgm.paused) return;
-    const fadeInterval = setInterval(() => {
+    if (bgmFadeInterval) clearInterval(bgmFadeInterval);
+    bgmFadeInterval = setInterval(() => {
         if (bgm.volume > 0.05) {
             bgm.volume = Math.max(0, bgm.volume - 0.05);
         } else {
@@ -560,7 +572,8 @@ function bgmStop() {
             bgm.pause();
             bgm.currentTime = 0;
             bgm.volume = 0.5;
-            clearInterval(fadeInterval);
+            clearInterval(bgmFadeInterval);
+            bgmFadeInterval = null;
         }
     }, 50);
 }
@@ -627,6 +640,7 @@ let score = 0, combo = 0, maxCombo = 0;
 let matchCount = 0, wrongCount = 0;
 let timeLeft = 60, isPlaying = false, timerInterval = null, adPaused = false;
 let selectedParts = { L: null, R: null }, activeSlot = 'L';
+let judging = false; // 판정 예약~다음 문제(또는 오답 정리) 사이 입력 잠금 (이중 채점 방지)
 
 const els = {
     screenStart:    document.getElementById('start-screen'),
@@ -678,7 +692,7 @@ function startGame() {
     els.screenStart.style.display = 'none';
     els.screenResult.style.display = 'none';
     score = 0; combo = 0; maxCombo = 0; matchCount = 0; wrongCount = 0;
-    timeLeft = 60; qIndex = 1; isPlaying = true;
+    timeLeft = 60; qIndex = 1; isPlaying = true; judging = false;
     if (window.WrongNote) WrongNote.reset();
     updateHUD(); nextQuestion();
     clearInterval(timerInterval);
@@ -711,6 +725,7 @@ function _drawQ(arr, last) {
 }
 function nextQuestion() {
     if (!isPlaying) return;
+    judging = false;
     currentQ = _drawQ(qBank, currentQ);
     els.qNum.textContent = 'Q.' + qIndex;
     els.qText.innerHTML = currentQ.q.replace(/\n/g, '<br>');
@@ -747,14 +762,14 @@ function renderSlots() {
 }
 
 function handleSlotClick(side) {
-    if (!isPlaying) return;
+    if (!isPlaying || judging) return;
     playSound('select');
     if (selectedParts[side]) { selectedParts[side].el.classList.remove('selected'); selectedParts[side] = null; }
     activeSlot = side; renderSlots();
 }
 
 function handlePartClick(text, btnEl) {
-    if (!isPlaying) return;
+    if (!isPlaying || judging) return;
     playSound('select');
     if (selectedParts[activeSlot]) selectedParts[activeSlot].el.classList.remove('selected');
     selectedParts[activeSlot] = { text, el: btnEl };
@@ -762,7 +777,7 @@ function handlePartClick(text, btnEl) {
     if (activeSlot === 'L' && !selectedParts.R) activeSlot = 'R';
     else if (activeSlot === 'R' && !selectedParts.L) activeSlot = 'L';
     renderSlots();
-    if (selectedParts.L && selectedParts.R) setTimeout(checkAnswer, 200);
+    if (selectedParts.L && selectedParts.R) { judging = true; setTimeout(checkAnswer, 200); }
 }
 
 function showFloatingText(text, color) {
@@ -777,11 +792,13 @@ function flashEffect(isOk) {
 }
 
 function checkAnswer() {
+    if (!isPlaying || !selectedParts.L || !selectedParts.R) { judging = false; return; }
     if (selectedParts.L.text === currentQ.L && selectedParts.R.text === currentQ.R) {
         playSound('ok'); flashEffect(true);
         combo++; if (combo > maxCombo) maxCombo = combo; matchCount++;
         const gain = 150 + (combo * 30); score += gain; timeLeft += 10;
         showFloatingText(`+${gain}점!`, 'var(--green)'); updateHUD(); qIndex++;
+        hapticCorrect();
         setTimeout(nextQuestion, 500);
     } else {
         playSound('bad'); flashEffect(false);
@@ -797,22 +814,39 @@ function checkAnswer() {
         const hintEl = document.getElementById('q-hint');
         if (currentQ.hint) { hintEl.textContent = '💡 ' + currentQ.hint; hintEl.style.display = 'block'; }
         updateHUD();
+        hapticWrong();
         setTimeout(() => {
             if (selectedParts.L) selectedParts.L.el.classList.remove('selected');
             if (selectedParts.R) selectedParts.R.el.classList.remove('selected');
             selectedParts = { L: null, R: null }; activeSlot = 'L';
             hintEl.style.display = 'none'; renderSlots();
+            judging = false; // 오답 정리 후 같은 문제 재도전 허용
         }, 600);
     }
 }
 
+// ── 등급 기준 단일 소스: getGrade·시작화면 기준표·팡파레 목표 공용 ──
+const GRADE_TIERS = [
+    { min: 12000, label: '👑 결산 마스터' },
+    { min: 7000,  label: '🥇 숙련 경리' },
+    { min: 4000,  label: '🥈 견습 경리' },
+    { min: 1500,  label: '🥉 수습생' },
+    { min: 0,     label: '📋 인턴' }
+];
+
 function getGrade(score) {
-    if (score >= 12000) return '👑 결산 마스터';
-    if (score >= 7000)  return '🥇 숙련 경리';
-    if (score >= 4000)  return '🥈 견습 경리';
-    if (score >= 1500)  return '🥉 수습생';
-    return '📋 인턴';
+    return (GRADE_TIERS.find(t => score >= t.min) || GRADE_TIERS[GRADE_TIERS.length - 1]).label;
 }
+
+// 시작화면 직급 체계 카드 렌더링 (GRADE_TIERS 단일 소스)
+(function renderGradeTable() {
+    const el = document.getElementById('grade-table');
+    if (!el) return;
+    const rows = GRADE_TIERS.slice().reverse().map((t, i) =>
+        i === 0 ? t.label : `${t.label} (${t.min.toLocaleString()}~)`
+    );
+    el.innerHTML = rows[0] + ' · ' + rows[1] + '<br>' + rows.slice(2).join('<br>');
+})();
 
 function endGame() {
     isPlaying = false; clearInterval(timerInterval);
@@ -1045,6 +1079,8 @@ function renderRankList(list) {
         };
         if (groupId) rpcParams.p_group_id = groupId;
         await db.rpc('upsert_score', rpcParams);
+        // 성장 그래프용 — 매 판 점수 이력 누적(이중저장, 예외 안 던짐)
+        if (window.Growth) Growth.record({ game: gameId, name: safeName, score: safeScore, grade: rpcParams.p_grade, combo: rpcParams.p_combo, correct: rpcParams.p_correct });
     }
 
     async function supabaseFetchRanking(gameId) {
@@ -1065,8 +1101,9 @@ function renderRankList(list) {
 
 <script>
     // ── 팡파레 시스템 ──
-    const FANFARE_TARGET_SCORE = 3000;
     const FANFARE_TARGET_LABEL = '숙련 경리';
+    // 목표 점수는 GRADE_TIERS(단일 소스)에서 해당 직급의 최소 점수로 산출 (= 7000)
+    const FANFARE_TARGET_SCORE = (GRADE_TIERS.find(t => t.label.includes(FANFARE_TARGET_LABEL)) || GRADE_TIERS[0]).min;
 
     function checkAndShowFanfare(currentScore, gradeFn) {
         const grade = typeof gradeFn === 'function' ? gradeFn(currentScore) : gradeFn;

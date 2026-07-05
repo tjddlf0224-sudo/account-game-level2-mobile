@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>내 성장 그래프 | 전산회계 2급</title>
+<meta name="description" content="게임을 할수록 쌓이는 내 점수의 성장곡선">
+<style>
+  :root{
+    --bg:#020810; --card:#0c1626; --card2:#11203a; --line:rgba(255,255,255,.08);
+    --blue:#00f2ff; --purple:#b44fff; --green:#2ecc71; --red:#ff2d78; --gold:#ffd24a;
+    --txt:#eaf2ff; --dim:rgba(234,242,255,.55);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{margin:0;background:var(--bg);color:var(--txt);
+       font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+       padding:0 0 60px;}
+  .wrap{max-width:640px;margin:0 auto;padding:18px 16px;}
+  .top{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+  .back{background:var(--card);border:1px solid var(--line);color:var(--txt);
+        border-radius:12px;padding:9px 13px;font-size:.92rem;text-decoration:none;}
+  h1{font-size:1.25rem;margin:0;letter-spacing:-.3px;}
+  h1 .sub{display:block;font-size:.72rem;color:var(--dim);font-weight:500;margin-top:3px;}
+
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;
+         padding:16px;margin-bottom:14px;}
+  .sum{display:flex;gap:10px;}
+  .sum .box{flex:1;background:var(--card2);border:1px solid var(--line);border-radius:13px;
+            padding:12px 10px;text-align:center;}
+  .sum .box b{display:block;font-size:1.5rem;color:var(--gold);line-height:1.15;}
+  .sum .box span{font-size:.72rem;color:var(--dim);}
+  .topgrow{margin-top:12px;font-size:.86rem;color:var(--green);
+           background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.25);
+           border-radius:11px;padding:10px 12px;line-height:1.5;}
+  .topgrow b{color:var(--gold);}
+
+  .gcard{background:var(--card);border:1px solid var(--line);border-radius:16px;
+         padding:14px 14px 8px;margin-bottom:14px;}
+  .ghead{display:flex;align-items:center;gap:9px;margin-bottom:4px;}
+  .ghead .ic{font-size:1.3rem;}
+  .ghead .nm{font-weight:700;font-size:1rem;flex:1;}
+  .ghead .gr{font-size:.74rem;color:var(--blue);background:rgba(0,242,255,.1);
+             border-radius:20px;padding:3px 9px;white-space:nowrap;}
+  .gstats{display:flex;gap:7px;margin:6px 0 2px;flex-wrap:wrap;}
+  .chip{font-size:.76rem;border-radius:20px;padding:3px 10px;background:rgba(255,255,255,.06);
+        color:var(--dim);font-variant-numeric:tabular-nums;}
+  .chip b{color:var(--txt);font-weight:700;}
+  .chip.best b{color:var(--gold);}
+  .chip.up{color:var(--green);background:rgba(46,204,113,.12);}
+  .chip.up b{color:var(--green);}
+  .chip.down{color:var(--red);background:rgba(255,45,120,.12);}
+  .chip.down b{color:var(--red);}
+  .chart{width:100%;display:block;margin-top:6px;}
+  .axis{display:flex;justify-content:space-between;font-size:.68rem;color:var(--dim);
+        padding:0 2px 6px;margin-top:-2px;}
+  .one-hint{font-size:.76rem;color:var(--dim);text-align:center;padding:6px 0 10px;}
+
+  .empty{text-align:center;color:var(--dim);padding:46px 14px;line-height:1.65;}
+  .empty .em{font-size:2.6rem;display:block;margin-bottom:12px;}
+  .empty .go{display:inline-block;margin-top:16px;background:linear-gradient(90deg,var(--blue),var(--green));
+             color:#021;font-weight:700;text-decoration:none;border-radius:13px;padding:12px 22px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <a class="back" href="index.html">←</a>
+    <h1>📈 내 성장 그래프
+      <span class="sub" id="who">불러오는 중…</span>
+    </h1>
+  </div>
+
+  <div id="content"><div class="empty">불러오는 중…</div></div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="growth.js"></script>
+<script>
+// 로그인 체크
+(function(){
+  var nick = (localStorage.getItem('hub_nickname')||'').trim();
+  if(!nick){ location.replace('login.html'); return; }
+  document.getElementById('who').textContent = nick + ' 님의 성장 기록';
+})();
+
+var GAME_ORDER = ['acid','memory','debit','factory','flight','theory'];
+var GAME_ICON  = {acid:'☁️',memory:'🧩',debit:'⚡',factory:'🏭',flight:'🛩',theory:'📝'};
+
+function esc(s){ return (s==null?'':String(s)).replace(/[&<>"']/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function gameName(g){ return (Growth.GAME_NAMES[g]||g); }
+function fmtDate(ts){ if(!ts) return ''; var d=new Date(ts); return (d.getMonth()+1)+'/'+d.getDate(); }
+function comma(n){ return (n||0).toLocaleString(); }
+
+async function load(){
+  var data = await Growth.series();
+  render(data);
+}
+
+function render(data){
+  var box = document.getElementById('content');
+  var games = GAME_ORDER.filter(function(g){ return data[g] && data[g].length; });
+
+  if(!games.length){
+    box.innerHTML =
+      '<div class="empty"><span class="em">🌱</span>'+
+      '아직 기록이 없어요.<br>게임을 플레이하면 점수가 차곡차곡 쌓여<br>나만의 <b style="color:#00f2ff">성장곡선</b>이 그려집니다.'+
+      '<br><a class="go" href="index.html">게임 하러 가기 →</a></div>';
+    return;
+  }
+
+  // ── 요약 ──
+  var totalPlays = 0, bestGrow = null;
+  games.forEach(function(g){
+    var arr = data[g];
+    totalPlays += arr.length;
+    if(arr.length >= 2){
+      var first = arr[0].score;
+      var best = Math.max.apply(null, arr.map(function(p){return p.score;}));
+      var grow = best - first;
+      if(grow > 0 && (!bestGrow || grow > bestGrow.grow)) bestGrow = {g:g, grow:grow, first:first, best:best};
+    }
+  });
+
+  var html =
+    '<div class="panel">'+
+      '<div class="sum">'+
+        '<div class="box"><b>'+totalPlays+'</b><span>총 플레이</span></div>'+
+        '<div class="box"><b>'+games.length+'</b><span>도전한 게임</span></div>'+
+      '</div>'+
+      (bestGrow
+        ? '<div class="topgrow">🚀 가장 많이 성장한 게임은 <b>'+esc(gameName(bestGrow.g))+'</b>!<br>'+
+          '처음 '+comma(bestGrow.first)+'점 → 최고 '+comma(bestGrow.best)+'점 ('+
+          '<b>+'+comma(bestGrow.grow)+'</b> 성장)</div>'
+        : '<div class="topgrow">한 게임을 두 판 이상 하면 여기서 성장폭을 볼 수 있어요 💪</div>')+
+    '</div>';
+
+  // ── 게임별 차트 ──
+  games.forEach(function(g){ html += gameCard(g, data[g]); });
+
+  box.innerHTML = html;
+}
+
+function gameCard(g, arr){
+  var scores = arr.map(function(p){return p.score;});
+  var n = scores.length;
+  var first = scores[0], latest = scores[n-1];
+  var best = Math.max.apply(null, scores);
+  var delta = latest - first;
+  var latestGrade = arr[n-1].grade || '';
+
+  var deltaChip = '';
+  if(n >= 2){
+    if(delta > 0)      deltaChip = '<span class="chip up">처음 대비 <b>▲ '+comma(delta)+'</b></span>';
+    else if(delta < 0) deltaChip = '<span class="chip down">처음 대비 <b>▼ '+comma(-delta)+'</b></span>';
+    else               deltaChip = '<span class="chip">처음 대비 <b>0</b></span>';
+  }
+
+  var h =
+    '<div class="gcard">'+
+      '<div class="ghead">'+
+        '<span class="ic">'+GAME_ICON[g]+'</span>'+
+        '<span class="nm">'+esc(gameName(g))+'</span>'+
+        (latestGrade ? '<span class="gr">'+esc(latestGrade)+'</span>' : '')+
+      '</div>'+
+      '<div class="gstats">'+
+        '<span class="chip">플레이 <b>'+n+'판</b></span>'+
+        '<span class="chip best">최고 <b>'+comma(best)+'</b></span>'+
+        '<span class="chip">최근 <b>'+comma(latest)+'</b></span>'+
+        deltaChip+
+      '</div>'+
+      chartSVG(arr);
+
+  if(n < 2){
+    h += '<div class="one-hint">아직 1판이에요 — 한 판 더 하면 성장곡선이 그려져요 ✏️</div>';
+  } else {
+    h += '<div class="axis"><span>'+fmtDate(arr[0].ts)+'</span><span>'+fmtDate(arr[n-1].ts)+'</span></div>';
+  }
+  h += '</div>';
+  return h;
+}
+
+function chartSVG(arr){
+  var W=320, H=140, padL=12, padR=14, padT=20, padB=14;
+  var n = arr.length;
+  var scores = arr.map(function(p){return p.score;});
+  var maxS = Math.max.apply(null,scores), minS = Math.min.apply(null,scores);
+  var span = maxS - minS;
+
+  function xFor(i){ return n<=1 ? W/2 : padL + i/(n-1)*(W-padL-padR); }
+  function yFor(s){
+    if(span<=0) return padT + (H-padT-padB)*0.45;
+    return padT + (1-(s-minS)/span)*(H-padT-padB);
+  }
+
+  var bestI=0; for(var i=1;i<n;i++) if(scores[i]>scores[bestI]) bestI=i;
+  var baseY = H - padB + 2;
+
+  var ptArr = arr.map(function(p,i){ return xFor(i)+','+yFor(p.score); });
+  var line = ptArr.join(' ');
+  var area = 'M'+xFor(0)+','+baseY+' L'+ptArr.join(' L')+' L'+xFor(n-1)+','+baseY+' Z';
+
+  var dots = arr.map(function(p,i){
+    var cx=xFor(i), cy=yFor(p.score);
+    if(i===bestI) return '<circle cx="'+cx+'" cy="'+cy+'" r="4.8" fill="var(--gold)" stroke="#020810" stroke-width="1.6"/>';
+    if(i===n-1)   return '<circle cx="'+cx+'" cy="'+cy+'" r="3.8" fill="var(--blue)" stroke="#020810" stroke-width="1.4"/>';
+    return '<circle cx="'+cx+'" cy="'+cy+'" r="2.5" fill="#9fe8ff"/>';
+  }).join('');
+
+  // 최고점 값 라벨 (가장자리 클램프)
+  var lx = xFor(bestI);
+  var anchor = lx < 30 ? 'start' : (lx > W-30 ? 'end' : 'middle');
+  var bestLabel = '<text x="'+lx+'" y="'+(yFor(scores[bestI])-9)+'" text-anchor="'+anchor+'" '+
+                  'fill="var(--gold)" font-size="11.5" font-weight="800">'+comma(scores[bestI])+'</text>';
+
+  var svgLine = (n>=2)
+    ? '<path d="'+area+'" fill="url(#gfill)"/><polyline points="'+line+'" fill="none" '+
+      'stroke="url(#gline)" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>'
+    : '';
+
+  return '<svg class="chart" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet" '+
+         'style="overflow:visible">'+
+    '<defs>'+
+      '<linearGradient id="gline" x1="0" y1="0" x2="1" y2="0">'+
+        '<stop offset="0%" stop-color="#00f2ff"/><stop offset="100%" stop-color="#2ecc71"/></linearGradient>'+
+      '<linearGradient id="gfill" x1="0" y1="0" x2="0" y2="1">'+
+        '<stop offset="0%" stop-color="rgba(0,242,255,.28)"/>'+
+        '<stop offset="100%" stop-color="rgba(0,242,255,0)"/></linearGradient>'+
+    '</defs>'+
+    '<line x1="'+padL+'" y1="'+baseY+'" x2="'+(W-padR)+'" y2="'+baseY+'" stroke="rgba(255,255,255,.08)" stroke-width="1"/>'+
+    svgLine + dots + bestLabel +
+  '</svg>';
+}
+
+load();
+</script>
+</body>
+</html>
