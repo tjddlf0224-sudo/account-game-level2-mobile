@@ -517,6 +517,7 @@
 
     <!-- 🎵 BGM 오디오 엘리먼트 -->
     <audio id="bgm" src="bgm2_memory.mp3" loop preload="auto"></audio>
+    <script src="bgmguard.js"></script>
 
     <header>
         <h1 style="flex:1;text-align:center;">🧩 기억의 전당 🧩</h1>
@@ -627,6 +628,7 @@
                 <div id="rank-body"><div class="spinner"></div></div>
             </div>
 
+            <button class="btn" id="stage-save-btn" onclick="stageSaveScore()" style="display:none;background:linear-gradient(135deg,#f1c40f,#e67e22);color:#1a1a2e;">🏆 랭킹 등록하기</button>
             <button class="btn" id="next-stage-btn" onclick="nextStage()" style="display:none;background:var(--accent2);">다음 스테이지 ▶</button>
             <div class="action-btns" style="align-items:center;">
                 <button class="btn-restart" id="restart-btn" onclick="startGame()">↺ 다시 하기</button>
@@ -941,10 +943,14 @@
             // 내 점수가 목록에 없으면 예상 순위로 표시
             if (!myInList) {
                 const medal = myRank <= 3 ? ['🥇','🥈','🥉'][myRank-1] : myRank+'위';
+                // 이미 등록한 점수(랭킹 20위 밖 포함)면 "저장됨"으로 — 미저장 오해 방지
+                const savedTag = myScore > 0 && (window._savedScore || 0) >= myScore
+                    ? '<span style="font-size:0.7rem;color:#00e676">저장됨 ✓</span>'
+                    : '<span style="font-size:0.7rem;color:rgba(255,255,255,0.4)">미저장</span>';
                 rows += `<div class="mini-rank-row mini-me-projected">
                     <span class="mini-rank-num">${medal}</span>
                     <span class="mini-rank-name">나 (현재) 👈</span>
-                    <span class="mini-rank-score">${myScore.toLocaleString()}점 <span style="font-size:0.7rem;color:rgba(255,255,255,0.4)">미저장</span></span>
+                    <span class="mini-rank-score">${myScore.toLocaleString()}점 ${savedTag}</span>
                 </div>`;
             }
 
@@ -1205,9 +1211,18 @@
                 document.getElementById('final-score').textContent = totalScore + '점';
                 document.getElementById('score-detail').textContent = detail;
                 updateRankPreview(totalScore);
-                document.querySelector('.name-row').style.display = 'none';
-                document.getElementById('save-status').style.display = 'none';
+                // 원탭 랭킹 등록: 허브 닉네임 자동 사용, 없으면 입력칸 노출
+                const prefillName = (localStorage.getItem('hub_nickname') || getMyName() || '').trim();
+                document.getElementById('player-name').value = prefillName;
+                document.querySelector('.name-row').style.display = prefillName ? 'none' : 'flex';
+                const stEl = document.getElementById('save-status');
+                stEl.textContent = ''; stEl.className = 'status-msg'; stEl.style.display = 'block';
+                document.getElementById('my-rank-badge').style.display = 'none';
                 document.querySelector('.rank-wrap').style.display = 'none';
+                const stageSaveBtn = document.getElementById('stage-save-btn');
+                stageSaveBtn.style.display = 'inline-block';
+                stageSaveBtn.disabled = false;
+                stageSaveBtn.textContent = '🏆 랭킹 등록하기';
                 document.getElementById('result-screen').style.display = 'flex';
                 document.getElementById('next-stage-btn').style.display = 'inline-block';
                 document.getElementById('next-stage-btn').textContent = isEndless ? '계속 도전 ▶' : '다음 스테이지 ▶';
@@ -1218,6 +1233,7 @@
         function showResult(finalScore, quit, detail) {
             const box = document.getElementById('rank-preview-box'); if(box) box.style.display='none';
             const mw = document.getElementById('mini-rank-wrap'); if(mw) mw.style.display='none';
+            const ssb = document.getElementById('stage-save-btn'); if(ssb) ssb.style.display='none';
             const rank = getRank(finalScore);
             document.querySelector('#result-screen h2').textContent = quit ? '포기... 😢' : 'ALL CLEAR! 🏆';
             document.getElementById('result-rank').textContent = rank.title;
@@ -1265,10 +1281,12 @@
 
         async function saveScore() {
             const name = document.getElementById('player-name').value.trim();
-            if (!name) { showStatus('닉네임을 입력해주세요', 'err'); return; }
-            if (name.length < 2) { showStatus('2글자 이상 입력해주세요', 'err'); return; }
+            if (!name) { showStatus('닉네임을 입력해주세요', 'err'); return false; }
+            if (name.length < 2) { showStatus('2글자 이상 입력해주세요', 'err'); return false; }
             const saveBtn = document.getElementById('save-btn');
+            const stageBtn = document.getElementById('stage-save-btn');
             if (saveBtn) saveBtn.disabled = true; // 저장 중 연타로 인한 중복 저장 방지
+            if (stageBtn) stageBtn.disabled = true; // 두 등록 버튼이 함께 보일 때 교차 연타 방지
             showStatus('확인 중...', '');
 
             const myStoredName = getMyName();
@@ -1284,7 +1302,8 @@
                 if (existingList.find(r => r.name === name)) {
                     showStatus('⚠️ 이미 사용 중인 닉네임입니다. 다른 닉네임을 사용해주세요.', 'err');
                     if (saveBtn) saveBtn.disabled = false;
-                    return;
+                    if (stageBtn) { stageBtn.disabled = false; stageBtn.textContent = '🏆 랭킹 등록하기'; }
+                    return false;
                 }
             }
 
@@ -1307,6 +1326,28 @@
                 showStatus('✓ 저장 완료!', 'ok');
                 renderRanking(_lget());
                 showMyRank(name);
+            }
+            window._savedScore = Math.max(window._savedScore || 0, score); // 미니 랭킹 "저장됨" 표시용
+            // 스테이지 클리어 화면(미니 랭킹 표시 중)이면: 배지 숨기고 미니 랭킹 갱신
+            const mw = document.getElementById('mini-rank-wrap');
+            if (mw && mw.style.display !== 'none') {
+                document.getElementById('my-rank-badge').style.display = 'none';
+                if (stageBtn) stageBtn.textContent = '✓ 등록 완료!';
+                loadMiniRanking(score);   // "미저장" → 저장된 순위로 갱신
+            }
+            return true;
+        }
+
+        // ── 스테이지 클리어 화면 원탭 랭킹 등록 ──
+        async function stageSaveScore() {
+            const btn = document.getElementById('stage-save-btn');
+            if (btn) { btn.disabled = true; btn.textContent = '등록 중...'; }
+            const ok = await saveScore();   // 성공 시 버튼 텍스트·미니 랭킹 갱신은 saveScore가 처리
+            if (!ok) {
+                // 닉네임 미입력/중복 → 입력칸 열어서 바꿔 쓰게
+                document.querySelector('.name-row').style.display = 'flex';
+                document.getElementById('player-name').focus();
+                if (btn) { btn.disabled = false; btn.textContent = '🏆 랭킹 등록하기'; }
             }
         }
 
