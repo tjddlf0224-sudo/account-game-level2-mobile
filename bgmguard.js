@@ -20,6 +20,8 @@
         var src = m.getAttribute('src');
         if (src) {
           m.dataset.guardSrc = src;
+          // 재생 중이었는지 기록 → 복귀 시 그 판의 BGM을 이어서 재생
+          m.dataset.guardWasPlaying = (!m.paused && !m.ended) ? '1' : '';
           m.pause();
           m.removeAttribute('src');
           m.load();   // 리소스 해제 → Now Playing 항목 제거
@@ -34,12 +36,28 @@
     }
   }
 
+  function resumeOnGesture(m) {
+    var h = function () {
+      document.removeEventListener('touchstart', h, true);
+      document.removeEventListener('click', h, true);
+      try { var p = m.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
+    };
+    document.addEventListener('touchstart', h, true);
+    document.addEventListener('click', h, true);
+  }
+
   function restoreAll() {
     document.querySelectorAll('audio, video').forEach(function (m) {
       try {
         if (!m.getAttribute('src') && m.dataset.guardSrc) {
           m.setAttribute('src', m.dataset.guardSrc);
-          m.load();   // 재생은 하지 않음 — 게임의 bgmPlay()가 결정
+          m.load();
+          // 이탈 시 재생 중이었다면 이어서 재생 (자동재생 차단 시 첫 터치에서 재개)
+          if (m.dataset.guardWasPlaying === '1') {
+            m.dataset.guardWasPlaying = '';
+            var p = m.play();
+            if (p && p.catch) p.catch(function () { resumeOnGesture(m); });
+          }
         }
       } catch (e) {}
     });

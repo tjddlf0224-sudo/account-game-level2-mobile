@@ -466,7 +466,7 @@ const Problems=[
   {q:"3월 말 현재 건물의 장부가액은?",key:"현재 '건물' 장부가액",L:"재무상태표",R:"총계정원장",a:"L"},
   {q:"4월 말 현재 자산총계는?",key:"현재 '자산' 총계",L:"월계표",R:"재무상태표",a:"R"},
   {q:"5월 말 현재 유동자산 금액은?",key:"현재 '유동자산' ",L:"재무상태표",R:"거래처원장",a:"L"},
-  {q:"6월 말 현재 당좌자산 금액은?",key:"현재 '유동자산' ",L:"현금출납장",R:"재무상태표",a:"R"},
+  {q:"6월 말 현재 당좌자산 금액은?",key:"현재 '당좌자산' ",L:"현금출납장",R:"재무상태표",a:"R"},
   {q:"1월~3월 외상매출금 회수총액?",key:"기간 + 계정과목",L:"월계표",R:"총계정원장",a:"L"},
   {q:"판매관리비 중 '현금' 지출액은?",key:"현금/대체 + 계정과목",L:"현금출납장",R:"월계표",a:"R"},
   {q:"4월 중 발생한 상품매입 거래 건수는?",key:"기간 + 계정과목",L:"월계표",R:"총계정원장",a:"L"},
@@ -620,6 +620,7 @@ const Game={
   _reset(){
     if(window.WrongNote)WrongNote.reset();
     this.state='playing';this.score=0;this.combo=0;this.maxCombo=0;this.okCount=0;
+    this._saving=false;this._saved=false;   // 새 판 — 저장 가드 초기화
     this.speed=3.0;this.frame=0;this.gates=[];this.items=[];this.parts=[];
     this.reviveUsed=false;this.pendingRevive=false;
     this.player.shield=false;this.player.magnet=false;this.player.magT=0;
@@ -681,6 +682,8 @@ const Game={
         g.y+=this.speed*.82;
       }
       if(g.domEl)g.domEl.style.top=(g.y-140)+'px';
+      // 화면 아래로 완전히 지나간 게이트는 배열/DOM에서 제거 — 긴 판 프레임 드랍 방지
+      if(g.y>this.h+220){if(g.domEl)g.domEl.remove();this.gates.splice(i,1);continue}
       if(!g.passed&&g.y>=this.player.y-10){
         const side=this.player.x<this.w/2?'L':'R';g.passed=true;
         if(g.domEl)g.domEl.style.opacity='.15';
@@ -808,6 +811,9 @@ const Game={
     const name=document.getElementById('pname').value.trim();
     if(!name){alert('이름을 입력하세요');return}
     if(name.length<2){alert('2글자 이상 입력해주세요');return}
+    // Enter 키가 버튼 disabled를 우회해 이중 저장(성장 이력 중복)되는 것 방지
+    if(this._saving||this._saved)return;
+    this._saving=true;
     const btn=document.getElementById('savebtn'),msg=document.getElementById('savemsg');
     btn.disabled=true;btn.style.opacity='.5';msg.textContent='저장 중...';msg.style.color='rgba(255,255,255,.4)';
     const today=new Date().toLocaleDateString('ko-KR',{month:'2-digit',day:'2-digit'});
@@ -815,9 +821,10 @@ const Game={
     if(false){this._lsave(data);msg.textContent='✓ 로컬 저장 완료';msg.style.color='var(--gd)';this.loadRanking();return}
     try{
       await supabaseSaveScore(data.name, data.score, data.combo||0, data.correct||0, GAME_ID);
-      this._lsave(data);msg.textContent='✓ 저장 완료! 랭킹에 반영됩니다';msg.style.color='#39ff14';
+      this._lsave(data);this._saved=true;msg.textContent='✓ 저장 완료! 랭킹에 반영됩니다';msg.style.color='#39ff14';
       await new Promise(r=>setTimeout(r,800));await this.loadRanking();
-    }catch(e){this._lsave(data);msg.textContent='✓ 로컬 저장 완료 (네트워크 오류)';msg.style.color='var(--gd)';this.loadRanking()}
+    }catch(e){this._lsave(data);msg.textContent='📴 기기에만 저장됨 (네트워크 오류 — 랭킹 미반영)';msg.style.color='var(--gd)';btn.disabled=false;btn.style.opacity='1';this.loadRanking()}
+    this._saving=false;
   },
   _lsave(d){const l=this._lget();l.push(d);l.sort((a,b)=>b.score-a.score);localStorage.setItem('hub_flight_rank',JSON.stringify(l.slice(0,15)))},
   _lget(){return JSON.parse(localStorage.getItem('hub_flight_rank')||'[]')},
@@ -829,7 +836,7 @@ const Game={
     try{const res=await supabaseFetchRanking(GAME_ID);this._render(this._merge(res,this._lget()))}
     catch(e){this._render(this._lget())}
   },
-  _merge(remote,local){const map=new Map();[...(Array.isArray(remote)?remote:[]),...local].forEach(r=>{const k=r.name+'_'+r.score;if(!map.has(k))map.set(k,r)});return[...map.values()].sort((a,b)=>b.score-a.score).slice(0,15)},
+  _merge(remote,local){const map=new Map();[...(Array.isArray(remote)?remote:[]),...local].forEach(r=>{const p=map.get(r.name);if(!p||(r.score||0)>(p.score||0))map.set(r.name,r)});return[...map.values()].sort((a,b)=>b.score-a.score).slice(0,15)},
   _render(list){
     const box=document.getElementById('rkbox');
     if(!list||!list.length){box.innerHTML='<div style="text-align:center;padding:20px;color:rgba(255,255,255,.3)">아직 기록이 없습니다</div>';return}
@@ -985,9 +992,12 @@ const GRADE_TIERS = [
             p_date:    today
         };
         if (groupId) rpcParams.p_group_id = groupId;
-        await db.rpc('upsert_score', rpcParams);
-        // 성장 그래프용 — 매 판 점수 이력 누적(이중저장, 예외 안 던짐)
+        // 성장 그래프용 — 매 판 점수 이력 누적(이중저장, 예외 안 던짐; rpc 실패와 무관하게 로컬 기록 보존)
         if (window.Growth) Growth.record({ game: gameId, name: safeName, score: safeScore, grade: rpcParams.p_grade, combo: rpcParams.p_combo, correct: rpcParams.p_correct });
+        // supabase-js는 실패해도 reject하지 않고 {error}로 resolve — 직접 확인해 throw해야
+        // 호출부 catch(로컬 저장 폴백 안내)가 실제 실패를 사용자에게 알릴 수 있다
+        const { error: rpcError } = await db.rpc('upsert_score', rpcParams);
+        if (rpcError) throw rpcError;
     }
 
     async function supabaseFetchRanking(gameId) {

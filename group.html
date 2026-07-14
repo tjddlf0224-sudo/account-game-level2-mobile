@@ -780,6 +780,19 @@ async function loadGroups() {
 
     if (error) throw error;
     allGroups = data || [];
+
+    // groups.member_count 컬럼은 아무도 갱신하지 않아 항상 0 —
+    // scores에서 그룹별 실제 참여 닉네임 수를 세어 표시값을 채운다 (실패 시 무시)
+    try {
+      const { data: rows } = await db.from('scores')
+        .select('group_id,name').not('group_id', 'is', null).limit(5000);
+      if (rows && rows.length) {
+        const cnt = {};
+        rows.forEach(r => { (cnt[r.group_id] = cnt[r.group_id] || new Set()).add(r.name); });
+        allGroups.forEach(g => { g.member_count = cnt[g.id] ? cnt[g.id].size : 0; });
+      }
+    } catch (e2) { /* 표시용 — 실패해도 목록은 정상 */ }
+
     renderGroups(allGroups);
   } catch(e) {
     listEl.innerHTML = '<div class="list-empty">⚠️ 목록을 불러올 수 없습니다.<br>네트워크를 확인해주세요.</div>';
@@ -890,7 +903,16 @@ async function joinGroup() {
 }
 
 function leaveGroup() {
-  if (!confirm('그룹에서 나가시겠습니까?')) return;
+  // Android WebView는 confirm()이 무동작(항상 false) → 2-스텝 버튼으로 확인
+  var lbtn = event && event.target ? event.target : null;
+  if (lbtn && lbtn.dataset && lbtn.dataset.armed !== '1') {
+    lbtn.dataset.armed = '1';
+    var origText = lbtn.textContent;
+    lbtn.textContent = '한 번 더 누르면 나가기';
+    setTimeout(function(){ if(lbtn.isConnected){ lbtn.dataset.armed=''; lbtn.textContent=origText; } }, 2500);
+    return;
+  }
+  if (lbtn && lbtn.dataset) lbtn.dataset.armed = '';
   localStorage.removeItem('hub_group_id');
   localStorage.removeItem('hub_group_name');
   document.getElementById('current-group-bar').classList.remove('show');

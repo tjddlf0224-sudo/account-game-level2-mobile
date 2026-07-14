@@ -975,7 +975,7 @@ const questions = [
     { sentence: '장기 시설자금을 은행에서 대출받다 → <b class="target-account">장기차입금</b>', target: '장기차입금', type: 'right', hint: '장기차입금(부채) 증가 → 대변' },
     { sentence: '상품 대금으로 어음을 발행하다 → <b class="target-account">지급어음</b>', target: '지급어음', type: 'right', hint: '지급어음(부채) 증가 → 대변' },
     { sentence: '직원 급여에서 소득세를 원천징수하다 → <b class="target-account">예수금</b>', target: '예수금', type: 'right', hint: '예수금(부채) 증가 → 대변' },
-    { sentence: '기말 외상매입금 잔액에 대해 대손충당금 설정 → <b class="target-account">대손충당금</b>', target: '대손충당금', type: 'right', hint: '대손충당금(자산차감) 증가 → 대변' },
+    { sentence: '기말 외상매출금 잔액에 대해 대손충당금 설정 → <b class="target-account">대손충당금</b>', target: '대손충당금', type: 'right', hint: '대손충당금(자산차감) 증가 → 대변' },
     // ── 자본 증가 → 대변 ──
     { sentence: '창업자가 현금을 출자하다 → <b class="target-account">자본금</b>', target: '자본금', type: 'right', hint: '자본금(자본) 증가 → 대변' },
     { sentence: '유상증자로 주식을 발행하다 → <b class="target-account">자본금</b>', target: '자본금', type: 'right', hint: '자본금(자본) 증가 → 대변' },
@@ -1113,7 +1113,8 @@ document.addEventListener('touchstart', e => { touchStartX = e.touches[0].client
 document.addEventListener('touchend', e => {
     if (!isPlaying) return;
     const dx = e.changedTouches[0].clientX - touchStartX;
-    if (Math.abs(dx) > 60) handleAnswer(dx < 0 ? 'right' : 'left');
+    // 왼쪽 스와이프 = 차변(왼쪽 버튼), 오른쪽 스와이프 = 대변(오른쪽 버튼) — 버튼 배치와 일치
+    if (Math.abs(dx) > 60) handleAnswer(dx < 0 ? 'left' : 'right');
 }, { passive: true });
 
 function handleAnswer(side) {
@@ -1214,7 +1215,10 @@ async function saveScore() {
     showSaveStatus('확인 중...', '');
 
     const myStoredName = getMyName();
-    if (name !== myStoredName) {
+    // 허브 로그인 닉네임(login.html에서 본인 확인 완료)은 중복검사 대상에서 제외
+    // — 앱 재설치/기기 변경 후 자기 이름이 "이미 사용 중"으로 막히던 문제 해결
+    const hubName = (localStorage.getItem('hub_nickname') || '').trim();
+    if (name !== myStoredName && name !== hubName) {
         let existingList = [];
         try {
             if (true) {
@@ -1306,8 +1310,10 @@ async function loadRanking() {
 
 function mergeRankings(remote, local) {
     const map = new Map();
+    // 이름별 최고점 1행만 유지 — 같은 사람이 점수별로 여러 줄 나오는 중복 방지
     [...(Array.isArray(remote) ? remote : []), ...local].forEach(r => {
-        const key = r.name + '_' + r.score; if (!map.has(key)) map.set(key, r);
+        const prev = map.get(r.name);
+        if (!prev || (r.score || 0) > (prev.score || 0)) map.set(r.name, r);
     });
     return [...map.values()].sort((a, b) => b.score - a.score).slice(0, 15);
 }
@@ -1514,9 +1520,12 @@ function getGrade(score) {
             p_date:    today
         };
         if (groupId) rpcParams.p_group_id = groupId;
-        await db.rpc('upsert_score', rpcParams);
-        // 성장 그래프용 — 매 판 점수 이력 누적(이중저장, 예외 안 던짐)
+        // 성장 그래프용 — 매 판 점수 이력 누적(이중저장, 예외 안 던짐; rpc 실패와 무관하게 로컬 기록 보존)
         if (window.Growth) Growth.record({ game: gameId, name: safeName, score: safeScore, grade: rpcParams.p_grade, combo: rpcParams.p_combo, correct: rpcParams.p_correct });
+        // supabase-js는 실패해도 reject하지 않고 {error}로 resolve — 직접 확인해 throw해야
+        // 호출부 catch(로컬 저장 폴백 안내)가 실제 실패를 사용자에게 알릴 수 있다
+        const { error: rpcError } = await db.rpc('upsert_score', rpcParams);
+        if (rpcError) throw rpcError;
     }
 
     async function supabaseFetchRanking(gameId) {

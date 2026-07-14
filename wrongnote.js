@@ -142,7 +142,10 @@
         if (gid) q = q.eq('group_id', gid);
         var res = await q;
         if (res && res.data) {
-          // Supabase rows → 동일 포맷으로 집계 병합
+          // Supabase rows → 동일 포맷으로 병합.
+          // 같은 오답은 로컬(count 집계)과 원격(행 수)에 이중 저장되므로
+          // 합산하지 않고 둘 중 큰 쪽을 채택 — 횟수 2배 부풀림 방지
+          var remoteCnt = {};
           res.data.forEach(function (row) {
             var rec = {
               game: row.game_id, key: row.q_key, q: row.q_text,
@@ -150,8 +153,11 @@
               ts: row.created_at ? Date.parse(row.created_at) : 0, count: 1, _src: 'remote'
             };
             var k = uid(rec);
-            if (byKey[k]) { byKey[k].count = (byKey[k].count || 1) + 1; }
-            else { byKey[k] = rec; }
+            remoteCnt[k] = (remoteCnt[k] || 0) + 1;
+            if (!byKey[k]) byKey[k] = rec;
+          });
+          Object.keys(remoteCnt).forEach(function (k) {
+            byKey[k].count = Math.max(byKey[k].count || 1, remoteCnt[k]);
           });
         }
       } catch (e) { /* 무시 → 로컬만 */ }
@@ -189,15 +195,19 @@
     var db = client();
     if (db) {
       try {
-        var res = await db.from(TABLE).select().eq('user_name', oldName);
+        var res = await db.from(TABLE).select().eq('user_name', oldName).limit(1000);
         if (res && res.data && res.data.length) {
+          // 1000행 캡에 걸렸다면(=일부만 복사됨) 삭제를 생략 — 오답 유실 방지
+          var truncated = res.data.length >= 1000;
           var rows = res.data.map(function (r) {
             var o = { user_name: newName, game_id: r.game_id, q_key: r.q_key,
                       q_text: r.q_text, correct: r.correct, wrong: r.wrong, q_type: r.q_type };
             if (r.group_id) o.group_id = r.group_id;
             return o;
           });
-          await db.from(TABLE).insert(rows);
+          var ins = await db.from(TABLE).insert(rows);
+          // insert 실패(supabase-js는 reject하지 않음)면 삭제 금지 — 데이터 유실 방지
+          if (!ins || ins.error || truncated) return;
           await db.from(TABLE).delete().eq('user_name', oldName);
         }
       } catch (e) { /* 무시 → 로컬만 이전 */ }

@@ -219,6 +219,11 @@ body {
   border:1px solid rgba(255,255,255,0.08);
   white-space:nowrap;
 }
+.card-best {
+  display:none;   /* 기록 있을 때 JS가 표시 */
+  font-size:0.74rem; color:#ffd24a;
+  margin-top:5px; white-space:nowrap;
+}
 .card-play {
   display:flex; align-items:center; justify-content:center;
   width:100%; padding:14px;
@@ -691,6 +696,7 @@ body {
         <div class="card-title">계정과목 산성비</div>
         <div class="card-desc">떨어지는 단어 중 계정과목만 클릭!</div>
         <div class="card-count">목표 : 🥇 베테랑</div>
+        <div class="card-best" id="best-acid"></div>
       </div>
       <div class="card-play">▶ 시작</div>
     </a>
@@ -704,6 +710,7 @@ body {
         <div class="card-title">기억의 전당</div>
         <div class="card-desc">계정과목과 뜻을 카드로 매칭!</div>
         <div class="card-count">목표 : ⭐ CEO급</div>
+        <div class="card-best" id="best-memory"></div>
       </div>
       <div class="card-play">▶ 시작</div>
     </a>
@@ -717,6 +724,7 @@ body {
         <div class="card-title">회계 차변대변</div>
         <div class="card-desc">거래를 읽고 차변/대변 판별!</div>
         <div class="card-count">목표 : 🥇 회계 부장</div>
+        <div class="card-best" id="best-debit"></div>
       </div>
       <div class="card-play">▶ 시작</div>
     </a>
@@ -730,6 +738,7 @@ body {
         <div class="card-title">결산분개 조립공장</div>
         <div class="card-desc">결산 거래의 차변·대변을 직접 조립!</div>
         <div class="card-count">목표 : 🥇 숙련 경리</div>
+        <div class="card-best" id="best-factory"></div>
       </div>
       <div class="card-play">▶ 시작</div>
     </a>
@@ -743,6 +752,7 @@ body {
         <div class="card-title">플라이트 장부조회</div>
         <div class="card-desc">비행기를 조종해 올바른 장부 통과!</div>
         <div class="card-count">목표 : 🥇 베테랑 파일럿</div>
+        <div class="card-best" id="best-flight"></div>
       </div>
       <div class="card-play">▶ 시작</div>
     </a>
@@ -885,12 +895,25 @@ async function changeNickname() {
   }
 
   // 1) 서버 점수(랭킹) 이름 변경 — RPC 우선(supabase_security_migration.sql 적용 후),
-  //    미적용 DB면 기존 직접 update 폴백
+  //    미적용 DB면 기존 직접 update 폴백.
+  //    실패하면 여기서 중단 — 점수는 옛 이름, 오답·성장만 새 이름인 "반쪽 개명" 방지
   if (db) {
     try {
-      const { error } = await db.rpc('rename_player', { p_old: oldName, p_new: name });
-      if (error) await db.from('scores').update({ name: name }).eq('name', oldName);
-    } catch (e) {}
+      const { data: renamed, error } = await db.rpc('rename_player', { p_old: oldName, p_new: name });
+      if (error && error.code === 'PGRST202') {
+        // 구스키마(RPC 없음) 폴백
+        const { error: e2 } = await db.from('scores').update({ name: name }).eq('name', oldName);
+        if (e2) throw e2;
+      } else if (error) {
+        throw error;
+      } else if (renamed !== true) {
+        alert('⚠️ 서버에서 닉네임 변경이 거부되었어요. (이미 사용 중인 이름일 수 있어요)');
+        return;
+      }
+    } catch (e) {
+      alert('⚠️ 네트워크 문제로 닉네임을 변경하지 못했어요. 잠시 후 다시 시도해주세요.');
+      return;
+    }
   }
   // 2) 오답노트(로컬+서버) 이전
   if (window.WrongNote && WrongNote.rename) { try { await WrongNote.rename(oldName, name); } catch (e) {} }

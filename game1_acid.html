@@ -839,6 +839,7 @@
         els.board.classList.remove('frozen');
         bgmSetFever(false); // 재시작 시 재생속도 초기화
         updateUI();
+        lastFrameTs = 0;   // 프레임 델타 기준점 초기화
         gameLoopId = requestAnimationFrame(gameLoop);
         spawnTimerId = setInterval(spawnWord, 600);
         countdownTimerId = setInterval(() => {
@@ -902,12 +903,20 @@
         activeWords.push(wordObj);
     }
 
-    function gameLoop() {
+    let lastFrameTs = 0;   // 주사율 독립: 60Hz든 120Hz든 같은 낙하 속도/얼음 시간
+    function gameLoop(ts) {
         if (!isPlaying || isPaused) return;
         const bh = getBoardHeight(); // 매 프레임 동적 계산
 
+        const nowTs = ts || performance.now();
+        if (!lastFrameTs) lastFrameTs = nowTs;
+        let dtms = nowTs - lastFrameTs;
+        lastFrameTs = nowTs;
+        if (dtms > 100) dtms = 100;         // 탭 복귀 등 큰 시간 점프 클램프
+        const dt = dtms / (1000 / 60);      // 60fps 기준 배수 (120Hz면 ≈0.5)
+
         if (freezeTime > 0) {
-            freezeTime -= 16;
+            freezeTime -= dtms;
             const pct = (freezeTime / 5000) * 100;
             els.freezeBar.style.width = pct + "%";
             if (freezeTime <= 0) {
@@ -921,7 +930,7 @@
 
         activeWords.forEach(wordObj => {
             if (wordObj.isDead) return;
-            wordObj.y += wordObj.speed;
+            wordObj.y += wordObj.speed * dt;
             wordObj.el.style.top = `${wordObj.y}px`;
 
             if (wordObj.y > bh - 50) {
@@ -1242,7 +1251,10 @@
 
         // 내 닉네임이면 중복 체크 스킵
         const myStoredName = getMyName();
-        if (name !== myStoredName) {
+        // 허브 로그인 닉네임(login.html에서 본인 확인 완료)은 중복검사 대상에서 제외
+        // — 앱 재설치/기기 변경 후 자기 이름이 "이미 사용 중"으로 막히던 문제 해결
+        const hubName = (localStorage.getItem('hub_nickname') || '').trim();
+        if (name !== myStoredName && name !== hubName) {
             let existingList = [];
             try {
                 if (true) {
@@ -1318,8 +1330,10 @@
 
     function mergeRank(remote, local) {
         const map = new Map();
+        // 이름별 최고점 1행만 유지 — 같은 사람이 점수별로 여러 줄 나오는 중복 방지
         [...(Array.isArray(remote) ? remote : []), ...local].forEach(r => {
-            const k = r.name + '_' + r.score; if (!map.has(k)) map.set(k, r);
+            const prev = map.get(r.name);
+            if (!prev || (r.score || 0) > (prev.score || 0)) map.set(r.name, r);
         });
         return [...map.values()].sort((a, b) => b.score - a.score).slice(0, 15);
     }
@@ -1375,9 +1389,12 @@
             p_date:    today
         };
         if (groupId) rpcParams.p_group_id = groupId;
-        await db.rpc('upsert_score', rpcParams);
-        // 성장 그래프용 — 매 판 점수 이력 누적(이중저장, 예외 안 던짐)
+        // 성장 그래프용 — 매 판 점수 이력 누적(이중저장, 예외 안 던짐; rpc 실패와 무관하게 로컬 기록 보존)
         if (window.Growth) Growth.record({ game: gameId, name: safeName, score: safeScore, grade: rpcParams.p_grade, combo: rpcParams.p_combo, correct: rpcParams.p_correct });
+        // supabase-js는 실패해도 reject하지 않고 {error}로 resolve — 직접 확인해 throw해야
+        // 호출부 catch(로컬 저장 폴백 안내)가 실제 실패를 사용자에게 알릴 수 있다
+        const { error: rpcError } = await db.rpc('upsert_score', rpcParams);
+        if (rpcError) throw rpcError;
     }
 
     async function supabaseFetchRanking(gameId) {

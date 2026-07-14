@@ -354,6 +354,31 @@ body{
 }
 .rb-fill{height:100%;border-radius:50px;transition:width 0.7s cubic-bezier(0.4,0,0.2,1)}
 
+/* 모달 성장 그래프 */
+.growth-wrap{margin-bottom:24px}
+.growth-game{
+  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);
+  border-radius:12px;padding:12px 14px;margin-bottom:10px;
+}
+.growth-game-head{
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:0.82rem;font-weight:700;margin-bottom:4px;
+}
+.growth-game-head .gg-chips{display:flex;gap:6px;font-weight:400}
+.gg-chip{
+  font-size:0.68rem;border-radius:20px;padding:2px 8px;
+  background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.55);
+  font-variant-numeric:tabular-nums;
+}
+.gg-chip b{color:#fff;font-weight:700}
+.gg-chip.up{color:var(--gn);background:rgba(0,230,118,0.1)}
+.gg-chip.up b{color:var(--gn)}
+.growth-svg{width:100%;display:block;margin-top:4px}
+.growth-empty{
+  text-align:center;color:rgba(255,255,255,0.35);font-size:0.8rem;
+  padding:18px 10px;line-height:1.6;
+}
+
 /* 모달 진단 코멘트 */
 .diagnosis-box{
   background:rgba(0,242,255,0.04);border:1px solid rgba(0,242,255,0.12);
@@ -639,6 +664,12 @@ body{
         <div class="radar-bars" id="radar-bars"></div>
       </div>
 
+      <!-- 성장 그래프 (score_history 시계열) -->
+      <div class="growth-wrap">
+        <div class="radar-title">GROWTH TIMELINE · 성장 그래프</div>
+        <div id="growth-body"><div class="growth-empty">불러오는 중…</div></div>
+      </div>
+
       <!-- AI 진단 -->
       <div class="diagnosis-box">
         <div class="diag-label">📋 학습 진단 & 권장 방향</div>
@@ -814,10 +845,12 @@ async function confirmPass() {
       return;
     }
     // 인증 성공 — 세션에 저장 (탭 닫으면 초기화)
-    sessionStorage.setItem('verified_group', pendingGid);
+    // ※ closePassPopup()이 pendingGid를 null로 만들므로 먼저 지역변수에 확보
+    const gid = pendingGid;
+    sessionStorage.setItem('verified_group', gid);
     closePassPopup();
-    const group = allGroups.find(g=>g.id===pendingGid) || { id:pendingGid, name:pendingGid, teacher_name:'—' };
-    enterGroup(pendingGid, group);
+    const group = allGroups.find(g=>g.id===gid) || { id:gid, name:gid, teacher_name:'—' };
+    enterGroup(gid, group);
   } catch(e) {
     errEl.textContent = '오류가 발생했습니다. 다시 시도해주세요';
     errEl.classList.add('show');
@@ -855,6 +888,14 @@ async function deleteGroup() {
     if (rpcErr) {
       // 폴백: 마이그레이션 이전 DB(RPC 없음) — 기존 직접 삭제
       if (rpcErr.code !== 'PGRST202') throw rpcErr;
+      // 폴백에서도 비밀번호 검증 (구스키마는 teacher_pass가 평문으로 남아있음)
+      const { data: gp, error: e0 } = await db.from('groups').select('teacher_pass').eq('id', currentGid).single();
+      if (e0) throw e0;
+      if ((gp.teacher_pass || '') !== pass.trim()) {
+        alert('비밀번호가 틀려 삭제를 취소했습니다.');
+        btn.disabled = false; btn.innerHTML = '<span>🗑</span> 그룹 삭제';
+        return;
+      }
       // 1) 연결된 점수 먼저 삭제 (group_id 기준)
       const { error: e1 } = await db.from('scores').delete().eq('group_id', currentGid);
       if (e1) throw e1;
@@ -867,7 +908,8 @@ async function deleteGroup() {
       return;
     }
 
-    // 세션/화면 정리
+    // 세션/화면 정리 (버튼도 원상복구 — 다음 그룹 진입 시 재사용)
+    btn.disabled = false; btn.innerHTML = '<span>🗑</span> 그룹 삭제';
     sessionStorage.removeItem('verified_group');
     alert(`"${name}" 그룹이 삭제되었습니다.`);
     currentGid = null; currentGroup = null; location.hash = '';
@@ -911,11 +953,13 @@ async function loadDashboard() {
   document.getElementById('ch-meta').textContent =
     `교수자: ${currentGroup.teacher_name||'—'} · 코드: ${currentGroup.id}`;
 
-  // 로딩 표시
-  ['group-rank-body','student-table-body','game-bar-list'].forEach(id =>
+  // 로딩 표시 (tbody에는 tr, div에는 div — 잘못된 마크업 주입 방지)
+  ['group-rank-body','student-table-body'].forEach(id =>
     document.getElementById(id).innerHTML =
       '<tr><td colspan="10" style="text-align:center;padding:30px;color:rgba(255,255,255,0.2)"><div class="spinner" style="margin:0 auto"></div></td></tr>'
   );
+  document.getElementById('game-bar-list').innerHTML =
+    '<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.2)"><div class="spinner" style="margin:0 auto"></div></div>';
 
   try {
     const { data, error } = await db
@@ -1127,6 +1171,112 @@ function openModal(name) {
 
   // 진단 텍스트 생성
   document.getElementById('diag-text').innerHTML = generateDiagnosis(name, student);
+
+  // 성장 그래프 로드 (비동기)
+  loadStudentGrowth(name);
+}
+
+/* ══════════════════════════════════════════
+   학생 성장 그래프 (score_history 시계열)
+══════════════════════════════════════════ */
+const GROWTH_GAMES = GAMES.concat([{ id:'theory', name:'이론 객관식', icon:'📝', color:'var(--cy)' }]);
+
+async function loadStudentGrowth(name) {
+  const body = document.getElementById('growth-body');
+  body.innerHTML = '<div class="growth-empty">불러오는 중…</div>';
+  try {
+    // 이 그룹 소속 기록 + 그룹 가입 전(group_id 없음) 기록만 — 타 그룹 동명이인 배제.
+    // 최신순 1000행 후 뒤집기 — 다작 학생도 "최신" 기록이 잘리지 않게.
+    const { data, error } = await db
+      .from('score_history')
+      .select('game_id,score,grade,played_at')
+      .eq('user_name', name)
+      .or(`group_id.eq."${currentGid}",group_id.is.null`)
+      .order('played_at', { ascending: false })
+      .limit(1000);
+    if (error) throw error;
+    // 모달이 다른 학생으로 바뀌었으면 낡은 응답 폐기
+    if (document.getElementById('modal-name').textContent !== `📊 ${name}`) return;
+    renderStudentGrowth((data || []).reverse());
+  } catch(e) {
+    // 에러 응답도 stale 가드 — 다른 학생의 정상 차트를 덮어쓰지 않게
+    if (document.getElementById('modal-name').textContent !== `📊 ${name}`) return;
+    body.innerHTML = '<div class="growth-empty">성장 기록을 불러오지 못했어요 (score_history 테이블 확인)</div>';
+  }
+}
+
+function renderStudentGrowth(rows) {
+  const body = document.getElementById('growth-body');
+  const byGame = {};
+  rows.forEach(r => { (byGame[r.game_id] = byGame[r.game_id] || []).push(r); });
+
+  const blocks = GROWTH_GAMES.filter(g => byGame[g.id] && byGame[g.id].length).map(g => {
+    const arr = byGame[g.id];
+    const scores = arr.map(r => r.score || 0);
+    const n = scores.length;
+    const first = scores[0], latest = scores[n-1];
+    const best = Math.max.apply(null, scores);
+    const delta = latest - first;
+    const deltaChip = n >= 2 && delta > 0
+      ? `<span class="gg-chip up">▲ <b>${delta.toLocaleString()}</b></span>` : '';
+    return `<div class="growth-game">
+      <div class="growth-game-head">
+        <span>${g.icon} ${g.name}</span>
+        <span class="gg-chips">
+          <span class="gg-chip"><b>${n}</b>판</span>
+          <span class="gg-chip">최고 <b>${best.toLocaleString()}</b></span>
+          ${deltaChip}
+        </span>
+      </div>
+      ${n >= 2 ? growthChartSVG(g.id, arr) : '<div class="growth-empty" style="padding:6px 0">1판 — 두 판째부터 곡선이 그려져요</div>'}
+    </div>`;
+  });
+
+  body.innerHTML = blocks.length
+    ? blocks.join('')
+    : '<div class="growth-empty">아직 성장 기록이 없어요.<br>성장 기록은 기능 배포(2026-07-10) 이후 플레이부터 쌓입니다.</div>';
+}
+
+function growthChartSVG(gid, arr) {
+  const W = 320, H = 84, padL = 8, padR = 10, padT = 16, padB = 8;
+  const scores = arr.map(r => r.score || 0);
+  const n = scores.length;
+  const maxS = Math.max.apply(null, scores), minS = Math.min.apply(null, scores);
+  const span = maxS - minS;
+  const xFor = i => padL + (n <= 1 ? 0.5 : i/(n-1)) * (W-padL-padR);
+  const yFor = s => span <= 0 ? padT + (H-padT-padB)*0.45
+                              : padT + (1-(s-minS)/span) * (H-padT-padB);
+  let bestI = 0;
+  for (let i = 1; i < n; i++) if (scores[i] > scores[bestI]) bestI = i;
+  const pts = arr.map((r,i) => `${xFor(i)},${yFor(r.score||0)}`);
+  const baseY = H - padB + 2;
+  const area = `M${xFor(0)},${baseY} L${pts.join(' L')} L${xFor(n-1)},${baseY} Z`;
+  const dots = arr.map((r,i) => {
+    const cx = xFor(i), cy = yFor(r.score||0);
+    if (i === bestI) return `<circle cx="${cx}" cy="${cy}" r="4" fill="var(--gd)" stroke="#020810" stroke-width="1.4"/>`;
+    if (i === n-1)   return `<circle cx="${cx}" cy="${cy}" r="3.2" fill="var(--cy)" stroke="#020810" stroke-width="1.2"/>`;
+    return `<circle cx="${cx}" cy="${cy}" r="2" fill="rgba(159,232,255,0.85)"/>`;
+  }).join('');
+  const lx = xFor(bestI);
+  const anchor = lx < 28 ? 'start' : (lx > W-28 ? 'end' : 'middle');
+  return `<svg class="growth-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" style="overflow:visible">
+    <defs>
+      <linearGradient id="ggl_${gid}" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#00f2ff"/><stop offset="100%" stop-color="#00e676"/>
+      </linearGradient>
+      <linearGradient id="ggf_${gid}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="rgba(0,242,255,0.22)"/>
+        <stop offset="100%" stop-color="rgba(0,242,255,0)"/>
+      </linearGradient>
+    </defs>
+    <line x1="${padL}" y1="${baseY}" x2="${W-padR}" y2="${baseY}" stroke="rgba(255,255,255,0.08)"/>
+    <path d="${area}" fill="url(#ggf_${gid})"/>
+    <polyline points="${pts.join(' ')}" fill="none" stroke="url(#ggl_${gid})"
+      stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+    ${dots}
+    <text x="${lx}" y="${yFor(scores[bestI])-7}" text-anchor="${anchor}"
+      fill="var(--gd)" font-size="10" font-weight="800">${scores[bestI].toLocaleString()}</text>
+  </svg>`;
 }
 
 function generateDiagnosis(name, student) {

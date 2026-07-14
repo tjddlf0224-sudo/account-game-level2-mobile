@@ -94,12 +94,14 @@
     var db = client();
     if (db) {
       try {
+        // 최신순으로 1000행을 받아 뒤집음 — 1000행 초과 헤비유저도 "최신" 기록이 잘리지 않게
         var q = db.from(TABLE).select().eq('user_name', u)
-                  .order('played_at', { ascending: true }).limit(1000);
+                  .order('played_at', { ascending: false }).limit(1000);
         var gid = groupId();
         if (gid) q = q.eq('group_id', gid);
         var res = await q;
         if (res && res.data && res.data.length) {
+          res.data.reverse();
           var remote = {};
           res.data.forEach(function (r) {
             (remote[r.game_id] = remote[r.game_id] || []).push({
@@ -143,8 +145,10 @@
     var db = client();
     if (db) {
       try {
-        var res = await db.from(TABLE).select().eq('user_name', oldName);
+        var res = await db.from(TABLE).select().eq('user_name', oldName).limit(1000);
         if (res && res.data && res.data.length) {
+          // 1000행 캡에 걸렸다면(=일부만 복사됨) 삭제를 생략 — 이력 유실 방지
+          var truncated = res.data.length >= 1000;
           var rows = res.data.map(function (r) {
             var o = { user_name: newName, game_id: r.game_id, score: r.score,
                       grade: r.grade, combo: r.combo, correct: r.correct };
@@ -152,7 +156,9 @@
             if (r.played_at) o.played_at = r.played_at;
             return o;
           });
-          await db.from(TABLE).insert(rows);
+          var ins = await db.from(TABLE).insert(rows);
+          // insert 실패(supabase-js는 reject하지 않음)면 삭제 금지 — 데이터 유실 방지
+          if (!ins || ins.error || truncated) return;
           await db.from(TABLE).delete().eq('user_name', oldName);
         }
       } catch (e) { /* 무시 → 로컬만 이전 */ }

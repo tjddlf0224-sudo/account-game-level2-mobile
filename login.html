@@ -426,8 +426,9 @@ async function doLogin() {
 
   // 서버 닉네임 중복 확인 — 동명이인의 점수가 한 기록으로 병합되는 것 방지
   // (이 기기에서 쓰던 닉네임 그대로면 본인이므로 통과, 오프라인이면 검사 생략)
+  // 앱 재설치/데이터 삭제로 localStorage가 비어도 "본인 확인" 버튼으로 복구 가능
   const saved = (localStorage.getItem('hub_nickname') || '').trim();
-  if (name !== saved) {
+  if (name !== saved && window._claimedName !== name) {
     try {
       const db = (window.supabase && supabase.createClient)
         ? supabase.createClient(_SB_URL, _SB_KEY) : null;
@@ -436,7 +437,8 @@ async function doLogin() {
         if (!error && data && data.length) {
           btn.disabled = false;
           btn.textContent = '🚀 훈련 시작';
-          showErr('이미 사용 중인 닉네임입니다. 다른 닉네임을 입력해주세요');
+          showErr('이미 등록된 닉네임입니다. 예전에 쓰던 본인 닉네임이면 아래 버튼을 누르세요');
+          showClaimButton(name);
           return;
         }
       }
@@ -452,6 +454,30 @@ async function doLogin() {
 
   btn.textContent = '이동 중...';
   window.location.href = 'index.html';
+}
+
+// "본인 확인" 버튼 — 앱 재설치 등으로 localStorage가 사라진 학생이
+// 예전 닉네임(서버 기록 보유)을 되찾는 경로. 두 번째 클릭은 검사를 건너뛴다.
+// (Android WebView는 confirm()이 무동작이라 대화상자 대신 버튼 방식 사용)
+function showClaimButton(name) {
+  let claim = document.getElementById('claim-btn');
+  if (!claim) {
+    claim = document.createElement('button');
+    claim.id = 'claim-btn';
+    claim.type = 'button';
+    claim.style.cssText = 'display:block;width:100%;margin-top:10px;padding:12px;border-radius:12px;'
+      + 'border:1px solid rgba(255,210,74,.45);background:rgba(255,210,74,.12);color:#ffd24a;'
+      + 'font-size:.9rem;font-weight:700;cursor:pointer;';
+    const startBtn = document.getElementById('start-btn');
+    startBtn.parentNode.insertBefore(claim, startBtn.nextSibling);
+  }
+  claim.textContent = '✅ "' + name + '" 은(는) 예전에 쓰던 내 닉네임입니다 — 이어서 사용';
+  claim.style.display = 'block';
+  claim.onclick = function () {
+    window._claimedName = name;   // 이 이름에 한해 중복검사 1회 면제
+    claim.style.display = 'none';
+    doLogin();
+  };
 }
 
 function clearGroup() {

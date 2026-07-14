@@ -904,7 +904,7 @@ async function loadRanking() {
 
 function mergeRank(remote, local) {
     const map = new Map();
-    [...(Array.isArray(remote)?remote:[]),...local].forEach(r=>{const k=r.name+'_'+r.score;if(!map.has(k))map.set(k,r)});
+    [...(Array.isArray(remote)?remote:[]),...local].forEach(r=>{const p=map.get(r.name);if(!p||(r.score||0)>(p.score||0))map.set(r.name,r)});
     return [...map.values()].sort((a,b)=>b.score-a.score).slice(0,15);
 }
 
@@ -1079,9 +1079,12 @@ function renderRankList(list) {
             p_date:    today
         };
         if (groupId) rpcParams.p_group_id = groupId;
-        await db.rpc('upsert_score', rpcParams);
-        // 성장 그래프용 — 매 판 점수 이력 누적(이중저장, 예외 안 던짐)
+        // 성장 그래프용 — 매 판 점수 이력 누적(이중저장, 예외 안 던짐; rpc 실패와 무관하게 로컬 기록 보존)
         if (window.Growth) Growth.record({ game: gameId, name: safeName, score: safeScore, grade: rpcParams.p_grade, combo: rpcParams.p_combo, correct: rpcParams.p_correct });
+        // supabase-js는 실패해도 reject하지 않고 {error}로 resolve — 직접 확인해 throw해야
+        // 호출부 catch(로컬 저장 폴백 안내)가 실제 실패를 사용자에게 알릴 수 있다
+        const { error: rpcError } = await db.rpc('upsert_score', rpcParams);
+        if (rpcError) throw rpcError;
     }
 
     async function supabaseFetchRanking(gameId) {

@@ -567,7 +567,7 @@
             <div class="action-btns" style="align-items:stretch; margin-top:20px; gap:10px;">
                 <button class="btn" onclick="startGame()">게임 시작 🚀</button>
                 <button class="btn-hub" onclick="openGuide()">📖 사용방법</button>
-                <button class="btn-hub" onclick="if(typeof stage!=='undefined'&&stage>1){if(!confirm('게임을 종료하고 메인으로 나가시겠어요?'))return;}location.href='index.html'">🏠 메인으로 나가기</button>
+                <button class="btn-hub" onclick="exitToHub(this)">🏠 메인으로 나가기</button>
             </div>
         </div>
     </div>
@@ -632,7 +632,7 @@
             <button class="btn" id="next-stage-btn" onclick="nextStage()" style="display:none;background:var(--accent2);">다음 스테이지 ▶</button>
             <div class="action-btns" style="align-items:center;">
                 <button class="btn-restart" id="restart-btn" onclick="startGame()">↺ 다시 하기</button>
-                <button class="btn-hub" onclick="if(typeof stage!=='undefined'&&stage>1){if(!confirm('게임을 종료하고 메인으로 나가시겠어요?'))return;}location.href='index.html'">🏠 메인으로 나가기</button>
+                <button class="btn-hub" onclick="exitToHub(this)">🏠 메인으로 나가기</button>
             </div>
         </div>
     </div>
@@ -958,7 +958,7 @@
             const totalCount = list.length;
             const summaryMsg = myRank === 1
                 ? '🏆 현재 <b style="color:#f1c40f">1위</b>예요!'
-                : `현재 <b style="color:#00e676">${myRank}위</b> / ${totalCount}명`;
+                : `현재 <b style="color:#00e676">${myRank}위</b> / ${totalCount}${totalCount >= 20 ? '+' : ''}명`;
 
             body.innerHTML = `<div style="text-align:center;font-size:0.82rem;margin-bottom:6px;color:rgba(255,255,255,0.7);">${summaryMsg}</div>` + rows;
         }
@@ -1033,9 +1033,23 @@
             stopTimer(); endGame(true);
         }
 
+        // 메인 이탈: 진행 중(stage>1)이면 두 번 눌러 확인 — Android WebView는
+        // confirm()이 무동작(항상 false)이라 대화상자 대신 2-스텝 버튼 사용
+        function exitToHub(btn) {
+            if (typeof stage === 'undefined' || stage <= 1 || btn.dataset.armed === '1') {
+                location.href = 'index.html';
+                return;
+            }
+            btn.dataset.armed = '1';
+            const orig = btn.textContent;
+            btn.textContent = '⚠️ 한 번 더 누르면 나가기 (점수 미저장)';
+            setTimeout(() => { btn.dataset.armed = ''; btn.textContent = orig; }, 2500);
+        }
+
         function startGame() {
             initAudio(); // ← AudioContext resume + BGM 시작
             hideAdPlaceholder();
+            window._roundOver = false;   // 새 게임 — endGame 재허용
             document.getElementById('start-screen').style.display = 'none';
             document.getElementById('result-screen').style.display = 'none';
             stage = 1; totalScore = 0; usedPairIds = new Set();
@@ -1182,6 +1196,9 @@
         }
 
         function endGame(quit = false) {
+            // 마지막 짝 매칭 직후 '그만'을 누르는 등 이중 호출 방지
+            if (window._roundOver) return;
+            window._roundOver = true;
             stopTimer();
             if (window.WrongNote) WrongNote.flush('memory');
             bgmStop(); // 🎵 게임 종료/포기 시 BGM 페이드 아웃
@@ -1260,6 +1277,7 @@
 
         function nextStage() {
             stage++;
+            window._roundOver = false;   // 새 스테이지 — endGame 재허용
             document.getElementById('result-screen').style.display = 'none';
             bgmPlay(); // 🎵 다음 스테이지 진행 시 BGM 재개
             resetStage();
@@ -1290,7 +1308,10 @@
             showStatus('확인 중...', '');
 
             const myStoredName = getMyName();
-            if (name !== myStoredName) {
+            // 허브 로그인 닉네임(login.html에서 본인 확인 완료)은 중복검사 대상에서 제외
+            // — 앱 재설치/기기 변경 후 자기 이름이 "이미 사용 중"으로 막히던 문제 해결
+            const hubName = (localStorage.getItem('hub_nickname') || '').trim();
+            if (name !== myStoredName && name !== hubName) {
                 let existingList = [];
                 try {
                     if (true) {
@@ -1323,9 +1344,16 @@
                 await loadRanking();
                 showMyRank(name);
             } catch(e) {
-                showStatus('✓ 저장 완료!', 'ok');
+                // 서버 미반영(오프라인 등) — 성공처럼 보이지 않게 구분해서 안내
+                showStatus('📴 기기에만 저장됨 — 인터넷 연결 후 다시 등록하면 랭킹에 반영돼요', 'ok');
                 renderRanking(_lget());
                 showMyRank(name);
+                const mwOff = document.getElementById('mini-rank-wrap');
+                if (mwOff && mwOff.style.display !== 'none' && stageBtn) {
+                    stageBtn.textContent = '📴 기기 저장됨 — 다시 시도';
+                    stageBtn.disabled = false;   // 재시도 허용
+                }
+                return 'local';
             }
             window._savedScore = Math.max(window._savedScore || 0, score); // 미니 랭킹 "저장됨" 표시용
             // 스테이지 클리어 화면(미니 랭킹 표시 중)이면: 배지 숨기고 미니 랭킹 갱신
@@ -1374,8 +1402,10 @@
 
         function mergeRank(remote, local) {
             const map = new Map();
+            // 이름별 최고점 1행만 유지 — 같은 사람이 점수별로 여러 줄 나오는 중복 방지
             [...(Array.isArray(remote) ? remote : []), ...local].forEach(r => {
-                const k = r.name + '_' + r.score; if (!map.has(k)) map.set(k, r);
+                const prev = map.get(r.name);
+                if (!prev || (r.score || 0) > (prev.score || 0)) map.set(r.name, r);
             });
             return [...map.values()].sort((a, b) => b.score - a.score).slice(0, 15);
         }
@@ -1515,9 +1545,12 @@
             p_date:    today
         };
         if (groupId) rpcParams.p_group_id = groupId;
-        await db.rpc('upsert_score', rpcParams);
-        // 성장 그래프용 — 매 판 점수 이력 누적(이중저장, 예외 안 던짐)
+        // 성장 그래프용 — 매 판 점수 이력 누적(이중저장, 예외 안 던짐; rpc 실패와 무관하게 로컬 기록 보존)
         if (window.Growth) Growth.record({ game: gameId, name: safeName, score: safeScore, grade: rpcParams.p_grade, combo: rpcParams.p_combo, correct: rpcParams.p_correct });
+        // supabase-js는 실패해도 reject하지 않고 {error}로 resolve — 직접 확인해 throw해야
+        // 호출부 catch(로컬 저장 폴백 안내)가 실제 실패를 사용자에게 알릴 수 있다
+        const { error: rpcError } = await db.rpc('upsert_score', rpcParams);
+        if (rpcError) throw rpcError;
     }
 
     async function supabaseFetchRanking(gameId) {
