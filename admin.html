@@ -272,6 +272,15 @@ body{
 }
 .student-table td:first-child{text-align:left;font-weight:700}
 .student-table tr:last-child td{border-bottom:none}
+/* 합격여부 뱃지 (클릭 토글) */
+.exam-badge{
+  font-family:'Orbitron',monospace;font-size:0.68rem;font-weight:700;cursor:pointer;
+  padding:5px 11px;border-radius:50px;white-space:nowrap;transition:transform .1s;
+  border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.55);
+}
+.exam-badge:active{transform:scale(0.94)}
+.exam-badge.ex-pass{background:linear-gradient(180deg,#2ecc71,#27ae60);color:#fff;border-color:#2ecc71;box-shadow:0 0 10px rgba(46,204,113,0.5)}
+.exam-badge.ex-no{}
 .student-table tr:hover td{background:rgba(255,255,255,0.02)}
 
 /* 게임 점수 셀 */
@@ -635,6 +644,7 @@ body{
                 <th>🏭 조립공장</th>
                 <th>🛩 플라이트</th>
                 <th>종합</th>
+                <th>합격</th>
               </tr></thead>
               <tbody id="student-table-body"></tbody>
             </table>
@@ -731,6 +741,7 @@ let allGroups   = [];
 let currentGid  = null;
 let currentGroup = null;
 let dashData    = null; // 현재 그룹 scores 배열
+let examMap     = {};   // name → { passed, status_text }  (전산회계 합격여부)
 
 /* ══════════════════════════════════════════
    초기화
@@ -962,12 +973,12 @@ async function loadDashboard() {
     '<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.2)"><div class="spinner" style="margin:0 auto"></div></div>';
 
   try {
-    const { data, error } = await db
-      .from('scores')
-      .select('*')
-      .eq('group_id', currentGid);
-    if (error) throw error;
-    dashData = data || [];
+    const [scoresRes] = await Promise.all([
+      db.from('scores').select('*').eq('group_id', currentGid),
+      loadExam(currentGid)   // 합격여부 병렬 로드
+    ]);
+    if (scoresRes.error) throw scoresRes.error;
+    dashData = scoresRes.data || [];
     renderDashboard(dashData);
   } catch(e) {
     console.error(e);
@@ -1073,7 +1084,7 @@ function renderDashboard(scores) {
   // ── 학생 상세 분석 테이블 ──
   const tbody = document.getElementById('student-table-body');
   if (!ranked.length) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:rgba(255,255,255,0.2)">아직 데이터가 없습니다</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;color:rgba(255,255,255,0.2)">아직 데이터가 없습니다</td></tr>';
   } else {
     tbody.innerHTML = ranked.map((r,i) => {
       const gameCells = GAMES.map(g => {
@@ -1107,6 +1118,9 @@ function renderDashboard(scores) {
         <td>
           <div class="total-score">${r.total.toLocaleString()}</div>
           <div class="student-level" style="color:${levelColor}">종합 ${level}</div>
+        </td>
+        <td onclick="event.stopPropagation()" style="text-align:center">
+          ${examBadge(r.name)}
         </td>
       </tr>`;
     }).join('');
@@ -1354,6 +1368,37 @@ function closeSidebar() {
 /* ══════════════════════════════════════════
    유틸
 ══════════════════════════════════════════ */
+/* ── 전산회계 합격여부 (student_exam) — 표시 + 교사 토글 ── */
+async function loadExam(gid){
+  examMap = {};
+  try {
+    const { data } = await db.from('student_exam').select('name,passed,status_text').eq('group_id', gid);
+    (data||[]).forEach(r => examMap[r.name] = { passed: !!r.passed, status_text: r.status_text });
+  } catch(e) { /* 테이블 없거나 오프라인 — 조용히 무시 */ }
+}
+function examBadge(name){
+  const e = examMap[name];
+  const passed = e && e.passed;
+  const label = passed ? '✅ 합격' : (e && e.status_text ? escHTML(e.status_text) : '미정');
+  const cls = passed ? 'ex-pass' : 'ex-no';
+  return `<button class="exam-badge ${cls}" title="클릭하면 합격/미합격 전환" onclick="toggleExam('${escAttr(name)}')">${label}</button>`;
+}
+async function toggleExam(name){
+  const prev = examMap[name] || { passed:false, status_text:null };
+  const passed = !prev.passed;
+  examMap[name] = { passed, status_text: passed ? '✅ 합격' : '❌ 불합격' };
+  renderDashboard(dashData);
+  try {
+    const { error } = await db.from('student_exam').upsert(
+      { group_id: currentGid, name, passed, status_text: examMap[name].status_text, updated_at: new Date().toISOString() },
+      { onConflict: 'group_id,name' });
+    if (error) throw error;
+  } catch(e){
+    examMap[name] = prev; renderDashboard(dashData);
+    alert('합격여부 저장 실패 — 인터넷 연결을 확인해 주세요.');
+  }
+}
+
 function escHTML(s){ return String(s||'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
 // onclick="fn('...')" 같은 HTML 속성 안 JS 문자열용:
 // JS 이스케이프(\, ') 후 HTML 엔티티 처리(&, <, >, ", ') — 큰따옴표로 인한 속성 브레이크아웃(XSS) 방지
