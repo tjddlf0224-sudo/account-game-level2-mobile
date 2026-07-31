@@ -510,6 +510,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="wrongnote.js"></script>
     <script src="growth.js"></script>
+    <script src="review-prompt.js"></script>
 </head>
 <body>
 
@@ -545,7 +546,7 @@
             <p style="margin-bottom:6px;">계정과목과 그 설명이 짝꿍입니다.<br>
                예: <b style="color:var(--blue)">접대비</b> ↔ <b style="color:var(--accent)">거래처 선물</b><br><br>
                <span style="font-size:0.92rem;color:rgba(255,255,255,0.6)">
-                 Stage 1→6 단계 클리어마다 점수 누적<br>Stage 6 이후 3×5판 무한 반복 도전!<br>최고 합산점수로 랭킹!
+                 Stage 1→4 단계 클리어마다 점수 누적<br>Stage 4 이후 2×5판 무한 반복 도전!<br>최고 합산점수로 랭킹!
                </span>
             </p>
 
@@ -821,14 +822,13 @@
             { pairs:3,  cols:2, rows:3,  baseScore:300 },
             { pairs:4,  cols:2, rows:4,  baseScore:400 },
             { pairs:5,  cols:2, rows:5,  baseScore:500 },
-            { pairs:6,  cols:3, rows:4,  baseScore:600 },
-            { pairs:7,  cols:3, rows:5,  baseScore:700 },
         ];
-        const MAX_STAGE = 6;
+        // 카드가 너무 많아지면 짝맞추기가 실력이 아니라 운이 되어버린다 — 최대 5쌍(10장)에서 고정.
+        const MAX_STAGE = 4;
 
         function currentStageConfig() {
             if (stage <= MAX_STAGE) return STAGES[stage];
-            return { pairs:7, cols:3, rows:5, baseScore:700 };
+            return { pairs:5, cols:2, rows:5, baseScore:500 };
         }
 
         const grid      = document.getElementById('grid');
@@ -964,16 +964,13 @@
         }
 
         // ── 직급 기준 단일 소스: getRank·미리보기·시작화면 기준표·팡파레 목표 공용 ──
+        // 다른 4개 게임과 같은 5단계로 통일 (표시만 — Supabase 저장 문자열은 getGradeForSupabase 가 별도 관리, 손대지 않음)
         const RANK_TIERS = [
-            { min:5000, title:'👑 CEO',       color:'#f1c40f', msg:'전설의 회계 CEO! 압도적인 실력!' },
-            { min:4000, title:'⭐ CEO급',     color:'#e67e22', msg:'CEO급 실력! 정말 훌륭합니다!' },
-            { min:3000, title:'🎖 전무/상무', color:'#3498db', msg:'임원급 실력! 대단합니다!' },
-            { min:2200, title:'🏅 이사',      color:'#2ecc71', msg:'이사급 실력! 잘했어요!' },
-            { min:1500, title:'📋 부장',      color:'#1abc9c', msg:'베테랑 부장! 좋습니다!' },
-            { min:900,  title:'🗂 차장',      color:'#9b59b6', msg:'믿음직한 차장! 조금만 더!' },
-            { min:500,  title:'📁 과장',      color:'#e74c3c', msg:'성장 중인 과장! 화이팅!' },
-            { min:250,  title:'📝 대리',      color:'#95a5a6', msg:'열심히 하는 대리! 다시 도전!' },
-            { min:0,    title:'💼 사원',      color:'#7f8c8d', msg:'이제 시작! 다시 도전해봐요!' },
+            { min:5000, title:'👑 CEO',   color:'#f1c40f', msg:'전설의 회계 CEO! 압도적인 실력!' },
+            { min:3000, title:'🥇 부장',  color:'#e67e22', msg:'베테랑 부장! 정말 훌륭합니다!' },
+            { min:1500, title:'🥈 과장',  color:'#3498db', msg:'믿음직한 과장! 잘했어요!' },
+            { min:500,  title:'🥉 대리',  color:'#2ecc71', msg:'성장하는 대리! 좋습니다!' },
+            { min:0,    title:'💼 사원',  color:'#7f8c8d', msg:'이제 시작! 다시 도전해봐요!' },
         ];
 
         // 시작화면 직급 기준표 렌더링 (RANK_TIERS 단일 소스)
@@ -1337,7 +1334,8 @@
             try {
                 // 개인 최고기록 갱신
             const _g2best = parseInt(localStorage.getItem('hub_memory_best')||'0');
-            if((data.score||0) > _g2best) localStorage.setItem('hub_memory_best', String(data.score||0));
+            if((data.score||0) > _g2best) { localStorage.setItem('hub_memory_best', String(data.score||0));
+              if (window.Review) Review.maybeAsk(); }   // 최고기록 갱신 = 만족스러운 순간
             await supabaseSaveScore(data.name, data.score, data.combo||0, data.correct||0, GAME_ID);
                 showStatus('✓ 등록 완료!', 'ok');
                 await new Promise(r => setTimeout(r, 800));
@@ -1571,7 +1569,7 @@
 
 <script>
     // ── 팡파레 시스템 ──
-    const FANFARE_TARGET_LABEL = 'CEO급';
+    const FANFARE_TARGET_LABEL = '부장';
     // 목표 점수는 RANK_TIERS(단일 소스)에서 해당 직급의 최소 점수로 산출 (= 4000)
     const FANFARE_TARGET_SCORE = (RANK_TIERS.find(t => t.title.includes(FANFARE_TARGET_LABEL)) || RANK_TIERS[0]).min;
 
@@ -1686,12 +1684,12 @@ const GUIDE_STEPS = [
   {
     img: 'guide/g2_4_stage.png',
     title: '🏆 스테이지 & 누적 점수',
-    desc: '점수는 <b>기본점수 − (오답×20) − (걸린초×0.5)</b>로 계산돼요. 스테이지가 클리어될 때마다 <b>점수가 누적</b>됩니다.<br><b>Stage 1→6</b>까지 점점 카드가 많아지고, Stage 6 이후엔 <b>3×5판 무한 반복</b>으로 점수를 더 쌓을 수 있어요!'
+    desc: '점수는 <b>기본점수 − (오답×20) − (걸린초×0.5)</b>로 계산돼요. 스테이지가 클리어될 때마다 <b>점수가 누적</b>됩니다.<br><b>Stage 1→4</b>까지 점점 카드가 많아지고, Stage 4 이후엔 <b>2×5판(10장) 무한 반복</b>으로 점수를 더 쌓을 수 있어요!'
   },
   {
     img: 'guide/g2_5_reward.png',
     title: '📝 직급 & 랭킹 등록',
-    desc: '누적 점수에 따라 <b>사원 → 대리 → 과장 → … → CEO</b> 직급이 올라가요. 게임을 마치면 <b>닉네임으로 점수를 등록</b>해 다른 친구들과 랭킹 대결을 할 수 있어요. 최고 점수에 도전해 보세요!'
+    desc: '누적 점수에 따라 <b>사원 → 대리 → 과장 → 부장 → CEO</b> 직급이 올라가요. 게임을 마치면 <b>닉네임으로 점수를 등록</b>해 다른 친구들과 랭킹 대결을 할 수 있어요. 최고 점수에 도전해 보세요!'
   }
 ];
 let guideIdx = 0;

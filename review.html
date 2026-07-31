@@ -35,7 +35,16 @@
        font-size:1.02rem;font-weight:700;color:#021;cursor:pointer;
        background:linear-gradient(90deg,var(--blue),var(--green));margin-top:6px;}
   .cta:disabled{opacity:.4;}
-  .grp-title{font-size:.8rem;color:var(--dim);margin:16px 2px 6px;}
+  .grp-title{font-size:.85rem;color:var(--txt);margin:10px 0 0;padding:12px 13px;
+             background:var(--card);border:1px solid var(--line);border-radius:12px;
+             display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
+  .grp-title .chev{color:var(--dim);transition:transform .18s;font-size:.85rem;}
+  .grp-title.open .chev{transform:rotate(90deg);}
+  .grp-title.open{border-radius:12px 12px 0 0;border-bottom:none;}
+  .grp-body{display:none;border:1px solid var(--line);border-top:none;
+            border-radius:0 0 12px 12px;padding:10px 10px 2px;margin-bottom:8px;}
+  .grp-body.open{display:block;}
+  .grp-body .item{margin-bottom:8px;}
   .item{background:var(--card2);border:1px solid var(--line);border-radius:12px;
         padding:12px 13px;margin-bottom:8px;}
   .item .q{font-size:.9rem;line-height:1.5;margin-bottom:7px;word-break:keep-all;overflow-wrap:break-word;}
@@ -108,6 +117,15 @@
 })();
 
 var ITEMS = [];
+var _openGroups = {};   // { gameKey: true } — 펼쳐진 게임 그룹(재렌더돼도 유지)
+
+function toggleGroup(g){
+  _openGroups[g] = !_openGroups[g];
+  var title = document.querySelector('.grp-title[onclick="toggleGroup(\''+g+'\')"]');
+  var body = document.getElementById('grp-'+g);
+  if (title) title.classList.toggle('open', _openGroups[g]);
+  if (body) body.classList.toggle('open', _openGroups[g]);
+}
 
 function esc(s){ return (s==null?'':String(s)).replace(/[&<>"']/g,function(c){
   return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
@@ -145,11 +163,16 @@ function render(){
     '<div class="panel"><h2>🎯 게임별 약점</h2>'+gameBars+'</div>'+
     (typeBars ? '<div class="panel"><h2>🔍 유형별 약점</h2>'+typeBars+'</div>' : '');
 
-  // 게임별 목록
+  // 게임별 목록 — 문제 많은(약한) 게임이 위로, 접기/펼치기
   var byGame = {};
   ITEMS.forEach(function(r){ (byGame[r.game]=byGame[r.game]||[]).push(r); });
-  Object.keys(byGame).forEach(function(g){
-    html += '<div class="grp-title">'+esc(gameName(g))+' · '+byGame[g].length+'문제</div>';
+  Object.keys(byGame).sort(function(a,b){ return byGame[b].length - byGame[a].length; }).forEach(function(g){
+    var isOpen = _openGroups[g];
+    html += '<div class="grp-title'+(isOpen?' open':'')+'" onclick="toggleGroup(\''+g+'\')">'+
+              '<span>'+esc(gameName(g))+' · '+byGame[g].length+'문제</span>'+
+              '<span class="chev">▸</span>'+
+            '</div>'+
+            '<div class="grp-body'+(isOpen?' open':'')+'" id="grp-'+g+'">';
     byGame[g].forEach(function(r){
       html +=
         '<div class="item">'+
@@ -161,6 +184,7 @@ function render(){
           '</div>'+
         '</div>';
     });
+    html += '</div>';
   });
 
   html += '<span class="clear-link" onclick="wipe()">오답노트 전체 비우기</span>';

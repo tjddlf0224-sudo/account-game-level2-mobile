@@ -518,59 +518,77 @@
             50%      { box-shadow: 0 0 28px rgba(255,214,0,0.8); }
         }
 
-        /* ── 사용방법 안내 오버레이 ── */
-        .guide-overlay {
-            display: none; position: fixed; inset: 0; z-index: 9999;
-            background: rgba(2,8,16,0.88); backdrop-filter: blur(6px);
-            align-items: center; justify-content: center; padding: 16px;
-        }
-        .guide-overlay.show { display: flex; }
-        .guide-card {
-            width: 100%; max-width: 380px; max-height: 92vh;
-            background: linear-gradient(180deg,#0d1830,#0a1120);
-            border: 1px solid rgba(0,242,255,0.25); border-radius: 20px;
-            box-shadow: 0 0 40px rgba(0,242,255,0.18);
-            display: flex; flex-direction: column; overflow: hidden;
-            animation: guidePop .25s ease;
-        }
-        @keyframes guidePop { from{transform:scale(.92);opacity:0} to{transform:scale(1);opacity:1} }
-        .guide-head {
-            display: flex; align-items: center; gap: 8px;
-            padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.08);
-        }
-        .guide-title { font-family:'Jua',sans-serif; font-size: 1.1rem; color:#00f2ff; flex: 1; }
-        .guide-count { font-size: .85rem; color:#8aa; font-weight:700; }
-        .guide-x {
-            background: rgba(255,255,255,0.08); border: none; color:#fff;
-            width: 30px; height: 30px; border-radius: 50%; font-size: .9rem; cursor: pointer;
-        }
-        .guide-body { padding: 16px; overflow-y: auto; text-align: center; }
-        .guide-img {
-            width: 100%; max-height: 44vh; object-fit: contain;
-            border-radius: 14px; border: 1px solid rgba(255,255,255,0.1);
-            background:#060c14; display:block; margin: 0 auto 14px;
-        }
-        .guide-step-title { font-family:'Jua',sans-serif; font-size: 1.15rem; color:#ffd700; margin-bottom: 8px; }
-        .guide-step-desc { font-size: .95rem; line-height: 1.65; color:#dfe7ef; word-break: keep-all; }
-        .guide-step-desc b { color:#00f2ff; }
-        .guide-dots { display:flex; gap:7px; justify-content:center; padding: 4px 0 2px; }
-        .guide-dots .dot { width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,0.22); transition:.2s; }
-        .guide-dots .dot.on { background:#00f2ff; width:20px; border-radius:5px; }
-        .guide-nav { display:flex; gap:10px; padding: 12px 16px 16px; }
-        .guide-btn {
-            flex:1; padding: 13px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.15);
-            background: rgba(255,255,255,0.06); color:#fff; font-size: 1rem; font-weight:700; cursor:pointer;
-        }
-        .guide-btn:disabled { opacity:.35; }
-        .guide-btn-next {
-            background: linear-gradient(135deg,#00f2ff,#0084ff); border:none; color:#021018;
-        }
+        /* ── 인터랙티브 튜토리얼 (사용방법) ── */
+        .tut { display:none; position:fixed; inset:0; z-index:9999; flex-direction:column;
+            background: rgba(2,8,16,0.92); backdrop-filter: blur(6px); }
+        .tut.show { display:flex; animation: tutPop .25s ease; }
+        @keyframes tutPop { from{opacity:0} to{opacity:1} }
+        .tut-top { display:flex; align-items:center; gap:9px; padding:calc(12px + env(safe-area-inset-top)) 18px 10px; }
+        .tut-top .tt-title { font-family:'Jua',sans-serif; font-size:1.05rem; color: var(--neon-blue); }
+        .tut-top .tt-badge { font-size:.8rem; font-weight:800; color:#021018; background: var(--neon-gold); border-radius:50px; padding:3px 12px; }
+        .tut-top .tt-skip { margin-left:auto; background:rgba(255,255,255,0.08); border:none; color:#ccc;
+            font-family:'Noto Sans KR',sans-serif; font-weight:800; font-size:.82rem; padding:8px 14px; border-radius:50px; cursor:pointer; }
+        .tut-stage { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:10px 20px 4px; }
+        .tut-status { display:flex; align-items:center; gap:9px;
+            font-family:'Jua',sans-serif; font-size:1.05rem; color:#fff; background: var(--panel);
+            border:2px solid var(--border); border-radius:50px; padding:8px 22px;
+            box-shadow: 0 0 12px rgba(0,242,255,0.15); transition:.3s; }
+        .tut-status b { display:inline-block; min-width:1.7em; text-align:center; color: var(--neon-green); }
+        .tut-status .tt-bar { color:#8aa; }
+        .tut-status.tut-glow { box-shadow:0 0 0 4px var(--neon-gold), 0 0 12px rgba(0,242,255,0.15); }
+        .tut-status.tut-hurt { animation:shake .4s; }
+        .tut-status.tut-hurt b { color: var(--neon-red); }
+
+        /* 떨어지는 낱말을 흉내낸 미니 하늘 */
+        .tut-sky { position:relative; width:100%; max-width:330px; height:236px;
+            border-radius:18px; border:2px solid var(--border); overflow:hidden;
+            background: linear-gradient(180deg, #0a0a14, #16213e);
+            box-shadow: 0 0 20px rgba(0,242,255,0.12); transition:box-shadow .3s;
+            display:flex; flex-direction:column; justify-content:space-around; padding:16px 14px; }
+        .tut-sky.tut-danger { box-shadow: inset 0 0 46px rgba(255,0,85,0.35), 0 0 20px rgba(0,242,255,0.12); }
+        @media (max-width:360px){ .tut-sky{ height:206px; } }
+        .tut-word { align-self:flex-start; pointer-events:none;
+            padding:11px 16px; border-radius:14px; font-family:'Jua',sans-serif; font-size:1.1rem;
+            color:#fff; background: var(--panel); border:2px solid var(--border);
+            box-shadow: 0 0 10px rgba(0,242,255,0.1);
+            white-space:nowrap; transition:opacity .3s, filter .3s;
+            animation:tutFloat 2.4s ease-in-out infinite; }
+        .tut-word.a-mid { align-self:center; }
+        .tut-word.a-end { align-self:flex-end; }
+        .tut-word.tut-live { pointer-events:auto; cursor:pointer; }
+        .tut-word.tut-dim { opacity:.4; filter:saturate(.55); }
+        .tut-word.tut-target { box-shadow:0 0 0 4px var(--neon-gold), 0 0 18px rgba(255,214,0,0.5);
+            animation:tutPulse 1.05s ease-in-out infinite; }
+        .tut-word.tut-warn { box-shadow:0 0 0 4px var(--neon-red), 0 0 18px rgba(255,0,85,0.45);
+            animation:tutPulse 1.05s ease-in-out infinite; }
+        .tut-word.tut-ok { background: var(--neon-green); color:#021018;
+            box-shadow: 0 0 12px rgba(46,204,113,0.5); animation:none; }
+        .tut-word.tut-bad { background: var(--neon-red); color:#fff;
+            box-shadow: 0 0 12px rgba(255,0,85,0.5); animation:shake .4s; }
+        @keyframes tutFloat { 0%,100%{ transform:translateY(-3px) } 50%{ transform:translateY(3px) } }
+        @keyframes tutPulse { 0%,100%{ transform:scale(1) } 50%{ transform:scale(1.055) } }
+        .tut-float { position:absolute; font-family:'Jua',sans-serif; font-size:1.05rem; font-weight:bold;
+            pointer-events:none; z-index:5; animation:floatUp .8s forwards;
+            color:#fff; text-shadow: 0 0 6px rgba(0,0,0,0.8); }
+        .tut-bubble { background: linear-gradient(180deg, #16213e, #0a0a14); border-top:2px solid var(--border);
+            border-radius:20px 20px 0 0; box-shadow: 0 -4px 18px rgba(0,242,255,0.1);
+            padding:20px 22px calc(18px + env(safe-area-inset-bottom)); }
+        .tut-bubble-text { font-size:1rem; line-height:1.6; color:#dfe7ef; word-break:keep-all; text-align:center;
+            min-height:3.2em; display:block; }
+        .tut-bubble-text b { color: var(--neon-blue); }
+        .tut-hint { text-align:center; font-family:'Jua',sans-serif; color: var(--neon-gold); font-size:1rem; margin-top:10px;
+            animation:tutBlink 1s ease-in-out infinite; }
+        @keyframes tutBlink { 0%,100%{ opacity:1 } 50%{ opacity:.4 } }
+        .tut-next { display:block; width:100%; margin-top:14px; padding:15px; border-radius:14px; border:2px solid var(--neon-blue);
+            color:#021018; background: linear-gradient(135deg, var(--neon-blue), #0084ff); box-shadow: 0 0 16px rgba(0,242,255,0.4);
+            font-family:'Jua',sans-serif; font-size:1.15rem; cursor:pointer; }
 </style>
 
 <button id="rewarded-btn" onclick="requestRewarded()">⏱ +15초 광고 보기</button>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="wrongnote.js"></script>
     <script src="growth.js"></script>
+    <script src="review-prompt.js"></script>
 </head>
 <body>
 
@@ -632,24 +650,25 @@
     </div>
 </div>
 
-<!-- ── 사용방법 안내 오버레이 ── -->
-<div id="guide-overlay" class="guide-overlay" onclick="if(event.target===this)closeGuide()">
-  <div class="guide-card">
-    <div class="guide-head">
-      <span class="guide-title">📖 게임 방법</span>
-      <span class="guide-count"><span id="guide-cur">1</span>/<span id="guide-total">5</span></span>
-      <button class="guide-x" onclick="closeGuide()">✕</button>
+<!-- ── 인터랙티브 튜토리얼 (사용방법) ── -->
+<div id="tutorial" class="tut">
+  <div class="tut-top">
+    <span class="tt-title">📖 게임 방법</span>
+    <span class="tt-badge" id="tut-badge">1/6</span>
+    <button class="tt-skip" onclick="Tutorial.close()">건너뛰기</button>
+  </div>
+  <div class="tut-stage">
+    <div class="tut-status" id="tut-status">
+      <span>⏰ <b id="tut-time">30</b></span>
+      <span class="tt-bar">|</span>
+      <span>💎 <b id="tut-score">0</b></span>
     </div>
-    <div class="guide-body" id="guide-body">
-      <img id="guide-img" class="guide-img" alt="게임 화면">
-      <div class="guide-step-title" id="guide-step-title"></div>
-      <div class="guide-step-desc" id="guide-step-desc"></div>
-    </div>
-    <div class="guide-dots" id="guide-dots"></div>
-    <div class="guide-nav">
-      <button class="guide-btn" id="guide-prev" onclick="guideGo(-1)">◀ 이전</button>
-      <button class="guide-btn guide-btn-next" id="guide-next" onclick="guideNext()">다음 ▶</button>
-    </div>
+    <div class="tut-sky" id="tut-sky"></div>
+  </div>
+  <div class="tut-bubble">
+    <div class="tut-bubble-text" id="tut-text"></div>
+    <div class="tut-hint" id="tut-hint" style="display:none"></div>
+    <button class="tut-next" id="tut-next" onclick="Tutorial.next()">다음 ▶</button>
   </div>
 </div>
 
@@ -1288,6 +1307,7 @@
             const prevBest = parseInt(localStorage.getItem('hub_acid_best') || '0');
             if (score > prevBest) {
                 localStorage.setItem('hub_acid_best', String(score));
+                if (window.Review) Review.maybeAsk();   // 최고기록 갱신 = 만족스러운 순간
                 showSaveStatus('✓ 등록 완료! 🎉 최고기록 갱신!', 'ok');
             } else {
                 showSaveStatus('✓ 등록 완료!', 'ok');
@@ -1646,93 +1666,132 @@
 </div>
 
 <script>
-/* ── 사용방법 안내 ── */
-const GUIDE_STEPS = [
-  {
-    img: 'guide/g1_1_goal.png',
-    title: '🎯 떨어지는 [계정과목]을 탭!',
-    desc: '<b>현금·외상매출금·보통예금</b>처럼 진짜 계정과목 단어가 위에서 내려와요. 손가락으로 탭하면 정답! <br>단, <b>회식비·월급·교통비</b>처럼 계정과목이 <u>아닌</u> 함정 단어는 누르면 시간이 깎여요. 단어를 놓쳐도 시간이 줄어듭니다.'
-  },
-  {
-    img: 'guide/g1_2_combo.png',
-    title: '🔥 연속 정답 = 콤보!',
-    desc: '정답을 연달아 맞히면 <b>콤보</b>가 쌓이고 점수가 점점 커져요. 맞힐 때마다 <b>시간도 +1초</b> 늘어나니, 쉬지 말고 빠르게 탭하세요.'
-  },
-  {
-    img: 'guide/g1_3_fever.png',
-    title: '⚡ 3콤보 → FEVER 모드',
-    desc: '3콤보를 달성하면 화면이 보라색으로 바뀌며 <b>FEVER 모드</b>! 이때는 <b>점수가 2배</b>로 들어와요. 콤보가 끊기지 않게 집중!'
-  },
-  {
-    img: 'guide/g1_4_item.png',
-    title: '🎁 특수 아이템',
-    desc: '<b>💣 폭탄</b> — 화면의 단어를 한 번에 정리하고 보너스 점수!<br><b>❄️ 얼음</b> — 5초간 단어가 멈춰 여유가 생겨요.<br><b>💊 회복</b> — 시간을 10초 늘려줍니다.'
-  },
-  {
-    img: 'guide/g1_5_reward.png',
-    title: '⏱ 시간 관리 & 점수 등록',
-    desc: '시간이 부족하면 <b>+15초 광고 보기</b> 버튼으로 시간을 더 받을 수 있어요. 게임이 끝나면 <b>닉네임으로 점수를 등록</b>해 랭킹에 도전하세요!'
-  }
-];
-let guideIdx = 0;
+/* ── 인터랙티브 튜토리얼 (사용방법) ── */
+const Tutorial = (function () {
+  // 고정 낱말 3개 + 고정 슬롯. '이 낱말을 탭' 지정이 항상 일관되게 한다.
+  const WORDS = [
+    { slot:0, kind:'account', text:'현금',       align:''      },
+    { slot:1, kind:'fake',    text:'회식비',     align:'a-end' },
+    { slot:2, kind:'account', text:'외상매출금', align:'a-mid' }
+  ];
+  const STEPS = [
+    { text:'하늘에서 낱말이 떨어지는 게임이에요.<br>그중 <b>진짜 계정과목</b>만 골라 탭하면 됩니다.',
+      show:[0], btn:'시작 ▶' },
+    { text:'빛나는 <b>현금</b>을 탭해 보세요.',
+      show:[0], tapSlot:0, hint:'빛나는 낱말을 탭!' },
+    { text:'정답이에요. <b>현금</b>은 계정과목이 맞아요.<br>맞힐 때마다 점수가 오르고 <b>시간도 1초</b> 늘어납니다.',
+      show:[0], btn:'다음 ▶', glow:true },
+    { text:'하지만 <b>회식비</b>는 계정과목이 아니에요.<br>이런 <b>함정 낱말</b>을 누르면 시간이 <b>3초</b> 깎입니다. 계정과목을 그냥 놓쳐도 3초가 깎여요.',
+      show:[1], warnSlot:1, btn:'다음 ▶', danger:true },
+    { text:'이번엔 직접 골라 보세요.<br>둘 중 <b>계정과목</b>만 탭하면 됩니다.',
+      show:[1,2], tapSlot:2, trapSlot:1, hint:'계정과목만 탭!' },
+    { text:'좋아요. 연달아 맞히면 <b>콤보</b>가 쌓이고, <b>3콤보</b>부터는 FEVER 모드로 점수가 2배가 됩니다.<br>💣폭탄 ❄️얼음 💊회복 아이템도 가끔 떨어져요.',
+      show:[0,1,2], btn:'게임 시작 ▶', finish:true }
+  ];
+  let step = 0, tScore = 0, tTime = 30, trapHit = false;
 
-function openGuide() {
-  guideIdx = 0;
-  document.getElementById('guide-total').textContent = GUIDE_STEPS.length;
-  buildGuideDots();
-  renderGuide();
-  document.getElementById('guide-overlay').classList.add('show');
-}
-function closeGuide() {
-  document.getElementById('guide-overlay').classList.remove('show');
-}
-function buildGuideDots() {
-  const wrap = document.getElementById('guide-dots');
-  wrap.innerHTML = '';
-  GUIDE_STEPS.forEach((_, i) => {
-    const d = document.createElement('div');
-    d.className = 'dot' + (i === 0 ? ' on' : '');
-    wrap.appendChild(d);
-  });
-}
-function renderGuide() {
-  const s = GUIDE_STEPS[guideIdx];
-  document.getElementById('guide-img').src = s.img;
-  document.getElementById('guide-step-title').innerHTML = s.title;
-  document.getElementById('guide-step-desc').innerHTML = s.desc;
-  document.getElementById('guide-cur').textContent = guideIdx + 1;
-  document.getElementById('guide-body').scrollTop = 0;
-  document.querySelectorAll('#guide-dots .dot').forEach((d, i) => d.classList.toggle('on', i === guideIdx));
-  document.getElementById('guide-prev').disabled = (guideIdx === 0);
-  const next = document.getElementById('guide-next');
-  next.textContent = (guideIdx === GUIDE_STEPS.length - 1) ? '게임 시작 ▶' : '다음 ▶';
-}
-function guideGo(delta) {
-  const n = guideIdx + delta;
-  if (n < 0 || n >= GUIDE_STEPS.length) return;
-  guideIdx = n;
-  renderGuide();
-}
-function guideNext() {
-  if (guideIdx === GUIDE_STEPS.length - 1) {
-    closeGuide();
-    if (window.startGame) startGame();
-  } else {
-    guideGo(1);
+  function el(id){ return document.getElementById(id); }
+  function wordAt(slot){ return el('tut-sky').querySelector('.tut-word[data-slot="' + slot + '"]'); }
+  function beep(type){ try { if (window.playSound) playSound(type); } catch (e) {} }
+
+  function buildSky() {
+    const sky = el('tut-sky');
+    sky.innerHTML = '';
+    tScore = 0; tTime = 30; trapHit = false;
+    el('tut-score').textContent = '0';
+    el('tut-time').textContent = '30';
+    el('tut-status').classList.remove('tut-glow', 'tut-hurt');
+    WORDS.forEach(function (w) {
+      const node = document.createElement('div');
+      node.className = 'tut-word' + (w.align ? ' ' + w.align : '');
+      node.dataset.slot = w.slot;
+      node.textContent = w.text;
+      // click 은 이 프로젝트에서 안 먹은 전례가 있어 pointerdown 으로 받는다
+      node.addEventListener('pointerdown', function (e) { e.preventDefault(); onTap(w.slot, node); });
+      sky.appendChild(node);
+    });
   }
-}
-// 스와이프(모바일) 지원
-(function() {
-  let x0 = null;
-  const ov = document.getElementById('guide-overlay');
-  ov.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
-  ov.addEventListener('touchend', e => {
-    if (x0 === null) return;
-    const dx = e.changedTouches[0].clientX - x0;
-    if (Math.abs(dx) > 45) guideGo(dx < 0 ? 1 : -1);
-    x0 = null;
-  }, { passive: true });
+
+  function floatText(node, msg, color) {
+    const f = document.createElement('div');
+    f.className = 'tut-float';
+    f.textContent = msg;
+    f.style.color = color;
+    f.style.left = Math.max(10, node.offsetLeft) + 'px';
+    f.style.top  = Math.max(8, node.offsetTop - 26) + 'px';
+    el('tut-sky').appendChild(f);
+    setTimeout(function () { f.remove(); }, 800);
+  }
+
+  function onTap(slot, node) {
+    const s = STEPS[step];
+    if (!s) return;
+
+    if (s.tapSlot === slot) {                       // 지정한 계정과목만 정답 처리
+      if (node.classList.contains('tut-ok')) return;
+      beep('correct');
+      node.classList.remove('tut-target', 'tut-live');
+      node.classList.add('tut-ok');
+      tScore += 100; tTime += 1;
+      el('tut-score').textContent = String(tScore);
+      el('tut-time').textContent = String(tTime);
+      floatText(node, '+100 (+1초)', '#ffd700');
+      if (navigator.vibrate) navigator.vibrate(15);
+      setTimeout(function () { go(step + 1); }, 620);
+      return;
+    }
+
+    if (s.trapSlot === slot) {                      // 함정은 눌러 보게 두되 왜 안 되는지 바로 알려준다
+      beep('wrong');
+      node.classList.add('tut-bad');
+      floatText(node, '-3초', '#ff0055');
+      if (!trapHit) {
+        trapHit = true;
+        tTime = Math.max(0, tTime - 3);
+        el('tut-time').textContent = String(tTime);
+      }
+      const st = el('tut-status');
+      st.classList.add('tut-hurt');
+      setTimeout(function () { st.classList.remove('tut-hurt'); }, 420);
+      setTimeout(function () { node.classList.remove('tut-bad'); }, 480);
+      el('tut-hint').textContent = '👆 회식비는 함정! 계정과목을 탭하세요';
+      if (navigator.vibrate) navigator.vibrate([30, 40, 30]);
+    }
+  }
+
+  function render() {
+    const s = STEPS[step];
+    el('tut-badge').textContent = (step + 1) + '/' + STEPS.length;
+    el('tut-text').innerHTML = s.text;
+    WORDS.forEach(function (w) {
+      const node = wordAt(w.slot);
+      node.classList.remove('tut-target', 'tut-live', 'tut-dim', 'tut-warn', 'tut-bad');
+      node.style.display = (s.show.indexOf(w.slot) >= 0) ? '' : 'none';
+    });
+    if (s.tapSlot != null)  wordAt(s.tapSlot).classList.add('tut-target', 'tut-live');
+    if (s.trapSlot != null) wordAt(s.trapSlot).classList.add('tut-live');
+    if (s.warnSlot != null) wordAt(s.warnSlot).classList.add('tut-warn');
+    el('tut-sky').classList.toggle('tut-danger', !!s.danger);
+    el('tut-status').classList.toggle('tut-glow', !!s.glow);
+    const hint = el('tut-hint');
+    if (s.hint) { hint.style.display = 'block'; hint.textContent = '👆 ' + s.hint; }
+    else { hint.style.display = 'none'; }
+    const btn = el('tut-next');
+    if (s.btn) { btn.style.display = 'block'; btn.textContent = s.btn; }
+    else { btn.style.display = 'none'; }
+  }
+
+  function go(n) { step = n; if (step >= STEPS.length) return finish(); render(); }
+  function nextBtn() { if (STEPS[step].finish) return finish(); go(step + 1); }
+  function start() { step = 0; buildSky(); render(); el('tutorial').classList.add('show'); }
+  function close() { el('tutorial').classList.remove('show'); }
+  function finish() { close(); if (window.startGame) startGame(); }
+
+  return { start:start, close:close, next:nextBtn };
 })();
+
+// 시작화면 '📖 사용방법' 버튼 → 인터랙티브 튜토리얼
+function openGuide() { Tutorial.start(); }
 </script>
 
 </html>
