@@ -711,13 +711,13 @@ const Game={
       // ▼ 문제를 읽을 수 있도록 화면 중앙 부근에서 한 번만 잠깐 정지
       //   (배경 별·코인은 계속 흐르므로 속도감은 그대로 유지)
       if(g.pauseDone){
-        g.y+=this.speed*.82;
+        g.y+=this.speed*1.15;   // 정지 전후 낙하 속도를 더 빠르게(기존 .82 → 1.15). 정지(pauseT) 로직은 그대로 유지.
       } else if(g.pauseT>0){
         if(--g.pauseT===0)g.pauseDone=true;   // 정지 중에는 멈춰 있음
       } else if(g.y>=this.h*0.40){
         g.pauseT=80;                            // 약 1.3초 정지 (숫자를 키우면 더 오래 멈춤)
       } else {
-        g.y+=this.speed*.82;
+        g.y+=this.speed*1.15;   // 정지 전후 낙하 속도를 더 빠르게(기존 .82 → 1.15). 정지(pauseT) 로직은 그대로 유지.
       }
       if(g.domEl)g.domEl.style.top=(g.y-140)+'px';
       // 화면 아래로 완전히 지나간 게이트는 배열/DOM에서 제거 — 긴 판 프레임 드랍 방지
