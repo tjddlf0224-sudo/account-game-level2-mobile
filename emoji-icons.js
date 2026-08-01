@@ -12,10 +12,14 @@
 (function (global) {
   'use strict';
 
+  // 2026-08 업데이트: 글로우 없는 순수 라인 스타일로 확정.
+  // 대부분은 currentColor로 주변 텍스트 색을 그대로 물려받고(문맥에 자동으로 맞음),
+  // 등수를 뜻하는 메달(금·은·동)과 상태 점(초록·노랑·빨강)만 의미 전달을 위해 고정 색을 유지한다.
   function svg(color, glow, inner) {
-    return '<svg viewBox="0 0 24 24" fill="none" stroke="' + color + '" stroke-width="1.6" ' +
+    var body = inner.split(color).join('currentColor');
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" ' +
       'stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;display:inline-block;' +
-      'vertical-align:-0.15em;overflow:visible;filter:drop-shadow(0 0 3px ' + glow + ')">' + inner + '</svg>';
+      'vertical-align:-0.15em;overflow:visible">' + body + '</svg>';
   }
 
   // ── 재사용 베이스 도형 ──
@@ -23,12 +27,17 @@
     '<path d="M12 12.2l1 2.3h2.4l-1.9 1.5.7 2.4-2.2-1.4-2.2 1.4.7-2.4-1.9-1.5h2.4z"/>';
   var POINT = '<path d="M13 3.3a1.4 1.4 0 0 0-2.8 0v6.8L8.4 8.6a1.5 1.5 0 0 0-2.2 2l3.8 5.8A4 4 0 0 0 13.4 18h1.6a4 4 0 0 0 4-4V8.2a1.4 1.4 0 0 0-2.8 0V7a1.4 1.4 0 0 0-2.8 0V6a1.4 1.4 0 0 0-1.4-1.3z"/>';
 
-  function medal(color, glow) { return svg(color, glow, MEDAL); }
+  function medal(color) {
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="' + color + '" stroke-width="1.6" ' +
+      'stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;display:inline-block;' +
+      'vertical-align:-0.15em;overflow:visible">' + MEDAL + '</svg>';
+  }
   function point(color, glow, deg) {
     return svg(color, glow, '<g transform="rotate(' + deg + ' 12 12)">' + POINT + '</g>');
   }
-  function dot(color, glow) {
-    return svg(color, glow, '<circle cx="12" cy="12" r="7.5" fill="' + color + '" stroke="none"/>');
+  function dot(color) {
+    return '<svg viewBox="0 0 24 24" style="width:1em;height:1em;display:inline-block;vertical-align:-0.15em;overflow:visible">' +
+      '<circle cx="12" cy="12" r="7.5" fill="' + color + '" stroke="none"/></svg>';
   }
 
   // ── 색상 팔레트 (기존 카드/버튼 네온 톤과 통일) ──
