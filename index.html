@@ -726,17 +726,17 @@ body {
 
   <div class="stagemap">
     <svg class="trail" viewBox="0 0 400 1000" preserveAspectRatio="none" aria-hidden="true">
-      <path class="trail-dim" d="M280,890 C280,780 120,800 120,690 C120,580 280,600 280,490 C280,380 120,400 120,290 C120,180 280,200 280,90"/>
-      <path class="trail-lit" id="trail-lit" d="M280,890 C280,780 120,800 120,690 C120,580 280,600 280,490 C280,380 120,400 120,290 C120,180 280,200 280,90"/>
+      <path class="trail-dim" d="M280,90 C280,200 120,180 120,290 C120,400 280,380 280,490 C280,600 120,580 120,690 C120,800 280,780 280,890"/>
+      <path class="trail-lit" id="trail-lit" d="M280,90 C280,200 120,180 120,290 C120,400 280,380 280,490 C280,600 120,580 120,690 C120,800 280,780 280,890"/>
     </svg>
     <div class="nodes">
-      <a class="stage-node card-1" id="node-acid" href="game1_acid.html" style="left:70%;top:89%"
+      <a class="stage-node card-1" id="node-acid" href="game1_acid.html" style="left:70%;top:9%"
          onclick="return onNodeClick(event,'acid')">
         <div class="disc">☁️<span class="badge lock-badge" title="잠김"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><span class="badge clear-badge" title="클리어" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"/></svg></span></div>
         <div class="n-title">계정과목 산성비</div>
         <div class="n-sub"></div>
       </a>
-      <a class="stage-node card-2" id="node-memory" href="game2_memory.html" style="left:30%;top:69%"
+      <a class="stage-node card-2" id="node-memory" href="game2_memory.html" style="left:30%;top:29%"
          onclick="return onNodeClick(event,'memory')">
         <div class="disc">🧩<span class="badge lock-badge" title="잠김"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><span class="badge clear-badge" title="클리어" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"/></svg></span></div>
         <div class="n-title">기억의 전당</div>
@@ -748,13 +748,13 @@ body {
         <div class="n-title">회계 차변대변</div>
         <div class="n-sub"></div>
       </a>
-      <a class="stage-node card-4" id="node-factory" href="game4_factory.html" style="left:30%;top:29%"
+      <a class="stage-node card-4" id="node-factory" href="game4_factory.html" style="left:30%;top:69%"
          onclick="return onNodeClick(event,'factory')">
         <div class="disc">🏭<span class="badge lock-badge" title="잠김"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><span class="badge clear-badge" title="클리어" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"/></svg></span></div>
         <div class="n-title">결산분개 조립공장</div>
         <div class="n-sub"></div>
       </a>
-      <a class="stage-node card-5" id="node-flight" href="game5_flight.html" style="left:70%;top:9%"
+      <a class="stage-node card-5" id="node-flight" href="game5_flight.html" style="left:70%;top:89%"
          onclick="return onNodeClick(event,'flight')">
         <div class="disc">🛩<span class="badge lock-badge" title="잠김"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><span class="badge clear-badge" title="클리어" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"/></svg></span></div>
         <div class="n-title">플라이트 장부조회</div>
@@ -998,6 +998,10 @@ function renderStageMap() {
         const best = parseInt(localStorage.getItem(g.best) || '0');
         const cleared = best > 0;
         const adUnlocked = localStorage.getItem('hub_adunlock_' + g.id) === '1';
+        // reachedByChain: 광고로 순서를 건너뛰지 않고 자연스럽게 여기까지 이어져 왔는지.
+        // 이게 false인데 adUnlocked 로만 열린 경우, 그 노드는 플레이 가능해도
+        // 경로(trail)는 끊긴 구간까지만 밝혀야 한다 — 안 그러면 건너뛴 잠긴 구간까지 노란색이 새버린다.
+        const reachedByChain = chainOpen;
         const open = chainOpen || adUnlocked;
         const el = document.getElementById('node-' + g.id);
         if (!el) return;
@@ -1015,13 +1019,13 @@ function renderStageMap() {
             lockBadge.style.display = 'none';
             clearBadge.style.display = 'flex';
             sub.textContent = '내 최고 ' + best.toLocaleString() + '점';
-            litIndex = i;
+            if (reachedByChain) litIndex = i;
         } else {
             el.classList.add('cur');
             lockBadge.style.display = 'none';
             clearBadge.style.display = 'none';
             sub.textContent = '도전!';
-            litIndex = i;
+            if (reachedByChain) litIndex = i;
         }
         chainOpen = open && cleared;
     });
@@ -1035,15 +1039,28 @@ function renderStageMap() {
 }
 renderStageMap();
 
-// ── 잠긴 노드 클릭 → 이동 대신 광고 시청으로 즉시 해제 ──
+// ── 잠긴 노드 클릭 → 이동 대신 광고 시청으로 즉시 해제 (카파시터의 "확인 후 광고" 동일 규칙) ──
+// Android WebView는 confirm()이 무동작(항상 false)이라 대화상자 대신
+// 이 코드베이스 전반(그룹 나가기·오답노트 비우기 등)과 동일한 2-스텝 탭 확인을 쓴다:
+// 한 번 탭하면 안내만 뜨고, 그 상태에서 한 번 더 탭해야 실제로 광고가 뜬다.
 function onNodeClick(e, gid) {
     const el = document.getElementById('node-' + gid);
-    if (el && el.classList.contains('lock')) {
-        e.preventDefault();
+    if (!el || !el.classList.contains('lock')) return true;
+    e.preventDefault();
+    if (el.dataset.armed === '1') {
+        el.dataset.armed = '';
+        if (el._armTimer) clearTimeout(el._armTimer);
+        el.querySelector('.n-sub').textContent = '';
         unlockStage(gid);
-        return false;
+    } else {
+        el.dataset.armed = '1';
+        el.querySelector('.n-sub').textContent = '한 번 더 탭하면 광고 보고 열기';
+        el._armTimer = setTimeout(() => {
+            el.dataset.armed = '';
+            el.querySelector('.n-sub').textContent = '';
+        }, 2800);
     }
-    return true;
+    return false;
 }
 window._unlockTarget = null;
 function unlockStage(gid) {
