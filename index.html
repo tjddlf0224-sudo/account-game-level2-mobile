@@ -243,6 +243,54 @@ body {
   color:#000;
 }
 
+/* ── 스테이지 노드맵 (징검다리 진행경로) ── */
+.stagemap { position:relative; max-width:360px; margin:0 auto 60px; aspect-ratio:400/1000; }
+.stagemap svg.trail { position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
+.trail-dim { fill:none; stroke:rgba(255,255,255,0.12); stroke-width:5; stroke-linecap:round; }
+.trail-lit { fill:none; stroke:var(--gd); stroke-width:5; stroke-linecap:round;
+  filter:drop-shadow(0 0 5px var(--gd)); transition:stroke-dashoffset 1.4s ease .2s; }
+.stagemap .nodes { position:absolute; inset:0; }
+.stage-node {
+  position:absolute; transform:translate(-50%,-50%);
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  text-decoration:none; width:112px;
+}
+.stage-node .disc {
+  position:relative;
+  width:64px; height:64px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.9rem; color:var(--card-color, var(--cy));
+  background:rgba(255,255,255,0.04);
+  border:2px solid var(--card-color, var(--cy));
+  box-shadow:0 0 16px var(--card-glow, rgba(0,242,255,0.35));
+  transition:transform 0.18s;
+}
+.stage-node:active .disc { transform:scale(0.93); }
+.stage-node.cur .disc { animation:nodePulse 1.6s ease-in-out infinite; }
+@keyframes nodePulse {
+  0%,100% { box-shadow:0 0 16px var(--card-glow, rgba(0,242,255,0.35)); }
+  50%     { box-shadow:0 0 32px var(--card-glow, rgba(0,242,255,0.35)); }
+}
+.stage-node.lock .disc {
+  color:rgba(255,255,255,0.3);
+  border-color:rgba(255,255,255,0.15);
+  background:rgba(255,255,255,0.02);
+  box-shadow:none;
+}
+.stage-node.lock .disc .ei { opacity:0.35; }
+.badge {
+  position:absolute; width:24px; height:24px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:#0b0e16; border:1.5px solid rgba(255,255,255,0.18);
+}
+.badge svg { width:13px; height:13px; }
+.stage-node .lock-badge { right:-3px; bottom:-3px; color:rgba(255,255,255,0.6); }
+.stage-node .clear-badge { right:-3px; top:-3px; color:#04240f; background:var(--gn); border-color:var(--gn); box-shadow:0 0 8px var(--gn); }
+.stage-node .n-title { font-family:'Black Han Sans', sans-serif; font-size:0.8rem; color:#fff; text-align:center; line-height:1.25; }
+.stage-node.lock .n-title { color:rgba(255,255,255,0.35); }
+.stage-node .n-sub { font-size:0.64rem; color:var(--card-color, var(--cy)); text-align:center; white-space:nowrap; min-height:1.1em; }
+.stage-node.lock .n-sub { color:rgba(255,255,255,0.3); }
+
 /* ── 푸터 ── */
 .hub-footer {
   text-align:center;
@@ -676,79 +724,43 @@ body {
     <div class="re-go">▶</div>
   </a>
 
-  <div class="games-grid">
-
-    <a class="game-card card-1" href="game1_acid.html">
-      <!-- 모바일 가로 레이아웃용 래퍼 -->
-      <div class="card-left">
-        <div class="card-stage">STAGE 01</div>
-        <div class="card-icon">☁️</div>
-      </div>
-      <div class="card-body">
-        <div class="card-title">계정과목 산성비</div>
-        <div class="card-desc">떨어지는 단어 중 계정과목만 클릭!</div>
-        <div class="card-count">목표 : 🥇 베테랑</div>
-        <div class="card-best" id="best-acid"></div>
-      </div>
-      <div class="card-play">▶ 시작</div>
-    </a>
-
-    <a class="game-card card-2" href="game2_memory.html">
-      <div class="card-left">
-        <div class="card-stage">STAGE 02</div>
-        <div class="card-icon">🧩</div>
-      </div>
-      <div class="card-body">
-        <div class="card-title">기억의 전당</div>
-        <div class="card-desc">계정과목과 뜻을 카드로 매칭!</div>
-        <div class="card-count">목표 : 🥇 부장</div>
-        <div class="card-best" id="best-memory"></div>
-      </div>
-      <div class="card-play">▶ 시작</div>
-    </a>
-
-    <a class="game-card card-3" href="game3_debit.html">
-      <div class="card-left">
-        <div class="card-stage">STAGE 03</div>
-        <div class="card-icon">⚡</div>
-      </div>
-      <div class="card-body">
-        <div class="card-title">회계 차변대변</div>
-        <div class="card-desc">거래를 읽고 차변/대변 판별!</div>
-        <div class="card-count">목표 : 🥇 회계 부장</div>
-        <div class="card-best" id="best-debit"></div>
-      </div>
-      <div class="card-play">▶ 시작</div>
-    </a>
-
-    <a class="game-card card-4" href="game4_factory.html">
-      <div class="card-left">
-        <div class="card-stage">STAGE 04</div>
-        <div class="card-icon">🏭</div>
-      </div>
-      <div class="card-body">
-        <div class="card-title">결산분개 조립공장</div>
-        <div class="card-desc">결산 거래의 차변·대변을 직접 조립!</div>
-        <div class="card-count">목표 : 🥇 숙련 경리</div>
-        <div class="card-best" id="best-factory"></div>
-      </div>
-      <div class="card-play">▶ 시작</div>
-    </a>
-
-    <a class="game-card card-5" href="game5_flight.html">
-      <div class="card-left">
-        <div class="card-stage">STAGE 05</div>
-        <div class="card-icon">🛩</div>
-      </div>
-      <div class="card-body">
-        <div class="card-title">플라이트 장부조회</div>
-        <div class="card-desc">비행기를 조종해 올바른 장부 통과!</div>
-        <div class="card-count">목표 : 🥇 베테랑 파일럿</div>
-        <div class="card-best" id="best-flight"></div>
-      </div>
-      <div class="card-play">▶ 시작</div>
-    </a>
-
+  <div class="stagemap">
+    <svg class="trail" viewBox="0 0 400 1000" preserveAspectRatio="none" aria-hidden="true">
+      <path class="trail-dim" d="M280,90 C280,200 120,180 120,290 C120,400 280,380 280,490 C280,600 120,580 120,690 C120,800 280,780 280,890"/>
+      <path class="trail-lit" id="trail-lit" d="M280,90 C280,200 120,180 120,290 C120,400 280,380 280,490 C280,600 120,580 120,690 C120,800 280,780 280,890"/>
+    </svg>
+    <div class="nodes">
+      <a class="stage-node card-1" id="node-acid" href="game1_acid.html" style="left:70%;top:9%"
+         onclick="return onNodeClick(event,'acid')">
+        <div class="disc">☁️<span class="badge lock-badge" title="잠김"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><span class="badge clear-badge" title="클리어" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"/></svg></span></div>
+        <div class="n-title">계정과목 산성비</div>
+        <div class="n-sub"></div>
+      </a>
+      <a class="stage-node card-2" id="node-memory" href="game2_memory.html" style="left:30%;top:29%"
+         onclick="return onNodeClick(event,'memory')">
+        <div class="disc">🧩<span class="badge lock-badge" title="잠김"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><span class="badge clear-badge" title="클리어" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"/></svg></span></div>
+        <div class="n-title">기억의 전당</div>
+        <div class="n-sub"></div>
+      </a>
+      <a class="stage-node card-3" id="node-debit" href="game3_debit.html" style="left:70%;top:49%"
+         onclick="return onNodeClick(event,'debit')">
+        <div class="disc">⚡<span class="badge lock-badge" title="잠김"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><span class="badge clear-badge" title="클리어" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"/></svg></span></div>
+        <div class="n-title">회계 차변대변</div>
+        <div class="n-sub"></div>
+      </a>
+      <a class="stage-node card-4" id="node-factory" href="game4_factory.html" style="left:30%;top:69%"
+         onclick="return onNodeClick(event,'factory')">
+        <div class="disc">🏭<span class="badge lock-badge" title="잠김"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><span class="badge clear-badge" title="클리어" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"/></svg></span></div>
+        <div class="n-title">결산분개 조립공장</div>
+        <div class="n-sub"></div>
+      </a>
+      <a class="stage-node card-5" id="node-flight" href="game5_flight.html" style="left:70%;top:89%"
+         onclick="return onNodeClick(event,'flight')">
+        <div class="disc">🛩<span class="badge lock-badge" title="잠김"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><span class="badge clear-badge" title="클리어" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"/></svg></span></div>
+        <div class="n-title">플라이트 장부조회</div>
+        <div class="n-sub"></div>
+      </a>
+    </div>
   </div>
 
   <div class="hub-footer" style="margin-top:40px;">
@@ -967,24 +979,100 @@ window.addEventListener('DOMContentLoaded', function() {
 
 
 <script>
-// ── 개인 최고기록 표시 ──
-(function() {
-    const keys = {
-        'acid':    'hub_acid_best',
-        'memory':  'hub_memory_best',
-        'debit':   'hub_debit_best',
-        'factory': 'hub_factory_best',
-        'flight':  'hub_flight_hi',
-    };
-    Object.entries(keys).forEach(([gid, key]) => {
-        const best = parseInt(localStorage.getItem(key) || '0');
-        const el = document.getElementById('best-' + gid);
-        if (el && best > 0) {
-            el.textContent = '내 최고: ' + best.toLocaleString() + '점';
-            el.style.display = 'block';
+// ── 스테이지 노드맵: 진행 상태(잠김/도전중/클리어) + 징검다리 경로 라이트업 ──
+// 체인 규칙: 이전 스테이지를 열었고(open) 클리어했을 때만(cleared) 다음 스테이지가 자동으로 열린다.
+// 광고 시청으로 얻는 hub_adunlock_<id> 는 그 스테이지 하나만 여는 개별 예외이며 체인에는 반영되지 않는다
+// (카파시터 버전과 동일한 규칙).
+const STAGE_GAMES = [
+    { id:'acid',    best:'hub_acid_best'   },
+    { id:'memory',  best:'hub_memory_best' },
+    { id:'debit',   best:'hub_debit_best'  },
+    { id:'factory', best:'hub_factory_best'},
+    { id:'flight',  best:'hub_flight_hi'   },
+];
+
+function renderStageMap() {
+    let chainOpen = true;
+    let litIndex = -1;
+    STAGE_GAMES.forEach((g, i) => {
+        const best = parseInt(localStorage.getItem(g.best) || '0');
+        const cleared = best > 0;
+        const adUnlocked = localStorage.getItem('hub_adunlock_' + g.id) === '1';
+        const open = chainOpen || adUnlocked;
+        const el = document.getElementById('node-' + g.id);
+        if (!el) return;
+        el.classList.remove('lock', 'cur', 'done');
+        const lockBadge = el.querySelector('.lock-badge');
+        const clearBadge = el.querySelector('.clear-badge');
+        const sub = el.querySelector('.n-sub');
+        if (!open) {
+            el.classList.add('lock');
+            lockBadge.style.display = 'flex';
+            clearBadge.style.display = 'none';
+            sub.textContent = '';
+        } else if (cleared) {
+            el.classList.add('done');
+            lockBadge.style.display = 'none';
+            clearBadge.style.display = 'flex';
+            sub.textContent = '내 최고 ' + best.toLocaleString() + '점';
+            litIndex = i;
+        } else {
+            el.classList.add('cur');
+            lockBadge.style.display = 'none';
+            clearBadge.style.display = 'none';
+            sub.textContent = '도전!';
+            litIndex = i;
         }
+        chainOpen = open && cleared;
     });
-})();
+    const lit = document.getElementById('trail-lit');
+    if (lit) {
+        const total = lit.getTotalLength();
+        lit.style.strokeDasharray = total;
+        const frac = litIndex < 0 ? 0 : litIndex / (STAGE_GAMES.length - 1);
+        lit.style.strokeDashoffset = total * (1 - frac);
+    }
+}
+renderStageMap();
+
+// ── 잠긴 노드 클릭 → 이동 대신 광고 시청으로 즉시 해제 ──
+function onNodeClick(e, gid) {
+    const el = document.getElementById('node-' + gid);
+    if (el && el.classList.contains('lock')) {
+        e.preventDefault();
+        unlockStage(gid);
+        return false;
+    }
+    return true;
+}
+window._unlockTarget = null;
+function unlockStage(gid) {
+    if (!window.AdBridge || typeof AdBridge.showRewarded !== 'function') {
+        alert('이전 스테이지를 먼저 클리어하면 열려요!');
+        return;
+    }
+    if (!AdBridge.isRewardedReady()) {
+        alert('광고를 불러오는 중이에요. 잠시 후 다시 눌러주세요!');
+        return;
+    }
+    window._unlockTarget = gid;
+    AdBridge.showRewarded();
+}
+// Kotlin/Swift → JS 콜백 (게임 화면들과 동일한 이름 규약)
+function onRewardGranted() {
+    if (!window._unlockTarget) return;
+    localStorage.setItem('hub_adunlock_' + window._unlockTarget, '1');
+    window._unlockTarget = null;
+    renderStageMap();
+}
+function onRewardedFailed() {
+    // 광고 실패로 진행을 막지 않는다 — 그냥 열어준다
+    if (!window._unlockTarget) return;
+    localStorage.setItem('hub_adunlock_' + window._unlockTarget, '1');
+    window._unlockTarget = null;
+    renderStageMap();
+    alert('광고를 불러오지 못했지만 스테이지를 열어드렸어요!');
+}
 </script>
 
 <!-- ── 오답노트: 미니 요약(틀린 문제 수) 표시 ── -->
