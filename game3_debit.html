@@ -1491,6 +1491,8 @@ function getGrade(score) {
     }
     let _rewardBtnShown = false;
     function showRewardedBtn() {
+        // 앱(AdBridge)에서만 노출 — 웹에선 눌러도 '준비 중' alert 만 떠서 지키지 못할 약속이 된다
+        if (!window.AdBridge || typeof AdBridge.showRewarded !== 'function') return;
         if (_rewardBtnShown) return; _rewardBtnShown = true;
         const btn = document.getElementById('rewarded-btn');
         if (btn) btn.style.display = 'flex';
@@ -1702,6 +1704,7 @@ const Tutorial = (function () {
       btn:'게임 시작 ▶', finish:true },
   ];
   let step = 0, tTime = 60, tCombo = 0, locked = false;
+  let timer = null, unlockTimer = null;   // 예약 연출 타이머 — close() 에서 취소(안 하면 재진입 시 1단계 건너뜀)
 
   function el(id){ return document.getElementById(id); }
   function slots(){ return Array.prototype.slice.call(el('tut-answers').querySelectorAll('.tut-slot')); }
@@ -1728,7 +1731,7 @@ const Tutorial = (function () {
       if (window.playSound) playSound('correct');
       card.classList.add('correct');
       tCombo++; setStatus();
-      setTimeout(function () { go(step + 1); }, 520);
+      timer = setTimeout(function () { timer = null; go(step + 1); }, 520);
     } else {                                  // 오답 → 콤보 0, -5초, 힌트 보여주고 재도전
       if (window.playSound) playSound('wrong');
       card.classList.add('wrong', 'shake');
@@ -1736,7 +1739,7 @@ const Tutorial = (function () {
       el('tut-qhint').innerHTML = '💡 ' + s.q.hint;
       el('tut-text').innerHTML =
         '아쉬워요. 틀리면 <b>콤보는 0</b>, <b>시간은 5초</b> 줄어요.<br>아래 힌트를 보고 다시 골라 보세요.';
-      setTimeout(function () { card.classList.remove('wrong', 'shake'); locked = false; }, 900);
+      unlockTimer = setTimeout(function () { unlockTimer = null; card.classList.remove('wrong', 'shake'); locked = false; }, 900);
     }
   }
 
@@ -1762,8 +1765,9 @@ const Tutorial = (function () {
 
   function go(n) { step = n; locked = false; if (step >= STEPS.length) return finish(); render(); }
   function nextBtn() { if (STEPS[step].finish) return finish(); go(step + 1); }
-  function start() { step = 0; tTime = 60; tCombo = 0; locked = false; setStatus(); render(); el('tutorial').classList.add('show'); }
-  function close() { el('tutorial').classList.remove('show'); }
+  function clearTimers() { if (timer) { clearTimeout(timer); timer = null; } if (unlockTimer) { clearTimeout(unlockTimer); unlockTimer = null; } }
+  function start() { clearTimers(); step = 0; tTime = 60; tCombo = 0; locked = false; setStatus(); render(); el('tutorial').classList.add('show'); }
+  function close() { clearTimers(); locked = false; el('tutorial').classList.remove('show'); }
   function finish() { close(); if (window.startGame) startGame(); }
 
   // 탭 입력은 pointerdown (이 프로젝트에서 click 이 안 먹은 전례가 있다)

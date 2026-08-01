@@ -1163,7 +1163,7 @@ const Tutorial = (function () {
       btn:'시작 ▶' },
     { text:'게이트는 화면 가운데서 <b>잠깐 멈춰</b>요. 그 사이에 문제와 <b>💡 힌트</b>를 읽으세요.<br>특정 거래처의 잔액은 <b>거래처원장</b>에서 찾습니다.',
       btn:'다음 ▶' },
-    { text:'화면을 <b>좌우로 드래그</b>(또는 톡 누르기)해서 비행기를 <b>거래처원장</b> 쪽으로 보내세요.',
+    { text:'화면을 <b>좌우로 드래그</b>해서 비행기를 <b>거래처원장</b> 쪽으로 보내세요.',
       drag:true, hint:'좌우로 끌어 비행기 옮기기' },
     { text:'게이트에 닿는 순간, 비행기가 <b>있는 쪽 장부</b>를 고른 것으로 판정돼요.<br>정답이면 <b>+500점</b>, 연속으로 맞히면 <b>콤보 보너스</b>까지 붙어요.',
       btn:'다음 ▶', glow:true },
@@ -1173,6 +1173,7 @@ const Tutorial = (function () {
       btn:'게임 시작 ▶', hideGate:true, finish:true },
   ];
   let step = 0, shipP = 0.5, live = false, dragging = false, wired = false;
+  let timer = null, judgeTimer = null;   // 예약 연출 타이머 — close() 에서 취소
 
   function el(id){ return document.getElementById(id); }
 
@@ -1204,11 +1205,14 @@ const Tutorial = (function () {
 
   function pop(isOk, msg) {
     const j = el('tut-judge');
+    // 이전 토스트의 남은 타이머를 취소한다.
+    // 안 그러면 오답 직후 정답을 맞혔을 때, 오답 타이머가 새 '정답 통과' 토스트를 조기에 지운다.
+    if (judgeTimer) { clearTimeout(judgeTimer); judgeTimer = null; }
     j.className = 'tut-judge' + (isOk ? '' : ' bad');
     j.textContent = msg;
     void j.offsetWidth;
     j.classList.add('on');
-    setTimeout(function () { j.classList.remove('on'); }, 900);
+    judgeTimer = setTimeout(function () { judgeTimer = null; j.classList.remove('on'); }, 900);
   }
 
   function judge() {
@@ -1226,7 +1230,7 @@ const Tutorial = (function () {
       el('tut-score').textContent = '500';
       pop(true, '정답 통과  +500');
     }, 430);
-    setTimeout(function () { go(step + 1); }, 1180);
+    timer = setTimeout(function () { timer = null; go(step + 1); }, 1180);
   }
 
   function wire() {
@@ -1269,8 +1273,9 @@ const Tutorial = (function () {
 
   function go(n) { step = n; if (step >= STEPS.length) return finish(); render(); }
   function nextBtn() { if (STEPS[step].finish) return finish(); go(step + 1); }
-  function start() { step = 0; wire(); buildStage(); render(); el('tutorial').classList.add('show'); }
-  function close() { live = false; dragging = false; el('tutorial').classList.remove('show'); }
+  function clearTimers() { if (timer) { clearTimeout(timer); timer = null; } if (judgeTimer) { clearTimeout(judgeTimer); judgeTimer = null; } }
+  function start() { clearTimers(); step = 0; wire(); buildStage(); render(); el('tutorial').classList.add('show'); }
+  function close() { clearTimers(); live = false; dragging = false; el('tutorial').classList.remove('show'); }
   // Game 은 const 로 선언돼 window 프로퍼티가 아니다 → window.Game 으로 확인하면 안 된다
   function finish() {
     close();

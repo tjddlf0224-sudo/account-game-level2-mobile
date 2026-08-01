@@ -734,6 +734,28 @@ const GAMES = [
   { id:'flight',  name:'플라이트',  icon:'🛩', color:'var(--game5)', max:55000 },  // 👑 전설의 에이스
 ];
 
+/* ── 직급 재계산 (학생 화면과 동일한 기준) ──
+   scores.grade 에 저장된 문자열을 그대로 쓰지 않고 점수로 다시 계산한다.
+   이유: 게임2(기억의전당)는 화면 표시가 5단계인데 저장 문자열은 옛 9단계 포맷이라
+   (라이브·앱이 공유하는 저장 포맷이라 바꾸지 않는다) 그대로 뿌리면 교수자에게만
+   '전무/상무·이사·차장·CEO급'처럼 학생 화면엔 없는 직급이 보인다.
+   아래 표는 각 게임 파일의 GRADE_TIERS / RANK_TIERS(화면용)와 동일하다. */
+const GRADE_SCALES = {
+  acid:    [[15000,'👑 전설의 에이스'],[11000,'🥇 베테랑'],      [7000,'🥈 숙련자'],     [3000,'🥉 정규 파일럿'],[0,'🛩 견습생']],
+  memory:  [[5000, '👑 CEO'],         [3000, '🥇 부장'],        [1500,'🥈 과장'],       [500, '🥉 대리'],       [0,'💼 사원']],
+  debit:   [[3300, '👑 전설의 CFO'],   [2800, '🥇 회계 부장'],    [1800,'🥈 회계 대리'],   [800, '🥉 신입 사원'],  [0,'📋 수습 직원']],
+  factory: [[12000,'👑 결산 마스터'],  [7000, '🥇 숙련 경리'],    [4000,'🥈 견습 경리'],   [1500,'🥉 수습생'],     [0,'📋 인턴']],
+  flight:  [[55000,'👑 전설의 에이스'],[40000,'🥇 베테랑 파일럿'],[30000,'🥈 숙련 파일럿'],[18000,'🥉 정규 파일럿'],[0,'🛩 견습 파일럿']],
+};
+function gradeOf(gameId, score) {
+  const t = GRADE_SCALES[gameId];
+  if (!t) return '';
+  const n = Number(score);
+  if (!Number.isFinite(n)) return '';
+  const hit = t.find(([min]) => n >= min);
+  return hit ? hit[1] : t[t.length - 1][1];
+}
+
 /* ══════════════════════════════════════════
    전역 상태
 ══════════════════════════════════════════ */
@@ -1149,7 +1171,7 @@ function openModal(name) {
     return `<div class="msg-card">
       <div class="msg-game">${g.icon} ${g.name}</div>
       <div class="msg-score" style="color:${col}">${s?s.score.toLocaleString():'—'}</div>
-      <div class="msg-grade">${s?s.grade||'—':'미참여'}</div>
+      <div class="msg-grade">${s?(gradeOf(g.id, s.score)||s.grade||'—'):'미참여'}</div>
     </div>`;
   }).join('');
 

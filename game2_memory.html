@@ -525,7 +525,7 @@
         <div style="display:flex;gap:6px;flex-shrink:0;">
             <!-- 🎵 음소거 버튼 -->
             <button class="mute-btn" id="mute-btn" onclick="toggleMute()" title="BGM 음소거">🎵</button>
-            <button onclick="quitGame()" style="font-family:'Jua';font-size:0.9rem;color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.3);padding:7px 12px;border-radius:50px;background:rgba(0,0,0,0.2);cursor:pointer;min-height:44px;">그만</button>
+            <button onclick="quitGame()" style="font-family:'Jua';font-size:0.9rem;color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.3);padding:7px 12px;border-radius:50px;background:rgba(0,0,0,0.2);cursor:pointer;min-height:44px;">결과 보기 🏁</button>
             <a class="hub-link" href="index.html">홈</a>
         </div>
     </header>
@@ -1033,7 +1033,11 @@
         // 메인 이탈: 진행 중(stage>1)이면 두 번 눌러 확인 — Android WebView는
         // confirm()이 무동작(항상 false)이라 대화상자 대신 2-스텝 버튼 사용
         function exitToHub(btn) {
-            if (typeof stage === 'undefined' || stage <= 1 || btn.dataset.armed === '1') {
+            // saveScore()/stageSaveScore() 가 성공할 때만 window._savedScore 를 올리므로
+            // (오프라인 로컬저장은 제외) 이미 화면 점수만큼 등록됐으면 경고 없이 바로 나간다.
+            const shownScore = parseInt((document.getElementById('final-score') || {}).textContent) || 0;
+            const alreadySaved = (window._savedScore || 0) >= shownScore && shownScore > 0;
+            if (typeof stage === 'undefined' || stage <= 1 || alreadySaved || btn.dataset.armed === '1') {
                 location.href = 'index.html';
                 return;
             }
@@ -1249,10 +1253,20 @@
             const mw = document.getElementById('mini-rank-wrap'); if(mw) mw.style.display='none';
             const ssb = document.getElementById('stage-save-btn'); if(ssb) ssb.style.display='none';
             const rank = getRank(finalScore);
-            document.querySelector('#result-screen h2').textContent = quit ? '포기... 😢' : 'ALL CLEAR! 🏆';
+            // 이 게임은 스테이지가 무한 반복이라 '그만'이 유일한 종료 수단이다.
+            // 그래서 quit=true 를 실패로 취급하면, 끝까지 잘 하고 랭킹에 올리려는 학생까지
+            // '포기... 😢' 를 보게 된다(3000점 팡파레가 그 위에 겹치기까지 한다).
+            // → 한 판도 못 깬 경우만 '포기'로 보고, 나머지는 정상 종료로 축하한다.
+            const gaveUp = quit && finalScore <= 0;
+            // FANFARE_TARGET_SCORE 는 다른 <script> 블록의 const 라 typeof 로 안전하게 참조한다
+            // (이 프로젝트에서 TDZ 를 try/catch 가 삼켜 조용히 죽은 전례가 있다)
+            const targetScore = (typeof FANFARE_TARGET_SCORE === 'number') ? FANFARE_TARGET_SCORE : 3000;
+            const allClear = finalScore >= targetScore;
+            document.querySelector('#result-screen h2').textContent =
+                gaveUp ? '포기... 😢' : (allClear ? 'ALL CLEAR! 🏆' : '게임 종료! 🏁');
             document.getElementById('result-rank').textContent = rank.title;
             document.getElementById('result-rank').style.color = rank.color;
-            document.getElementById('result-msg').innerHTML = quit
+            document.getElementById('result-msg').innerHTML = gaveUp
                 ? `${rank.msg}<br>지금까지의 점수로 랭킹 등록 가능!` : rank.msg;
             document.getElementById('final-score').textContent = finalScore + '점';
             document.getElementById('score-detail').textContent = detail;
@@ -1570,7 +1584,7 @@
 <script>
     // ── 팡파레 시스템 ──
     const FANFARE_TARGET_LABEL = '부장';
-    // 목표 점수는 RANK_TIERS(단일 소스)에서 해당 직급의 최소 점수로 산출 (= 4000)
+    // 목표 점수는 RANK_TIERS(단일 소스)에서 해당 직급의 최소 점수로 산출 (현재 '부장' = 3000)
     const FANFARE_TARGET_SCORE = (RANK_TIERS.find(t => t.title.includes(FANFARE_TARGET_LABEL)) || RANK_TIERS[0]).min;
 
     function checkAndShowFanfare(currentScore, gradeFn) {

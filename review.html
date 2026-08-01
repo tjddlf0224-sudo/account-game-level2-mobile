@@ -130,6 +130,23 @@ function toggleGroup(g){
 function esc(s){ return (s==null?'':String(s)).replace(/[&<>"']/g,function(c){
   return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
 
+/* 문제 본문(q)은 게임이 만든 강조 태그를 포함한다: <b class="target-account">계정과목</b>, <br>.
+   그런데 오답노트는 Supabase(wrong_answers)에서도 읽어오고 그 테이블은 anon insert 가 열려 있어서,
+   q_text 에 임의 HTML 이 들어올 수 있다 → 그대로 innerHTML 하면 저장형 XSS 가 된다.
+   그래서 "전부 이스케이프한 뒤 알려진 강조 태그만 되살리는" 화이트리스트 방식으로 처리한다.
+   (허용 목록에 없는 태그·속성은 전부 문자로 남아 실행되지 않는다) */
+function safeQ(s){
+  return esc(s)
+    .replace(/&lt;b class=&quot;target-account&quot;&gt;/g, '<b class="target-account">')
+    .replace(/&lt;b&gt;/g, '<b>')
+    .replace(/&lt;\/b&gt;/g, '</b>')
+    .replace(/&lt;br\s*\/?&gt;/g, '<br>');
+}
+
+/* onclick="fn('...')" 안에 넣을 문자열 — JS 이스케이프를 먼저 하고 HTML 이스케이프를 나중에 한다.
+   (순서를 뒤집으면 esc 가 만든 &#39; 를 HTML 파서가 ' 로 되돌려 JS 문자열이 깨진다) */
+function jsAttr(s){ return esc(String(s==null?'':s).replace(/\\/g,'\\\\').replace(/'/g,"\\'")); }
+
 function gameName(g){ return (WrongNote.GAME_NAMES[g]||g); }
 
 async function load(){
@@ -176,7 +193,7 @@ function render(){
     byGame[g].forEach(function(r){
       html +=
         '<div class="item">'+
-          '<div class="q">'+r.q /* 게임에서 만든 안전한 HTML(태그 강조 포함) */ +'</div>'+
+          '<div class="q">'+safeQ(r.q)+'</div>'+
           '<div class="meta">'+
             '<span class="pill ok">정답: '+esc(r.correct)+'</span>'+
             (r.wrong ? '<span class="pill no">내 답: '+esc(r.wrong)+'</span>' : '')+
@@ -256,7 +273,7 @@ function showQ(){
     body.innerHTML =
       '<div class="quiz-card">'+
         '<div class="quiz-tag">'+esc(gameName(r.game))+(r.type?' · '+esc(r.type):'')+'</div>'+
-        '<div class="quiz-q">'+r.q+'</div>'+
+        '<div class="quiz-q">'+safeQ(r.q)+'</div>'+
         '<button class="choice" data-v="'+esc(opts[0])+'">'+esc(opts[0])+'</button>'+
         '<button class="choice" data-v="'+esc(opts[1])+'">'+esc(opts[1])+'</button>'+
         '<div class="quiz-next"><button class="cta" onclick="nextQ()">다음 →</button></div>'+
@@ -268,12 +285,12 @@ function showQ(){
     body.innerHTML =
       '<div class="quiz-card flashcard">'+
         '<div class="quiz-tag">'+esc(gameName(r.game))+(r.type?' · '+esc(r.type):'')+'</div>'+
-        '<div class="quiz-q">'+r.q+'</div>'+
+        '<div class="quiz-q">'+safeQ(r.q)+'</div>'+
         '<button class="choice" onclick="this.nextElementSibling.style.display=\'block\';this.style.display=\'none\'">👀 정답 보기</button>'+
         '<div class="reveal">'+esc(r.correct)+'</div>'+
         '<div class="quiz-foot">'+
           '<button class="keep" onclick="nextQ()">아직 헷갈려요</button>'+
-          '<button onclick="solveCard(\''+r.game+'\',\''+esc(r.key).replace(/'/g,"\\'")+'\')">외웠어요 ✓</button>'+
+          '<button onclick="solveCard(\''+jsAttr(r.game)+'\',\''+jsAttr(r.key)+'\')">외웠어요 ✓</button>'+
         '</div>'+
       '</div>';
   }

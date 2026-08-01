@@ -359,7 +359,8 @@
         .tut-top .tt-badge { font-size:.8rem; font-weight:800; color:#fff; background:var(--red); border-radius:50px; padding:3px 12px; }
         .tut-top .tt-skip { margin-left:auto; background:rgba(255,255,255,0.1); border:none; color:rgba(255,255,255,0.75);
             font-family:'Noto Sans KR',sans-serif; font-weight:800; font-size:.82rem; padding:8px 14px; border-radius:50px; cursor:pointer; }
-        .tut-stage { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+        .tut-stage { flex:1; min-height:0; display:flex; flex-direction:column; align-items:center;
+            justify-content:safe center;   /* 넘칠 땐 위쪽부터 — center 면 상단이 잘려 스크롤로도 못 본다 */
             gap:14px; padding:10px 20px 4px; overflow-y:auto; }
         .tut-status { font-family:'Black Han Sans', sans-serif; font-size:1.05rem; color:#fff; background:var(--panel);
             border:2px solid var(--border); border-radius:50px; padding:8px 22px; white-space:nowrap;
@@ -679,7 +680,13 @@ function initAudio() {
     bgmPlay(); // 🎵 첫 인터랙션 시 BGM 시작
 }
 function playSound(type) {
-    if (!audioCtx) return;
+    // 튜토리얼은 startGame() 을 거치지 않아 initAudio() 가 안 불린다.
+    // 그래서 여기서 지연 생성한다(첫 호출이 pointerdown 사용자 제스처라 모바일에서도 허용).
+    // BGM 은 startGame 때만 시작되도록 bgmPlay() 는 부르지 않는다.
+    if (!audioCtx) {
+        try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return; }
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume();
     const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
     osc.connect(gain); gain.connect(audioCtx.destination);
     const now = audioCtx.currentTime;
@@ -833,7 +840,11 @@ function checkAnswer() {
             if (selectedParts.L) selectedParts.L.el.classList.remove('selected');
             if (selectedParts.R) selectedParts.R.el.classList.remove('selected');
             selectedParts = { L: null, R: null }; activeSlot = 'L';
-            hintEl.style.display = 'none'; renderSlots();
+            // 힌트는 지우지 않는다 — 같은 문제에 재도전하는 동안 계속 보여야
+            // 튜토리얼이 가르친 '힌트 보고 다시 도전'이 실제로 가능하다.
+            // (다음 문제로 넘어갈 때 nextQuestion() 이 알아서 초기화한다)
+            els.qCard.classList.remove('shake');   // 빨간 테두리 잔류 방지
+            renderSlots();
             judging = false; // 오답 정리 후 같은 문제 재도전 허용
         }, 600);
     }
@@ -1031,6 +1042,8 @@ function renderRankList(list) {
     }
     let _rewardBtnShown = false;
     function showRewardedBtn() {
+        // 앱(AdBridge)에서만 노출 — 웹에선 눌러도 '준비 중' alert 만 떠서 지키지 못할 약속이 된다
+        if (!window.AdBridge || typeof AdBridge.showRewarded !== 'function') return;
         if (_rewardBtnShown) return; _rewardBtnShown = true;
         const btn = document.getElementById('rewarded-btn');
         if (btn) btn.style.display = 'flex';
@@ -1232,17 +1245,21 @@ const Tutorial = (function () {
       status:'지금 채울 칸: <b>👈 차변</b>', side:'L', tap:QUIZ.L, hint:'빛나는 계정을 탭!' },
     { text:'차변이 채워지면 켜진 칸이 <b>대변 👉</b>으로 자동으로 넘어가요.<br>이제 대변에 올 계정을 고르세요.',
       status:'지금 채울 칸: <b>대변 👉</b>', side:'R', tap:QUIZ.R, hint:'대변 계정을 탭!' },
-    { text:'차변·대변이 다 차면 바로 채점돼요. 맞히면 <b>+150점</b>과 <b>시간 +10초</b>!<br>연속으로 맞힐수록 <b>콤보</b>가 쌓여 한 문제 점수가 더 커집니다.',
-      status:'정답! <b>+150점 · +10초</b>', glow:true, btn:'다음 ▶' },
+    { text:'차변·대변이 다 차면 바로 채점돼요. 첫 정답은 <b>+180점</b>과 <b>시간 +10초</b>!<br>연속으로 맞힐수록 <b>콤보</b>가 쌓여 한 문제 점수가 30점씩 더 커집니다.<br>잘못 골랐으면 <b>채워진 칸을 다시 탭</b>해서 취소할 수 있어요.',
+      status:'정답! <b>+180점 · +10초</b>', glow:true, btn:'다음 ▶' },
     { text:'계정을 맞게 골라도 <b>차변·대변이 바뀌면 오답</b>이에요. 그래서 순서가 중요합니다.<br>오답은 <b>시간 -5초</b>에 콤보가 끊기지만, 힌트를 보고 <b>같은 문제에 다시</b> 도전할 수 있어요.',
       status:'순서가 바뀌면 <b>오답</b>', demo:'wrong', btn:'다음 ▶' },
-    { text:'제한 시간은 <b>60초</b>. 모자라면 <b>⏱ +30초 광고 보기</b>로 시간을 더 받을 수 있어요.<br>점수가 쌓이면 <b>📋 인턴</b>에서 <b>👑 결산 마스터</b>까지 직급이 올라갑니다.',
+    // 광고 안내는 앱(AdBridge)에서만 — 웹 브라우저에선 '준비 중' alert 만 떠서 지키지 못할 약속이 된다
+    { text:'제한 시간은 <b>60초</b>.' +
+           (window.AdBridge ? ' 모자라면 <b>⏱ +30초 광고 보기</b>로 시간을 더 받을 수 있어요.' : ' 정답마다 <b>+10초</b>씩 늘어나요.') +
+           '<br>점수가 쌓이면 <b>📋 인턴</b>에서 <b>👑 결산 마스터</b>까지 직급이 올라갑니다.',
       status:'준비 끝!', btn:'게임 시작 ▶', finish:true },
   ];
 
   let step = 0;
   let picked = { L:null, R:null };
   let locked = false;   // 오답 안내·정답 연출 중 입력 잠금
+  let timer = null;     // 예약된 연출 타이머 — close() 때 반드시 취소(안 그러면 재진입 시 1단계를 건너뛴다)
 
   function el(id) { return document.getElementById(id); }
   function partAt(name) {
@@ -1299,7 +1316,7 @@ const Tutorial = (function () {
       el('tut-text').innerHTML = '앗! ' + missMsg(name, s);
       el('tut-hint').style.display = 'block';
       el('tut-hint').innerHTML = '👆 다시 골라 보세요';
-      setTimeout(function () { locked = false; render(); }, 1500);
+      timer = setTimeout(function () { timer = null; locked = false; render(); }, 1500);
       return;
     }
     if (window.playSound) playSound('select');
@@ -1309,7 +1326,7 @@ const Tutorial = (function () {
       locked = true;
       renderSlots(null);
       if (window.playSound) playSound('ok');
-      setTimeout(function () { locked = false; go(step + 1); }, 500);
+      timer = setTimeout(function () { timer = null; locked = false; go(step + 1); }, 500);
     } else {
       go(step + 1);
     }
@@ -1353,8 +1370,9 @@ const Tutorial = (function () {
 
   function go(n) { step = n; if (step >= STEPS.length) return finish(); render(); }
   function nextBtn() { if (STEPS[step].finish) return finish(); go(step + 1); }
-  function start() { step = 0; buildBoard(); render(); el('tutorial').classList.add('show'); }
-  function close() { el('tutorial').classList.remove('show'); }
+  function clearTimer() { if (timer) { clearTimeout(timer); timer = null; } }
+  function start() { clearTimer(); step = 0; locked = false; buildBoard(); render(); el('tutorial').classList.add('show'); }
+  function close() { clearTimer(); locked = false; el('tutorial').classList.remove('show'); }
   function finish() { close(); if (window.startGame) startGame(); }
 
   return { start:start, close:close, next:nextBtn };

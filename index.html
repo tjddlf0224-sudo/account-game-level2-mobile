@@ -709,7 +709,7 @@ body {
       <div class="card-body">
         <div class="card-title">기억의 전당</div>
         <div class="card-desc">계정과목과 뜻을 카드로 매칭!</div>
-        <div class="card-count">목표 : ⭐ CEO급</div>
+        <div class="card-count">목표 : 🥇 부장</div>
         <div class="card-best" id="best-memory"></div>
       </div>
       <div class="card-play">▶ 시작</div>
@@ -855,6 +855,16 @@ window.addEventListener('resize', () => { resize(); initStars(); });
 // 안드로이드 앱에서 JS 브릿지로 아래를 호출:
 //   webView.evaluateJavascript("hideAdPlaceholder()", null);
 function hideAdPlaceholder() {}
+
+// ── 하단 배너 복구 (허브 = 홈 베이스) ──
+// 배너는 네이티브 View 라서 웹 페이지를 이동해도 상태가 그대로 남는다.
+// 게임은 시작할 때 AdBridge.hide() 하고 결과화면에서 다시 show() 하는데,
+// 플레이 도중 '홈' 버튼으로 나가면 show() 를 못 부르고 나가버린다.
+// 그러면 배너가 앱을 끌 때까지 영영 숨겨진 채로 남는다(이론·그룹·로그인 화면도 hide 만 한다).
+// → 허브로 돌아올 때마다 여기서 다시 켜 준다.
+(function restoreBanner() {
+  try { if (window.AdBridge && typeof AdBridge.show === 'function') AdBridge.show(); } catch (e) {}
+})();
 
 // ── 로그아웃 ──
 function doLogout() {

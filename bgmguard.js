@@ -4,7 +4,8 @@
  *
  *  문제: iOS(WKWebView·Safari)에서 <audio>는 pause()해도 미디어가
  *  로드돼 있는 한 잠금화면 Now Playing 플레이어가 남는다.
- *  (네이티브 stopBGM은 pause+되감기만 하므로 "0:00 일시정지"로 잔존)
+ *  (네이티브 stopBGM 도 같은 방식으로 src 를 내리며, 이때 guardWasPlaying 플래그를
+ *   같이 남기기로 계약돼 있다 — 안 남기면 복귀 시 재생이 안 살아난다)
  *
  *  해결: 화면이 숨겨질 때(백그라운드/잠금/페이지 이탈) src를 내려서
  *  미디어 리소스를 해제 → 잠금화면 플레이어 즉시 제거.
@@ -69,4 +70,9 @@
   });
   window.addEventListener('pagehide', unloadAll);
   window.addEventListener('pageshow', restoreAll);
+
+  // 네이티브 래퍼가 포그라운드 복귀 때 직접 부를 수 있게 노출한다.
+  // (제어센터/알림센터처럼 페이지가 hidden 까지 가지 않는 이탈에서는
+  //  visibilitychange 가 안 와서 src 가 복원되지 않은 채 남는다)
+  window.__bgmGuardRestore = restoreAll;
 })();
