@@ -97,11 +97,8 @@
     '🎯': svg(RED, REDG, '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="' + RED + '" stroke="none"/>'),
     '🎮': svg(PURPLE, PURPLEG, '<path d="M6 9h12a4 4 0 0 1 4 4.5l-.8 3a2 2 0 0 1-3.4.9L15 14H9l-2.8 3.4a2 2 0 0 1-3.4-.9l-.8-3A4 4 0 0 1 6 9z"/>' +
       '<path d="M8 11v3M6.5 12.5h3"/><circle cx="16" cy="11.5" r=".8" fill="' + PURPLE + '" stroke="none"/><circle cx="18" cy="13.5" r=".8" fill="' + PURPLE + '" stroke="none"/>'),
-    '🧩': svg(PURPLE, PURPLEG, '<path d="M9 4h4a1.5 1.5 0 0 1 0 3 1.5 1.5 0 0 0 0 3h4v4a1.5 1.5 0 0 1-3 0 1.5 1.5 0 0 0-3 0v4H7a1 1 0 0 1-1-1v-4a1.5 1.5 0 0 1 3 0 1.5 1.5 0 0 0 0-3 1.5 1.5 0 0 1-3 0V5a1 1 0 0 1 1-1z"/>'),
     '🛡': svg(CYAN, CYANG, '<path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/>'),
     '🧲': svg(RED, REDG, '<path d="M6 4h4v9a2 2 0 0 0 4 0V4h4v9a6 6 0 0 1-12 0z"/><path d="M6 8h4M14 8h4"/>'),
-    '🏭': svg(ORANGE2, ORANGE2G, '<path d="M3 20V11l4 3v-3l4 3v-3l4 3V6l4 4v10z"/><path d="M3 20h16"/>'),
-    '🛩': svg(CYAN, CYANG, '<path d="M2 13l8-2 4-8 2 1-2 7 6 1 2-2 1.5.5-1.5 3-7 1-3 6-2-1 1.5-4-6-1z"/>'),
     '🚀': svg(ORANGE, ORANGEG, '<path d="M12 2c3 2 5 6 5 10 0 2-.5 3.5-1.5 5l-3.5 3-3.5-3c-1-1.5-1.5-3-1.5-5 0-4 2-8 5-10z"/>' +
       '<circle cx="12" cy="10" r="2"/><path d="M8 15l-3 3 1 3 3-1M16 15l3 3-1 3-3-1"/>'),
     '🏁': svg(WHITE, WHITEG, '<path d="M5 3v18"/><path d="M5 4h6v3h-3v3h3v3H5z"/><path d="M11 4h6v3h-3v3h3v3h-6z"/>'),
@@ -112,9 +109,7 @@
     '💰': svg(GOLD, GOLDG, '<path d="M12 4c4 0 7 2.5 7 6s-3 6-7 6-7-2.5-7-6 3-6 7-6z"/><path d="M12 8.5c-1.2 0-2 .5-2 1.3s.8 1.2 2 1.4c1.2.2 2 .6 2 1.4s-.8 1.4-2 1.4-2-.4-2-1"/><path d="M6 14c-1.2.7-2 1.6-2 2.6C4 19 7.6 21 12 21s8-2 8-4.4c0-1-.8-1.9-2-2.6"/>'),
     '💊': svg(PINK, PINKG, '<rect x="3.5" y="9.5" width="17" height="5" rx="2.5" transform="rotate(-30 12 12)"/><path d="M12 8.3v7.4" transform="rotate(-30 12 12)"/>'),
     '❄': svg(ICEBLUE, ICEBLUEG, '<path d="M12 2v20M4 7l16 10M20 7L4 17"/>'),
-    '☁': svg(ICEBLUE, ICEBLUEG, '<path d="M7 18a4 4 0 0 1-.5-8 5.5 5.5 0 0 1 10.7-1.5A4.5 4.5 0 0 1 17 18H7z"/>'),
     '🔥': svg(ORANGE, ORANGEG, '<path d="M12 21c-3.5 0-6-2.2-6-5.5C6 12 8 10 8 7c2 1 3 3 3 5 1-2 .5-4 0-6 3 1.5 5 4.5 5 7.5 0 3.5-2.5 6.5-6 6.5z"/>'),
-    '⚡': svg(GOLD, GOLDG, '<path d="M13 2L4 14h6l-1 8 9-12h-6z"/>'),
     '💡': svg(GOLD, GOLDG, '<path d="M9 18h6M10 21h4"/><path d="M12 2a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.9v.2h5v-.2c0-.8.4-1.5 1-1.9A6 6 0 0 0 12 2z"/>'),
     '💣': svg(GRAY, GRAYG, '<circle cx="11" cy="14" r="7"/><path d="M15 8l3-3M17 3l2 1-1 2"/>'),
     '💥': svg(ORANGE, ORANGEG, '<path d="M12 2l2 6 6-3-3 6 6 2-6 2 3 6-6-3-2 6-2-6-6 3 3-6-6-2 6-2-3-6 6 3z"/>'),
