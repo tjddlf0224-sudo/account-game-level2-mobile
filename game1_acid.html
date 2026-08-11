@@ -65,7 +65,7 @@
             z-index: 10;
             position: relative;
             flex-shrink: 0;
-            padding-top: calc(env(safe-area-inset-top) + 10px);
+            padding-top: calc(env(safe-area-inset-top) + 18px);
         }
         h1 {
             margin: 0;
@@ -213,12 +213,18 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(10, 10, 20, 0.95);
             display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
+            align-items: center; justify-content: flex-start;
             z-index: 100; backdrop-filter: blur(10px);
-            padding: max(env(safe-area-inset-top), 20px) 20px max(env(safe-area-inset-bottom, 16px));
+            padding: max(env(safe-area-inset-top), 20px) 20px calc(env(safe-area-inset-bottom, 16px) + var(--ad-banner-h, 0px));
             overflow-y: auto;
             touch-action: pan-y;
             overscroll-behavior: contain;
+        }
+        .overlay-inner {
+            display: flex; flex-direction: column;
+            align-items: center; gap: 10px;
+            width: 100%; max-width: 480px;
+            margin: auto;
         }
         .overlay h2 {
             font-size: 2rem; margin: 0 0 16px 0;
@@ -332,6 +338,17 @@
         .rank-grade { font-size: 0.8rem; color: var(--neon-green); text-align: center; }
         .rank-score { color: var(--neon-gold); font-weight: 700; text-align: right; font-size: 0.8rem; }
         .rank-me { background: rgba(0,242,255,0.07); }
+        .rank-delta { font-size:0.72rem; margin-left:6px; padding:2px 9px; border-radius:20px; font-weight:700; }
+        .rank-delta.up { color:#39ff14; background:rgba(57,255,20,0.14); }
+        .rank-delta.down { color:#ff4757; background:rgba(255,71,87,0.14); }
+        .rank-delta.flat { color:rgba(255,255,255,0.4); background:rgba(255,255,255,0.06); }
+        #my-rank-neighbors { display:none; margin-top:8px; border-radius:14px; border:1px solid rgba(0,242,255,0.2); }
+        .next-tier-msg { text-align:center; font-size:0.78rem; color:rgba(255,255,255,0.75); padding:9px 14px; background:rgba(255,255,255,0.03); }
+        .rn-row { display:flex; align-items:center; padding:8px 14px; font-size:0.82rem; background:rgba(255,255,255,0.02); gap:8px; }
+        .rn-row.rn-me { background:rgba(0,242,255,0.12); font-weight:700; }
+        .rn-label { color:rgba(255,255,255,0.35); font-size:0.68rem; width:52px; flex-shrink:0; }
+        .rn-name { flex:1; color:#fff; text-align:left; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .rn-score { color:var(--neon-gold); font-weight:700; flex-shrink:0; }
         .spin-row { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 22px; color: rgba(255,255,255,0.3); font-size: 0.9rem; }
         .spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.12); border-top-color: var(--neon-blue); border-radius: 50%; animation: sp 0.7s linear infinite; }
 
@@ -674,6 +691,7 @@
 
 <!-- 결과 화면 -->
 <div id="result-screen" class="overlay" style="display: none;">
+  <div class="overlay-inner">
     <h2>GAME OVER</h2>
     <p id="final-rank" style="color:var(--neon-blue); font-weight:bold; font-size:1.2rem; margin:0;">계급: 인턴</p>
     <div id="final-score">0점</div>
@@ -685,6 +703,7 @@
     </div>
 
     <div id="my-rank-badge" style="display:none; font-family:'Jua',sans-serif; font-size:1rem; color:var(--neon-blue); background:rgba(0,242,255,0.1); border:1px solid rgba(0,242,255,0.3); border-radius:50px; padding:7px 20px; text-align:center; margin-top:4px;"></div>
+    <div id="my-rank-neighbors"></div>
     <div class="result-container">
         <div id="review-box" class="review-box" style="display: none;"></div>
         <div id="rank-box"></div>
@@ -694,6 +713,7 @@
         <button class="btn-restart" onclick="location.reload()">↺ 다시 하기</button>
         <button class="btn-hub" onclick="location.href='index.html'">🏠 메인으로 나가기</button>
     </div>
+  </div>
 </div>
 
 <script>
@@ -1120,7 +1140,7 @@
         }
 
         els.input.disabled = false; els.input.value = localStorage.getItem('hub_nickname') || getMyName();
-        document.getElementById('my-rank-badge').style.display = 'none';
+        showMyRank(els.input.value || '나', score, { trackDelta: false }); // 랭킹 등록 전 예상 순위 미리보기
         const saveBtn = document.getElementById('save-btn');
         saveBtn.textContent = '저장'; saveBtn.disabled = false;
         // 전면 광고 (10회마다) → 닫히면 결과화면 표시
@@ -1297,7 +1317,7 @@
 
         if (false) {
             await loadRanking(); showSaveStatus('✓ 저장 완료!', 'ok');
-            showMyRank(name); return;
+            await showMyRank(name, score); return;
         }
         try {
             await supabaseSaveScore(newRecord.name, newRecord.score, newRecord.combo||0, newRecord.correct||0, GAME_ID);
@@ -1312,10 +1332,10 @@
             } else {
                 showSaveStatus('✓ 등록 완료!', 'ok');
             }
-            showMyRank(name);
+            await showMyRank(name, score);
         } catch (err) {
             await loadRanking(); showSaveStatus('✓ 저장됨(오프라인)', 'ok');
-            showMyRank(name);
+            await showMyRank(name, score);
         }
     }
 
@@ -1326,16 +1346,64 @@
         if (type === 'err') alert(msg);
     }
 
-    function showMyRank(name) {
+    const RANK_PREV_KEY = 'hub_acid_prevRank';
+
+    function nextTierHtml(score) {
+        const idx = GRADE_TIERS.findIndex(t => score >= t.min);
+        const next = idx > 0 ? GRADE_TIERS[idx - 1] : null;
+        return next
+            ? `<div class="next-tier-msg">다음 등급 <b style="color:${next.color}">${next.label}</b>까지 <b>${(next.min - score).toLocaleString()}점</b> 더!</div>`
+            : `<div class="next-tier-msg">🎉 최고 등급 달성!</div>`;
+    }
+
+    async function showMyRank(name, score, opts) {
+        const trackDelta = !opts || opts.trackDelta !== false;
         const badge = document.getElementById('my-rank-badge');
-        const rows = document.querySelectorAll('#rank-box .rank-row');
-        let myIdx = -1;
-        rows.forEach((row, i) => {
-            const nameEl = row.querySelector('.rank-name');
-            if (nameEl && nameEl.textContent.trim() === name) myIdx = i;
-        });
-        if (myIdx >= 0) { badge.textContent = '🎯 내 순위: ' + (myIdx + 1) + '위'; badge.style.display = 'block'; }
-        else badge.style.display = 'none';
+        const nbox = document.getElementById('my-rank-neighbors');
+        const tierHtml = nextTierHtml(score);
+        try {
+            const groupId = localStorage.getItem('hub_group_id') || null;
+            const withGroup = (q) => groupId ? q.eq('group_id', groupId) : q;
+
+            const countQ = withGroup(db.from('scores').select('*', { count: 'exact', head: true }).eq('game_id', GAME_ID).gt('score', score));
+            const aboveQ = withGroup(db.from('scores').select('name,score').eq('game_id', GAME_ID).gt('score', score).order('score', { ascending: true }).limit(1));
+            const belowQ = withGroup(db.from('scores').select('name,score').eq('game_id', GAME_ID).lt('score', score).order('score', { ascending: false }).limit(1));
+
+            const [{ count, error: cErr }, { data: aboveRows }, { data: belowRows }] = await Promise.all([countQ, aboveQ, belowQ]);
+            if (cErr) throw cErr;
+
+            const myRank = (count || 0) + 1;
+            const above = aboveRows && aboveRows[0];
+            const below = belowRows && belowRows[0];
+
+            let deltaHtml = '';
+            if (trackDelta) {
+                const prevRank = parseInt(localStorage.getItem(RANK_PREV_KEY) || '0', 10);
+                if (prevRank > 0) {
+                    const diff = prevRank - myRank; // 양수 = 등수 상승(숫자가 작아짐)
+                    if (diff > 0) deltaHtml = `<span class="rank-delta up">▲ ${diff}계단 상승</span>`;
+                    else if (diff < 0) deltaHtml = `<span class="rank-delta down">▼ ${Math.abs(diff)}계단 하락</span>`;
+                    else deltaHtml = `<span class="rank-delta flat">− 순위 유지</span>`;
+                }
+                localStorage.setItem(RANK_PREV_KEY, String(myRank));
+            }
+
+            badge.innerHTML = `🎯 ${trackDelta ? '내 순위' : '예상 순위'}: ${myRank.toLocaleString()}위 ${deltaHtml}`;
+            badge.style.display = 'block';
+
+            const row = (label, r, cls) => r
+                ? `<div class="rn-row ${cls}"><span class="rn-label">${label}</span><span class="rn-name">${escapeHTML(r.name)}</span><span class="rn-score">${(r.score || 0).toLocaleString()}</span></div>`
+                : '';
+            nbox.innerHTML = tierHtml +
+                row(`▲ ${myRank - 1}위`, above, 'rn-above') +
+                `<div class="rn-row rn-me"><span class="rn-label">내 기록</span><span class="rn-name">${escapeHTML(name)}</span><span class="rn-score">${(score || 0).toLocaleString()}</span></div>` +
+                row(`▼ ${myRank + 1}위`, below, 'rn-below');
+            nbox.style.display = 'block';
+        } catch (e) {
+            badge.style.display = 'none';
+            nbox.innerHTML = tierHtml;
+            nbox.style.display = 'block';
+        }
     }
 
     async function loadRanking() {
@@ -1409,6 +1477,8 @@
             p_date:    today
         };
         if (groupId) rpcParams.p_group_id = groupId;
+        // 로그인 계정이면 uid도 같이 저장 — 기기가 바뀌어도 "내 최고기록"이 계정에 귀속되게
+        try { if (window.Auth) { const uid = await Auth.currentUid(); if (uid) rpcParams.p_uid = uid; } } catch (e) {}
         // 성장 그래프용 — 매 판 점수 이력 누적(이중저장, 예외 안 던짐; rpc 실패와 무관하게 로컬 기록 보존)
         if (window.Growth) Growth.record({ game: gameId, name: safeName, score: safeScore, grade: rpcParams.p_grade, combo: rpcParams.p_combo, correct: rpcParams.p_correct });
         // supabase-js는 실패해도 reject하지 않고 {error}로 resolve — 직접 확인해 throw해야

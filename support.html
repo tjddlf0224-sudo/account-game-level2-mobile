@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>전산회계 오락실 — 고객 지원</title>
 <meta name="description" content="전산회계 오락실 회계 교육 게임 앱의 고객 지원 및 문의 페이지입니다.">
 <style>
@@ -17,7 +17,7 @@
     color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased;
     min-height:100vh;
   }
-  .wrap{max-width:760px;margin:0 auto;padding:48px 20px 80px}
+  .wrap{max-width:760px;margin:0 auto;padding:calc(48px + env(safe-area-inset-top)) 20px calc(80px + var(--ad-banner-h, 0px))}
   header{text-align:center;margin-bottom:40px}
   .badge{
     display:inline-block;font-size:13px;color:var(--accent2);

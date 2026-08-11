@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -42,7 +42,7 @@ body {
 .top-bar {
   position: relative; z-index: 10;
   display: flex; align-items: center;
-  padding: 18px 24px;
+  padding: calc(18px + env(safe-area-inset-top)) 24px 18px;
   border-bottom: 1px solid rgba(255,255,255,0.07);
   background: rgba(2,8,16,0.7);
   backdrop-filter: blur(12px);
@@ -72,7 +72,7 @@ body {
   position: relative; z-index: 1;
   max-width: 640px;
   margin: 0 auto;
-  padding: 36px 24px 60px;
+  padding: 36px 24px calc(60px + var(--ad-banner-h, 0px));
 }
 
 /* 내 닉네임 표시 */
@@ -134,6 +134,69 @@ body {
   cursor: pointer; transition: all 0.2s; white-space: nowrap;
 }
 .current-group-bar .cg-leave:hover { border-color: var(--pk); color: var(--pk); }
+.current-group-bar .cg-hof {
+  background: rgba(255,214,0,0.1); border: 1px solid rgba(255,214,0,0.35);
+  border-radius: 8px; padding: 6px 12px;
+  color: var(--gd); font-size: 0.75rem; font-weight: 700;
+  cursor: pointer; transition: all 0.2s; white-space: nowrap;
+}
+.current-group-bar .cg-hof:hover { background: rgba(255,214,0,0.18); }
+
+/* 그룹 명예의 전당 */
+.hof-overlay {
+  display: none; position: fixed; inset: 0; z-index: 300;
+  background: rgba(2,8,16,0.92); backdrop-filter: blur(10px);
+  align-items: flex-start; justify-content: center;
+  padding: max(20px, env(safe-area-inset-top)) 16px calc(20px + env(safe-area-inset-bottom));
+  overflow-y: auto;
+}
+.hof-overlay.show { display: flex; }
+.hof-panel {
+  width: 100%; max-width: 480px;
+  background: rgba(10,12,20,0.98); border: 1px solid var(--border);
+  border-radius: 18px; padding: 18px; margin: auto;
+}
+.hof-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.hof-title { font-family: 'Black Han Sans'; font-size: 1.1rem; color: var(--gd); }
+.hof-close {
+  background: rgba(255,255,255,0.06); border: none; color: rgba(255,255,255,0.6);
+  width: 30px; height: 30px; border-radius: 50%; font-size: 0.9rem; cursor: pointer;
+}
+.hof-mode-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
+.hof-mode-tab {
+  flex: 1; background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+  color: rgba(255,255,255,0.6); font-size: 0.82rem; font-weight: 700; padding: 10px; border-radius: 10px;
+  cursor: pointer; transition: all 0.2s;
+}
+.hof-mode-tab.active { background: rgba(255,214,0,0.12); border-color: var(--gd); color: var(--gd); }
+.hof-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px solid var(--border); }
+.hof-tab {
+  flex-shrink: 0; background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+  color: rgba(255,255,255,0.6); font-size: 0.78rem; padding: 8px 14px; border-radius: 20px;
+  cursor: pointer; white-space: nowrap; transition: all 0.2s;
+}
+.hof-tab.active { background: rgba(0,242,255,0.12); border-color: var(--cy); color: var(--cy); font-weight: 700; }
+.hof-body { min-height: 120px; }
+.hof-row {
+  display: grid; grid-template-columns: 44px 1fr auto; align-items: center; gap: 10px;
+  padding: 10px 6px; border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.hof-row:last-child { border-bottom: none; }
+.hof-row.hof-me { background: rgba(0,242,255,0.07); border-radius: 10px; }
+.hof-num { font-size: 0.85rem; color: rgba(255,255,255,0.35); text-align: center; }
+.hof-num.top { font-size: 1.2rem; }
+.hof-name { font-weight: 700; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hof-score { color: var(--gd); font-weight: 700; font-size: 0.9rem; text-align: right; }
+.hof-empty { text-align: center; padding: 30px 0; color: rgba(255,255,255,0.3); font-size: 0.9rem; }
+.cross-row {
+  display: grid; grid-template-columns: 44px 1fr auto auto; align-items: center; gap: 10px;
+  padding: 10px 6px; border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.cross-row:last-child { border-bottom: none; }
+.cross-row.cross-me { background: rgba(180,79,255,0.1); border-radius: 10px; }
+.cross-name { font-weight: 700; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cross-count { font-size: 0.7rem; color: rgba(255,255,255,0.35); text-align: right; }
+.cross-avg { color: var(--gd); font-weight: 700; font-size: 0.9rem; text-align: right; }
 
 /* 섹션 탭 */
 .mode-tabs {
@@ -425,8 +488,8 @@ body {
 .admin-link-btn:hover { background: rgba(0,242,255,0.1); border-color: rgba(0,242,255,0.4); color: var(--cy); }
 
 @media (max-width: 480px) {
-  .page-wrap { padding: 24px 16px 48px; }
-  .top-bar { padding: 14px 16px; }
+  .page-wrap { padding: 24px 16px calc(48px + var(--ad-banner-h, 0px)); }
+  .top-bar { padding: calc(14px + env(safe-area-inset-top)) 16px; }
   .mode-tab { padding: 16px 12px; }
   .mode-tab .tab-icon { font-size: 1.6rem; }
   .create-card, .join-card { padding: 20px 16px; }
@@ -465,7 +528,24 @@ body {
       <div class="cg-label">CURRENT GROUP</div>
       <div class="cg-name" id="current-group-name">—</div>
     </div>
+    <button class="cg-hof" onclick="openHallOfFame()">🏆 명예의 전당</button>
     <button class="cg-leave" onclick="leaveGroup()">나가기</button>
+  </div>
+
+  <!-- 그룹 명예의 전당 -->
+  <div class="hof-overlay" id="hof-overlay">
+    <div class="hof-panel">
+      <div class="hof-header">
+        <div class="hof-title">🏆 명예의 전당</div>
+        <button class="hof-close" onclick="closeHallOfFame()">✕</button>
+      </div>
+      <div class="hof-mode-tabs">
+        <button class="hof-mode-tab active" id="hof-mode-group" onclick="switchHofMode('group')">👤 우리 그룹 랭킹</button>
+        <button class="hof-mode-tab" id="hof-mode-cross" onclick="switchHofMode('cross')">⚔️ 그룹 대항전</button>
+      </div>
+      <div class="hof-tabs" id="hof-tabs"></div>
+      <div class="hof-body" id="hof-body"></div>
+    </div>
   </div>
 
   <!-- 모드 선택 탭 -->
@@ -924,6 +1004,137 @@ function leaveGroup() {
       ? allGroups.filter(g => g.name.toLowerCase().includes(document.getElementById('search-input').value.trim().toLowerCase()))
       : allGroups
   );
+}
+
+/* ═══════════════════════════════════════
+   그룹 명예의 전당
+═══════════════════════════════════════ */
+const HOF_GAMES = [
+  { id: 'acid',    name: '계정과목 산성비',   icon: '☁️' },
+  { id: 'memory',  name: '기억의 전당',       icon: '🧩' },
+  { id: 'debit',   name: '차변대변',          icon: '⚡' },
+  { id: 'factory', name: '결산분개 공장',     icon: '🏭' },
+  { id: 'flight',  name: '회계 플라이트',     icon: '🛩' },
+];
+let hofCurrentGame = 'acid';
+let hofMode = 'group';
+
+function openHallOfFame() {
+  const gid = localStorage.getItem('hub_group_id');
+  if (!gid) return;
+  document.getElementById('hof-overlay').classList.add('show');
+  switchHofMode('group');
+}
+function closeHallOfFame() {
+  document.getElementById('hof-overlay').classList.remove('show');
+}
+function switchHofMode(mode) {
+  hofMode = mode;
+  document.getElementById('hof-mode-group').classList.toggle('active', mode === 'group');
+  document.getElementById('hof-mode-cross').classList.toggle('active', mode === 'cross');
+  if (mode === 'group') {
+    document.getElementById('hof-tabs').style.display = 'flex';
+    renderHofTabs();
+    loadHofRanking(hofCurrentGame);
+  } else {
+    document.getElementById('hof-tabs').style.display = 'none';
+    loadCrossGroupRanking();
+  }
+}
+function renderHofTabs() {
+  document.getElementById('hof-tabs').innerHTML = HOF_GAMES.map(g =>
+    `<button class="hof-tab ${g.id === hofCurrentGame ? 'active' : ''}" onclick="switchHofGame('${g.id}')">${g.icon} ${g.name}</button>`
+  ).join('');
+}
+function switchHofGame(gameId) {
+  hofCurrentGame = gameId;
+  renderHofTabs();
+  loadHofRanking(gameId);
+}
+async function loadHofRanking(gameId) {
+  const body = document.getElementById('hof-body');
+  body.innerHTML = '<div class="hof-empty"><div class="spinner"></div></div>';
+  const gid = localStorage.getItem('hub_group_id');
+  try {
+    const { data, error } = await db
+      .from('scores')
+      .select('name,score,grade')
+      .eq('game_id', gameId)
+      .eq('group_id', gid)
+      .order('score', { ascending: false })
+      .limit(15);
+    if (error) throw error;
+    renderHofList(data || []);
+  } catch (e) {
+    body.innerHTML = '<div class="hof-empty">랭킹을 불러오지 못했어요</div>';
+  }
+}
+function renderHofList(list) {
+  const body = document.getElementById('hof-body');
+  if (!list.length) { body.innerHTML = '<div class="hof-empty">아직 이 게임의 그룹 기록이 없습니다</div>'; return; }
+  const me = (localStorage.getItem('hub_nickname') || '').trim();
+  body.innerHTML = list.map((r, i) => {
+    const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1) + '위';
+    return `<div class="hof-row ${escapeHTML(r.name) === escapeHTML(me) ? 'hof-me' : ''}">
+      <div class="hof-num ${i < 3 ? 'top' : ''}">${medal}</div>
+      <div class="hof-name">${escapeHTML(r.name)}</div>
+      <div class="hof-score">${(r.score || 0).toLocaleString()}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ── 그룹 대항전: 학생 1인당 평균 점수(전 게임 합산) ── */
+async function loadCrossGroupRanking() {
+  const body = document.getElementById('hof-body');
+  body.innerHTML = '<div class="hof-empty"><div class="spinner"></div></div>';
+  try {
+    const [{ data: scoreRows, error: scoreErr }, { data: groupRows, error: groupErr }] = await Promise.all([
+      db.from('scores').select('group_id,name,score').not('group_id', 'is', null),
+      db.from('groups').select('id,name'),
+    ]);
+    if (scoreErr) throw scoreErr;
+    if (groupErr) throw groupErr;
+
+    const groupNameMap = {};
+    (groupRows || []).forEach(g => { groupNameMap[g.id] = g.name; });
+
+    // group_id -> { name -> totalScore }
+    const perGroupStudents = {};
+    (scoreRows || []).forEach(r => {
+      if (!perGroupStudents[r.group_id]) perGroupStudents[r.group_id] = {};
+      perGroupStudents[r.group_id][r.name] = (perGroupStudents[r.group_id][r.name] || 0) + (r.score || 0);
+    });
+
+    const ranked = Object.entries(perGroupStudents).map(([gid, students]) => {
+      const names = Object.keys(students);
+      const total = names.reduce((s, n) => s + students[n], 0);
+      return {
+        gid,
+        name: groupNameMap[gid] || gid,
+        studentCount: names.length,
+        avgPerStudent: names.length ? total / names.length : 0,
+      };
+    }).filter(g => g.studentCount > 0)
+      .sort((a, b) => b.avgPerStudent - a.avgPerStudent);
+
+    renderCrossGroupList(ranked);
+  } catch (e) {
+    body.innerHTML = '<div class="hof-empty">랭킹을 불러오지 못했어요</div>';
+  }
+}
+function renderCrossGroupList(ranked) {
+  const body = document.getElementById('hof-body');
+  if (!ranked.length) { body.innerHTML = '<div class="hof-empty">아직 그룹 기록이 없습니다</div>'; return; }
+  const myGid = localStorage.getItem('hub_group_id');
+  body.innerHTML = ranked.map((g, i) => {
+    const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1) + '위';
+    return `<div class="cross-row ${g.gid === myGid ? 'cross-me' : ''}">
+      <div class="hof-num ${i < 3 ? 'top' : ''}">${medal}</div>
+      <div class="cross-name">${escapeHTML(g.name)}</div>
+      <div class="cross-count">${g.studentCount}명</div>
+      <div class="cross-avg">${Math.round(g.avgPerStudent).toLocaleString()}</div>
+    </div>`;
+  }).join('');
 }
 
 /* ═══════════════════════════════════════

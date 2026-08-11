@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>오답노트 · 약점복습 | 전산회계 2급</title>
 <meta name="description" content="틀린 문제만 모아 다시 풀고 약점을 잡는 오답노트">
 <style>
@@ -14,8 +14,8 @@
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   body{margin:0;background:var(--bg);color:var(--txt);
        font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
-       padding:0 0 60px;}
-  .wrap{max-width:640px;margin:0 auto;padding:18px 16px;}
+       padding:0 0 calc(60px + var(--ad-banner-h, 0px));}
+  .wrap{max-width:640px;margin:0 auto;padding:calc(18px + env(safe-area-inset-top)) 16px 18px;}
   .top{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
   .back{background:var(--card);border:1px solid var(--line);color:var(--txt);
         border-radius:12px;padding:9px 13px;font-size:.92rem;text-decoration:none;}

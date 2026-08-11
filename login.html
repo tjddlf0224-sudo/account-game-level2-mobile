@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -36,6 +36,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding-bottom: var(--ad-banner-h, 0px);
   background-image:
     radial-gradient(ellipse 60% 40% at 15% 20%, rgba(0,242,255,0.07) 0%, transparent 60%),
     radial-gradient(ellipse 50% 35% at 85% 80%, rgba(180,79,255,0.07) 0%, transparent 55%),
@@ -48,7 +49,7 @@ body {
 /* ── 그룹 모드 버튼 (우측 상단) ── */
 .group-mode-btn {
   position: fixed;
-  top: 20px; right: 20px;
+  top: calc(20px + env(safe-area-inset-top)); right: 20px;
   z-index: 100;
   display: flex;
   align-items: center;
@@ -190,6 +191,43 @@ body {
 }
 .err-msg.show { display: block; }
 
+/* ── 소셜 로그인 (앱에서만 표시 — Auth.socialAvailable()로 판단) ── */
+.social-block { display: none; margin-bottom: 22px; }
+.social-block.show { display: block; }
+.social-btn {
+  width: 100%;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  padding: 14px;
+  border-radius: 14px;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 0.98rem; font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s, opacity 0.2s;
+  margin-bottom: 10px;
+  border: 1px solid transparent;
+}
+.social-btn:active { transform: scale(0.98); }
+.social-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.social-btn svg { width: 20px; height: 20px; flex: none; }
+.social-btn.google { background: #fff; color: #1f1f1f; }
+.social-btn.apple { background: #000; color: #fff; border-color: rgba(255,255,255,0.15); }
+.social-divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 18px 0;
+  font-size: 0.72rem; color: rgba(255,255,255,0.3);
+  letter-spacing: 0.5px;
+}
+.social-divider::before, .social-divider::after {
+  content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.1);
+}
+.pending-auth-hint {
+  font-size: 0.8rem; color: var(--cy);
+  background: rgba(0,242,255,0.08); border: 1px solid rgba(0,242,255,0.2);
+  border-radius: 12px; padding: 10px 14px;
+  margin-bottom: 16px; display: none; line-height: 1.5;
+}
+.pending-auth-hint.show { display: block; }
+
 /* 시작 버튼 */
 .start-btn {
   width: 100%;
@@ -287,6 +325,20 @@ body {
 
   <!-- 입력 카드 -->
   <div class="login-card">
+    <!-- 소셜 로그인 (앱에서만 노출, 웹에서는 JS가 숨김 유지) -->
+    <div class="social-block" id="social-block">
+      <button class="social-btn google" id="google-btn" onclick="socialLogin('google')">
+        <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M23.52 12.27c0-.85-.08-1.67-.22-2.45H12v4.64h6.47a5.53 5.53 0 0 1-2.4 3.63v3.02h3.88c2.27-2.09 3.57-5.17 3.57-8.84z"/><path fill="#34A853" d="M12 24c3.24 0 5.96-1.07 7.95-2.9l-3.88-3.02c-1.08.72-2.45 1.15-4.07 1.15-3.13 0-5.78-2.11-6.73-4.96H1.27v3.11A12 12 0 0 0 12 24z"/><path fill="#FBBC05" d="M5.27 14.27a7.2 7.2 0 0 1 0-4.54V6.62H1.27a12 12 0 0 0 0 10.76l4-3.11z"/><path fill="#EA4335" d="M12 4.77c1.77 0 3.35.61 4.6 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0A12 12 0 0 0 1.27 6.62l4 3.11C6.22 6.88 8.87 4.77 12 4.77z"/></svg>
+        Google로 계속하기
+      </button>
+      <button class="social-btn apple" id="apple-btn" onclick="socialLogin('apple')">
+        <svg viewBox="0 0 24 24" fill="#fff"><path d="M16.36 1.43c0 1.14-.46 2.2-1.2 2.98-.83.87-2.13 1.56-3.24 1.47-.13-1.1.42-2.26 1.14-3.02.82-.88 2.26-1.56 3.3-1.43zm3.63 16.5c-.5 1.16-.98 1.87-1.76 2.98-1.09 1.55-2.62 3.48-4.53 3.5-1.7.02-2.14-1.1-4.44-1.09-2.31.01-2.8 1.11-4.5 1.1-1.9-.02-3.35-1.76-4.44-3.31C-2.94 17.3-2.02 11.4 1.36 8.5c1.68-1.44 3.5-1.5 4.7-1.5 1.35 0 2.32.62 3.5.62 1.14 0 2.06-.63 3.53-.63 1.06 0 3.13.15 4.63 2.15-3.62 2.04-3.04 6.24.27 7.79z"/></svg>
+        Apple로 계속하기
+      </button>
+    </div>
+    <div class="social-divider" id="social-divider" style="display:none">또는 닉네임으로</div>
+    <div class="pending-auth-hint" id="pending-auth-hint">로그인 성공! 사용할 닉네임을 정하고 시작해주세요.</div>
+
     <label class="field-label" for="nickname">NICKNAME</label>
     <input
       class="nickname-input"
@@ -380,7 +432,42 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('gs-name-el').textContent = gname;
     document.getElementById('group-status').classList.add('show');
   }
+
+  // 앱(캡차시터)에서만 소셜 로그인 버튼 노출 — 웹(깃허브 페이지)에서는 기존 닉네임 로그인만
+  if (window.Auth && Auth.socialAvailable()) {
+    document.getElementById('social-block').classList.add('show');
+    document.getElementById('social-divider').style.display = 'flex';
+  }
 });
+
+/* ── 소셜 로그인 (Google / Apple) ──
+ * 이미 등록된 uid면 바로 허브로, 처음 온 uid면 닉네임 확정 단계로 이어간다
+ * (기존 닉네임 입력창을 그대로 재사용 — window._pendingAuth 로 상태만 표시). */
+window._pendingAuth = null;
+async function socialLogin(kind) {
+  const gBtn = document.getElementById('google-btn');
+  const aBtn = document.getElementById('apple-btn');
+  gBtn.disabled = true; aBtn.disabled = true;
+  errMsg.classList.remove('show');
+  try {
+    const res = await Auth.signIn(kind);               // { uid, email, provider }
+    const player = await Auth.loadPlayer(res.uid);      // 이전에 가입한 적 있으면 {name,avatar,group_id}
+    if (player && player.name) {
+      Auth.applyLocal(res.uid, player.name, player.avatar);
+      window.location.href = 'index.html';
+      return;
+    }
+    // 처음 로그인 — 닉네임을 정해야 함. 기존 입력창을 그대로 사용.
+    window._pendingAuth = { uid: res.uid, provider: res.provider };
+    document.getElementById('pending-auth-hint').classList.add('show');
+    if (input.dataset.autoGenerated === 'true') { input.select(); }
+    input.focus();
+  } catch (e) {
+    showErr('로그인에 실패했어요. 다시 시도해주세요.');
+  } finally {
+    gBtn.disabled = false; aBtn.disabled = false;
+  }
+}
 
 input.addEventListener('keydown', e => {
   if (e.key === 'Enter') doLogin();
@@ -388,6 +475,9 @@ input.addEventListener('keydown', e => {
 });
 input.addEventListener('input', () => {
   errMsg.classList.remove('show');
+  // 경고 뜬 뒤 이름을 바꾸면 이전 이름에 대한 중복검사 면제를 초기화
+  window._claimedName = null;
+  document.getElementById('start-btn').textContent = '🚀 훈련 시작';
 });
 // 첫 글자 입력 시 자동 생성 닉네임 즉시 대체
 input.addEventListener('keydown', e => {
@@ -424,9 +514,33 @@ async function doLogin() {
   btn.disabled = true;
   btn.textContent = '확인 중...';
 
+  // 소셜 로그인 직후 첫 닉네임 확정 단계라면, players 표에 uid로 등록하고 끝낸다
+  // (scores 표 기준 중복검사가 아니라 Auth.nameAvailable — 내 uid가 이미 쓰던 이름이면 통과)
+  if (window._pendingAuth) {
+    const { uid, provider } = window._pendingAuth;
+    const available = await Auth.nameAvailable(name, uid);
+    if (!available) {
+      btn.disabled = false; btn.textContent = '🚀 훈련 시작';
+      showErr('이미 사용 중인 닉네임입니다. 다른 닉네임을 입력해주세요');
+      return;
+    }
+    const saved = await Auth.savePlayer(uid, name, 'rookie', provider);
+    if (!saved) {
+      btn.disabled = false; btn.textContent = '🚀 훈련 시작';
+      showErr('저장에 실패했어요. 네트워크를 확인하고 다시 시도해주세요');
+      return;
+    }
+    Auth.applyLocal(uid, name, 'rookie');
+    btn.textContent = '이동 중...';
+    window.location.href = 'index.html';
+    return;
+  }
+
   // 서버 닉네임 중복 확인 — 동명이인의 점수가 한 기록으로 병합되는 것 방지
   // (이 기기에서 쓰던 닉네임 그대로면 본인이므로 통과, 오프라인이면 검사 생략)
-  // 앱 재설치/데이터 삭제로 localStorage가 비어도 "본인 확인" 버튼으로 복구 가능
+  // 다른 기기/브라우저에서 예전 닉네임 그대로 이어하려는 학생을 막지 않도록,
+  // 하드 블록 대신 경고만 띄우고 같은 버튼을 한 번 더 누르면 통과시킨다.
+  // (구글/애플 소셜 로그인은 위 window._pendingAuth 분기에서 uid 기준으로 여전히 확실하게 막는다)
   const saved = (localStorage.getItem('hub_nickname') || '').trim();
   if (name !== saved && window._claimedName !== name) {
     try {
@@ -436,9 +550,9 @@ async function doLogin() {
         const { data, error } = await db.from('scores').select('name').eq('name', name).limit(1);
         if (!error && data && data.length) {
           btn.disabled = false;
-          btn.textContent = '🚀 훈련 시작';
-          showErr('이미 등록된 닉네임입니다. 예전에 쓰던 본인 닉네임이면 아래 버튼을 누르세요');
-          showClaimButton(name);
+          btn.textContent = '⚠️ 한 번 더 누르면 이어서 진행';
+          showErr('이미 등록된 닉네임이에요. 예전에 쓰던 본인 닉네임이 맞으면 시작 버튼을 한 번 더 눌러 이어서 진행하세요. 다른 사람 닉네임이면 새로 지어주세요.');
+          window._claimedName = name; // 다음 클릭부터는 이 이름에 한해 중복검사 통과
           return;
         }
       }
@@ -454,30 +568,6 @@ async function doLogin() {
 
   btn.textContent = '이동 중...';
   window.location.href = 'index.html';
-}
-
-// "본인 확인" 버튼 — 앱 재설치 등으로 localStorage가 사라진 학생이
-// 예전 닉네임(서버 기록 보유)을 되찾는 경로. 두 번째 클릭은 검사를 건너뛴다.
-// (Android WebView는 confirm()이 무동작이라 대화상자 대신 버튼 방식 사용)
-function showClaimButton(name) {
-  let claim = document.getElementById('claim-btn');
-  if (!claim) {
-    claim = document.createElement('button');
-    claim.id = 'claim-btn';
-    claim.type = 'button';
-    claim.style.cssText = 'display:block;width:100%;margin-top:10px;padding:12px;border-radius:12px;'
-      + 'border:1px solid rgba(255,210,74,.45);background:rgba(255,210,74,.12);color:#ffd24a;'
-      + 'font-size:.9rem;font-weight:700;cursor:pointer;';
-    const startBtn = document.getElementById('start-btn');
-    startBtn.parentNode.insertBefore(claim, startBtn.nextSibling);
-  }
-  claim.textContent = '✅ "' + name + '" 은(는) 예전에 쓰던 내 닉네임입니다 — 이어서 사용';
-  claim.style.display = 'block';
-  claim.onclick = function () {
-    window._claimedName = name;   // 이 이름에 한해 중복검사 1회 면제
-    claim.style.display = 'none';
-    doLogin();
-  };
 }
 
 function clearGroup() {

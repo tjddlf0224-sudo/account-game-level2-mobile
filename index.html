@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -67,7 +67,7 @@ body {
   position: relative; z-index: 1;
   max-width: 1100px;
   margin: 0 auto;
-  padding: 60px 40px 80px;
+  padding: 60px 40px calc(80px + var(--ad-banner-h, 0px));
 }
 
 /* ── 헤더 ── */
@@ -350,7 +350,7 @@ body {
 @media (max-width: 600px) {
 
   .wrap {
-    padding: 32px 16px 24px;
+    padding: 32px 16px calc(24px + var(--ad-banner-h, 0px));
   }
 
   /* 헤더 */
@@ -433,7 +433,7 @@ body {
 
 /* ── 태블릿 (601px ~ 900px) — 2열 그리드 ── */
 @media (min-width: 601px) and (max-width: 900px) {
-  .wrap { padding: 40px 24px 60px; }
+  .wrap { padding: 40px 24px calc(60px + var(--ad-banner-h, 0px)); }
   .hub-title { font-size: 2.8rem; }
   .games-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -448,7 +448,9 @@ body {
   top: 0; left: 0; right: 0;
   z-index: 200;
   display: flex; align-items: center; gap: 10px;
-  padding: 12px 20px;
+  /* 캡차시터 웹뷰는 노치/다이나믹아일랜드 아래까지 그려지므로 안전영역만큼 더 밀어준다.
+     (구 네이티브 앱은 웹뷰 자체가 이미 세이프에어리어 안쪽이라 필요 없었다) */
+  padding: calc(12px + env(safe-area-inset-top)) 20px 12px;
   background: rgba(2,8,16,0.82);
   backdrop-filter: blur(14px);
   border-bottom: 1px solid rgba(255,255,255,0.07);
@@ -542,12 +544,12 @@ body {
   color: var(--pk);
 }
 
-/* 유저바 공간 확보용 패딩 */
-.wrap { padding-top: 96px !important; }
+/* 유저바 공간 확보용 패딩 (유저바가 안전영역만큼 커진 만큼 그대로 더해준다) */
+.wrap { padding-top: calc(96px + env(safe-area-inset-top)) !important; }
 @media (max-width: 600px) {
-  .user-bar { padding: 10px 14px; }
+  .user-bar { padding-left: 14px; padding-right: 14px; }
   .group-mode-btn { font-size: 0.58rem; padding: 7px 12px; }
-  .wrap { padding-top: 80px !important; }
+  .wrap { padding-top: calc(80px + env(safe-area-inset-top)) !important; }
   .user-bar .ub-group { max-width: 100px; font-size: 0.68rem; }
 }
 
@@ -619,32 +621,6 @@ body {
   .examday-box .ed-set-btn { padding: 7px 12px; font-size: 0.56rem; }
 }
 
-/* ── 광고 제거 버튼 ── */
-.remove-ads-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    width: 100%;
-    max-width: 340px;
-    margin: 0 auto 12px;
-    padding: 12px 20px;
-    background: rgba(255,214,0,0.08);
-    border: 1.5px solid rgba(255,214,0,0.35);
-    border-radius: 50px;
-    font-family: 'Black Han Sans', sans-serif;
-    font-size: 0.9rem;
-    color: #ffd600;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-.remove-ads-btn:active { background: rgba(255,214,0,0.2); }
-.remove-ads-btn.purchased {
-    border-color: rgba(0,230,118,0.35);
-    color: #00e676;
-    background: rgba(0,230,118,0.08);
-    pointer-events: none;
-}
 </style>
 </head>
 <body>
@@ -767,9 +743,15 @@ body {
     <button class="logout-btn" onclick="changeNickname()" style="margin-right:8px;">✏️ &nbsp;닉네임 변경</button>
     <button class="logout-btn" onclick="doLogout()">⏻ &nbsp;로그아웃</button>
   </div>
+  <!-- 소셜(Firebase) 계정으로 로그인했을 때만 노출 — 애플/구글 심사 요건상
+       "계정 생성"을 제공하면 앱 내 탈퇴 경로도 반드시 있어야 한다. -->
+  <div class="hub-footer" id="delete-account-row" style="margin-top:10px;display:none;">
+    <button class="logout-btn" onclick="doDeleteAccount()" style="color:var(--pk);border-color:rgba(255,45,120,0.3);">🗑️ &nbsp;회원 탈퇴</button>
+  </div>
 
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ── 로그인 체크 & 유저바 초기화 ──
 (function() {
@@ -786,6 +768,11 @@ body {
   if (gname) {
     document.getElementById('ub-group-name').textContent = gname;
     document.getElementById('ub-group-el').classList.add('show');
+  }
+  // 소셜(Firebase) 계정으로 로그인한 경우에만 탈퇴 버튼 노출
+  if (localStorage.getItem('hub_uid')) {
+    const row = document.getElementById('delete-account-row');
+    if (row) row.style.display = 'block';
   }
 })();
 
@@ -871,8 +858,10 @@ function hideAdPlaceholder() {}
 })();
 
 // ── 로그아웃 ──
-function doLogout() {
+async function doLogout() {
   if (!confirm('로그아웃 하시겠습니까?\n닉네임과 그룹 정보가 초기화됩니다.')) return;
+  // 소셜(Firebase) 로그인 세션이 있으면 그것도 정리 (hub_uid/hub_nickname/hub_avatar 포함)
+  if (window.Auth && Auth.socialAvailable()) { try { await Auth.signOut(); } catch (e) {} }
   localStorage.removeItem('hub_nickname');
   localStorage.removeItem('hub_group_id');
   localStorage.removeItem('hub_group_name');
@@ -881,6 +870,32 @@ function doLogout() {
   );
   const base = location.pathname.replace(/[^/]*$/, '');
   window.location.replace(base + 'login.html');
+}
+
+// ── 회원 탈퇴 (소셜 로그인 계정만) — 되돌릴 수 없어서 2단계 탭 확인을 쓴다
+// (이 코드베이스 다른 곳들과 동일 패턴: Android WebView confirm() 이슈와 무관하게
+//  실수로 한 번 누른 것만으로 탈퇴되는 걸 막기 위한 이중 확인). ──
+async function doDeleteAccount() {
+  const btn = event && event.target ? event.target : null;
+  // 한 번 더 탭하는 것만으로는 의도치 않게(연타 등) 눌릴 수 있어서, 되돌릴 수 없는
+  // 작업인 탈퇴만큼은 "탈퇴"라는 글자를 직접 입력해야만 진행되게 한다.
+  const typed = prompt('정말 탈퇴하시겠어요?\n계정과 모든 기록이 영구히 삭제됩니다.\n\n계속하려면 아래에 "탈퇴"라고 입력해주세요.');
+  if (typed === null) return;               // 취소
+  if (typed.trim() !== '탈퇴') {
+    alert('입력한 내용이 "탈퇴"와 일치하지 않아 취소했어요.');
+    return;
+  }
+  if (!window.Auth || !Auth.socialAvailable()) return;
+  try {
+    if (btn) btn.textContent = '삭제 중...';
+    await Auth.deleteAccount();
+    alert('계정이 삭제됐어요. 그동안 함께해줘서 고마워요!');
+    const base = location.pathname.replace(/[^/]*$/, '');
+    window.location.replace(base + 'login.html');
+  } catch (e) {
+    alert('탈퇴에 실패했어요. 네트워크를 확인하고 다시 시도해주세요.');
+    if (btn) btn.textContent = '🗑️  회원 탈퇴';
+  }
 }
 
 // ── 닉네임 변경 (점수·오답노트도 새 이름으로 이전) ──
@@ -946,39 +961,6 @@ async function changeNickname() {
 </script>
 
 <script>
-// ── 광고 제거 기능 ──
-function purchaseRemoveAds() {
-    if (window.AdBridge && typeof AdBridge.purchaseRemoveAds === 'function') {
-        AdBridge.purchaseRemoveAds();
-    } else {
-        alert('구매 기능은 앱에서만 사용 가능합니다.');
-    }
-}
-
-// 광고 제거 완료 시 Kotlin에서 호출
-function onAdsRemoved() {
-    const btn = document.getElementById('remove-ads-btn');
-    if (btn) {
-        btn.textContent = '✅ 광고 제거 완료';
-        btn.classList.add('purchased');
-    }
-}
-
-// 앱 시작 시 광고 제거 여부 확인
-window.addEventListener('DOMContentLoaded', function() {
-    // 약간의 딜레이 후 확인 (WebView 브릿지 초기화 대기)
-    setTimeout(function() {
-        if (window.AdBridge && typeof AdBridge.isAdsRemoved === 'function') {
-            if (AdBridge.isAdsRemoved()) {
-                onAdsRemoved();
-            }
-        }
-    }, 500);
-});
-</script>
-
-
-<script>
 // ── 스테이지 노드맵: 진행 상태(잠김/도전중/클리어) + 징검다리 경로 라이트업 ──
 // 체인 규칙: 이전 스테이지를 열었고(open) 클리어했을 때만(cleared) 다음 스테이지가 자동으로 열린다.
 // 광고 시청으로 얻는 hub_adunlock_<id> 는 그 스테이지 하나만 여는 개별 예외이며 체인에는 반영되지 않는다
@@ -1039,6 +1021,58 @@ function renderStageMap() {
 }
 renderStageMap();
 
+// ── 계정 기준 "내 최고기록" 동기화 ──
+// 기기 localStorage 는 기기가 바뀌면 비어서 "내 최고 0점"으로 보이는 문제가 있었다.
+// 로그인 계정(uid)이 있으면 서버(scores.uid)가 진짜 최고기록을 갖고 있으므로,
+// 우선 로컬 값으로 즉시 렌더(위에서 이미 함)한 뒤, 서버 값이 오면 덮어쓰고 다시 그린다.
+// 로그인 계정(uid)뿐 아니라 "닉네임만 쓰는" 사용자도 대상으로 한다 — 닉네임이 서버 scores의
+// 실질적인 키라서(로그인 계정도 결국 닉네임 unique 제약으로 연결됨) 닉네임 기준으로도 동기화 가능.
+// 그리고 기기에서 계정/닉네임이 바뀌면(로그아웃 후 다른 걸로 로그인 등) 이전 사람 진행상황이
+// 새 사람한테 그대로 보이던 문제가 있었다 — identityKey 를 기억해뒀다가 바뀌면 강제로 리셋한다.
+async function syncBestScoresFromAccount() {
+    try {
+        const uid = window.Auth ? await Auth.currentUid() : null;
+        const nickname = (localStorage.getItem('hub_nickname') || '').trim();
+        const identityKey = uid ? ('uid:' + uid) : (nickname ? ('name:' + nickname) : null);
+        if (!identityKey) return;               // 로그인도 닉네임도 없으면 동기화할 대상이 없음
+
+        const lastIdentity = localStorage.getItem('_synced_identity');
+        const identityChanged = lastIdentity !== null && lastIdentity !== identityKey;
+
+        const db = _sbClient();
+        if (!db) return;
+        let query = db.from('scores').select('game_id, score');
+        query = uid ? query.eq('uid', uid) : query.eq('name', nickname);
+        const { data, error } = await query;
+        if (error) return;                      // 네트워크 실패 시 기존 로컬 값 유지(오프라인 폴백)
+
+        const byGame = {};
+        (data || []).forEach(r => { byGame[r.game_id] = r.score; });
+
+        let changed = false;
+        STAGE_GAMES.forEach(g => {
+            // byGame[g.id] 가 없으면(이 계정/닉네임으로 아직 안 깬 게임) 0으로 — 이전 사람 기록이
+            // 남아있으면 안 되므로 "없으면 그냥 넘어가기"가 아니라 명시적으로 0을 채워야 한다.
+            const serverBest = parseInt(byGame[g.id] || 0, 10) || 0;
+            const localBest = parseInt(localStorage.getItem(g.best) || '0', 10);
+            if (identityChanged || serverBest !== localBest) {
+                localStorage.setItem(g.best, String(serverBest));
+                changed = true;
+            }
+        });
+
+        if (identityChanged) {
+            // 계정/닉네임 전환 — 이전 사람이 광고로 미리 열어둔 스테이지는 새 사람한테 안 넘어가야 함
+            STAGE_GAMES.forEach(g => localStorage.removeItem('hub_adunlock_' + g.id));
+            changed = true;
+        }
+
+        localStorage.setItem('_synced_identity', identityKey);
+        if (changed) renderStageMap();
+    } catch (e) { /* 오프라인이면 기기 값 그대로 사용 */ }
+}
+syncBestScoresFromAccount();
+
 // ── 잠긴 노드 클릭 → 이동 대신 광고 시청으로 즉시 해제 (카파시터의 "확인 후 광고" 동일 규칙) ──
 // Android WebView는 confirm()이 무동작(항상 false)이라 대화상자 대신
 // 이 코드베이스 전반(그룹 나가기·오답노트 비우기 등)과 동일한 2-스텝 탭 확인을 쓴다:
@@ -1065,14 +1099,15 @@ function onNodeClick(e, gid) {
 window._unlockTarget = null;
 function unlockStage(gid) {
     if (!window.AdBridge || typeof AdBridge.showRewarded !== 'function') {
-        alert('이전 스테이지를 먼저 클리어하면 열려요!');
-        return;
-    }
-    if (!AdBridge.isRewardedReady()) {
-        alert('광고를 불러오는 중이에요. 잠시 후 다시 눌러주세요!');
+        // 웹 배포판 등 광고 SDK 자체가 없는 환경 — 광고 실패와 동일하게 그냥 열어준다
+        localStorage.setItem('hub_adunlock_' + gid, '1');
+        renderStageMap();
         return;
     }
     window._unlockTarget = gid;
+    // 광고가 아직 준비 안 됐어도(로딩 중/노필) 시도는 해본다 — 못 띄우면
+    // AdBridge.showRewarded() 가 즉시 onRewardedFailed 를 불러주고, 그건 이미
+    // "광고 실패로 진행을 막지 않는다"로 무조건 열어주게 되어 있다.
     AdBridge.showRewarded();
 }
 // Kotlin/Swift → JS 콜백 (게임 화면들과 동일한 이름 규약)
@@ -1092,8 +1127,7 @@ function onRewardedFailed() {
 }
 </script>
 
-<!-- ── 오답노트: 미니 요약(틀린 문제 수) 표시 ── -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- ── 오답노트: 미니 요약(틀린 문제 수) 표시 (supabase-js는 상단에서 이미 로드됨) ── -->
 <script src="wrongnote.js"></script>
 <script src="growth.js"></script>
 <script>

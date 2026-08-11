@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#020810">
@@ -39,10 +39,10 @@ body{
   transition:transform 0.3s ease;
   overflow-y:auto;
 }
-.main{margin-left:260px;flex:1;position:relative;z-index:1}
+.main{margin-left:260px;flex:1;position:relative;z-index:1;padding-bottom:var(--ad-banner-h, 0px)}
 
 /* ── 사이드바 내부 ── */
-.sb-header{padding:28px 22px 20px}
+.sb-header{padding:calc(28px + env(safe-area-inset-top)) 22px 20px}
 .sb-badge{
   font-family:'Orbitron',monospace;font-size:0.58rem;letter-spacing:3px;
   color:rgba(0,242,255,0.5);margin-bottom:12px;display:block;
@@ -118,7 +118,7 @@ body{
 .sb-back-btn:hover{border-color:rgba(255,255,255,0.25);color:rgba(255,255,255,0.7)}
 
 /* ══ 메인 콘텐츠 ══ */
-.content-wrap{padding:36px 36px 60px}
+.content-wrap{padding:calc(36px + env(safe-area-inset-top)) 36px 60px}
 
 /* 콘텐츠 헤더 */
 .content-header{
@@ -281,6 +281,12 @@ body{
 .exam-badge:active{transform:scale(0.94)}
 .exam-badge.ex-pass{background:linear-gradient(180deg,#2ecc71,#27ae60);color:#fff;border-color:#2ecc71;box-shadow:0 0 10px rgba(46,204,113,0.5)}
 .exam-badge.ex-no{}
+.cert-select{
+  font-family:'Noto Sans KR',sans-serif;font-size:0.72rem;font-weight:600;cursor:pointer;
+  padding:5px 8px;border-radius:8px;white-space:nowrap;max-width:130px;
+  border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.75);
+}
+.cert-select option{background:#0a0e16;color:#fff}
 .student-table tr:hover td{background:rgba(255,255,255,0.02)}
 
 /* 게임 점수 셀 */
@@ -429,7 +435,7 @@ body{
 
 /* ── 모바일 햄버거 ── */
 .menu-toggle{
-  display:none;position:fixed;top:14px;left:14px;z-index:300;
+  display:none;position:fixed;top:calc(14px + env(safe-area-inset-top));left:14px;z-index:300;
   background:rgba(2,8,16,0.9);border:1px solid rgba(255,255,255,0.12);
   border-radius:10px;padding:10px;cursor:pointer;color:#fff;
   font-size:1.2rem;line-height:1;
@@ -446,7 +452,7 @@ body{
   .sidebar-overlay.open{display:block}
   .main{margin-left:0}
   .menu-toggle{display:flex}
-  .content-wrap{padding:24px 16px 48px}
+  .content-wrap{padding:calc(24px + env(safe-area-inset-top)) 16px 48px}
   .summary-grid{grid-template-columns:repeat(2,1fr)}
   .two-col{grid-template-columns:1fr}
   .modal-score-grid{grid-template-columns:repeat(3,1fr)}
@@ -624,6 +630,22 @@ body{
 
       </div>
 
+      <!-- 이론 약점 분석 (주제별) -->
+      <div class="one-col" id="theory-weak-section" style="display:none">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <div class="pt-dot" style="background:var(--cy);box-shadow:0 0 8px var(--cy)"></div>
+              📝 이론 약점 분석 (주제별 오답)
+            </div>
+            <span style="font-size:0.72rem;color:rgba(255,255,255,0.25)" id="theory-weak-meta"></span>
+          </div>
+          <div class="panel-body">
+            <div class="game-bar-list" id="theory-weak-list"></div>
+          </div>
+        </div>
+      </div>
+
       <!-- 학생 상세 분석 테이블 -->
       <div class="one-col">
         <div class="panel">
@@ -645,6 +667,7 @@ body{
                 <th>🛩 플라이트</th>
                 <th>종합</th>
                 <th>합격</th>
+                <th>자격증</th>
               </tr></thead>
               <tbody id="student-table-body"></tbody>
             </table>
@@ -672,6 +695,12 @@ body{
       <div class="radar-wrap">
         <div class="radar-title">COMPETENCY ANALYSIS</div>
         <div class="radar-bars" id="radar-bars"></div>
+      </div>
+
+      <!-- 이론 약점 (주제별 오답, 개인) -->
+      <div class="radar-wrap" id="modal-theory-wrap" style="display:none">
+        <div class="radar-title">📝 이론 약점 주제</div>
+        <div class="radar-bars" id="modal-theory-bars"></div>
       </div>
 
       <!-- 성장 그래프 (score_history 시계열) -->
@@ -997,7 +1026,8 @@ async function loadDashboard() {
   try {
     const [scoresRes] = await Promise.all([
       db.from('scores').select('*').eq('group_id', currentGid),
-      loadExam(currentGid)   // 합격여부 병렬 로드
+      loadExam(currentGid),        // 합격여부 병렬 로드
+      loadTheoryWeak(currentGid)   // 이론 주제별 오답 병렬 로드
     ]);
     if (scoresRes.error) throw scoresRes.error;
     dashData = scoresRes.data || [];
@@ -1007,6 +1037,57 @@ async function loadDashboard() {
   } finally {
     btn.classList.remove('spin'); btn.disabled = false;
   }
+}
+
+/* ══════════════════════════════════════════
+   이론 약점 분석 (주제별 오답, wrong_answers game_id='theory')
+══════════════════════════════════════════ */
+let theoryWeakByTopic = {};   // topic → count (그룹 전체)
+let theoryWeakByStudent = {}; // name → { topic → count }
+const TOPIC_ORDER = ['회계의 기본원리','당좌자산','재고자산','유형자산','부채','자본','수익과 비용'];
+
+async function loadTheoryWeak(gid) {
+  theoryWeakByTopic = {}; theoryWeakByStudent = {};
+  try {
+    const { data, error } = await db.from('wrong_answers')
+      .select('user_name,q_type').eq('group_id', gid).eq('game_id', 'theory').limit(5000);
+    if (error) throw error;
+    (data || []).forEach(r => {
+      const topic = r.q_type || '기타';
+      theoryWeakByTopic[topic] = (theoryWeakByTopic[topic] || 0) + 1;
+      if (!theoryWeakByStudent[r.user_name]) theoryWeakByStudent[r.user_name] = {};
+      theoryWeakByStudent[r.user_name][topic] = (theoryWeakByStudent[r.user_name][topic] || 0) + 1;
+    });
+  } catch (e) { /* 테이블 없거나 오프라인 — 조용히 무시 */ }
+}
+
+function renderTheoryWeakPanel() {
+  const section = document.getElementById('theory-weak-section');
+  const total = Object.values(theoryWeakByTopic).reduce((a, b) => a + b, 0);
+  if (!total) { section.style.display = 'none'; return; }
+  section.style.display = '';
+
+  const studentCount = Object.keys(theoryWeakByStudent).length;
+  document.getElementById('theory-weak-meta').textContent = `누적 오답 ${total}건 · ${studentCount}명`;
+
+  const maxCnt = Math.max(...Object.values(theoryWeakByTopic));
+  const sorted = TOPIC_ORDER.filter(t => theoryWeakByTopic[t]).sort((a, b) => theoryWeakByTopic[b] - theoryWeakByTopic[a]);
+  const barEl = document.getElementById('theory-weak-list');
+  barEl.innerHTML = sorted.map((topic, i) => {
+    const cnt = theoryWeakByTopic[topic];
+    const pct = Math.round(cnt / maxCnt * 100);
+    const color = i === 0 ? 'var(--pk)' : i === 1 ? 'var(--gd)' : 'var(--cy)';
+    return `<div class="game-bar-item">
+      <div class="gbi-header">
+        <div class="gbi-name"><div class="gbi-dot" style="background:${color}"></div>${escHTML(topic)}${i === 0 ? ' <span style="color:var(--pk);font-size:0.68rem">⚠ 최다 오답</span>' : ''}</div>
+        <div class="gbi-count">오답 ${cnt}건</div>
+      </div>
+      <div class="gbi-track"><div class="gbi-fill" style="background:${color};width:0" data-w="${pct}"></div></div>
+    </div>`;
+  }).join('');
+  setTimeout(() => {
+    barEl.querySelectorAll('.gbi-fill').forEach(el => { el.style.width = el.dataset.w + '%'; });
+  }, 50);
 }
 
 /* ══════════════════════════════════════════
@@ -1063,7 +1144,7 @@ function renderDashboard(scores) {
   if (!ranked.length) {
     rankBody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:30px;color:rgba(255,255,255,0.2)">아직 데이터가 없습니다</td></tr>';
   } else {
-    rankBody.innerHTML = ranked.slice(0,20).map((r,i) => {
+    rankBody.innerHTML = ranked.map((r,i) => {
       const cls = i===0?'gold':i===1?'silver':i===2?'bronze':'other';
       const medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
       return `<tr>
@@ -1142,7 +1223,10 @@ function renderDashboard(scores) {
           <div class="student-level" style="color:${levelColor}">종합 ${level}</div>
         </td>
         <td onclick="event.stopPropagation()" style="text-align:center">
-          ${examBadge(r.name)}
+          ${examBadge(r.cleared)}
+        </td>
+        <td onclick="event.stopPropagation()" style="text-align:center">
+          ${certSelect(r.name)}
         </td>
       </tr>`;
     }).join('');
@@ -1150,6 +1234,8 @@ function renderDashboard(scores) {
 
   // 점수 바 초기 애니메이션 (모달 열릴 때 적용)
   window._ranked = ranked;
+
+  renderTheoryWeakPanel();
 }
 
 /* ══════════════════════════════════════════
@@ -1161,6 +1247,7 @@ function openModal(name) {
   if (!student) return;
 
   document.getElementById('modal-name').textContent = `📊 ${name}`;
+  document.getElementById('modal-name').dataset.rawName = name; // emoji-icons.js가 "📊"를 아이콘으로 치환해 textContent 비교가 깨지므로, stale 가드는 이 원본 값으로 판단한다
 
   // 게임별 점수 카드
   const scoreGrid = document.getElementById('modal-score-grid');
@@ -1194,6 +1281,32 @@ function openModal(name) {
       </div>
     </div>`;
   }).join('');
+
+  // 이론 약점 (주제별 오답, 개인)
+  const theoryWrap = document.getElementById('modal-theory-wrap');
+  const theoryTopics = theoryWeakByStudent[name];
+  if (theoryTopics && Object.keys(theoryTopics).length) {
+    theoryWrap.style.display = '';
+    const maxCnt = Math.max(...Object.values(theoryTopics));
+    const sorted = TOPIC_ORDER.filter(t => theoryTopics[t]).sort((a,b) => theoryTopics[b]-theoryTopics[a]);
+    document.getElementById('modal-theory-bars').innerHTML = sorted.map((topic,i) => {
+      const cnt = theoryTopics[topic];
+      const pct = Math.round(cnt/maxCnt*100);
+      const col = i===0?'var(--pk)':i===1?'var(--gd)':'var(--cy)';
+      return `<div class="rb-item">
+        <div class="rb-header">
+          <div class="rb-name" style="color:${col}">
+            <span style="background:${col};width:8px;height:8px;border-radius:50%;display:inline-block"></span>
+            ${escHTML(topic)}
+          </div>
+          <div class="rb-pct">오답 ${cnt}건</div>
+        </div>
+        <div class="rb-track"><div class="rb-fill" style="background:${col};width:0" data-w="${pct}"></div></div>
+      </div>`;
+    }).join('');
+  } else {
+    theoryWrap.style.display = 'none';
+  }
 
   // 모달 열기
   document.getElementById('modal-overlay').classList.add('open');
@@ -1232,11 +1345,11 @@ async function loadStudentGrowth(name) {
       .limit(1000);
     if (error) throw error;
     // 모달이 다른 학생으로 바뀌었으면 낡은 응답 폐기
-    if (document.getElementById('modal-name').textContent !== `📊 ${name}`) return;
+    if (document.getElementById('modal-name').dataset.rawName !== name) return;
     renderStudentGrowth((data || []).reverse());
   } catch(e) {
     // 에러 응답도 stale 가드 — 다른 학생의 정상 차트를 덮어쓰지 않게
-    if (document.getElementById('modal-name').textContent !== `📊 ${name}`) return;
+    if (document.getElementById('modal-name').dataset.rawName !== name) return;
     body.innerHTML = '<div class="growth-empty">성장 기록을 불러오지 못했어요 (score_history 테이블 확인)</div>';
   }
 }
@@ -1361,6 +1474,13 @@ function generateDiagnosis(name, student) {
     lines.push(`<br><br>✅ <strong>강점 영역:</strong> ${strongGames.map(g=>g.icon+' '+g.name).join(', ')} — 해당 부분은 잘 유지되고 있습니다.`);
   }
 
+  // 이론 약점 주제
+  const theoryTopics = theoryWeakByStudent[name];
+  if (theoryTopics && Object.keys(theoryTopics).length) {
+    const topTopic = TOPIC_ORDER.filter(t=>theoryTopics[t]).sort((a,b)=>theoryTopics[b]-theoryTopics[a])[0];
+    lines.push(`<br><br>📝 <strong>이론 최다 오답 주제:</strong> ${escHTML(topTopic)}(${theoryTopics[topTopic]}건) — 이론 객관식에서 해당 주제 위주로 복습을 권장합니다.`);
+  }
+
   // 전산회계 2급 진단
   const readiness = missing.length===0 && weakGames.length===0 ? '합격 가능성 높음 🟢'
     : missing.length===0 && weakGames.length<=1 ? '조금 더 보완 필요 🟡'
@@ -1390,34 +1510,37 @@ function closeSidebar() {
 /* ══════════════════════════════════════════
    유틸
 ══════════════════════════════════════════ */
-/* ── 전산회계 합격여부 (student_exam) — 표시 + 교사 토글 ── */
+/* ── 전산회계 합격여부: 5/5 게임 클리어 시 자동 합격(점수 기반, 교사 수동체크 없음) ── */
 async function loadExam(gid){
   examMap = {};
   try {
-    const { data } = await db.from('student_exam').select('name,passed,status_text').eq('group_id', gid);
-    (data||[]).forEach(r => examMap[r.name] = { passed: !!r.passed, status_text: r.status_text });
+    const { data } = await db.from('student_exam').select('name,current_cert').eq('group_id', gid);
+    (data||[]).forEach(r => examMap[r.name] = { current_cert: r.current_cert || '' });
   } catch(e) { /* 테이블 없거나 오프라인 — 조용히 무시 */ }
 }
-function examBadge(name){
-  const e = examMap[name];
-  const passed = e && e.passed;
-  const label = passed ? '✅ 합격' : (e && e.status_text ? escHTML(e.status_text) : '미정');
-  const cls = passed ? 'ex-pass' : 'ex-no';
-  return `<button class="exam-badge ${cls}" title="클릭하면 합격/미합격 전환" onclick="toggleExam('${escAttr(name)}')">${label}</button>`;
+function examBadge(cleared){
+  const passed = cleared >= GAMES.length;
+  return `<span class="exam-badge ${passed?'ex-pass':'ex-no'}" style="cursor:default">${passed?'✅ 합격':'—'}</span>`;
 }
-async function toggleExam(name){
-  const prev = examMap[name] || { passed:false, status_text:null };
-  const passed = !prev.passed;
-  examMap[name] = { passed, status_text: passed ? '✅ 합격' : '❌ 불합격' };
-  renderDashboard(dashData);
+
+const CERT_OPTIONS = ['전산회계2급','전산회계1급','전산세무2급','전산세무1급'];
+function certSelect(name){
+  const cur = (examMap[name] && examMap[name].current_cert) || '';
+  const opts = ['<option value="">— 선택 —</option>']
+    .concat(CERT_OPTIONS.map(c => `<option value="${c}" ${c===cur?'selected':''}>${c}</option>`));
+  return `<select class="cert-select" onchange="updateCert('${escAttr(name)}', this.value)" onclick="event.stopPropagation()">${opts.join('')}</select>`;
+}
+async function updateCert(name, cert){
+  const prev = examMap[name] || { current_cert:'' };
+  examMap[name] = { current_cert: cert };
   try {
     const { error } = await db.from('student_exam').upsert(
-      { group_id: currentGid, name, passed, status_text: examMap[name].status_text, updated_at: new Date().toISOString() },
+      { group_id: currentGid, name, current_cert: cert || null, updated_at: new Date().toISOString() },
       { onConflict: 'group_id,name' });
     if (error) throw error;
   } catch(e){
     examMap[name] = prev; renderDashboard(dashData);
-    alert('합격여부 저장 실패 — 인터넷 연결을 확인해 주세요.');
+    alert('자격증 저장 실패 — 인터넷 연결을 확인해 주세요.');
   }
 }
 

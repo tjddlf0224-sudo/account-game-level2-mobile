@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data:; connect-src 'self' https://pjagaulfivafamhhiveg.supabase.co https://cdn.jsdelivr.net;">
 <title>이론 객관식 | 전산회계 2급</title>
 <meta name="description" content="전산회계 2급 이론(필기) 기출 객관식을 풀고 오답을 복습">
@@ -15,8 +15,8 @@
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   body{margin:0;background:var(--bg);color:var(--txt);
        font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
-       padding:0 0 40px;}
-  .wrap{max-width:640px;margin:0 auto;padding:16px;}
+       padding:0 0 calc(40px + var(--ad-banner-h, 0px));}
+  .wrap{max-width:640px;margin:0 auto;padding:calc(16px + env(safe-area-inset-top)) 16px 16px;}
   .top{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
   .back{background:var(--card);border:1px solid var(--line);color:var(--txt);
         border-radius:12px;padding:9px 13px;font-size:.92rem;text-decoration:none;}
@@ -45,9 +45,10 @@
   .hud b{color:var(--gold);}
   .progress-track{height:6px;background:rgba(255,255,255,.07);border-radius:6px;overflow:hidden;margin-bottom:14px;}
   .progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--purple));transition:width .3s;}
-  .qcard{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;}
+  .qcard{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;position:relative;}
   .qtag{font-size:.72rem;color:var(--blue);margin-bottom:8px;}
   .qtag .fmt{color:var(--gold);margin-left:6px;}
+  .qsrc{position:absolute;right:14px;bottom:10px;font-size:.62rem;color:var(--sub,#8a95a8);opacity:.55;letter-spacing:.2px;}
   .qstem{font-size:1.04rem;line-height:1.65;margin-bottom:18px;white-space:pre-wrap;word-break:keep-all;overflow-wrap:break-word;}
   .qstem .data{display:block;margin-top:4px;padding-left:2px;color:#cfe0f5;font-size:.98rem;}
   .choice{display:flex;gap:10px;width:100%;text-align:left;border:1.5px solid var(--line);
@@ -61,9 +62,29 @@
   .choice.wrong{border-color:var(--red);background:rgba(255,45,120,.16);}
   .choice.wrong .no{background:var(--red);color:#fff;}
   .choice[disabled]{cursor:default;}
+  .choice.has-visual{align-items:center;}
+  .t-acc{flex:1;max-width:220px;}
+  .t-acc-label{display:block;text-align:center;font-size:.86rem;font-weight:700;margin-bottom:4px;}
+  .t-acc-line{display:block;border-top:1.5px solid currentColor;opacity:.6;margin-bottom:3px;}
+  .t-acc-body{display:flex;}
+  .t-acc-side{flex:1;min-height:1.3em;font-size:.82rem;padding:0 8px;font-variant-numeric:tabular-nums;}
+  .t-acc-side.debit{text-align:left;border-right:1px solid rgba(255,255,255,.22);}
+  .t-acc-side.credit{text-align:right;}
   .expl{margin-top:12px;padding:13px;border-radius:13px;background:rgba(0,242,255,.07);
         border:1px solid rgba(0,242,255,.22);font-size:.9rem;line-height:1.55;display:none;}
   .expl .verdict{font-weight:700;margin-bottom:5px;}
+  .dd-btn{margin-top:12px;width:100%;padding:10px;border-radius:10px;
+    background:rgba(180,79,255,.12);border:1px solid rgba(180,79,255,.35);
+    color:var(--purple);font-size:.82rem;font-weight:700;cursor:pointer;transition:background .15s;}
+  .dd-btn:hover{background:rgba(180,79,255,.2);}
+  .dd-panel{margin-top:10px;padding:14px 15px;border-radius:12px;
+    background:rgba(180,79,255,.06);border:1px solid rgba(180,79,255,.2);}
+  .dd-block{margin-bottom:12px;}
+  .dd-block:last-child{margin-bottom:0;}
+  .dd-label{font-size:.72rem;font-weight:700;color:var(--purple);margin-bottom:4px;letter-spacing:.02em;}
+  .dd-text{font-size:.87rem;line-height:1.65;color:var(--txt);white-space:pre-wrap;word-break:keep-all;}
+  .dd-wrong{font-size:.84rem;line-height:1.6;color:var(--dim);margin-top:6px;word-break:keep-all;}
+  .dd-wrong-no{display:inline-block;font-weight:700;color:var(--red);margin-right:2px;}
   .next-wrap{margin-top:14px;display:none;}
 
   /* 결과 화면 */
@@ -84,7 +105,7 @@
 <div class="wrap">
   <div class="top">
     <a class="back" href="index.html">←</a>
-    <h1>📝 이론 객관식 <span class="sub">전산회계 2급 필기(이론 30%) · 기출유형 원작문항</span></h1>
+    <h1>📝 이론 객관식 <span class="sub">전산회계 2급 필기(이론 30%) · 기출 변형 문항</span></h1>
   </div>
 
   <!-- 시작 -->
@@ -202,6 +223,17 @@ function startQuiz(){
   showQ();
 }
 
+function tAccountHtml(v){
+  return `<span class="t-acc">
+    <span class="t-acc-label">${esc(v.account)}</span>
+    <span class="t-acc-line"></span>
+    <span class="t-acc-body">
+      <span class="t-acc-side debit">${v.side==='debit'?esc(v.amount):''}</span>
+      <span class="t-acc-side credit">${v.side==='credit'?esc(v.amount):''}</span>
+    </span>
+  </span>`;
+}
+
 function showQ(){
   const q=QUEUE[qi];
   document.getElementById('hud-prog').textContent=`${qi+1} / ${QUEUE.length}`;
@@ -213,10 +245,12 @@ function showQ(){
     <div class="qtag">${esc(q.topicName)}${fmt}</div>
     <div class="qstem">${fmtStem(q.stem)}</div>`;
   q.options.forEach((o,i)=>{
-    html+=`<button class="choice" data-i="${i+1}"><span class="no">${i+1}</span><span>${esc(o)}</span></button>`;
+    const body = q.optionsVisual && q.optionsVisual[i] ? tAccountHtml(q.optionsVisual[i]) : `<span>${esc(o)}</span>`;
+    html+=`<button class="choice${q.optionsVisual?' has-visual':''}" data-i="${i+1}"><span class="no">${i+1}</span>${body}</button>`;
   });
   html+=`<div class="expl" id="expl"></div>
     <div class="next-wrap" id="next-wrap"><button class="cta" id="next-btn">${qi+1>=QUEUE.length?'결과 보기 🏁':'다음 문제 →'}</button></div>
+    ${q.source?`<div class="qsrc">${esc(q.source)}</div>`:''}
   </div>`;
   document.getElementById('quiz-body').innerHTML=html;
   document.querySelectorAll('.choice').forEach(b=>b.onclick=()=>pick(parseInt(b.dataset.i),q));
@@ -231,25 +265,62 @@ function pick(choice,q){
   });
   const ok=choice===q.answer;
   const expl=document.getElementById('expl');
+  const verdictHtml = ok
+    ? `<div class="verdict" style="color:var(--green)">✓ 정답!</div>${esc(q.explanation)||''}`
+    : `<div class="verdict" style="color:var(--red)">✗ 오답 — 정답은 ${q.answer}번</div>${esc(q.explanation)||''}`;
+  expl.innerHTML = verdictHtml + deepDiveHtml(q);
   if(ok){
     combo++; correctCnt++;
     score+=100+(combo-1)*20;
-    expl.innerHTML=`<div class="verdict" style="color:var(--green)">✓ 정답!</div>${esc(q.explanation)||''}`;
   }else{
     combo=0;
-    expl.innerHTML=`<div class="verdict" style="color:var(--red)">✗ 오답 — 정답은 ${q.answer}번</div>${esc(q.explanation)||''}`;
     if(window.WrongNote) WrongNote.add({
       game:'theory', key:q.id, q:q.stem,
       correct:q.answerText, wrong:q.options[choice-1]||'',
       type:q.topicName
     });
   }
+  const dd=document.getElementById('dd-toggle');
+  if(dd) dd.onclick=()=>toggleDeepDive(q);
   document.getElementById('hud-score').textContent=score.toLocaleString();
   document.getElementById('hud-combo').textContent=combo;
   expl.style.display='block';
   document.getElementById('next-wrap').style.display='block';
   document.getElementById('next-btn').onclick=()=>{ qi++; qi>=QUEUE.length?endQuiz():showQ(); };
   expl.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function deepDiveHtml(q){
+  if(!q.deepDive) return '';
+  return `<button class="dd-btn" id="dd-toggle">🔍 자세한 개념 알아보기</button>
+    <div class="dd-panel" id="dd-panel" style="display:none"></div>`;
+}
+
+function toggleDeepDive(q){
+  const panel=document.getElementById('dd-panel');
+  const btn=document.getElementById('dd-toggle');
+  if(!panel) return;
+  const opening = panel.style.display==='none';
+  if(opening && !panel.dataset.built){
+    const d=q.deepDive;
+    const wrongList = q.options.map((o,i)=>{
+      const idx=i+1;
+      if(idx===q.answer) return '';
+      const reason = d.wrongReasons && d.wrongReasons[String(idx)];
+      if(!reason) return '';
+      return `<div class="dd-wrong"><span class="dd-wrong-no">${idx}번</span> ${esc(o)} — ${esc(reason)}</div>`;
+    }).join('');
+    panel.innerHTML = `
+      <div class="dd-block"><div class="dd-label">📌 핵심 개념</div><div class="dd-text">${esc(d.concept||'')}</div></div>
+      <div class="dd-block"><div class="dd-label">💡 쉬운 설명</div><div class="dd-text">${esc(d.conceptExplain||'')}</div></div>
+      <div class="dd-block"><div class="dd-label">✅ 정답 해설</div><div class="dd-text">${esc(d.whyCorrect||'')}</div></div>
+      ${wrongList?`<div class="dd-block"><div class="dd-label">❌ 오답 해설</div>${wrongList}</div>`:''}
+    `;
+    panel.dataset.built='1';
+  }
+  panel.style.display = opening ? 'block' : 'none';
+  btn.textContent = opening ? '🔍 개념 설명 접기' : '🔍 자세한 개념 알아보기';
+  if(opening) panel.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 
 function grade(rate){

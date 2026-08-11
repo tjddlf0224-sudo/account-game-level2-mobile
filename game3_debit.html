@@ -342,7 +342,7 @@
             z-index: 200; backdrop-filter: blur(16px);
             gap: clamp(10px, 2vh, 16px);
             overflow-y: auto;
-            padding: 20px 16px 16px;
+            padding: 20px 16px calc(16px + var(--ad-banner-h, 0px));
             padding-top: max(20px, env(safe-area-inset-top));
             touch-action: pan-y;
             overscroll-behavior: contain;
@@ -469,6 +469,17 @@
         .rank-name { font-weight: 700; }
         .rank-score { color: var(--gold); font-weight: 700; text-align: right; }
         .rank-me { background: rgba(0,194,255,0.08); }
+        .rank-delta { font-size:0.72rem; margin-left:6px; padding:2px 9px; border-radius:20px; font-weight:700; }
+        .rank-delta.up { color:#2ecc71; background:rgba(46,204,113,0.14); }
+        .rank-delta.down { color:#e74c3c; background:rgba(231,76,60,0.14); }
+        .rank-delta.flat { color:rgba(255,255,255,0.4); background:rgba(255,255,255,0.06); }
+        #my-rank-neighbors { display:none; margin-top:8px; border-radius:14px; border:1px solid rgba(0,194,255,0.25); }
+        .rn-row { display:flex; align-items:center; padding:8px 14px; font-size:0.82rem; background:rgba(255,255,255,0.02); gap:8px; }
+        .rn-row.rn-me { background:rgba(0,194,255,0.12); font-weight:700; }
+        .rn-label { color:rgba(255,255,255,0.35); font-size:0.68rem; width:52px; flex-shrink:0; }
+        .rn-name { flex:1; color:#fff; text-align:left; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .rn-score { color:var(--blue); font-weight:700; flex-shrink:0; }
+        .next-tier-msg { text-align:center; font-size:0.78rem; color:rgba(255,255,255,0.75); padding:9px 14px; background:rgba(255,255,255,0.03); }
 
         .loading { display: flex; align-items: center; gap: 10px; color: rgba(255,255,255,0.4); font-size: 0.85rem; }
         .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.2); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; }
@@ -766,6 +777,7 @@
         </div>
         <div id="save-status"></div>
         <div id="my-rank-badge" style="display:none; font-family:'Black Han Sans',sans-serif; font-size:1rem; color:var(--blue); background:rgba(0,194,255,0.12); border:1px solid rgba(0,194,255,0.3); border-radius:50px; padding:7px 20px; text-align:center;"></div>
+        <div id="my-rank-neighbors"></div>
         <div style="font-family:'Black Han Sans',sans-serif; font-size:0.95rem; color:rgba(255,255,255,0.35); letter-spacing:2px;">🏆 TOP 랭킹</div>
         <div class="rank-container" id="rank-container">
             <div class="loading" style="justify-content:center;padding:20px 0;">
@@ -1227,6 +1239,7 @@ function endGame() {
     document.getElementById('stat-combo').textContent = maxCombo;
     document.getElementById('result-rank').textContent = '최종 계급: ' + getGrade(score);
     document.getElementById('player-name').value = localStorage.getItem('hub_nickname') || getMyName();
+    showMyRank(document.getElementById('player-name').value || '나', score, { trackDelta: false }); // 랭킹 등록 전 예상 순위 미리보기
     document.getElementById('save-status').textContent = '';
     document.getElementById('save-btn').disabled = false;
     requestInterstitialIfNeeded(function() {
@@ -1276,7 +1289,7 @@ async function saveScore() {
         saveMyName(name);
         showSaveStatus('✓ 저장 완료!', 'ok');
         await loadRanking();
-        showMyRank(name);
+        await showMyRank(name, score);
         return;
     }
     try {
@@ -1289,12 +1302,12 @@ async function saveScore() {
         saveMyName(name);
         showSaveStatus('✓ 등록 완료!', 'ok');
         await loadRanking();
-        showMyRank(name);
+        await showMyRank(name, score);
     } catch(e) {
         saveLocal(data);
         showSaveStatus('✓ 로컬 저장 완료 (네트워크 오류)', 'ok');
         loadRanking();
-        showMyRank(name);
+        await showMyRank(name, score);
     }
 }
 
@@ -1304,20 +1317,63 @@ function showSaveStatus(msg, type) {
     el.style.color = type === 'err' ? 'var(--red)' : type === 'ok' ? 'var(--green)' : 'rgba(255,255,255,0.4)';
 }
 
-function showMyRank(name) {
+const RANK_PREV_KEY = 'hub_debit_prevRank';
+
+function nextTierHtml(score) {
+    const idx = GRADE_TIERS.findIndex(t => score >= t.min);
+    const next = idx > 0 ? GRADE_TIERS[idx - 1] : null;
+    return next
+        ? `<div class="next-tier-msg">다음 등급 <b style="color:${next.color || 'var(--blue)'}">${next.label}</b>까지 <b>${(next.min - score).toLocaleString()}점</b> 더!</div>`
+        : `<div class="next-tier-msg">🎉 최고 등급 달성!</div>`;
+}
+
+async function showMyRank(name, score, opts) {
+    const trackDelta = !opts || opts.trackDelta !== false;
     const badge = document.getElementById('my-rank-badge');
-    const container = document.getElementById('rank-container');
-    const rows = container.querySelectorAll('.rank-row');
-    let myIdx = -1;
-    rows.forEach((row, i) => {
-        const nameEl = row.querySelector('.rank-name');
-        if (nameEl && nameEl.textContent.trim() === name) myIdx = i;
-    });
-    if (myIdx >= 0) {
-        badge.textContent = `🎯 내 순위: ${myIdx + 1}위`;
+    const nbox = document.getElementById('my-rank-neighbors');
+    const tierHtml = nextTierHtml(score);
+    try {
+        const groupId = localStorage.getItem('hub_group_id') || null;
+        const withGroup = (q) => groupId ? q.eq('group_id', groupId) : q;
+
+        const countQ = withGroup(db.from('scores').select('*', { count: 'exact', head: true }).eq('game_id', GAME_ID).gt('score', score));
+        const aboveQ = withGroup(db.from('scores').select('name,score').eq('game_id', GAME_ID).gt('score', score).order('score', { ascending: true }).limit(1));
+        const belowQ = withGroup(db.from('scores').select('name,score').eq('game_id', GAME_ID).lt('score', score).order('score', { ascending: false }).limit(1));
+
+        const [{ count, error: cErr }, { data: aboveRows }, { data: belowRows }] = await Promise.all([countQ, aboveQ, belowQ]);
+        if (cErr) throw cErr;
+
+        const myRank = (count || 0) + 1;
+        const above = aboveRows && aboveRows[0];
+        const below = belowRows && belowRows[0];
+
+        let deltaHtml = '';
+        if (trackDelta) {
+            const prevRank = parseInt(localStorage.getItem(RANK_PREV_KEY) || '0', 10);
+            if (prevRank > 0) {
+                const diff = prevRank - myRank;
+                if (diff > 0) deltaHtml = `<span class="rank-delta up">▲ ${diff}계단 상승</span>`;
+                else if (diff < 0) deltaHtml = `<span class="rank-delta down">▼ ${Math.abs(diff)}계단 하락</span>`;
+                else deltaHtml = `<span class="rank-delta flat">− 순위 유지</span>`;
+            }
+            localStorage.setItem(RANK_PREV_KEY, String(myRank));
+        }
+
+        badge.innerHTML = `🎯 ${trackDelta ? '내 순위' : '예상 순위'}: ${myRank.toLocaleString()}위 ${deltaHtml}`;
         badge.style.display = 'block';
-    } else {
+
+        const row = (label, r, cls) => r
+            ? `<div class="rn-row ${cls}"><span class="rn-label">${label}</span><span class="rn-name">${escapeHTML(r.name)}</span><span class="rn-score">${(r.score || 0).toLocaleString()}</span></div>`
+            : '';
+        nbox.innerHTML = tierHtml +
+            row(`▲ ${myRank - 1}위`, above, 'rn-above') +
+            `<div class="rn-row rn-me"><span class="rn-label">내 기록</span><span class="rn-name">${escapeHTML(name)}</span><span class="rn-score">${(score || 0).toLocaleString()}</span></div>` +
+            row(`▼ ${myRank + 1}위`, below, 'rn-below');
+        nbox.style.display = 'block';
+    } catch (e) {
         badge.style.display = 'none';
+        nbox.innerHTML = tierHtml;
+        nbox.style.display = 'block';
     }
 }
 
@@ -1555,6 +1611,8 @@ function getGrade(score) {
             p_date:    today
         };
         if (groupId) rpcParams.p_group_id = groupId;
+        // 로그인 계정이면 uid도 같이 저장 — 기기가 바뀌어도 "내 최고기록"이 계정에 귀속되게
+        try { if (window.Auth) { const uid = await Auth.currentUid(); if (uid) rpcParams.p_uid = uid; } } catch (e) {}
         // 성장 그래프용 — 매 판 점수 이력 누적(이중저장, 예외 안 던짐; rpc 실패와 무관하게 로컬 기록 보존)
         if (window.Growth) Growth.record({ game: gameId, name: safeName, score: safeScore, grade: rpcParams.p_grade, combo: rpcParams.p_combo, correct: rpcParams.p_correct });
         // supabase-js는 실패해도 reject하지 않고 {error}로 resolve — 직접 확인해 throw해야
