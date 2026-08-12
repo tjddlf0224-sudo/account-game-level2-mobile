@@ -35,27 +35,10 @@
             flex-direction: column;
             overflow: hidden;
             user-select: none;
-            position: relative;
+
             background-image:
                 radial-gradient(ellipse 80% 50% at 20% 20%, rgba(0,194,255,0.07) 0%, transparent 60%),
                 radial-gradient(ellipse 60% 40% at 80% 80%, rgba(255,45,85,0.07) 0%, transparent 60%);
-        }
-
-        /* PC 화면: 폰 비율 프레임으로 가운데 정렬 + 뒤에 은은한 배경 */
-        @media (min-width: 701px) {
-            html {
-                min-height: 100%;
-                background:
-                    radial-gradient(ellipse 55% 45% at 20% 15%, rgba(0,194,255,0.10), transparent 60%),
-                    radial-gradient(ellipse 50% 40% at 85% 85%, rgba(255,45,85,0.10), transparent 55%),
-                    var(--bg);
-                display: flex; align-items: center; justify-content: center;
-            }
-            body {
-                width: 480px; height: min(100dvh, 900px);
-                border-radius: 28px;
-                box-shadow: 0 30px 90px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08);
-            }
         }
 
         
@@ -321,7 +304,7 @@
 
         /* ── 팝업 ── */
         .combo-popup {
-            position: absolute; top: 30%; left: 50%;
+            position: fixed; top: 30%; left: 50%;
             transform: translate(-50%, -50%);
             font-family: 'Black Han Sans', sans-serif;
             font-size: clamp(2rem, 8vw, 3.5rem);
@@ -335,7 +318,7 @@
             100% { opacity: 0; transform: translate(-50%,-120%) scale(1); }
         }
         .feedback-popup {
-            position: absolute; top: 50%; left: 50%;
+            position: fixed; top: 50%; left: 50%;
             transform: translate(-50%, -50%);
             font-family: 'Black Han Sans', sans-serif;
             font-size: clamp(1.4rem, 5vw, 2rem);
@@ -352,7 +335,7 @@
 
         /* ── 오버레이 ── */
         .overlay {
-            position: absolute; inset: 0;
+            position: fixed; inset: 0;
             background: rgba(10,10,20,0.92);
             display: flex; flex-direction: column;
             align-items: center; justify-content: flex-start;
@@ -567,7 +550,7 @@
         
         /* ── 목표달성 팡파레 오버레이 ── */
         #fanfare-overlay {
-            display: none; position: absolute; inset: 0; z-index: 9999;
+            display: none; position: fixed; inset: 0; z-index: 9999;
             align-items: center; justify-content: center;
             pointer-events: none;
         }
@@ -659,7 +642,7 @@
         /* ── 보상형 광고 버튼 ── */
         #rewarded-btn {
             display: none;
-            position: absolute;
+            position: fixed;
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
@@ -683,7 +666,7 @@
         }
 
         /* ── 인터랙티브 튜토리얼 ── */
-        .tut { display:none; position:absolute; inset:0; z-index:9999;
+        .tut { display:none; position:fixed; inset:0; z-index:9999;
             flex-direction:column; background:var(--bg);
             background-image:
                 radial-gradient(ellipse 80% 50% at 20% 20%, rgba(0,194,255,0.07) 0%, transparent 60%),
@@ -900,7 +883,7 @@
         <button class="hdr-btn" onclick="if(typeof isPlaying!=='undefined'&&isPlaying){if(!confirm('게임을 종료하고 메인으로 나가시겠어요?'))return;}location.href='index.html'">홈</button>
     </div>
 </header>
-<button id="freeze-btn" onclick="requestFreeze()">⏸ 설명타임 (5문제 정지)</button>
+<button id="freeze-btn" onclick="requestFreeze()">⏸ 시간 정지(5문제 시간제한 없음)</button>
 
 <!-- ── 게임 영역 ── -->
 <div class="game-area">
@@ -1167,7 +1150,7 @@ function updateHUD() {
     const fb = document.getElementById('freeze-btn');
     if (fb) {
         fb.classList.toggle('active', freezeLeft > 0);
-        fb.textContent = freezeLeft > 0 ? `⏸ 설명타임 중 (${freezeLeft}문제 남음)` : '⏸ 설명타임 (5문제 정지)';
+        fb.textContent = freezeLeft > 0 ? `⏸ 정지중 (${freezeLeft}문제 남음)` : '⏸ 시간 정지(5문제 시간제한 없음)';
     }
 }
 
@@ -1612,7 +1595,7 @@ function getGrade(score) {
             el = document.createElement('div');
             el.id = 'resume-flash';
             el.textContent = '곧 시작!';
-            el.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:42px;font-weight:900;color:#7cf;text-shadow:0 2px 12px rgba(0,0,0,.6);z-index:9999;pointer-events:none;';
+            el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:42px;font-weight:900;color:#7cf;text-shadow:0 2px 12px rgba(0,0,0,.6);z-index:9999;pointer-events:none;';
             document.body.appendChild(el);
         }
         el.style.display = 'block';

@@ -16,22 +16,7 @@
 <style>
 :root{--cy:#00f2ff;--pk:#ff2d78;--gd:#ffd600;--gn:#39ff14;--pu:#b44fff;--bg:#020810;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{height:100%}
-body{background:var(--bg);font-family:'Noto Sans KR',sans-serif;overflow:hidden;user-select:none;touch-action:none;height:100dvh;position:relative;}
-
-/* PC 화면: 게임 프레임(기존 canvas-wrap 850px 폭)을 가운데 정렬 + 뒤에 은은한 배경 */
-@media (min-width: 901px) {
-  html{min-height:100%;
-    background:
-      radial-gradient(ellipse 55% 45% at 20% 15%, rgba(0,242,255,0.10), transparent 60%),
-      radial-gradient(ellipse 50% 40% at 85% 85%, rgba(180,79,255,0.10), transparent 55%),
-      var(--bg);
-    display:flex; align-items:center; justify-content:center;
-  }
-  body{width:850px; height:min(100dvh,960px);
-    border-radius:28px; overflow:hidden;
-    box-shadow:0 30px 90px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08);
-  }
-}
+body{background:var(--bg);font-family:'Noto Sans KR',sans-serif;overflow:hidden;user-select:none;touch-action:none;height:100dvh;}
 canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 
 
@@ -202,7 +187,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
         
         /* ── 목표달성 팡파레 오버레이 ── */
         #fanfare-overlay {
-            display: none; position: absolute; inset: 0; z-index: 9999;
+            display: none; position: fixed; inset: 0; z-index: 9999;
             align-items: center; justify-content: center;
             pointer-events: none;
         }
@@ -270,7 +255,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
         
         #rewarded-btn {
             display: none;
-            position: absolute;
+            position: fixed;
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
@@ -309,7 +294,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
         }
 
         /* ── 인터랙티브 튜토리얼 (사용방법) ── */
-        .tut { display:none; position:absolute; inset:0; z-index:9999; flex-direction:column; background:radial-gradient(ellipse at 50% 30%,#0d1830 0%,var(--bg) 100%); }
+        .tut { display:none; position:fixed; inset:0; z-index:9999; flex-direction:column; background:radial-gradient(ellipse at 50% 30%,#0d1830 0%,var(--bg) 100%); }
         .tut.show { display:flex; animation:tutPop .25s ease; }
         @keyframes tutPop { from{opacity:0} to{opacity:1} }
         .tut-top { display:flex; align-items:center; gap:9px; padding:calc(12px + env(safe-area-inset-top)) 18px 10px; }
@@ -391,7 +376,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 <script src="bgmguard.js"></script>
 
 
-<div style="position:absolute;inset:0;background:var(--bg);z-index:-1;"></div>
+<div style="position:fixed;inset:0;background:var(--bg);z-index:-1;"></div>
 
 <div id="canvas-wrap" style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:850px;height:100%;overflow:hidden;background:rgba(0,0,0,.6);">
 
