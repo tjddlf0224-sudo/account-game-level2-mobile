@@ -33,9 +33,25 @@
             color: white;
             margin: 0; padding: 0;
             min-height: 100dvh;
-            
+            position: relative;
             display: flex; flex-direction: column;
             align-items: center;
+        }
+
+        /* PC 화면: 폰 비율 프레임으로 가운데 정렬 + 뒤에 은은한 배경 */
+        @media (min-width: 701px) {
+            html {
+                min-height: 100%;
+                background:
+                    radial-gradient(ellipse 55% 45% at 20% 15%, rgba(52,152,219,0.12), transparent 60%),
+                    radial-gradient(ellipse 50% 40% at 85% 85%, rgba(230,126,34,0.10), transparent 55%),
+                    #1a2531;
+                display: flex; justify-content: center;
+            }
+            body {
+                width: 480px; max-width: 480px;
+                box-shadow: 0 30px 90px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08);
+            }
         }
 
         header {
@@ -163,7 +179,7 @@
 
         /* 오버레이 */
         .overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(22,32,42,0.97);
             display: flex; flex-direction: column;
             justify-content: flex-start; align-items: center;
@@ -404,7 +420,7 @@
         
         /* ── 목표달성 팡파레 오버레이 ── */
         #fanfare-overlay {
-            display: none; position: fixed; inset: 0; z-index: 9999;
+            display: none; position: absolute; inset: 0; z-index: 9999;
             align-items: center; justify-content: center;
             pointer-events: none;
         }
@@ -472,7 +488,7 @@
 
         /* ── 사용방법 안내 오버레이 ── */
         .guide-overlay {
-            display: none; position: fixed; inset: 0; z-index: 9999;
+            display: none; position: absolute; inset: 0; z-index: 9999;
             background: rgba(2,8,16,0.88); backdrop-filter: blur(6px);
             align-items: center; justify-content: center; padding: 16px;
         }

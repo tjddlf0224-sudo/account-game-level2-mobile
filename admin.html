@@ -665,6 +665,7 @@ body{
                 <th>⚡ 차변대변</th>
                 <th>🏭 조립공장</th>
                 <th>🛩 플라이트</th>
+                <th>📝 이론</th>
                 <th>종합</th>
                 <th>합격</th>
                 <th>자격증</th>
@@ -1027,7 +1028,8 @@ async function loadDashboard() {
     const [scoresRes] = await Promise.all([
       db.from('scores').select('*').eq('group_id', currentGid),
       loadExam(currentGid),        // 합격여부 병렬 로드
-      loadTheoryWeak(currentGid)   // 이론 주제별 오답 병렬 로드
+      loadTheoryWeak(currentGid),  // 이론 주제별 오답 병렬 로드
+      loadTheoryScores(currentGid) // 이론 참여/점수 병렬 로드
     ]);
     if (scoresRes.error) throw scoresRes.error;
     dashData = scoresRes.data || [];
@@ -1045,6 +1047,23 @@ async function loadDashboard() {
 let theoryWeakByTopic = {};   // topic → count (그룹 전체)
 let theoryWeakByStudent = {}; // name → { topic → count }
 const TOPIC_ORDER = ['회계의 기본원리','당좌자산','재고자산','유형자산','부채','자본','수익과 비용'];
+
+let theoryScoreByStudent = {}; // name → { best, plays }
+
+async function loadTheoryScores(gid) {
+  theoryScoreByStudent = {};
+  try {
+    const { data, error } = await db.from('score_history')
+      .select('user_name,score').eq('group_id', gid).eq('game_id', 'theory').limit(5000);
+    if (error) throw error;
+    (data || []).forEach(r => {
+      const cur = theoryScoreByStudent[r.user_name] || { best: 0, plays: 0 };
+      cur.best = Math.max(cur.best, r.score || 0);
+      cur.plays += 1;
+      theoryScoreByStudent[r.user_name] = cur;
+    });
+  } catch (e) { /* 테이블 없거나 오프라인 — 조용히 무시 */ }
+}
 
 async function loadTheoryWeak(gid) {
   theoryWeakByTopic = {}; theoryWeakByStudent = {};
@@ -1100,6 +1119,10 @@ function renderDashboard(scores) {
     if (!students[s.name]) students[s.name] = {};
     const cur = students[s.name][s.game_id];
     if (!cur || s.score > cur.score) students[s.name][s.game_id] = s;
+  });
+  // 아케이드 게임은 안 하고 이론만 푼 학생도 명단에 포함시킨다
+  Object.keys(theoryScoreByStudent).forEach(name => {
+    if (!students[name]) students[name] = {};
   });
   const studentNames = Object.keys(students);
   const studentCount = studentNames.length;
@@ -1158,10 +1181,13 @@ function renderDashboard(scores) {
     }).join('');
   }
 
-  // ── 게임별 참여율 바 ──
+  // ── 게임별 참여율 바 (이론 포함) ──
   const barEl = document.getElementById('game-bar-list');
-  barEl.innerHTML = GAMES.map(g => {
-    const cnt = new Set(scores.filter(s=>s.game_id===g.id).map(s=>s.name)).size;
+  const barGames = GAMES.concat([{ id:'theory', name:'이론 객관식', icon:'📝', color:'var(--cy)' }]);
+  barEl.innerHTML = barGames.map(g => {
+    const cnt = g.id === 'theory'
+      ? Object.keys(theoryScoreByStudent).length
+      : new Set(scores.filter(s=>s.game_id===g.id).map(s=>s.name)).size;
     const pct = studentCount ? Math.round(cnt/studentCount*100) : 0;
     return `<div class="game-bar-item">
       <div class="gbi-header">
@@ -1210,6 +1236,11 @@ function renderDashboard(scores) {
       const level = totalPct>=70?'상':totalPct>=40?'중':'하';
       const levelColor = totalPct>=70?'var(--gn)':totalPct>=40?'var(--gd)':'var(--pk)';
 
+      const theoryInfo = theoryScoreByStudent[r.name];
+      const theoryCell = theoryInfo
+        ? `<td><span class="score-cell sc-high">${theoryInfo.best.toLocaleString()}</span><div style="font-size:0.62rem;color:rgba(255,255,255,0.3);margin-top:2px">${theoryInfo.plays}회</div></td>`
+        : `<td><span class="score-cell sc-none">미참여</span></td>`;
+
       return `<tr style="cursor:pointer" onclick="openModal('${escAttr(r.name)}')">
         <td style="padding-left:20px">
           <div class="student-name-wrap">
@@ -1218,6 +1249,7 @@ function renderDashboard(scores) {
           </div>
         </td>
         ${gameCells}
+        ${theoryCell}
         <td>
           <div class="total-score">${r.total.toLocaleString()}</div>
           <div class="student-level" style="color:${levelColor}">종합 ${level}</div>
@@ -1260,7 +1292,14 @@ function openModal(name) {
       <div class="msg-score" style="color:${col}">${s?s.score.toLocaleString():'—'}</div>
       <div class="msg-grade">${s?(gradeOf(g.id, s.score)||s.grade||'—'):'미참여'}</div>
     </div>`;
-  }).join('');
+  }).join('') + (() => {
+    const t = theoryScoreByStudent[name];
+    return `<div class="msg-card">
+      <div class="msg-game">📝 이론</div>
+      <div class="msg-score" style="color:${t?'var(--cy)':'rgba(255,255,255,0.2)'}">${t?t.best.toLocaleString():'—'}</div>
+      <div class="msg-grade">${t?t.plays+'회 플레이':'미참여'}</div>
+    </div>`;
+  })();
 
   // 역량 바
   const radars = document.getElementById('radar-bars');
