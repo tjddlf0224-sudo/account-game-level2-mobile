@@ -61,6 +61,30 @@
   .qsrc{position:absolute;right:14px;bottom:10px;font-size:.62rem;color:var(--sub,#8a95a8);opacity:.55;letter-spacing:.2px;}
   .qstem{font-size:1.04rem;line-height:1.65;margin-bottom:18px;white-space:pre-wrap;word-break:keep-all;overflow-wrap:break-word;}
   .qstem .data{display:block;margin-top:4px;padding-left:2px;color:#cfe0f5;font-size:.98rem;}
+
+  /* 스템에 들어가는 원장/T계정 표 */
+  .ledger{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:10px 0 18px;}
+  .ledger-title{text-align:center;font-weight:700;font-size:.98rem;margin-bottom:8px;padding-bottom:6px;border-bottom:1.5px solid var(--line);}
+  .ledger-body{display:flex;}
+  .ledger-side{flex:1;font-size:.9rem;}
+  .ledger-side.left{border-right:1px solid var(--line);padding-right:10px;}
+  .ledger-side.right{padding-left:10px;}
+  .ledger-row{display:flex;justify-content:space-between;gap:8px;padding:3px 0;font-variant-numeric:tabular-nums;}
+  .ledger-row .lr-date{color:var(--dim);flex:none;width:2.6em;}
+  .ledger-row .lr-label{flex:1;}
+  .ledger-row .lr-amt{flex:none;text-align:right;}
+  .ledger-total{display:flex;justify-content:space-between;margin-top:6px;padding-top:6px;border-top:1.5px solid var(--line);font-weight:700;font-variant-numeric:tabular-nums;}
+
+  /* 스템에 들어가는 잔액시산표(4열) */
+  .tbal{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:10px 0 18px;overflow-x:auto;}
+  .tbal-head{text-align:center;margin-bottom:8px;}
+  .tbal-head .tbal-title{font-weight:700;font-size:.98rem;}
+  .tbal-head .tbal-meta{font-size:.78rem;color:var(--dim);margin-top:2px;}
+  .tbal table{width:100%;border-collapse:collapse;font-size:.88rem;font-variant-numeric:tabular-nums;}
+  .tbal th{font-size:.72rem;color:var(--dim);font-weight:600;padding:5px 6px;border-bottom:1.5px solid var(--line);}
+  .tbal td{padding:5px 6px;text-align:center;border-bottom:1px dotted var(--line);}
+  .tbal td.num{text-align:right;}
+  .tbal tr.total td{border-top:1.5px solid var(--line);border-bottom:none;font-weight:700;}
   .choice{display:flex;gap:10px;width:100%;text-align:left;border:1.5px solid var(--line);
           background:var(--card2);color:var(--txt);border-radius:13px;padding:13px 14px;
           font-size:.97rem;line-height:1.45;margin-bottom:9px;cursor:pointer;transition:.12s;word-break:keep-all;overflow-wrap:break-word;}
@@ -171,6 +195,29 @@ function fmtStem(s){
   return head + items.map(it=>`<span class="data">· ${it}</span>`).join('');
 }
 
+function ledgerHtml(t){
+  const side = rows => rows.map(r => `<div class="ledger-row">${r.date?`<span class="lr-date">${esc(r.date)}</span>`:''}<span class="lr-label">${esc(r.label)}</span><span class="lr-amt">${esc(r.amount)}</span></div>`).join('');
+  return `<div class="ledger">
+    <div class="ledger-title">${esc(t.title||'')}</div>
+    <div class="ledger-body">
+      <div class="ledger-side left">${side(t.left)}</div>
+      <div class="ledger-side right">${side(t.right)}</div>
+    </div>
+    ${(t.leftTotal||t.rightTotal)?`<div class="ledger-total"><span>${esc(t.leftTotal)}</span><span>${esc(t.rightTotal)}</span></div>`:''}
+  </div>`;
+}
+
+function trialBalanceHtml(t){
+  const rows = t.rows.map(r => `<tr><td class="num">${esc(r.debit||'')}</td><td>${esc(r.ref||'')}</td><td>${esc(r.name)}</td><td class="num">${esc(r.credit||'')}</td></tr>`).join('');
+  return `<div class="tbal">
+    <div class="tbal-head"><div class="tbal-title">${esc(t.title||'')}</div><div class="tbal-meta">${esc(t.meta||'')}</div></div>
+    <table>
+      <thead><tr><th>차변</th><th>${esc(t.refLabel||'원면')}</th><th>계정과목</th><th>대변</th></tr></thead>
+      <tbody>${rows}<tr class="total"><td class="num">${esc(t.debitTotal)}</td><td></td><td></td><td class="num">${esc(t.creditTotal)}</td></tr></tbody>
+    </table>
+  </div>`;
+}
+
 async function load(){
   try{
     const r=await fetch('theory_bank.json');
@@ -253,7 +300,9 @@ function showQ(){
   const fmt=q.format&&q.format.length?`<span class="fmt">${q.format.map(esc).join('·')}</span>`:'';
   let html=`<div class="qcard">
     <div class="qtag">${esc(q.topicName)}${fmt}</div>
-    <div class="qstem">${fmtStem(q.stem)}</div>`;
+    <div class="qstem">${fmtStem(q.stem)}</div>
+    ${q.stemTAccount ? ledgerHtml(q.stemTAccount) : ''}
+    ${q.stemTrialBalance ? trialBalanceHtml(q.stemTrialBalance) : ''}`;
   q.options.forEach((o,i)=>{
     const body = q.optionsVisual && q.optionsVisual[i] ? tAccountHtml(q.optionsVisual[i]) : `<span>${esc(o)}</span>`;
     html+=`<button class="choice${q.optionsVisual?' has-visual':''}" data-i="${i+1}"><span class="no">${i+1}</span>${body}</button>`;
