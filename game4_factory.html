@@ -351,6 +351,29 @@
             100% { opacity:0; transform: translate(var(--tx), var(--ty)) scale(0); }
         }
         
+        /* ── 설명타임(시간정지) 버튼 — 헤더 바로 아래 별도 줄 ── */
+        #freeze-btn {
+            display: flex; align-items: center; justify-content: center; gap: 5px;
+            width: fit-content; margin: 6px auto 0;
+            padding: 6px 14px;
+            background: rgba(0,194,255,0.14);
+            border: 1.5px solid var(--blue);
+            border-radius: 50px;
+            color: var(--blue);
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 700;
+            font-size: 0.72rem;
+            cursor: pointer;
+            white-space: nowrap;
+            flex-shrink: 0;
+            position: relative; z-index: 30;
+        }
+        #freeze-btn.active {
+            background: rgba(0,230,118,0.18);
+            border-color: var(--green);
+            color: var(--green);
+        }
+
         /* ── 보상형 광고 버튼 ── */
         #rewarded-btn {
             display: none;
@@ -536,6 +559,7 @@
         <button class="hdr-btn hdr-btn-home" onclick="if(typeof isPlaying!=='undefined'&&isPlaying){if(!confirm('게임을 종료하고 메인으로 나가시겠어요?'))return;}location.href='index.html'">홈</button>
     </div>
 </header>
+<button id="freeze-btn" onclick="requestFreeze()">⏸ 설명타임 (5문제 정지)</button>
 
 <!-- 게임 -->
 <div class="game-main">
@@ -684,6 +708,8 @@ let currentQ = null, qIndex = 0;
 let score = 0, combo = 0, maxCombo = 0;
 let matchCount = 0, wrongCount = 0;
 let timeLeft = 60, isPlaying = false, timerInterval = null, adPaused = false;
+let freezeLeft = 0;   // 설명타임: 남은 문제 수만큼 타이머 완전 정지
+let pendingReward = null; // 'time' | 'freeze'
 let selectedParts = { L: null, R: null }, activeSlot = 'L';
 let judging = false; // 판정 예약~다음 문제(또는 오답 정리) 사이 입력 잠금 (이중 채점 방지)
 
@@ -744,11 +770,12 @@ function startGame() {
     els.screenResult.style.display = 'none';
     score = 0; combo = 0; maxCombo = 0; matchCount = 0; wrongCount = 0;
     timeLeft = 60; qIndex = 1; isPlaying = true; judging = false;
+    freezeLeft = 0; pendingReward = null;
     if (window.WrongNote) WrongNote.reset();
     updateHUD(); nextQuestion();
     clearInterval(timerInterval);
     timerInterval = setInterval(() => {
-        if (!isPlaying || adPaused) return; // 광고 보는 동안 시간 멈춤
+        if (!isPlaying || adPaused || freezeLeft > 0) return; // 광고 시청/설명타임 중엔 시간 멈춤
         timeLeft--; updateHUD();
         if (timeLeft <= 15 && timeLeft > 0) showRewardedBtn();
         if (timeLeft <= 0) endGame();
@@ -756,12 +783,34 @@ function startGame() {
 }
 
 function updateHUD() {
-    els.time.textContent  = timeLeft;
+    els.time.textContent  = freezeLeft > 0 ? '⏸' : timeLeft;
     els.score.textContent = score.toLocaleString();
     els.combo.textContent = combo + 'x';
     const pct = Math.max(0, Math.min(100, (timeLeft / 60) * 100));
     els.bar.style.width = pct + '%';
-    els.bar.style.backgroundColor = timeLeft <= 10 ? 'var(--red)' : 'var(--yellow)';
+    els.bar.style.backgroundColor = freezeLeft > 0 ? 'var(--green)' : timeLeft <= 10 ? 'var(--red)' : 'var(--yellow)';
+    const fb = document.getElementById('freeze-btn');
+    if (fb) {
+        fb.classList.toggle('active', freezeLeft > 0);
+        fb.textContent = freezeLeft > 0 ? `⏸ 설명타임 중 (${freezeLeft}문제 남음)` : '⏸ 설명타임 (5문제 정지)';
+    }
+}
+
+// 설명타임(제한시간 정지) — 광고가 되면 보고 나서, 안 되거나 실패해도 그냥 바로 지급
+function requestFreeze() {
+    if (freezeLeft > 0) return;
+    if (window.AdBridge && typeof AdBridge.isRewardedReady === 'function' && AdBridge.isRewardedReady()) {
+        pendingReward = 'freeze';
+        adPaused = true;
+        armResumeOnReturn();
+        AdBridge.showRewarded();
+    } else {
+        grantFreeze();
+    }
+}
+function grantFreeze() {
+    freezeLeft = 5;
+    updateHUD();
 }
 
 // 셔플 백: 전체 문제를 섞어 하나씩 소진, 다 나오면 재셔플(직전 문제 연속 방지)
@@ -844,16 +893,18 @@ function flashEffect(isOk) {
 
 function checkAnswer() {
     if (!isPlaying || !selectedParts.L || !selectedParts.R) { judging = false; return; }
+    const wasFrozen = freezeLeft > 0; // 이번 문제가 설명타임(정지) 중이었는지 — 가감 면제용
+    if (wasFrozen) { freezeLeft--; updateHUD(); }
     if (selectedParts.L.text === currentQ.L && selectedParts.R.text === currentQ.R) {
         playSound('ok'); flashEffect(true);
         combo++; if (combo > maxCombo) maxCombo = combo; matchCount++;
-        const gain = 150 + (combo * 30); score += gain; timeLeft += 10;
+        const gain = 150 + (combo * 30); score += gain; if (!wasFrozen) timeLeft += 10;
         showFloatingText(`+${gain}점!`, 'var(--green)'); updateHUD(); qIndex++;
         hapticCorrect();
         setTimeout(nextQuestion, 500);
     } else {
         playSound('bad'); flashEffect(false);
-        combo = 0; wrongCount++; timeLeft = Math.max(0, timeLeft - 5);
+        combo = 0; wrongCount++; if (!wasFrozen) timeLeft = Math.max(0, timeLeft - 5);
         if (window.WrongNote) WrongNote.add({ game:'factory', key:currentQ.q,
             q:currentQ.q.replace(/\n/g,'<br>'),
             correct:'(차) '+currentQ.L+' / (대) '+currentQ.R,
@@ -1096,8 +1147,13 @@ function renderRankList(list) {
     }
     // Kotlin → JS 콜백: 보상 지급 (※ 광고가 아직 떠 있는 도중에 호출됨 → 여기서 재개 X)
     function onRewardGranted() {
-        timeLeft += 30;
-        updateHUD();
+        if (pendingReward === 'freeze') {
+            grantFreeze();
+        } else {
+            timeLeft += 30;
+            updateHUD();
+        }
+        pendingReward = null;
         hideRewardedBtn();
         // 재개는 광고를 닫고 게임 화면으로 돌아온 순간(visibilitychange/focus)에 처리
     }
@@ -1150,7 +1206,12 @@ function renderRankList(list) {
         _wantResume = false;
         if (window._resumeSafety) clearTimeout(window._resumeSafety);
         adPaused = false;
-        alert('광고를 불러올 수 없어요. 잠시 후 다시 시도해주세요.');
+        if (pendingReward === 'freeze') {
+            grantFreeze();
+            pendingReward = null;
+        } else {
+            alert('광고를 불러올 수 없어요. 잠시 후 다시 시도해주세요.');
+        }
     }
 
 

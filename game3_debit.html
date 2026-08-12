@@ -633,6 +633,29 @@
             100% { opacity:0; transform: translate(var(--tx), var(--ty)) scale(0); }
         }
         
+        /* ── 설명타임(시간정지) 버튼 — 헤더 바로 아래 별도 줄 ── */
+        #freeze-btn {
+            display: flex; align-items: center; justify-content: center; gap: 5px;
+            width: fit-content; margin: 6px auto 0;
+            padding: 6px 14px;
+            background: rgba(0,194,255,0.14);
+            border: 1.5px solid var(--blue);
+            border-radius: 50px;
+            color: var(--blue);
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 700;
+            font-size: 0.72rem;
+            cursor: pointer;
+            white-space: nowrap;
+            flex-shrink: 0;
+            position: relative; z-index: 30;
+        }
+        #freeze-btn.active {
+            background: rgba(0,230,118,0.18);
+            border-color: var(--green);
+            color: var(--green);
+        }
+
         /* ── 보상형 광고 버튼 ── */
         #rewarded-btn {
             display: none;
@@ -877,6 +900,7 @@
         <button class="hdr-btn" onclick="if(typeof isPlaying!=='undefined'&&isPlaying){if(!confirm('게임을 종료하고 메인으로 나가시겠어요?'))return;}location.href='index.html'">홈</button>
     </div>
 </header>
+<button id="freeze-btn" onclick="requestFreeze()">⏸ 설명타임 (5문제 정지)</button>
 
 <!-- ── 게임 영역 ── -->
 <div class="game-area">
@@ -1111,6 +1135,7 @@ function startGame() {
     document.getElementById('result-screen').style.display = 'none';
     score = 0; combo = 0; maxCombo = 0;
     timeLeft = GAME_TIME; correctCount = 0; wrongCount = 0;
+    freezeLeft = 0; pendingReward = null;
     isPlaying = true;
     isLocked = false;
     if (nextQTimer) { clearTimeout(nextQTimer); nextQTimer = null; }
@@ -1122,8 +1147,10 @@ function startGame() {
 }
 
 let adPaused = false; // 광고 시청 중 타이머 일시정지 플래그
+let freezeLeft = 0;   // 설명타임: 이 값이 0보다 크면 남은 문제 수만큼 타이머 완전 정지
+let pendingReward = null; // 'time' | 'freeze' — 광고 시청 후 지급할 보상 종류
 function tick() {
-    if (adPaused) return; // 광고 보는 동안 시간 멈춤
+    if (adPaused || freezeLeft > 0) return; // 광고 시청/설명타임 중엔 시간 멈춤
     timeLeft--;
     updateHUD();
     if (timeLeft <= 15 && timeLeft > 0) showRewardedBtn();
@@ -1131,12 +1158,34 @@ function tick() {
 }
 
 function updateHUD() {
-    document.getElementById('timer-val').textContent = timeLeft;
+    document.getElementById('timer-val').textContent = freezeLeft > 0 ? '⏸' : timeLeft;
     document.getElementById('score-val').textContent = score.toLocaleString();
     document.getElementById('combo-val').textContent = combo + 'x';
     document.getElementById('timer-bar').style.width = Math.min(100, timeLeft / GAME_TIME * 100) + '%';
     document.getElementById('timer-val').style.color =
-        timeLeft <= 10 ? '#ff2d55' : timeLeft <= 20 ? '#ffd600' : 'var(--red)';
+        freezeLeft > 0 ? 'var(--green)' : timeLeft <= 10 ? '#ff2d55' : timeLeft <= 20 ? '#ffd600' : 'var(--red)';
+    const fb = document.getElementById('freeze-btn');
+    if (fb) {
+        fb.classList.toggle('active', freezeLeft > 0);
+        fb.textContent = freezeLeft > 0 ? `⏸ 설명타임 중 (${freezeLeft}문제 남음)` : '⏸ 설명타임 (5문제 정지)';
+    }
+}
+
+// 설명타임(제한시간 정지) — 광고가 되면 보고 나서, 광고가 안 되거나 실패해도 그냥 바로 지급
+function requestFreeze() {
+    if (freezeLeft > 0) return; // 이미 정지 중이면 중복 요청 무시
+    if (window.AdBridge && typeof AdBridge.isRewardedReady === 'function' && AdBridge.isRewardedReady()) {
+        pendingReward = 'freeze';
+        adPaused = true;
+        armResumeOnReturn();
+        AdBridge.showRewarded();
+    } else {
+        grantFreeze(); // 앱에 광고 기능이 없거나(PC/웹) 준비 안 됐으면 바로 지급
+    }
+}
+function grantFreeze() {
+    freezeLeft = 5;
+    updateHUD();
 }
 
 // 셔플 백: 전체 문제를 섞어 하나씩 소진, 다 나오면 재셔플(직전 문제 연속 방지)
@@ -1189,6 +1238,8 @@ function checkAnswer(side) {
     if (!isPlaying || isLocked) return;
     isLocked = true;
     const card = document.getElementById('question-card');
+    const wasFrozen = freezeLeft > 0; // 이번 문제가 설명타임(정지) 중이었는지 — 페널티 면제용
+    if (wasFrozen) { freezeLeft--; updateHUD(); }
 
     if (side === currentQ.type) {
         playSound('correct');
@@ -1205,7 +1256,7 @@ function checkAnswer(side) {
     } else {
         playSound('wrong');
         combo = 0;
-        timeLeft = Math.max(0, timeLeft - 5);
+        if (!wasFrozen) timeLeft = Math.max(0, timeLeft - 5);
         wrongCount++;
         if (window.WrongNote) WrongNote.add({ game:'debit', key:currentQ.target+'｜'+currentQ.sentence,
             q:currentQ.sentence,
@@ -1526,8 +1577,13 @@ function getGrade(score) {
     }
     // Kotlin → JS 콜백: 보상 지급 (※ 광고가 아직 떠 있는 도중에 호출됨 → 여기서 재개 X)
     function onRewardGranted() {
-        timeLeft += 30;
-        document.getElementById('timer-val').textContent = timeLeft;
+        if (pendingReward === 'freeze') {
+            grantFreeze();
+        } else {
+            timeLeft += 30;
+            updateHUD();
+        }
+        pendingReward = null;
         hideRewardedBtn();
         // 재개는 광고를 닫고 게임 화면으로 돌아온 순간(visibilitychange/focus)에 처리
     }
@@ -1580,7 +1636,13 @@ function getGrade(score) {
         _wantResume = false;
         if (window._resumeSafety) clearTimeout(window._resumeSafety);
         adPaused = false;
-        alert('광고를 불러올 수 없어요. 잠시 후 다시 시도해주세요.');
+        if (pendingReward === 'freeze') {
+            // 설명타임은 광고 실패해도 그냥 지급 (수업 중 끊기지 않게)
+            grantFreeze();
+            pendingReward = null;
+        } else {
+            alert('광고를 불러올 수 없어요. 잠시 후 다시 시도해주세요.');
+        }
     }
 
 
