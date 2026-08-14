@@ -763,6 +763,8 @@ const GAMES = [
   { id:'factory', name:'조립공장',  icon:'🏭', color:'var(--game4)', max:12000 },  // 👑 결산 마스터
   { id:'flight',  name:'플라이트',  icon:'🛩', color:'var(--game5)', max:55000 },  // 👑 전설의 에이스
 ];
+// 게임 클리어(합격) 기준: 만점의 70% 이상 — 점수 칸이 초록색(sc-high)으로 표시되는 기준과 동일
+const CLEAR_PCT = 70;
 
 /* ── 직급 재계산 (학생 화면과 동일한 기준) ──
    scores.grade 에 저장된 문자열을 그대로 쓰지 않고 점수로 다시 계산한다.
@@ -1159,7 +1161,7 @@ function renderDashboard(scores) {
   const ranked = studentNames.map(name => {
     const s = students[name];
     const total = GAMES.reduce((sum,g) => sum+(s[g.id]?.score||0), 0);
-    const cleared = GAMES.filter(g=>s[g.id]).length;
+    const cleared = GAMES.filter(g=>s[g.id] && (s[g.id].score/g.max*100)>=CLEAR_PCT).length;
     return { name, total, cleared, scores: s };
   }).sort((a,b)=>b.total-a.total);
 
@@ -1220,7 +1222,7 @@ function renderDashboard(scores) {
         const s = r.scores[g.id];
         if (!s) return `<td><span class="score-cell sc-none">미참여</span></td>`;
         const pct = s.score/g.max*100;
-        const cls = pct>=70?'sc-high':pct>=40?'sc-mid':'sc-low';
+        const cls = pct>=CLEAR_PCT?'sc-high':pct>=40?'sc-mid':'sc-low';
         return `<td><span class="score-cell ${cls}">${s.score.toLocaleString()}</span></td>`;
       }).join('');
 
