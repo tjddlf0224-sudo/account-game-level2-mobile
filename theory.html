@@ -208,12 +208,13 @@ function ledgerHtml(t){
 }
 
 function trialBalanceHtml(t){
-  const rows = t.rows.map(r => `<tr><td class="num">${esc(r.debit||'')}</td><td>${esc(r.ref||'')}</td><td>${esc(r.name)}</td><td class="num">${esc(r.credit||'')}</td></tr>`).join('');
+  const noRef = !!t.noRef;
+  const rows = t.rows.map(r => `<tr><td class="num">${esc(r.debit||'')}</td>${noRef?'':`<td>${esc(r.ref||'')}</td>`}<td>${esc(r.name)}</td><td class="num">${esc(r.credit||'')}</td></tr>`).join('');
   return `<div class="tbal">
     <div class="tbal-head"><div class="tbal-title">${esc(t.title||'')}</div><div class="tbal-meta">${esc(t.meta||'')}</div></div>
     <table>
-      <thead><tr><th>차변</th><th>${esc(t.refLabel||'원면')}</th><th>계정과목</th><th>대변</th></tr></thead>
-      <tbody>${rows}<tr class="total"><td class="num">${esc(t.debitTotal)}</td><td></td><td></td><td class="num">${esc(t.creditTotal)}</td></tr></tbody>
+      <thead><tr><th>차변</th>${noRef?'':`<th>${esc(t.refLabel||'원면')}</th>`}<th>계정과목</th><th>대변</th></tr></thead>
+      <tbody>${rows}<tr class="total"><td class="num">${esc(t.debitTotal)}</td>${noRef?'':'<td></td>'}<td></td><td class="num">${esc(t.creditTotal)}</td></tr></tbody>
     </table>
   </div>`;
 }
