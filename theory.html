@@ -82,8 +82,9 @@
   .ledger-side.right{padding-left:10px;}
   .ledger-row{display:flex;justify-content:space-between;gap:8px;padding:3px 0;font-variant-numeric:tabular-nums;}
   .ledger-row .lr-date{color:var(--dim);flex:none;width:2.6em;}
-  .ledger-row .lr-label{flex:1;}
-  .ledger-row .lr-amt{flex:none;text-align:right;}
+  .ledger-row .lr-label{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .ledger-row .lr-amt{flex:none;text-align:right;white-space:nowrap;}
+  .ledger-group .ledger{overflow-x:auto;}
   .ledger-total{display:flex;justify-content:space-between;margin-top:6px;padding-top:6px;border-top:1.5px solid var(--line);font-weight:700;font-variant-numeric:tabular-nums;}
 
   /* 스템에 들어가는 잔액시산표(4열) */
@@ -196,14 +197,72 @@ const TOPIC_ORDER=['T1','T2','T3','T4','T5','T6','T7'];
 let BANK=[], META=null, POOL=[], SEL_TOPIC='ALL', SEL_LEN=10;
 
 function esc(s){return (s==null?'':String(s)).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-// 문제 본문: 'ㆍ'로 구분된 자료 항목을 각각 줄바꿈해 가독성 향상
+
+// 문제 본문(문두) 뒤에 이어지는 자료/보기를 항상 줄바꿈으로 분리해 가독성 향상
 function fmtStem(s){
-  const e=esc(s);
-  const idx=e.indexOf('ㆍ');
-  if(idx<0) return e;
+  let e=esc(s);
+  e=e.replace(/옳지 않은/g,'옳지 <b><u>않은</u></b>');
+  e=e.replace(/아닌(?=\s*것은)/g,'<b><u>아닌</u></b>');
+
+  const qm=e.indexOf('?');
+  if(qm<0 || qm===e.length-1) return splitBulletsOnly(e);
+  const head=e.slice(0,qm+1);
+  const tail=e.slice(qm+1).trim();
+  if(!tail) return head;
+  const lines=splitTailLines(tail);
+  if(!lines.length) return head;
+  return head + lines.map(l=>`<span class="data">${l}</span>`).join('');
+}
+
+function splitBulletsOnly(e){
+  const b=bulletChar(e);
+  if(!b) return e;
+  const idx=e.indexOf(b);
   const head=e.slice(0,idx).trim();
-  const items=e.slice(idx).split('ㆍ').map(x=>x.trim()).filter(Boolean);
+  const items=e.slice(idx).split(b).map(x=>x.trim()).filter(Boolean);
   return head + items.map(it=>`<span class="data">· ${it}</span>`).join('');
+}
+
+function bulletChar(s){
+  if(s.indexOf('ㆍ')>=0) return 'ㆍ';
+  if(s.indexOf('⦁')>=0) return '⦁';
+  return null;
+}
+
+function splitTailLines(tail){
+  const b=bulletChar(tail);
+  if(b){
+    const idx=tail.indexOf(b);
+    const pre=tail.slice(0,idx).trim();
+    const items=tail.slice(idx).split(b).map(x=>x.trim()).filter(Boolean).map(it=>'· '+it);
+    return pre?[pre,...items]:items;
+  }
+  if(/\(차\)/.test(tail) && /\(대\)/.test(tail)){
+    const di=tail.lastIndexOf('(대)');
+    const a=tail.slice(0,di).trim(), c=tail.slice(di).trim();
+    if(a && c) return [a,c];
+  }
+  let m=tail.match(/(?:^|\s)[가나다라]\.\s?/g);
+  if(m && m.length>=2) return splitByMarker(tail, /([가나다라])\.\s?/g);
+  m=tail.match(/(?:^|\s)[ㄱㄴㄷㄹ]\.\s?/g);
+  if(m && m.length>=2) return splitByMarker(tail, /([ㄱㄴㄷㄹ])\.\s?/g);
+  const colons=(tail.match(/：/g)||[]).length;
+  if(colons>=2){
+    const parts=tail.split(/\s+(?=[^\s：]{1,12}：)/).map(x=>x.trim()).filter(Boolean);
+    if(parts.length>=2) return parts;
+  }
+  return [tail];
+}
+function splitByMarker(tail, re){
+  const parts=tail.split(re);
+  const out=[];
+  const pre=(parts[0]||'').trim();
+  if(pre) out.push(pre);
+  for(let i=1;i<parts.length;i+=2){
+    const marker=parts[i], text=(parts[i+1]||'').trim();
+    if(text) out.push(`${marker}. ${text}`);
+  }
+  return out.length?out:[tail];
 }
 
 function ledgerHtml(t){
