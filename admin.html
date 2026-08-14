@@ -1559,7 +1559,8 @@ async function loadExam(gid){
 }
 function examBadge(cleared){
   const passed = cleared >= GAMES.length;
-  return `<span class="exam-badge ${passed?'ex-pass':'ex-no'}" style="cursor:default">${passed?'✅ 합격':'—'}</span>`;
+  const label = passed ? '✅ 합격' : `${cleared}/${GAMES.length}`;
+  return `<span class="exam-badge ${passed?'ex-pass':'ex-no'}" style="cursor:default">${label}</span>`;
 }
 
 const CERT_OPTIONS = ['전산회계2급','전산회계1급','전산세무2급','전산세무1급'];
