@@ -87,6 +87,18 @@
   .ledger-group .ledger{overflow-x:auto;}
   .ledger-total{display:flex;justify-content:space-between;margin-top:6px;padding-top:6px;border-top:1.5px solid var(--line);font-weight:700;font-variant-numeric:tabular-nums;}
 
+  /* 스템에 들어가는 현금영수증 */
+  .receipt{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:10px 0 18px;font-variant-numeric:tabular-nums;}
+  .rcpt-notice{font-size:.66rem;color:var(--dim);text-align:center;margin-bottom:10px;line-height:1.45;}
+  .rcpt-title{text-align:center;font-weight:700;font-size:1rem;letter-spacing:5px;margin-bottom:10px;padding-bottom:9px;border-bottom:1.5px solid var(--line);}
+  .rcpt-row{display:flex;gap:10px;padding:2px 0;font-size:.85rem;}
+  .rcpt-row.rcpt-div{margin-top:7px;padding-top:9px;border-top:1px dashed var(--line);}
+  .rcpt-row.rcpt-big{font-weight:700;font-size:1.02rem;margin-top:3px;}
+  .rcpt-cell{flex:1;display:flex;justify-content:space-between;gap:8px;min-width:0;}
+  .rcpt-l{color:var(--dim);flex:none;}
+  .rcpt-v{text-align:right;flex:1;overflow-wrap:break-word;}
+  .rcpt-footer{text-align:center;font-size:.62rem;color:var(--dim2);margin-top:10px;padding-top:9px;border-top:1px solid var(--line);line-height:1.5;}
+
   /* 스템에 들어가는 잔액시산표(4열) */
   .tbal{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:10px 0 18px;overflow-x:auto;}
   .tbal-head{text-align:center;margin-bottom:8px;}
@@ -266,7 +278,10 @@ function splitByMarker(tail, re){
 }
 
 function ledgerHtml(t){
-  const side = rows => rows.map(r => `<div class="ledger-row">${r.date?`<span class="lr-date">${esc(r.date)}</span>`:''}<span class="lr-label">${esc(r.label)}</span><span class="lr-amt">${esc(r.amount)}</span></div>`).join('');
+  const side = rows => {
+    const hasDate = rows.some(r=>r.date);
+    return rows.map(r => `<div class="ledger-row">${hasDate?`<span class="lr-date">${esc(r.date||'')}</span>`:''}<span class="lr-label">${esc(r.label)}</span><span class="lr-amt">${esc(r.amount)}</span></div>`).join('');
+  };
   return `<div class="ledger">
     <div class="ledger-title">${esc(t.title||'')}</div>
     <div class="ledger-body">
@@ -295,6 +310,19 @@ function simpleTableHtml(t){
   return `<div class="tbal">
     ${t.title?`<div class="tbal-head"><div class="tbal-title">${esc(t.title)}</div></div>`:''}
     <table><thead><tr>${headRow}</tr></thead><tbody>${bodyRows}</tbody></table>
+  </div>`;
+}
+
+function receiptHtml(t){
+  const rows=t.rows.map(r=>{
+    const cells=r.cells.map(c=>`<div class="rcpt-cell"><span class="rcpt-l">${esc(c.l)}</span><span class="rcpt-v">${esc(c.v)}</span></div>`).join('');
+    return `<div class="rcpt-row${r.divider?' rcpt-div':''}${r.big?' rcpt-big':''}">${cells}</div>`;
+  }).join('');
+  return `<div class="receipt">
+    ${t.notice?`<div class="rcpt-notice">${esc(t.notice)}</div>`:''}
+    <div class="rcpt-title">${esc(t.title||'현금영수증')}</div>
+    <div class="rcpt-body">${rows}</div>
+    ${t.footer?`<div class="rcpt-footer">${esc(t.footer)}</div>`:''}
   </div>`;
 }
 
@@ -384,7 +412,8 @@ function showQ(){
     ${q.stemTAccount ? ledgerHtml(q.stemTAccount) : ''}
     ${q.stemTAccounts ? `<div class="ledger-group">${q.stemTAccounts.map(ledgerHtml).join('')}</div>` : ''}
     ${q.stemTrialBalance ? trialBalanceHtml(q.stemTrialBalance) : ''}
-    ${q.stemTable ? simpleTableHtml(q.stemTable) : ''}`;
+    ${q.stemTable ? simpleTableHtml(q.stemTable) : ''}
+    ${q.stemReceipt ? receiptHtml(q.stemReceipt) : ''}`;
   q.options.forEach((o,i)=>{
     const body = q.optionsVisual && q.optionsVisual[i] ? tAccountHtml(q.optionsVisual[i]) : `<span>${esc(o)}</span>`;
     html+=`<button class="choice${q.optionsVisual?' has-visual':''}" data-i="${i+1}"><span class="no">${i+1}</span>${body}</button>`;
