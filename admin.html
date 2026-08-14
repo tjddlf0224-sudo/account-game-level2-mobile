@@ -666,7 +666,7 @@ body{
                 <th>⚡ 차변대변<span class="th-sub">2,310↑</span></th>
                 <th>🏭 조립공장<span class="th-sub">8,400↑</span></th>
                 <th>🛩 플라이트<span class="th-sub">38,500↑</span></th>
-                <th>📝 이론</th>
+                <th>📝 이론<span class="th-sub">정답률 60%↑</span></th>
                 <th>종합</th>
                 <th>합격</th>
                 <th>자격증</th>
@@ -1051,18 +1051,21 @@ let theoryWeakByTopic = {};   // topic → count (그룹 전체)
 let theoryWeakByStudent = {}; // name → { topic → count }
 const TOPIC_ORDER = ['회계의 기본원리','당좌자산','재고자산','유형자산','부채','자본','수익과 비용'];
 
-let theoryScoreByStudent = {}; // name → { best, plays }
+let theoryScoreByStudent = {}; // name → { best, plays, passed }
+// 이론 합격 기준: 정답률 60%(🥈 합격 가시권) 이상을 한 번이라도 달성 — theory.html의 grade() 등급과 동일
+const THEORY_PASS_GRADES = ['👑 회계 마스터', '🥇 합격 안정권', '🥈 합격 가시권'];
 
 async function loadTheoryScores(gid) {
   theoryScoreByStudent = {};
   try {
     const { data, error } = await db.from('score_history')
-      .select('user_name,score').eq('group_id', gid).eq('game_id', 'theory').limit(5000);
+      .select('user_name,score,grade').eq('group_id', gid).eq('game_id', 'theory').limit(5000);
     if (error) throw error;
     (data || []).forEach(r => {
-      const cur = theoryScoreByStudent[r.user_name] || { best: 0, plays: 0 };
+      const cur = theoryScoreByStudent[r.user_name] || { best: 0, plays: 0, passed: false };
       cur.best = Math.max(cur.best, r.score || 0);
       cur.plays += 1;
+      if (THEORY_PASS_GRADES.includes(r.grade)) cur.passed = true;
       theoryScoreByStudent[r.user_name] = cur;
     });
   } catch (e) { /* 테이블 없거나 오프라인 — 조용히 무시 */ }
@@ -1241,7 +1244,7 @@ function renderDashboard(scores) {
 
       const theoryInfo = theoryScoreByStudent[r.name];
       const theoryCell = theoryInfo
-        ? `<td><span class="score-cell sc-high">${theoryInfo.best.toLocaleString()}</span><div style="font-size:0.62rem;color:rgba(255,255,255,0.3);margin-top:2px">${theoryInfo.plays}회</div></td>`
+        ? `<td><span class="score-cell ${theoryInfo.passed?'sc-high':'sc-low'}">${theoryInfo.best.toLocaleString()}</span><div style="font-size:0.62rem;color:rgba(255,255,255,0.3);margin-top:2px">${theoryInfo.plays}회</div></td>`
         : `<td><span class="score-cell sc-none">미참여</span></td>`;
 
       return `<tr style="cursor:pointer" onclick="openModal('${escAttr(r.name)}')">
@@ -1289,7 +1292,7 @@ function openModal(name) {
   scoreGrid.innerHTML = GAMES.map(g => {
     const s = student.scores[g.id];
     const pct = s ? s.score/g.max*100 : 0;
-    const col = !s?'rgba(255,255,255,0.2)':pct>=70?'var(--gn)':pct>=40?'var(--gd)':'var(--pk)';
+    const col = !s?'rgba(255,255,255,0.2)':pct>=CLEAR_PCT?'var(--gn)':pct>=40?'var(--gd)':'var(--pk)';
     return `<div class="msg-card">
       <div class="msg-game">${g.icon} ${g.name}</div>
       <div class="msg-score" style="color:${col}">${s?s.score.toLocaleString():'—'}</div>
@@ -1297,10 +1300,11 @@ function openModal(name) {
     </div>`;
   }).join('') + (() => {
     const t = theoryScoreByStudent[name];
+    const tcol = !t?'rgba(255,255,255,0.2)':t.passed?'var(--gn)':'var(--pk)';
     return `<div class="msg-card">
       <div class="msg-game">📝 이론</div>
-      <div class="msg-score" style="color:${t?'var(--cy)':'rgba(255,255,255,0.2)'}">${t?t.best.toLocaleString():'—'}</div>
-      <div class="msg-grade">${t?t.plays+'회 플레이':'미참여'}</div>
+      <div class="msg-score" style="color:${tcol}">${t?t.best.toLocaleString():'—'}</div>
+      <div class="msg-grade">${t?t.plays+'회 플레이'+(t.passed?' · 합격 가시권↑':''):'미참여'}</div>
     </div>`;
   })();
 
