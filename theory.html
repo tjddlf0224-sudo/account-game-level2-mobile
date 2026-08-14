@@ -25,7 +25,16 @@
       radial-gradient(ellipse 45% 35% at 90% 90%, rgba(180,79,255,0.07), transparent 55%),
       var(--bg);
       display:flex; flex-direction:column; justify-content:center;}
-    .wrap{padding-top:16px;}
+    .wrap{padding-top:16px;max-width:900px;width:100%;}
+    h1{font-size:1.5rem;}
+    h1 .sub{font-size:.85rem;}
+    .qcard{padding:26px 30px;}
+    .qtag{font-size:.8rem;}
+    .qstem{font-size:1.18rem;}
+    .qstem .data{font-size:1.05rem;}
+    .choice{font-size:1.05rem;padding:16px 18px;}
+    .cta{font-size:1.15rem;padding:17px;}
+    .expl{font-size:1rem;padding:16px;}
   }
   .top{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
   .back{background:var(--card);border:1px solid var(--line);color:var(--txt);
@@ -63,6 +72,8 @@
   .qstem .data{display:block;margin-top:4px;padding-left:2px;color:#cfe0f5;font-size:.98rem;}
 
   /* 스템에 들어가는 원장/T계정 표 */
+  .ledger-group{display:flex;gap:10px;margin:10px 0 18px;flex-wrap:wrap;}
+  .ledger-group .ledger{flex:1;min-width:150px;margin:0;}
   .ledger{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:10px 0 18px;}
   .ledger-title{text-align:center;font-weight:700;font-size:.98rem;margin-bottom:8px;padding-bottom:6px;border-bottom:1.5px solid var(--line);}
   .ledger-body{display:flex;}
@@ -303,6 +314,7 @@ function showQ(){
     <div class="qtag">${esc(q.topicName)}${fmt}</div>
     <div class="qstem">${fmtStem(q.stem)}</div>
     ${q.stemTAccount ? ledgerHtml(q.stemTAccount) : ''}
+    ${q.stemTAccounts ? `<div class="ledger-group">${q.stemTAccounts.map(ledgerHtml).join('')}</div>` : ''}
     ${q.stemTrialBalance ? trialBalanceHtml(q.stemTrialBalance) : ''}`;
   q.options.forEach((o,i)=>{
     const body = q.optionsVisual && q.optionsVisual[i] ? tAccountHtml(q.optionsVisual[i]) : `<span>${esc(o)}</span>`;
