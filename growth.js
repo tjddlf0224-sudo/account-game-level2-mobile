@@ -37,6 +37,18 @@
   function user() { return (localStorage.getItem('hub_nickname') || '').trim(); }
   function groupId() { return localStorage.getItem('hub_group_id') || null; }
   function nowMs() { return new Date().getTime(); }
+  // 웹(GitHub Pages) 수업 플레이는 광고가 안 뜨는 별개 채널이라, 광고수익 분석용
+  // plays_total/active_players 집계에서 앱 실사용과 구분해야 한다. score_history에
+  // 이미 있던 미사용 source 컬럼(과거엔 엑셀 이전 데이터 표시용으로만 쓰임)을 재활용.
+  function platform() {
+    try {
+      var C = global.Capacitor;
+      if (C && C.isNativePlatform && C.isNativePlatform()) {
+        return (C.getPlatform && C.getPlatform()) || 'app';
+      }
+    } catch (e) {}
+    return 'web';
+  }
 
   function _all() {
     try { return JSON.parse(localStorage.getItem(LS_KEY) || '{}'); }
@@ -69,7 +81,8 @@
       var row = {
         user_name: u, game_id: rec.game, score: score, grade: rec.grade || '',
         combo: Math.max(0, parseInt(rec.combo, 10) || 0),
-        correct: Math.max(0, parseInt(rec.correct, 10) || 0)
+        correct: Math.max(0, parseInt(rec.correct, 10) || 0),
+        source: platform()   // 'web' | 'android' | 'ios' — 광고수익 분석 시 앱/웹 구분용
       };
       var gid = groupId();
       if (gid) row.group_id = gid;
