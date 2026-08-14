@@ -1229,37 +1229,40 @@
                     showResult(totalScore + Math.round(stageScore), true, detail);
                 });
             } else {
-                playSound('clear');
-                totalScore += stageScore;
-                document.querySelector('#result-screen h2').textContent = `Stage ${stage} CLEAR! 🎉`;
-                document.getElementById('result-rank').textContent = `+${stageScore}점 획득!`;
-                document.getElementById('result-rank').style.color = '#2ecc71';
-                const isEndless = stage >= MAX_STAGE;
-                document.getElementById('result-msg').textContent = isEndless
-                    ? `누적 점수: ${totalScore}점 — 계속 도전!`
-                    : `누적 점수: ${totalScore}점 — 다음 스테이지로!`;
-                document.getElementById('final-score').textContent = totalScore + '점';
-                document.getElementById('score-detail').textContent = detail;
-                // 원탭 랭킹 등록: 허브 닉네임 자동 사용, 없으면 입력칸 노출
-                const prefillName = (localStorage.getItem('hub_nickname') || getMyName() || '').trim();
-                document.getElementById('player-name').value = prefillName;
-                document.querySelector('.name-row').style.display = prefillName ? 'none' : 'flex';
-                const stEl = document.getElementById('save-status');
-                stEl.textContent = ''; stEl.className = 'status-msg'; stEl.style.display = 'block';
-                // 다른 게임들과 동일한 정확한 랭킹 위젯 사용 (구 미니랭킹의 "20위 밖은 항상 21위" 근사치 버그 제거)
-                document.getElementById('rank-preview-box').style.display = 'none';
-                document.getElementById('mini-rank-wrap').style.display = 'none';
-                document.querySelector('.rank-wrap').style.display = '';
-                showMyRank(prefillName || '나', totalScore, { trackDelta: false });
-                loadRanking();
-                const stageSaveBtn = document.getElementById('stage-save-btn');
-                stageSaveBtn.style.display = 'inline-block';
-                stageSaveBtn.disabled = false;
-                stageSaveBtn.textContent = '🏆 랭킹 등록하기';
-                document.getElementById('result-screen').style.display = 'flex';
-                document.getElementById('next-stage-btn').style.display = 'inline-block';
-                document.getElementById('next-stage-btn').textContent = isEndless ? '계속 도전 ▶' : '다음 스테이지 ▶';
-                document.getElementById('restart-btn').style.display = 'none';
+                const clearedStage = stage;
+                requestStageInterstitialIfNeeded(clearedStage, function () {
+                    playSound('clear');
+                    totalScore += stageScore;
+                    document.querySelector('#result-screen h2').textContent = `Stage ${clearedStage} CLEAR! 🎉`;
+                    document.getElementById('result-rank').textContent = `+${stageScore}점 획득!`;
+                    document.getElementById('result-rank').style.color = '#2ecc71';
+                    const isEndless = clearedStage >= MAX_STAGE;
+                    document.getElementById('result-msg').textContent = isEndless
+                        ? `누적 점수: ${totalScore}점 — 계속 도전!`
+                        : `누적 점수: ${totalScore}점 — 다음 스테이지로!`;
+                    document.getElementById('final-score').textContent = totalScore + '점';
+                    document.getElementById('score-detail').textContent = detail;
+                    // 원탭 랭킹 등록: 허브 닉네임 자동 사용, 없으면 입력칸 노출
+                    const prefillName = (localStorage.getItem('hub_nickname') || getMyName() || '').trim();
+                    document.getElementById('player-name').value = prefillName;
+                    document.querySelector('.name-row').style.display = prefillName ? 'none' : 'flex';
+                    const stEl = document.getElementById('save-status');
+                    stEl.textContent = ''; stEl.className = 'status-msg'; stEl.style.display = 'block';
+                    // 다른 게임들과 동일한 정확한 랭킹 위젯 사용 (구 미니랭킹의 "20위 밖은 항상 21위" 근사치 버그 제거)
+                    document.getElementById('rank-preview-box').style.display = 'none';
+                    document.getElementById('mini-rank-wrap').style.display = 'none';
+                    document.querySelector('.rank-wrap').style.display = '';
+                    showMyRank(prefillName || '나', totalScore, { trackDelta: false });
+                    loadRanking();
+                    const stageSaveBtn = document.getElementById('stage-save-btn');
+                    stageSaveBtn.style.display = 'inline-block';
+                    stageSaveBtn.disabled = false;
+                    stageSaveBtn.textContent = '🏆 랭킹 등록하기';
+                    document.getElementById('result-screen').style.display = 'flex';
+                    document.getElementById('next-stage-btn').style.display = 'inline-block';
+                    document.getElementById('next-stage-btn').textContent = isEndless ? '계속 도전 ▶' : '다음 스테이지 ▶';
+                    document.getElementById('restart-btn').style.display = 'none';
+                });
             }
         }
 
@@ -1383,11 +1386,15 @@
                 return 'local';
             }
             window._savedScore = Math.max(window._savedScore || 0, score); // 미니 랭킹 "저장됨" 표시용
+            // ⚠ 예전엔 이 버튼 갱신이 미니랭킹 위젯(mini-rank-wrap) 표시 여부에 묶여있었는데,
+            //   지금은 스테이지 클리어 화면이 항상 신형 .rank-wrap 위젯을 쓰고 mini-rank-wrap은
+            //   항상 숨겨져 있어서(endGame() 참고) 조건이 영영 참이 안 되고, 저장은 성공했는데
+            //   버튼만 "등록 중..."에 영원히 갇혀있었다. 위젯 종류와 무관하게 항상 갱신한다.
+            if (stageBtn) stageBtn.textContent = '✓ 등록 완료!';
             // 스테이지 클리어 화면(미니 랭킹 표시 중)이면: 배지 숨기고 미니 랭킹 갱신
             const mw = document.getElementById('mini-rank-wrap');
             if (mw && mw.style.display !== 'none') {
                 document.getElementById('my-rank-badge').style.display = 'none'; document.getElementById('my-rank-neighbors').style.display = 'none';
-                if (stageBtn) stageBtn.textContent = '✓ 등록 완료!';
                 loadMiniRanking(score);   // "미저장" → 저장된 순위로 갱신
             }
             return true;
@@ -1536,6 +1543,24 @@
         window._adAfterFn = afterFn;
         const count = incrementGameCount();
         if (count % AD_INTERSTITIAL_EVERY === 0 && window.AdBridge) {
+            AdBridge.showInterstitial();
+            // onInterstitialClosed() 에서 afterFn 실행
+        } else {
+            afterFn && afterFn();
+        }
+    }
+
+    // 이 게임은 스테이지가 무한 반복이라 위 requestInterstitialIfNeeded()(그만두기 시에만,
+    // 5게임 공용 카운터 10회마다)로는 정상 클리어 흐름에서 광고 노출 기회가 거의 없었다.
+    // 그래서 정상 클리어 쪽엔 이 게임 전용으로 "N스테이지 클리어마다" 별도 트리거를 둔다.
+    const STAGE_AD_EVERY = 10;
+    function requestStageInterstitialIfNeeded(clearedStage, afterFn) {
+        if (window.AdBridge && typeof AdBridge.isAdsRemoved === 'function' && AdBridge.isAdsRemoved()) {
+            afterFn && afterFn();
+            return;
+        }
+        if (clearedStage % STAGE_AD_EVERY === 0 && window.AdBridge) {
+            window._adAfterFn = afterFn;
             AdBridge.showInterstitial();
             // onInterstitialClosed() 에서 afterFn 실행
         } else {
