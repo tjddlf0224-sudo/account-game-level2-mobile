@@ -230,6 +230,15 @@ function trialBalanceHtml(t){
   </div>`;
 }
 
+function simpleTableHtml(t){
+  const headRow = t.headers.map(h=>`<th>${esc(h)}</th>`).join('');
+  const bodyRows = t.rows.map(r=>`<tr>${r.map(c=>`<td class="num">${esc(c)}</td>`).join('')}</tr>`).join('');
+  return `<div class="tbal">
+    ${t.title?`<div class="tbal-head"><div class="tbal-title">${esc(t.title)}</div></div>`:''}
+    <table><thead><tr>${headRow}</tr></thead><tbody>${bodyRows}</tbody></table>
+  </div>`;
+}
+
 async function load(){
   try{
     const r=await fetch('theory_bank.json');
@@ -315,7 +324,8 @@ function showQ(){
     <div class="qstem">${fmtStem(q.stem)}</div>
     ${q.stemTAccount ? ledgerHtml(q.stemTAccount) : ''}
     ${q.stemTAccounts ? `<div class="ledger-group">${q.stemTAccounts.map(ledgerHtml).join('')}</div>` : ''}
-    ${q.stemTrialBalance ? trialBalanceHtml(q.stemTrialBalance) : ''}`;
+    ${q.stemTrialBalance ? trialBalanceHtml(q.stemTrialBalance) : ''}
+    ${q.stemTable ? simpleTableHtml(q.stemTable) : ''}`;
   q.options.forEach((o,i)=>{
     const body = q.optionsVisual && q.optionsVisual[i] ? tAccountHtml(q.optionsVisual[i]) : `<span>${esc(o)}</span>`;
     html+=`<button class="choice${q.optionsVisual?' has-visual':''}" data-i="${i+1}"><span class="no">${i+1}</span>${body}</button>`;
