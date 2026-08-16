@@ -56,6 +56,43 @@
   }
   function _saveAll(o) { try { localStorage.setItem(LS_KEY, JSON.stringify(o)); } catch (e) {} }
 
+  // ── DAU 체크 ──────────────────────────────────────────────────
+  // Play/App Store DAU는 지연이 크고(며칠~몇 주) 매번 콘솔에서 CSV를 수동으로
+  // 내려받아야 해서, 하루에 한 번만 찍는 가벼운 이벤트를 우리 Supabase에 직접 쌓는다.
+  // score_history(저장 버튼을 눌러야만 기록됨)와 달리, 앱/페이지를 열기만 해도 찍힌다
+  // — "저장까지 한 진성 플레이"가 아니라 "그날 실제로 앱을 연 사람" 자체가 목적.
+  var DAU_TABLE = 'dau_events';
+  var LS_DEVICE = 'hub_device_id';
+  var LS_DAU_DATE = 'hub_dau_date';
+
+  function todayStr() { return new Date().toISOString().slice(0, 10); }
+
+  function deviceId() {
+    try {
+      var id = localStorage.getItem(LS_DEVICE);
+      if (id) return id;
+      id = (global.crypto && global.crypto.randomUUID)
+        ? global.crypto.randomUUID()
+        : 'dev-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+      localStorage.setItem(LS_DEVICE, id);
+      return id;
+    } catch (e) { return 'unknown'; }
+  }
+
+  // 닉네임 유무와 무관하게(신규 유저도 포함) 기기 ID 기준으로 하루 한 번만 기록.
+  function checkDAU() {
+    try {
+      var today = todayStr();
+      if (localStorage.getItem(LS_DAU_DATE) === today) return; // 오늘 이미 기록함
+      localStorage.setItem(LS_DAU_DATE, today); // 요청 성공 여부와 무관하게 먼저 찍어 중복 방지
+      var db = client();
+      if (!db) return;
+      var row = { device_id: deviceId(), user_name: user() || null, platform: platform(), snapshot_date: today };
+      db.from(DAU_TABLE).upsert(row, { onConflict: 'device_id,snapshot_date', ignoreDuplicates: true })
+        .then(function () {}, function () {});
+    } catch (e) {}
+  }
+
   // ── 매 판 종료 시 호출 — 로컬 즉시 + Supabase 베스트에포트(예외 안 던짐) ──
   function record(rec) {
     if (!rec || !rec.game) return;
@@ -185,4 +222,8 @@
       factory: '결산분개 조립', flight: '플라이트 장부조회', theory: '이론 객관식'
     }
   };
+
+  // growth.js는 모든 게임/허브 화면에 공통으로 로드되므로, 로드 시점에 한 번 체크하면
+  // 앱 전체에서 자동으로 DAU가 잡힌다(별도 페이지마다 호출부 추가 불필요).
+  checkDAU();
 })(window);
