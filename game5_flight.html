@@ -21,7 +21,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 
 
 
-#hud{position:absolute;top:0;left:0;width:100%;z-index:20;display:flex;justify-content:space-between;align-items:center;gap:6px;padding:max(10px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 10px max(14px,env(safe-area-inset-left));pointer-events:none;background:linear-gradient(to bottom,rgba(2,8,16,.7) 0%,transparent 100%)}
+#hud{position:absolute;top:0;left:0;width:100%;box-sizing:border-box;z-index:20;display:flex;justify-content:space-between;align-items:center;gap:6px;padding:max(10px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 10px max(14px,env(safe-area-inset-left));pointer-events:none;background:linear-gradient(to bottom,rgba(2,8,16,.7) 0%,transparent 100%)}
 .hud-left{display:flex;gap:clamp(12px,4vw,30px);align-items:center}
 .hb{display:flex;flex-direction:column;align-items:center;gap:2px}
 .hl{font-family:'Orbitron',monospace;font-size:clamp(.55rem,.18vw+.5rem,.72rem);color:rgba(0,242,255,.5);letter-spacing:2px;text-transform:uppercase}
@@ -118,10 +118,10 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 #rkbox::-webkit-scrollbar{width:4px}
 #rkbox::-webkit-scrollbar-thumb{background:rgba(0,242,255,.3);border-radius:2px}
 .rkhdr{text-align:center;padding:10px 0 6px;font-family:'Orbitron';font-size:.75rem;color:rgba(0,242,255,.42);letter-spacing:3px}
-.rkrow{display:grid;grid-template-columns:44px 1fr 100px 70px;padding:9px 14px;gap:6px;border-bottom:1px solid rgba(255,255,255,.06);align-items:center;font-size:clamp(.75rem,2.5vw,.9rem)}
+.rkrow{display:grid;grid-template-columns:44px minmax(46px,1fr) minmax(0,100px) minmax(40px,70px);padding:9px 14px;gap:6px;border-bottom:1px solid rgba(255,255,255,.06);align-items:center;font-size:clamp(.75rem,2.5vw,.9rem)}
 .rkrow:last-child{border-bottom:none}
 .rkn{font-family:'Orbitron';font-size:.82rem;color:rgba(255,255,255,.3)}
-.rkn.top{color:var(--gd)}.rknm{font-weight:700;color:#fff}.rkgr{font-size:.78rem;color:var(--gn);text-align:center}.rksc{color:var(--gd);font-weight:700;text-align:right;font-family:'Orbitron';font-size:.8rem}.rkme{background:rgba(0,242,255,.07)}
+.rkn.top{color:var(--gd)}.rknm{font-weight:700;color:#fff;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rkgr{font-size:.78rem;color:var(--gn);text-align:center;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rksc{color:var(--gd);font-weight:700;text-align:right;font-family:'Orbitron';font-size:.8rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rkme{background:rgba(0,242,255,.07)}
 .rank-delta{font-size:.72rem;margin-left:6px;padding:2px 9px;border-radius:20px;font-weight:700}
 .rank-delta.up{color:#39ff14;background:rgba(57,255,20,.14)}
 .rank-delta.down{color:#ff4757;background:rgba(255,71,87,.14)}
@@ -147,6 +147,14 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 .pill.wh{color:rgba(255,255,255,.75);border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.08)}.pill.wh:active{background:rgba(255,255,255,.2)}
 
 @media(max-width:480px){.ggrid{grid-template-columns:1fr}}
+/* 좁은 폰(iPhone SE 등 320px대)에서 HUD 버튼들이 넘치는 것 방지 — 기본 디자인은 그대로 */
+@media(max-width:340px){
+  .hud-btns{gap:2px}
+  .hdb{padding:0 8px;font-size:.68rem;height:32px}
+  .mute-btn{padding:0 6px;height:32px}
+  .hud-left{gap:clamp(4px,1.2vw,30px)}
+  #hud{gap:2px}
+}
 
         /* ── 공통 하단 버튼 ── */
         .action-btns {

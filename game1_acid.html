@@ -326,7 +326,7 @@
         #rank-box::-webkit-scrollbar-thumb { background: rgba(0,242,255,0.3); border-radius: 2px; }
         .rank-hdr { text-align: center; padding: 10px 0 6px; font-size: 0.78rem; color: rgba(0,242,255,0.42); letter-spacing: 3px; }
         .rank-row {
-            display: grid; grid-template-columns: 44px 1fr 110px 70px;
+            display: grid; grid-template-columns: 44px minmax(46px,1fr) minmax(0,110px) minmax(40px,70px);
             padding: 9px 14px; gap: 6px;
             border-bottom: 1px solid rgba(255,255,255,0.06);
             align-items: center; font-size: 0.88rem;
@@ -334,9 +334,9 @@
         .rank-row:last-child { border-bottom: none; }
         .rank-num { font-size: 0.82rem; color: rgba(255,255,255,0.3); }
         .rank-num.top { color: var(--neon-gold); }
-        .rank-name { font-weight: 700; color: #fff; }
-        .rank-grade { font-size: 0.8rem; color: var(--neon-green); text-align: center; }
-        .rank-score { color: var(--neon-gold); font-weight: 700; text-align: right; font-size: 0.8rem; }
+        .rank-name { font-weight: 700; color: #fff; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .rank-grade { font-size: 0.8rem; color: var(--neon-green); text-align: center; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .rank-score { color: var(--neon-gold); font-weight: 700; text-align: right; font-size: 0.8rem; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .rank-me { background: rgba(0,242,255,0.07); }
         .rank-delta { font-size:0.72rem; margin-left:6px; padding:2px 9px; border-radius:20px; font-weight:700; }
         .rank-delta.up { color:#39ff14; background:rgba(57,255,20,0.14); }
@@ -355,7 +355,7 @@
         /* ── 이름 입력 + 저장 버튼 ── */
         .save-row { display: flex; gap: 10px; margin-bottom: 16px; width: 100%; max-width: 340px; }
         .save-row input {
-            flex: 1; padding: 12px 10px;
+            width: 0; flex: 1; min-width: 0; padding: 12px 10px;
             border-radius: 10px; border: 2px solid var(--neon-blue);
             background: rgba(0,0,0,0.5); color: white;
             text-align: center; font-size: 1.1rem;

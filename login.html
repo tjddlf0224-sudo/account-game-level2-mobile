@@ -300,9 +300,42 @@ body {
   .login-card { padding: 28px 22px; border-radius: 20px; }
   .group-mode-btn { top: 14px; right: 14px; font-size: 0.62rem; padding: 8px 14px; }
 }
+
+/* ── 시스템 큰글자모드 대응 ──
+ * 평소엔 body를 overflow:hidden + 세로중앙정렬로 고정해도 카드가 화면에 다 들어오지만,
+ * OS 글자크기 접근성 설정이 켜지면 rem 기준값이 커져 카드 높이가 화면을 넘는데
+ * 스크롤이 막혀있어 아래쪽(시작 버튼 등)에 닿을 수 없었다. JS가 감지해 붙이는
+ * .large-font-mode 클래스가 있을 때만 스크롤 가능한 레이아웃으로 전환한다
+ * (기본 디자인·레이아웃은 그대로, 이 클래스가 없으면 위 규칙 전혀 영향 없음). */
+html.large-font-mode body {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  align-items: flex-start;
+  padding-top: max(28px, env(safe-area-inset-top));
+  padding-bottom: calc(28px + var(--ad-banner-h, 0px));
+}
+html.large-font-mode .login-wrap {
+  margin: auto;
+}
 </style>
 </head>
 <body>
+
+<script>
+/* 시스템 큰글자모드 감지 — 1rem이 기본 16px보다 눈에 띄게 크면(안드로이드 글자크기
+ * 접근성 설정 등) 켜진 것으로 보고 <html>에 large-font-mode 클래스를 붙인다.
+ * 화면이 그려지기 전에(첫 콘텐츠보다 먼저) 실행해 깜빡임 없이 적용한다. */
+(function () {
+  try {
+    var probe = document.createElement('div');
+    probe.style.cssText = 'position:absolute;visibility:hidden;pointer-events:none;height:0;width:0;font-size:1rem;';
+    document.documentElement.appendChild(probe);
+    var px = parseFloat(getComputedStyle(probe).fontSize) || 16;
+    document.documentElement.removeChild(probe);
+    if (px / 16 > 1.15) document.documentElement.classList.add('large-font-mode');
+  } catch (e) {}
+})();
+</script>
 
 <canvas id="starfield"></canvas>
 

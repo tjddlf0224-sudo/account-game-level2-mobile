@@ -315,23 +315,24 @@
             overflow: hidden;
         }
         .rank-header {
-            display: grid; grid-template-columns: 44px 1fr 70px 70px;
+            display: grid; grid-template-columns: 44px minmax(46px,1fr) minmax(0,70px) minmax(40px,70px);
             padding: 8px 12px;
             background: rgba(0,0,0,0.35);
             font-size: 0.82rem; color: rgba(255,255,255,0.5);
             font-weight: bold; text-align: center;
         }
         .rank-row {
-            display: grid; grid-template-columns: 44px 1fr 70px 70px;
+            display: grid; grid-template-columns: 44px minmax(46px,1fr) minmax(0,70px) minmax(40px,70px);
             padding: 9px 12px;
             border-bottom: 1px solid rgba(255,255,255,0.07);
             font-size: clamp(0.82rem,2.5vw,0.96rem); text-align: center; align-items: center;
         }
+        .rank-row .rank-name, .rank-row .rank-grade { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .rank-row .rank-num        { font-family: 'Jua'; }
         .rank-row .rank-num.gold   { color: #f1c40f; }
         .rank-row .rank-num.silver { color: #bdc3c7; }
         .rank-row .rank-num.bronze { color: #cd7f32; }
-        .rank-row .rank-score      { color: #f1c40f; font-weight: bold; font-family: 'Jua'; }
+        .rank-row .rank-score      { color: #f1c40f; font-weight: bold; font-family: 'Jua'; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .rank-me { background: rgba(52,152,219,0.15); }
         .rank-delta { font-size:0.72rem; margin-left:6px; padding:2px 9px; border-radius:20px; font-weight:700; }
         .rank-delta.up { color:#2ecc71; background:rgba(46,204,113,0.14); }
@@ -1505,8 +1506,8 @@
                 const rk = getRank(Number(r.score));
                 return `<div class="rank-row${escapeHTML(r.name) === escapeHTML(me) ? ' rank-me' : ''}">
                     <span class="rank-num ${colors[i] || ''}">${i + 1}위</span>
-                    <span>${escapeHTML(r.name)}</span>
-                    <span style="color:${rk.color};font-family:'Jua';font-size:0.85rem;">${escapeHTML(rk.title)}</span>
+                    <span class="rank-name">${escapeHTML(r.name)}</span>
+                    <span class="rank-grade" style="color:${rk.color};font-family:'Jua';font-size:0.85rem;">${escapeHTML(rk.title)}</span>
                     <span class="rank-score">${(r.score||0).toLocaleString()}점</span>
                 </div>`;
             }).join('');
