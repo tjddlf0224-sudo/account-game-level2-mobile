@@ -1467,6 +1467,10 @@ const World = {
   paused:false,
 
   init(){
+    // 나갔다가 다시 들어오면 마지막으로 있던 자리에서 시작(없으면 기본 스폰 위치 그대로)
+    if(Number.isFinite(Stage.state.px) && Number.isFinite(Stage.state.py)){
+      this.px = Stage.state.px; this.py = Stage.state.py;
+    }
     this.cv=document.getElementById('game');
     this.ctx=this.cv.getContext('2d');
     applyOrientation();   // 최초 1회 — 세로로 들고 있으면 즉시 회전(내부에서 resize()도 호출)
@@ -1835,10 +1839,17 @@ const Stage = {
 
   exit(){
     if(confirm('허브로 나갈까요? 진행 상황은 저장됩니다.')){
-      this.save();
+      this.savePosition();
       try{ unlockOrientation(); }catch(e){}
       location.href='index_lv1.html';
     }
+  },
+
+  /* 나갔다가 다시 들어와도 있던 자리에서 이어서 시작하도록 플레이어 좌표 저장 */
+  savePosition(){
+    this.state.px = World.px;
+    this.state.py = World.py;
+    this.save();
   },
 };
 
@@ -2350,7 +2361,7 @@ World.init();
 setTimeout(()=>{ const h=document.getElementById('hint'); if(h) h.classList.add('hide'); }, 5200);
 
 // 이탈 시 저장
-window.addEventListener('pagehide',()=>Stage.save());
+window.addEventListener('pagehide',()=>Stage.savePosition());
 
 /* 안드로이드 WebView 광고 배너 (기존 화면들과 동일 시그니처) */
 function hideAdPlaceholder(){}
