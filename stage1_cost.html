@@ -1227,6 +1227,17 @@ const SIGNS = [
   { x:38, y:6,  label:'공장 사무실' },
 ];
 
+/* ── 구역 연결통로(문) — 사용자 지적: "공간이 너무 열려있어 구분이 안 된다".
+   raw↔line, line↔fin 통로는 그냥 평범한 바닥 타일이라 벽 사이 틈이 있다는 게
+   잘 안 느껴짐(계단 2곳은 이미 이번 세션에서 깊이감 처리함). 통로 타일 자체를
+   금속 문턱 플레이트로, 통로 양 끝에는 문틀 기둥을 그려서 "문을 지나간다"는
+   느낌을 준다. x는 통로가 뚫린 단일 열(벽이 갈라지는 지점), y0~y1은 그 열에서
+   개방된 구간(buildMap의 carve 범위와 반드시 일치시킬 것). */
+const DOORS = [
+  { x:25, y0:10, y1:13 },   // 원재료창고 ↔ 공장 라인
+  { x:47, y0:10, y1:13 },   // 공장 라인 ↔ 제품창고
+];
+
 /* ── 맵 생성: 전부 벽으로 채운 뒤 구역·통로를 파낸다 ────────── */
 function buildMap(){
   const g = [];
@@ -1809,6 +1820,34 @@ const World = {
           ctx.beginPath(); ctx.moveTo(sx+TS*0.18+inset,yy); ctx.lineTo(sx+TS*0.82-inset,yy); ctx.stroke();
         }
       }
+      // 구역 연결통로(문) 문턱 — 밋밋한 바닥과 구분되는 금속 플레이트 느낌(대각선 해치)
+      for(const d of DOORS){
+        if(x===d.x && y>=d.y0 && y<=d.y1){
+          ctx.fillStyle='rgba(255,214,0,0.05)';
+          ctx.fillRect(sx,sy,TS+1,TS+1);
+          ctx.strokeStyle='rgba(255,214,0,0.22)'; ctx.lineWidth=1;
+          for(let i=-1;i<=1;i++){
+            const off=i*TS*0.33;
+            ctx.beginPath();
+            ctx.moveTo(sx+TS*0.08+off, sy+TS*0.92);
+            ctx.lineTo(sx+TS*0.42+off, sy+TS*0.08);
+            ctx.stroke();
+          }
+        }
+      }
+    }
+
+    // ── 문틀 — 통로 시작/끝에 프레임 바를 걸쳐 그려 "벽 틈"이 아니라 "문"처럼 보이게 ──
+    for(const d of DOORS){
+      const dsx=d.x*TS-camX;
+      if(dsx<-TS||dsx>this.viewW+TS) continue;
+      const topSy=d.y0*TS-camY, botSy=(d.y1+1)*TS-camY;
+      ctx.fillStyle='rgba(20,16,30,0.6)';
+      ctx.fillRect(dsx-TS*0.06, topSy-TS*0.16, TS+TS*0.12, TS*0.16);
+      ctx.fillRect(dsx-TS*0.06, botSy, TS+TS*0.12, TS*0.16);
+      ctx.strokeStyle='rgba(255,214,0,0.4)'; ctx.lineWidth=1.5;
+      ctx.strokeRect(dsx-TS*0.06, topSy-TS*0.16, TS+TS*0.12, TS*0.16);
+      ctx.strokeRect(dsx-TS*0.06, botSy, TS+TS*0.12, TS*0.16);
     }
 
     // ── 배치 오브젝트(P2 이모지 + P4 제미나이 아트) ──
