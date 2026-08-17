@@ -214,8 +214,12 @@ function esc(s){return (s==null?'':String(s)).replace(/[&<>"']/g,c=>({'&':'&amp;
 // 문제 본문(문두) 뒤에 이어지는 자료/보기를 항상 줄바꿈으로 분리해 가독성 향상
 function fmtStem(s){
   let e=esc(s);
-  e=e.replace(/옳지 않은/g,'옳지 <b><u>않은</u></b>');
+  // "~지 않은/않는"류(옳지·적절하지·타당하지·해당하지·맞지 않은/않는 등)를
+  // 한 번에 강조 — 앞부분(옳지 등)은 그대로 두고 부정 어미만 굵게+밑줄.
+  e=e.replace(/(\S*?지)\s+(않은|않는)/g,(m0,pre,neg)=>`${pre} <b><u>${neg}</u></b>`);
   e=e.replace(/아닌(?=\s*것은)/g,'<b><u>아닌</u></b>');
+  e=e.replace(/틀린(?=\s*것)/g,'<b><u>틀린</u></b>');
+  e=e.replace(/잘못된(?=\s*것)/g,'<b><u>잘못된</u></b>');
 
   const qm=e.indexOf('?');
   if(qm<0 || qm===e.length-1) return splitBulletsOnly(e);
@@ -255,10 +259,13 @@ function splitTailLines(tail){
     const a=tail.slice(0,di).trim(), c=tail.slice(di).trim();
     if(a && c) return [a,c];
   }
-  let m=tail.match(/(?:^|\s)[가나다라]\.\s?/g);
-  if(m && m.length>=2) return splitByMarker(tail, /([가나다라])\.\s?/g);
-  m=tail.match(/(?:^|\s)[ㄱㄴㄷㄹ]\.\s?/g);
-  if(m && m.length>=2) return splitByMarker(tail, /([ㄱㄴㄷㄹ])\.\s?/g);
+  // ⚠️ 분리 정규식에 (?:^|\s) 경계를 안 넣으면 "회수하다." 같은 평범한 문장까지
+  //    "다."를 목록 마커로 오인식해서 문장을 잘라먹는다(감지용 정규식과 분리용
+  //    정규식이 서로 달라서 생긴 버그, 실사용자 리포트로 발견). 두 정규식을 통일.
+  let m=tail.match(/(?:^|\s)[가나다라마바사아자차]\.\s?/g);
+  if(m && m.length>=2) return splitByMarker(tail, /(?:^|\s)([가나다라마바사아자차])\.\s?/g);
+  m=tail.match(/(?:^|\s)[ㄱㄴㄷㄹㅁㅂㅅㅇ]\.\s?/g);
+  if(m && m.length>=2) return splitByMarker(tail, /(?:^|\s)([ㄱㄴㄷㄹㅁㅂㅅㅇ])\.\s?/g);
   const colons=(tail.match(/：/g)||[]).length;
   if(colons>=2){
     const parts=tail.split(/\s+(?=[^\s：]{1,12}：)/).map(x=>x.trim()).filter(Boolean);
