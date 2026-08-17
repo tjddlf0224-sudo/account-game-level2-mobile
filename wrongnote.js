@@ -239,7 +239,8 @@
     list: list, resolve: resolve, clearAll: clearAll, rename: rename, summarize: summarize,
     user: user, GAME_NAMES: {
       acid: '계정과목 산성비', memory: '계정·뜻 메모리', debit: '분개 차·대변',
-      factory: '결산분개 조립', flight: '플라이트 장부조회', theory: '이론 객관식'
+      factory: '결산분개 조립', flight: '플라이트 장부조회', theory: '이론 객관식',
+      cost_lv1: '원가의 길', capital_lv1: '자본의 제왕', theory_lv1: '이론 객관식(1급)'
     }
   };
 })(window);
