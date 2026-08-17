@@ -442,7 +442,7 @@
                 title: "자본금 확충 (할인발행)",
                 dialogue: [
                     { char: "boss", text: "큰일이야... 돈은 급한데 아무도 투자를 안 해줘..." },
-                    { char: "me", text: "지금 주가는 {{price}}지만, 투자 심리가 얼어붙었습니다." },
+                    { char: "me", text: "지금 주가는 %PRICE%지만, 투자 심리가 얼어붙었습니다." },
                     { char: "boss", text: "어쩔 수 없다. 액면가(5천원)보다 싼 4천원에라도 던져서 현금을 구해와!" },
                 ],
                 desc: "자금난으로 신주 100주(액면 5,000원)를 4,000원에 발행하다.",
@@ -720,10 +720,10 @@
             const textEl = document.getElementById('char-text');
             textEl.innerHTML = '';
             let i = 0;
-            // 대사 속 {{price}}는 실제 현재 주가(HUD와 동일 값)로 치환 — 하드코딩된
+            // 대사 속 %PRICE%는 실제 현재 주가(HUD와 동일 값)로 치환 — 하드코딩된
             // "지금 주가는 1만원인데" 같은 문구가 셔플된 시나리오 순서 때문에
             // 실제 HUD 숫자와 어긋나던 문제를 방지.
-            const txt = line.text.replace(/\{\{price\}\}/g, formatNum(state.stockPrice) + '원');
+            const txt = line.text.replace(/%PRICE%/g, formatNum(state.stockPrice) + '원');
 
             // 모바일에서는 타이핑 효과가 너무 느리면 답답하므로 조금 빠르게
             function typeWriter() {
