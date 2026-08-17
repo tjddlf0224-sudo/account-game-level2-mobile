@@ -739,12 +739,12 @@
                 state.score += 10;
                 state.classCorrect++;
                 Sound.playClick();
+                classIdx++;
+                loadClassProblem();
             } else {
                 Sound.playFail();
-                showToast('땡! 틀렸습니다.', 'err');
+                showToast('땡! 틀렸습니다. 다시 골라보세요.', 'err');
             }
-            classIdx++;
-            loadClassProblem();
             updateDash();
         }
 
