@@ -122,6 +122,38 @@ body{ font-family:'Noto Sans KR',sans-serif; color:#fff; position:relative; touc
 }
 #recap-close:active{ transform:scale(0.96); }
 
+/* 게임 클리어 결과 화면(등급·점수·랭킹) */
+#result-overlay{ z-index:70; }
+#result-panel{
+  width:100%; max-width:480px; margin:0 auto; max-height:100%; overflow-y:auto;
+  padding:26px 22px calc(24px + env(safe-area-inset-bottom));
+  background:linear-gradient(180deg, rgba(20,16,34,0.98), rgba(8,6,16,0.99));
+  border:1px solid rgba(255,214,0,0.4); border-radius:20px;
+  box-shadow:0 0 50px rgba(255,214,0,0.12);
+  text-align:center;
+  scrollbar-width:none; -ms-overflow-style:none;
+}
+#result-panel::-webkit-scrollbar{ display:none; width:0; }
+#result-title{ font-family:'Black Han Sans',sans-serif; font-size:1.5rem; color:var(--gd); margin-bottom:8px; text-shadow:0 0 20px rgba(255,214,0,0.3); }
+#result-grade{ font-family:'Black Han Sans',sans-serif; font-size:1rem; color:#fff; padding:6px 18px; border:1px solid var(--gd); border-radius:50px; background:rgba(255,214,0,0.1); display:inline-block; margin-bottom:14px; }
+#result-score{ font-family:'Black Han Sans',sans-serif; font-size:2.4rem; color:#fff; margin-bottom:12px; }
+.result-stats{ display:flex; gap:6px; justify-content:center; flex-wrap:wrap; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:14px; padding:10px 12px; font-size:0.72rem; color:rgba(255,255,255,0.55); margin-bottom:16px; }
+.result-stats b{ color:#fff; }
+#result-my-rank{ display:none; font-family:'Black Han Sans',sans-serif; font-size:0.86rem; color:var(--cy); background:rgba(0,242,255,0.1); border:1px solid rgba(0,242,255,0.3); border-radius:50px; padding:6px 16px; margin-bottom:12px; }
+.result-ranklabel{ font-family:'Black Han Sans',sans-serif; font-size:0.76rem; color:rgba(255,255,255,0.3); letter-spacing:2px; margin-bottom:8px; }
+#result-rankbox{ width:100%; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:12px; max-height:170px; overflow-y:auto; padding:4px 0; margin-bottom:18px; text-align:left; }
+#result-rankbox::-webkit-scrollbar{ display:none; width:0; }
+.rr-row{ display:grid; grid-template-columns:30px 1fr 60px; gap:6px; padding:8px 12px; font-size:0.78rem; border-bottom:1px solid rgba(255,255,255,0.05); align-items:center; }
+.rr-row:last-child{ border-bottom:none; }
+.rr-row.me{ background:rgba(0,242,255,0.08); }
+.rr-num{ color:rgba(255,255,255,0.3); font-weight:bold; }
+.rr-name{ color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.rr-score{ color:var(--gd); text-align:right; font-weight:bold; }
+.result-btns{ display:flex; gap:10px; }
+.result-btn{ flex:1; padding:13px; border-radius:50px; font-family:'Black Han Sans',sans-serif; font-size:0.88rem; cursor:pointer; border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.06); color:#fff; }
+.result-btn.primary{ background:rgba(255,214,0,0.18); border-color:rgba(255,214,0,0.5); }
+.result-btn:active{ transform:scale(0.96); }
+
 /* ── 조이스틱 ── */
 #stick-zone{
   position:absolute; left:0; bottom:0; width:46%; height:46%;
@@ -453,6 +485,28 @@ body{ font-family:'Noto Sans KR',sans-serif; color:#fff; position:relative; touc
     </div>
     <div id="recap-sub">원재료가 라인을 거쳐 완제품이 되는 흐름을 두 발로 다 걸었습니다.<br>이제 되돌아가서 보조부문·공장사무실의 배분까지 마저 봐야 합니다.</div>
     <button id="recap-close">계속하기</button>
+  </div>
+</div>
+
+<div class="ov center" id="result-overlay">
+  <div id="result-panel">
+    <div id="result-title">🎉 게임 클리어!</div>
+    <div id="result-grade"></div>
+    <div id="result-score">0</div>
+    <div class="result-stats">
+      <span>서류 <b id="rs-docs">0/14</b></span>
+      <span>·</span>
+      <span>퀴즈 오답 <b id="rs-quizwrong">0</b>회</span>
+      <span>·</span>
+      <span>명세서 오배치 <b id="rs-sheetwrong">0</b>회</span>
+    </div>
+    <div id="result-my-rank"></div>
+    <div class="result-ranklabel">🏆 TOP 랭킹</div>
+    <div id="result-rankbox"><div style="padding:22px;color:rgba(255,255,255,0.3);font-size:0.8rem;">불러오는 중...</div></div>
+    <div class="result-btns">
+      <button class="result-btn" onclick="ResultScreen.restart()">↺ 다시 도전</button>
+      <button class="result-btn primary" onclick="ResultScreen.exit()">🏠 허브로</button>
+    </div>
   </div>
 </div>
 
@@ -1882,7 +1936,7 @@ const SAVE_KEY='lv1_s1_progress';
 const TOTAL_DOCS=14;
 
 const Stage = {
-  state:{ docs:[], docData:{}, metNpc:{}, quizOk:{}, cleared:false, score:0 },
+  state:{ docs:[], docData:{}, metNpc:{}, quizOk:{}, cleared:false, score:0, quizWrong:0 },
 
   load(){
     try{ const r=localStorage.getItem(SAVE_KEY); if(r) Object.assign(this.state, JSON.parse(r)||{}); }catch(e){}
@@ -1890,6 +1944,7 @@ const Stage = {
     if(!this.state.docData) this.state.docData={};
     if(!this.state.metNpc) this.state.metNpc={};
     if(!this.state.eventsFired) this.state.eventsFired={};
+    if(!Number.isFinite(this.state.quizWrong)) this.state.quizWrong=0;
     this.refresh();
   },
   save(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(this.state)); }catch(e){} },
@@ -1908,10 +1963,20 @@ const Stage = {
 
   exit(){
     if(confirm('허브로 나갈까요? 진행 상황은 저장됩니다.')){
+      if(!this.state.cleared) this.saveProgressScore();
       this.savePosition();
       try{ unlockOrientation(); }catch(e){}
       location.href='index_lv1.html';
     }
+  },
+
+  /* 중도 이탈 시 부분 점수 — 그때까지 모은 서류 개수 비율에서 NPC 퀴즈 오답을 감점.
+     Stage.state.cleared는 건드리지 않으므로 허브 진행률 표시는 그대로 "미완주"로 남는다. */
+  saveProgressScore(){
+    const pct = Math.round((this.state.docs.length/TOTAL_DOCS)*100);
+    const quizWrong = this.state.quizWrong||0;
+    const score = Math.max(0, pct - quizWrong*2);
+    try{ saveStageScore(score, 0, quizWrong, true); }catch(e){}
   },
 
   /* 나갔다가 다시 들어와도 있던 자리에서 이어서 시작하도록 플레이어 좌표 저장 */
@@ -2223,6 +2288,8 @@ const Dialog = {
       EventFX.fire('ev_support_join','⬆️','보조부문 원가가 라인으로 올라갑니다');          // ev_support_join
     if(docs.includes('doc_oh_rate') && docs.includes('doc_signoff'))
       EventFX.fire('ev_oh_rain','⬇️','제조간접비가 라인으로 배분됩니다');                 // ev_oh_rain
+    // ── 한서준 엔딩 대화까지 전부 끝났으면 게임 클리어 화면 ──
+    if(key==='n_han_end') ResultScreen.show();
   },
 };
 document.getElementById('dlg-panel').addEventListener('click', ()=>Dialog.next());
@@ -2296,6 +2363,9 @@ const Quiz = {
       optEls[i].classList.add('wrong');
       optEls[i].style.pointerEvents='none';
       fb.className='quiz-fb wrong show'; fb.textContent='❌ '+q.hint;
+      // 최종 채점 기준에 반영되는 오답 카운트(§ 게임클리어 스코어링)
+      Stage.state.quizWrong = (Stage.state.quizWrong||0) + 1;
+      Stage.save();
     }
   },
 
@@ -2508,14 +2578,17 @@ const Sheet = {
 
   finish(){
     const cogm=this.sum('mat')+this.sum('lab')+this.sum('exp')+this.wipBy(+1)-this.wipBy(-1);
-    // 점수: 기본 100 − 오배치당 5점(최저 50). 퀴즈 정답률·수집률은 이미 전제(14/14).
-    const score=Math.max(50, 100-this.wrong*5);
+    // 점수: 기본 100 − 명세서 오배치당 5점 − NPC 퀴즈 오답 1회당 2점(최저 30).
+    // 명세서만 잘 맞추고 그 전 14명 대화 중 퀴즈를 계속 틀려도 만점이 나오던 걸 보완.
+    const quizWrong=Stage.state.quizWrong||0;
+    const score=Math.max(30, 100-this.wrong*5-quizWrong*2);
     Stage.state.cleared=true;
     Stage.state.score=score;
     Stage.state.cogm=cogm;
+    Stage.state.sheetWrong=this.wrong;
     Stage.save();
     document.getElementById('sheet-overlay').classList.remove('show');
-    try{ saveStageScore(score, this.wrong); }catch(e){}
+    try{ saveStageScore(score, this.wrong, quizWrong); }catch(e){}
     const cb=this.onDone; this.onDone=null;
     if(cb) cb({cogm, wrong:this.wrong, score});
   },
@@ -2542,11 +2615,11 @@ function gradeForStageScore(score){
   if(score>=70)  return '🥈 합격';
   return '🥉 재도전 권장';
 }
-async function saveStageScore(score, wrong){
+async function saveStageScore(score, wrong, quizWrong, partial){
   const name=(localStorage.getItem('hub_nickname')||'').trim();
   if(!name) return;                          // 로그인 안 된 상태(로컬 테스트 등)면 스킵
   const correct=Math.max(0, SHEET_CARDS.length-wrong);
-  const grade=gradeForStageScore(score);
+  const grade= partial ? '🚪 중도 이탈' : gradeForStageScore(score);
   const groupId=localStorage.getItem('hub_group_id') || null;
   const today=new Date().toISOString().split('T')[0];
   const rpcParams={ p_game_id:GAME_ID, p_name:name, p_score:score, p_grade:grade, p_combo:0, p_correct:correct, p_date:today };
@@ -2559,6 +2632,79 @@ async function saveStageScore(score, wrong){
   try{ const {error}=await db.rpc('upsert_score', rpcParams); if(error) console.warn('cost_lv1 점수 저장 실패:', error); }
   catch(e){ console.warn('cost_lv1 점수 저장 예외:', e); }
 }
+function escHtml(s){ return String(s==null?'':s).replace(/[&<>'"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+
+/* =========================================================================
+ *  ResultScreen — 한서준 엔딩 대화 완료 시 표시되는 게임 클리어 화면.
+ *  등급·점수·수집 통계 + Supabase TOP 랭킹·내 순위 + 다시 도전/허브로.
+ * ========================================================================= */
+const ResultScreen = {
+  show(){
+    const s=Stage.state;
+    document.getElementById('result-grade').textContent = gradeForStageScore(s.score||0);
+    document.getElementById('result-score').textContent = (s.score||0)+'점';
+    document.getElementById('rs-docs').textContent = s.docs.length+'/'+TOTAL_DOCS;
+    document.getElementById('rs-quizwrong').textContent = s.quizWrong||0;
+    document.getElementById('rs-sheetwrong').textContent = s.sheetWrong||0;
+    document.getElementById('result-my-rank').style.display='none';
+    document.getElementById('result-overlay').classList.add('show');
+    World.paused = true;
+    this.loadRanking();
+  },
+
+  async loadRanking(){
+    const box=document.getElementById('result-rankbox');
+    const db=supaClient();
+    if(!db){ box.innerHTML='<div style="padding:22px;color:rgba(255,255,255,0.3);font-size:0.8rem;text-align:center;">랭킹을 불러올 수 없습니다</div>'; return; }
+    const groupId=localStorage.getItem('hub_group_id')||null;
+    const me=(localStorage.getItem('hub_nickname')||'').trim();
+    try{
+      let q=db.from('scores').select('name,score').eq('game_id',GAME_ID).order('score',{ascending:false}).limit(15);
+      if(groupId) q=q.eq('group_id',groupId);
+      const {data,error}=await q;
+      if(error) throw error;
+      const list=data||[];
+      if(!list.length){
+        box.innerHTML='<div style="padding:22px;color:rgba(255,255,255,0.3);font-size:0.8rem;text-align:center;">아직 기록이 없습니다</div>';
+      } else {
+        box.innerHTML=list.map((r,i)=>{
+          const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'위';
+          return `<div class="rr-row${r.name===me?' me':''}"><span class="rr-num">${medal}</span><span class="rr-name">${escHtml(r.name)}</span><span class="rr-score">${(r.score||0).toLocaleString()}</span></div>`;
+        }).join('');
+      }
+      // 내 순위(랭킹 등록 이후이므로 내 최고점 기준으로 계산)
+      if(me){
+        const countQ0=db.from('scores').select('*',{count:'exact',head:true}).eq('game_id',GAME_ID).eq('name',me);
+        const myRowQ = groupId ? db.from('scores').select('score').eq('game_id',GAME_ID).eq('name',me).eq('group_id',groupId).maybeSingle()
+                                : db.from('scores').select('score').eq('game_id',GAME_ID).eq('name',me).maybeSingle();
+        const {data:myRow}=await myRowQ;
+        if(myRow && Number.isFinite(myRow.score)){
+          let cq=db.from('scores').select('*',{count:'exact',head:true}).eq('game_id',GAME_ID).gt('score',myRow.score);
+          if(groupId) cq=cq.eq('group_id',groupId);
+          const {count}=await cq;
+          const myRank=(count||0)+1;
+          const badge=document.getElementById('result-my-rank');
+          badge.textContent = `🎯 내 순위: ${myRank.toLocaleString()}위`;
+          badge.style.display='block';
+        }
+      }
+    }catch(e){
+      box.innerHTML='<div style="padding:22px;color:rgba(255,255,255,0.3);font-size:0.8rem;text-align:center;">랭킹을 불러올 수 없습니다</div>';
+    }
+  },
+
+  restart(){
+    if(!confirm('처음부터 다시 도전할까요? 지금까지의 진행 상황이 초기화됩니다.')) return;
+    try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
+    location.reload();
+  },
+
+  exit(){
+    document.getElementById('result-overlay').classList.remove('show');
+    try{ unlockOrientation(); }catch(e){}
+    location.href='index_lv1.html';
+  },
+};
 
 /* ── 부팅 ── */
 Stage.load();
