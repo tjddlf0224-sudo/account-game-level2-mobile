@@ -1130,10 +1130,7 @@ const OBJECTS = [
   { zone:'line', x:39, y:10, icon:'🧰' },
   { zone:'line', x:43, y:12, icon:'⏰' },
   // ⑤ 공장 사무실 (한서준 대리 자리 겸용 — 사무실 단일화)
-  { zone:'foff', x:41, y:1,  icon:'🖥️' },
   { zone:'foff', x:35, y:2,  img:'lv1/sprites/obj_desk_whiteboard.webp',scale:2.0 },
-  { zone:'foff', x:39, y:5,  icon:'📝' },
-  { zone:'foff', x:43, y:2,  icon:'📋' },
   // ④ 보조부문동(식당·보일러실)
   { zone:'supp', x:36, y:17, img:'lv1/sprites/obj_serving_counter.webp',scale:2.0 },
   { zone:'supp', x:34, y:20, icon:'📌' },
@@ -1713,12 +1710,8 @@ const World = {
       const cx=o.x*TS-camX+TS/2, cy=o.y*TS-camY+TS/2;
       if(o._img && o._img.ready){
         const w=TS*(o.scale||1.6);
-        ctx.fillStyle='rgba(0,0,0,0.3)';
-        ctx.beginPath(); ctx.ellipse(cx,cy+w*0.32,w*0.34,w*0.1,0,0,7); ctx.fill();
         ctx.drawImage(o._img, cx-w/2, cy-w*0.62, w, w);
       } else if(o.icon){
-        ctx.fillStyle='rgba(0,0,0,0.28)';
-        ctx.beginPath(); ctx.ellipse(cx,cy+TS*0.28,TS*0.26,TS*0.1,0,0,7); ctx.fill();
         ctx.font=`${Math.round(TS*0.56)}px sans-serif`;
         ctx.fillText(o.icon, cx, cy-TS*0.06);
       }
@@ -1754,10 +1747,8 @@ const World = {
       if(n.x<x0-1||n.x>x1+1||n.y<y0-1||n.y>y1+1) continue;
       const cx=n.x*TS-camX+TS/2, cy=n.y*TS-camY+TS/2;
       const look=LOOK[n.id];
-      if(look) drawCharacter(ctx,cx,cy,TS*0.38,look,{shadow:true,dir:'front'});
+      if(look) drawCharacter(ctx,cx,cy,TS*0.38,look,{shadow:false,dir:'front'});
       else {
-        ctx.fillStyle='rgba(0,0,0,0.35)';
-        ctx.beginPath(); ctx.ellipse(cx,cy+TS*0.34,TS*0.3,TS*0.12,0,0,7); ctx.fill();
         ctx.fillStyle=n.color;
         ctx.beginPath(); ctx.arc(cx,cy,TS*0.32,0,7); ctx.fill();
       }
@@ -1784,8 +1775,6 @@ const World = {
     {
       const cx=this.px*TS-camX+TS/2, cy=this.py*TS-camY+TS/2;
       const swing=this.moving ? Math.sin(this.walkT)*TS*0.06 : 0;
-      ctx.fillStyle='rgba(0,0,0,0.32)';
-      ctx.beginPath(); ctx.ellipse(cx,cy+TS*0.36,TS*0.28,TS*0.11,0,0,7); ctx.fill();
       ctx.save();
       ctx.translate(cx,cy+swing);
       drawCharacter(ctx,0,0,TS*0.38,PLAYER_LOOK,{shadow:false,dir:this.dir,facing:this.facing});
