@@ -1759,12 +1759,17 @@ const World = {
         ctx.fillRect(cx-w/2, cy-TS*0.92, w, TS*0.4);
         ctx.fillStyle='#fff'; ctx.fillText(label, cx, cy-TS*0.62);
         ctx.restore();
-      } else if(n.id==='n_han' || Stage.state.metNpc['n_han_intro']){
-        // 대화 가능 표시 — 한서준 대리와 첫 대화 끝내기 전엔 다른 NPC 위엔 안 띄움(어차피 안내 멘트뿐이라)
-        ctx.fillStyle='rgba(255,214,0,'+(0.55+0.35*Math.sin(this.bob*2))+')';
-        ctx.font=`700 ${Math.round(TS*0.42)}px 'Black Han Sans', sans-serif`;
-        ctx.textAlign='center';
-        ctx.fillText('!', cx, cy-TS*0.42);
+      } else {
+        // 대화 가능 표시 — 한서준 대리와 첫 대화 끝내기 전엔 다른 NPC 위엔 안 띄우고(어차피 안내
+        // 멘트뿐), 이 NPC와 이미 대화(+퀴즈)를 다 끝낸 뒤에는 더 이상 "할 얘기 있음"이 아니므로 끔.
+        const dkey = n.id==='n_han' ? (Stage.state.docs.length>=TOTAL_DOCS?'n_han_end':'n_han_intro') : n.id;
+        const canTalk = n.id==='n_han' || Stage.state.metNpc['n_han_intro'];
+        if(canTalk && !Stage.state.metNpc[dkey]){
+          ctx.fillStyle='rgba(255,214,0,'+(0.55+0.35*Math.sin(this.bob*2))+')';
+          ctx.font=`700 ${Math.round(TS*0.42)}px 'Black Han Sans', sans-serif`;
+          ctx.textAlign='center';
+          ctx.fillText('!', cx, cy-TS*0.42);
+        }
       }
     }
 
