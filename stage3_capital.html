@@ -868,16 +868,18 @@
         // --- 엔딩 --- (등급은 gradeForCapitalScore()로 통일 — 아래 저장에 쓰는 등급과 화면에 보이는
         // 등급이 서로 다른 문구였던 걸 하나로 정리)
         function showEnding() {
-            Sound.playSuccess();
-            showScreen('screen-ending');
+            requestInterstitialIfNeeded(function(){
+                Sound.playSuccess();
+                showScreen('screen-ending');
 
-            document.getElementById('end-score').innerText = state.score;
-            document.getElementById('end-asset').innerText = formatNum(state.stockPrice) + "원";
+                document.getElementById('end-score').innerText = state.score;
+                document.getElementById('end-asset').innerText = formatNum(state.stockPrice) + "원";
 
-            const rank = gradeForCapitalScore(state.score);
-            document.getElementById('end-rank').innerText = rank;
+                const rank = gradeForCapitalScore(state.score);
+                document.getElementById('end-rank').innerText = rank;
 
-            try{ saveStageScore(state.score, rank); }catch(e){}
+                try{ saveStageScore(state.score, rank); }catch(e){}
+            });
         }
     </script>
 
@@ -927,6 +929,34 @@
           try{ const {error}=await db.rpc('upsert_score', rpcParams); if(error) console.warn('capital_lv1 점수 저장 실패:', error); }
           catch(e){ console.warn('capital_lv1 점수 저장 예외:', e); }
         }
+    </script>
+
+    <script>
+        /* =========================================================================
+         *  광고 시스템 — 2급 게임(game4_factory.html 등)과 동일 패턴.
+         *  window.AdBridge 자체가 없어 항상 즉시 afterFn()으로 열린다(웹은 원래도 이랬음).
+         * ========================================================================= */
+        const AD_GAME_COUNT_KEY='hub_ad_game_count';
+        const AD_INTERSTITIAL_EVERY=10; // N번마다 전면 광고
+        function incrementGameCount(){
+          const n=(parseInt(localStorage.getItem(AD_GAME_COUNT_KEY)||'0'))+1;
+          localStorage.setItem(AD_GAME_COUNT_KEY, String(n));
+          return n;
+        }
+        function requestInterstitialIfNeeded(afterFn){
+          if(window.AdBridge && typeof AdBridge.isAdsRemoved==='function' && AdBridge.isAdsRemoved()){ afterFn&&afterFn(); return; }
+          window._adAfterFn=afterFn;
+          const count=incrementGameCount();
+          if(count%AD_INTERSTITIAL_EVERY===0 && window.AdBridge){
+            AdBridge.showInterstitial();
+          } else {
+            afterFn&&afterFn();
+          }
+        }
+        function onAdsRemoved(){}
+        function onInterstitialClosed(){ if(window._adAfterFn){ const f=window._adAfterFn; window._adAfterFn=null; f(); } }
+        function hideAdPlaceholder(){ if(window.AdBridge) AdBridge.hide(); }
+        function showAdPlaceholder(){ if(window.AdBridge) AdBridge.show(); }
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

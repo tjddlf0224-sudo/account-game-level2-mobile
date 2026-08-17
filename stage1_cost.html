@@ -2328,7 +2328,7 @@ const Dialog = {
     if(docs.includes('doc_oh_rate') && docs.includes('doc_signoff'))
       EventFX.fire('ev_oh_rain','⬇️','제조간접비가 라인으로 배분됩니다');                 // ev_oh_rain
     // ── 한서준 엔딩 대화까지 전부 끝났으면 게임 클리어 화면 ──
-    if(key==='n_han_end') ResultScreen.show();
+    if(key==='n_han_end') requestInterstitialIfNeeded(()=>ResultScreen.show());
   },
 };
 document.getElementById('dlg-panel').addEventListener('click', ()=>Dialog.next());
@@ -2756,8 +2756,34 @@ setTimeout(()=>{ const h=document.getElementById('hint'); if(h) h.classList.add(
 // 이탈 시 저장
 window.addEventListener('pagehide',()=>Stage.savePosition());
 
+/* =========================================================================
+ *  광고 시스템 — 2급 게임(game4_factory.html 등)과 동일 패턴.
+ *  window.AdBridge 자체가 없어 항상 즉시 afterFn()으로 열린다(웹은 원래도 이랬음).
+ * ========================================================================= */
+const AD_GAME_COUNT_KEY='hub_ad_game_count';
+const AD_INTERSTITIAL_EVERY=10; // N번마다 전면 광고
+function incrementGameCount(){
+  const n=(parseInt(localStorage.getItem(AD_GAME_COUNT_KEY)||'0'))+1;
+  localStorage.setItem(AD_GAME_COUNT_KEY, String(n));
+  return n;
+}
+// 게임 종료(결과 화면 진입) 시 호출 — 광고 닫히면 onInterstitialClosed()가 네이티브에서 호출됨
+function requestInterstitialIfNeeded(afterFn){
+  if(window.AdBridge && typeof AdBridge.isAdsRemoved==='function' && AdBridge.isAdsRemoved()){ afterFn&&afterFn(); return; }
+  window._adAfterFn=afterFn;
+  const count=incrementGameCount();
+  if(count%AD_INTERSTITIAL_EVERY===0 && window.AdBridge){
+    AdBridge.showInterstitial();
+    // onInterstitialClosed()에서 afterFn 실행 — 광고 로드 실패 시에도 브리지 쪽에서 콜백을 호출하므로 그냥 열리게 됨
+  } else {
+    afterFn&&afterFn();
+  }
+}
+function onAdsRemoved(){}
+function onInterstitialClosed(){ if(window._adAfterFn){ const f=window._adAfterFn; window._adAfterFn=null; f(); } }
 /* 안드로이드 WebView 광고 배너 (기존 화면들과 동일 시그니처) */
-function hideAdPlaceholder(){}
+function hideAdPlaceholder(){ if(window.AdBridge) AdBridge.hide(); }
+function showAdPlaceholder(){ if(window.AdBridge) AdBridge.show(); }
 </script>
 <script src="emoji-icons.js"></script>
 </body>
