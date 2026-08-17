@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#020810">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="manifest" href="manifest.json">
+<title>급수 선택 — 전산회계 오락실</title>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cy:#00f2ff; --pk:#ff2d78; --gd:#ffd600; --gn:#00e676; --pu:#b44fff;
+  --bg:#020810;
+}
+*{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+html,body{ width:100%; height:100%; }
+body{
+  font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:#fff;
+  min-height:100vh; min-height:100dvh; overflow:hidden;
+  display:flex; align-items:center; justify-content:center;
+  padding-bottom:var(--ad-banner-h,0px);
+  background-image:
+    radial-gradient(ellipse 60% 40% at 15% 20%, rgba(0,242,255,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 35% at 85% 80%, rgba(180,79,255,0.07) 0%, transparent 55%);
+}
+#starfield{ position:fixed; inset:0; z-index:0; pointer-events:none; }
+
+.wrap{ position:relative; z-index:1; width:100%; max-width:520px; padding:0 22px; animation:fadeInUp .5s ease both; }
+@keyframes fadeInUp{ from{opacity:0;transform:translateY(24px);} to{opacity:1;transform:translateY(0);} }
+
+.head{ text-align:center; margin-bottom:30px; }
+.badge{
+  display:inline-block; font-family:'Orbitron',monospace; font-size:0.62rem; letter-spacing:4px;
+  color:rgba(0,242,255,0.6); border:1px solid rgba(0,242,255,0.2);
+  padding:5px 18px; border-radius:50px; margin-bottom:16px; background:rgba(0,242,255,0.04);
+}
+.title{ font-family:'Black Han Sans',sans-serif; font-size:2rem; line-height:1.2; margin-bottom:8px; }
+.title .g{ background:linear-gradient(90deg,var(--cy),var(--pu)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.sub{ font-size:0.85rem; color:rgba(255,255,255,0.38); }
+
+.cards{ display:flex; flex-direction:column; gap:14px; }
+.lv-card{
+  position:relative; display:block; width:100%; text-align:left; cursor:pointer;
+  background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.10);
+  border-radius:20px; padding:20px 22px; color:#fff;
+  transition:border-color .2s, background .2s, transform .12s;
+  font-family:'Noto Sans KR',sans-serif;
+}
+.lv-card:active{ transform:scale(0.985); }
+.lv-card.lv2{ border-left:4px solid var(--cy); }
+.lv-card.lv1{ border-left:4px solid var(--pu); }
+.lv-card.lv2:hover{ border-color:rgba(0,242,255,0.45); background:rgba(0,242,255,0.06); }
+.lv-card.lv1:hover{ border-color:rgba(180,79,255,0.45); background:rgba(180,79,255,0.06); }
+
+.lv-top{ display:flex; align-items:center; gap:10px; margin-bottom:8px; flex-wrap:wrap; }
+.lv-name{ font-family:'Black Han Sans',sans-serif; font-size:1.32rem; }
+.lv-card.lv2 .lv-name{ color:var(--cy); }
+.lv-card.lv1 .lv-name{ color:var(--pu); }
+.lv-tag{
+  font-family:'Orbitron',monospace; font-size:0.55rem; letter-spacing:1.5px;
+  padding:3px 9px; border-radius:20px; white-space:nowrap;
+}
+.tag-last{ color:var(--gd); border:1px solid rgba(255,214,0,0.4); background:rgba(255,214,0,0.08); }
+.tag-new{ color:var(--gn); border:1px solid rgba(0,230,118,0.4); background:rgba(0,230,118,0.08); }
+.lv-desc{ font-size:0.84rem; color:rgba(255,255,255,0.55); line-height:1.55; }
+.lv-meta{ margin-top:12px; display:flex; align-items:center; gap:8px; font-size:0.72rem; color:rgba(255,255,255,0.3); }
+.bar{ flex:1; height:5px; background:rgba(255,255,255,0.08); border-radius:4px; overflow:hidden; min-width:40px; }
+.bar > i{ display:block; height:100%; border-radius:4px; }
+.lv-card.lv2 .bar > i{ background:linear-gradient(90deg,var(--cy),#4dd0e1); }
+.lv-card.lv1 .bar > i{ background:linear-gradient(90deg,var(--pu),var(--pk)); }
+.go{ position:absolute; right:20px; top:50%; transform:translateY(-50%); font-size:1.1rem; color:rgba(255,255,255,0.22); }
+
+.foot{ margin-top:22px; text-align:center; font-size:0.74rem; color:rgba(255,255,255,0.26); line-height:1.6; }
+
+/* ── 시스템 큰글자모드 대응 (login.html과 동일 패턴) ── */
+html.large-font-mode body{
+  overflow-y:auto; -webkit-overflow-scrolling:touch; align-items:flex-start;
+  padding-top:max(24px,env(safe-area-inset-top));
+  padding-bottom:calc(24px + var(--ad-banner-h,0px));
+}
+html.large-font-mode .wrap{ margin:auto; }
+html.large-font-mode .go{ display:none; }
+
+@media (max-width:400px){
+  .title{ font-size:1.7rem; }
+  .lv-card{ padding:17px 18px; }
+  .go{ display:none; }
+}
+</style>
+</head>
+<body>
+
+<script>
+/* 큰글자모드 감지 — 화면 그려지기 전에 실행(깜빡임 방지). login.html과 동일. */
+(function(){
+  try{
+    var p=document.createElement('div');
+    p.style.cssText='position:absolute;visibility:hidden;pointer-events:none;height:0;width:0;font-size:1rem;';
+    document.documentElement.appendChild(p);
+    var px=parseFloat(getComputedStyle(p).fontSize)||16;
+    document.documentElement.removeChild(p);
+    if(px/16>1.15) document.documentElement.classList.add('large-font-mode');
+  }catch(e){}
+})();
+</script>
+
+<canvas id="starfield"></canvas>
+
+<div class="wrap">
+  <div class="head">
+    <div class="badge">SELECT LEVEL</div>
+    <div class="title">어떤 급수를 <span class="g">공부할까요?</span></div>
+    <div class="sub">언제든 바꿀 수 있어요</div>
+  </div>
+
+  <div class="cards">
+    <button class="lv-card lv2" onclick="pick('lv2')">
+      <div class="lv-top">
+        <span class="lv-name">전산회계 2급</span>
+        <span class="lv-tag tag-last" id="tag-lv2" style="display:none">최근 학습</span>
+      </div>
+      <div class="lv-desc">회계원리 · 5개 미니게임 + 이론 225문항<br>회계가 처음이라면 여기부터</div>
+      <div class="lv-meta" id="meta-lv2">
+        <div class="bar"><i style="width:0%"></i></div><span class="pct">0%</span>
+      </div>
+      <div class="go">▶</div>
+    </button>
+
+    <button class="lv-card lv1" onclick="pick('lv1')">
+      <div class="lv-top">
+        <span class="lv-name">전산회계 1급</span>
+        <span class="lv-tag tag-last" id="tag-lv1" style="display:none">최근 학습</span>
+        <span class="lv-tag tag-new" id="tag-lv1-new">NEW</span>
+      </div>
+      <div class="lv-desc">원가회계 · 공장을 직접 걸어다니며 배우는 탐험 모드<br>2급을 마쳤다면 다음 단계로</div>
+      <div class="lv-meta" id="meta-lv1">
+        <div class="bar"><i style="width:0%"></i></div><span class="pct">0%</span>
+      </div>
+      <div class="go">▶</div>
+    </button>
+  </div>
+
+  <div class="foot">고른 급수는 기억해 뒀다가 다음에 바로 열어드려요</div>
+</div>
+
+<script>
+/* ── 별 배경 (login.html과 동일 로직) ── */
+(function(){
+  const cv=document.getElementById('starfield'); if(!cv) return;
+  const ctx=cv.getContext('2d'); let stars=[];
+  const COUNT=(window.innerWidth<=600)?70:140;
+  function resize(){ cv.width=window.innerWidth; cv.height=window.innerHeight; }
+  function mk(){ return { x:Math.random()*cv.width, y:Math.random()*cv.height,
+    r:Math.random()*1.4+0.2, v:Math.random()*0.3+0.05, o:Math.random()*0.6+0.2,
+    c:Math.random()>0.88?'#00f2ff':(Math.random()>0.75?'#b44fff':'#ffffff') }; }
+  function init(){ stars=Array.from({length:COUNT},mk); }
+  function anim(){ ctx.clearRect(0,0,cv.width,cv.height);
+    stars.forEach(s=>{ s.y+=s.v; if(s.y>cv.height){ s.y=-2; s.x=Math.random()*cv.width; }
+      ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fillStyle=s.c;
+      ctx.globalAlpha=s.o; ctx.fill(); ctx.globalAlpha=1; });
+    requestAnimationFrame(anim); }
+  resize(); init(); anim();
+  window.addEventListener('resize',()=>{ resize(); init(); });
+})();
+
+/* ── 진행률 표시 ── */
+function pctOf(n,d){ return d>0 ? Math.round(Math.min(100, n/d*100)) : 0; }
+
+function setMeta(id, done, total, label){
+  const box=document.getElementById(id); if(!box) return;
+  const p=pctOf(done,total);
+  box.querySelector('.bar > i').style.width = p+'%';
+  box.querySelector('.pct').textContent = label || (p+'%');
+}
+
+(function(){
+  // 2급 진행률 — 게임 5종 중 기록이 있는 개수
+  try{
+    const games=['acid','memory','debit','factory','flight'];
+    let played=0;
+    games.forEach(g=>{ if(localStorage.getItem('hub_'+g+'_best')) played++; });
+    setMeta('meta-lv2', played, games.length, played>0 ? played+'/5 게임' : '아직 시작 전');
+  }catch(e){}
+
+  // 1급 진행률 — 스테이지1 진행 상태
+  try{
+    let done=0, total=1;
+    const raw=localStorage.getItem('lv1_s1_progress');
+    if(raw){ const s=JSON.parse(raw); if(s && s.cleared) done=1; }
+    setMeta('meta-lv1', done, total, done ? '스테이지1 완료' : '아직 시작 전');
+    if(raw) document.getElementById('tag-lv1-new').style.display='none';
+  }catch(e){}
+
+  // 최근 선택 표시
+  try{
+    const last=localStorage.getItem('hub_level');
+    if(last==='lv1') document.getElementById('tag-lv1').style.display='inline-block';
+    else if(last==='lv2') document.getElementById('tag-lv2').style.display='inline-block';
+  }catch(e){}
+})();
+
+function pick(lv){
+  try{ localStorage.setItem('hub_level', lv); }catch(e){}
+  window.location.href = (lv==='lv1') ? 'index_lv1.html' : 'index.html';
+}
+</script>
+<script src="emoji-icons.js"></script>
+</body>
+</html>

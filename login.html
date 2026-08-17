@@ -436,6 +436,17 @@ window.addEventListener('resize', () => { resize(); initStars(); });
 const input = document.getElementById('nickname');
 const errMsg = document.getElementById('err-msg');
 
+/* 로그인 후 이동할 곳 — 마지막에 고른 급수가 있으면 그 허브로 바로,
+   없으면(=처음 오는 사람) 급수 선택 화면으로. 선택 화면에서 hub_level을 심는다. */
+function afterLoginHref(){
+  try{
+    const lv = localStorage.getItem('hub_level');
+    if(lv === 'lv1') return 'index_lv1.html';
+    if(lv === 'lv2') return 'index.html';
+  }catch(e){}
+  return 'select_level.html';
+}
+
 // 이미 저장된 닉네임이 있으면 채워넣기
 // 자동 닉네임 생성
 function genNickname() {
@@ -487,7 +498,7 @@ async function socialLogin(kind) {
     const player = await Auth.loadPlayer(res.uid);      // 이전에 가입한 적 있으면 {name,avatar,group_id}
     if (player && player.name) {
       Auth.applyLocal(res.uid, player.name, player.avatar);
-      window.location.href = 'index.html';
+      window.location.href = afterLoginHref();
       return;
     }
     // 처음 로그인 — 닉네임을 정해야 함. 기존 입력창을 그대로 사용.
@@ -565,7 +576,7 @@ async function doLogin() {
     }
     Auth.applyLocal(uid, name, 'rookie');
     btn.textContent = '이동 중...';
-    window.location.href = 'index.html';
+    window.location.href = afterLoginHref();
     return;
   }
 
@@ -600,7 +611,7 @@ async function doLogin() {
   );
 
   btn.textContent = '이동 중...';
-  window.location.href = 'index.html';
+  window.location.href = afterLoginHref();
 }
 
 function clearGroup() {
