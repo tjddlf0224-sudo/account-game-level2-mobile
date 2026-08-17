@@ -2328,7 +2328,18 @@ const Dialog = {
     if(docs.includes('doc_oh_rate') && docs.includes('doc_signoff'))
       EventFX.fire('ev_oh_rain','⬇️','제조간접비가 라인으로 배분됩니다');                 // ev_oh_rain
     // ── 한서준 엔딩 대화까지 전부 끝났으면 게임 클리어 화면 ──
-    if(key==='n_han_end') requestInterstitialIfNeeded(()=>ResultScreen.show());
+    // 첫 클리어는 무조건 광고(있으면) 후 표시, 그 이후 재도전(랭킹 갱신용)은
+    // 매번 광고를 띄우면 짜증날 수 있어 2급과 동일하게 전체 스테이지 공유
+    // 카운터로 10번에 한 번만(requestInterstitialIfNeeded).
+    if(key==='n_han_end'){
+      const firstClear = !localStorage.getItem(S1_FIRST_AD_KEY);
+      if(firstClear){
+        localStorage.setItem(S1_FIRST_AD_KEY,'1');
+        showInterstitialAlways(()=>ResultScreen.show());
+      } else {
+        requestInterstitialIfNeeded(()=>ResultScreen.show());
+      }
+    }
   },
 };
 document.getElementById('dlg-panel').addEventListener('click', ()=>Dialog.next());
@@ -2781,6 +2792,18 @@ function requestInterstitialIfNeeded(afterFn){
 }
 function onAdsRemoved(){}
 function onInterstitialClosed(){ if(window._adAfterFn){ const f=window._adAfterFn; window._adAfterFn=null; f(); } }
+// 스테이지1 "첫 클리어" 전용 — 공유 카운터(10번에 한 번)와 별개로 무조건 광고 시도(있으면).
+// 재도전(랭킹 갱신)할 때마다 뜨면 짜증나므로 딱 한 번, 첫 클리어에서만 사용.
+const S1_FIRST_AD_KEY='lv1_s1_first_ad_shown';
+function showInterstitialAlways(afterFn){
+  if(window.AdBridge && typeof AdBridge.isAdsRemoved==='function' && AdBridge.isAdsRemoved()){ afterFn&&afterFn(); return; }
+  if(window.AdBridge){
+    window._adAfterFn=afterFn;
+    AdBridge.showInterstitial();
+  } else {
+    afterFn&&afterFn();
+  }
+}
 /* 안드로이드 WebView 광고 배너 (기존 화면들과 동일 시그니처) */
 function hideAdPlaceholder(){ if(window.AdBridge) AdBridge.hide(); }
 function showAdPlaceholder(){ if(window.AdBridge) AdBridge.show(); }
