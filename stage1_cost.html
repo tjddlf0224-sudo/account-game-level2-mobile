@@ -1771,8 +1771,8 @@ const World = {
         ctx.fillRect(cx-w/2, cy-TS*0.92, w, TS*0.4);
         ctx.fillStyle='#fff'; ctx.fillText(label, cx, cy-TS*0.62);
         ctx.restore();
-      } else {
-        // 대화 가능 표시
+      } else if(n.id==='n_han' || Stage.state.metNpc['n_han_intro']){
+        // 대화 가능 표시 — 한서준 대리와 첫 대화 끝내기 전엔 다른 NPC 위엔 안 띄움(어차피 안내 멘트뿐이라)
         ctx.fillStyle='rgba(255,214,0,'+(0.55+0.35*Math.sin(this.bob*2))+')';
         ctx.font=`700 ${Math.round(TS*0.42)}px 'Black Han Sans', sans-serif`;
         ctx.textAlign='center';
