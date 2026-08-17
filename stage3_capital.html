@@ -137,17 +137,28 @@
             background: #333; padding: 15px; border-radius: 10px;
             border-left: 5px solid var(--neon-gold); font-size: 1rem; line-height: 1.4; word-break: keep-all;
         }
-        .mode-switcher { display: flex; gap: 10px; margin-bottom: 5px; flex-shrink: 0; }
+        /* 계정과목 풀 — 모드 전환 버튼 없이, 카드마다 "차변으로/대변으로" 버튼을 항상 노출.
+           (예전엔 상단 모드 버튼을 먼저 눌러야 계정과목 탭 결과가 정해지는 구조라, 모드를
+           깜빡하면 반대쪽에 조용히 들어가는 문제가 있었음 — 목적지를 매번 명시적으로
+           고르게 바꿔서 해결) */
         .account-pool {
             display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
             padding: 10px; background: #222; border-radius: 10px;
             overflow-y: auto; min-height: 100px; /* 모바일에서 최소 높이 */
         }
-        .acc-btn {
-            background: #3d3d3d; color: #ddd; padding: 12px 5px; border-radius: 8px;
-            cursor: pointer; text-align: center; font-size: 0.9rem; word-break: keep-all;
-            display: flex; align-items: center; justify-content: center;
+        .acc-card {
+            background: #3d3d3d; border-radius: 8px; padding: 8px;
+            display: flex; flex-direction: column; gap: 6px; align-items: center;
         }
+        .acc-name { color: #ddd; font-size: 0.86rem; text-align: center; word-break: keep-all; }
+        .acc-picks { display: flex; gap: 6px; width: 100%; }
+        .acc-pick {
+            flex: 1; border: none; border-radius: 6px; padding: 8px 4px; cursor: pointer;
+            font-family: 'Jua'; font-size: 0.8rem; color: white;
+        }
+        .acc-pick.dr { background: #d63031; }
+        .acc-pick.cr { background: #0984e3; }
+        .acc-pick:active { transform: scale(0.94); }
 
         .journal-right { flex: 1; display: flex; flex-direction: column; }
         .journal-board { display: flex; gap: 10px; flex: 1; margin-bottom: 10px; min-height: 150px; }
@@ -209,7 +220,8 @@
             .journal-left { flex: none; height: auto; max-height: 45%; }
             .journal-right { flex: 1; min-height: 250px; }
             .journal-problem-box { font-size: 0.9rem; padding: 10px; }
-            .acc-btn { padding: 10px; font-size: 0.85rem; }
+            .acc-name { font-size: 0.8rem; }
+            .acc-pick { padding: 9px 4px; font-size: 0.74rem; }
         }
 
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
@@ -296,11 +308,6 @@
             <div id="screen-journal" class="screen">
                 <div class="journal-left">
                     <div id="journal-problem-desc" class="journal-problem-box">문제 내용</div>
-
-                    <div class="mode-switcher">
-                        <button class="btn-action" id="btn-dr-mode" style="flex:1; background:#d63031; padding:10px; font-size:1rem;" onclick="setJournalMode('dr')">차변(왼쪽)</button>
-                        <button class="btn-action" id="btn-cr-mode" style="flex:1; background:#0984e3; padding:10px; font-size:1rem;" onclick="setJournalMode('cr')">대변(오른쪽)</button>
-                    </div>
 
                     <div class="account-pool" id="account-pool">
                         </div>
@@ -570,7 +577,6 @@
             journalCorrect: 0,
             day: 0,
             gameList: [],
-            journalMode: 'dr',
             userJournal: { dr: [], cr: [] }
         };
 
@@ -716,6 +722,12 @@
         }
 
         // --- 3. 분개 ---
+        // 예전엔 상단 모드(차변/대변) 버튼을 먼저 눌러야 이후 계정과목 탭이 어느 쪽으로
+        // 들어갈지 정해지는 구조였음 — 화면에 안 보이는 상태를 기억해야 해서, 모드
+        // 전환을 깜빡하고 누르면 반대쪽에 조용히 들어가는 문제가 있었음. 계정과목
+        // 카드마다 "차변으로/대변으로" 버튼을 항상 같이 보여줘서 탭할 때마다 목적지를
+        // 명시적으로 고르도록 변경(전수조사 결과 반영).
+        let journalOpts = [];
         function showJournalScreen() {
             const scene = state.gameList[state.day];
             showScreen('screen-journal');
@@ -723,38 +735,38 @@
             document.getElementById('journal-problem-desc').innerText = "[문제] " + scene.desc;
 
             state.userJournal = { dr: [], cr: [] };
-            state.journalMode = 'dr';
             updateJournalUI();
 
+            journalOpts = shuffle([...scene.options]);
+            renderAccountPool();
+        }
+
+        function renderAccountPool() {
             const poolEl = document.getElementById('account-pool');
             poolEl.innerHTML = '';
-
-            const opts = shuffle([...scene.options]);
-            opts.forEach(opt => {
-                const btn = document.createElement('div');
-                btn.className = 'acc-btn';
-                btn.innerText = opt;
-                btn.onclick = () => addAccount(opt);
-                poolEl.appendChild(btn);
+            const placed = new Set([...state.userJournal.dr, ...state.userJournal.cr]);
+            journalOpts.forEach(opt => {
+                if (placed.has(opt)) return; // 이미 배치된 계정과목은 풀에서 숨김
+                const card = document.createElement('div');
+                card.className = 'acc-card';
+                card.innerHTML = `<div class="acc-name">${opt}</div>
+                    <div class="acc-picks">
+                        <button class="acc-pick dr">차변으로</button>
+                        <button class="acc-pick cr">대변으로</button>
+                    </div>`;
+                card.querySelector('.dr').onclick = () => addAccount(opt, 'dr');
+                card.querySelector('.cr').onclick = () => addAccount(opt, 'cr');
+                poolEl.appendChild(card);
             });
-
-            setJournalMode('dr');
         }
 
-        function setJournalMode(mode) {
+        function addAccount(accName, mode) {
             Sound.playClick();
-            state.journalMode = mode;
-            document.getElementById('btn-dr-mode').style.border = 'none';
-            document.getElementById('btn-cr-mode').style.border = 'none';
-            document.getElementById(`btn-${mode}-mode`).style.border = '3px solid white';
-        }
-
-        function addAccount(accName) {
-            Sound.playClick();
-            const targetList = state.userJournal[state.journalMode];
+            const targetList = state.userJournal[mode];
             if (!targetList.includes(accName)) {
                 targetList.push(accName);
                 updateJournalUI();
+                renderAccountPool();
             }
         }
 
@@ -762,6 +774,7 @@
             Sound.playClick();
             state.userJournal[mode].splice(idx, 1);
             updateJournalUI();
+            renderAccountPool();
         }
 
         function updateJournalUI() {
