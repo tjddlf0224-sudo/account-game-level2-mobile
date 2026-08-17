@@ -100,14 +100,6 @@ body{
   .examday-box .ed-set-btn{ padding:7px 12px; font-size:0.56rem; }
 }
 
-/* ── 진행 경로 ── */
-.path-line{ display:flex; align-items:center; justify-content:center; gap:5px; margin-bottom:26px; flex-wrap:wrap; }
-.path-step{ display:flex; align-items:center; gap:5px; font-size:0.7rem; color:rgba(255,255,255,0.3); white-space:nowrap; }
-.path-step.active{ color:var(--pu); }
-.path-dot{ width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,0.2); }
-.path-step.active .path-dot{ background:var(--pu); box-shadow:0 0 8px var(--pu); }
-.path-arrow{ width:16px; height:1px; background:rgba(255,255,255,0.15); }
-
 /* ── 스테이지 노드맵(2급 허브 stagemap과 동일 패턴 — 징검다리 경로) ── */
 .stagemap{ position:relative; max-width:300px; margin:0 auto 34px; aspect-ratio:340/780; }
 .stagemap svg.trail{ position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
@@ -208,7 +200,7 @@ body{
     <span id="ub-group-name">—</span>
   </div>
   <a class="group-mode-btn" href="select_level.html" style="color:var(--or); border-color:rgba(255,152,0,0.3); background:rgba(255,152,0,0.07);">🔀 급수 변경</a>
-  <a class="group-mode-btn" href="group.html">👥 그룹 모드</a>
+  <a class="graph-btn" href="group.html" title="그룹 모드" aria-label="그룹 모드">👥</a>
   <button class="graph-btn hub-mute-btn" id="hub-mute-btn" onclick="toggleHubMute()" title="전체 음소거" aria-label="전체 음소거">🎵</button>
   <a class="graph-btn" href="growth.html" title="내 성장 그래프" aria-label="내 성장 그래프">
     <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -233,18 +225,6 @@ body{
       </div>
     </div>
     <button class="ed-set-btn" id="ed-set-btn" onclick="setExamDate()">📅 시험일 설정</button>
-  </div>
-
-  <div class="path-line">
-    <div class="path-step active"><div class="path-dot"></div>원재료</div>
-    <div class="path-arrow"></div>
-    <div class="path-step active"><div class="path-dot"></div>재공품</div>
-    <div class="path-arrow"></div>
-    <div class="path-step active"><div class="path-dot"></div>제품</div>
-    <div class="path-arrow"></div>
-    <div class="path-step"><div class="path-dot"></div>배분</div>
-    <div class="path-arrow"></div>
-    <div class="path-step"><div class="path-dot"></div>결산</div>
   </div>
 
   <!-- ── 이론 객관식: 2급처럼 스테이지가 아니라 별도 진입점 ── -->
@@ -336,7 +316,6 @@ body{
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="auth.js"></script>
 <script>
 /* 닉네임/그룹 표시 + 탈퇴 버튼 노출(2급 허브와 동일 로직 — 통일감) */
 (function(){
