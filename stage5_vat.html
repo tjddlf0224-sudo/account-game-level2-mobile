@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data:; connect-src 'self' https://pjagaulfivafamhhiveg.supabase.co https://cdn.jsdelivr.net;">
+<title>신고의 문 | 전산회계 1급</title>
+<meta name="description" content="거래를 부가가치세 신고서의 올바른 칸에 배치하며 신고서 구조를 익히는 연습">
+<style>
+  :root{
+    --bg:#020810; --card:#0c1626; --card2:#11203a; --line:rgba(255,255,255,.08);
+    --blue:#00f2ff; --purple:#b44fff; --green:#2ecc71; --red:#ff2d78; --gold:#ffd24a;
+    --sale:#00f2ff; --buy:#ffab40; --none:#8a94a8;
+    --txt:#eaf2ff; --dim:rgba(234,242,255,.55);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{margin:0;background:var(--bg);color:var(--txt);
+       font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+       padding:0 0 40px; min-height:100vh;}
+  .wrap{max-width:640px;margin:0 auto;padding:calc(16px + env(safe-area-inset-top)) 16px 16px;}
+  @media (min-width:701px){
+    body{background:
+      radial-gradient(ellipse 50% 40% at 12% 10%, rgba(0,242,255,0.07), transparent 60%),
+      radial-gradient(ellipse 45% 35% at 90% 90%, rgba(180,79,255,0.06), transparent 55%),
+      var(--bg);
+      display:flex; flex-direction:column; justify-content:center;}
+    .wrap{padding-top:16px;max-width:820px;width:100%;}
+  }
+  .top{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+  .back{background:var(--card);border:1px solid var(--line);color:var(--txt);
+        border-radius:12px;padding:9px 13px;font-size:.92rem;text-decoration:none;flex:none;}
+  h1{font-size:1.15rem;margin:0;}
+  h1 .sub{display:block;font-size:.72rem;color:var(--dim);font-weight:500;margin-top:3px;}
+
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px;}
+  .panel h2{font-size:.92rem;margin:0 0 12px;color:var(--blue);}
+  .mini{font-size:.78rem;color:var(--dim);margin-top:10px;line-height:1.6;}
+  .cta{display:block;width:100%;border:none;border-radius:14px;padding:15px;
+       font-size:1.05rem;font-weight:700;color:#021;cursor:pointer;
+       background:linear-gradient(90deg,var(--blue),var(--green));margin-top:8px;}
+  .cta:disabled{opacity:.45;}
+  .intro-row{display:flex;gap:10px;font-size:.82rem;color:var(--dim);margin-top:10px;flex-wrap:wrap;}
+  .intro-row b{color:var(--txt);}
+
+  #quiz{display:none;}
+  .hud{display:flex;justify-content:space-between;align-items:center;font-size:.82rem;color:var(--dim);margin-bottom:10px;}
+  .hud b{color:var(--gold);}
+  .progress-track{height:6px;background:rgba(255,255,255,.07);border-radius:6px;overflow:hidden;margin-bottom:14px;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--purple));transition:width .3s;}
+
+  /* ── 실시간 신고서 리포트 ── */
+  .report{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-bottom:14px;}
+  .report-title{font-size:.78rem;color:var(--dim);letter-spacing:.05em;margin-bottom:8px;}
+  .report-sec{margin-bottom:8px;}
+  .report-sec-label{font-size:.72rem;font-weight:700;color:var(--dim);margin-bottom:4px;display:flex;align-items:center;gap:6px;}
+  .report-sec-label .dot{width:7px;height:7px;border-radius:50%;}
+  .report-sec-label.sale .dot{background:var(--sale);}
+  .report-sec-label.buy .dot{background:var(--buy);}
+  .rline{display:flex;justify-content:space-between;font-size:.82rem;padding:5px 0;border-bottom:1px dashed rgba(255,255,255,.06);}
+  .rline:last-child{border-bottom:none;}
+  .rline .nm{color:var(--dim);}
+  .rline .amt{font-variant-numeric:tabular-nums;color:var(--txt);}
+  .rline.dim2 .nm, .rline.dim2 .amt{color:rgba(255,255,255,.3);}
+  .rsum{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--line);}
+  .rsum .nm{font-size:.9rem;font-weight:700;}
+  .rsum .amt{font-size:1.15rem;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums;}
+
+  .qcard{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;margin-bottom:14px;}
+  .qtag{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap;}
+  .cat-badge{font-family:ui-monospace,monospace;font-weight:700;font-size:.72rem;letter-spacing:.03em;
+    padding:4px 9px;border-radius:6px;background:rgba(0,242,255,.14);color:var(--sale);border:1px solid rgba(0,242,255,.3);}
+  .qamt{font-family:ui-monospace,monospace;font-size:.8rem;color:var(--gold);}
+  .qstem{font-size:1.06rem;line-height:1.65;word-break:keep-all;}
+
+  .dest-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .dbtn{background:var(--card2);border:1.5px solid var(--line);border-radius:12px;
+    padding:12px 8px;text-align:center;cursor:pointer;transition:.12s;color:var(--txt);font-size:.82rem;line-height:1.4;}
+  .dbtn:active{transform:scale(.96);}
+  .dbtn[disabled]{cursor:default;}
+  .dbtn.correct{border-color:var(--green);background:rgba(46,204,113,.18);}
+  .dbtn.wrong{border-color:var(--red);background:rgba(255,45,120,.18);}
+  .dbtn.dim{opacity:.35;}
+  .dbtn.none{grid-column:1 / -1;color:var(--none);}
+
+  .expl{margin-top:14px;padding:14px;border-radius:13px;background:rgba(0,242,255,.07);
+        border:1px solid rgba(0,242,255,.22);font-size:.9rem;line-height:1.6;display:none;}
+  .expl .verdict{font-weight:700;margin-bottom:6px;font-size:.98rem;}
+  .next-wrap{margin-top:14px;display:none;}
+
+  #result{display:none;text-align:center;}
+  #result .em{font-size:3rem;display:block;margin:8px 0;}
+  #result .score{font-size:2.4rem;color:var(--gold);font-weight:800;}
+  #result .grade{font-size:1.1rem;margin:6px 0 2px;}
+  .res-row{display:flex;justify-content:space-around;margin:18px 0;font-size:.9rem;}
+  .res-row .v{font-size:1.4rem;font-weight:700;display:block;}
+  .res-note{font-size:.82rem;color:var(--dim);margin-bottom:18px;}
+  .btn-row{display:flex;gap:10px;}
+  .btn-row a,.btn-row button{flex:1;border-radius:13px;padding:13px;font-size:.92rem;font-weight:600;
+      border:1px solid var(--line);background:var(--card2);color:var(--txt);cursor:pointer;text-decoration:none;text-align:center;}
+  .btn-row .primary{border:none;background:linear-gradient(90deg,var(--blue),var(--green));color:#021;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="back" href="index_lv1.html">←</a>
+    <h1>🚪 신고의 문 <span class="sub">전산회계 1급 실무 · 부가가치세 신고서</span></h1>
+  </div>
+
+  <div id="home">
+    <div class="panel">
+      <h2>이 스테이지는?</h2>
+      <div class="mini">
+        스테이지3 「전표의 눈」에서 익힌 매입매출전표 유형(11.과세, 54.불공 등)이
+        실제로 <b style="color:#fff">부가가치세 신고서</b>의 어느 칸에 찍히는지 배웁니다.
+        거래를 하나씩 보고, 신고서의 올바른 칸에 금액을 배치하면 신고서가 실시간으로 채워집니다.
+      </div>
+      <div class="intro-row">
+        <span>🔑 <b>세금계산서를 받아도</b> 접대비·비영업용승용차 등은 <b>불공제</b>(공제 안 됨)</span>
+      </div>
+      <div class="intro-row">
+        <span>🔑 <b>면세 거래</b>는 부가세 자체가 없어 신고서에 아예 올라가지 않음</span>
+      </div>
+      <button class="cta" id="start-btn">▶ 시작 (14문항)</button>
+    </div>
+  </div>
+
+  <div id="quiz">
+    <div class="hud">
+      <span id="hud-prog">1 / 14</span>
+      <span>점수 <b id="hud-score">0</b></span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+
+    <div class="report" id="report"></div>
+
+    <div id="quiz-body"></div>
+  </div>
+
+  <div id="result"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth.js"></script>
+<script src="wrongnote.js"></script>
+<script src="growth.js"></script>
+<script>
+(function(){ if(!(localStorage.getItem('hub_nickname')||'').trim()){ location.replace('login.html'); } })();
+
+const GAME_ID='vat_lv1';
+
+/* ── 신고서 칸(목적지) — 실제 부가세 신고서를 학습용으로 단순화 ──
+   과세표준(공급가액) 자체보다 "이 거래가 신고서 어느 줄에 찍히는가"가 핵심이라
+   세율이 있는 칸(A/B/C/E/F/G)은 세액(공급가액×10%)만 누적해서 보여준다. */
+const DESTS = [
+  { key:'A', side:'sale', label:'과세 매출 · 세금계산서 발급분', rate:0.1 },
+  { key:'B', side:'sale', label:'과세 매출 · 신용카드·현금영수증분', rate:0.1 },
+  { key:'C', side:'sale', label:'과세 매출 · 기타(무증빙)', rate:0.1 },
+  { key:'D', side:'sale', label:'영세율 매출분(세액 0)', rate:0 },
+  { key:'E', side:'buy',  label:'매입세액 · 세금계산서 수취분', rate:0.1, deduct:true },
+  { key:'F', side:'buy',  label:'매입세액 · 카드·현금영수증 수취분', rate:0.1, deduct:true },
+  { key:'G', side:'buy',  label:'공제받지못할매입세액(불공제)', rate:0.1, deduct:false },
+  { key:'H', side:'none', label:'해당없음 — 면세 거래(부가세 없음)', rate:0 },
+];
+const DMAP = Object.fromEntries(DESTS.map(d=>[d.key,d]));
+
+/* ── 거래 14건 — 스테이지3(전표의 눈)에서 다룬 유형 코드를 그대로 이어받아,
+   이번엔 "그 유형이 신고서 어디로 가는지"를 묻는다. 금액은 계산이 쉽도록 라운드 숫자. */
+const TX = [
+  { id:1,  type:'11.과세', desc:'제품을 판매하고 전자세금계산서를 발급했다.', amt:5000000, dest:'A',
+    explain:'세금계산서를 발급한 일반 과세매출 → 과세표준및매출세액 "세금계산서 발급분"에 찍힙니다.' },
+  { id:2,  type:'17.카과', desc:'개인 고객에게 제품을 판매하고 신용카드로 결제받았다.', amt:1000000, dest:'B',
+    explain:'신용카드로 결제받은 과세매출 → "신용카드·현금영수증 발행분"에 찍힙니다.' },
+  { id:3,  type:'22.현과', desc:'제품을 판매하고 지출증빙용 현금영수증을 발급했다.', amt:800000, dest:'B',
+    explain:'현금영수증을 발급한 과세매출도 카드매출과 같은 "신용카드·현금영수증 발행분"에 합산됩니다.' },
+  { id:4,  type:'14.건별', desc:'비사업자에게 제품을 판매하고 증빙 없이 현금을 받았다.', amt:300000, dest:'C',
+    explain:'세금계산서·카드·현금영수증 어느 증빙도 없는 과세매출 → "기타(정규영수증 외 매출분)"에 찍힙니다.' },
+  { id:5,  type:'12.영세', desc:'내국신용장에 의해 제품을 공급하고 영세율 세금계산서를 발급했다.', amt:2000000, dest:'D',
+    explain:'영세율 적용 매출 → 세율 0%라 매출세액은 0원이지만, 영세율분 칸에는 반드시 집계해야 합니다.' },
+  { id:6,  type:'16.수출', desc:'해외 거래처에 제품을 직수출했다.', amt:3000000, dest:'D',
+    explain:'직수출도 영세율 매출 → 세금계산서 발급 여부와 무관하게 영세율분 칸에 집계됩니다.' },
+  { id:7,  type:'13.면세', desc:'도서를 판매하고 계산서를 발급했다.', amt:500000, dest:'H',
+    explain:'면세 재화의 공급은 애초에 부가가치세 과세 대상이 아니므로, 세금계산서가 아닌 계산서를 발급하고 부가세 신고서 자체에는 올라가지 않습니다.' },
+  { id:8,  type:'51.과세', desc:'원재료를 매입하고 전자세금계산서를 수취했다.', amt:4000000, dest:'E',
+    explain:'세금계산서를 받은 일반 과세매입 → 매입세액이 전액 공제됩니다.' },
+  { id:9,  type:'57.카과', desc:'사무용품을 구입하고 법인카드로 결제했다.', amt:200000, dest:'F',
+    explain:'신용카드로 결제한 과세매입 → 매입세액이 공제되는 "카드·현금영수증 수취분"에 찍힙니다.' },
+  { id:10, type:'61.현과', desc:'소모품을 구입하고 지출증빙용 현금영수증을 수취했다.', amt:150000, dest:'F',
+    explain:'현금영수증을 받은 과세매입도 카드매입과 같은 공제 칸에 합산됩니다.' },
+  { id:11, type:'54.불공', desc:'거래처 접대를 위해 선물세트를 구입하고 세금계산서를 수취했다.', amt:500000, dest:'G',
+    explain:'세금계산서는 받았지만 접대(기업업무추진비) 관련 매입이라 매입세액이 공제되지 않습니다 — "공제받지못할매입세액"에 별도 집계.' },
+  { id:12, type:'54.불공', desc:'업무와 무관한 비영업용 소형승용차(2,000cc)를 구입하고 세금계산서를 수취했다.', amt:20000000, dest:'G',
+    explain:'비영업용 소형승용차(개별소비세 과세대상)는 세금계산서를 받아도 매입세액 불공제 대상입니다.' },
+  { id:13, type:'53.면세', desc:'도서를 구입하고 계산서를 수취했다.', amt:100000, dest:'H',
+    explain:'면세 매입은 애초에 매입세액이라는 게 존재하지 않아 신고서에 올라가지 않습니다(계산서 수취, 세금계산서 아님).' },
+  { id:14, type:'62.현면', desc:'직원 휴게실 간식(과일)을 구입하고 지출증빙용 현금영수증을 수취했다.', amt:80000, dest:'H',
+    explain:'면세 품목은 현금영수증을 받아도 부가세가 없어 신고서에 올라가지 않습니다.' },
+];
+
+function esc(s){return (s==null?'':String(s)).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function won(n){ return Math.round(n).toLocaleString('ko-KR')+'원'; }
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+document.getElementById('start-btn').onclick=startQuiz;
+
+let QUEUE=[], qi=0, score=0, correctCnt=0;
+let placed={}; // key -> 누적 세액
+
+function startQuiz(){
+  QUEUE=shuffle(TX.slice());
+  qi=0; score=0; correctCnt=0;
+  placed={ A:0,B:0,C:0,D:0,E:0,F:0,G:0 };
+  if(window.WrongNote) WrongNote.reset();
+  document.getElementById('home').style.display='none';
+  document.getElementById('result').style.display='none';
+  document.getElementById('quiz').style.display='block';
+  renderReport();
+  showQ();
+}
+
+function renderReport(){
+  const sale = ['A','B','C','D'];
+  const buy = ['E','F','G'];
+  const saleTotal = sale.reduce((s,k)=>s+(k==='D'?0:placed[k]),0);
+  const buyDeductTotal = ['E','F'].reduce((s,k)=>s+placed[k],0);
+  const pay = saleTotal - buyDeductTotal;
+  const box=document.getElementById('report');
+  box.innerHTML = `
+    <div class="report-title">📋 부가가치세 신고서 (진행 중)</div>
+    <div class="report-sec">
+      <div class="report-sec-label sale"><span class="dot"></span>매출세액</div>
+      ${sale.map(k=>`<div class="rline${k==='D'?' dim2':''}"><span class="nm">${DMAP[k].label}</span><span class="amt">${k==='D'?'영세율(0원)':won(placed[k])}</span></div>`).join('')}
+    </div>
+    <div class="report-sec">
+      <div class="report-sec-label buy"><span class="dot"></span>매입세액</div>
+      ${buy.map(k=>`<div class="rline${k==='G'?' dim2':''}"><span class="nm">${DMAP[k].label}</span><span class="amt">${won(placed[k])}${k==='G'&&placed[k]>0?' (차감계 제외)':''}</span></div>`).join('')}
+    </div>
+    <div class="rsum"><span class="nm">납부세액</span><span class="amt">${won(pay)}</span></div>
+  `;
+}
+
+function showQ(){
+  const q=QUEUE[qi];
+  document.getElementById('hud-prog').textContent=`${qi+1} / ${QUEUE.length}`;
+  document.getElementById('hud-score').textContent=score.toLocaleString();
+  document.getElementById('prog-fill').style.width=(qi/QUEUE.length*100)+'%';
+  const destBtns = DESTS.map(d=>`<button class="dbtn${d.key==='H'?' none':''}" data-key="${d.key}">${esc(d.label)}</button>`).join('');
+  const html=`
+    <div class="qcard">
+      <div class="qtag"><span class="cat-badge">${esc(q.type)}</span><span class="qamt">공급가액 ${won(q.amt)}</span></div>
+      <div class="qstem">${esc(q.desc)}</div>
+    </div>
+    <div class="dest-grid">${destBtns}</div>
+    <div class="expl" id="expl"></div>
+    <div class="next-wrap" id="next-wrap"><button class="cta" id="next-btn">${qi+1>=QUEUE.length?'결과 보기 🏁':'다음 거래 →'}</button></div>
+  `;
+  document.getElementById('quiz-body').innerHTML=html;
+  document.querySelectorAll('.dbtn').forEach(b=>b.onclick=()=>pick(b.dataset.key,q));
+}
+
+function pick(key,q){
+  document.querySelectorAll('.dbtn').forEach(b=>{
+    b.disabled=true;
+    if(b.dataset.key===q.dest) b.classList.add('correct');
+    else if(b.dataset.key===key) b.classList.add('wrong');
+    else b.classList.add('dim');
+  });
+  const ok = key===q.dest;
+  const expl=document.getElementById('expl');
+  expl.innerHTML = (ok
+    ? `<div class="verdict" style="color:var(--green)">✓ 정답! ${esc(DMAP[q.dest].label)}</div>${esc(q.explain||'')}`
+    : `<div class="verdict" style="color:var(--red)">✗ 오답 — 정답은 "${esc(DMAP[q.dest].label)}"</div>${esc(q.explain||'')}`
+  );
+  if(ok){
+    correctCnt++; score+=100;
+    if(q.dest!=='H' && q.dest!=='D'){ placed[q.dest]+=Math.round(q.amt*0.1); }
+    renderReport();
+  } else {
+    if(window.WrongNote) WrongNote.add({
+      game:GAME_ID, key:'V'+q.id, q:q.desc,
+      correct:DMAP[q.dest].label, wrong:(DMAP[key]?DMAP[key].label:'(선택 안 함)'),
+      type:q.type
+    });
+  }
+  document.getElementById('hud-score').textContent=score.toLocaleString();
+  expl.style.display='block';
+  document.getElementById('next-wrap').style.display='block';
+  document.getElementById('next-btn').onclick=()=>{ qi++; qi>=QUEUE.length?endQuiz():showQ(); };
+  expl.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function grade(rate){
+  if(rate>=0.9) return '👑 신고 마스터';
+  if(rate>=0.75) return '🥇 합격 안정권';
+  if(rate>=0.6) return '🥈 합격 가시권';
+  if(rate>=0.4) return '🥉 분발 필요';
+  return '📋 기초 다지기';
+}
+
+async function endQuiz(){
+  if(window.WrongNote) await WrongNote.flush(GAME_ID);
+  const rate=QUEUE.length?correctCnt/QUEUE.length:0;
+  const g = grade(rate);
+  if(window.Growth) Growth.record({game:GAME_ID, score:score, grade:g, combo:0, correct:correctCnt});
+  try{ await saveStageScore(score, g, correctCnt, QUEUE.length); }catch(e){}
+  requestInterstitialIfNeeded(renderResult);
+}
+
+/* ── 허브 연동 — 기존 1급 스테이지들과 동일 패턴: 로컬(lv1_s5_progress) + Supabase(game_id:'vat_lv1') ── */
+const SUPA_URL='https://pjagaulfivafamhhiveg.supabase.co';
+const SUPA_KEY='sb_publishable_yck2tAKApEjVSJOJMVSXuQ_AGaNatuI';
+const S5_SAVE_KEY='lv1_s5_progress';
+let _supaDb=null;
+function supaClient(){
+  if(_supaDb) return _supaDb;
+  try{ if(window.supabase && supabase.createClient) _supaDb=supabase.createClient(SUPA_URL, SUPA_KEY); }catch(e){}
+  return _supaDb;
+}
+async function saveStageScore(score, gradeStr, correct, total){
+  try{
+    localStorage.setItem(S5_SAVE_KEY, JSON.stringify({
+      cleared:true, score, grade:gradeStr, correct, total, playedAt:new Date().toISOString()
+    }));
+  }catch(e){}
+  const name=(localStorage.getItem('hub_nickname')||'').trim();
+  if(!name) return;
+  const groupId=localStorage.getItem('hub_group_id') || null;
+  const today=new Date().toISOString().split('T')[0];
+  const rpcParams={ p_game_id:GAME_ID, p_name:name, p_score:score, p_grade:gradeStr, p_combo:0, p_correct:correct, p_date:today };
+  if(groupId) rpcParams.p_group_id=groupId;
+  try{ if(window.Auth){ const uid=await Auth.currentUid(); if(uid) rpcParams.p_uid=uid; } }catch(e){}
+  const db=supaClient();
+  if(!db) return;
+  try{ const {error}=await db.rpc('upsert_score', rpcParams); if(error) console.warn('vat_lv1 점수 저장 실패:', error); }
+  catch(e){ console.warn('vat_lv1 점수 저장 예외:', e); }
+}
+function renderResult(){
+  const total=QUEUE.length, wrong=total-correctCnt;
+  const rate=total?correctCnt/total:0;
+  document.getElementById('quiz').style.display='none';
+  const box=document.getElementById('result');
+  box.style.display='block';
+  box.innerHTML=`
+    <span class="em">${rate>=0.6?'🎉':'💪'}</span>
+    <div class="score">${score.toLocaleString()}점</div>
+    <div class="grade">${grade(rate)}</div>
+    <div class="res-row">
+      <div>정답률<span class="v" style="color:var(--blue)">${Math.round(rate*100)}%</span></div>
+      <div>맞힘<span class="v" style="color:var(--green)">${correctCnt}</span></div>
+      <div>틀림<span class="v" style="color:var(--red)">${wrong}</span></div>
+    </div>
+    <div class="res-note">${wrong>0?`틀린 ${wrong}문제가 <b style="color:var(--gold)">오답노트</b>에 저장됐어요.`:'전부 맞혔어요! 완벽합니다 👏'}</div>
+    <div class="btn-row">
+      <button class="primary" onclick="location.reload()">다시 풀기</button>
+      ${wrong>0?'<a href="review.html">오답노트 →</a>':'<a href="index_lv1.html">메인 →</a>'}
+    </div>`;
+  box.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+const AD_GAME_COUNT_KEY='hub_ad_game_count';
+const AD_INTERSTITIAL_EVERY=10;
+function incrementGameCount(){
+  const n=parseInt(localStorage.getItem(AD_GAME_COUNT_KEY)||'0')+1;
+  localStorage.setItem(AD_GAME_COUNT_KEY,String(n)); return n;
+}
+function requestInterstitialIfNeeded(afterFn){
+  if(window.AdBridge && typeof AdBridge.isAdsRemoved==='function' && AdBridge.isAdsRemoved()){ afterFn&&afterFn(); return; }
+  window._adAfterFn=afterFn;
+  const count=incrementGameCount();
+  if(count%AD_INTERSTITIAL_EVERY===0 && window.AdBridge && typeof AdBridge.showInterstitial==='function'){
+    AdBridge.showInterstitial();
+  } else { afterFn&&afterFn(); }
+}
+function onInterstitialClosed(){ if(window._adAfterFn){ const f=window._adAfterFn; window._adAfterFn=null; f(); } }
+function onAdsRemoved(){}
+function hideAdPlaceholder(){ if(window.AdBridge && typeof AdBridge.hide==='function') AdBridge.hide(); }
+</script>
+<script src="emoji-icons.js"></script>
+</body>
+</html>

@@ -94,7 +94,7 @@ body{
 .path-arrow{ width:16px; height:1px; background:rgba(255,255,255,0.15); }
 
 /* ── 스테이지 노드맵(2급 허브 stagemap과 동일 패턴 — 징검다리 경로) ── */
-.stagemap{ position:relative; max-width:300px; margin:0 auto 34px; aspect-ratio:340/620; }
+.stagemap{ position:relative; max-width:300px; margin:0 auto 34px; aspect-ratio:340/780; }
 .stagemap svg.trail{ position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
 .trail-dim{ fill:none; stroke:rgba(255,255,255,0.12); stroke-width:5; stroke-linecap:round; }
 .trail-lit{ fill:none; stroke:var(--pu); stroke-width:5; stroke-linecap:round;
@@ -250,12 +250,12 @@ body{
 
   <!-- ── 스테이지 노드맵(2급 허브 stagemap과 동일 패턴, 게임 스테이지만) ── -->
   <div class="stagemap">
-    <svg class="trail" viewBox="0 0 340 620" preserveAspectRatio="none" aria-hidden="true">
-      <path class="trail-dim" d="M240,70 C240,180 100,160 100,290 C100,420 240,400 240,540"/>
-      <path class="trail-lit" id="trail-lit" d="M240,70 C240,180 100,160 100,290 C100,420 240,400 240,540"/>
+    <svg class="trail" viewBox="0 0 340 780" preserveAspectRatio="none" aria-hidden="true">
+      <path class="trail-dim" d="M240,70 C240,180 100,160 100,270 C100,380 240,360 240,470 C240,580 100,580 100,690"/>
+      <path class="trail-lit" id="trail-lit" d="M240,70 C240,180 100,160 100,270 C100,380 240,360 240,470 C240,580 100,580 100,690"/>
     </svg>
     <div class="nodes">
-      <a class="stage-node cur" id="node-s1" href="stage1_cost.html" style="left:70%;top:11%; --node-color:var(--pu); --node-glow:rgba(180,79,255,0.4);">
+      <a class="stage-node cur" id="node-s1" href="stage1_cost.html" style="left:70%;top:9%; --node-color:var(--pu); --node-glow:rgba(180,79,255,0.4);">
         <div class="disc">🏭
           <span class="nm-badge clear-badge" title="클리어" style="display:none">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"/></svg>
@@ -264,7 +264,7 @@ body{
         <div class="n-title">STAGE 1<br>원가의 길</div>
         <div class="n-sub" id="sub-s1">자료 0/14</div>
       </a>
-      <a class="stage-node lock" id="node-s3" href="stage3_capital.html" style="left:30%;top:47%; --node-color:var(--cy); --node-glow:rgba(0,242,255,0.4);">
+      <a class="stage-node lock" id="node-s3" href="stage3_capital.html" style="left:30%;top:35%; --node-color:var(--cy); --node-glow:rgba(0,242,255,0.4);">
         <div class="disc">👑
           <span class="nm-badge lock-badge" title="스테이지1 클리어 필요">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
@@ -276,7 +276,7 @@ body{
         <div class="n-title">STAGE 2<br>자본의 제왕</div>
         <div class="n-sub" id="sub-s3">스테이지1 클리어 필요</div>
       </a>
-      <a class="stage-node lock" id="node-s4" href="stage4_voucher.html" style="left:70%;top:87%; --node-color:var(--gd); --node-glow:rgba(255,210,74,0.4);">
+      <a class="stage-node lock" id="node-s4" href="stage4_voucher.html" style="left:70%;top:60%; --node-color:var(--gd); --node-glow:rgba(255,210,74,0.4);">
         <div class="disc">🧾
           <span class="nm-badge lock-badge" title="스테이지2 클리어 필요">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
@@ -286,7 +286,19 @@ body{
           </span>
         </div>
         <div class="n-title">STAGE 3<br>전표의 눈</div>
-        <div class="n-sub" id="sub-s4">스테이지1 클리어 필요</div>
+        <div class="n-sub" id="sub-s4">스테이지2 클리어 필요</div>
+      </a>
+      <a class="stage-node lock" id="node-s5" href="stage5_vat.html" style="left:30%;top:88%; --node-color:var(--gn); --node-glow:rgba(0,230,118,0.4);">
+        <div class="disc">🏛️
+          <span class="nm-badge lock-badge" title="스테이지3 클리어 필요">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          </span>
+          <span class="nm-badge clear-badge" title="클리어" style="display:none">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"/></svg>
+          </span>
+        </div>
+        <div class="n-title">STAGE 4<br>신고의 문</div>
+        <div class="n-sub" id="sub-s5">스테이지3 클리어 필요</div>
       </a>
     </div>
   </div>
@@ -410,12 +422,37 @@ function renderStageMap(){
     }
   }
 
+  // 스테이지4(신고의 문) — 스테이지3(전표의 눈) 클리어로 순차 언락
+  let s5Cleared=false, s5Score=0;
+  try{
+    const raw5=localStorage.getItem('lv1_s5_progress');
+    if(raw5){ const s5=JSON.parse(raw5)||{}; s5Cleared=!!s5.cleared; s5Score=s5.score||0; }
+  }catch(e){}
+  const node5=document.getElementById('node-s5'), sub5=document.getElementById('sub-s5');
+  if(node5){
+    const lockBadge5=node5.querySelector('.lock-badge'), clearBadge5=node5.querySelector('.clear-badge');
+    if(s4Cleared){
+      node5.classList.remove('lock');
+      lockBadge5.style.display='none';
+      if(s5Cleared){
+        node5.classList.add('done');
+        clearBadge5.style.display='flex';
+        sub5.textContent=`클리어 · ${s5Score}점`;
+      } else {
+        node5.classList.add('cur');
+        sub5.textContent='도전!';
+      }
+    } else {
+      sub5.textContent='스테이지3 클리어 필요';
+    }
+  }
+
   const lit=document.getElementById('trail-lit');
   if(lit){
     const total=lit.getTotalLength();
     lit.style.strokeDasharray=total;
-    // 3노드(2구간) 경로 — 스테이지1 클리어로 절반까지, 스테이지2(자본의 제왕) 클리어로 끝까지
-    const frac = !cleared ? 0 : (s3Cleared ? 1 : 0.5);
+    // 4노드(3구간) 경로 — 스테이지1 클리어로 1/3, 스테이지2 클리어로 2/3, 스테이지3 클리어로 끝까지
+    const frac = !cleared ? 0 : (s3Cleared ? (s4Cleared ? 1 : 2/3) : 1/3);
     lit.style.strokeDashoffset = total*(1-frac);
   }
 }
