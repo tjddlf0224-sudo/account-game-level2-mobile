@@ -20,6 +20,10 @@
 html,body{ width:100%; height:100%; overflow:hidden; background:#0a0a12; }
 body{ font-family:'Noto Sans KR',sans-serif; color:#fff; position:relative; touch-action:none; }
 
+/* 이 스테이지는 가로모드 전용 — 보카바리스타 탐험모드와 동일한 방식(회전 트릭).
+   기기가 세로면 #rotator를 90도 돌려서 가로처럼 보이게 한다(iOS 웹은 기기회전 강제 불가). */
+#rotator{ position:fixed; top:0; left:0; width:100%; height:100%; }
+
 #game{ position:absolute; inset:0; display:block; }
 
 /* ── 상단 HUD ── */
@@ -255,12 +259,14 @@ body{ font-family:'Noto Sans KR',sans-serif; color:#fff; position:relative; touc
 </head>
 <body>
 
+<div id="rotator">
+
 <canvas id="game"></canvas>
 
 <div id="hud">
   <div class="hud-zone">
     <div class="zl">STAGE 1 · 원가의 길</div>
-    <div class="zn" id="zone-name">본사 회계팀</div>
+    <div class="zn" id="zone-name">공장 사무실</div>
   </div>
   <div class="hud-sp"></div>
   <div class="hud-btns">
@@ -322,6 +328,8 @@ body{ font-family:'Noto Sans KR',sans-serif; color:#fff; position:relative; touc
   </div>
 </div>
 
+</div><!-- /rotator -->
+
 <script>
 /* =========================================================================
  *  스테이지1 「원가의 길」 — 맵 엔진 (P1)
@@ -329,6 +337,33 @@ body{ font-family:'Noto Sans KR',sans-serif; color:#fff; position:relative; touc
  *  절차적 생성/전투/채집은 전부 제외 — 이 스테이지는 손으로 설계한 고정맵이다.
  *  에셋은 아직 임시 도형(P2에서 확정, P4에서 제미나이 아트로 교체).
  * ========================================================================= */
+
+/* ── 화면 방향 — 보카바리스타 탐험모드와 동일한 3단 방어 패턴 ──────
+   1) 네이티브 플러그인(@capacitor/screen-orientation) 2) 표준 웹 API
+   3) CSS 회전 트릭(#rotator, 항상 동작 — iOS 웹은 기기회전 강제 불가) */
+async function lockLandscape(){
+  try{ const P=window.Capacitor&&window.Capacitor.Plugins; if(P&&P.ScreenOrientation) await P.ScreenOrientation.lock({orientation:'landscape'}); }catch(e){}
+  try{ if(screen.orientation&&screen.orientation.lock) await screen.orientation.lock('landscape'); }catch(e){}
+}
+async function unlockOrientation(){
+  try{ const P=window.Capacitor&&window.Capacitor.Plugins; if(P&&P.ScreenOrientation) await P.ScreenOrientation.lock({orientation:'portrait'}); }catch(e){}
+  try{ if(screen.orientation&&screen.orientation.unlock) screen.orientation.unlock(); }catch(e){}
+}
+function applyOrientation(){
+  const rot=document.getElementById('rotator'); if(!rot) return;
+  const portrait = window.innerHeight > window.innerWidth;
+  if(portrait){
+    document.body.classList.add('rot');
+    rot.style.width  = window.innerHeight+'px';
+    rot.style.height = window.innerWidth+'px';
+    rot.style.transformOrigin = 'top left';
+    rot.style.transform = 'rotate(90deg) translateY(-'+window.innerWidth+'px)';
+  } else {
+    document.body.classList.remove('rot');
+    rot.style.width=''; rot.style.height=''; rot.style.transform=''; rot.style.transformOrigin='';
+  }
+  if(window.World && World.resize){ World.resize(); World.drawMinimap && World.drawMinimap(); }
+}
 
 /* ── 타일 종류 ─────────────────────────────────────────────
    0 벽 / 1 공장바닥 / 2 사무실바닥 / 3 창고바닥 / 4 식당바닥
@@ -339,7 +374,6 @@ const WT = 62, HT = 22;
 
 /* ── 구역 정의 (기획서 §4-2 좌표 그대로) ───────────────────── */
 const ZONES = [
-  { id:'hq',    name:'본사 회계팀',   acct:null,        x0:0,  x1:8,  y0:8,  y1:15, floor:T.OFFICE },
   { id:'raw',   name:'원재료 창고',   acct:'원재료 T',  x0:10, x1:24, y0:8,  y1:15, floor:T.WARE },
   { id:'line',  name:'공장 라인',     acct:'재공품 T',  x0:26, x1:46, y0:7,  y1:15, floor:T.FLOOR },
   { id:'foff',  name:'공장 사무실',   acct:'제조간접비',x0:34, x1:44, y0:0,  y1:6,  floor:T.OFFICE },
@@ -349,7 +383,7 @@ const ZONES = [
 
 /* ── NPC 배치 (기획서 §6 로스터 14명 + 차대한 재등장) ───────── */
 const NPCS = [
-  { id:'n_han',    name:'한서준 대리', zone:'hq',   x:4,  y:11, color:'#4dd0e1' },
+  { id:'n_han',    name:'한서준 대리', zone:'foff', x:39, y:1,  color:'#4dd0e1' },
   { id:'n_truck',  name:'차대한 기사', zone:'raw',  x:13, y:10, color:'#ff9800' },
   { id:'n_go',     name:'고재고 반장', zone:'raw',  x:18, y:13, color:'#9ccc65' },
   { id:'n_oh',     name:'오지람 주임', zone:'raw',  x:22, y:10, color:'#ffd54f' },
@@ -893,37 +927,37 @@ const DOC_ORDER = [
 
 /* ── P2: 배치 오브젝트(기획서 §4-5) — 임시 이모지 아이콘, P4에서 제미나이 아트로 교체 ── */
 const OBJECTS = [
-  // ⓪ 본사 회계팀
-  { zone:'hq',   x:2,  y:9,  icon:'🖥️' },
-  { zone:'hq',   x:6,  y:9,  icon:'📚' },
-  { zone:'hq',   x:4,  y:14, icon:'📝' },
-  // ① 원재료 창고
-  { zone:'raw',  x:11, y:9,  icon:'🚛' },
-  { zone:'raw',  x:13, y:14, icon:'📦' },
-  { zone:'raw',  x:17, y:9,  icon:'🪵' },
+  // ① 원재료 창고 (P4: 제미나이 상징 오브젝트 — 배경제거+webp)
+  { zone:'raw',  x:11, y:9,  img:'lv1/sprites/obj_truck.webp',          scale:2.2 },
+  { zone:'raw',  x:13, y:14, img:'lv1/sprites/obj_raw_pallet.webp',     scale:1.6 },
+  { zone:'raw',  x:17, y:9,  img:'lv1/sprites/obj_material_shelf.webp', scale:2.0 },
   { zone:'raw',  x:21, y:14, icon:'🧴' },
   // ② 공장 라인
-  { zone:'line', x:29, y:10, icon:'🦾' },
+  { zone:'line', x:29, y:10, img:'lv1/sprites/obj_robot_arm.webp',      scale:1.8 },
   { zone:'line', x:34, y:12, icon:'🛠️' },
   { zone:'line', x:39, y:10, icon:'🧰' },
   { zone:'line', x:43, y:12, icon:'⏰' },
-  // ⑤ 공장 사무실
-  { zone:'foff', x:35, y:2,  icon:'🖩' },
+  // ⑤ 공장 사무실 (한서준 대리 자리 겸용 — 사무실 단일화)
+  { zone:'foff', x:41, y:1,  icon:'🖥️' },
+  { zone:'foff', x:35, y:2,  img:'lv1/sprites/obj_desk_whiteboard.webp',scale:2.0 },
   { zone:'foff', x:39, y:5,  icon:'📝' },
   { zone:'foff', x:43, y:2,  icon:'📋' },
   // ④ 보조부문동(식당·보일러실)
-  { zone:'supp', x:36, y:17, icon:'🍽️' },
+  { zone:'supp', x:36, y:17, img:'lv1/sprites/obj_serving_counter.webp',scale:2.0 },
   { zone:'supp', x:34, y:20, icon:'📌' },
-  { zone:'supp', x:43, y:17, icon:'🔥' },
+  { zone:'supp', x:43, y:17, img:'lv1/sprites/obj_boiler.webp',         scale:2.0 },
   // ③ 제품 창고
-  { zone:'fin',  x:50, y:9,  icon:'📦' },
+  { zone:'fin',  x:50, y:9,  img:'lv1/sprites/obj_finished_pallet.webp',scale:1.8 },
   { zone:'fin',  x:55, y:14, icon:'📦' },
   { zone:'fin',  x:59, y:9,  icon:'🚪' },
 ];
+/* 이미지 오브젝트 프리로드 */
+OBJECTS.forEach(o=>{
+  if(o.img){ const im=new Image(); im.ready=false; im.onload=()=>im.ready=true; im.src=o.img; o._img=im; }
+});
 
 /* ── 경계 팻말(§4-5) — 통로 진입부에 방향+한줄설명 ── */
 const SIGNS = [
-  { x:9,  y:9,  icon:'➡️', label:'원재료 창고' },
   { x:25, y:9,  icon:'➡️', label:'공장 라인' },
   { x:47, y:9,  icon:'➡️', label:'제품 창고' },
   { x:38, y:16, icon:'⬇️', label:'구내식당·보일러실' },
@@ -951,7 +985,6 @@ function buildMap(){
   carve(40,16,44,21,T.BOILER);
 
   // ── 가로 본선 연결통로 (구역 사이 벽을 뚫는다) ──
-  carve(9,10,9,13,   T.FLOOR);   // 본사 ↔ 원재료창고
   carve(25,10,25,13, T.FLOOR);   // 원재료창고 ↔ 라인
   carve(47,10,47,13, T.FLOOR);   // 라인 ↔ 제품창고
 
@@ -963,6 +996,273 @@ function buildMap(){
 }
 
 const MAP = buildMap();
+
+/* =========================================================================
+ *  P4 — 절차적 타일 텍스처 (제미나이 없이 코드로 확정, 사용자 검증 완료)
+ *  128px 오프스크린 캔버스에 한 번만 그려서 재사용 — 매 프레임 재생성 안 함.
+ * ========================================================================= */
+function trand(a,b){ return a+Math.random()*(b-a); }
+function texCanvas(){ const c=document.createElement('canvas'); c.width=128; c.height=128; return c; }
+
+function drawConcrete(ctx,w,h){
+  ctx.fillStyle='#4a4a52'; ctx.fillRect(0,0,w,h);
+  for(let i=0;i<6;i++){
+    const x=trand(0,w), y=trand(0,h), r=trand(20,50);
+    const g=ctx.createRadialGradient(x,y,0,x,y,r);
+    const shade=trand(-14,14);
+    g.addColorStop(0,`rgba(${74+shade},${74+shade},${82+shade},0.35)`);
+    g.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.fill();
+  }
+  for(let i=0;i<900;i++){
+    const x=trand(0,w), y=trand(0,h), shade=trand(-22,22);
+    ctx.fillStyle=`rgba(${74+shade},${74+shade},${82+shade},${trand(0.15,0.5)})`;
+    ctx.fillRect(x,y,1,1);
+  }
+  ctx.strokeStyle='rgba(20,20,24,0.35)'; ctx.lineWidth=1;
+  for(let i=0;i<2;i++){
+    ctx.beginPath();
+    let x=trand(0,w), y=trand(0,h);
+    ctx.moveTo(x,y);
+    for(let s=0;s<4;s++){ x+=trand(-18,18); y+=trand(-18,18); ctx.lineTo(x,y); }
+    ctx.stroke();
+  }
+}
+function drawOfficeCarpet(ctx,w,h){
+  ctx.fillStyle='#2a3142'; ctx.fillRect(0,0,w,h);
+  for(let i=0;i<10;i++){
+    const x=trand(0,w), y=trand(0,h), r=trand(16,34);
+    const g=ctx.createRadialGradient(x,y,0,x,y,r);
+    const shade=trand(-8,8);
+    g.addColorStop(0,`rgba(${42+shade},${49+shade},${66+shade},0.4)`);
+    g.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.fill();
+  }
+  for(let i=0;i<1400;i++){
+    const x=trand(0,w), y=trand(0,h);
+    ctx.fillStyle=`rgba(255,255,255,${trand(0.02,0.09)})`;
+    ctx.fillRect(x,y,1,1);
+  }
+  ctx.strokeStyle='rgba(0,0,0,0.10)'; ctx.lineWidth=1; ctx.strokeRect(0.5,0.5,w-1,h-1);
+}
+function drawWarehouseEpoxy(ctx,w,h){
+  ctx.fillStyle='#7a6a4f'; ctx.fillRect(0,0,w,h);
+  for(let i=0;i<4;i++){
+    const x=trand(0,w), y=trand(0,h), r=trand(30,55);
+    const g=ctx.createRadialGradient(x,y,0,x,y,r);
+    g.addColorStop(0,'rgba(255,255,255,0.14)'); g.addColorStop(1,'rgba(255,255,255,0)');
+    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.fill();
+  }
+  for(let i=0;i<350;i++){
+    const x=trand(0,w), y=trand(0,h);
+    ctx.fillStyle=`rgba(255,255,255,${trand(0.02,0.08)})`;
+    ctx.fillRect(x,y,1,1);
+  }
+}
+function drawKitchenTile(ctx,w,h){
+  ctx.fillStyle='#c9cdd2'; ctx.fillRect(0,0,w,h);
+  const step=32;
+  ctx.strokeStyle='rgba(120,125,132,0.6)'; ctx.lineWidth=2;
+  for(let x=0;x<=w;x+=step){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+  for(let y=0;y<=h;y+=step){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+  for(let i=0;i<300;i++){
+    const x=trand(0,w), y=trand(0,h);
+    ctx.fillStyle=`rgba(0,0,0,${trand(0.01,0.05)})`;
+    ctx.fillRect(x,y,1,1);
+  }
+}
+function drawFactoryWall(ctx,w,h){
+  ctx.fillStyle='#3a3d44'; ctx.fillRect(0,0,w,h);
+  const step=32;
+  ctx.strokeStyle='rgba(0,0,0,0.4)'; ctx.lineWidth=2;
+  for(let x=0;x<=w;x+=step){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+  ctx.fillStyle='rgba(200,200,210,0.5)';
+  for(let x=step/2;x<w;x+=step){
+    ctx.beginPath(); ctx.arc(x,8,2,0,7); ctx.fill();
+    ctx.beginPath(); ctx.arc(x,h-8,2,0,7); ctx.fill();
+  }
+  for(let i=0;i<200;i++){
+    const x=trand(0,w), y=trand(0,h);
+    ctx.fillStyle=`rgba(255,255,255,${trand(0.02,0.05)})`;
+    ctx.fillRect(x,y,1,1);
+  }
+}
+function drawBelt(ctx,w,h){
+  ctx.fillStyle='#16161a'; ctx.fillRect(0,0,w,h);
+  ctx.strokeStyle='rgba(255,255,255,0.06)'; ctx.lineWidth=3;
+  for(let i=-h;i<w+h;i+=14){ ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i+h,h); ctx.stroke(); }
+  for(let i=0;i<200;i++){
+    const x=trand(0,w), y=trand(0,h);
+    ctx.fillStyle=`rgba(255,255,255,${trand(0.01,0.04)})`;
+    ctx.fillRect(x,y,1,1);
+  }
+}
+
+const TEX = (()=>{
+  const mk=(fn)=>{ const c=texCanvas(); fn(c.getContext('2d'),128,128); return c; };
+  const concrete=mk(drawConcrete), belt=mk(drawBelt);
+  return {
+    [T.FLOOR]:  concrete,
+    [T.BOILER]: concrete,          // 보일러실도 공장 콘크리트 바닥 재사용(별도 생성 안 함)
+    [T.OFFICE]: mk(drawOfficeCarpet),
+    [T.WARE]:   mk(drawWarehouseEpoxy),
+    [T.MESS]:   mk(drawKitchenTile),
+    [T.LINE_A]: belt,   // 제미나이 이미지 로드 전 폴백(아래 LINE_IMG)
+    [T.LINE_B]: belt,
+    [T.WALL]:   mk(drawFactoryWall),
+  };
+})();
+
+/* ── P4: 제미나이 생성 라인 이미지 — 로드되면 절차적 벨트 대신 슬라이스 매핑으로 사용 ──
+   19타일 폭(x27~45)에 이미지를 세로로 잘라 각 타일 컬럼에 매핑 → 한 장의 그림이
+   라인 전체에 걸쳐 자연스럽게 이어짐(작은 반복타일이 아니라 하나의 큰 장면). */
+const LINE_X0=27, LINE_X1=45;
+function makeLineImg(src){
+  const img=new Image(); img.ready=false;
+  img.onload=()=>{ img.ready=true; };
+  img.onerror=()=>{ console.warn('라인 이미지 로드 실패(폴백 유지):', src); };
+  img.src=src;
+  return img;
+}
+const LINE_IMG_A = makeLineImg('lv1/tiles/line_a_workbench.webp');
+const LINE_IMG_B = makeLineImg('lv1/tiles/line_b_conveyor.webp');
+function drawLineSlice(ctx, img, x, sx, sy, tw){
+  const n=LINE_X1-LINE_X0+1;
+  const f0=(x-LINE_X0)/n, f1=(x-LINE_X0+1)/n;
+  const sxImg=f0*img.width, swImg=Math.max(1,(f1-f0)*img.width);
+  ctx.drawImage(img, sxImg, 0, swImg, img.height, sx, sy, tw, tw);
+}
+
+/* =========================================================================
+ *  P4 — NPC·플레이어 canvas 도형 캐릭터 (제미나이 없이 코드로 확정)
+ *  참고: 사용자가 제공한 비서교과 수행평가 게임(원+사각형 조합) 방식을
+ *  그대로 채택 — 원(머리)+사각형(몸)에 NPC별 머리스타일·소품 하나씩만
+ *  더해 구분한다. 맵 스프라이트/대화 초상화 양쪽에 같은 함수를 재사용.
+ * ========================================================================= */
+const LOOK = {
+  n_han:   { skin:'#ffe0b2', hair:'#3e2723', hairStyle:'short',     outfit:'#4dd0e1', accessory:'coffee' },
+  n_truck: { skin:'#ffcc80', hair:'#5d4037', hairStyle:'short',     outfit:'#ff9800', accessory:'cap' },
+  n_go:    { skin:'#ffe0b2', hair:'#424242', hairStyle:'short',     outfit:'#9ccc65', accessory:'glasses' },
+  n_oh:    { skin:'#ffe0b2', hair:'#6d4c41', hairStyle:'ponytail',  outfit:'#ffd54f', accessory:'none' },
+  n_jung:  { skin:'#ffcc80', hair:'#616161', hairStyle:'headband',  outfit:'#a1887f', accessory:'none' },
+  n_lee:   { skin:'#ffe0b2', hair:'#4e342e', hairStyle:'ponytail',  outfit:'#4fc3f7', accessory:'none' },
+  n_seo:   { skin:'#ffe0b2', hair:'#757575', hairStyle:'short',     outfit:'#90a4ae', accessory:'tie' },
+  n_ma:    { skin:'#ffcc80', hair:'#37474f', hairStyle:'short',     outfit:'#7986cb', accessory:'goggles' },
+  n_mi:    { skin:'#ffe0b2', hair:'#4a148c', hairStyle:'bun',       outfit:'#ce93d8', accessory:'cardigan' },
+  n_wan:   { skin:'#ffe0b2', hair:'#212121', hairStyle:'short',     outfit:'#80cbc4', accessory:'glasses' },
+  n_truck2:{ skin:'#ffcc80', hair:'#5d4037', hairStyle:'short',     outfit:'#ff9800', accessory:'cap' },
+  n_soon:  { skin:'#ffe0b2', hair:'#795548', hairStyle:'headscarf', outfit:'#f48fb1', accessory:'apron' },
+  n_steam: { skin:'#ffcc80', hair:'#3e2723', hairStyle:'short',     outfit:'#ffab91', accessory:'goggles' },
+  n_bae:   { skin:'#ffe0b2', hair:'#212121', hairStyle:'short',     outfit:'#81d4fa', accessory:'glasses' },
+  n_gyul:  { skin:'#ffcc80', hair:'#424242', hairStyle:'short',     outfit:'#ffe082', accessory:'tie' },
+};
+const PLAYER_LOOK = { skin:'#ffe0b2', hair:'#3e2723', hairStyle:'short', outfit:'#e8eaf6', accessory:'none' };
+
+function drawHair(ctx,cx,cy,r,color,style){
+  ctx.fillStyle=color;
+  if(style==='short'){
+    ctx.beginPath(); ctx.arc(cx,cy,r*1.04,Math.PI,0); ctx.fill();
+  } else if(style==='ponytail'){
+    ctx.beginPath(); ctx.arc(cx,cy,r*1.04,Math.PI,0); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx+r*0.95,cy+r*0.3,r*0.22,r*0.5,0.5,0,7); ctx.fill();
+  } else if(style==='bun'){
+    ctx.beginPath(); ctx.arc(cx,cy,r*1.04,Math.PI,0); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx,cy-r*1.05,r*0.28,0,7); ctx.fill();
+  } else if(style==='headband'){
+    ctx.beginPath(); ctx.arc(cx,cy,r*1.04,Math.PI,0); ctx.fill();
+    ctx.fillStyle='#e53935';
+    ctx.fillRect(cx-r*1.05,cy-r*0.15,r*2.1,r*0.22);
+  } else if(style==='headscarf'){
+    ctx.beginPath(); ctx.arc(cx,cy,r*1.1,Math.PI*1.02,Math.PI*1.98); ctx.fill();
+    ctx.fillStyle='#ef9a9a';
+    ctx.beginPath(); ctx.arc(cx,cy-r*0.15,r*1.12,Math.PI,0); ctx.fill();
+  }
+}
+function drawAccessory(ctx,cx,cy,s,type,look){
+  if(type==='coffee'){
+    ctx.fillStyle='#fff';
+    ctx.fillRect(cx+s*0.32,cy+s*0.5,s*0.22,s*0.26);
+    ctx.fillStyle='#4e342e'; ctx.fillRect(cx+s*0.34,cy+s*0.52,s*0.18,s*0.08);
+  } else if(type==='cap'){
+    ctx.fillStyle=look.outfit;
+    ctx.beginPath(); ctx.arc(cx,cy-s*0.14,s*0.46,Math.PI*1.05,Math.PI*1.95); ctx.fill();
+    ctx.fillRect(cx-s*0.05,cy-s*0.58,s*0.5,s*0.12);
+  } else if(type==='glasses'){
+    ctx.strokeStyle='#37474f'; ctx.lineWidth=Math.max(1,s*0.035);
+    ctx.beginPath(); ctx.arc(cx-s*0.14,cy-s*0.08,s*0.13,0,7); ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx+s*0.14,cy-s*0.08,s*0.13,0,7); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx-s*0.02,cy-s*0.08); ctx.lineTo(cx+s*0.02,cy-s*0.08); ctx.stroke();
+  } else if(type==='goggles'){
+    ctx.fillStyle='rgba(160,220,255,0.55)'; ctx.strokeStyle='#455a64'; ctx.lineWidth=Math.max(1,s*0.045);
+    ctx.beginPath(); ctx.ellipse(cx,cy-s*0.08,s*0.32,s*0.15,0,0,7); ctx.fill(); ctx.stroke();
+  } else if(type==='tie'){
+    ctx.fillStyle='#c62828';
+    ctx.beginPath(); ctx.moveTo(cx-s*0.06,cy+s*0.18); ctx.lineTo(cx+s*0.06,cy+s*0.18); ctx.lineTo(cx,cy+s*0.6); ctx.closePath(); ctx.fill();
+  } else if(type==='cardigan'){
+    ctx.fillStyle='rgba(255,255,255,0.28)';
+    ctx.fillRect(cx-s*0.52,cy+s*0.16,s*0.18,s*0.82);
+    ctx.fillRect(cx+s*0.34,cy+s*0.16,s*0.18,s*0.82);
+  } else if(type==='apron'){
+    ctx.fillStyle='#fdf6e3';
+    ctx.fillRect(cx-s*0.3,cy+s*0.28,s*0.6,s*0.7);
+  }
+}
+/* size(s)=머리 반지름 기준 스케일. shadow는 맵 스프라이트에서만 켠다(초상화는 배경 위라 불필요). */
+function drawCharacter(ctx, cx, cy, s, look, opts){
+  opts = opts||{};
+  if(opts.shadow){
+    ctx.fillStyle='rgba(0,0,0,0.32)';
+    ctx.beginPath(); ctx.ellipse(cx,cy+s*0.98,s*0.55,s*0.18,0,0,7); ctx.fill();
+  }
+  // 몸(어깨~가슴)
+  ctx.fillStyle=look.outfit;
+  ctx.beginPath();
+  ctx.roundRect(cx-s*0.5, cy+s*0.18, s*1.0, s*0.88, s*0.2);
+  ctx.fill();
+  ctx.lineWidth=Math.max(1,s*0.05); ctx.strokeStyle='rgba(0,0,0,0.25)'; ctx.stroke();
+  // 목~머리
+  const hy=cy-s*0.08;
+  ctx.fillStyle=look.skin;
+  ctx.beginPath(); ctx.arc(cx,hy,s*0.44,0,7); ctx.fill();
+  ctx.lineWidth=Math.max(1,s*0.04); ctx.strokeStyle='rgba(0,0,0,0.2)'; ctx.stroke();
+  // 머리카락(눈보다 먼저 — 헤어라인이 정확히 중심선이라 눈은 그 아래에 그린다)
+  drawHair(ctx,cx,hy,s*0.44,look.hair,look.hairStyle);
+  // 눈(헤어라인 아래 얼굴 하단부)
+  if(opts.dir!=='back'){
+    ctx.fillStyle='#2b2b3a';
+    const ex = opts.dir==='side' ? (opts.facing||1)*s*0.1 : 0;
+    if(opts.dir==='side'){
+      ctx.beginPath(); ctx.arc(cx+ex,hy+s*0.1,s*0.07,0,7); ctx.fill();
+    } else {
+      ctx.beginPath(); ctx.arc(cx-s*0.16,hy+s*0.1,s*0.07,0,7); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx+s*0.16,hy+s*0.1,s*0.07,0,7); ctx.fill();
+    }
+  }
+  // 소품
+  if(look.accessory && look.accessory!=='none') drawAccessory(ctx,cx,cy,s,look.accessory,look);
+}
+
+/* ── 대화 초상화 프리렌더(96px, NPC_DATA에 data URL 주입) ── */
+let PLAYER_PORTRAIT_IMG = '';
+(function(){
+  const size=160;
+  const render=(look)=>{
+    const c=document.createElement('canvas'); c.width=size; c.height=size;
+    const pctx=c.getContext('2d');
+    const g=pctx.createLinearGradient(0,0,0,size);
+    g.addColorStop(0,'#3a4050'); g.addColorStop(1,'#232733');
+    pctx.fillStyle=g; pctx.fillRect(0,0,size,size);
+    drawCharacter(pctx, size/2, size*0.62, size*0.5, look, {shadow:false, dir:'front'});
+    return c.toDataURL('image/png');
+  };
+  for(const key in NPC_DATA){
+    const npcId = key.replace(/_intro$|_end$/,'');
+    const look = LOOK[npcId];
+    if(!look) continue;
+    NPC_DATA[key].portraitImg = render(look);
+  }
+  PLAYER_PORTRAIT_IMG = render(PLAYER_LOOK);
+})();
 
 /* ── 구역 판정 ── */
 function zoneAt(x,y){
@@ -977,7 +1277,7 @@ function zoneAt(x,y){
  * ========================================================================= */
 const World = {
   cv:null, ctx:null, dpr:1, viewW:0, viewH:0, TS:40,
-  px:6, py:12,                 // 플레이어 시작 — 한서준(4,11) 앞. 겹치지 않게 띄운다.
+  px:39, py:4,                 // 플레이어 시작 — 공장 사무실, 한서준(39,1) 앞. 겹치지 않게 띄운다.
   dir:'front', facing:1, moving:false, walkT:0, bob:0,
   keys:{}, stick:{active:false,dx:0,dy:0,cx:0,cy:0,id:null},
   raf:null, _lastTs:0,
@@ -987,8 +1287,9 @@ const World = {
   init(){
     this.cv=document.getElementById('game');
     this.ctx=this.cv.getContext('2d');
-    this.resize();
-    window.addEventListener('resize',()=>{ this.resize(); this.drawMinimap(); });
+    applyOrientation();   // 최초 1회 — 세로로 들고 있으면 즉시 회전(내부에서 resize()도 호출)
+    window.addEventListener('resize',()=>applyOrientation());
+    window.addEventListener('orientationchange',()=>setTimeout(applyOrientation,80));
     window.addEventListener('keydown',e=>this.onKey(e));
     window.addEventListener('keyup',e=>this.onKeyUp(e));
     this.bindStick();
@@ -997,8 +1298,12 @@ const World = {
     this.loop(0);
   },
 
+  /* #rotator가 세로일 때 90도 회전되므로, 실제 표시 폭/높이는
+     window.innerWidth/innerHeight를 서로 바꾼 값이다(applyOrientation과 동일 기준). */
   resize(){
-    const w=window.innerWidth, h=window.innerHeight;
+    const portrait = window.innerHeight > window.innerWidth;
+    const w = portrait ? window.innerHeight : window.innerWidth;
+    const h = portrait ? window.innerWidth  : window.innerHeight;
     this.dpr=Math.min(window.devicePixelRatio||1,2);
     this.cv.width=Math.floor(w*this.dpr); this.cv.height=Math.floor(h*this.dpr);
     this.cv.style.width=w+'px'; this.cv.style.height=h+'px';
@@ -1053,6 +1358,9 @@ const World = {
     const reset=()=>{ self.stick.active=false; self.stick.dx=0; self.stick.dy=0; setKnob(0,0); };
     function move(e){
       let dx=e.clientX-self.stick.cx, dy=e.clientY-self.stick.cy;
+      // 화면이 세로라 #rotator가 90도 회전된 상태면, 실제 터치는 화면(회전 전) 좌표계라
+      // 캔버스 내부(회전된) 좌표계로 변환해줘야 방향이 맞다(보카바리스타와 동일 보정).
+      if(document.body.classList.contains('rot')){ const t=dx; dx=dy; dy=-t; }
       const d=Math.hypot(dx,dy)||1;
       if(d>R){ dx=dx/d*R; dy=dy/d*R; }
       self.stick.dx=dx/R; self.stick.dy=dy/R; setKnob(dx,dy);
@@ -1158,26 +1466,27 @@ const World = {
     const x0=Math.max(0,Math.floor(camX/TS)-1), x1=Math.min(WT-1,Math.ceil((camX+this.viewW)/TS)+1);
     const y0=Math.max(0,Math.floor(camY/TS)-1), y1=Math.min(HT-1,Math.ceil((camY+this.viewH)/TS)+1);
 
-    // ── 바닥 타일 (임시 도형 에셋) ──
-    const COL={
-      [T.WALL]:  '#14121c',
-      [T.FLOOR]: '#3a3a44',
-      [T.OFFICE]:'#2f3a4a',
-      [T.WARE]:  '#4a4034',
-      [T.MESS]:  '#4a3540',
-      [T.BOILER]:'#4a3a2c',
-      [T.LINE_A]:'#5a4a2c',
-      [T.LINE_B]:'#2c4a52',
-      [T.STAIR]: '#584a6a',
-    };
+    // ── 바닥 타일 (P4: 6종 절차적 텍스처 — §"6종은 코드로 확정" — 계단만 색+선) ──
+    const COL={ [T.STAIR]:'#584a6a' };
     for(let y=y0;y<=y1;y++) for(let x=x0;x<=x1;x++){
       const t=MAP[y][x];
       const sx=Math.round(x*TS-camX), sy=Math.round(y*TS-camY);
-      ctx.fillStyle=COL[t]||'#222';
-      ctx.fillRect(sx,sy,TS+1,TS+1);
+      let usedLineImg=false;
+      if(t===T.LINE_A && LINE_IMG_A.ready){ drawLineSlice(ctx,LINE_IMG_A,x,sx,sy,TS+1); usedLineImg=true; }
+      else if(t===T.LINE_B && LINE_IMG_B.ready){ drawLineSlice(ctx,LINE_IMG_B,x,sx,sy,TS+1); usedLineImg=true; }
+      else{
+        const tex=TEX[t];
+        if(tex) ctx.drawImage(tex,sx,sy,TS+1,TS+1);
+        else{ ctx.fillStyle=COL[t]||'#222'; ctx.fillRect(sx,sy,TS+1,TS+1); }
+      }
       if(t!==T.WALL){
         ctx.strokeStyle='rgba(255,255,255,0.045)'; ctx.lineWidth=1;
         ctx.strokeRect(sx+0.5,sy+0.5,TS,TS);
+      }
+      // 라인 A/B 색 구분(제미나이 그림 로드 전 절차적 벨트일 때만 워시로 구분)
+      if(!usedLineImg && (t===T.LINE_A||t===T.LINE_B)){
+        ctx.fillStyle = t===T.LINE_A ? 'rgba(255,193,7,0.07)' : 'rgba(0,242,255,0.07)';
+        ctx.fillRect(sx,sy,TS+1,TS+1);
       }
       // 컨베이어 방향 표시(흐르는 화살표)
       if(t===T.LINE_A||t===T.LINE_B){
@@ -1198,16 +1507,23 @@ const World = {
       }
     }
 
-    // ── 배치 오브젝트(P2, §4-5 — 임시 이모지, P4에서 아트로 교체) ──
+    // ── 배치 오브젝트(P2 이모지 + P4 제미나이 아트) ──
     ctx.save();
     ctx.textAlign='center'; ctx.textBaseline='middle';
     for(const o of OBJECTS){
       if(o.x<x0-1||o.x>x1+1||o.y<y0-1||o.y>y1+1) continue;
       const cx=o.x*TS-camX+TS/2, cy=o.y*TS-camY+TS/2;
-      ctx.fillStyle='rgba(0,0,0,0.28)';
-      ctx.beginPath(); ctx.ellipse(cx,cy+TS*0.28,TS*0.26,TS*0.1,0,0,7); ctx.fill();
-      ctx.font=`${Math.round(TS*0.56)}px sans-serif`;
-      ctx.fillText(o.icon, cx, cy-TS*0.06);
+      if(o._img && o._img.ready){
+        const w=TS*(o.scale||1.6);
+        ctx.fillStyle='rgba(0,0,0,0.3)';
+        ctx.beginPath(); ctx.ellipse(cx,cy+w*0.32,w*0.34,w*0.1,0,0,7); ctx.fill();
+        ctx.drawImage(o._img, cx-w/2, cy-w*0.62, w, w);
+      } else if(o.icon){
+        ctx.fillStyle='rgba(0,0,0,0.28)';
+        ctx.beginPath(); ctx.ellipse(cx,cy+TS*0.28,TS*0.26,TS*0.1,0,0,7); ctx.fill();
+        ctx.font=`${Math.round(TS*0.56)}px sans-serif`;
+        ctx.fillText(o.icon, cx, cy-TS*0.06);
+      }
     }
     // ── 경계 팻말 ──
     for(const s of SIGNS){
@@ -1235,17 +1551,18 @@ const World = {
     }
     ctx.restore();
 
-    // ── NPC (임시: 원형 + 이름표) ──
+    // ── NPC (P4: canvas 도형 캐릭터) ──
     for(const n of NPCS){
       if(n.x<x0-1||n.x>x1+1||n.y<y0-1||n.y>y1+1) continue;
       const cx=n.x*TS-camX+TS/2, cy=n.y*TS-camY+TS/2;
-      // 그림자
-      ctx.fillStyle='rgba(0,0,0,0.35)';
-      ctx.beginPath(); ctx.ellipse(cx,cy+TS*0.34,TS*0.3,TS*0.12,0,0,7); ctx.fill();
-      // 몸통
-      ctx.fillStyle=n.color;
-      ctx.beginPath(); ctx.arc(cx,cy,TS*0.32,0,7); ctx.fill();
-      ctx.lineWidth=2; ctx.strokeStyle='rgba(0,0,0,0.4)'; ctx.stroke();
+      const look=LOOK[n.id];
+      if(look) drawCharacter(ctx,cx,cy,TS*0.38,look,{shadow:true,dir:'front'});
+      else {
+        ctx.fillStyle='rgba(0,0,0,0.35)';
+        ctx.beginPath(); ctx.ellipse(cx,cy+TS*0.34,TS*0.3,TS*0.12,0,0,7); ctx.fill();
+        ctx.fillStyle=n.color;
+        ctx.beginPath(); ctx.arc(cx,cy,TS*0.32,0,7); ctx.fill();
+      }
       // 근처면 이름표 + 느낌표
       if(this.nearNpc && this.nearNpc.id===n.id){
         ctx.save();
@@ -1265,27 +1582,15 @@ const World = {
       }
     }
 
-    // ── 플레이어 (임시: 캡슐 + 보행 흔들림) ──
+    // ── 플레이어 (P4: canvas 도형 캐릭터 + 보행 흔들림) ──
     {
       const cx=this.px*TS-camX+TS/2, cy=this.py*TS-camY+TS/2;
       const swing=this.moving ? Math.sin(this.walkT)*TS*0.06 : 0;
-      ctx.fillStyle='rgba(0,0,0,0.4)';
+      ctx.fillStyle='rgba(0,0,0,0.32)';
       ctx.beginPath(); ctx.ellipse(cx,cy+TS*0.36,TS*0.28,TS*0.11,0,0,7); ctx.fill();
       ctx.save();
       ctx.translate(cx,cy+swing);
-      // 몸
-      ctx.fillStyle='#e8eaf6';
-      ctx.beginPath(); ctx.roundRect(-TS*0.2,-TS*0.34,TS*0.4,TS*0.62,TS*0.14); ctx.fill();
-      ctx.lineWidth=2; ctx.strokeStyle='rgba(0,0,0,0.45)'; ctx.stroke();
-      // 방향 표시(바라보는 쪽 눈)
-      ctx.fillStyle='#2b2b3a';
-      if(this.dir==='back'){ /* 뒷모습: 눈 없음 */ }
-      else if(this.dir==='side'){
-        ctx.beginPath(); ctx.arc(this.facing*TS*0.08,-TS*0.14,TS*0.045,0,7); ctx.fill();
-      } else {
-        ctx.beginPath(); ctx.arc(-TS*0.07,-TS*0.14,TS*0.045,0,7); ctx.fill();
-        ctx.beginPath(); ctx.arc( TS*0.07,-TS*0.14,TS*0.045,0,7); ctx.fill();
-      }
+      drawCharacter(ctx,0,0,TS*0.38,PLAYER_LOOK,{shadow:false,dir:this.dir,facing:this.facing});
       ctx.restore();
     }
   },
@@ -1350,6 +1655,7 @@ const Stage = {
   exit(){
     if(confirm('허브로 나갈까요? 진행 상황은 저장됩니다.')){
       this.save();
+      try{ unlockOrientation(); }catch(e){}
       location.href='index_lv1.html';
     }
   },
@@ -1407,13 +1713,15 @@ const Dialog = {
     textEl.className = 'dlg-box' + (b.who==='player' ? ' player' : b.who==='narrator' ? ' narrator' : '');
     if(b.who==='player'){
       nameEl.textContent='나'; tagEl.textContent='PLAYER';
-      portrait.textContent='🙂'; portrait.style.background='#37474f';
+      portrait.textContent=''; portrait.style.background=`center/cover url(${PLAYER_PORTRAIT_IMG})`;
     } else if(b.who==='narrator'){
       nameEl.textContent=''; tagEl.textContent='';
       portrait.textContent=''; portrait.style.background='transparent';
     } else {
       nameEl.textContent=this.npcDef.name; tagEl.textContent='STAGE 1';
-      portrait.textContent=this.npcDef.icon; portrait.style.background='#cfd8dc';
+      const img=this.npcDef.portraitImg;
+      portrait.textContent = img ? '' : this.npcDef.icon;
+      portrait.style.background = img ? `center/cover url(${img})` : '#cfd8dc';
     }
     textEl.textContent=b.t;
   },
@@ -1440,6 +1748,13 @@ const Dialog = {
     }
     Stage.save(); Stage.refresh();
     World.paused = false;
+    // 한서준 오프닝(공장 사무실) 완료 → 원재료 창고로 순간이동해서 본편 시작.
+    // 복귀(엔딩)는 라인→북쪽 계단으로 도보 이동이라 여긴 관여 안 함.
+    if(key==='n_han_intro'){
+      World.px=11; World.py=11;
+      World.checkZone(true);
+      World._miniDirty=true;
+    }
   },
 };
 document.getElementById('dlg-panel').addEventListener('click', ()=>Dialog.next());
@@ -1551,6 +1866,7 @@ const DocsUI = {
 
 /* ── 부팅 ── */
 Stage.load();
+lockLandscape();
 World.init();
 
 // 첫 힌트는 잠시 뒤 사라짐
