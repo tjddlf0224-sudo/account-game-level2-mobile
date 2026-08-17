@@ -11,6 +11,9 @@
 <link rel="icon" type="image/png" href="icon.png">
 <title>원가의 길 — 전산회계 1급 스테이지 1</title>
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth.js"></script>
+<script src="growth.js"></script>
 <style>
 :root{
   --cy:#00f2ff; --pu:#b44fff; --or:#ff9800; --gd:#ffd600; --gn:#00e676; --pk:#ff2d78;
@@ -2300,11 +2303,50 @@ const Sheet = {
     Stage.state.cogm=cogm;
     Stage.save();
     document.getElementById('sheet-overlay').classList.remove('show');
+    try{ saveStageScore(score, this.wrong); }catch(e){}
     const cb=this.onDone; this.onDone=null;
     if(cb) cb({cogm, wrong:this.wrong, score});
   },
 };
 document.getElementById('sh-done').addEventListener('click',()=>Sheet.finish());
+
+/* =========================================================================
+ *  P6 — Supabase 연동(game_id:'cost_lv1'). 2급 게임(game1_acid.html 등)과
+ *  동일 패턴: scores(최고점 1행)는 upsert_score RPC, score_history(매 판
+ *  누적, 성장그래프용)는 Growth.record()가 별도로 처리 — growth.js가 함.
+ * ========================================================================= */
+const SUPA_URL='https://pjagaulfivafamhhiveg.supabase.co';
+const SUPA_KEY='sb_publishable_yck2tAKApEjVSJOJMVSXuQ_AGaNatuI';
+const GAME_ID='cost_lv1';
+let _supaDb=null;
+function supaClient(){
+  if(_supaDb) return _supaDb;
+  try{ if(window.supabase && supabase.createClient) _supaDb=supabase.createClient(SUPA_URL, SUPA_KEY); }catch(e){}
+  return _supaDb;
+}
+function gradeForStageScore(score){
+  if(score>=100) return '👑 완벽한 신입';
+  if(score>=90)  return '🥇 우수';
+  if(score>=70)  return '🥈 합격';
+  return '🥉 재도전 권장';
+}
+async function saveStageScore(score, wrong){
+  const name=(localStorage.getItem('hub_nickname')||'').trim();
+  if(!name) return;                          // 로그인 안 된 상태(로컬 테스트 등)면 스킵
+  const correct=Math.max(0, SHEET_CARDS.length-wrong);
+  const grade=gradeForStageScore(score);
+  const groupId=localStorage.getItem('hub_group_id') || null;
+  const today=new Date().toISOString().split('T')[0];
+  const rpcParams={ p_game_id:GAME_ID, p_name:name, p_score:score, p_grade:grade, p_combo:0, p_correct:correct, p_date:today };
+  if(groupId) rpcParams.p_group_id=groupId;
+  try{ if(window.Auth){ const uid=await Auth.currentUid(); if(uid) rpcParams.p_uid=uid; } }catch(e){}
+  // 성장 그래프용 매 판 이력 — rpc 성패와 무관하게 항상 시도
+  if(window.Growth) Growth.record({ game:GAME_ID, name, score, grade, combo:0, correct });
+  const db=supaClient();
+  if(!db) return;
+  try{ const {error}=await db.rpc('upsert_score', rpcParams); if(error) console.warn('cost_lv1 점수 저장 실패:', error); }
+  catch(e){ console.warn('cost_lv1 점수 저장 예외:', e); }
+}
 
 /* ── 부팅 ── */
 Stage.load();
