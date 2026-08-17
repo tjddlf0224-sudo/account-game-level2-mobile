@@ -590,6 +590,14 @@ const NPCS = [
  * ========================================================================= */
 const NPC_DATA = {
 
+  /* 한서준 대리와 첫 대화(n_han_intro)를 끝내기 전, 다른 NPC에게 말 걸면 나오는 안내용 가짜 NPC */
+  n_blocked: {
+    name:'???', icon:'🙂',
+    beats:[{who:'npc', t:'신입이지? 여기 사람들 다 바쁘니까, 저기 한서준 대리한테 먼저 가봐.'}],
+    quiz:[], doc:null,
+    repeat:'한서준 대리한테 먼저 갔다 와.',
+  },
+
   n_han_intro: {
     name:'한서준 대리', icon:'☕',
     beats:[
@@ -1915,6 +1923,9 @@ const Dialog = {
     let key = npcMapId;
     if(npcMapId==='n_han'){
       key = (Stage.state.docs.length >= TOTAL_DOCS) ? 'n_han_end' : 'n_han_intro';
+    } else if(!Stage.state.metNpc['n_han_intro']){
+      // 한서준 대리와 첫 대화를 끝내기 전엔 다른 NPC는 전부 안내 멘트만.
+      key = 'n_blocked';
     }
     const def = NPC_DATA[key];
     if(!def) return;
