@@ -114,14 +114,27 @@
             text-shadow: 1px 1px 3px rgba(0,0,0,0.5); padding: 5px; text-align: center;
         }
 
-        /* [2. 대화창] */
+        /* [2. 대화창] — 보카바리스타의 대화 컷씬 패턴 참고: 배경 투명 캐릭터를
+           대화창보다 위 레이어에 크게 걸쳐서 배치(비주얼노벨 방식) */
         .dialogue-wrapper {
-            flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%;
+            flex: 1; position: relative; display: flex; flex-direction: column;
+            justify-content: flex-end; align-items: center; width: 100%; overflow: visible;
         }
-        .char-img { margin-bottom: 15px; animation: bounce 2s infinite; }
-        .char-avatar { width:88px; height:88px; border-radius:50%; object-fit:cover; display:block; box-shadow:0 4px 18px rgba(0,0,0,0.4); border:2px solid rgba(255,255,255,0.15); }
+        .char-cutscene {
+            position: absolute; left: 50%; bottom: 128px; transform: translate(-50%, 0);
+            max-height: 66%; max-width: 84%; width: auto; height: auto;
+            object-fit: contain; object-position: bottom center;
+            filter: drop-shadow(0 14px 24px rgba(0,0,0,0.55));
+            pointer-events: none; z-index: 1;
+            animation: charIn .42s cubic-bezier(.22,1,.36,1);
+        }
+        @keyframes charIn {
+            from { opacity: 0; transform: translate(-50%, 26px); }
+            to   { opacity: 1; transform: translate(-50%, 0); }
+        }
         .dialogue-box {
-            background: rgba(0,0,0,0.6); border: 2px solid var(--neon-gold);
+            position: relative; z-index: 2;
+            background: rgba(0,0,0,0.72); border: 2px solid var(--neon-gold);
             border-radius: 15px; padding: 20px; width: 100%; max-width: 800px;
             min-height: 150px; display: flex; flex-direction: column;
             cursor: pointer;
@@ -213,7 +226,7 @@
             .folder-grid { grid-template-columns: 1fr 1fr; }
 
             /* 2. 대화창: 꽉 차게 */
-            .char-avatar { width:64px; height:64px; font-size:1.2rem; }
+            .char-cutscene { max-height:58%; bottom:118px; }
             .dialogue-box { width: 100%; padding: 15px; }
 
             /* 3. 분개 화면: 상하 배치 */
@@ -587,7 +600,7 @@
         };
         function avatarHtml(who){
             const a = AVATARS[who];
-            return `<img class="char-avatar" src="${a.img}" alt="">`;
+            return `<img class="char-cutscene" src="${a.img}" alt="">`;
         }
 
         function shuffle(array) {
