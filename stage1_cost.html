@@ -135,6 +135,10 @@ body{ font-family:'Noto Sans KR',sans-serif; color:#fff; position:relative; touc
 /* =========================================================================
  *  P3 — 대화 · 퀴즈 · 서류철 UI
  * ========================================================================= */
+/* ⚠️ 이 오버레이들은 #rotator(회전 트릭) 안에 있다. vh/dvh 단위는 회전된
+   로컬 좌표계가 아니라 실제(회전 전) 뷰포트를 기준으로 계산되므로, 세로로
+   든 상태(=콘텐츠가 회전된 상태)에서 크기가 어긋난다. 반드시 max-height:100%
+   (부모 .ov의 실제 로컬 박스 기준)만 쓸 것 — vh 금지. */
 .ov{
   position:absolute; inset:0; z-index:60; display:none;
   align-items:flex-end; justify-content:center;
@@ -147,6 +151,7 @@ body{ font-family:'Noto Sans KR',sans-serif; color:#fff; position:relative; touc
 /* ── 대화 패널 ── */
 #dlg-panel{
   width:100%; max-width:640px; margin:0 auto;
+  max-height:100%; overflow-y:auto;
   padding:14px 16px calc(18px + env(safe-area-inset-bottom));
   background:linear-gradient(180deg, rgba(18,14,32,0.98), rgba(8,6,16,0.99));
   border-top:2px solid rgba(180,79,255,0.4);
@@ -181,6 +186,7 @@ body{ font-family:'Noto Sans KR',sans-serif; color:#fff; position:relative; touc
 /* ── 퀴즈 패널 ── */
 #quiz-panel{
   width:100%; max-width:640px; margin:0 auto;
+  max-height:100%; overflow-y:auto;
   padding:16px 16px calc(18px + env(safe-area-inset-bottom));
   background:linear-gradient(180deg, rgba(18,14,32,0.98), rgba(8,6,16,0.99));
   border-top:2px solid rgba(255,214,0,0.4);
@@ -230,7 +236,7 @@ body{ font-family:'Noto Sans KR',sans-serif; color:#fff; position:relative; touc
 
 /* ── 서류철 모달 ── */
 #docs-panel{
-  width:92%; max-width:480px; max-height:78vh; overflow-y:auto;
+  width:92%; max-width:480px; max-height:100%; overflow-y:auto;
   padding:18px; border-radius:20px;
   background:linear-gradient(180deg, rgba(18,14,32,0.98), rgba(8,6,16,0.99));
   border:1px solid rgba(180,79,255,0.35);

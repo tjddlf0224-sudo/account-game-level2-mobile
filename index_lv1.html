@@ -70,31 +70,64 @@ body{
 .path-step.active .path-dot{ background:var(--pu); box-shadow:0 0 8px var(--pu); }
 .path-arrow{ width:16px; height:1px; background:rgba(255,255,255,0.15); }
 
-/* ── 스테이지 카드 ── */
-.stage-list{ display:flex; flex-direction:column; gap:14px; margin-bottom:34px; }
-.stage-card{
-  position:relative; display:block; text-decoration:none; color:#fff;
-  background:rgba(255,255,255,0.04); border:1px solid var(--border);
-  border-radius:20px; padding:20px 22px; overflow:hidden;
-  transition:border-color .2s, background .2s, transform .12s;
+/* ── 스테이지 노드맵(2급 허브 stagemap과 동일 패턴 — 징검다리 경로) ── */
+.stagemap{ position:relative; max-width:300px; margin:0 auto 34px; aspect-ratio:340/620; }
+.stagemap svg.trail{ position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
+.trail-dim{ fill:none; stroke:rgba(255,255,255,0.12); stroke-width:5; stroke-linecap:round; }
+.trail-lit{ fill:none; stroke:var(--pu); stroke-width:5; stroke-linecap:round;
+  filter:drop-shadow(0 0 5px var(--pu)); transition:stroke-dashoffset 1.4s ease .2s; }
+.stagemap .nodes{ position:absolute; inset:0; }
+.stage-node{
+  position:absolute; transform:translate(-50%,-50%);
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  text-decoration:none; width:118px;
 }
-.stage-card:active{ transform:scale(0.985); }
-.stage-card.open{ border-left:4px solid var(--pu); }
-.stage-card.open:hover{ border-color:rgba(180,79,255,0.45); background:rgba(180,79,255,0.06); }
-.stage-card.lock{ opacity:0.5; pointer-events:none; border-left:4px solid rgba(255,255,255,0.15); }
+.stage-node .disc{
+  position:relative;
+  width:64px; height:64px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.9rem; color:var(--node-color, var(--pu));
+  background:rgba(255,255,255,0.04);
+  border:2px solid var(--node-color, var(--pu));
+  box-shadow:0 0 16px var(--node-glow, rgba(180,79,255,0.35));
+  transition:transform 0.18s;
+}
+.stage-node:active .disc{ transform:scale(0.93); }
+.stage-node.cur .disc{ animation:nodePulse 1.6s ease-in-out infinite; }
+@keyframes nodePulse{
+  0%,100%{ box-shadow:0 0 16px var(--node-glow, rgba(180,79,255,0.35)); }
+  50%{ box-shadow:0 0 32px var(--node-glow, rgba(180,79,255,0.35)); }
+}
+.stage-node.lock .disc{
+  color:rgba(255,255,255,0.3); border-color:rgba(255,255,255,0.15);
+  background:rgba(255,255,255,0.02); box-shadow:none; cursor:default;
+}
+.stage-node.lock{ pointer-events:none; }
+.stage-node.lock .disc .ei{ opacity:0.35; }
+.nm-badge{
+  position:absolute; width:24px; height:24px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:#0b0e16; border:1.5px solid rgba(255,255,255,0.18);
+}
+.nm-badge svg{ width:13px; height:13px; }
+.stage-node .lock-badge{ right:-3px; bottom:-3px; color:rgba(255,255,255,0.6); }
+.stage-node .clear-badge{ right:-3px; top:-3px; color:#04240f; background:var(--gn); border-color:var(--gn); box-shadow:0 0 8px var(--gn); }
+.stage-node .n-title{ font-family:'Black Han Sans',sans-serif; font-size:0.82rem; color:#fff; text-align:center; line-height:1.25; }
+.stage-node.lock .n-title{ color:rgba(255,255,255,0.35); }
+.stage-node .n-sub{ font-size:0.62rem; color:var(--node-color, var(--pu)); text-align:center; white-space:nowrap; min-height:1.1em; }
+.stage-node.lock .n-sub{ color:rgba(255,255,255,0.3); }
 
-.sc-top{ display:flex; align-items:center; gap:9px; margin-bottom:7px; flex-wrap:wrap; }
-.sc-no{ font-family:'Orbitron',monospace; font-size:0.6rem; letter-spacing:2px; color:rgba(255,255,255,0.35); }
-.sc-name{ font-family:'Black Han Sans',sans-serif; font-size:1.24rem; }
-.stage-card.open .sc-name{ color:var(--pu); }
-.sc-tag{ font-family:'Orbitron',monospace; font-size:0.52rem; letter-spacing:1.4px; padding:3px 9px; border-radius:20px; white-space:nowrap; }
-.tag-clear{ color:var(--gn); border:1px solid rgba(0,230,118,0.4); background:rgba(0,230,118,0.08); }
-.tag-doing{ color:var(--gd); border:1px solid rgba(255,214,0,0.4); background:rgba(255,214,0,0.08); }
-.tag-lock{ color:rgba(255,255,255,0.4); border:1px solid rgba(255,255,255,0.18); }
-.sc-desc{ font-size:0.83rem; color:rgba(255,255,255,0.52); line-height:1.6; }
-.sc-meta{ margin-top:13px; display:flex; align-items:center; gap:9px; font-size:0.7rem; color:rgba(255,255,255,0.3); }
-.sc-bar{ flex:1; height:5px; background:rgba(255,255,255,0.08); border-radius:4px; overflow:hidden; min-width:40px; }
-.sc-bar > i{ display:block; height:100%; border-radius:4px; background:linear-gradient(90deg,var(--pu),var(--or)); }
+/* ── 하단 계정 관리(2급 허브와 동일) ── */
+.hub-footer{ text-align:center; padding-top:20px; border-top:1px solid var(--border); margin-top:30px; }
+.logout-btn{
+  display:inline-flex; align-items:center; gap:8px;
+  padding:11px 24px; background:rgba(255,45,120,0.08);
+  border:1px solid rgba(255,45,120,0.25); border-radius:50px;
+  font-family:'Orbitron',monospace; font-size:0.64rem; letter-spacing:2px;
+  color:rgba(255,45,120,0.7); cursor:pointer;
+  transition:background .2s, border-color .2s, color .2s; margin:4px;
+}
+.logout-btn:active{ background:rgba(255,45,120,0.18); border-color:rgba(255,45,120,0.6); color:#ff2d78; }
 
 /* ── 안내 박스 ── */
 .notice{
@@ -106,7 +139,7 @@ body{
 
 @media (max-width:400px){
   .hero-title{ font-size:1.62rem; }
-  .stage-card{ padding:17px 18px; }
+  .stagemap{ max-width:260px; }
 }
 /* 좁은 폰에서 상단바가 넘치지 않도록 */
 @media (max-width:340px){
@@ -150,54 +183,62 @@ body{
     이론 문제은행과 나머지 스테이지는 순차적으로 열립니다.
   </div>
 
-  <div class="stage-list">
-    <a class="stage-card open" id="card-s1" href="stage1_cost.html">
-      <div class="sc-top">
-        <span class="sc-no">STAGE 1</span>
-        <span class="sc-name">원가의 길</span>
-        <span class="sc-tag tag-doing" id="tag-s1">진행 가능</span>
+  <!-- ── 스테이지 노드맵(2급 허브 stagemap과 동일 패턴) ── -->
+  <div class="stagemap">
+    <svg class="trail" viewBox="0 0 340 620" preserveAspectRatio="none" aria-hidden="true">
+      <path class="trail-dim" d="M240,70 C240,180 100,160 100,290 C100,420 240,400 240,540"/>
+      <path class="trail-lit" id="trail-lit" d="M240,70 C240,180 100,160 100,290 C100,420 240,400 240,540"/>
+    </svg>
+    <div class="nodes">
+      <a class="stage-node cur" id="node-s1" href="stage1_cost.html" style="left:70%;top:11%; --node-color:var(--pu); --node-glow:rgba(180,79,255,0.4);">
+        <div class="disc">🏭
+          <span class="nm-badge clear-badge" title="클리어" style="display:none">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"/></svg>
+          </span>
+        </div>
+        <div class="n-title">STAGE 1<br>원가의 길</div>
+        <div class="n-sub" id="sub-s1">자료 0/14</div>
+      </a>
+      <div class="stage-node lock" id="node-s2" style="left:30%;top:47%; --node-color:var(--or);">
+        <div class="disc">⚖️<span class="nm-badge lock-badge" title="준비 중"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span></div>
+        <div class="n-title">STAGE 2<br>배분의 방</div>
+        <div class="n-sub">준비 중</div>
       </div>
-      <div class="sc-desc">
-        회계팀 신입사원이 되어 공장을 횡단합니다.<br>
-        원재료 창고 → 공장 라인 → 제품 창고, 그리고 제조원가명세서까지.
+      <div class="stage-node lock" id="node-s3" style="left:70%;top:87%; --node-color:var(--cy);">
+        <div class="disc">📝<span class="nm-badge lock-badge" title="준비 중"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span></div>
+        <div class="n-title">STAGE 3<br>이론 객관식</div>
+        <div class="n-sub">준비 중</div>
       </div>
-      <div class="sc-meta" id="meta-s1">
-        <div class="sc-bar"><i style="width:0%"></i></div><span class="pct">자료 0/14</span>
-      </div>
-    </a>
-
-    <div class="stage-card lock">
-      <div class="sc-top">
-        <span class="sc-no">STAGE 2</span>
-        <span class="sc-name">배분의 방</span>
-        <span class="sc-tag tag-lock">준비 중</span>
-      </div>
-      <div class="sc-desc">단계배분법 · 상호배분법을 직접 계산해 봅니다.</div>
     </div>
+  </div>
 
-    <div class="stage-card lock">
-      <div class="sc-top">
-        <span class="sc-no">STAGE 3</span>
-        <span class="sc-name">이론 객관식</span>
-        <span class="sc-tag tag-lock">준비 중</span>
-      </div>
-      <div class="sc-desc">1급 기출 27회차 기반 이론 문제은행.</div>
-    </div>
+  <div class="hub-footer">
+    <button class="logout-btn" onclick="changeNickname()">✏️ &nbsp;닉네임 변경</button>
+    <button class="logout-btn" onclick="doLogout()">⏻ &nbsp;로그아웃</button>
+  </div>
+  <div class="hub-footer" id="delete-account-row" style="margin-top:6px;display:none;">
+    <button class="logout-btn" onclick="doDeleteAccount()" style="color:var(--pk);border-color:rgba(255,45,120,0.3);">🗑️ &nbsp;회원 탈퇴</button>
   </div>
 
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth.js"></script>
 <script>
-/* 닉네임 표시 */
+/* 닉네임 표시 + 탈퇴 버튼 노출(소셜 로그인 계정만) */
 (function(){
   try{
     const n=(localStorage.getItem('hub_nickname')||'').trim();
     if(n) document.getElementById('ub-name').textContent=n;
+    if(localStorage.getItem('hub_uid')){
+      const row=document.getElementById('delete-account-row');
+      if(row) row.style.display='block';
+    }
   }catch(e){}
 })();
 
-/* 스테이지1 진행률 — 서류철 수집 개수(총 14) 기준 */
-(function(){
+/* 스테이지1 진행률 — 서류철 수집 개수(총 14) 기준, 노드맵 상태 반영 */
+function renderStageMap(){
   const TOTAL_DOCS=14;
   let docs=0, cleared=false;
   try{
@@ -206,18 +247,106 @@ body{
       docs=Array.isArray(s.docs)?s.docs.length:0;
       cleared=!!s.cleared; }
   }catch(e){}
-  const box=document.getElementById('meta-s1');
-  const pct=Math.round(Math.min(100, docs/TOTAL_DOCS*100));
-  box.querySelector('.sc-bar > i').style.width=pct+'%';
-  box.querySelector('.pct').textContent = cleared ? '완료' : ('자료 '+docs+'/'+TOTAL_DOCS);
-  const tag=document.getElementById('tag-s1');
-  if(cleared){ tag.textContent='클리어'; tag.className='sc-tag tag-clear'; }
-  else if(docs>0){ tag.textContent='진행 중'; tag.className='sc-tag tag-doing'; }
-})();
+  const node=document.getElementById('node-s1'), sub=document.getElementById('sub-s1');
+  const clearBadge=node.querySelector('.clear-badge');
+  if(cleared){
+    node.classList.remove('cur'); node.classList.add('done');
+    clearBadge.style.display='flex';
+    sub.textContent='클리어';
+  } else {
+    sub.textContent = docs>0 ? `자료 ${docs}/${TOTAL_DOCS}` : '도전!';
+  }
+  const lit=document.getElementById('trail-lit');
+  if(lit){
+    const total=lit.getTotalLength();
+    lit.style.strokeDasharray=total;
+    // 스테이지1까지만 실제로 존재 — 클리어해야 다음 구간(스테이지2 방향)이 밝혀짐
+    const frac = cleared ? 0.5 : 0;
+    lit.style.strokeDashoffset = total*(1-frac);
+  }
+}
+renderStageMap();
 
 /* 안드로이드 WebView 광고 배너 자리 확보용 (기존 화면들과 동일 시그니처) */
 function hideAdPlaceholder(){}
+
+/* ── 계정 관리: 2급 허브(index.html)와 동일 로직 ── */
+async function doLogout(){
+  if(!confirm('로그아웃 하시겠습니까?\n닉네임과 그룹 정보가 초기화됩니다.')) return;
+  if(window.Auth && Auth.socialAvailable()){ try{ await Auth.signOut(); }catch(e){} }
+  localStorage.removeItem('hub_nickname');
+  localStorage.removeItem('hub_group_id');
+  localStorage.removeItem('hub_group_name');
+  const base=location.pathname.replace(/[^/]*$/, '');
+  window.location.replace(base+'login.html');
+}
+
+async function doDeleteAccount(){
+  const btn=event && event.target ? event.target : null;
+  const typed=prompt('정말 탈퇴하시겠어요?\n계정과 모든 기록이 영구히 삭제됩니다.\n\n계속하려면 아래에 "탈퇴"라고 입력해주세요.');
+  if(typed===null) return;
+  if(typed.trim()!=='탈퇴'){ alert('입력한 내용이 "탈퇴"와 일치하지 않아 취소했어요.'); return; }
+  if(!window.Auth || !Auth.socialAvailable()) return;
+  try{
+    if(btn) btn.textContent='삭제 중...';
+    await Auth.deleteAccount();
+    alert('계정이 삭제됐어요. 그동안 함께해줘서 고마워요!');
+    const base=location.pathname.replace(/[^/]*$/, '');
+    window.location.replace(base+'login.html');
+  }catch(e){
+    alert('탈퇴에 실패했어요. 네트워크를 확인하고 다시 시도해주세요.');
+    if(btn) btn.textContent='🗑️  회원 탈퇴';
+  }
+}
+
+const _SB_URL="https://pjagaulfivafamhhiveg.supabase.co";
+const _SB_KEY="sb_publishable_yck2tAKApEjVSJOJMVSXuQ_AGaNatuI";
+function _sbClient(){
+  try{ return (window.supabase && supabase.createClient) ? supabase.createClient(_SB_URL,_SB_KEY) : null; }
+  catch(e){ return null; }
+}
+async function changeNickname(){
+  const oldName=(localStorage.getItem('hub_nickname')||'').trim();
+  const input=prompt('새 닉네임을 입력하세요 (2~12글자)', oldName);
+  if(input===null) return;
+  const name=input.trim();
+  if(name.length<2){ alert('2글자 이상 입력해주세요'); return; }
+  if(name.length>12){ alert('12글자 이하로 입력해주세요'); return; }
+  if(name===oldName) return;
+
+  const db=_sbClient();
+  if(db){
+    try{
+      const {data}=await db.from('scores').select('name').eq('name',name).limit(1);
+      if(data && data.length){ alert('⚠️ 이미 사용 중인 닉네임입니다. 다른 닉네임을 입력해주세요.'); return; }
+    }catch(e){}
+  }
+  if(db){
+    try{
+      const {data:renamed, error}=await db.rpc('rename_player', {p_old:oldName, p_new:name});
+      if(error && error.code==='PGRST202'){
+        const {error:e2}=await db.from('scores').update({name:name}).eq('name',oldName);
+        if(e2) throw e2;
+      } else if(error){ throw error; }
+      else if(renamed!==true){ alert('⚠️ 서버에서 닉네임 변경이 거부되었어요. (이미 사용 중인 이름일 수 있어요)'); return; }
+    }catch(e){
+      alert('⚠️ 네트워크 문제로 닉네임을 변경하지 못했어요. 잠시 후 다시 시도해주세요.');
+      return;
+    }
+  }
+  if(window.WrongNote && WrongNote.rename){ try{ await WrongNote.rename(oldName,name); }catch(e){} }
+  if(window.Growth && Growth.rename){ try{ await Growth.rename(oldName,name); }catch(e){} }
+  localStorage.setItem('hub_nickname', name);
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i);
+    if(k && k.endsWith('_myName') && localStorage.getItem(k)===oldName) localStorage.setItem(k,name);
+  }
+  const el=document.getElementById('ub-name');
+  if(el) el.textContent=name;
+  alert('✅ 닉네임이 "'+name+'"(으)로 변경되었어요.\n기존 점수와 오답노트도 함께 이동했습니다.');
+}
 </script>
+<script src="growth.js"></script>
 <script src="emoji-icons.js"></script>
 </body>
 </html>
