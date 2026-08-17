@@ -264,12 +264,7 @@ body{
         <div class="n-title">STAGE 1<br>원가의 길</div>
         <div class="n-sub" id="sub-s1">자료 0/14</div>
       </a>
-      <div class="stage-node lock" id="node-s2" style="left:30%;top:47%; --node-color:var(--or);">
-        <div class="disc">⚖️<span class="nm-badge lock-badge" title="준비 중"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span></div>
-        <div class="n-title">STAGE 2<br>배분의 방</div>
-        <div class="n-sub">준비 중</div>
-      </div>
-      <a class="stage-node lock" id="node-s3" href="stage3_capital.html" style="left:70%;top:87%; --node-color:var(--cy); --node-glow:rgba(0,242,255,0.4);">
+      <a class="stage-node lock" id="node-s3" href="stage3_capital.html" style="left:30%;top:47%; --node-color:var(--cy); --node-glow:rgba(0,242,255,0.4);">
         <div class="disc">👑
           <span class="nm-badge lock-badge" title="스테이지1 클리어 필요">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
@@ -278,8 +273,20 @@ body{
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"/></svg>
           </span>
         </div>
-        <div class="n-title">STAGE 3<br>자본의 제왕</div>
+        <div class="n-title">STAGE 2<br>자본의 제왕</div>
         <div class="n-sub" id="sub-s3">스테이지1 클리어 필요</div>
+      </a>
+      <a class="stage-node lock" id="node-s4" href="stage4_voucher.html" style="left:70%;top:87%; --node-color:var(--gd); --node-glow:rgba(255,210,74,0.4);">
+        <div class="disc">🧾
+          <span class="nm-badge lock-badge" title="스테이지2 클리어 필요">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          </span>
+          <span class="nm-badge clear-badge" title="클리어" style="display:none">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"/></svg>
+          </span>
+        </div>
+        <div class="n-title">STAGE 3<br>전표의 눈</div>
+        <div class="n-sub" id="sub-s4">스테이지1 클리어 필요</div>
       </a>
     </div>
   </div>
@@ -378,12 +385,37 @@ function renderStageMap(){
     }
   }
 
+  // 스테이지3(전표의 눈) — 스테이지2(자본의 제왕) 클리어로 순차 언락(진짜 3단계 시퀀스가 됨)
+  let s4Cleared=false, s4Score=0;
+  try{
+    const raw4=localStorage.getItem('lv1_s4_progress');
+    if(raw4){ const s4=JSON.parse(raw4)||{}; s4Cleared=!!s4.cleared; s4Score=s4.score||0; }
+  }catch(e){}
+  const node4=document.getElementById('node-s4'), sub4=document.getElementById('sub-s4');
+  if(node4){
+    const lockBadge4=node4.querySelector('.lock-badge'), clearBadge4=node4.querySelector('.clear-badge');
+    if(s3Cleared){
+      node4.classList.remove('lock');
+      lockBadge4.style.display='none';
+      if(s4Cleared){
+        node4.classList.add('done');
+        clearBadge4.style.display='flex';
+        sub4.textContent=`클리어 · ${s4Score}점`;
+      } else {
+        node4.classList.add('cur');
+        sub4.textContent='도전!';
+      }
+    } else {
+      sub4.textContent='스테이지2 클리어 필요';
+    }
+  }
+
   const lit=document.getElementById('trail-lit');
   if(lit){
     const total=lit.getTotalLength();
     lit.style.strokeDasharray=total;
-    // 3노드 경로 — 스테이지1 클리어로 절반(스테이지2 방향)까지, 스테이지3 클리어로 끝까지 밝혀짐
-    const frac = cleared ? (s3Cleared ? 1 : 0.5) : 0;
+    // 3노드(2구간) 경로 — 스테이지1 클리어로 절반까지, 스테이지2(자본의 제왕) 클리어로 끝까지
+    const frac = !cleared ? 0 : (s3Cleared ? 1 : 0.5);
     lit.style.strokeDashoffset = total*(1-frac);
   }
 }

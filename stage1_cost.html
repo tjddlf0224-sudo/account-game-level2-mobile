@@ -230,8 +230,13 @@ body{ font-family:'Noto Sans KR',sans-serif; color:#fff; position:relative; touc
 }
 .dlg-name{ font-family:'Black Han Sans',sans-serif; font-size:1.05rem; color:var(--cy); }
 .dlg-tag{ font-family:'Orbitron',monospace; font-size:0.56rem; letter-spacing:1.5px; color:rgba(255,255,255,0.35); }
+.dlg-visual{
+  margin:2px 0 10px; padding:10px 8px; border-radius:12px;
+  background:rgba(255,255,255,0.04); border:1px solid rgba(180,79,255,0.3);
+}
+.dlg-visual svg{ display:block; width:100%; height:auto; }
 .dlg-box{
-  min-height:88px; font-size:0.92rem; line-height:1.65; color:#f0f0f5;
+  min-height:88px; font-size:1.12rem; line-height:1.6; color:#f0f0f5;
   padding:2px 2px 14px; white-space:pre-wrap;
 }
 .dlg-box.player{ color:var(--gd); }
@@ -257,7 +262,16 @@ body{ font-family:'Noto Sans KR',sans-serif; color:#fff; position:relative; touc
   box-shadow:0 -8px 30px rgba(0,0,0,0.6);
 }
 .quiz-tag{ font-family:'Orbitron',monospace; font-size:0.6rem; letter-spacing:2px; color:var(--gd); margin-bottom:8px; }
-.quiz-q{ font-size:0.92rem; line-height:1.6; margin-bottom:12px; color:#fff; }
+.quiz-body{ display:flex; gap:14px; align-items:stretch; }
+.quiz-main{ flex:1; min-width:0; }
+.quiz-visual{
+  flex:0 0 38%; max-width:210px;
+  padding:8px 6px; border-radius:12px;
+  background:rgba(255,255,255,0.04); border:1px solid rgba(255,214,0,0.3);
+  display:flex; align-items:center;
+}
+.quiz-visual svg{ width:100%; height:auto; display:block; }
+.quiz-q{ font-size:1.05rem; line-height:1.6; margin-bottom:12px; color:#fff; }
 .quiz-table{ width:100%; border-collapse:collapse; margin-bottom:12px; font-size:0.78rem; }
 .quiz-table th,.quiz-table td{ border:1px solid rgba(255,255,255,0.18); padding:6px 8px; text-align:center; }
 .quiz-table th{ background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.7); }
@@ -461,6 +475,7 @@ body{ font-family:'Noto Sans KR',sans-serif; color:#fff; position:relative; touc
         <div class="dlg-name" id="dlg-name"></div>
       </div>
     </div>
+    <div class="dlg-visual" id="dlg-visual" style="display:none"></div>
     <div class="dlg-box" id="dlg-text"></div>
     <div class="dlg-next" id="dlg-next"><span>계속</span><span class="arrow">▶</span></div>
   </div>
@@ -469,9 +484,14 @@ body{ font-family:'Noto Sans KR',sans-serif; color:#fff; position:relative; touc
 <div class="ov center" id="quiz-overlay">
   <div id="quiz-panel">
     <div class="quiz-tag" id="quiz-tag">확인 퀴즈</div>
-    <div class="quiz-q" id="quiz-q"></div>
-    <div id="quiz-table-wrap"></div>
-    <div class="quiz-opts" id="quiz-opts"></div>
+    <div class="quiz-body">
+      <div class="quiz-visual" id="quiz-visual" style="display:none"></div>
+      <div class="quiz-main">
+        <div class="quiz-q" id="quiz-q"></div>
+        <div id="quiz-table-wrap"></div>
+        <div class="quiz-opts" id="quiz-opts"></div>
+      </div>
+    </div>
     <div class="quiz-fb" id="quiz-fb"></div>
     <div class="quiz-next" id="quiz-next"><span>다음</span><span class="arrow">▶</span></div>
   </div>
@@ -644,12 +664,12 @@ const NPC_DATA = {
       {who:'npc', t:'쉿. (장부를 넘기며) …지금 숫자 세는 중이니까 말 시키지 마.'},
       {who:'npc', t:'…됐다. 맞아떨어졌어. 아, 신입이구나. 서류철 들고 온 거 보니 회계팀?'},
       {who:'npc', t:'그럼 딱 하나만 기억해. 창고는 T자로 생겼어.'},
-      {who:'npc', t:'(허공에 T자를 그린다) 왼쪽은 들어온 것. 기초 재고랑 이번에 산 거.'},
-      {who:'npc', t:'오른쪽은 나간 것. 라인으로 투입된 거랑, 아직 안 나가고 남은 기말 재고.'},
-      {who:'npc', t:'이게 원재료 T계정이야. 창고 그 자체지.'},
+      {who:'npc', t:'(허공에 T자를 그린다) 왼쪽은 들어온 것. 기초 재고랑 이번에 산 거.', visual:'taccount_left'},
+      {who:'npc', t:'오른쪽은 나간 것. 라인으로 투입된 거랑, 아직 안 나가고 남은 기말 재고.', visual:'taccount_full'},
+      {who:'npc', t:'이게 원재료 T계정이야. 창고 그 자체지.', visual:'taccount_full'},
       {who:'npc', t:'근데 문제는… 얼마나 나갔는지를 어떻게 아느냐야.'},
-      {who:'npc', t:'방법이 둘. 나갈 때마다 하나하나 적는 계속기록법. 나는 이거 써. 안 그럼 잠이 안 와.'},
-      {who:'npc', t:'아니면 기말에 창고 싹 세는 실지재고조사법. 기초 더하기 매입 빼기 기말 = 나간 거.'},
+      {who:'npc', t:'방법이 둘. 나갈 때마다 하나하나 적는 계속기록법. 나는 이거 써. 안 그럼 잠이 안 와.', visual:'inventory_method'},
+      {who:'npc', t:'아니면 기말에 창고 싹 세는 실지재고조사법. 기초 더하기 매입 빼기 기말 = 나간 거.', visual:'inventory_method'},
       {who:'npc', t:'(한숨) 근데 그건 누가 몰래 가져가도 모른다는 게 문제야. 그냥 다 쓴 걸로 잡히거든.'},
       {who:'npc', t:'아 그리고, 목재 값이 계속 오르잖아? 3월에 산 거랑 9월에 산 거랑 값이 달라.'},
       {who:'npc', t:'그럼 지금 나간 게 어느 것 값이냐. 먼저 산 것부터 나간 걸로 치면 선입선출법.'},
@@ -660,6 +680,9 @@ const NPC_DATA = {
       opts:['4,100,000원','4,300,000원','4,500,000원','3,700,000원'], answer:0,
       hint:'T자를 그려봐. 왼쪽(기초+매입)에서 남은 기말을 빼면 나간 게 나오지. 200 + 4,200 − 300.',
       ok:'…정확해. (처음으로 웃는다) 자네 숫자 감각 있네.',
+      taccount:{ title:'원재료 T계정',
+        left:[{label:'기초재고',val:200000},{label:'당기매입',val:4200000}],
+        right:[{label:'당기소비액',unknown:true},{label:'기말재고',val:300000}] },
     }],
     doc:{ id:'doc_material_ledger', name:'원재료 수불부', icon:'📗', values:{'기초원재료':200000,'기말원재료':300000} },
     repeat:'왼쪽 들어온 것, 오른쪽 나간 것. T자야, T자.',
@@ -837,11 +860,11 @@ const NPC_DATA = {
       {who:'npc', t:'여기가 끝이에요. 라인에서 완성된 애들이 여기로 와서 팔릴 때까지 기다리죠.'},
       {who:'npc', t:'아까 정미완 주임님 만나고 오셨죠? 그럼 얘기가 빨라요.'},
       {who:'npc', t:'저 라인에서 완성돼서 나온 것들의 원가, 그걸 당기제품제조원가라고 해요.'},
-      {who:'npc', t:'재공품 창고에서 나가는 순간(대변), 제 창고로 들어오는 거예요(차변). 그대로 이어져요.'},
-      {who:'npc', t:'그러니까 창고 세 개가 손을 잡고 있는 셈이죠. 원재료 → 재공품 → 제품.'},
-      {who:'npc', t:'여기도 T자예요. 왼쪽은 기초 제품이랑 이번 달에 들어온 것. 오른쪽은 팔려나간 것과 남은 것.'},
-      {who:'npc', t:'그리고 팔려나간 것, 그게 바로 매출원가예요.'},
-      {who:'npc', t:'기초제품 + 당기제품제조원가 − 기말제품 = 매출원가. 딱 이겁니다.'},
+      {who:'npc', t:'재공품 창고에서 나가는 순간(대변), 제 창고로 들어오는 거예요(차변). 그대로 이어져요.', visual:'taccount_transfer'},
+      {who:'npc', t:'그러니까 창고 세 개가 손을 잡고 있는 셈이죠. 원재료 → 재공품 → 제품.', visual:'taccount_transfer'},
+      {who:'npc', t:'여기도 T자예요. 왼쪽은 기초 제품이랑 이번 달에 들어온 것. 오른쪽은 팔려나간 것과 남은 것.', visual:'taccount_product'},
+      {who:'npc', t:'그리고 팔려나간 것, 그게 바로 매출원가예요.', visual:'taccount_product'},
+      {who:'npc', t:'기초제품 + 당기제품제조원가 − 기말제품 = 매출원가. 딱 이겁니다.', visual:'taccount_product'},
       {who:'npc', t:'중요한 건요… 만든 거랑 판 건 다르다는 거예요.'},
       {who:'npc', t:'1,000개 만들고 700개 팔면, 손익계산서엔 700개 값만 올라가요. 나머지 300개는 여기 서서 기다리는 거고요.'},
       {who:'npc', t:'(팔레트를 툭 치며) 얘네는 아직 비용이 아니에요. 자산이에요. 팔려야 비용이 됩니다.'},
@@ -855,6 +878,9 @@ const NPC_DATA = {
       opts:['10,180,000원','10,580,000원','10,780,000원','11,780,000원'], answer:1,
       hint:'T자예요. 있던 거(400) + 들어온 거(10,780) − 남은 거(600). 나간 게 팔린 거죠.',
       ok:'정확합니다. 10,580,000원. (팔레트 각을 한 번 더 맞춘다) 기분 좋네요, 숫자가 딱 맞으면.',
+      taccount:{ title:'제품 T계정',
+        left:[{label:'기초제품',val:400000},{label:'당기제품제조원가',val:10780000}],
+        right:[{label:'매출원가',unknown:true},{label:'기말제품',val:600000}] },
     }],
     doc:{ id:'doc_product', name:'제품 입출고 대장', icon:'📦', values:{'기초제품':400000,'기말제품':600000} },
     repeat:'만든 거랑 판 건 달라요. 팔려야 비용이에요.',
@@ -1123,8 +1149,9 @@ const OBJECTS = [
   { zone:'raw',  x:11, y:9,  img:'lv1/sprites/obj_truck.webp',          scale:2.2 },
   { zone:'raw',  x:13, y:14, img:'lv1/sprites/obj_raw_pallet.webp',     scale:1.6 },
   { zone:'raw',  x:17, y:9,  img:'lv1/sprites/obj_material_shelf.webp', scale:2.0 },
-  // ② 공장 라인
+  // ② 공장 라인 — A라인(장인이 손으로 만드는 주문제작)은 레일이 아니라 작업대 하나만 크게
   { zone:'line', x:29, y:10, img:'lv1/sprites/obj_robot_arm.webp',      scale:1.8 },
+  { zone:'line', x:39, y:8,  img:'lv1/tiles/line_a_workbench.webp',     scale:3.2 },
   // ⑤ 공장 사무실 (한서준 대리 자리 겸용 — 사무실 단일화)
   { zone:'foff', x:35, y:2,  img:'lv1/sprites/obj_desk_whiteboard.webp',scale:2.0 },
   // ④ 보조부문동(식당·보일러실)
@@ -1138,12 +1165,12 @@ OBJECTS.forEach(o=>{
   if(o.img){ const im=new Image(); im.ready=false; im.onload=()=>im.ready=true; im.src=o.img; o._img=im; }
 });
 
-/* ── 경계 팻말(§4-5) — 통로 진입부에 방향+한줄설명 ── */
+/* ── 경계 팻말(§4-5) — 통로 진입부에 구역명 안내판(방향 화살표 아님, 그냥 팻말) ── */
 const SIGNS = [
-  { x:25, y:9,  icon:'➡️', label:'공장 라인' },
-  { x:47, y:9,  icon:'➡️', label:'제품 창고' },
-  { x:38, y:16, icon:'⬇️', label:'구내식당·보일러실' },
-  { x:38, y:6,  icon:'⬆️', label:'공장 사무실' },
+  { x:25, y:9,  label:'공장 라인' },
+  { x:47, y:9,  label:'제품 창고' },
+  { x:38, y:16, label:'구내식당·보일러실' },
+  { x:38, y:6,  label:'공장 사무실' },
 ];
 
 /* ── 맵 생성: 전부 벽으로 채운 뒤 구역·통로를 파낸다 ────────── */
@@ -1295,9 +1322,12 @@ const TEX = (()=>{
   };
 })();
 
-/* ── P4: 제미나이 생성 라인 이미지 — 로드되면 절차적 벨트 대신 슬라이스 매핑으로 사용 ──
-   19타일 폭(x27~45)에 이미지를 세로로 잘라 각 타일 컬럼에 매핑 → 한 장의 그림이
-   라인 전체에 걸쳐 자연스럽게 이어짐(작은 반복타일이 아니라 하나의 큰 장면). */
+/* ── P4: 제미나이 생성 라인 이미지 — B라인(대량생산 컨베이어)만 레일처럼 반복 타일링 ──
+   이미지를 라인 전체 폭에 억지로 늘려 붙이면(구 방식) 정사각형/가로로 짧은 원본이
+   심하게 찌그러진다. 대신 이미지 높이를 타일 높이(TS)에 맞추고, 그 비율 그대로의
+   폭을 한 "묶음"으로 삼아 라인을 따라 반복(타일링)한다 — 의자가 여러 개 자연스럽게
+   이어붙은 것처럼 보임. A라인(장인의 수작업 라인)은 레일이 아니므로 OBJECTS의
+   단일 큰 스프라이트로 따로 배치한다(아래 workbench 항목 참고). */
 const LINE_X0=27, LINE_X1=45;
 function makeLineImg(src){
   const img=new Image(); img.ready=false;
@@ -1306,12 +1336,15 @@ function makeLineImg(src){
   img.src=src;
   return img;
 }
-const LINE_IMG_A = makeLineImg('lv1/tiles/line_a_workbench.webp');
 const LINE_IMG_B = makeLineImg('lv1/tiles/line_b_conveyor.webp');
 function drawLineSlice(ctx, img, x, sx, sy, tw){
-  const n=LINE_X1-LINE_X0+1;
-  const f0=(x-LINE_X0)/n, f1=(x-LINE_X0+1)/n;
-  const sxImg=f0*img.width, swImg=Math.max(1,(f1-f0)*img.width);
+  const aspect = img.width / img.height;         // 원본 비율(찌그러뜨리지 않고 그대로 유지)
+  const unitPx = tw * aspect;                     // 한 묶음을 타일 높이에 맞췄을 때의 폭
+  const worldPx = (x - LINE_X0) * tw;             // 라인 시작점부터의 누적 픽셀 위치
+  const pos = ((worldPx % unitPx) + unitPx) % unitPx;
+  const sxImg = (pos / unitPx) * img.width;
+  let swImg = (tw / unitPx) * img.width;
+  if(sxImg + swImg > img.width) swImg = Math.max(1, img.width - sxImg); // 묶음 경계에서만 살짝 클램프
   ctx.drawImage(img, sxImg, 0, swImg, img.height, sx, sy, tw, tw);
 }
 
@@ -1663,9 +1696,10 @@ const World = {
     for(let y=y0;y<=y1;y++) for(let x=x0;x<=x1;x++){
       const t=MAP[y][x];
       const sx=Math.round(x*TS-camX), sy=Math.round(y*TS-camY);
+      // A라인(장인의 수작업 라인)은 컨베이어가 아니라 작업대 하나를 크게 배치한 공간이라
+      // 레일 이미지/흐르는 화살표를 쓰지 않고 은은한 워시만 깔아 구역감만 준다.
       let usedLineImg=false;
-      if(t===T.LINE_A && LINE_IMG_A.ready){ drawLineSlice(ctx,LINE_IMG_A,x,sx,sy,TS+1); usedLineImg=true; }
-      else if(t===T.LINE_B && LINE_IMG_B.ready){ drawLineSlice(ctx,LINE_IMG_B,x,sx,sy,TS+1); usedLineImg=true; }
+      if(t===T.LINE_B && LINE_IMG_B.ready){ drawLineSlice(ctx,LINE_IMG_B,x,sx,sy,TS+1); usedLineImg=true; }
       else{
         const tex=TEX[t];
         if(tex) ctx.drawImage(tex,sx,sy,TS+1,TS+1);
@@ -1675,26 +1709,50 @@ const World = {
         ctx.strokeStyle='rgba(255,255,255,0.045)'; ctx.lineWidth=1;
         ctx.strokeRect(sx+0.5,sy+0.5,TS,TS);
       }
-      // 라인 A/B 색 구분(제미나이 그림 로드 전 절차적 벨트일 때만 워시로 구분)
-      if(!usedLineImg && (t===T.LINE_A||t===T.LINE_B)){
+      // 라인 A/B 색 구분(A라인은 항상 워시만, B라인은 제미나이 그림 로드 전 폴백일 때만)
+      if(t===T.LINE_A || (!usedLineImg && t===T.LINE_B)){
         ctx.fillStyle = t===T.LINE_A ? 'rgba(255,193,7,0.07)' : 'rgba(0,242,255,0.07)';
         ctx.fillRect(sx,sy,TS+1,TS+1);
       }
-      // 컨베이어 방향 표시(흐르는 화살표)
-      if(t===T.LINE_A||t===T.LINE_B){
+      // 컨베이어 방향 표시(흐르는 화살표) — B라인(레일)에만. A라인은 작업대라 흐름이 없다.
+      if(t===T.LINE_B){
         const ph=(this.bob*0.5+x*0.35)%1;
-        ctx.fillStyle= t===T.LINE_A ? 'rgba(255,193,7,0.5)' : 'rgba(0,242,255,0.45)';
+        ctx.fillStyle='rgba(0,242,255,0.45)';
         ctx.beginPath();
         const ax=sx+ph*TS, ay=sy+TS/2;
         ctx.moveTo(ax,ay-TS*0.16); ctx.lineTo(ax+TS*0.2,ay); ctx.lineTo(ax,ay+TS*0.16);
         ctx.closePath(); ctx.fill();
       }
-      // 계단 표시
+      // 보조부문동(구내식당·보일러실)은 지하라는 느낌이 들도록 전체적으로 살짝 어둡게
+      if(t===T.MESS||t===T.BOILER){
+        ctx.fillStyle='rgba(0,0,0,0.22)';
+        ctx.fillRect(sx,sy,TS+1,TS+1);
+      }
+      // 계단 표시 — 남쪽(보조부문동 방면)은 내려갈수록 어두워지는 그라데이션+좌우 벽 그림자로
+      // "구멍 속으로 꺼지는" 느낌을, 북쪽(공장 사무실 방면)은 반대로 은은하게 밝아지는 톤을 준다.
       if(t===T.STAIR){
-        ctx.strokeStyle='rgba(255,255,255,0.28)'; ctx.lineWidth=2;
+        const goingDown = y>=15, goingUp = y<=7;
+        if(goingDown){
+          const depth=(y-15);
+          const grad=ctx.createLinearGradient(sx,sy,sx,sy+TS);
+          grad.addColorStop(0, `rgba(8,4,16,${0.18+depth*0.22})`);
+          grad.addColorStop(1, `rgba(3,1,8,${0.38+depth*0.3})`);
+          ctx.fillStyle=grad; ctx.fillRect(sx,sy,TS+1,TS+1);
+          ctx.fillStyle='rgba(0,0,0,0.35)';
+          ctx.fillRect(sx,sy,TS*0.12,TS+1);
+          ctx.fillRect(sx+TS*0.88,sy,TS*0.12,TS+1);
+        } else if(goingUp){
+          const grad=ctx.createLinearGradient(sx,sy,sx,sy+TS);
+          grad.addColorStop(0,'rgba(255,255,255,0.06)');
+          grad.addColorStop(1,'rgba(255,255,255,0)');
+          ctx.fillStyle=grad; ctx.fillRect(sx,sy,TS+1,TS+1);
+        }
+        ctx.strokeStyle = goingDown ? 'rgba(190,160,255,0.4)' : 'rgba(255,255,255,0.28)';
+        ctx.lineWidth=2;
         for(let i=1;i<=3;i++){
           const yy=sy+TS*i/4;
-          ctx.beginPath(); ctx.moveTo(sx+TS*0.18,yy); ctx.lineTo(sx+TS*0.82,yy); ctx.stroke();
+          const inset = goingDown ? TS*0.05*i : 0; // 내려갈수록 폭이 좁아 보이는 원근감
+          ctx.beginPath(); ctx.moveTo(sx+TS*0.18+inset,yy); ctx.lineTo(sx+TS*0.82-inset,yy); ctx.stroke();
         }
       }
     }
@@ -1713,18 +1771,24 @@ const World = {
         ctx.fillText(o.icon, cx, cy-TS*0.06);
       }
     }
-    // ── 경계 팻말 ──
+    // ── 경계 팻말: 방향 화살표 대신, 매달린 안내판(포스트+명패) 모양으로 ──
     for(const s of SIGNS){
       if(s.x<x0-1||s.x>x1+1||s.y<y0-1||s.y>y1+1) continue;
       const cx=s.x*TS-camX+TS/2, cy=s.y*TS-camY+TS/2;
-      ctx.font=`${Math.round(TS*0.5)}px sans-serif`;
-      ctx.fillText(s.icon, cx, cy-TS*0.22);
-      ctx.font=`700 ${Math.round(TS*0.2)}px 'Noto Sans KR', sans-serif`;
-      const w=ctx.measureText(s.label).width+12;
-      ctx.fillStyle='rgba(5,3,16,0.7)';
-      ctx.fillRect(cx-w/2, cy+TS*0.12, w, TS*0.28);
-      ctx.fillStyle='rgba(255,255,255,0.8)';
-      ctx.fillText(s.label, cx, cy+TS*0.26);
+      ctx.font=`700 ${Math.round(TS*0.19)}px 'Noto Sans KR', sans-serif`;
+      const padX=14, plateW=ctx.measureText(s.label).width+padX*2, plateH=TS*0.26;
+      const px=cx-plateW/2, py=cy-plateH/2;
+      // 지지대(포스트): 명패 위에서 바닥 쪽으로 짧게
+      ctx.strokeStyle='rgba(200,190,175,0.4)'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(cx,py-TS*0.16); ctx.lineTo(cx,py); ctx.stroke();
+      ctx.fillStyle='rgba(200,190,175,0.5)';
+      ctx.beginPath(); ctx.arc(cx,py-TS*0.16,2.2,0,Math.PI*2); ctx.fill();
+      // 명패 본체(나무 질감 톤 + 금색 테두리)
+      ctx.fillStyle='rgba(38,28,20,0.88)';
+      ctx.strokeStyle='rgba(255,214,0,0.45)'; ctx.lineWidth=1.4;
+      ctx.beginPath(); ctx.roundRect(px,py,plateW,plateH,5); ctx.fill(); ctx.stroke();
+      ctx.fillStyle='rgba(255,236,190,0.92)';
+      ctx.fillText(s.label, cx, cy+1);
     }
     ctx.restore();
 
@@ -1912,6 +1976,129 @@ const Toast = {
 };
 
 /* =========================================================================
+ *  DialogVisuals — 대사 중 개념 설명 구간에 곁들이는 미니 도해(SVG)
+ *  beats 배열에 visual:'키' 를 붙이면 dlg-box 위에 표시됨(생략 시 이전 상태 유지 X, 매 비트마다 갱신)
+ * ========================================================================= */
+const DialogVisuals = {
+  taccount_left: `
+    <svg viewBox="0 0 300 116" xmlns="http://www.w3.org/2000/svg">
+      <text x="150" y="14" text-anchor="middle" font-family="'Black Han Sans',sans-serif" font-size="12" fill="#fff">원재료 T계정</text>
+      <line x1="150" y1="24" x2="150" y2="106" stroke="rgba(255,255,255,0.35)" stroke-width="2"/>
+      <line x1="20" y1="24" x2="280" y2="24" stroke="rgba(255,255,255,0.35)" stroke-width="2"/>
+      <text x="85" y="40" text-anchor="middle" font-family="Orbitron,monospace" font-size="9" letter-spacing="1" fill="#00f2ff">← 왼쪽 · 들어온 것</text>
+      <rect x="30" y="48" width="110" height="24" rx="6" fill="rgba(0,242,255,0.16)" stroke="#00f2ff" stroke-width="1.5"/>
+      <text x="85" y="64" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="11" fill="#fff">기초재고 + 당기매입</text>
+      <text x="215" y="40" text-anchor="middle" font-family="Orbitron,monospace" font-size="9" letter-spacing="1" fill="rgba(255,255,255,0.3)">오른쪽 · 나간 것 →</text>
+      <rect x="160" y="48" width="110" height="24" rx="6" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" stroke-dasharray="4 3"/>
+      <text x="215" y="64" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="10" fill="rgba(255,255,255,0.4)">?</text>
+    </svg>`,
+  taccount_full: `
+    <svg viewBox="0 0 300 116" xmlns="http://www.w3.org/2000/svg">
+      <text x="150" y="14" text-anchor="middle" font-family="'Black Han Sans',sans-serif" font-size="12" fill="#fff">원재료 T계정</text>
+      <line x1="150" y1="24" x2="150" y2="106" stroke="rgba(255,255,255,0.35)" stroke-width="2"/>
+      <line x1="20" y1="24" x2="280" y2="24" stroke="rgba(255,255,255,0.35)" stroke-width="2"/>
+      <text x="85" y="40" text-anchor="middle" font-family="Orbitron,monospace" font-size="9" letter-spacing="1" fill="#00f2ff">왼쪽 · 들어온 것</text>
+      <rect x="30" y="48" width="110" height="24" rx="6" fill="rgba(0,242,255,0.16)" stroke="#00f2ff" stroke-width="1.5"/>
+      <text x="85" y="64" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="11" fill="#fff">기초재고 + 당기매입</text>
+      <text x="215" y="40" text-anchor="middle" font-family="Orbitron,monospace" font-size="9" letter-spacing="1" fill="#ffd600">오른쪽 · 나간 것</text>
+      <rect x="160" y="48" width="52" height="24" rx="6" fill="rgba(255,214,0,0.16)" stroke="#ffd600" stroke-width="1.5"/>
+      <text x="186" y="64" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="#fff">투입액</text>
+      <rect x="216" y="48" width="54" height="24" rx="6" fill="rgba(255,214,0,0.16)" stroke="#ffd600" stroke-width="1.5"/>
+      <text x="243" y="64" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="#fff">기말재고</text>
+      <text x="150" y="98" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="rgba(255,255,255,0.5)">왼쪽 합계 = 오른쪽 합계</text>
+    </svg>`,
+  inventory_method: `
+    <svg viewBox="0 0 300 116" xmlns="http://www.w3.org/2000/svg">
+      <rect x="10" y="8" width="136" height="100" rx="10" fill="rgba(0,242,255,0.08)" stroke="#00f2ff" stroke-width="1.5"/>
+      <text x="78" y="26" text-anchor="middle" font-family="'Black Han Sans',sans-serif" font-size="11.5" fill="#00f2ff">계속기록법</text>
+      <text x="78" y="46" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="#fff">나갈 때마다</text>
+      <text x="78" y="60" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="#fff">하나하나 기록</text>
+      <text x="78" y="84" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9" fill="rgba(255,255,255,0.55)">→ 항상 정확</text>
+      <text x="78" y="98" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9" fill="rgba(255,255,255,0.55)">기록 부담 큼</text>
+      <rect x="154" y="8" width="136" height="100" rx="10" fill="rgba(255,214,0,0.08)" stroke="#ffd600" stroke-width="1.5"/>
+      <text x="222" y="26" text-anchor="middle" font-family="'Black Han Sans',sans-serif" font-size="11.5" fill="#ffd600">실지재고조사법</text>
+      <text x="222" y="46" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="#fff">기말에 창고를</text>
+      <text x="222" y="60" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="#fff">직접 세서 계산</text>
+      <text x="222" y="84" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9" fill="rgba(255,255,255,0.55)">기초+매입−기말</text>
+      <text x="222" y="98" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9" fill="rgba(255,255,255,0.55)">분실도 소비로 잡힘</text>
+    </svg>`,
+  taccount_product: `
+    <svg viewBox="0 0 300 116" xmlns="http://www.w3.org/2000/svg">
+      <text x="150" y="14" text-anchor="middle" font-family="'Black Han Sans',sans-serif" font-size="12" fill="#fff">제품 T계정</text>
+      <line x1="150" y1="24" x2="150" y2="106" stroke="rgba(255,255,255,0.35)" stroke-width="2"/>
+      <line x1="20" y1="24" x2="280" y2="24" stroke="rgba(255,255,255,0.35)" stroke-width="2"/>
+      <text x="85" y="40" text-anchor="middle" font-family="Orbitron,monospace" font-size="9" letter-spacing="1" fill="#00f2ff">왼쪽 · 들어온 것</text>
+      <rect x="30" y="48" width="110" height="24" rx="6" fill="rgba(0,242,255,0.16)" stroke="#00f2ff" stroke-width="1.5"/>
+      <text x="85" y="64" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="11" fill="#fff">기초제품 + 당기제품제조원가</text>
+      <text x="215" y="40" text-anchor="middle" font-family="Orbitron,monospace" font-size="9" letter-spacing="1" fill="#ffd600">오른쪽 · 나간 것</text>
+      <rect x="160" y="48" width="52" height="24" rx="6" fill="rgba(255,45,120,0.12)" stroke="#ff2d78" stroke-width="1.5" stroke-dasharray="4 3"/>
+      <text x="186" y="64" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="#fff">매출원가</text>
+      <rect x="216" y="48" width="54" height="24" rx="6" fill="rgba(255,214,0,0.16)" stroke="#ffd600" stroke-width="1.5"/>
+      <text x="243" y="64" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="#fff">기말제품</text>
+      <text x="150" y="98" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="rgba(255,255,255,0.5)">왼쪽 합계 = 오른쪽 합계</text>
+    </svg>`,
+  taccount_transfer: `
+    <svg viewBox="0 0 300 92" xmlns="http://www.w3.org/2000/svg">
+      <text x="65" y="14" text-anchor="middle" font-family="'Black Han Sans',sans-serif" font-size="11" fill="#fff">재공품 T계정</text>
+      <line x1="65" y1="22" x2="65" y2="86" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
+      <line x1="12" y1="22" x2="118" y2="22" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
+      <text x="92" y="33" text-anchor="middle" font-family="Orbitron,monospace" font-size="7" fill="rgba(255,255,255,0.4)">대변</text>
+      <rect x="70" y="37" width="44" height="42" rx="5" fill="rgba(255,45,120,0.16)" stroke="#ff2d78" stroke-width="1.3"/>
+      <text x="92" y="55" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="7.5" fill="#fff">완성돼서</text>
+      <text x="92" y="67" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="7.5" fill="#fff">나감</text>
+      <text x="150" y="52" text-anchor="middle" font-family="'Black Han Sans',sans-serif" font-size="9" fill="#ffd600">당기제품</text>
+      <text x="150" y="64" text-anchor="middle" font-family="'Black Han Sans',sans-serif" font-size="9" fill="#ffd600">제조원가</text>
+      <path d="M120,66 L176,66" stroke="#ffd600" stroke-width="2.5"/>
+      <path d="M176,66 L168,61 L168,71 Z" fill="#ffd600"/>
+      <text x="234" y="14" text-anchor="middle" font-family="'Black Han Sans',sans-serif" font-size="11" fill="#fff">제품 T계정</text>
+      <line x1="234" y1="22" x2="234" y2="86" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
+      <line x1="182" y1="22" x2="288" y2="22" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
+      <text x="208" y="33" text-anchor="middle" font-family="Orbitron,monospace" font-size="7" fill="rgba(255,255,255,0.4)">차변</text>
+      <rect x="186" y="37" width="44" height="42" rx="5" fill="rgba(0,242,255,0.16)" stroke="#00f2ff" stroke-width="1.3"/>
+      <text x="208" y="55" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="7.5" fill="#fff">그대로</text>
+      <text x="208" y="67" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="7.5" fill="#fff">들어옴</text>
+    </svg>`,
+};
+
+/* ── 퀴즈용 T계정 — 실제 문제 속 숫자를 그대로 채워 넣은 동적 SVG(값 하나는 '?') ── */
+function fmtWon(n){ return Number(n).toLocaleString('ko-KR')+'원'; }
+function taccountBox(x, y, item){
+  const w=76, h=32;
+  const unknown = !!item.unknown;
+  const fill = unknown ? 'rgba(255,45,120,0.12)' : 'rgba(0,242,255,0.14)';
+  const stroke = unknown ? '#ff2d78' : '#00f2ff';
+  const dash = unknown ? ' stroke-dasharray="4 3"' : '';
+  const cx = x + w/2;
+  let out = `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="6" fill="${fill}" stroke="${stroke}" stroke-width="1.3"${dash}/>`;
+  out += `<text x="${cx}" y="${y+13}" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="7.5" fill="#fff">${item.label}</text>`;
+  if(unknown){
+    out += `<text x="${cx}" y="${y+27}" text-anchor="middle" font-family="'Black Han Sans',sans-serif" font-size="14" fill="#ff2d78">?</text>`;
+  } else {
+    out += `<text x="${cx}" y="${y+26}" text-anchor="middle" font-family="Orbitron,monospace" font-size="8.5" fill="#fff">${fmtWon(item.val)}</text>`;
+  }
+  return out;
+}
+function taccountQuizSVG(title, leftItems, rightItems){
+  const rowH=32, rowGap=6, startY=44, leftX=18, rightX=106;
+  let boxes='';
+  leftItems.forEach((it,i)=>{ boxes+=taccountBox(leftX, startY+i*(rowH+rowGap), it); });
+  rightItems.forEach((it,i)=>{ boxes+=taccountBox(rightX, startY+i*(rowH+rowGap), it); });
+  const rows=Math.max(leftItems.length, rightItems.length);
+  const lineBottom = startY + rows*(rowH+rowGap) - rowGap + 4;
+  const bottomY = lineBottom + 14;
+  const vbH = bottomY + 10;
+  return `<svg viewBox="0 0 200 ${vbH}" xmlns="http://www.w3.org/2000/svg">`+
+    `<text x="100" y="14" text-anchor="middle" font-family="'Black Han Sans',sans-serif" font-size="12" fill="#fff">${title}</text>`+
+    `<line x1="100" y1="22" x2="100" y2="${lineBottom}" stroke="rgba(255,255,255,0.35)" stroke-width="2"/>`+
+    `<line x1="14" y1="22" x2="186" y2="22" stroke="rgba(255,255,255,0.35)" stroke-width="2"/>`+
+    `<text x="57" y="34" text-anchor="middle" font-family="Orbitron,monospace" font-size="8" letter-spacing="0.5" fill="#00f2ff">왼쪽 · 들어온 것</text>`+
+    `<text x="143" y="34" text-anchor="middle" font-family="Orbitron,monospace" font-size="8" letter-spacing="0.5" fill="#ffd600">오른쪽 · 나간 것</text>`+
+    boxes+
+    `<text x="100" y="${bottomY}" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="8.5" fill="rgba(255,255,255,0.55)">왼쪽 합계 = 오른쪽 합계</text>`+
+    `</svg>`;
+}
+
+/* =========================================================================
  *  Dialog — 대화 진행(비트 순차 표시) → 퀴즈 또는 즉시 완료
  * ========================================================================= */
 const Dialog = {
@@ -1964,6 +2151,14 @@ const Dialog = {
       portrait.style.background = img ? `center/cover url(${img})` : '#cfd8dc';
     }
     textEl.textContent=b.t;
+
+    const visualEl=document.getElementById('dlg-visual');
+    if(b.visual && DialogVisuals[b.visual]){
+      visualEl.innerHTML = DialogVisuals[b.visual];
+      visualEl.style.display='block';
+    } else {
+      visualEl.style.display='none';
+    }
 
     // ── P5 연출 이벤트: ev_yearend — 정미완 12/31 컷신 구간만 화면 암전 ──
     if(this.npcKey==='n_mi'){
@@ -2050,6 +2245,14 @@ const Quiz = {
     document.getElementById('quiz-tag').textContent =
       '확인 퀴즈' + (this.list.length>1 ? ' '+(this.idx+1)+'/'+this.list.length : '');
     document.getElementById('quiz-q').textContent=q.q;
+
+    const vEl=document.getElementById('quiz-visual');
+    if(q.taccount){
+      vEl.innerHTML = taccountQuizSVG(q.taccount.title, q.taccount.left, q.taccount.right);
+      vEl.style.display='flex';
+    } else {
+      vEl.style.display='none';
+    }
 
     const tw=document.getElementById('quiz-table-wrap');
     tw.innerHTML='';
