@@ -28,26 +28,49 @@ body{
     radial-gradient(ellipse 50% 35% at 85% 75%, rgba(255,152,0,0.07) 0%, transparent 55%);
 }
 
-/* ── 상단바 ── */
-.userbar{
-  position:sticky; top:0; z-index:50;
-  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+/* ── 상단바(2급 허브 index.html의 .user-bar와 동일 패턴 — 통일감) ── */
+.user-bar{
+  position:sticky; top:0; z-index:200;
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
   padding:calc(12px + env(safe-area-inset-top)) 16px 12px;
   background:rgba(5,3,16,0.88); backdrop-filter:blur(10px);
   border-bottom:1px solid var(--border);
 }
-.ub-label{ font-family:'Orbitron',monospace; font-size:0.58rem; letter-spacing:2px; color:rgba(255,255,255,0.28); }
-.ub-name{ font-weight:700; font-size:0.98rem; }
-.ub-spacer{ flex:1; min-width:4px; }
-.ub-btn{
-  display:flex; align-items:center; gap:5px; flex-shrink:0;
-  padding:7px 13px; border-radius:50px; cursor:pointer;
-  background:rgba(255,255,255,0.06); border:1px solid var(--border);
-  color:rgba(255,255,255,0.75); font-size:0.72rem; text-decoration:none;
-  font-family:'Noto Sans KR',sans-serif; white-space:nowrap;
+.ub-nick{ display:flex; align-items:center; gap:7px; flex:1; min-width:0; }
+.ub-label{ font-family:'Orbitron',monospace; font-size:0.58rem; letter-spacing:2px; color:rgba(180,79,255,0.5); flex-shrink:0; }
+.ub-name{ font-weight:700; font-size:0.92rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:rgba(255,255,255,0.88); }
+.ub-group{
+  display:none; align-items:center; gap:6px; padding:4px 12px;
+  background:rgba(180,79,255,0.09); border:1px solid rgba(180,79,255,0.22); border-radius:50px;
+  font-size:0.75rem; color:rgba(180,79,255,0.85); white-space:nowrap;
+  max-width:160px; overflow:hidden; text-overflow:ellipsis; flex-shrink:0;
 }
-.ub-btn:active{ transform:scale(0.96); }
-.ub-btn.lv{ color:var(--pu); border-color:rgba(180,79,255,0.35); background:rgba(180,79,255,0.10); }
+.ub-group.show{ display:flex; }
+.ub-group .ug-dot{ width:5px; height:5px; border-radius:50%; background:var(--pu); flex-shrink:0; animation:ubBlink 2s ease-in-out infinite; }
+@keyframes ubBlink{ 0%,100%{opacity:1} 50%{opacity:0.3} }
+.group-mode-btn{
+  display:flex; align-items:center; gap:6px; padding:8px 16px;
+  background:rgba(180,79,255,0.09); border:1px solid rgba(180,79,255,0.28); border-radius:50px;
+  font-family:'Orbitron',monospace; font-size:0.62rem; letter-spacing:1.5px; color:var(--pu);
+  cursor:pointer; text-decoration:none; transition:background .2s, border-color .2s, box-shadow .2s;
+  white-space:nowrap; flex-shrink:0;
+}
+.group-mode-btn:active{ background:rgba(180,79,255,0.18); border-color:var(--pu); }
+.graph-btn{
+  position:relative; display:flex; align-items:center; justify-content:center;
+  width:40px; height:40px; flex-shrink:0;
+  background:rgba(0,242,255,0.09); border:1px solid rgba(0,242,255,0.28); border-radius:12px;
+  color:var(--cy); text-decoration:none; transition:background .2s, border-color .2s;
+  font-size:1.1rem; cursor:pointer;
+}
+.graph-btn:active{ background:rgba(0,242,255,0.18); border-color:var(--cy); }
+.graph-btn svg{ display:block; }
+.graph-btn .gdot{
+  position:absolute; top:-3px; right:-3px; width:9px; height:9px; border-radius:50%;
+  background:#2ecc71; border:1.5px solid var(--bg); display:none; box-shadow:0 0 6px rgba(46,204,113,0.85);
+}
+.graph-btn .gdot.show{ display:block; }
+.hub-mute-btn.muted{ background:rgba(255,45,120,0.09); border-color:rgba(255,45,120,0.32); color:var(--pk); }
 
 .wrap{ max-width:560px; margin:0 auto; padding:20px 18px 0; }
 
@@ -71,7 +94,7 @@ body{
 .path-arrow{ width:16px; height:1px; background:rgba(255,255,255,0.15); }
 
 /* ── 스테이지 노드맵(2급 허브 stagemap과 동일 패턴 — 징검다리 경로) ── */
-.stagemap{ position:relative; max-width:300px; margin:0 auto 34px; aspect-ratio:340/620; }
+.stagemap{ position:relative; max-width:300px; margin:0 auto 34px; aspect-ratio:340/420; }
 .stagemap svg.trail{ position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
 .trail-dim{ fill:none; stroke:rgba(255,255,255,0.12); stroke-width:5; stroke-linecap:round; }
 .trail-lit{ fill:none; stroke:var(--pu); stroke-width:5; stroke-linecap:round;
@@ -129,6 +152,23 @@ body{
 }
 .logout-btn:active{ background:rgba(255,45,120,0.18); border-color:rgba(255,45,120,0.6); color:#ff2d78; }
 
+/* ── 이론 객관식(2급 허브의 review-entry와 동일 패턴 — 스테이지 아님, 별도 진입점) ── */
+.review-entry{
+  display:flex; align-items:center; gap:14px; text-decoration:none;
+  background:linear-gradient(100deg, rgba(180,79,255,.18), rgba(0,242,255,.12));
+  border:1px solid rgba(0,242,255,.28); border-radius:18px;
+  padding:16px 18px; margin-bottom:22px; color:#eaf2ff;
+  transition:transform .15s;
+}
+.review-entry:active{ transform:scale(.985); }
+.review-entry .re-icon{ font-size:1.7rem; flex:none; }
+.review-entry .re-body{ flex:1; min-width:0; }
+.review-entry .re-title{ font-weight:700; font-size:1.02rem; letter-spacing:-.2px; }
+.review-entry .re-desc{ font-size:.78rem; color:rgba(234,242,255,.6); margin-top:3px; }
+.review-entry .re-go{ font-size:1.1rem; color:#00f2ff; flex:none; }
+.review-entry.locked{ opacity:0.5; pointer-events:none; }
+.review-entry.locked .re-go{ color:rgba(255,255,255,0.4); font-size:1rem; }
+
 /* ── 안내 박스 ── */
 .notice{
   background:rgba(255,152,0,0.06); border:1px solid rgba(255,152,0,0.22);
@@ -143,19 +183,34 @@ body{
 }
 /* 좁은 폰에서 상단바가 넘치지 않도록 */
 @media (max-width:340px){
-  .userbar{ padding-left:10px; padding-right:10px; gap:5px; }
-  .ub-btn{ padding:6px 9px; font-size:0.66rem; }
+  .user-bar{ padding-left:10px; padding-right:10px; gap:5px; }
+  .group-mode-btn{ font-size:0.58rem; padding:7px 12px; }
+  .ub-group{ max-width:100px; font-size:0.68rem; }
 }
 </style>
 </head>
 <body>
 
-<div class="userbar">
-  <span class="ub-label">PLAYER</span>
-  <span class="ub-name" id="ub-name">게스트</span>
-  <div class="ub-spacer"></div>
-  <a class="ub-btn lv" href="select_level.html">급수 변경</a>
-  <a class="ub-btn" href="growth.html">성장</a>
+<div class="user-bar" id="user-bar">
+  <div class="ub-nick">
+    <span class="ub-label">PLAYER</span>
+    <span class="ub-name" id="ub-name">게스트</span>
+  </div>
+  <div class="ub-group" id="ub-group-el">
+    <div class="ug-dot"></div>
+    <span id="ub-group-name">—</span>
+  </div>
+  <a class="group-mode-btn" href="select_level.html" style="color:var(--or); border-color:rgba(255,152,0,0.3); background:rgba(255,152,0,0.07);">🔀 급수 변경</a>
+  <a class="group-mode-btn" href="group.html">👥 그룹 모드</a>
+  <button class="graph-btn hub-mute-btn" id="hub-mute-btn" onclick="toggleHubMute()" title="전체 음소거" aria-label="전체 음소거">🎵</button>
+  <a class="graph-btn" href="growth.html" title="내 성장 그래프" aria-label="내 성장 그래프">
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+      <polyline points="17 6 23 6 23 12"></polyline>
+    </svg>
+    <span class="gdot" id="growth-dot"></span>
+  </a>
 </div>
 
 <div class="wrap">
@@ -183,14 +238,24 @@ body{
     이론 문제은행과 나머지 스테이지는 순차적으로 열립니다.
   </div>
 
-  <!-- ── 스테이지 노드맵(2급 허브 stagemap과 동일 패턴) ── -->
+  <!-- ── 이론 객관식: 2급처럼 스테이지가 아니라 별도 진입점(아직 미구현이라 잠금) ── -->
+  <div class="review-entry theory-entry locked" title="준비 중">
+    <div class="re-icon">📝</div>
+    <div class="re-body">
+      <div class="re-title">이론 객관식 (필기)</div>
+      <div class="re-desc">1급 기출 27회차 기반 문제은행 · 준비 중</div>
+    </div>
+    <div class="re-go">🔒</div>
+  </div>
+
+  <!-- ── 스테이지 노드맵(2급 허브 stagemap과 동일 패턴, 게임 스테이지만) ── -->
   <div class="stagemap">
-    <svg class="trail" viewBox="0 0 340 620" preserveAspectRatio="none" aria-hidden="true">
-      <path class="trail-dim" d="M240,70 C240,180 100,160 100,290 C100,420 240,400 240,540"/>
-      <path class="trail-lit" id="trail-lit" d="M240,70 C240,180 100,160 100,290 C100,420 240,400 240,540"/>
+    <svg class="trail" viewBox="0 0 340 420" preserveAspectRatio="none" aria-hidden="true">
+      <path class="trail-dim" d="M240,70 C240,200 100,180 100,350"/>
+      <path class="trail-lit" id="trail-lit" d="M240,70 C240,200 100,180 100,350"/>
     </svg>
     <div class="nodes">
-      <a class="stage-node cur" id="node-s1" href="stage1_cost.html" style="left:70%;top:11%; --node-color:var(--pu); --node-glow:rgba(180,79,255,0.4);">
+      <a class="stage-node cur" id="node-s1" href="stage1_cost.html" style="left:70%;top:17%; --node-color:var(--pu); --node-glow:rgba(180,79,255,0.4);">
         <div class="disc">🏭
           <span class="nm-badge clear-badge" title="클리어" style="display:none">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"/></svg>
@@ -199,14 +264,9 @@ body{
         <div class="n-title">STAGE 1<br>원가의 길</div>
         <div class="n-sub" id="sub-s1">자료 0/14</div>
       </a>
-      <div class="stage-node lock" id="node-s2" style="left:30%;top:47%; --node-color:var(--or);">
+      <div class="stage-node lock" id="node-s2" style="left:30%;top:83%; --node-color:var(--or);">
         <div class="disc">⚖️<span class="nm-badge lock-badge" title="준비 중"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span></div>
         <div class="n-title">STAGE 2<br>배분의 방</div>
-        <div class="n-sub">준비 중</div>
-      </div>
-      <div class="stage-node lock" id="node-s3" style="left:70%;top:87%; --node-color:var(--cy);">
-        <div class="disc">📝<span class="nm-badge lock-badge" title="준비 중"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span></div>
-        <div class="n-title">STAGE 3<br>이론 객관식</div>
         <div class="n-sub">준비 중</div>
       </div>
     </div>
@@ -219,23 +279,47 @@ body{
   <div class="hub-footer" id="delete-account-row" style="margin-top:6px;display:none;">
     <button class="logout-btn" onclick="doDeleteAccount()" style="color:var(--pk);border-color:rgba(255,45,120,0.3);">🗑️ &nbsp;회원 탈퇴</button>
   </div>
+  <div class="hub-footer" style="margin-top:6px;">
+    <button class="logout-btn" onclick="resetLv1Progress()" style="color:rgba(255,255,255,0.45);border-color:rgba(255,255,255,0.15);">🔄 &nbsp;데이터 초기화</button>
+  </div>
 
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="auth.js"></script>
 <script>
-/* 닉네임 표시 + 탈퇴 버튼 노출(소셜 로그인 계정만) */
+/* 닉네임/그룹 표시 + 탈퇴 버튼 노출(2급 허브와 동일 로직 — 통일감) */
 (function(){
   try{
     const n=(localStorage.getItem('hub_nickname')||'').trim();
     if(n) document.getElementById('ub-name').textContent=n;
+    const gname=localStorage.getItem('hub_group_name');
+    if(gname){
+      document.getElementById('ub-group-name').textContent=gname;
+      document.getElementById('ub-group-el').classList.add('show');
+    }
     if(localStorage.getItem('hub_uid')){
       const row=document.getElementById('delete-account-row');
       if(row) row.style.display='block';
     }
   }catch(e){}
 })();
+
+/* 전역 음소거 토글(hub_muted) — 2급 허브와 동일 */
+(function(){
+  const btn=document.getElementById('hub-mute-btn');
+  if(!btn) return;
+  const isHubMuted=localStorage.getItem('hub_muted')==='true';
+  btn.textContent=isHubMuted?'🔇':'🎵';
+  btn.classList.toggle('muted', isHubMuted);
+})();
+function toggleHubMute(){
+  const muted=localStorage.getItem('hub_muted')==='true';
+  const next=!muted;
+  localStorage.setItem('hub_muted', next);
+  const btn=document.getElementById('hub-mute-btn');
+  if(btn){ btn.textContent=next?'🔇':'🎵'; btn.classList.toggle('muted', next); }
+}
 
 /* 스테이지1 진행률 — 서류철 수집 개수(총 14) 기준, 노드맵 상태 반영 */
 function renderStageMap(){
@@ -260,8 +344,8 @@ function renderStageMap(){
   if(lit){
     const total=lit.getTotalLength();
     lit.style.strokeDasharray=total;
-    // 스테이지1까지만 실제로 존재 — 클리어해야 다음 구간(스테이지2 방향)이 밝혀짐
-    const frac = cleared ? 0.5 : 0;
+    // 2노드(스테이지1→2) 경로 — 스테이지1 클리어해야 스테이지2 방향까지 전부 밝혀짐
+    const frac = cleared ? 1 : 0;
     lit.style.strokeDashoffset = total*(1-frac);
   }
 }
@@ -269,6 +353,14 @@ renderStageMap();
 
 /* 안드로이드 WebView 광고 배너 자리 확보용 (기존 화면들과 동일 시그니처) */
 function hideAdPlaceholder(){}
+
+/* 스테이지1 진행 데이터 초기화 — 계정/닉네임은 그대로 두고 서류철·클리어·연출 이벤트 기록만 지운다 */
+function resetLv1Progress(){
+  if(!confirm('스테이지1 진행 상황(서류철·클리어 기록)을 전부 초기화할까요?\n닉네임과 계정 정보는 그대로 유지됩니다.')) return;
+  localStorage.removeItem('lv1_s1_progress');
+  renderStageMap();
+  alert('✅ 초기화됐어요. 스테이지1을 처음부터 다시 플레이할 수 있습니다.');
+}
 
 /* ── 계정 관리: 2급 허브(index.html)와 동일 로직 ── */
 async function doLogout(){
@@ -347,6 +439,20 @@ async function changeNickname(){
 }
 </script>
 <script src="growth.js"></script>
+<script>
+/* 성장 그래프 버튼: 기록 있으면 초록 점(2급 허브와 동일 — growth.js 로드 후 실행) */
+(async function(){
+  try{
+    if(!window.Growth || !Growth.series) return;
+    const data=await Growth.series();
+    const dot=document.getElementById('growth-dot');
+    if(!dot || !data) return;
+    let totalPlays=0;
+    Object.keys(data).forEach(g=>{ totalPlays += (data[g]||[]).length; });
+    if(totalPlays>0) dot.classList.add('show');
+  }catch(e){}
+})();
+</script>
 <script src="emoji-icons.js"></script>
 </body>
 </html>

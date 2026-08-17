@@ -638,6 +638,8 @@ body {
     <div class="ug-dot"></div>
     <span id="ub-group-name">—</span>
   </div>
+  <!-- 급수 변경(2급↔1급) — 1급 허브엔 이미 있던 버튼, 2급에는 없어 편도였음 -->
+  <a class="group-mode-btn" href="select_level.html" style="color:var(--pu); border-color:rgba(180,79,255,0.3); background:rgba(180,79,255,0.07);">🔀 급수 변경</a>
   <!-- 그룹 모드 버튼 -->
   <a class="group-mode-btn" href="group.html">👥 그룹 모드</a>
   <!-- 전역 음소거 토글: 켜면 각 게임 로드 시 hub_muted 참조(게임별 기존 설정 있으면 그게 우선) -->
@@ -752,6 +754,7 @@ body {
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth.js"></script>
 <script>
 // ── 로그인 체크 & 유저바 초기화 ──
 (function() {
