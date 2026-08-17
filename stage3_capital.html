@@ -623,7 +623,20 @@
             state.gameList = shuffle([...scenarioPool]).slice(0, 5);
 
             updateDash();
-            startClassGame();
+            startIntro();
+        }
+
+        // --- 0. 도입부 — 왜 계정과목부터 분류하는지 짧게 설명 ---
+        const introDialogue = [
+            { char: "boss", text: "나팀장, 요즘 자본 관련 계정과목들이 장부에 뒤죽박죽 섞여 있더군. 결산 들어가기 전에 싹 정리해 줘." },
+            { char: "me", text: "네, 사장님. 먼저 자본금·자본잉여금·자본조정·이익잉여금, 이렇게 성격별로 나눠서 정리하겠습니다." },
+        ];
+        let introMode = false;
+        function startIntro() {
+            introMode = true;
+            dialogueIdx = 0;
+            showScreen('screen-dialogue');
+            renderDialogue(introDialogue[0]);
         }
 
         // --- 1. 분류 미니게임 ---
@@ -712,8 +725,18 @@
         function nextDialogue() {
             Sound.playClick();
             dialogueIdx++;
-            const scene = state.gameList[state.day];
 
+            if (introMode) {
+                if (dialogueIdx < introDialogue.length) {
+                    renderDialogue(introDialogue[dialogueIdx]);
+                } else {
+                    introMode = false;
+                    startClassGame();
+                }
+                return;
+            }
+
+            const scene = state.gameList[state.day];
             if (dialogueIdx < scene.dialogue.length) {
                 renderDialogue(scene.dialogue[dialogueIdx]);
             } else {
