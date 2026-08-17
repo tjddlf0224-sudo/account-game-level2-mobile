@@ -119,7 +119,7 @@
             flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%;
         }
         .char-img { margin-bottom: 15px; animation: bounce 2s infinite; }
-        .char-avatar { width:88px; height:88px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Jua'; font-size:1.6rem; color:#fff; box-shadow:0 4px 18px rgba(0,0,0,0.4); }
+        .char-avatar { width:88px; height:88px; border-radius:50%; object-fit:cover; display:block; box-shadow:0 4px 18px rgba(0,0,0,0.4); border:2px solid rgba(255,255,255,0.15); }
         .dialogue-box {
             background: rgba(0,0,0,0.6); border: 2px solid var(--neon-gold);
             border-radius: 15px; padding: 20px; width: 100%; max-width: 800px;
@@ -580,14 +580,14 @@
             userJournal: { dr: [], cr: [] }
         };
 
-        // 사장님/나회계 대화 아바타 — 이모지 대신 이니셜 원형 아바타(SVG 아님, 색+글자로 충분히 가벼움)
+        // 사장님/나회계 대화 아바타 — 제미나이로 생성한 캐릭터 포트레이트
         const AVATARS = {
-            boss: { label:'사장', bg:'#8b5cf6' },
-            me:   { label:'나',   bg:'#00c2ff' }
+            boss: { img:'lv1/avatars/boss.webp',       bg:'#8b5cf6' },
+            me:   { img:'lv1/avatars/accountant.webp', bg:'#00c2ff' }
         };
         function avatarHtml(who){
             const a = AVATARS[who];
-            return `<div class="char-avatar" style="background:${a.bg}">${a.label}</div>`;
+            return `<img class="char-avatar" src="${a.img}" alt="">`;
         }
 
         function shuffle(array) {
