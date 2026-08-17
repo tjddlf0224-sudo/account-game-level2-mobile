@@ -94,7 +94,7 @@ body{
 .path-arrow{ width:16px; height:1px; background:rgba(255,255,255,0.15); }
 
 /* ── 스테이지 노드맵(2급 허브 stagemap과 동일 패턴 — 징검다리 경로) ── */
-.stagemap{ position:relative; max-width:300px; margin:0 auto 34px; aspect-ratio:340/420; }
+.stagemap{ position:relative; max-width:300px; margin:0 auto 34px; aspect-ratio:340/620; }
 .stagemap svg.trail{ position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
 .trail-dim{ fill:none; stroke:rgba(255,255,255,0.12); stroke-width:5; stroke-linecap:round; }
 .trail-lit{ fill:none; stroke:var(--pu); stroke-width:5; stroke-linecap:round;
@@ -250,12 +250,12 @@ body{
 
   <!-- ── 스테이지 노드맵(2급 허브 stagemap과 동일 패턴, 게임 스테이지만) ── -->
   <div class="stagemap">
-    <svg class="trail" viewBox="0 0 340 420" preserveAspectRatio="none" aria-hidden="true">
-      <path class="trail-dim" d="M240,70 C240,200 100,180 100,350"/>
-      <path class="trail-lit" id="trail-lit" d="M240,70 C240,200 100,180 100,350"/>
+    <svg class="trail" viewBox="0 0 340 620" preserveAspectRatio="none" aria-hidden="true">
+      <path class="trail-dim" d="M240,70 C240,180 100,160 100,290 C100,420 240,400 240,540"/>
+      <path class="trail-lit" id="trail-lit" d="M240,70 C240,180 100,160 100,290 C100,420 240,400 240,540"/>
     </svg>
     <div class="nodes">
-      <a class="stage-node cur" id="node-s1" href="stage1_cost.html" style="left:70%;top:17%; --node-color:var(--pu); --node-glow:rgba(180,79,255,0.4);">
+      <a class="stage-node cur" id="node-s1" href="stage1_cost.html" style="left:70%;top:11%; --node-color:var(--pu); --node-glow:rgba(180,79,255,0.4);">
         <div class="disc">🏭
           <span class="nm-badge clear-badge" title="클리어" style="display:none">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"/></svg>
@@ -264,11 +264,23 @@ body{
         <div class="n-title">STAGE 1<br>원가의 길</div>
         <div class="n-sub" id="sub-s1">자료 0/14</div>
       </a>
-      <div class="stage-node lock" id="node-s2" style="left:30%;top:83%; --node-color:var(--or);">
+      <div class="stage-node lock" id="node-s2" style="left:30%;top:47%; --node-color:var(--or);">
         <div class="disc">⚖️<span class="nm-badge lock-badge" title="준비 중"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span></div>
         <div class="n-title">STAGE 2<br>배분의 방</div>
         <div class="n-sub">준비 중</div>
       </div>
+      <a class="stage-node lock" id="node-s3" href="stage3_capital.html" style="left:70%;top:87%; --node-color:var(--cy); --node-glow:rgba(0,242,255,0.4);">
+        <div class="disc">👑
+          <span class="nm-badge lock-badge" title="스테이지1 클리어 필요">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          </span>
+          <span class="nm-badge clear-badge" title="클리어" style="display:none">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"/></svg>
+          </span>
+        </div>
+        <div class="n-title">STAGE 3<br>자본의 제왕</div>
+        <div class="n-sub" id="sub-s3">스테이지1 클리어 필요</div>
+      </a>
     </div>
   </div>
 
@@ -340,12 +352,38 @@ function renderStageMap(){
   } else {
     sub.textContent = docs>0 ? `자료 ${docs}/${TOTAL_DOCS}` : '도전!';
   }
+
+  // 스테이지3(자본의 제왕) — 스테이지2(배분의 방)가 아직 없어서, 스테이지1 클리어로 바로 언락
+  let s3Cleared=false, s3Score=0;
+  try{
+    const raw3=localStorage.getItem('lv1_s3_progress');
+    if(raw3){ const s3=JSON.parse(raw3)||{}; s3Cleared=!!s3.cleared; s3Score=s3.score||0; }
+  }catch(e){}
+  const node3=document.getElementById('node-s3'), sub3=document.getElementById('sub-s3');
+  if(node3){
+    const lockBadge3=node3.querySelector('.lock-badge'), clearBadge3=node3.querySelector('.clear-badge');
+    if(cleared){
+      node3.classList.remove('lock');
+      lockBadge3.style.display='none';
+      if(s3Cleared){
+        node3.classList.add('done');
+        clearBadge3.style.display='flex';
+        sub3.textContent=`클리어 · ${s3Score}점`;
+      } else {
+        node3.classList.add('cur');
+        sub3.textContent='도전!';
+      }
+    } else {
+      sub3.textContent='스테이지1 클리어 필요';
+    }
+  }
+
   const lit=document.getElementById('trail-lit');
   if(lit){
     const total=lit.getTotalLength();
     lit.style.strokeDasharray=total;
-    // 2노드(스테이지1→2) 경로 — 스테이지1 클리어해야 스테이지2 방향까지 전부 밝혀짐
-    const frac = cleared ? 1 : 0;
+    // 3노드 경로 — 스테이지1 클리어로 절반(스테이지2 방향)까지, 스테이지3 클리어로 끝까지 밝혀짐
+    const frac = cleared ? (s3Cleared ? 1 : 0.5) : 0;
     lit.style.strokeDashoffset = total*(1-frac);
   }
 }
