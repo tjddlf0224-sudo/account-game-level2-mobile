@@ -255,6 +255,80 @@ body{ font-family:'Noto Sans KR',sans-serif; color:#fff; position:relative; touc
   color:#fff; font-family:'Black Han Sans',sans-serif; font-size:0.9rem;
 }
 .docs-close:active{ transform:scale(0.98); }
+
+/* =========================================================================
+ *  P5 — 제조원가명세서 최종 미니게임 (§5-2)
+ * ========================================================================= */
+#sheet-overlay{ align-items:stretch; }
+#sheet-panel{
+  width:100%; display:flex; gap:10px; padding:8px 10px;
+  padding-top:max(8px,env(safe-area-inset-top));
+  padding-bottom:max(8px,env(safe-area-inset-bottom));
+  background:linear-gradient(180deg, rgba(16,13,28,0.99), rgba(8,6,16,1));
+  overflow:hidden;
+}
+/* ── 왼쪽: 명세서 ── */
+.sh-left{ flex:1.05; min-width:0; display:flex; flex-direction:column; }
+.sh-title{
+  font-family:'Black Han Sans',sans-serif; font-size:0.95rem; text-align:center;
+  padding:4px 0 6px; border-bottom:2px solid rgba(180,79,255,0.45); margin-bottom:4px; flex-shrink:0;
+}
+.sh-rows{ flex:1; overflow-y:auto; font-size:0.72rem; }
+.sh-row{
+  display:flex; align-items:center; gap:5px; padding:4px 6px; border-radius:7px;
+  border:1px solid transparent; min-height:26px;
+}
+.sh-row.sum{ background:rgba(180,79,255,0.10); border-color:rgba(180,79,255,0.3); }
+.sh-row.final{ background:rgba(0,230,118,0.12); border-color:rgba(0,230,118,0.45); }
+.sh-rn{ width:16px; color:rgba(255,255,255,0.4); font-family:'Orbitron',monospace; font-size:0.6rem; flex-shrink:0; }
+.sh-nm{ flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:rgba(255,255,255,0.85); }
+.sh-vl{ font-family:'Orbitron',monospace; font-size:0.72rem; color:var(--gd); white-space:nowrap; }
+.sh-row.final .sh-vl{ color:var(--gn); font-size:0.8rem; }
+.sh-sub{ font-size:0.6rem; color:rgba(255,255,255,0.32); padding:1px 6px 3px 22px; line-height:1.35; }
+/* ── 오른쪽: 카드 + 분류 버튼 ── */
+.sh-right{ flex:1; min-width:0; display:flex; flex-direction:column; }
+.sh-hint{ font-size:0.66rem; color:rgba(255,255,255,0.45); text-align:center; margin-bottom:5px; flex-shrink:0; line-height:1.4; }
+.sh-cards{ flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:5px; }
+.sh-card{
+  padding:7px 9px; border-radius:9px; cursor:pointer; text-align:left;
+  background:rgba(255,255,255,0.06); border:1.5px solid rgba(255,255,255,0.2);
+  color:#f0f0f5; font-family:'Noto Sans KR',sans-serif; font-size:0.7rem; line-height:1.3;
+}
+.sh-card:active{ transform:scale(0.98); }
+.sh-card.sel{ border-color:var(--gd); background:rgba(255,214,0,0.16); }
+.sh-card .cv{ font-family:'Orbitron',monospace; font-size:0.68rem; color:var(--cy); }
+.sh-card .cminus{ color:var(--pk); font-size:0.62rem; }
+.sh-buckets{ display:grid; grid-template-columns:repeat(2,1fr); gap:5px; margin-top:6px; flex-shrink:0; }
+.sh-bk{
+  padding:8px 4px; border-radius:9px; cursor:pointer; text-align:center;
+  background:rgba(180,79,255,0.14); border:1.5px solid rgba(180,79,255,0.4);
+  color:#fff; font-family:'Black Han Sans',sans-serif; font-size:0.72rem; line-height:1.2;
+}
+.sh-bk:active{ transform:scale(0.97); }
+.sh-bk.trash{ background:rgba(255,45,120,0.12); border-color:rgba(255,45,120,0.4); }
+.sh-bk[disabled]{ opacity:0.3; pointer-events:none; }
+.sh-fb{
+  font-size:0.68rem; line-height:1.45; padding:7px 9px; border-radius:8px;
+  margin-top:6px; flex-shrink:0; display:none;
+}
+.sh-fb.show{ display:block; }
+.sh-fb.bad{ background:rgba(255,45,120,0.12); border:1px solid rgba(255,45,120,0.4); color:#ffb3cb; }
+.sh-fb.good{ background:rgba(0,230,118,0.12); border:1px solid rgba(0,230,118,0.4); color:#a3f7c5; }
+.sh-done{
+  margin-top:6px; height:40px; border-radius:10px; cursor:pointer; width:100%; flex-shrink:0;
+  background:rgba(0,230,118,0.2); border:1px solid rgba(0,230,118,0.55);
+  color:#fff; font-family:'Black Han Sans',sans-serif; font-size:0.84rem;
+  display:none; align-items:center; justify-content:center;
+}
+.sh-done.show{ display:flex; }
+.sh-done:active{ transform:scale(0.98); }
+
+@media (max-width:700px){
+  .sh-rows{ font-size:0.66rem; }
+  .sh-card{ font-size:0.65rem; padding:6px 7px; }
+  .sh-bk{ font-size:0.66rem; padding:7px 3px; }
+  .sh-title{ font-size:0.86rem; }
+}
 </style>
 </head>
 <body>
@@ -328,6 +402,22 @@ body{ font-family:'Noto Sans KR',sans-serif; color:#fff; position:relative; touc
   </div>
 </div>
 
+<div class="ov" id="sheet-overlay">
+  <div id="sheet-panel">
+    <div class="sh-left">
+      <div class="sh-title">제조원가명세서</div>
+      <div class="sh-rows" id="sh-rows"></div>
+    </div>
+    <div class="sh-right">
+      <div class="sh-hint" id="sh-hint">자료 카드를 고른 뒤, 들어갈 칸을 누르세요</div>
+      <div class="sh-cards" id="sh-cards"></div>
+      <div class="sh-buckets" id="sh-buckets"></div>
+      <div class="sh-fb" id="sh-fb"></div>
+      <button class="sh-done" id="sh-done">명세서 제출하기</button>
+    </div>
+  </div>
+</div>
+
 </div><!-- /rotator -->
 
 <script>
@@ -362,7 +452,13 @@ function applyOrientation(){
     document.body.classList.remove('rot');
     rot.style.width=''; rot.style.height=''; rot.style.transform=''; rot.style.transformOrigin='';
   }
-  if(window.World && World.resize){ World.resize(); World.drawMinimap && World.drawMinimap(); }
+  // ⚠️ 최상위 const로 선언된 World는 window에 안 붙는다(window.World === undefined).
+  //    예전엔 window.World로 체크해서 resize가 아예 안 돌았고, 캔버스가 기본 300×150로
+  //    남아 화면 구석에만 그려지는 버그가 있었다. 직접 참조로 고정할 것.
+  if(typeof World!=='undefined' && World.resize){
+    World.resize();
+    if(World.drawMinimap) World.drawMinimap();
+  }
 }
 
 /* ── 타일 종류 ─────────────────────────────────────────────
@@ -661,10 +757,10 @@ const NPC_DATA = {
       {who:'npc', t:'되돌아가야 해서 좀 귀찮으시겠지만… 안 가면 명세서 숫자가 안 맞아요.'},
     ],
     quiz:[{
-      q:'기초제품 400,000원, 당기제품제조원가 9,000,000원, 기말제품 600,000원. 매출원가는?',
-      opts:['8,800,000원','9,000,000원','9,200,000원','10,000,000원'], answer:0,
-      hint:'T자예요. 있던 거(400) + 들어온 거(9,000) − 남은 거(600). 나간 게 팔린 거죠.',
-      ok:'정확합니다. 8,800,000원. (팔레트 각을 한 번 더 맞춘다) 기분 좋네요, 숫자가 딱 맞으면.',
+      q:'기초제품 400,000원, 당기제품제조원가 10,780,000원, 기말제품 600,000원. 매출원가는?',
+      opts:['10,180,000원','10,580,000원','10,780,000원','11,780,000원'], answer:1,
+      hint:'T자예요. 있던 거(400) + 들어온 거(10,780) − 남은 거(600). 나간 게 팔린 거죠.',
+      ok:'정확합니다. 10,580,000원. (팔레트 각을 한 번 더 맞춘다) 기분 좋네요, 숫자가 딱 맞으면.',
     }],
     doc:{ id:'doc_product', name:'제품 입출고 대장', icon:'📦', values:{'기초제품':400000,'기말제품':600000} },
     repeat:'만든 거랑 판 건 달라요. 팔려야 비용이에요.',
@@ -902,7 +998,9 @@ const NPC_DATA = {
       {who:'npc', t:'(넘겨본다) …목재 명세서, 수불부, 작업원가표, 감가상각 명세, 재공품 조사표, 식수 인원표까지.'},
       {who:'npc', t:'다 받아왔네. 그럼 이제 진짜다.'},
       {who:'npc', t:'이 흩어진 종이들을 한 장으로 합치는 게 제조원가명세서야. 해보자.'},
-      {who:'narrator', t:'— 제조원가명세서 미니게임은 다음 업데이트에서 이어집니다 —'},
+      {who:'npc', t:'내가 자료를 카드로 뽑아놨어. 하나씩 골라서 어디 칸에 들어갈지 정하면 돼.'},
+      {who:'npc', t:'아, 그리고 미리 말해두는데 — 저기 안 들어갈 것도 섞어놨다. 잘 골라내.'},
+      {who:'action', act:'sheet'},                        // ← 최종 미니게임 진입(§5-2)
       {who:'npc', t:'아침에 내가 던진 그 보고서, 기억나?'},
       {who:'player', t:'…이제 조금은 읽힙니다.'},
       {who:'npc', t:'그래. 그게 오늘의 전부야.'},
@@ -914,7 +1012,7 @@ const NPC_DATA = {
     ],
     quiz:[],
     doc:null,
-    repeat:'서류철 다 모았잖아. 명세서는 다음 업데이트에서 마저 완성하자.',
+    repeat:'명세서까지 끝냈잖아. 이제 자네가 나보다 낫겠어.',
   },
 };
 
@@ -1697,7 +1795,8 @@ const Dialog = {
       this.queue = [{who:'npc', t:def.repeat}];
     } else {
       this._repeatMode = false;
-      this.queue = def.beats;
+      // 복사본 — 미니게임 결과 대사를 런타임에 끼워넣으므로 NPC_DATA 원본을 건드리면 안 된다
+      this.queue = def.beats.slice();
     }
     this.idx = 0;
     document.getElementById('dlg-overlay').classList.add('show');
@@ -1736,7 +1835,26 @@ const Dialog = {
       else this.complete(this.npcKey, def);
       return;
     }
+    const b=this.queue[this.idx];
+    if(b && b.who==='action'){ this.runAction(b); return; }
     this.render();
+  },
+
+  /* 대사 도중 미니게임 진입 → 끝나면 결과 대사를 끼워넣고 이어서 재생 */
+  runAction(b){
+    document.getElementById('dlg-overlay').classList.remove('show');
+    if(b.act!=='sheet'){ this.next(); return; }
+    Sheet.open((res)=>{
+      const lines=[
+        {who:'npc', t:`당기제품제조원가 ${res.cogm.toLocaleString('ko-KR')}원. …맞췄네.`},
+        res.wrong===0
+          ? {who:'npc', t:'게다가 한 번도 안 틀렸어. 영업부 급여랑 출하 운임 안 넣은 거, 그거 넣는 신입이 열에 아홉이야.'}
+          : {who:'npc', t:'몇 번 헤맸지만 결국 다 골라냈네. 처음엔 다 그래. 중요한 건 왜 빠지는지 알게 된 거고.'},
+      ];
+      this.queue = this.queue.slice(0,this.idx+1).concat(lines, this.queue.slice(this.idx+1));
+      document.getElementById('dlg-overlay').classList.add('show');
+      this.next();
+    });
   },
 
   complete(key, def){
@@ -1863,6 +1981,187 @@ const DocsUI = {
     World.paused=false;
   },
 };
+
+/* =========================================================================
+ *  P5 — 제조원가명세서 최종 미니게임 (기획서 §5-2)
+ *  카드를 재료비/노무비/경비/재공품 칸에 분류해 넣고, 판관비 함정 3장은
+ *  걸러낸다. 오답 페널티 없음(§5-1 원칙) — 한서준이 이유를 설명하고 되돌려줌.
+ * ========================================================================= */
+const BUCKETS = [
+  { id:'mat',   label:'Ⅰ 재료비' },
+  { id:'lab',   label:'Ⅱ 노무비' },
+  { id:'exp',   label:'Ⅲ 경비' },
+  { id:'wip',   label:'Ⅴ·Ⅶ 재공품' },
+  { id:'sga',   label:'✕ 판매관리비', trash:true },
+];
+
+/* sign: +1 가산 / -1 차감. bucket: 정답 칸. why: 오배치 시 한서준의 설명 */
+const SHEET_CARDS = [
+  { id:'c1',  name:'기초 원재료 재고액',   val:200000,   sign:+1, bucket:'mat',
+    why:'창고에 원래 있던 재료도 이번 달에 쓸 수 있는 재료야. 재료비 칸이지.' },
+  { id:'c2',  name:'당기 원재료 매입액',   val:4200000,  sign:+1, bucket:'mat',
+    why:'이번 달에 사온 재료. 당연히 재료비다.' },
+  { id:'c3',  name:'기말 원재료 재고액',   val:300000,   sign:-1, bucket:'mat',
+    why:'아직 창고에 남아 있는 건 안 쓴 거야. 재료비에서 빼야지.' },
+  { id:'c4',  name:'간접재료비(소모품)',   val:180000,   sign:+1, bucket:'mat',
+    why:'오지람 주임이 말했지? 간접재료비도 재료비야. 경비 아니고.' },
+  { id:'c5',  name:'직접노무비',           val:2600000,  sign:+1, bucket:'lab',
+    why:'제품을 직접 만든 사람 인건비. 노무비 칸이다.' },
+  { id:'c6',  name:'간접노무비(감독자 급여)', val:1100000, sign:+1, bucket:'lab',
+    why:'서성일 반장 급여. 간접이어도 공장 사람 인건비니까 노무비야.' },
+  { id:'c7',  name:'공장 기계 감가상각비', val:1000000,  sign:+1, bucket:'exp',
+    why:'재료도 인건비도 아니지. 공장 설비가 닳은 값이니 제조경비다.' },
+  { id:'c8',  name:'전력비 등 기타경비',   val:700000,   sign:+1, bucket:'exp',
+    why:'공장을 돌리는 데 든 그 밖의 비용. 경비 칸이야.' },
+  { id:'c9',  name:'식당부문 배분액',      val:600000,   sign:+1, bucket:'exp',
+    why:'보조부문 원가는 라인으로 올라와서 제조원가가 돼. 경비로 잡는다.' },
+  { id:'c10', name:'동력부문 배분액',      val:800000,   sign:+1, bucket:'exp',
+    why:'보일러실 몫도 결국 의자에 붙어. 경비 칸이다.' },
+  { id:'c11', name:'기초 재공품 재고액',   val:500000,   sign:+1, bucket:'wip',
+    why:'지난달에 만들다 만 것. 당기총제조비용에 더해서 합계를 낸다.' },
+  { id:'c12', name:'기말 재공품 재고액',   val:800000,   sign:-1, bucket:'wip',
+    why:'아직 완성 안 된 건 제품이 아니야. 합계에서 빼야 당기제품제조원가가 나온다.' },
+  { id:'t1',  name:'본사 영업부 급여',     val:1500000,  sign:+1, bucket:'sga', trap:true,
+    why:'본사 영업부는 공장이 아니야. 판매비와관리비지 제조원가가 아니다.' },
+  { id:'t2',  name:'본사 건물 감가상각비', val:400000,   sign:+1, bucket:'sga', trap:true,
+    why:'같은 감가상각비라도 공장 것만 제조경비야. 본사 건물은 판관비.' },
+  { id:'t3',  name:'제품 출하 운임',       val:250000,   sign:+1, bucket:'sga', trap:true,
+    why:'차대한 기사가 말했지? 사올 때 운임은 원가, 팔러 갈 때 운임은 판관비야.' },
+];
+
+const Sheet = {
+  placed:{}, sel:null, wrong:0, onDone:null, phase:'place',
+
+  open(cb){
+    this.onDone=cb; this.placed={}; this.sel=null; this.wrong=0; this.phase='place';
+    World.paused=true;
+    document.getElementById('sheet-overlay').classList.add('show');
+    document.getElementById('sh-done').classList.remove('show');
+    this.renderBuckets();
+    this.render();
+  },
+
+  sum(bucketId){
+    return SHEET_CARDS.reduce((s,c)=>
+      (this.placed[c.id]===bucketId ? s + c.val*c.sign : s), 0);
+  },
+  /* 재공품은 Ⅴ(가산)·Ⅶ(차감)로 따로 보여줘야 해서 부호별로 뽑는다 */
+  wipBy(sign){
+    return SHEET_CARDS.reduce((s,c)=>
+      (this.placed[c.id]==='wip' && c.sign===sign ? s + c.val : s), 0);
+  },
+
+  render(){
+    const mat=this.sum('mat'), lab=this.sum('lab'), exp=this.sum('exp');
+    const total=mat+lab+exp;
+    const wipStart=this.wipBy(+1), wipEnd=this.wipBy(-1);
+    const subtotal=total+wipStart;
+    const cogm=subtotal-wipEnd;
+
+    const won=(n)=> n.toLocaleString('ko-KR')+'원';
+    const rows=[
+      { rn:'Ⅰ', nm:'재료비',          v:mat,   sub:'기초원재료 + 당기매입 − 기말원재료 + 간접재료비' },
+      { rn:'Ⅱ', nm:'노무비',          v:lab,   sub:'직접노무비 + 간접노무비' },
+      { rn:'Ⅲ', nm:'경비',            v:exp,   sub:'감가상각비 + 기타경비 + 보조부문 배분액' },
+      { rn:'Ⅳ', nm:'당기총제조비용',   v:total, cls:'sum', sub:'Ⅰ + Ⅱ + Ⅲ' },
+      { rn:'Ⅴ', nm:'기초재공품재고액', v:wipStart },
+      { rn:'Ⅵ', nm:'합계',            v:subtotal, cls:'sum', sub:'Ⅳ + Ⅴ' },
+      { rn:'Ⅶ', nm:'기말재공품재고액', v:wipEnd, minus:true },
+      { rn:'Ⅷ', nm:'당기제품제조원가', v:cogm, cls:'final', sub:'Ⅵ − Ⅶ' },
+    ];
+    const box=document.getElementById('sh-rows');
+    box.innerHTML='';
+    rows.forEach(r=>{
+      const el=document.createElement('div');
+      el.className='sh-row'+(r.cls?' '+r.cls:'');
+      el.innerHTML=`<span class="sh-rn">${r.rn}</span>`+
+                   `<span class="sh-nm">${r.nm}</span>`+
+                   `<span class="sh-vl">${r.minus&&r.v?'(−) ':''}${won(r.v)}</span>`;
+      box.appendChild(el);
+      if(r.sub){
+        const s=document.createElement('div');
+        s.className='sh-sub'; s.textContent=r.sub;
+        box.appendChild(s);
+      }
+    });
+
+    // 남은 카드
+    const cards=document.getElementById('sh-cards');
+    cards.innerHTML='';
+    const left=SHEET_CARDS.filter(c=>!this.placed[c.id]);
+    left.forEach(c=>{
+      const b=document.createElement('button');
+      b.className='sh-card'+(this.sel===c.id?' sel':'');
+      b.innerHTML=`${c.name}<br><span class="cv">${c.val.toLocaleString('ko-KR')}원</span>`+
+                  (c.sign<0?' <span class="cminus">(차감 항목)</span>':'');
+      b.addEventListener('click',()=>this.pick(c.id));
+      cards.appendChild(b);
+    });
+
+    document.getElementById('sh-hint').textContent =
+      left.length ? `자료 카드를 고른 뒤, 들어갈 칸을 누르세요 (남은 카드 ${left.length}장)`
+                  : '모든 자료를 배치했습니다. 명세서를 제출하세요.';
+    document.getElementById('sh-done').classList.toggle('show', left.length===0);
+    this.syncBuckets();
+  },
+
+  renderBuckets(){
+    const box=document.getElementById('sh-buckets');
+    box.innerHTML='';
+    BUCKETS.forEach(b=>{
+      const el=document.createElement('button');
+      el.className='sh-bk'+(b.trash?' trash':'');
+      el.textContent=b.label;
+      el.dataset.bk=b.id;
+      el.addEventListener('click',()=>this.place(b.id));
+      box.appendChild(el);
+    });
+  },
+  syncBuckets(){
+    const on=!!this.sel;
+    document.querySelectorAll('#sh-buckets .sh-bk').forEach(el=>{
+      if(on) el.removeAttribute('disabled'); else el.setAttribute('disabled','');
+    });
+  },
+
+  pick(id){
+    this.sel = (this.sel===id) ? null : id;
+    this.render();
+  },
+
+  place(bucketId){
+    if(!this.sel) return;
+    const card=SHEET_CARDS.find(c=>c.id===this.sel);
+    const fb=document.getElementById('sh-fb');
+    if(card.bucket===bucketId){
+      this.placed[card.id]=bucketId;
+      this.sel=null;
+      fb.className='sh-fb good show';
+      fb.textContent = card.trap
+        ? `✅ 한서준: 그래, 그건 빼는 게 맞아. ${card.why}`
+        : `✅ 한서준: 맞아. ${card.why}`;
+    } else {
+      this.wrong++;
+      fb.className='sh-fb bad show';
+      fb.textContent = `❌ 한서준: 거기 아니야. ${card.why}`;
+    }
+    this.render();
+  },
+
+  finish(){
+    const cogm=this.sum('mat')+this.sum('lab')+this.sum('exp')+this.wipBy(+1)-this.wipBy(-1);
+    // 점수: 기본 100 − 오배치당 5점(최저 50). 퀴즈 정답률·수집률은 이미 전제(14/14).
+    const score=Math.max(50, 100-this.wrong*5);
+    Stage.state.cleared=true;
+    Stage.state.score=score;
+    Stage.state.cogm=cogm;
+    Stage.save();
+    document.getElementById('sheet-overlay').classList.remove('show');
+    const cb=this.onDone; this.onDone=null;
+    if(cb) cb({cogm, wrong:this.wrong, score});
+  },
+};
+document.getElementById('sh-done').addEventListener('click',()=>Sheet.finish());
 
 /* ── 부팅 ── */
 Stage.load();
