@@ -135,37 +135,38 @@
         .journal-left { flex: 1; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
         .journal-problem-box {
             background: #333; padding: 15px; border-radius: 10px;
-            border-left: 5px solid var(--neon-gold); font-size: 1rem; line-height: 1.4; word-break: keep-all;
+            border-left: 5px solid var(--neon-gold); font-size: 1.15rem; line-height: 1.5; word-break: keep-all;
         }
-        /* 계정과목 풀 — 모드 전환 버튼 없이, 카드마다 "차변으로/대변으로" 버튼을 항상 노출.
-           (예전엔 상단 모드 버튼을 먼저 눌러야 계정과목 탭 결과가 정해지는 구조라, 모드를
-           깜빡하면 반대쪽에 조용히 들어가는 문제가 있었음 — 목적지를 매번 명시적으로
-           고르게 바꿔서 해결) */
+        /* 계정과목 풀 — 카드를 손가락으로 끌어다 차변/대변 칸에 놓는 드래그 앤 드롭.
+           (버튼 두 개를 카드마다 붙여놓는 방식은 버튼이 많아 지저분하다는 피드백으로 교체) */
         .account-pool {
             display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
             padding: 10px; background: #222; border-radius: 10px;
             overflow-y: auto; min-height: 100px; /* 모바일에서 최소 높이 */
         }
         .acc-card {
-            background: #3d3d3d; border-radius: 8px; padding: 8px;
-            display: flex; flex-direction: column; gap: 6px; align-items: center;
+            background: #3d3d3d; border-radius: 8px; padding: 14px 8px;
+            text-align: center; color: #ddd; font-size: 0.92rem; word-break: keep-all;
+            cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none;
+            border: 1.5px solid transparent; transition: opacity .12s;
         }
-        .acc-name { color: #ddd; font-size: 0.86rem; text-align: center; word-break: keep-all; }
-        .acc-picks { display: flex; gap: 6px; width: 100%; }
-        .acc-pick {
-            flex: 1; border: none; border-radius: 6px; padding: 8px 4px; cursor: pointer;
-            font-family: 'Jua'; font-size: 0.8rem; color: white;
+        .acc-card:active{ cursor: grabbing; }
+        .acc-card.dragging{ opacity: 0.3; }
+        .acc-ghost{
+            position: fixed; z-index: 999; pointer-events: none;
+            background: #4a4a4a; border: 2px solid var(--neon-gold); border-radius: 8px;
+            padding: 12px 18px; color: #fff; font-family: 'Jua'; font-size: 1rem;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5); white-space: nowrap;
+            transform: translate(-50%, -50%) scale(1.08);
         }
-        .acc-pick.dr { background: #d63031; }
-        .acc-pick.cr { background: #0984e3; }
-        .acc-pick:active { transform: scale(0.94); }
 
         .journal-right { flex: 1; display: flex; flex-direction: column; }
         .journal-board { display: flex; gap: 10px; flex: 1; margin-bottom: 10px; min-height: 150px; }
         .j-col {
             flex: 1; background: rgba(0,0,0,0.3); border: 2px solid #444; border-radius: 10px;
-            display: flex; flex-direction: column; padding: 5px;
+            display: flex; flex-direction: column; padding: 5px; transition: border-color .12s, background .12s;
         }
+        .j-col.drop-hover{ border-color: var(--neon-gold); background: rgba(255,215,0,0.1); }
         .j-header { text-align: center; font-family: 'Jua'; font-size: 1rem; padding: 5px; border-bottom: 1px solid #444; }
         .j-items { flex: 1; padding: 5px; gap: 5px; display: flex; flex-direction: column; overflow-y: auto; }
         .j-item-tag {
@@ -219,9 +220,8 @@
             #screen-journal { flex-direction: column; overflow-y: auto; }
             .journal-left { flex: none; height: auto; max-height: 45%; }
             .journal-right { flex: 1; min-height: 250px; }
-            .journal-problem-box { font-size: 0.9rem; padding: 10px; }
-            .acc-name { font-size: 0.8rem; }
-            .acc-pick { padding: 9px 4px; font-size: 0.74rem; }
+            .journal-problem-box { font-size: 1.02rem; padding: 10px; }
+            .acc-card { padding: 11px 6px; font-size: 0.84rem; }
         }
 
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
@@ -749,15 +749,57 @@
                 if (placed.has(opt)) return; // 이미 배치된 계정과목은 풀에서 숨김
                 const card = document.createElement('div');
                 card.className = 'acc-card';
-                card.innerHTML = `<div class="acc-name">${opt}</div>
-                    <div class="acc-picks">
-                        <button class="acc-pick dr">차변으로</button>
-                        <button class="acc-pick cr">대변으로</button>
-                    </div>`;
-                card.querySelector('.dr').onclick = () => addAccount(opt, 'dr');
-                card.querySelector('.cr').onclick = () => addAccount(opt, 'cr');
+                card.textContent = opt;
+                bindAccountDrag(card, opt);
                 poolEl.appendChild(card);
             });
+        }
+
+        // --- 계정과목 카드를 손가락/마우스로 끌어다 차변·대변 칸에 놓는 드래그 앤 드롭 ---
+        function drCol(){ return document.getElementById('list-dr').closest('.j-col'); }
+        function crCol(){ return document.getElementById('list-cr').closest('.j-col'); }
+        function zoneAtPoint(x, y){
+            const d = drCol().getBoundingClientRect();
+            if (x>=d.left && x<=d.right && y>=d.top && y<=d.bottom) return 'dr';
+            const c = crCol().getBoundingClientRect();
+            if (x>=c.left && x<=c.right && y>=c.top && y<=c.bottom) return 'cr';
+            return null;
+        }
+        function setDropHover(zone){
+            drCol().classList.toggle('drop-hover', zone==='dr');
+            crCol().classList.toggle('drop-hover', zone==='cr');
+        }
+        function bindAccountDrag(card, accName){
+            let ghost = null;
+            function onDown(e){
+                e.preventDefault();
+                card.setPointerCapture(e.pointerId);
+                card.classList.add('dragging');
+                ghost = document.createElement('div');
+                ghost.className = 'acc-ghost';
+                ghost.textContent = accName;
+                document.body.appendChild(ghost);
+                placeGhost(e.clientX, e.clientY);
+                card.addEventListener('pointermove', onMove);
+                card.addEventListener('pointerup', onUp);
+                card.addEventListener('pointercancel', onUp);
+            }
+            function placeGhost(x, y){ ghost.style.left = x+'px'; ghost.style.top = y+'px'; }
+            function onMove(e){
+                placeGhost(e.clientX, e.clientY);
+                setDropHover(zoneAtPoint(e.clientX, e.clientY));
+            }
+            function onUp(e){
+                card.removeEventListener('pointermove', onMove);
+                card.removeEventListener('pointerup', onUp);
+                card.removeEventListener('pointercancel', onUp);
+                card.classList.remove('dragging');
+                setDropHover(null);
+                if (ghost) { ghost.remove(); ghost = null; }
+                const zone = zoneAtPoint(e.clientX, e.clientY);
+                if (zone) addAccount(accName, zone);
+            }
+            card.addEventListener('pointerdown', onDown);
         }
 
         function addAccount(accName, mode) {
