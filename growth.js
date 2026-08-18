@@ -121,6 +121,8 @@
         correct: Math.max(0, parseInt(rec.correct, 10) || 0),
         source: platform()   // 'web' | 'android' | 'ios' — 광고수익 분석 시 앱/웹 구분용
       };
+      // 이론(theory)처럼 문항 수가 판마다 달라지는 게임만 total을 넘김 — 교수자 대시보드 정답률(correct/total) 계산용
+      if (rec.total != null) row.total = Math.max(0, parseInt(rec.total, 10) || 0);
       var gid = groupId();
       if (gid) row.group_id = gid;
       try { db.from(TABLE).insert(row).then(function () {}, function () {}); } catch (e) {}

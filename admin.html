@@ -1051,7 +1051,7 @@ let theoryWeakByTopic = {};   // topic → count (그룹 전체)
 let theoryWeakByStudent = {}; // name → { topic → count }
 const TOPIC_ORDER = ['회계의 기본원리','당좌자산','재고자산','유형자산','부채','자본','수익과 비용'];
 
-let theoryScoreByStudent = {}; // name → { best, plays, passed }
+let theoryScoreByStudent = {}; // name → { bestRate, plays, passed }
 // 이론 합격 기준: 정답률 60%(🥈 합격 가시권) 이상을 한 번이라도 달성 — theory.html의 grade() 등급과 동일
 const THEORY_PASS_GRADES = ['👑 회계 마스터', '🥇 합격 안정권', '🥈 합격 가시권'];
 
@@ -1059,11 +1059,12 @@ async function loadTheoryScores(gid) {
   theoryScoreByStudent = {};
   try {
     const { data, error } = await db.from('score_history')
-      .select('user_name,score,grade').eq('group_id', gid).eq('game_id', 'theory').limit(5000);
+      .select('user_name,score,grade,correct,total').eq('group_id', gid).eq('game_id', 'theory').limit(5000);
     if (error) throw error;
     (data || []).forEach(r => {
-      const cur = theoryScoreByStudent[r.user_name] || { best: 0, plays: 0, passed: false };
-      cur.best = Math.max(cur.best, r.score || 0);
+      const cur = theoryScoreByStudent[r.user_name] || { bestRate: 0, plays: 0, passed: false };
+      // total은 이번 업데이트 이후 판부터 저장됨 — 그 전 기록(total null)은 정답률 계산에서 제외
+      if (r.total) cur.bestRate = Math.max(cur.bestRate, r.correct / r.total);
       cur.plays += 1;
       if (THEORY_PASS_GRADES.includes(r.grade)) cur.passed = true;
       theoryScoreByStudent[r.user_name] = cur;
@@ -1244,7 +1245,7 @@ function renderDashboard(scores) {
 
       const theoryInfo = theoryScoreByStudent[r.name];
       const theoryCell = theoryInfo
-        ? `<td><span class="score-cell ${theoryInfo.passed?'sc-high':'sc-low'}">${theoryInfo.best.toLocaleString()}</span><div style="font-size:0.62rem;color:rgba(255,255,255,0.3);margin-top:2px">${theoryInfo.plays}회</div></td>`
+        ? `<td><span class="score-cell ${theoryInfo.passed?'sc-high':'sc-low'}">${Math.round(theoryInfo.bestRate*100)}%</span><div style="font-size:0.62rem;color:rgba(255,255,255,0.3);margin-top:2px">${theoryInfo.plays}회</div></td>`
         : `<td><span class="score-cell sc-none">미참여</span></td>`;
 
       return `<tr style="cursor:pointer" onclick="openModal('${escAttr(r.name)}')">
@@ -1303,7 +1304,7 @@ function openModal(name) {
     const tcol = !t?'rgba(255,255,255,0.2)':t.passed?'var(--gn)':'var(--pk)';
     return `<div class="msg-card">
       <div class="msg-game">📝 이론</div>
-      <div class="msg-score" style="color:${tcol}">${t?t.best.toLocaleString():'—'}</div>
+      <div class="msg-score" style="color:${tcol}">${t?Math.round(t.bestRate*100)+'%':'—'}</div>
       <div class="msg-grade">${t?t.plays+'회 플레이'+(t.passed?' · 합격 가시권↑':''):'미참여'}</div>
     </div>`;
   })();
