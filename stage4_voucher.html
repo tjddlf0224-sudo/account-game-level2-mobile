@@ -104,6 +104,42 @@
   .btn-row a,.btn-row button{flex:1;border-radius:13px;padding:13px;font-size:.92rem;font-weight:600;
       border:1px solid var(--line);background:var(--card2);color:var(--txt);cursor:pointer;text-decoration:none;text-align:center;}
   .btn-row .primary{border:none;background:linear-gradient(90deg,var(--blue),var(--green));color:#021;}
+
+  /* ── 게임 방법 튜토리얼 ── */
+  .guide-btn{display:block;width:100%;border:1.5px solid var(--line);border-radius:14px;padding:12px;
+    font-size:.9rem;font-weight:600;color:var(--dim);background:var(--card2);cursor:pointer;margin-top:8px;text-align:center;}
+  .tut{display:none;position:fixed;inset:0;z-index:9999;flex-direction:column;background:var(--bg);}
+  .tut.show{display:flex;animation:tutPop .25s ease;}
+  @keyframes tutPop{from{opacity:0;transform:scale(.97);}to{opacity:1;transform:scale(1);}}
+  .tut-top{display:flex;align-items:center;gap:9px;padding:calc(12px + env(safe-area-inset-top)) 18px 10px;}
+  .tut-top .tt-title{font-weight:800;font-size:1.05rem;color:#fff;}
+  .tut-top .tt-badge{font-size:.8rem;font-weight:800;color:#fff;background:var(--red);border-radius:50px;padding:3px 12px;}
+  .tut-top .tt-skip{margin-left:auto;background:rgba(255,255,255,.1);border:none;color:rgba(255,255,255,.75);
+    border-radius:50px;padding:6px 14px;font-size:.8rem;cursor:pointer;}
+  .tut-stage{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;padding:6px 16px 0;overflow-y:auto;}
+  .tut-stage .qcard{width:100%;max-width:480px;}
+  .tut-stage .tgroup{width:100%;max-width:480px;}
+  .tut .tbtn.tut-target{position:relative;border-color:var(--gold);box-shadow:0 0 0 3px rgba(255,210,74,.35);animation:tutGlow 1s ease-in-out infinite;}
+  @keyframes tutGlow{0%,100%{box-shadow:0 0 0 3px rgba(255,210,74,.35);}50%{box-shadow:0 0 0 7px rgba(255,210,74,.1);}}
+  .tut .tbtn.tut-dim{opacity:.3;pointer-events:none;}
+  .tut-bubble{background:rgba(0,0,0,.35);border-top:1px solid var(--line);padding:16px 18px calc(16px + env(safe-area-inset-bottom));}
+  .tut-bubble-text{font-size:.98rem;line-height:1.6;color:#e0e6ed;word-break:keep-all;text-align:center;}
+  .tut-bubble-text b{color:var(--blue);}
+  .tut-hint{text-align:center;font-weight:800;color:var(--gold);font-size:.92rem;margin-top:8px;}
+  .tut-next{display:block;width:100%;margin-top:14px;padding:15px;border-radius:14px;border:2px solid rgba(255,255,255,.3);
+    background:transparent;color:#fff;font-size:1rem;font-weight:700;cursor:pointer;}
+
+  /* ── TOP 랭킹(결과화면) ── */
+  .rank-title{font-size:.72rem;color:rgba(255,255,255,.35);letter-spacing:2px;margin:18px 0 8px;text-align:center;}
+  #my-rank-badge{display:none;font-size:.82rem;color:var(--blue);background:rgba(0,242,255,.1);border:1px solid rgba(0,242,255,.3);
+    border-radius:50px;padding:6px 16px;margin:0 auto 8px;text-align:center;max-width:max-content;}
+  #rank-box{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:12px;max-height:180px;overflow-y:auto;padding:4px 0;text-align:left;}
+  .rr-row{display:grid;grid-template-columns:34px 1fr 70px;gap:6px;padding:8px 12px;font-size:.8rem;border-bottom:1px solid rgba(255,255,255,.05);align-items:center;}
+  .rr-row:last-child{border-bottom:none;}
+  .rr-row.me{background:rgba(0,242,255,.08);}
+  .rr-num{color:rgba(255,255,255,.35);font-weight:700;}
+  .rr-name{color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .rr-score{color:var(--gold);text-align:right;font-weight:700;}
 </style>
 </head>
 <body>
@@ -130,6 +166,7 @@
         <div class="chip" data-len="0">전체</div>
       </div>
       <button class="cta" id="start-btn">▶ 시작</button>
+      <button class="guide-btn" id="guide-btn">📖 게임 방법</button>
       <div class="mini" id="pool-info"></div>
       <div class="legend">
         <span><i style="background:var(--sale)"></i>매출유형(11~2x번)</span>
@@ -148,10 +185,30 @@
   </div>
 
   <div id="result"></div>
+
+  <!-- ── 인터랙티브 튜토리얼(게임 방법) ── -->
+  <div id="tutorial" class="tut">
+    <div class="tut-top">
+      <span class="tt-title">📖 게임 방법</span>
+      <span class="tt-badge" id="tut-badge">1/5</span>
+      <button class="tt-skip" onclick="Tutorial.close()">건너뛰기</button>
+    </div>
+    <div class="tut-stage">
+      <div class="qcard">
+        <div class="qtag"><span class="cat-badge 매출">매출</span><span class="qsrc">예시 거래</span></div>
+        <div class="qstem" id="tut-q-text"></div>
+      </div>
+      <div id="tut-parts"></div>
+    </div>
+    <div class="tut-bubble">
+      <div class="tut-bubble-text" id="tut-text"></div>
+      <div class="tut-hint" id="tut-hint" style="display:none"></div>
+      <button class="tut-next" id="tut-next" onclick="Tutorial.next()">다음 ▶</button>
+    </div>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="auth.js"></script>
 <script src="wrongnote.js"></script>
 <script src="growth.js"></script>
 <script>
@@ -212,7 +269,79 @@ function updatePool(){
   document.getElementById('pool-info').textContent=`선택 범위 ${POOL.length}문항 중 ${n}문항 출제 · 틀린 문제는 오답노트에 자동 저장돼요.`;
   document.getElementById('start-btn').disabled=POOL.length===0;
 }
-function bindStart(){ document.getElementById('start-btn').onclick=startQuiz; }
+function bindStart(){
+  document.getElementById('start-btn').onclick=startQuiz;
+  document.getElementById('guide-btn').onclick=()=>Tutorial.start();
+}
+
+/* =========================================================================
+ *  Tutorial — 실제 문제 하나(과세 세금계산서 발급)로 "거래 읽고 유형 버튼 탭"
+ *  흐름을 미리 체험시키는 인터랙티브 미니 튜토리얼. game4_factory.html의
+ *  Tutorial 엔진과 같은 톤(단계별 말풍선+타겟 하이라이트)이지만, 이 게임은
+ *  칸이 하나(유형 버튼 1개 탭)뿐이라 game4의 차변/대변 2단계 로직은 걷어내고 단순화함.
+ * ========================================================================= */
+const TUT_QUIZ = { stem:'제품을 판매하고 전자세금계산서를 발급하였다.', code:'11' };
+const TUT_STEPS = [
+  { text:'실제 기출 거래를 읽고, 그 거래가 <b>어느 매입매출전표 유형</b>인지 버튼에서 골라보는 연습이에요.<br>거래 하나로 같이 해볼까요?', btn:'시작 ▶' },
+  { text:'제품을 판매하면서 <b>전자세금계산서를 발급</b>했어요. 세금계산서를 발급한 <b>일반 과세매출</b>은 코드 <b>11.과세</b>예요.<br>아래에서 <b>11.과세</b> 버튼을 찾아 눌러보세요.', tap:'11', hint:'👆 빛나는 버튼을 탭!' },
+  { text:'정답! 정답마다 <b>+100점</b>, 연속으로 맞히면 <b>콤보 보너스</b>가 붙어서 점수가 더 커져요.', glow:true, btn:'다음 ▶' },
+  { text:'틀리면 정답과 해설이 바로 나오고, <b>오답노트</b>에 자동 저장돼서 나중에 다시 볼 수 있어요.', btn:'다음 ▶' },
+  { text:'범위(전체/매출만/매입만)와 문항 수를 고르고 시작하면 돼요. 준비됐으면 시작해볼까요?', btn:'시작하기 ▶', finish:true },
+];
+const Tutorial = (function(){
+  let step=0, locked=false, timer=null;
+  function el(id){ return document.getElementById(id); }
+  function targetBtn(){ return el('tut-parts').querySelector(`[data-code="${TUT_QUIZ.code}"]`); }
+
+  function buildBoard(){
+    locked=false;
+    el('tut-q-text').textContent = TUT_QUIZ.stem;
+    const wrap=el('tut-parts');
+    wrap.innerHTML = typeGroupHtml(SALE_TYPES,'매출') + typeGroupHtml(BUY_TYPES,'매입');
+    wrap.querySelectorAll('.tbtn').forEach(b=>b.addEventListener('pointerdown', e=>{ e.preventDefault(); onTap(b.dataset.code,b); }));
+  }
+
+  function onTap(code, btn){
+    const s=TUT_STEPS[step];
+    if(locked || !s || !s.tap) return;
+    if(code!==s.tap){
+      locked=true;
+      btn.classList.add('wrong');
+      el('tut-text').innerHTML='앗, 그건 아니에요. 세금계산서를 발급한 과세매출은 <b>11.과세</b>예요.';
+      el('tut-hint').style.display='block'; el('tut-hint').textContent='👆 다시 골라 보세요';
+      timer=setTimeout(()=>{ timer=null; locked=false; btn.classList.remove('wrong'); render(); }, 1400);
+      return;
+    }
+    locked=true;
+    btn.classList.add('correct');
+    el('tut-parts').querySelectorAll('.tbtn').forEach(b=>{ if(b!==btn) b.classList.add('tut-dim'); });
+    timer=setTimeout(()=>{ timer=null; locked=false; go(step+1); }, 550);
+  }
+
+  function render(){
+    const s=TUT_STEPS[step];
+    el('tut-badge').textContent=(step+1)+'/'+TUT_STEPS.length;
+    el('tut-text').innerHTML=s.text;
+    el('tut-parts').querySelectorAll('.tbtn').forEach(b=>{
+      b.classList.remove('tut-target','tut-dim','wrong');
+      if(!b.classList.contains('correct')){
+        if(s.tap) { if(b.dataset.code===s.tap) b.classList.add('tut-target'); else b.classList.add('tut-dim'); }
+      }
+    });
+    const hint=el('tut-hint');
+    if(s.hint){ hint.style.display='block'; hint.textContent=s.hint; } else hint.style.display='none';
+    const btn=el('tut-next');
+    if(s.btn){ btn.style.display='block'; btn.textContent=s.btn; } else btn.style.display='none';
+  }
+
+  function go(n){ step=n; if(step>=TUT_STEPS.length) return finish(); render(); }
+  function nextBtn(){ if(TUT_STEPS[step].finish) return finish(); go(step+1); }
+  function clearTimer(){ if(timer){ clearTimeout(timer); timer=null; } }
+  function start(){ clearTimer(); step=0; locked=false; buildBoard(); render(); el('tutorial').classList.add('show'); }
+  function close(){ clearTimer(); locked=false; el('tutorial').classList.remove('show'); }
+  function finish(){ close(); }
+  return { start, close, next:nextBtn };
+})();
 
 let QUEUE=[], qi=0, score=0, combo=0, correctCnt=0;
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
@@ -355,8 +484,49 @@ function renderResult(){
     <div class="btn-row">
       <button class="primary" onclick="location.reload()">다시 풀기</button>
       ${wrong>0?'<a href="review.html">오답노트 →</a>':'<a href="index_lv1.html">메인 →</a>'}
-    </div>`;
+    </div>
+    <div id="my-rank-badge"></div>
+    <div class="rank-title">🏆 TOP 랭킹</div>
+    <div id="rank-box"><div style="padding:22px;color:rgba(255,255,255,.3);font-size:.8rem;text-align:center;">불러오는 중...</div></div>`;
   box.scrollIntoView({behavior:'smooth',block:'start'});
+  loadRanking();
+}
+
+/* ── TOP 랭킹(stage1_cost.html ResultScreen.loadRanking 패턴 이식) ── */
+async function loadRanking(){
+  const box=document.getElementById('rank-box');
+  const db=supaClient();
+  if(!db){ box.innerHTML='<div style="padding:22px;color:rgba(255,255,255,.3);font-size:.8rem;text-align:center;">랭킹을 불러올 수 없습니다</div>'; return; }
+  const groupId=localStorage.getItem('hub_group_id')||null;
+  const me=(localStorage.getItem('hub_nickname')||'').trim();
+  try{
+    let q=db.from('scores').select('name,score').eq('game_id',GAME_ID).order('score',{ascending:false}).limit(15);
+    if(groupId) q=q.eq('group_id',groupId);
+    const {data,error}=await q;
+    if(error) throw error;
+    const list=data||[];
+    box.innerHTML = list.length
+      ? list.map((r,i)=>{
+          const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'위';
+          return `<div class="rr-row${r.name===me?' me':''}"><span class="rr-num">${medal}</span><span class="rr-name">${esc(r.name)}</span><span class="rr-score">${(r.score||0).toLocaleString()}</span></div>`;
+        }).join('')
+      : '<div style="padding:22px;color:rgba(255,255,255,.3);font-size:.8rem;text-align:center;">아직 기록이 없습니다</div>';
+    if(me){
+      const myRowQ = groupId ? db.from('scores').select('score').eq('game_id',GAME_ID).eq('name',me).eq('group_id',groupId).maybeSingle()
+                              : db.from('scores').select('score').eq('game_id',GAME_ID).eq('name',me).maybeSingle();
+      const {data:myRow}=await myRowQ;
+      if(myRow && Number.isFinite(myRow.score)){
+        let cq=db.from('scores').select('*',{count:'exact',head:true}).eq('game_id',GAME_ID).gt('score',myRow.score);
+        if(groupId) cq=cq.eq('group_id',groupId);
+        const {count}=await cq;
+        const badge=document.getElementById('my-rank-badge');
+        badge.textContent=`🎯 내 순위: ${((count||0)+1).toLocaleString()}위`;
+        badge.style.display='block';
+      }
+    }
+  }catch(e){
+    box.innerHTML='<div style="padding:22px;color:rgba(255,255,255,.3);font-size:.8rem;text-align:center;">랭킹을 불러올 수 없습니다</div>';
+  }
 }
 
 const AD_GAME_COUNT_KEY='hub_ad_game_count';

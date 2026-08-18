@@ -246,6 +246,43 @@
         .blink-effect {
             animation: flash-highlight 0.5s infinite;
         }
+
+        /* ── 게임 방법 튜토리얼 ── */
+        .guide-btn{
+            margin-top:12px; background:transparent; border:1.5px solid rgba(255,255,255,0.25);
+            color:#bbb; padding:12px 30px; border-radius:8px; font-family:'Jua'; font-size:1rem; cursor:pointer;
+        }
+        .tut{ display:none; position:fixed; inset:0; z-index:9999; flex-direction:column; background:var(--bg-color); }
+        .tut.show{ display:flex; animation:tutPop .25s ease; }
+        @keyframes tutPop{ from{opacity:0;transform:scale(.97);} to{opacity:1;transform:scale(1);} }
+        .tut-top{ display:flex; align-items:center; gap:9px; padding:calc(12px + env(safe-area-inset-top)) 18px 10px; }
+        .tut-top .tt-title{ font-family:'Jua'; font-size:1.05rem; color:#fff; }
+        .tut-top .tt-badge{ font-size:.8rem; font-weight:800; color:#fff; background:var(--up-color); border-radius:50px; padding:3px 12px; }
+        .tut-top .tt-skip{ margin-left:auto; background:rgba(255,255,255,.1); border:none; color:rgba(255,255,255,.75);
+          border-radius:50px; padding:6px 14px; font-size:.8rem; cursor:pointer; }
+        .tut-stage{ flex:1; min-height:0; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:6px 16px; overflow-y:auto; }
+        .folder.tut-target .folder-body{ box-shadow:0 0 0 3px var(--neon-gold); animation:tutFolderGlow 1s ease-in-out infinite; }
+        @keyframes tutFolderGlow{ 0%,100%{box-shadow:0 0 0 3px var(--neon-gold);} 50%{box-shadow:0 0 0 7px rgba(255,215,0,.35);} }
+        .folder.tut-dim{ opacity:.35; pointer-events:none; }
+        .tut-drag-card.tut-target{ box-shadow:0 0 0 3px var(--neon-gold); animation:tutFolderGlow 1s ease-in-out infinite; }
+        .tut-bubble{ background:rgba(0,0,0,.4); border-top:1px solid #444; padding:16px 18px calc(16px + env(safe-area-inset-bottom)); }
+        .tut-bubble-text{ font-size:.98rem; line-height:1.6; color:#e0e6ed; word-break:keep-all; text-align:center; }
+        .tut-bubble-text b{ color:#7fd8ff; }
+        .tut-hint{ text-align:center; font-family:'Jua'; color:var(--neon-gold); font-size:.95rem; margin-top:8px; }
+        .tut-next{ display:block; width:100%; margin-top:14px; padding:15px; border-radius:14px; border:2px solid rgba(255,255,255,.3);
+          background:transparent; color:#fff; font-family:'Jua'; font-size:1rem; cursor:pointer; }
+
+        /* ── TOP 랭킹(엔딩화면) ── */
+        .rank-title{ font-family:'Jua'; font-size:.8rem; color:rgba(255,255,255,.35); letter-spacing:2px; margin:18px 0 8px; text-align:center; }
+        #my-rank-badge{ display:none; font-family:'Jua'; font-size:.86rem; color:#7fd8ff; background:rgba(127,216,255,.1);
+          border:1px solid rgba(127,216,255,.3); border-radius:50px; padding:6px 16px; margin:0 auto 8px; text-align:center; max-width:max-content; }
+        #rank-box{ background:rgba(255,255,255,.03); border:1px solid #444; border-radius:12px; max-height:170px; overflow-y:auto; padding:4px 0; text-align:left; }
+        .rr-row{ display:grid; grid-template-columns:34px 1fr 70px; gap:6px; padding:8px 12px; font-size:.8rem; border-bottom:1px solid rgba(255,255,255,.06); align-items:center; }
+        .rr-row:last-child{ border-bottom:none; }
+        .rr-row.me{ background:rgba(127,216,255,.08); }
+        .rr-num{ color:rgba(255,255,255,.35); font-weight:700; }
+        .rr-name{ color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .rr-score{ color:var(--neon-gold); text-align:right; font-weight:700; }
     </style>
 </head>
 <body>
@@ -278,6 +315,7 @@
                     정확한 회계 처리로 회사를 성장시키세요.
                 </p>
                 <button class="btn-action start-btn" onclick="startGame()">업무 시작</button>
+                <button class="guide-btn" onclick="Tutorial.start()">📖 게임 방법</button>
             </div>
 
             <div id="screen-class" class="screen">
@@ -353,6 +391,9 @@
                     <button class="btn-action" style="background:#555; padding:15px 30px;" onclick="location.reload()">처음부터 다시</button>
                     <button class="btn-action" style="background:var(--neon-gold); color:#000; padding:15px 30px;" onclick="location.href='index_lv1.html'">허브로 돌아가기</button>
                 </div>
+                <div id="my-rank-badge"></div>
+                <div class="rank-title">🏆 TOP 랭킹</div>
+                <div id="rank-box" style="width:90%; max-width:500px;"><div style="padding:22px;color:rgba(255,255,255,.3);font-size:.8rem;text-align:center;">불러오는 중...</div></div>
             </div>
 
         </div>
@@ -365,6 +406,34 @@
 
         <div class="toast-wrap" id="toast-wrap"></div>
 
+    </div>
+
+    <!-- ── 인터랙티브 튜토리얼(게임 방법) ── -->
+    <div id="tutorial" class="tut">
+      <div class="tut-top">
+        <span class="tt-title">📖 게임 방법</span>
+        <span class="tt-badge" id="tut-badge">1/6</span>
+        <button class="tt-skip" onclick="Tutorial.close()">건너뛰기</button>
+      </div>
+      <div class="tut-stage">
+        <div id="tut-classify" style="display:none; width:100%; text-align:center;">
+          <div id="tut-class-word" style="background:white;color:black;padding:12px 30px;border-radius:12px;font-family:'Jua';font-size:1.5rem;box-shadow:0 0 16px var(--neon-gold);margin-bottom:20px;display:inline-block;">보통주 자본금</div>
+          <div class="folder-grid" id="tut-folder-grid" style="max-width:500px;margin:0 auto;"></div>
+        </div>
+        <div id="tut-drag" style="display:none; width:100%; max-width:520px;">
+          <div class="journal-problem-box" style="margin-bottom:10px;">거래처에서 상품 판매대금으로 현금을 받았다.</div>
+          <div class="journal-board" style="min-height:110px;">
+            <div class="j-col" id="tut-dr-col" style="border-color:#d63031;"><div class="j-header" style="color:#ff7675">차변</div><div class="j-items" id="tut-list-dr"></div></div>
+            <div class="j-col" id="tut-cr-col" style="border-color:#0984e3;"><div class="j-header" style="color:#74b9ff">대변</div><div class="j-items" id="tut-list-cr"></div></div>
+          </div>
+          <div class="account-pool" id="tut-account-pool" style="margin-top:10px; grid-template-columns:1fr;"></div>
+        </div>
+      </div>
+      <div class="tut-bubble">
+        <div class="tut-bubble-text" id="tut-text"></div>
+        <div class="tut-hint" id="tut-hint" style="display:none"></div>
+        <button class="tut-next" id="tut-next" onclick="Tutorial.next()">다음 ▶</button>
+      </div>
     </div>
 
     <script>
@@ -948,7 +1017,7 @@
         // --- 엔딩 --- (등급은 gradeForCapitalScore()로 통일 — 아래 저장에 쓰는 등급과 화면에 보이는
         // 등급이 서로 다른 문구였던 걸 하나로 정리)
         function showEnding() {
-            requestInterstitialIfNeeded(function(){
+            requestInterstitialIfNeeded(async function(){
                 Sound.playSuccess();
                 showScreen('screen-ending');
 
@@ -957,9 +1026,143 @@
                 const rank = gradeForCapitalScore(state.score);
                 document.getElementById('end-rank').innerText = rank;
 
-                try{ saveStageScore(state.score, rank); }catch(e){}
+                // 저장이 끝나기 전에 랭킹을 조회하면 방금 낸 내 점수가 목록에 안 보이는
+                // 레이스 컨디션이 생김(stage4/5는 처음부터 await로 순서를 보장했었음) — await로 순서 고정.
+                try{ await saveStageScore(state.score, rank); }catch(e){}
+                try{ loadRanking(); }catch(e){}
             });
         }
+
+        /* =========================================================================
+         *  Tutorial — 이 게임의 두 메커닉(① 계정과목 분류 탭, ② 분개 드래그앤드롭)을
+         *  각각 실제 조작으로 한 번씩 체험시키는 인터랙티브 미니 튜토리얼.
+         *  game4_factory.html Tutorial 엔진과 같은 톤(단계별 말풍선+타겟 하이라이트)이되,
+         *  이 게임은 메커닉이 두 가지라 스텝마다 mode로 분기해서 그에 맞는 데모 UI를 그림.
+         * ========================================================================= */
+        const TUT_STEPS = [
+          { mode:'text', text:'이 스테이지는 두 단계로 진행돼요. 먼저 계정과목을 성격별로 <b>분류</b>하고,<br>그 다음 실제 거래를 보고 <b>분개</b>를 완성합니다. 하나씩 같이 해볼까요?', btn:'시작 ▶' },
+          { mode:'classify', text:'"보통주 자본금"은 회사가 최초로 받은 출자금이니 <b>자본금</b> 폴더예요.<br>빛나는 폴더를 눌러보세요.', tap:'capital', hint:'👆 빛나는 폴더를 탭!' },
+          { mode:'classify', text:'정답! 이런 식으로 5개 계정과목을 성격별 폴더에 분류하면 다음 단계로 넘어가요.', glow:true, btn:'다음 ▶' },
+          { mode:'drag', text:'이제 실제 거래를 보고 분개해봐요. 판매대금으로 <b>현금을 받았으니</b> 자산이 늘어나 <b>차변</b>에 와요.<br>아래 "현금" 카드를 <b>차변</b> 칸으로 끌어보세요.', hint:'👆 카드를 눌러서 차변으로 드래그!' },
+          { mode:'text', text:'정답! 차변·대변을 다 채우고 "결재 상신"을 누르면 채점돼요.<br>틀리면 사장님이 반려하고 정답을 알려주니 걱정 마세요.', glow:true, btn:'다음 ▶' },
+          { mode:'text', text:'맞힌 만큼 회사 주가도 오르고 업무 점수도 쌓여요. 준비됐으면 실제 업무를 시작해볼까요?', btn:'업무 시작 ▶', finish:true },
+        ];
+        const Tutorial = (function(){
+          let step=0, locked=false, timer=null;
+          const FOLDERS=[['capital','자본금','var(--folder-1)'],['surplus','자본잉여금','var(--folder-2)'],['adjust','자본조정','var(--folder-3)'],['retained','이익잉여금','var(--folder-4)']];
+          function el(id){ return document.getElementById(id); }
+
+          function buildClassify(){
+            const grid=el('tut-folder-grid');
+            grid.innerHTML = FOLDERS.map(([t,label,color])=>
+              `<div class="folder" data-type="${t}"><div class="folder-tab" style="background:${color}"></div><div class="folder-body" style="background:${color}">${label}</div></div>`
+            ).join('');
+            grid.querySelectorAll('.folder').forEach(f=>f.addEventListener('pointerdown', e=>{ e.preventDefault(); onFolderTap(f.dataset.type, f); }));
+          }
+          function onFolderTap(type, f){
+            const s=TUT_STEPS[step];
+            if(locked || s.mode!=='classify' || !s.tap) return;
+            if(type!==s.tap){
+              locked=true;
+              el('tut-text').innerHTML='앗, 그건 아니에요. 회사가 처음 받은 출자금은 <b>자본금</b> 폴더예요.';
+              el('tut-hint').style.display='block'; el('tut-hint').textContent='👆 다시 골라 보세요';
+              timer=setTimeout(()=>{ timer=null; locked=false; render(); }, 1400);
+              return;
+            }
+            locked=true;
+            f.style.outline='3px solid #2ecc71';
+            timer=setTimeout(()=>{ timer=null; locked=false; go(step+1); }, 550);
+          }
+
+          function buildDrag(){
+            el('tut-list-dr').innerHTML=''; el('tut-list-cr').innerHTML='';
+            const pool=el('tut-account-pool'); pool.innerHTML='';
+            const card=document.createElement('div');
+            card.className='acc-card tut-drag-card tut-target';
+            card.textContent='현금';
+            pool.appendChild(card);
+            bindTutDrag(card);
+          }
+          function tutZoneAt(x,y){
+            const d=el('tut-dr-col').getBoundingClientRect();
+            if(x>=d.left&&x<=d.right&&y>=d.top&&y<=d.bottom) return 'dr';
+            const c=el('tut-cr-col').getBoundingClientRect();
+            if(x>=c.left&&x<=c.right&&y>=c.top&&y<=c.bottom) return 'cr';
+            return null;
+          }
+          function bindTutDrag(card){
+            function onDown(e){
+              e.preventDefault();
+              card.setPointerCapture(e.pointerId);
+              card.classList.add('dragging');
+              card.addEventListener('pointermove', onMove);
+              card.addEventListener('pointerup', onUp);
+              card.addEventListener('pointercancel', onUp);
+            }
+            function onMove(e){
+              const zone=tutZoneAt(e.clientX, e.clientY);
+              el('tut-dr-col').classList.toggle('drop-hover', zone==='dr');
+              el('tut-cr-col').classList.toggle('drop-hover', zone==='cr');
+            }
+            function onUp(e){
+              card.removeEventListener('pointermove', onMove);
+              card.removeEventListener('pointerup', onUp);
+              card.removeEventListener('pointercancel', onUp);
+              card.classList.remove('dragging');
+              el('tut-dr-col').classList.remove('drop-hover');
+              el('tut-cr-col').classList.remove('drop-hover');
+              const zone=tutZoneAt(e.clientX, e.clientY);
+              if(TUT_STEPS[step].mode!=='drag' || locked) return;
+              if(zone==='dr'){
+                locked=true;
+                el('tut-list-dr').innerHTML='<div class="j-item-tag">현금 <span>✕</span></div>';
+                card.remove();
+                timer=setTimeout(()=>{ timer=null; locked=false; go(step+1); }, 550);
+              } else if(zone==='cr'){
+                el('tut-text').innerHTML='앗, 현금이 늘었으니(자산 증가) <b>차변</b>이에요. 대변은 반대쪽!';
+                el('tut-hint').style.display='block'; el('tut-hint').textContent='👆 왼쪽(차변) 칸으로 끌어보세요';
+              }
+            }
+            card.addEventListener('pointerdown', onDown);
+          }
+
+          function render(){
+            const s=TUT_STEPS[step];
+            el('tut-badge').textContent=(step+1)+'/'+TUT_STEPS.length;
+            el('tut-text').innerHTML=s.text;
+            el('tut-classify').style.display = s.mode==='classify' ? 'block' : 'none';
+            el('tut-drag').style.display = s.mode==='drag' ? 'block' : 'none';
+            if(s.mode==='classify'){
+              el('tut-folder-grid').querySelectorAll('.folder').forEach(f=>{
+                f.classList.remove('tut-target','tut-dim'); f.style.outline='';
+                if(s.tap){ if(f.dataset.type===s.tap) f.classList.add('tut-target'); else f.classList.add('tut-dim'); }
+              });
+            }
+            const hint=el('tut-hint');
+            if(s.hint){ hint.style.display='block'; hint.textContent=s.hint; } else hint.style.display='none';
+            const btn=el('tut-next');
+            if(s.btn){ btn.style.display='block'; btn.textContent=s.btn; } else btn.style.display='none';
+          }
+
+          function go(n){
+            step=n; if(step>=TUT_STEPS.length) return finish();
+            const s=TUT_STEPS[step];
+            if(s.mode==='classify' && !el('tut-folder-grid').children.length) buildClassify();
+            if(s.mode==='drag') buildDrag();
+            render();
+          }
+          function nextBtn(){ if(TUT_STEPS[step].finish) return finish(); go(step+1); }
+          function clearTimer(){ if(timer){ clearTimeout(timer); timer=null; } }
+          function start(){
+            clearTimer(); step=0; locked=false;
+            buildClassify();
+            render();
+            el('tutorial').classList.add('show');
+          }
+          function close(){ clearTimer(); locked=false; el('tutorial').classList.remove('show'); }
+          function finish(){ close(); }
+          return { start, close, next:nextBtn };
+        })();
     </script>
 
     <script>
@@ -1008,11 +1211,50 @@
           try{ const {error}=await db.rpc('upsert_score', rpcParams); if(error) console.warn('capital_lv1 점수 저장 실패:', error); }
           catch(e){ console.warn('capital_lv1 점수 저장 예외:', e); }
         }
+
+        function escHtml(s){ return String(s==null?'':s).replace(/[&<>'"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+        /* ── TOP 랭킹(stage1_cost.html ResultScreen.loadRanking 패턴 이식) ── */
+        async function loadRanking(){
+          const box=document.getElementById('rank-box');
+          const db=supaClient();
+          if(!db){ box.innerHTML='<div style="padding:22px;color:rgba(255,255,255,.3);font-size:.8rem;text-align:center;">랭킹을 불러올 수 없습니다</div>'; return; }
+          const groupId=localStorage.getItem('hub_group_id')||null;
+          const me=(localStorage.getItem('hub_nickname')||'').trim();
+          try{
+            let q=db.from('scores').select('name,score').eq('game_id',GAME_ID).order('score',{ascending:false}).limit(15);
+            if(groupId) q=q.eq('group_id',groupId);
+            const {data,error}=await q;
+            if(error) throw error;
+            const list=data||[];
+            box.innerHTML = list.length
+              ? list.map((r,i)=>{
+                  const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'위';
+                  return `<div class="rr-row${r.name===me?' me':''}"><span class="rr-num">${medal}</span><span class="rr-name">${escHtml(r.name)}</span><span class="rr-score">${(r.score||0).toLocaleString()}</span></div>`;
+                }).join('')
+              : '<div style="padding:22px;color:rgba(255,255,255,.3);font-size:.8rem;text-align:center;">아직 기록이 없습니다</div>';
+            if(me){
+              const myRowQ = groupId ? db.from('scores').select('score').eq('game_id',GAME_ID).eq('name',me).eq('group_id',groupId).maybeSingle()
+                                      : db.from('scores').select('score').eq('game_id',GAME_ID).eq('name',me).maybeSingle();
+              const {data:myRow}=await myRowQ;
+              if(myRow && Number.isFinite(myRow.score)){
+                let cq=db.from('scores').select('*',{count:'exact',head:true}).eq('game_id',GAME_ID).gt('score',myRow.score);
+                if(groupId) cq=cq.eq('group_id',groupId);
+                const {count}=await cq;
+                const badge=document.getElementById('my-rank-badge');
+                badge.textContent=`🎯 내 순위: ${((count||0)+1).toLocaleString()}위`;
+                badge.style.display='block';
+              }
+            }
+          }catch(e){
+            box.innerHTML='<div style="padding:22px;color:rgba(255,255,255,.3);font-size:.8rem;text-align:center;">랭킹을 불러올 수 없습니다</div>';
+          }
+        }
     </script>
 
     <script>
         /* =========================================================================
          *  광고 시스템 — 2급 게임(game4_factory.html 등)과 동일 패턴.
+         *  AdBridge는 capacitor-bridge.js(네이티브 앱에서만 로드)가 주입 — 웹 배포판은
          *  window.AdBridge 자체가 없어 항상 즉시 afterFn()으로 열린다(웹은 원래도 이랬음).
          * ========================================================================= */
         const AD_GAME_COUNT_KEY='hub_ad_game_count';
@@ -1039,7 +1281,6 @@
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="auth.js"></script>
     <script src="growth.js"></script>
 </body>
 </html>
