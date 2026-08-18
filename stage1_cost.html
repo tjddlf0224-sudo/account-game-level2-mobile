@@ -1925,12 +1925,18 @@ const World = {
     ctx.setTransform(dpr,0,0,dpr,0,0);
     ctx.fillStyle='#07060d'; ctx.fillRect(0,0,this.viewW,this.viewH);
 
-    // 카메라 — 플레이어 중앙 고정 + 월드 경계 클램프
+    // 카메라 — 플레이어 중앙 고정 + "현재 구역" 경계 클램프(맵 전체가 아니라).
+    // 보카바리스타처럼 방 끝에 가면 카메라가 거기서 멈추고 캐릭터가 화면 가장자리로
+    // 밀려야 "맵이 여기서 끝난다"는 느낌이 남 — 클램프를 맵 전체(WT×HT)로 하면
+    // 방이 화면보다 작을 때 캐릭터가 항상 정중앙에만 있어서 그 느낌이 안 살았다.
     const halfW=this.viewW/2, halfH=this.viewH/2;
     let camX=this.px*TS-halfW+TS/2, camY=this.py*TS-halfH+TS/2;
-    const worldW=WT*TS, worldH=HT*TS;
-    camX = worldW<=this.viewW ? (worldW-this.viewW)/2 : Math.max(0,Math.min(camX,worldW-this.viewW));
-    camY = worldH<=this.viewH ? (worldH-this.viewH)/2 : Math.max(0,Math.min(camY,worldH-this.viewH));
+    const z=this.curZone;
+    const zx0=z?z.x0*TS:0, zx1=z?(z.x1+1)*TS:WT*TS;
+    const zy0=z?z.y0*TS:0, zy1=z?(z.y1+1)*TS:HT*TS;
+    const zoneW=zx1-zx0, zoneH=zy1-zy0;
+    camX = zoneW<=this.viewW ? zx0+(zoneW-this.viewW)/2 : Math.max(zx0,Math.min(camX,zx1-this.viewW));
+    camY = zoneH<=this.viewH ? zy0+(zoneH-this.viewH)/2 : Math.max(zy0,Math.min(camY,zy1-this.viewH));
 
     const x0=Math.max(0,Math.floor(camX/TS)-1), x1=Math.min(WT-1,Math.ceil((camX+this.viewW)/TS)+1);
     const y0=Math.max(0,Math.floor(camY/TS)-1), y1=Math.min(HT-1,Math.ceil((camY+this.viewH)/TS)+1);
