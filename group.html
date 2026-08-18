@@ -169,6 +169,14 @@ body {
   cursor: pointer; transition: all 0.2s;
 }
 .hof-mode-tab.active { background: rgba(255,214,0,0.12); border-color: var(--gd); color: var(--gd); }
+.hof-level-tabs { display: flex; gap: 8px; margin-bottom: 10px; }
+.hof-level-tab {
+  flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+  color: rgba(255,255,255,0.45); font-size: 0.78rem; font-weight: 700; padding: 8px; border-radius: 10px;
+  cursor: pointer; transition: all 0.2s;
+}
+.hof-level-tab.lv2.active { background: rgba(0,242,255,0.12); border-color: var(--cy); color: var(--cy); }
+.hof-level-tab.lv1.active { background: rgba(180,79,255,0.12); border-color: var(--pu); color: var(--pu); }
 .hof-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px solid var(--border); }
 .hof-tab {
   flex-shrink: 0; background: rgba(255,255,255,0.04); border: 1px solid var(--border);
@@ -538,6 +546,10 @@ body {
       <div class="hof-header">
         <div class="hof-title">🏆 명예의 전당</div>
         <button class="hof-close" onclick="closeHallOfFame()">✕</button>
+      </div>
+      <div class="hof-level-tabs">
+        <button class="hof-level-tab lv2 active" id="hof-level-lv2" onclick="switchHofLevel('lv2')">🟢 2급</button>
+        <button class="hof-level-tab lv1" id="hof-level-lv1" onclick="switchHofLevel('lv1')">🟣 1급</button>
       </div>
       <div class="hof-mode-tabs">
         <button class="hof-mode-tab active" id="hof-mode-group" onclick="switchHofMode('group')">👤 우리 그룹 랭킹</button>
@@ -1009,13 +1021,22 @@ function leaveGroup() {
 /* ═══════════════════════════════════════
    그룹 명예의 전당
 ═══════════════════════════════════════ */
-const HOF_GAMES = [
+const HOF_GAMES_LV2 = [
   { id: 'acid',    name: '계정과목 산성비',   icon: '☁️' },
   { id: 'memory',  name: '기억의 전당',       icon: '🧩' },
   { id: 'debit',   name: '차변대변',          icon: '⚡' },
   { id: 'factory', name: '결산분개 공장',     icon: '🏭' },
   { id: 'flight',  name: '회계 플라이트',     icon: '🛩' },
 ];
+const HOF_GAMES_LV1 = [
+  { id: 'cost_lv1',    name: '원가의 길',   icon: '🏭' },
+  { id: 'capital_lv1', name: '자본의 제왕', icon: '👑' },
+  { id: 'voucher_lv1', name: '전표의 눈',   icon: '📋' },
+  { id: 'vat_lv1',     name: '신고의 문',   icon: '🧾' },
+];
+function currentHofGames() { return hofLevel === 'lv1' ? HOF_GAMES_LV1 : HOF_GAMES_LV2; }
+
+let hofLevel = 'lv2';
 let hofCurrentGame = 'acid';
 let hofMode = 'group';
 
@@ -1023,10 +1044,27 @@ function openHallOfFame() {
   const gid = localStorage.getItem('hub_group_id');
   if (!gid) return;
   document.getElementById('hof-overlay').classList.add('show');
+  // 접속한 급수 허브(index.html/index_lv1.html)에 맞춰 기본 탭 선택
+  hofLevel = localStorage.getItem('hub_level') === 'lv1' ? 'lv1' : 'lv2';
+  hofCurrentGame = currentHofGames()[0].id;
+  document.getElementById('hof-level-lv2').classList.toggle('active', hofLevel === 'lv2');
+  document.getElementById('hof-level-lv1').classList.toggle('active', hofLevel === 'lv1');
   switchHofMode('group');
 }
 function closeHallOfFame() {
   document.getElementById('hof-overlay').classList.remove('show');
+}
+function switchHofLevel(level) {
+  hofLevel = level;
+  hofCurrentGame = currentHofGames()[0].id;
+  document.getElementById('hof-level-lv2').classList.toggle('active', level === 'lv2');
+  document.getElementById('hof-level-lv1').classList.toggle('active', level === 'lv1');
+  if (hofMode === 'group') {
+    renderHofTabs();
+    loadHofRanking(hofCurrentGame);
+  } else {
+    loadCrossGroupRanking();
+  }
 }
 function switchHofMode(mode) {
   hofMode = mode;
@@ -1042,7 +1080,7 @@ function switchHofMode(mode) {
   }
 }
 function renderHofTabs() {
-  document.getElementById('hof-tabs').innerHTML = HOF_GAMES.map(g =>
+  document.getElementById('hof-tabs').innerHTML = currentHofGames().map(g =>
     `<button class="hof-tab ${g.id === hofCurrentGame ? 'active' : ''}" onclick="switchHofGame('${g.id}')">${g.icon} ${g.name}</button>`
   ).join('');
 }
@@ -1088,8 +1126,9 @@ async function loadCrossGroupRanking() {
   const body = document.getElementById('hof-body');
   body.innerHTML = '<div class="hof-empty"><div class="spinner"></div></div>';
   try {
+    const levelGameIds = currentHofGames().map(g => g.id);
     const [{ data: scoreRows, error: scoreErr }, { data: groupRows, error: groupErr }] = await Promise.all([
-      db.from('scores').select('group_id,name,score').not('group_id', 'is', null),
+      db.from('scores').select('group_id,name,score').not('group_id', 'is', null).in('game_id', levelGameIds),
       db.from('groups').select('id,name'),
     ]);
     if (scoreErr) throw scoreErr;
