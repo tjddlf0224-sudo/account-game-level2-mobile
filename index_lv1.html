@@ -134,7 +134,9 @@ body{
   color:rgba(255,255,255,0.3); border-color:rgba(255,255,255,0.15);
   background:rgba(255,255,255,0.02); box-shadow:none; cursor:default;
 }
-.stage-node.lock{ pointer-events:none; }
+/* pointer-events:none이었던 걸 제거 — 잠긴 노드도 탭해서 "광고 보고 열기"(2급과 동일
+   2탭 확인 패턴, onNodeClick)를 쓸 수 있어야 함. 실제 이동 차단은 onNodeClick 안의
+   e.preventDefault()가 담당. */
 .stage-node.lock .disc .ei{ opacity:0.35; }
 .nm-badge{
   position:absolute; width:24px; height:24px; border-radius:50%;
@@ -265,7 +267,8 @@ body{
         <div class="n-title">STAGE 1<br>원가의 길</div>
         <div class="n-sub" id="sub-s1">자료 0/14</div>
       </a>
-      <a class="stage-node lock" id="node-s3" href="stage3_capital.html" style="left:30%;top:35%; --node-color:var(--cy); --node-glow:rgba(0,242,255,0.4);">
+      <a class="stage-node lock" id="node-s3" href="stage3_capital.html" style="left:30%;top:35%; --node-color:var(--cy); --node-glow:rgba(0,242,255,0.4);"
+         onclick="return onNodeClick(event,'s3')">
         <div class="disc">👑
           <span class="nm-badge lock-badge" title="스테이지1 클리어 필요">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
@@ -277,7 +280,8 @@ body{
         <div class="n-title">STAGE 2<br>자본의 제왕</div>
         <div class="n-sub" id="sub-s3">스테이지1 클리어 필요</div>
       </a>
-      <a class="stage-node lock" id="node-s4" href="stage4_voucher.html" style="left:70%;top:60%; --node-color:var(--gd); --node-glow:rgba(255,210,74,0.4);">
+      <a class="stage-node lock" id="node-s4" href="stage4_voucher.html" style="left:70%;top:60%; --node-color:var(--gd); --node-glow:rgba(255,210,74,0.4);"
+         onclick="return onNodeClick(event,'s4')">
         <div class="disc">🧾
           <span class="nm-badge lock-badge" title="스테이지2 클리어 필요">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
@@ -289,7 +293,8 @@ body{
         <div class="n-title">STAGE 3<br>전표의 눈</div>
         <div class="n-sub" id="sub-s4">스테이지2 클리어 필요</div>
       </a>
-      <a class="stage-node lock" id="node-s5" href="stage5_vat.html" style="left:30%;top:88%; --node-color:var(--gn); --node-glow:rgba(0,230,118,0.4);">
+      <a class="stage-node lock" id="node-s5" href="stage5_vat.html" style="left:30%;top:88%; --node-color:var(--gn); --node-glow:rgba(0,230,118,0.4);"
+         onclick="return onNodeClick(event,'s5')">
         <div class="disc">🏛️
           <span class="nm-badge lock-badge" title="스테이지3 클리어 필요">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
@@ -378,10 +383,11 @@ function renderStageMap(){
     const raw3=localStorage.getItem('lv1_s3_progress');
     if(raw3){ const s3=JSON.parse(raw3)||{}; s3Cleared=!!s3.cleared; s3Score=s3.score||0; }
   }catch(e){}
+  const adUnlockS3 = localStorage.getItem('hub_adunlock_s3')==='1';
   const node3=document.getElementById('node-s3'), sub3=document.getElementById('sub-s3');
   if(node3){
     const lockBadge3=node3.querySelector('.lock-badge'), clearBadge3=node3.querySelector('.clear-badge');
-    if(cleared){
+    if(cleared || adUnlockS3){
       node3.classList.remove('lock');
       lockBadge3.style.display='none';
       if(s3Cleared){
@@ -403,10 +409,11 @@ function renderStageMap(){
     const raw4=localStorage.getItem('lv1_s4_progress');
     if(raw4){ const s4=JSON.parse(raw4)||{}; s4Cleared=!!s4.cleared; s4Score=s4.score||0; }
   }catch(e){}
+  const adUnlockS4 = localStorage.getItem('hub_adunlock_s4')==='1';
   const node4=document.getElementById('node-s4'), sub4=document.getElementById('sub-s4');
   if(node4){
     const lockBadge4=node4.querySelector('.lock-badge'), clearBadge4=node4.querySelector('.clear-badge');
-    if(s3Cleared){
+    if(s3Cleared || adUnlockS4){
       node4.classList.remove('lock');
       lockBadge4.style.display='none';
       if(s4Cleared){
@@ -428,10 +435,11 @@ function renderStageMap(){
     const raw5=localStorage.getItem('lv1_s5_progress');
     if(raw5){ const s5=JSON.parse(raw5)||{}; s5Cleared=!!s5.cleared; s5Score=s5.score||0; }
   }catch(e){}
+  const adUnlockS5 = localStorage.getItem('hub_adunlock_s5')==='1';
   const node5=document.getElementById('node-s5'), sub5=document.getElementById('sub-s5');
   if(node5){
     const lockBadge5=node5.querySelector('.lock-badge'), clearBadge5=node5.querySelector('.clear-badge');
-    if(s4Cleared){
+    if(s4Cleared || adUnlockS5){
       node5.classList.remove('lock');
       lockBadge5.style.display='none';
       if(s5Cleared){
@@ -457,6 +465,55 @@ function renderStageMap(){
   }
 }
 renderStageMap();
+
+// ── 잠긴 노드 클릭 → 광고 시청으로 즉시 해제 (2급 index.html과 완전히 동일한 규칙 —
+//    지금까지 1급 허브엔 이 기능 자체가 이식이 안 돼 있어서 스테이지가 순차 클리어
+//    전엔 절대 안 열렸음. Android WebView는 confirm()이 무동작이라 2-스텝 탭 확인을 쓴다:
+//    한 번 탭하면 안내만 뜨고, 그 상태에서 한 번 더 탭해야 실제로 광고가 뜬다.) ──
+function onNodeClick(e, gid) {
+  const el = document.getElementById('node-' + gid);
+  if (!el || !el.classList.contains('lock')) return true;
+  e.preventDefault();
+  if (el.dataset.armed === '1') {
+    el.dataset.armed = '';
+    if (el._armTimer) clearTimeout(el._armTimer);
+    el.querySelector('.n-sub').textContent = '';
+    unlockStage(gid);
+  } else {
+    el.dataset.armed = '1';
+    el.querySelector('.n-sub').textContent = '한 번 더 탭하면 광고 보고 열기';
+    el._armTimer = setTimeout(() => {
+      el.dataset.armed = '';
+      el.querySelector('.n-sub').textContent = '';
+    }, 2800);
+  }
+  return false;
+}
+window._unlockTarget = null;
+function unlockStage(gid) {
+  if (!window.AdBridge || typeof AdBridge.showRewarded !== 'function') {
+    // 웹 배포판 등 광고 SDK 자체가 없는 환경 — 광고 실패와 동일하게 그냥 열어준다
+    localStorage.setItem('hub_adunlock_' + gid, '1');
+    renderStageMap();
+    return;
+  }
+  window._unlockTarget = gid;
+  AdBridge.showRewarded();
+}
+// Kotlin/Swift → JS 콜백 (게임 화면들과 동일한 이름 규약)
+function onRewardGranted() {
+  if (!window._unlockTarget) return;
+  localStorage.setItem('hub_adunlock_' + window._unlockTarget, '1');
+  window._unlockTarget = null;
+  renderStageMap();
+}
+function onRewardedFailed() {
+  if (!window._unlockTarget) return;
+  localStorage.setItem('hub_adunlock_' + window._unlockTarget, '1');
+  window._unlockTarget = null;
+  renderStageMap();
+  alert('광고를 불러오지 못했지만 스테이지를 열어드렸어요!');
+}
 
 /* 안드로이드 WebView 광고 배너 자리 확보용 (기존 화면들과 동일 시그니처) */
 function hideAdPlaceholder(){}
