@@ -1447,6 +1447,7 @@ const TEX = (()=>{
     [T.LINE_A]: belt,   // 제미나이 이미지 로드 전 폴백(아래 LINE_IMG)
     [T.LINE_B]: belt,
     [T.WALL]:   mk(drawFactoryWall),
+    [T.STAIR]:  concrete,   // 계단 스프라이트가 위에 덮으므로 바닥은 콘크리트 재사용(전용 보라색 안 씀)
   };
 })();
 
@@ -1820,7 +1821,7 @@ const World = {
     const y0=Math.max(0,Math.floor(camY/TS)-1), y1=Math.min(HT-1,Math.ceil((camY+this.viewH)/TS)+1);
 
     // ── 바닥 타일 (P4: 6종 절차적 텍스처 — §"6종은 코드로 확정" — 계단만 색+선) ──
-    const COL={ [T.STAIR]:'#584a6a' };
+    const COL={};
     for(let y=y0;y<=y1;y++) for(let x=x0;x<=x1;x++){
       const t=MAP[y][x];
       const sx=Math.round(x*TS-camX), sy=Math.round(y*TS-camY);
