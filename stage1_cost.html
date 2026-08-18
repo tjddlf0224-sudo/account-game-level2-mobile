@@ -1263,6 +1263,9 @@ const OBJECTS = [
   { zone:'supp', x:43, y:17, img:'lv1/sprites/obj_boiler.webp',         scale:2.0 },
   // ③ 제품 창고
   { zone:'fin',  x:50, y:9,  img:'lv1/sprites/obj_finished_pallet.webp',scale:1.8 },
+  // 세로 계단(제미나이 생성, 남/북 동일 에셋 재사용 — 톤 차이는 기존 그라데이션 코드가 처리)
+  { zone:'line', x:38, y:6.5,  img:'lv1/sprites/obj_stairs.webp', scale:2.2 },
+  { zone:'line', x:38, y:15.5, img:'lv1/sprites/obj_stairs.webp', scale:2.2 },
 ];
 /* 이미지 오브젝트 프리로드 */
 OBJECTS.forEach(o=>{
@@ -1872,13 +1875,7 @@ const World = {
           grad.addColorStop(1,'rgba(255,255,255,0)');
           ctx.fillStyle=grad; ctx.fillRect(sx,sy,TS+1,TS+1);
         }
-        ctx.strokeStyle = goingDown ? 'rgba(190,160,255,0.4)' : 'rgba(255,255,255,0.28)';
-        ctx.lineWidth=2;
-        for(let i=1;i<=3;i++){
-          const yy=sy+TS*i/4;
-          const inset = goingDown ? TS*0.05*i : 0; // 내려갈수록 폭이 좁아 보이는 원근감
-          ctx.beginPath(); ctx.moveTo(sx+TS*0.18+inset,yy); ctx.lineTo(sx+TS*0.82-inset,yy); ctx.stroke();
-        }
+        // (계단 발판 선은 제미나이 계단 스프라이트가 그 위에 덮으므로 별도로 안 그림)
       }
       // 구역 연결통로(문) 문턱 — 밋밋한 바닥과 구분되는 금속 플레이트 느낌(대각선 해치)
       for(const d of DOORS){
