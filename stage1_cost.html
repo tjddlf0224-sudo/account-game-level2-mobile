@@ -1504,22 +1504,6 @@ function drawCrateWall(ctx,w,h){
     ctx.fillRect(x,y,1,1);
   }
 }
-function drawFactoryWall(ctx,w,h){
-  ctx.fillStyle='#3a3d44'; ctx.fillRect(0,0,w,h);
-  const step=32;
-  ctx.strokeStyle='rgba(0,0,0,0.4)'; ctx.lineWidth=2;
-  for(let x=0;x<=w;x+=step){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
-  ctx.fillStyle='rgba(200,200,210,0.5)';
-  for(let x=step/2;x<w;x+=step){
-    ctx.beginPath(); ctx.arc(x,8,2,0,7); ctx.fill();
-    ctx.beginPath(); ctx.arc(x,h-8,2,0,7); ctx.fill();
-  }
-  for(let i=0;i<200;i++){
-    const x=trand(0,w), y=trand(0,h);
-    ctx.fillStyle=`rgba(255,255,255,${trand(0.02,0.05)})`;
-    ctx.fillRect(x,y,1,1);
-  }
-}
 function drawBelt(ctx,w,h){
   ctx.fillStyle='#16161a'; ctx.fillRect(0,0,w,h);
   ctx.strokeStyle='rgba(255,255,255,0.06)'; ctx.lineWidth=3;
@@ -1542,16 +1526,13 @@ const TEX = (()=>{
     [T.MESS]:   mk(drawKitchenTile),
     [T.LINE_A]: belt,   // 제미나이 이미지 로드 전 폴백(아래 LINE_IMG)
     [T.LINE_B]: belt,
-    [T.WALL]:   mk(drawFactoryWall),
+    [T.WALL]:   mk(drawCrateWall),   // 모든 벽을 화물상자 더미로 통일 — 작은 방(사무실 등)은
+                                      // 화면(뷰포트)이 방보다 훨씬 커서 안쪽 벽이 넓게 보이기도
+                                      // 하므로, 일부만 꾸미면 "안 꾸민 깊은 벽"이 그대로 노출됨.
+                                      // 전부 통일해야 어디서 봐도 "여기가 맵의 끝"으로 보인다.
     [T.STAIR]:  concrete,   // 계단 스프라이트가 위에 덮으므로 바닥은 콘크리트 재사용(전용 보라색 안 씀)
   };
 })();
-// 방 경계에 맞닿은 벽 전용 텍스처(화물상자 더미) — 깊은 안쪽 벽은 그냥 콘크리트 유지
-const WALL_CRATE_TEX = (()=>{ const c=texCanvas(); drawCrateWall(c.getContext('2d'),128,128); return c; })();
-function isBoundaryWall(x,y){
-  const at=(xx,yy)=> (xx>=0&&xx<WT&&yy>=0&&yy<HT) ? MAP[yy][xx] : T.WALL;
-  return at(x-1,y)!==T.WALL || at(x+1,y)!==T.WALL || at(x,y-1)!==T.WALL || at(x,y+1)!==T.WALL;
-}
 
 /* ── P4: 제미나이 생성 라인 이미지 — B라인(대량생산 컨베이어)만 레일처럼 반복 타일링 ──
    이미지를 라인 전체 폭에 억지로 늘려 붙이면(구 방식) 정사각형/가로로 짧은 원본이
@@ -1964,7 +1945,7 @@ const World = {
       let usedLineImg=false;
       if(t===T.LINE_B && LINE_IMG_B.ready){ drawLineSlice(ctx,LINE_IMG_B,x,sx,sy,TS+1); usedLineImg=true; }
       else{
-        const tex = (t===T.WALL && isBoundaryWall(x,y)) ? WALL_CRATE_TEX : TEX[t];
+        const tex=TEX[t];
         if(tex) ctx.drawImage(tex,sx,sy,TS+1,TS+1);
         else{ ctx.fillStyle=COL[t]||'#222'; ctx.fillRect(sx,sy,TS+1,TS+1); }
       }
