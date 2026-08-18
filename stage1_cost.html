@@ -69,6 +69,22 @@ body{ font-family:'Noto Sans KR',sans-serif; color:#fff; position:relative; touc
   background:rgba(180,79,255,0.16); border:1px solid rgba(180,79,255,0.5); color:#e9d5ff;
 }
 
+/* ── 계단 텔레포트: 화면전환 페이드 + 층 배지 ── */
+#floor-fade{
+  position:absolute; inset:0; z-index:40; background:#050308;
+  opacity:0; pointer-events:none; transition:opacity .18s ease;
+}
+#floor-fade.show{ opacity:1; }
+#floor-badge{
+  position:absolute; top:calc(14px + env(safe-area-inset-top)); left:50%;
+  transform:translate(-50%,-10px); z-index:41; pointer-events:none;
+  font-family:'Orbitron',monospace; font-weight:900; font-size:1rem; letter-spacing:3px;
+  padding:7px 18px; border-radius:50px; color:#ffd600;
+  background:rgba(5,3,16,0.88); border:1px solid rgba(255,214,0,0.5);
+  opacity:0; transition:opacity .3s ease, transform .3s ease;
+}
+#floor-badge.show{ opacity:1; transform:translate(-50%,0); }
+
 /* ── P5: 연출 이벤트(§4-6) — 자동 재생 배너 ── */
 #event-banner{
   position:absolute; top:16%; left:50%; transform:translate(-50%,-14px);
@@ -496,6 +512,8 @@ body{ font-family:'Noto Sans KR',sans-serif; color:#fff; position:relative; touc
   <div class="zb-name" id="zb-name"></div>
   <div class="zb-acct" id="zb-acct"></div>
 </div>
+<div id="floor-badge"></div>
+<div id="floor-fade"></div>
 
 <div id="event-banner"><div class="eb-inner"><span class="eb-icon" id="eb-icon"></span><span class="eb-txt" id="eb-txt"></span></div></div>
 <div id="yearend-dim"></div>
@@ -676,20 +694,20 @@ function applyOrientation(){
    5 A라인 컨베이어 / 6 B라인 컨베이어 / 7 계단 / 8 보일러실바닥        */
 const T = { WALL:0, FLOOR:1, OFFICE:2, WARE:3, MESS:4, LINE_A:5, LINE_B:6, STAIR:7, BOILER:8 };
 
-const WT = 62, HT = 22;
+const WT = 62, HT = 56;
 
 /* ── 구역 정의 (기획서 §4-2 좌표 그대로) ───────────────────── */
 const ZONES = [
   { id:'raw',   name:'원재료 창고',   acct:'원재료 T',  x0:10, x1:24, y0:8,  y1:15, floor:T.WARE },
   { id:'line',  name:'공장 라인',     acct:'재공품 T',  x0:26, x1:46, y0:7,  y1:15, floor:T.FLOOR },
-  { id:'foff',  name:'공장 사무실',   acct:'제조간접비',x0:34, x1:44, y0:0,  y1:6,  floor:T.OFFICE },
-  { id:'supp',  name:'보조부문동',    acct:'배분',      x0:34, x1:44, y0:16, y1:21, floor:T.MESS },
+  { id:'foff',  name:'공장 사무실',   acct:'제조간접비',x0:34, x1:44, y0:26, y1:32, floor:T.OFFICE },
+  { id:'supp',  name:'보조부문동',    acct:'배분',      x0:34, x1:44, y0:46, y1:51, floor:T.MESS },
   { id:'fin',   name:'제품 창고',     acct:'제품 T',    x0:48, x1:61, y0:8,  y1:15, floor:T.WARE },
 ];
 
 /* ── NPC 배치 (기획서 §6 로스터 14명 + 차대한 재등장) ───────── */
 const NPCS = [
-  { id:'n_han',    name:'한서준 대리', zone:'foff', x:39, y:1,  color:'#4dd0e1' },
+  { id:'n_han',    name:'한서준 대리', zone:'foff', x:39, y:27, color:'#4dd0e1' },
   { id:'n_truck',  name:'차대한 기사', zone:'raw',  x:13, y:10, color:'#ff9800' },
   { id:'n_go',     name:'고재고 반장', zone:'raw',  x:18, y:13, color:'#9ccc65' },
   { id:'n_oh',     name:'오지람 주임', zone:'raw',  x:22, y:10, color:'#ffd54f' },
@@ -700,8 +718,8 @@ const NPCS = [
   { id:'n_mi',     name:'정미완 주임', zone:'line', x:44, y:13, color:'#ce93d8' },
   { id:'n_wan',    name:'한완성 담당', zone:'fin',  x:53, y:11, color:'#80cbc4' },
   { id:'n_truck2', name:'차대한 기사', zone:'fin',  x:58, y:13, color:'#ff9800' },
-  { id:'n_soon',   name:'정순자 여사님', zone:'supp', x:37, y:19, color:'#f48fb1' },
-  { id:'n_steam',  name:'한증기 기사', zone:'supp', x:42, y:19, color:'#ffab91' },
+  { id:'n_soon',   name:'정순자 여사님', zone:'supp', x:37, y:49, color:'#f48fb1' },
+  { id:'n_steam',  name:'한증기 기사', zone:'supp', x:42, y:49, color:'#ffab91' },
   { id:'n_bae',    name:'배정확 주임', zone:'foff', x:37, y:3,  color:'#81d4fa' },
   { id:'n_gyul',   name:'결단호 공장장', zone:'foff', x:42, y:3, color:'#ffe082' },
 ];
@@ -1257,15 +1275,19 @@ const OBJECTS = [
   { zone:'line', x:29, y:10, img:'lv1/sprites/obj_robot_arm.webp',      scale:1.8 },
   { zone:'line', x:32, y:8,  img:'lv1/tiles/line_a_workbench.webp',     scale:1.2 },
   // ⑤ 공장 사무실 (한서준 대리 자리 겸용 — 사무실 단일화)
-  { zone:'foff', x:35, y:2,  img:'lv1/sprites/obj_desk_whiteboard.webp',scale:2.0 },
+  { zone:'foff', x:35, y:28, img:'lv1/sprites/obj_desk_whiteboard.webp',scale:2.0 },
   // ④ 보조부문동(식당·보일러실)
-  { zone:'supp', x:36, y:17, img:'lv1/sprites/obj_serving_counter.webp',scale:2.0 },
-  { zone:'supp', x:43, y:17, img:'lv1/sprites/obj_boiler.webp',         scale:2.0 },
+  { zone:'supp', x:36, y:47, img:'lv1/sprites/obj_serving_counter.webp',scale:2.0 },
+  { zone:'supp', x:43, y:47, img:'lv1/sprites/obj_boiler.webp',         scale:2.0 },
   // ③ 제품 창고
   { zone:'fin',  x:50, y:9,  img:'lv1/sprites/obj_finished_pallet.webp',scale:1.8 },
-  // 세로 계단(제미나이 생성, 남/북 동일 에셋 재사용 — 톤 차이는 기존 그라데이션 코드가 처리)
-  { zone:'line', x:38, y:6.5,  img:'lv1/sprites/obj_stairs.webp', scale:2.2 },
-  { zone:'line', x:38, y:15.5, img:'lv1/sprites/obj_stairs.webp', scale:2.2 },
+  // 계단(제미나이 생성, 텔레포트 지점 4곳 전부 같은 에셋 재사용) — 다른 층 룸은
+  // 라인과 멀리 떨어진 별도 공간에 있어서, 계단은 "그 층의 출입구"를 표시하는
+  // 표지 역할만 하고 실제 이동은 World.checkTeleport()가 처리한다.
+  { zone:'line', x:38, y:7,  img:'lv1/sprites/obj_stairs.webp', scale:2.2 },  // 라인→사무실
+  { zone:'line', x:38, y:14, img:'lv1/sprites/obj_stairs.webp', scale:2.2 },  // 라인→보조부문동
+  { zone:'foff', x:38, y:32, img:'lv1/sprites/obj_stairs.webp', scale:2.2 },  // 사무실→라인
+  { zone:'supp', x:38, y:46, img:'lv1/sprites/obj_stairs.webp', scale:2.2 },  // 보조부문동→라인
 ];
 /* 이미지 오브젝트 프리로드 */
 OBJECTS.forEach(o=>{
@@ -1276,9 +1298,24 @@ OBJECTS.forEach(o=>{
 const SIGNS = [
   { x:25, y:9,  label:'공장 라인' },
   { x:47, y:9,  label:'제품 창고' },
-  { x:38, y:16, label:'구내식당·보일러실' },
-  { x:38, y:6,  label:'공장 사무실' },
+  { x:38, y:46, label:'구내식당·보일러실' },
+  { x:38, y:32, label:'공장 사무실' },
 ];
+
+/* ── 계단(=텔레포트) 짝 — 트리거 좌표(x0~x1,y)를 밟으면 to로 순간이동.
+   공장사무실·보조부문동을 라인과 물리적으로 멀리 떨어뜨려놨으므로(buildMap 참고),
+   걸어서 오가는 통로가 아예 없다 — 반드시 이 표를 통해서만 이동한다. */
+const TELEPORTS = [
+  { x0:37,x1:39,y:7,  toX:38,toY:31 },  // 라인 → 공장사무실
+  { x0:37,x1:39,y:32, toX:38,toY:8  },  // 공장사무실 → 라인
+  { x0:37,x1:39,y:14, toX:38,toY:47 },  // 라인 → 보조부문동
+  { x0:37,x1:39,y:46, toX:38,toY:13 },  // 보조부문동 → 라인
+];
+// 구역 id → 층 표시(계단으로만 오갈 수 있어 실제로 다른 층처럼 분리됨)
+const ZONE_FLOOR = { raw:'1F', line:'1F', fin:'1F', foff:'2F', supp:'B1' };
+// 계단 타일 렌더 톤(위층행=밝게/지하행=어둡게) — TELEPORTS와 y좌표로 짝지음
+const STAIR_UP_ROWS = new Set([7,32]);
+const STAIR_DOWN_ROWS = new Set([14,46]);
 
 /* ── 구역 연결통로(문) — 사용자 지적: "공간이 너무 열려있어 구분이 안 된다".
    raw↔line, line↔fin 통로는 그냥 평범한 바닥 타일이라 벽 사이 틈이 있다는 게
@@ -1309,25 +1346,27 @@ function buildMap(){
   carve(27,13,45,13,T.LINE_B);   // B라인(대량생산)
 
   // 보조부문동: 오른쪽 절반은 보일러실
-  carve(40,16,44,21,T.BOILER);
+  carve(40,46,44,51,T.BOILER);
 
   // ── 가로 본선 연결통로 (구역 사이 벽을 뚫는다) ──
   carve(25,10,25,13, T.FLOOR);   // 원재료창고 ↔ 라인
   carve(47,10,47,13, T.FLOOR);   // 라인 ↔ 제품창고
 
-  // ── 세로 계단 (기획서: x 38 부근 한 곳으로 관통) ──
-  carve(37,6,39,7,   T.STAIR);   // 라인 → 북쪽 공장사무실
-  carve(37,15,39,16, T.STAIR);   // 라인 → 남쪽 보조부문동
-
-  // 위 계단은 시각 효과일 뿐, 구역 경계 자체가 뚫려 있어 계단 폭(37~39) 밖으로도
-  // 아무데서나 드나들 수 있었음(사용자 지적) — 경계 행에 벽을 채워 계단만 유일한 통로로 만든다.
-  carve(34,6,36,6,  T.WALL); carve(40,6,44,6,  T.WALL);   // 공장사무실 ↔ 라인
-  carve(34,15,36,15,T.WALL); carve(40,15,44,15,T.WALL);   // 라인 ↔ 보조부문동
+  // ── 계단(=텔레포트 지점) ──
+  // 공장사무실·보조부문동은 라인과 붙어있지 않고 맵 아래쪽 멀리 떨어진 별도
+  // 공간에 있음(사용자 지시: "층이 다른 맵은 안 보이게" — 걸어서 이어지는 통로가
+  // 아예 없으니 카메라 뷰포트(약 10~12칸)에 다른 층이 잡힐 일이 없다). 계단
+  // 타일을 밟으면 World.checkTeleport()가 짝지어진 반대편 좌표로 순간이동시킨다.
+  // 벽은 이제 각 구역 사각형 바깥이 전부 기본값(WALL)이라 별도로 파낼 필요가 없다.
+  carve(37,7, 39,7, T.STAIR);   // 라인 쪽 — 공장사무실행
+  carve(37,14,39,14,T.STAIR);   // 라인 쪽 — 보조부문동행
+  carve(37,32,39,32,T.STAIR);   // 공장사무실 쪽 — 라인행
+  carve(37,46,39,46,T.STAIR);   // 보조부문동 쪽 — 라인행
 
   // 보조부문동 내부: 구내식당(정순자 여사님)과 보일러실(한증기 기사) 사이에도
-  // 벽을 세우고 문 하나(y18~19)만 남긴다 — "너무 오픈형" 지적 반영.
-  carve(40,16,40,17,T.WALL);
-  carve(40,20,40,21,T.WALL);
+  // 벽을 세우고 문 하나만 남긴다 — "너무 오픈형" 지적 반영.
+  carve(40,46,40,47,T.WALL);
+  carve(40,50,40,51,T.WALL);
 
   return g;
 }
@@ -1621,7 +1660,7 @@ function zoneAt(x,y){
  * ========================================================================= */
 const World = {
   cv:null, ctx:null, dpr:1, viewW:0, viewH:0, TS:40,
-  px:39, py:4,                 // 플레이어 시작 — 공장 사무실, 한서준(39,1) 앞. 겹치지 않게 띄운다.
+  px:39, py:30,                // 플레이어 시작 — 공장 사무실, 한서준(39,27) 앞. 겹치지 않게 띄운다.
   dir:'front', facing:1, moving:false, walkT:0, bob:0,
   keys:{}, stick:{active:false,dx:0,dy:0,cx:0,cy:0,id:null},
   raf:null, _lastTs:0,
@@ -1746,6 +1785,33 @@ const World = {
       this._miniDirty=true;
     }
     this.checkNpc();
+    this.checkTeleport();
+  },
+
+  /* ── 계단 타일 = 텔레포트 트리거 ── */
+  _teleportLock:false,
+  checkTeleport(){
+    if(this._teleportLock) return;
+    const tx=Math.round(this.px), ty=Math.round(this.py);
+    const t=TELEPORTS.find(t=>ty===t.y && tx>=t.x0 && tx<=t.x1);
+    if(!t) return;
+    this._teleportLock=true;
+    const fx=document.getElementById('floor-fade');
+    fx.classList.add('show');
+    setTimeout(()=>{
+      this.px=t.toX; this.py=t.toY;
+      this.checkZone(true);
+      this._miniDirty=true;
+      setTimeout(()=>{ fx.classList.remove('show'); }, 160);
+      setTimeout(()=>{ this._teleportLock=false; }, 500);
+    }, 180);
+  },
+  showFloorBadge(label){
+    const el=document.getElementById('floor-badge');
+    el.textContent=label;
+    el.classList.add('show');
+    clearTimeout(this._floorBadgeT);
+    this._floorBadgeT=setTimeout(()=>el.classList.remove('show'),1400);
   },
 
   /* ── 구역 진입 감지 → 배너 ── */
@@ -1756,6 +1822,7 @@ const World = {
       this.curZone=z;
       document.getElementById('zone-name').textContent=z.name;
       this.showBanner(z);
+      if(ZONE_FLOOR[z.id]) this.showFloorBadge(ZONE_FLOOR[z.id]);
       // ── P5 연출 이벤트: 구역 최초 진입 ──
       if(z.id==='raw')  EventFX.fire('ev_truck_in',    '🚚', '원재료가 하역장에 도착했습니다');
       if(z.id==='line') EventFX.fire('ev_line_start',  '⚙️', '컨베이어가 가동을 시작합니다');
@@ -1857,20 +1924,17 @@ const World = {
         ctx.fillStyle='rgba(0,0,0,0.22)';
         ctx.fillRect(sx,sy,TS+1,TS+1);
       }
-      // 계단 표시 — 남쪽(보조부문동 방면)은 내려갈수록 어두워지는 그라데이션+좌우 벽 그림자로
-      // "구멍 속으로 꺼지는" 느낌을, 북쪽(공장 사무실 방면)은 반대로 은은하게 밝아지는 톤을 준다.
+      // 계단(=텔레포트 지점) 표시 — 보조부문동(지하) 쪽 계단은 어둡게 "구멍 속으로
+      // 꺼지는" 톤을, 공장사무실(위층) 쪽 계단은 반대로 은은하게 밝아지는 톤을 준다.
+      // 라인↔사무실 계단은 y=7(라인쪽)·y=32(사무실쪽) 두 지점, 라인↔보조부문동
+      // 계단은 y=14(라인쪽)·y=46(보조부문동쪽) 두 지점 — 같은 계단의 양끝이라 톤을 맞춘다.
       if(t===T.STAIR){
-        const goingDown = y>=15, goingUp = y<=7;
-        if(goingDown){
-          const depth=(y-15);
-          const grad=ctx.createLinearGradient(sx,sy,sx,sy+TS);
-          grad.addColorStop(0, `rgba(8,4,16,${0.18+depth*0.22})`);
-          grad.addColorStop(1, `rgba(3,1,8,${0.38+depth*0.3})`);
-          ctx.fillStyle=grad; ctx.fillRect(sx,sy,TS+1,TS+1);
+        if(STAIR_DOWN_ROWS.has(y)){
+          ctx.fillStyle='rgba(8,4,16,0.4)'; ctx.fillRect(sx,sy,TS+1,TS+1);
           ctx.fillStyle='rgba(0,0,0,0.35)';
           ctx.fillRect(sx,sy,TS*0.12,TS+1);
           ctx.fillRect(sx+TS*0.88,sy,TS*0.12,TS+1);
-        } else if(goingUp){
+        } else if(STAIR_UP_ROWS.has(y)){
           const grad=ctx.createLinearGradient(sx,sy,sx,sy+TS);
           grad.addColorStop(0,'rgba(255,255,255,0.06)');
           grad.addColorStop(1,'rgba(255,255,255,0)');
