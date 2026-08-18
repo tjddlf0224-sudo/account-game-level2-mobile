@@ -1669,7 +1669,11 @@ const World = {
 
   init(){
     // 나갔다가 다시 들어오면 마지막으로 있던 자리에서 시작(없으면 기본 스폰 위치 그대로)
-    if(Number.isFinite(Stage.state.px) && Number.isFinite(Stage.state.py)){
+    // 단, 맵 구조가 바뀐 뒤(계단→텔레포트 전환 등) 저장된 좌표가 이제 벽 안에 파묻혀
+    // 있을 수 있음 — 그러면 사방이 막혀 한 발짝도 못 움직이는 채로 시작하게 되므로,
+    // 복원 전에 실제로 서 있을 수 있는 자리인지 검증하고 아니면 기본 스폰으로 되돌린다.
+    if(Number.isFinite(Stage.state.px) && Number.isFinite(Stage.state.py)
+       && !this.isBarrier(Math.round(Stage.state.px), Math.round(Stage.state.py))){
       this.px = Stage.state.px; this.py = Stage.state.py;
     }
     this.cv=document.getElementById('game');
