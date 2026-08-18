@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data:; connect-src 'self' https://pjagaulfivafamhhiveg.supabase.co https://cdn.jsdelivr.net;">
+<title>배관의 방(보조부문원가 배분) | 전산회계 1급</title>
+<meta name="description" content="파이프 밸브를 잠그고 열며 직접배분법·단계배분법·상호배분법의 차이를 몸으로 익히는 연습">
+<style>
+  :root{
+    --bg:#020810; --card:#0c1626; --card2:#11203a; --line:rgba(255,255,255,.08);
+    --blue:#00f2ff; --purple:#b44fff; --green:#2ecc71; --red:#ff2d78; --gold:#ffd24a;
+    --pipe-on:#00f2ff; --pipe-off:#3a4658;
+    --txt:#eaf2ff; --dim:rgba(234,242,255,.55);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{margin:0;background:var(--bg);color:var(--txt);
+       font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+       padding:0 0 40px; min-height:100vh;}
+  .wrap{max-width:640px;margin:0 auto;padding:calc(16px + env(safe-area-inset-top)) 16px 16px;}
+  @media (min-width:701px){
+    body{background:
+      radial-gradient(ellipse 50% 40% at 12% 10%, rgba(180,79,255,0.07), transparent 60%),
+      radial-gradient(ellipse 45% 35% at 90% 90%, rgba(0,242,255,0.06), transparent 55%),
+      var(--bg);
+      display:flex; flex-direction:column; justify-content:center;}
+    .wrap{padding-top:16px;max-width:820px;width:100%;}
+  }
+  .top{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+  .back{background:var(--card);border:1px solid var(--line);color:var(--txt);
+        border-radius:12px;padding:9px 13px;font-size:.92rem;text-decoration:none;flex:none;}
+  h1{font-size:1.15rem;margin:0;}
+  h1 .sub{display:block;font-size:.72rem;color:var(--dim);font-weight:500;margin-top:3px;}
+
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px;}
+  .panel h2{font-size:.92rem;margin:0 0 10px;color:var(--blue);}
+  .panel p{font-size:.88rem;line-height:1.65;color:var(--dim);margin:0 0 8px;}
+  .cta{display:block;width:100%;border:none;border-radius:14px;padding:15px;
+       font-size:1.05rem;font-weight:700;color:#021;cursor:pointer;
+       background:linear-gradient(90deg,var(--blue),var(--purple));margin-top:8px;}
+  .cta:disabled{opacity:.45;}
+  .guide-btn{display:block;width:100%;border:1.5px solid var(--line);border-radius:14px;padding:12px;
+    font-size:.9rem;font-weight:600;color:var(--dim);background:var(--card2);cursor:pointer;margin-top:8px;text-align:center;}
+
+  #quiz{display:none;}
+  .hud{display:flex;justify-content:space-between;align-items:center;font-size:.82rem;color:var(--dim);margin-bottom:10px;}
+  .hud b{color:var(--gold);}
+  .progress-track{height:6px;background:rgba(255,255,255,.07);border-radius:6px;overflow:hidden;margin-bottom:14px;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--purple));transition:width .3s;}
+
+  .round-badge{display:inline-block;font-family:ui-monospace,monospace;font-weight:700;font-size:.7rem;
+    letter-spacing:.03em;padding:4px 10px;border-radius:6px;background:rgba(180,79,255,.15);color:var(--purple);
+    border:1px solid rgba(180,79,255,.3);margin-bottom:10px;}
+  .round-title{font-size:1.02rem;font-weight:700;margin-bottom:6px;}
+  .round-desc{font-size:.86rem;color:var(--dim);line-height:1.6;margin-bottom:14px;word-break:keep-all;}
+
+  /* ── 배관도(탱크+밸브 칩) ── */
+  .plant{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px;}
+  .tank{margin-bottom:16px;}
+  .tank:last-child{margin-bottom:0;}
+  .tank-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+  .tank-name{font-weight:700;font-size:.98rem;}
+  .tank-cost{font-family:ui-monospace,monospace;font-weight:700;color:var(--gold);font-size:.92rem;}
+  .tank-cost.zero{color:rgba(255,255,255,.25);text-decoration:line-through;}
+  .pipe-row{display:flex;gap:8px;flex-wrap:wrap;margin-left:14px;padding-left:14px;border-left:2px dashed var(--pipe-off);}
+  .valve{position:relative;flex:1;min-width:96px;border:1.5px solid var(--pipe-off);border-radius:12px;
+    padding:9px 8px;text-align:center;cursor:pointer;transition:.15s;background:var(--card2);}
+  .valve .vname{display:block;font-size:.78rem;color:var(--dim);}
+  .valve .vamt{display:block;font-size:.72rem;font-family:ui-monospace,monospace;color:rgba(255,255,255,.35);margin-top:2px;}
+  .valve.open{border-color:var(--pipe-on);background:rgba(0,242,255,.12);box-shadow:0 0 0 2px rgba(0,242,255,.15);}
+  .valve.open .vname{color:var(--blue);font-weight:700;}
+  .valve.open .vamt{color:var(--blue);}
+  .valve.closed{opacity:.55;}
+  .valve.closed::after{content:'✕';position:absolute;top:4px;right:6px;color:var(--red);font-size:.7rem;font-weight:900;}
+  .valve.locked{cursor:default;}
+  .valve.fixed-open{border-color:var(--green);background:rgba(46,204,113,.1);cursor:default;}
+  .valve.fixed-open .vname{color:var(--green);}
+
+  .hint-box{margin-top:12px;padding:12px 14px;border-radius:12px;background:rgba(255,210,74,.08);
+    border:1px solid rgba(255,210,74,.25);font-size:.84rem;color:var(--gold);line-height:1.55;display:none;}
+  .hint-box.show{display:block;}
+  .ok-box{margin-top:12px;padding:12px 14px;border-radius:12px;background:rgba(46,204,113,.1);
+    border:1px solid rgba(46,204,113,.3);font-size:.86rem;color:var(--green);line-height:1.55;display:none;font-weight:700;}
+  .ok-box.show{display:block;}
+
+  .qcard{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;margin-bottom:14px;}
+  .qstem{font-size:1.0rem;line-height:1.6;word-break:keep-all;margin-bottom:14px;}
+  .opt-grid{display:grid;gap:9px;}
+  .opt{background:var(--card2);border:1.5px solid var(--line);border-radius:12px;padding:13px 14px;
+    text-align:left;cursor:pointer;transition:.12s;color:var(--txt);font-size:.92rem;font-family:ui-monospace,monospace;}
+  .opt:active{transform:scale(.98);}
+  .opt[disabled]{cursor:default;}
+  .opt.correct{border-color:var(--green);background:rgba(46,204,113,.18);}
+  .opt.wrong{border-color:var(--red);background:rgba(255,45,120,.18);}
+  .opt.dim{opacity:.35;}
+
+  .expl{margin-top:14px;padding:14px;border-radius:13px;background:rgba(0,242,255,.07);
+        border:1px solid rgba(0,242,255,.22);font-size:.88rem;line-height:1.6;display:none;}
+  .expl .verdict{font-weight:700;margin-bottom:6px;font-size:.96rem;}
+  .next-wrap{margin-top:14px;}
+
+  #result{display:none;text-align:center;}
+  #result .em{font-size:3rem;display:block;margin:8px 0;}
+  #result .score{font-size:2.4rem;color:var(--gold);font-weight:800;}
+  #result .grade{font-size:1.1rem;margin:6px 0 2px;}
+  .res-row{display:flex;justify-content:space-around;margin:18px 0;font-size:.9rem;}
+  .res-row .v{font-size:1.4rem;font-weight:700;display:block;}
+  .res-note{font-size:.82rem;color:var(--dim);margin-bottom:18px;}
+  .btn-row{display:flex;gap:10px;}
+  .btn-row a,.btn-row button{flex:1;border-radius:13px;padding:13px;font-size:.92rem;font-weight:600;
+      border:1px solid var(--line);background:var(--card2);color:var(--txt);cursor:pointer;text-decoration:none;text-align:center;}
+  .btn-row .primary{border:none;background:linear-gradient(90deg,var(--blue),var(--purple));color:#021;}
+
+  /* ── 게임 방법 튜토리얼 ── */
+  .tut{display:none;position:fixed;inset:0;z-index:9999;flex-direction:column;background:var(--bg);}
+  .tut.show{display:flex;animation:tutPop .25s ease;}
+  @keyframes tutPop{from{opacity:0;transform:scale(.97);}to{opacity:1;transform:scale(1);}}
+  .tut-top{display:flex;align-items:center;gap:9px;padding:calc(12px + env(safe-area-inset-top)) 18px 10px;}
+  .tut-top .tt-title{font-weight:800;font-size:1.05rem;color:#fff;}
+  .tut-top .tt-badge{font-size:.8rem;font-weight:800;color:#fff;background:var(--purple);border-radius:50px;padding:3px 12px;}
+  .tut-top .tt-skip{margin-left:auto;background:rgba(255,255,255,.1);border:none;color:rgba(255,255,255,.75);
+    border-radius:50px;padding:6px 14px;font-size:.8rem;cursor:pointer;}
+  .tut-stage{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;padding:6px 16px 0;overflow-y:auto;}
+  .tut-stage .plant{width:100%;max-width:480px;}
+  .tut .valve.tut-target{position:relative;box-shadow:0 0 0 3px rgba(255,210,74,.4);animation:tutGlow 1s ease-in-out infinite;}
+  @keyframes tutGlow{0%,100%{box-shadow:0 0 0 3px rgba(255,210,74,.4);}50%{box-shadow:0 0 0 7px rgba(255,210,74,.12);}}
+  .tut-bubble{background:rgba(0,0,0,.35);border-top:1px solid var(--line);padding:16px 18px calc(16px + env(safe-area-inset-bottom));}
+  .tut-bubble-text{font-size:.98rem;line-height:1.6;color:#e0e6ed;word-break:keep-all;text-align:center;}
+  .tut-bubble-text b{color:var(--blue);}
+  .tut-hint{text-align:center;font-weight:800;color:var(--gold);font-size:.92rem;margin-top:8px;}
+  .tut-next{display:block;width:100%;margin-top:14px;padding:15px;border-radius:14px;border:2px solid rgba(255,255,255,.3);
+    background:transparent;color:#fff;font-size:1rem;font-weight:700;cursor:pointer;}
+
+  /* ── TOP 랭킹(결과화면) ── */
+  .rank-title{font-size:.72rem;color:rgba(255,255,255,.35);letter-spacing:2px;margin:18px 0 8px;text-align:center;}
+  #my-rank-badge{display:none;font-size:.82rem;color:var(--blue);background:rgba(0,242,255,.1);border:1px solid rgba(0,242,255,.3);
+    border-radius:50px;padding:6px 16px;margin:0 auto 8px;text-align:center;max-width:max-content;}
+  #rank-box{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:12px;max-height:180px;overflow-y:auto;padding:4px 0;text-align:left;}
+  .rr-row{display:grid;grid-template-columns:34px 1fr 70px;gap:6px;padding:8px 12px;font-size:.8rem;border-bottom:1px solid rgba(255,255,255,.05);align-items:center;}
+  .rr-row:last-child{border-bottom:none;}
+  .rr-row.me{background:rgba(0,242,255,.08);}
+  .rr-num{color:rgba(255,255,255,.35);font-weight:700;}
+  .rr-name{color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .rr-score{color:var(--gold);text-align:right;font-weight:700;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="back" href="index_lv1.html">←</a>
+    <h1>🔧 배관의 방 <span class="sub">전산회계 1급 · 보조부문원가 배분</span></h1>
+  </div>
+
+  <div id="home">
+    <div class="panel">
+      <h2>보조부문원가, 어떻게 나눠 낼까?</h2>
+      <p>동력부·수선부 같은 보조부문은 제품을 직접 안 만들지만, 없으면 공장이 안 돌아가요. 이 부문의 원가를 절단부·조립부 같은 제조부문에 어떻게 배분하느냐에 따라 방법이 3가지로 갈립니다.</p>
+      <p>파이프 밸브를 직접 잠그고 열면서 <b style="color:#fff">직접배분법 → 단계배분법 → 상호배분법(개념)</b> 순서로 차이를 몸으로 익혀봐요.</p>
+      <button class="cta" id="start-btn">▶ 시작</button>
+      <button class="guide-btn" id="guide-btn">📖 게임 방법</button>
+    </div>
+  </div>
+
+  <div id="quiz">
+    <div class="hud">
+      <span id="hud-prog">1 / 7</span>
+      <span>점수 <b id="hud-score">0</b></span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+    <div id="quiz-body"></div>
+  </div>
+
+  <div id="result"></div>
+
+  <!-- ── 인터랙티브 튜토리얼(게임 방법) ── -->
+  <div id="tutorial" class="tut">
+    <div class="tut-top">
+      <span class="tt-title">📖 게임 방법</span>
+      <span class="tt-badge" id="tut-badge">1/5</span>
+      <button class="tt-skip" onclick="Tutorial.close()">건너뛰기</button>
+    </div>
+    <div class="tut-stage">
+      <div class="plant">
+        <div class="tank">
+          <div class="tank-head"><span class="tank-name">🔵 동력부</span><span class="tank-cost">900,000원</span></div>
+          <div class="pipe-row" id="tut-valves"></div>
+        </div>
+      </div>
+    </div>
+    <div class="tut-bubble">
+      <div class="tut-bubble-text" id="tut-text"></div>
+      <div class="tut-hint" id="tut-hint" style="display:none"></div>
+      <button class="tut-next" id="tut-next" onclick="Tutorial.next()">다음 ▶</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="wrongnote.js"></script>
+<script src="growth.js"></script>
+<script>
+(function(){ if(!(localStorage.getItem('hub_nickname')||'').trim()){ location.replace('login.html'); } })();
+
+const GAME_ID='alloc_lv1';
+
+/* =========================================================================
+ *  보조부문원가 배분 데이터 — 검산 완료.
+ *  동력부 900,000원(수선부20%/절단부50%/조립부30%), 수선부 600,000원(동력부10%/절단부60%/조립부30%)
+ *  직접배분법: 절단부 962,500 / 조립부 537,500 (합 1,500,000 = 원가 총액과 일치)
+ *  단계배분법(동력부 먼저): 수선부 총액 780,000 → 절단부 970,000 / 조립부 530,000 (합 1,500,000)
+ * ========================================================================= */
+const DATA = {
+  power:  { name:'동력부', cost:900000, to:{ repair:0.20, cut:0.50, assemble:0.30 } },
+  repair: { name:'수선부', cost:600000, to:{ power:0.10,  cut:0.60, assemble:0.30 } },
+};
+const won = n => n.toLocaleString()+'원';
+
+function directMethod(){
+  const p=DATA.power.to, r=DATA.repair.to;
+  const pSum=p.cut+p.assemble, rSum=r.cut+r.assemble;
+  const powerToCut=DATA.power.cost*(p.cut/pSum), powerToAssemble=DATA.power.cost*(p.assemble/pSum);
+  const repairToCut=DATA.repair.cost*(r.cut/rSum), repairToAssemble=DATA.repair.cost*(r.assemble/rSum);
+  return { powerToCut, powerToAssemble, repairToCut, repairToAssemble,
+           cut:powerToCut+repairToCut, assemble:powerToAssemble+repairToAssemble };
+}
+function stepMethod(){
+  // 동력부가 먼저 배분(원래 비율 그대로, 수선부 포함) → 수선부는 그다음 배분(동력부로는 못 감, 제조부문에만)
+  const power=DATA.power, repair=DATA.repair;
+  const powerToRepair=power.cost*power.to.repair, powerToCut=power.cost*power.to.cut, powerToAssemble=power.cost*power.to.assemble;
+  const repairTotal=repair.cost+powerToRepair;
+  const rSum=repair.to.cut+repair.to.assemble;
+  const repairToCut=repairTotal*(repair.to.cut/rSum), repairToAssemble=repairTotal*(repair.to.assemble/rSum);
+  return { powerToRepair, powerToCut, powerToAssemble, repairTotal, repairToCut, repairToAssemble,
+           cut:powerToCut+repairToCut, assemble:powerToAssemble+repairToAssemble };
+}
+const D = directMethod(), S = stepMethod();
+// 자체 검산(총원가 불변 확인) — 어긋나면 콘솔에 바로 드러나게
+console.assert(Math.round(D.cut+D.assemble)===1500000, '직접배분법 합계 오류', D);
+console.assert(Math.round(S.cut+S.assemble)===1500000, '단계배분법 합계 오류', S);
+
+function esc(s){return (s==null?'':String(s)).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+/* =========================================================================
+ *  라운드 정의 — ①밸브 퍼즐(직접배분법) ②밸브 퍼즐(단계배분법) ③개념 퀴즈(상호배분법)
+ * ========================================================================= */
+const ROUNDS = [
+  {
+    key:'direct', badge:'ROUND 1 · 직접배분법',
+    title:'보조부문끼리는 없는 셈 친다',
+    desc:'직접배분법은 보조부문 상호 간 용역수수를 <b style="color:#fff">전혀 반영하지 않아요</b>. 동력부↔수선부로 가는 파이프 2개를 잠가서, 제조부문(절단부·조립부)으로만 흐르게 만들어보세요.',
+    valvePuzzle:true,
+  },
+  {
+    key:'step', badge:'ROUND 2 · 단계배분법',
+    title:'순서를 정해서 한 번씩만 배분한다',
+    desc:'단계배분법은 배분 순서를 정해요. <b style="color:#fff">동력부를 먼저</b> 배분하면(수선부까지 포함해서 전부), 동력부는 다 비워지고 다시는 못 받아요. 그다음 수선부는 <b style="color:#fff">이미 끝난 동력부로는 못 가고</b> 제조부문에만 배분합니다.',
+    valvePuzzle:true,
+  },
+  {
+    key:'recip', badge:'ROUND 3 · 상호배분법(개념)',
+    title:'서로 완전히 주고받는다',
+    desc:'상호배분법은 보조부문끼리도 완전히 주고받는 걸 반영해요. 실제 시험에서는 <b style="color:#fff">복잡한 계산보다 "직접배분법·단계배분법과 어떻게 다른가"를 묻는 개념 문제</b>로 훨씬 자주 나와요.',
+    valvePuzzle:false,
+  },
+];
+
+const QUESTIONS = {
+  direct:[
+    { q:'절단부가 배분받는 보조부문원가 합계는?',
+      opts:[962500, 810000, 900000, 1050000], correct:962500,
+      expl:`동력부 900,000×(50/80)=562,500 + 수선부 600,000×(60/90)=400,000 = <b>962,500원</b>. 교차 파이프를 잠그고 남은 비율(절단:조립)로 다시 나눠야 해요.` },
+    { q:'조립부가 배분받는 보조부문원가 합계는?',
+      opts:[537500, 450000, 750000, 600000], correct:537500,
+      expl:`동력부 900,000×(30/80)=337,500 + 수선부 600,000×(30/90)=200,000 = <b>537,500원</b>. 절단부(962,500)+조립부(537,500)=1,500,000원으로 원래 원가 총액(900,000+600,000)과 정확히 일치해요.` },
+  ],
+  step:[
+    { q:'1단계, 동력부가 수선부로 보내는(=수선부가 받는) 금액은?',
+      opts:[180000, 90000, 200000, 270000], correct:180000,
+      expl:`동력부 900,000×20% = <b>180,000원</b>. 1단계는 동력부의 "원래" 비율 그대로 전부(수선부 포함) 배분해요.` },
+    { q:'2단계, 수선부가 배분할 원가 총액(자기 원가+받은 금액)은?',
+      opts:[780000, 600000, 900000, 720000], correct:780000,
+      expl:`수선부 원래 원가 600,000 + 1단계에서 받은 180,000 = <b>780,000원</b>. 이제 이 780,000원을 절단부·조립부에만 나눠요(동력부는 이미 끝나서 못 감).` },
+    { q:'절단부가 최종적으로 배분받는 원가 합계는?',
+      opts:[970000, 962500, 900000, 1020000], correct:970000,
+      expl:`동력부 몫 450,000(900,000×50%) + 수선부 몫 520,000(780,000×60/90) = <b>970,000원</b>. 직접배분법(962,500원)과 살짝 다르죠? 배분방법이 달라지면 부문별 배분액도 달라져요.` },
+  ],
+  recip:[
+    { q:'다음 중 보조부문원가 배분방법에 대한 설명으로 옳은 것은?',
+      opts:['직접배분법은 보조부문 상호 간 용역수수를 전혀 반영하지 않는다',
+            '상호배분법은 배분순서를 고려하여 배분한다',
+            '단계배분법은 보조부문 상호 간 용역수수를 전혀 반영하지 않는다',
+            '배분방법에 따라 보조부문원가의 총액 자체가 달라진다'],
+      correct:'직접배분법은 보조부문 상호 간 용역수수를 전혀 반영하지 않는다',
+      expl:`배분순서를 고려하는 건 <b>단계배분법</b>이고, 용역수수를 전혀 반영 안 하는 건 <b>직접배분법</b>이에요. 어떤 방법을 쓰든 회사 전체 보조부문원가 <b>총액은 바뀌지 않아요</b> — 부문별로 얼마씩 지느냐만 달라져요.` },
+    { q:'직접배분법·단계배분법·상호배분법 중, 보조부문 상호 간 용역수수관계를 가장 정확하게(완전히) 반영하는 방법은?',
+      opts:['상호배분법','직접배분법','단계배분법','세 방법 모두 동일하다'],
+      correct:'상호배분법',
+      expl:`상호배분법은 보조부문끼리 주고받는 걸 <b>완전히</b> 반영해서 가장 정확해요. 다만 계산이 복잡해서(연립방정식) 실제 시험에는 개념 문제로 훨씬 자주 나와요.` },
+  ],
+};
+
+let queue=[], qi=0, score=0, correctCnt=0;
+function buildQueue(){
+  queue=[];
+  ROUNDS.forEach(r=>{
+    let first=true;
+    if(r.valvePuzzle){ queue.push({type:'valve', round:r, first}); first=false; }
+    QUESTIONS[r.key].forEach(q=>{ queue.push({type:'quiz', round:r, q, first}); first=false; });
+  });
+}
+
+function bindStart(){
+  document.getElementById('start-btn').onclick=startQuiz;
+  document.getElementById('guide-btn').onclick=()=>Tutorial.start();
+}
+
+function startQuiz(){
+  buildQueue();
+  qi=0; score=0; correctCnt=0;
+  if(window.WrongNote) WrongNote.reset();
+  document.getElementById('home').style.display='none';
+  document.getElementById('result').style.display='none';
+  document.getElementById('quiz').style.display='block';
+  showStep();
+}
+
+const totalQuizCount = ROUNDS.reduce((s,r)=>s+QUESTIONS[r.key].length,0);
+function showStep(){
+  const item=queue[qi];
+  const quizIdx = queue.slice(0,qi+1).filter(x=>x.type==='quiz').length;
+  document.getElementById('hud-prog').textContent = item.type==='valve' ? `밸브 ${ROUNDS.indexOf(item.round)+1}/${ROUNDS.length}` : `${quizIdx} / ${totalQuizCount}`;
+  document.getElementById('hud-score').textContent=score.toLocaleString();
+  document.getElementById('prog-fill').style.width=(qi/queue.length*100)+'%';
+  if(item.type==='valve') renderValveStep(item.round);
+  else renderQuizStep(item.q, item.first?item.round:null);
+}
+
+/* ── 밸브 퍼즐 화면 ── */
+function valveHtml(round){
+  if(round.key==='direct'){
+    return `
+    <div class="plant">
+      <div class="tank">
+        <div class="tank-head"><span class="tank-name">🔵 동력부</span><span class="tank-cost" id="pw-cost">${won(DATA.power.cost)}</span></div>
+        <div class="pipe-row">
+          <div class="valve open" data-src="power" data-dst="repair"><span class="vname">→ 수선부</span><span class="vamt">교차</span></div>
+          <div class="valve fixed-open" data-src="power" data-dst="cut"><span class="vname">→ 절단부</span><span class="vamt">고정</span></div>
+          <div class="valve fixed-open" data-src="power" data-dst="assemble"><span class="vname">→ 조립부</span><span class="vamt">고정</span></div>
+        </div>
+      </div>
+      <div class="tank">
+        <div class="tank-head"><span class="tank-name">🟣 수선부</span><span class="tank-cost" id="rp-cost">${won(DATA.repair.cost)}</span></div>
+        <div class="pipe-row">
+          <div class="valve open" data-src="repair" data-dst="power"><span class="vname">→ 동력부</span><span class="vamt">교차</span></div>
+          <div class="valve fixed-open" data-src="repair" data-dst="cut"><span class="vname">→ 절단부</span><span class="vamt">고정</span></div>
+          <div class="valve fixed-open" data-src="repair" data-dst="assemble"><span class="vname">→ 조립부</span><span class="vamt">고정</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="hint-box" id="valve-hint">👆 교차 파이프(동력부→수선부, 수선부→동력부) 2개를 탭해서 잠가보세요.</div>
+    <div class="ok-box" id="valve-ok">✓ 교차 파이프를 다 잠갔어요! 이제 동력부·수선부 원가는 절단부·조립부로만 흘러갑니다.</div>
+    <div class="next-wrap"><button class="cta" id="valve-next-btn" disabled>다음 →</button></div>`;
+  }
+  // step
+  return `
+    <div class="plant">
+      <div class="tank">
+        <div class="tank-head"><span class="tank-name">🔵 동력부 (1단계 · 먼저 배분)</span><span class="tank-cost" id="pw-cost">${won(DATA.power.cost)}</span></div>
+        <div class="pipe-row">
+          <div class="valve fixed-open" data-src="power" data-dst="repair"><span class="vname">→ 수선부</span><span class="vamt">${won(S.powerToRepair)}</span></div>
+          <div class="valve fixed-open" data-src="power" data-dst="cut"><span class="vname">→ 절단부</span><span class="vamt">${won(S.powerToCut)}</span></div>
+          <div class="valve fixed-open" data-src="power" data-dst="assemble"><span class="vname">→ 조립부</span><span class="vamt">${won(S.powerToAssemble)}</span></div>
+        </div>
+      </div>
+      <div class="tank">
+        <div class="tank-head"><span class="tank-name">🟣 수선부 (2단계)</span><span class="tank-cost" id="rp-cost">${won(DATA.repair.cost)}</span></div>
+        <div class="pipe-row">
+          <div class="valve open" data-src="repair" data-dst="power"><span class="vname">→ 동력부</span><span class="vamt">이미 끝남</span></div>
+          <div class="valve fixed-open" data-src="repair" data-dst="cut"><span class="vname">→ 절단부</span><span class="vamt">?</span></div>
+          <div class="valve fixed-open" data-src="repair" data-dst="assemble"><span class="vname">→ 조립부</span><span class="vamt">?</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="hint-box" id="valve-hint">👆 동력부는 이미 1단계에서 다 배분했어요. 수선부→동력부 파이프를 탭해서 잠그세요(이미 끝난 부문으로는 다시 못 갑니다).</div>
+    <div class="ok-box" id="valve-ok">✓ 맞아요! 수선부는 자기 원가 600,000원 + 동력부한테 받은 180,000원 = 780,000원을 절단부·조립부에만 나눕니다.</div>
+    <div class="next-wrap"><button class="cta" id="valve-next-btn" disabled>다음 →</button></div>`;
+}
+function renderValveStep(round){
+  document.getElementById('quiz-body').innerHTML = `
+    <div class="round-badge">${round.badge}</div>
+    <div class="round-title">${round.title}</div>
+    <div class="round-desc">${round.desc}</div>
+    ${valveHtml(round)}`;
+  const crossKey = round.key==='direct' ? null : 'repair-power';
+  document.querySelectorAll('.valve.open').forEach(v=>{
+    v.addEventListener('click', ()=>{
+      v.classList.remove('open'); v.classList.add('closed');
+      checkValveDone(round);
+    });
+  });
+  document.getElementById('valve-hint').classList.add('show');
+}
+function checkValveDone(round){
+  const remainOpen = document.querySelectorAll('.plant .valve.open').length;
+  if(remainOpen===0){
+    document.getElementById('valve-hint').classList.remove('show');
+    document.getElementById('valve-ok').classList.add('show');
+    document.getElementById('valve-next-btn').disabled=false;
+    document.getElementById('valve-next-btn').onclick=()=>{ qi++; showStep(); };
+    if(round.key==='step'){
+      document.getElementById('pw-cost').textContent=won(0);
+      document.getElementById('pw-cost').classList.add('zero');
+      document.querySelectorAll('.plant .valve[data-dst="cut"], .plant .valve[data-dst="assemble"]').forEach(v=>{
+        if(v.dataset.src==='repair'){
+          const amt = v.dataset.dst==='cut' ? S.repairToCut : S.repairToAssemble;
+          v.querySelector('.vamt').textContent = won(Math.round(amt));
+        }
+      });
+    }
+  }
+}
+
+/* ── 퀴즈(객관식) 화면 ── */
+function renderQuizStep(q, introRound){
+  const opts = q._shuffled || (q._shuffled = shuffle(q.opts.slice()));
+  const header = introRound ? `
+    <div class="round-badge">${introRound.badge}</div>
+    <div class="round-title">${introRound.title}</div>
+    <div class="round-desc">${introRound.desc}</div>` : '';
+  document.getElementById('quiz-body').innerHTML = `
+    ${header}
+    <div class="qcard">
+      <div class="qstem">${esc(q.q)}</div>
+      <div class="opt-grid" id="opt-grid">
+        ${opts.map(o=>`<button class="opt" data-v="${esc(String(o))}">${typeof o==='number'?won(o):esc(o)}</button>`).join('')}
+      </div>
+      <div class="expl" id="expl"></div>
+      <div class="next-wrap" id="next-wrap" style="display:none"><button class="cta" id="next-btn"></button></div>
+    </div>`;
+  document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>pickAnswer(b,q));
+}
+function pickAnswer(btn,q){
+  const val=btn.dataset.v;
+  const correctVal=String(q.correct);
+  document.querySelectorAll('.opt').forEach(b=>{
+    b.disabled=true;
+    if(b.dataset.v===correctVal) b.classList.add('correct');
+    else if(b.dataset.v===val) b.classList.add('wrong');
+    else b.classList.add('dim');
+  });
+  const ok = val===correctVal;
+  const expl=document.getElementById('expl');
+  expl.innerHTML = (ok
+    ? `<div class="verdict" style="color:var(--green)">✓ 정답!</div>${q.expl}`
+    : `<div class="verdict" style="color:var(--red)">✗ 오답</div>${q.expl}`);
+  expl.style.display='block';
+  if(ok){ correctCnt++; score+=150; }
+  else{
+    if(window.WrongNote) WrongNote.add({ game:GAME_ID, key:q.q.slice(0,20), q:q.q,
+      correct:(typeof q.correct==='number'?won(q.correct):q.correct), wrong:val, type:'보조부문배분' });
+  }
+  document.getElementById('hud-score').textContent=score.toLocaleString();
+  const isLast = qi>=queue.length-1;
+  document.getElementById('next-wrap').style.display='block';
+  document.getElementById('next-btn').textContent = isLast ? '결과 보기 🏁' : '다음 →';
+  document.getElementById('next-btn').onclick=()=>{ qi++; if(qi>=queue.length) endQuiz(); else showStep(); };
+  expl.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function grade(rate){
+  if(rate>=0.9) return '👑 배관의 달인';
+  if(rate>=0.75) return '🥇 합격 안정권';
+  if(rate>=0.6) return '🥈 합격 가시권';
+  if(rate>=0.4) return '🥉 분발 필요';
+  return '📋 기초 다지기';
+}
+
+async function endQuiz(){
+  if(window.WrongNote) await WrongNote.flush(GAME_ID);
+  const rate = totalQuizCount ? correctCnt/totalQuizCount : 0;
+  const g = grade(rate);
+  if(window.Growth) Growth.record({game:GAME_ID, score:score, grade:g, combo:0, correct:correctCnt});
+  try{ await saveStageScore(score, g, correctCnt, totalQuizCount); }catch(e){}
+  requestInterstitialIfNeeded(renderResult);
+}
+
+/* =========================================================================
+ *  Tutorial — 직접배분법 교차 파이프 1개만 잠가보는 짧은 체험(퀴즈 없이)
+ * ========================================================================= */
+const TUT_STEPS = [
+  { text:'보조부문원가를 제조부문에 나눠주는 <b>배관</b>을 밸브로 직접 잠그고 열면서 배분방법 차이를 익히는 게임이에요.', btn:'시작 ▶' },
+  { text:'<b>직접배분법</b>은 보조부문끼리 주고받는 건 없는 셈 쳐요. 동력부→수선부로 가는 <b>교차 파이프</b>를 탭해서 잠가보세요.', tap:true, hint:'👆 빛나는 밸브를 탭!' },
+  { text:'맞아요! 이렇게 교차 파이프를 잠그면, 동력부 원가는 절단부·조립부로만 흘러가요.', glow:true, btn:'다음 ▶' },
+  { text:'그다음엔 계산 문제로 실제 배분액을 직접 확인해요. 오답이어도 바로 해설이 나오니 걱정 마세요.', btn:'다음 ▶' },
+  { text:'직접배분법 → 단계배분법 → 상호배분법(개념) 순서로 이어져요. 준비되면 시작해볼까요?', btn:'시작하기 ▶', finish:true },
+];
+const Tutorial = (function(){
+  let step=0, locked=false, timer=null;
+  function el(id){ return document.getElementById(id); }
+  function buildBoard(){
+    el('tut-valves').innerHTML = `
+      <div class="valve open" id="tut-valve-target"><span class="vname">→ 수선부</span><span class="vamt">교차</span></div>
+      <div class="valve fixed-open"><span class="vname">→ 절단부</span><span class="vamt">고정</span></div>
+      <div class="valve fixed-open"><span class="vname">→ 조립부</span><span class="vamt">고정</span></div>`;
+    el('tut-valve-target').addEventListener('pointerdown', e=>{ e.preventDefault(); onTap(); });
+  }
+  function onTap(){
+    const s=TUT_STEPS[step];
+    if(locked || !s || !s.tap) return;
+    locked=true;
+    const v=el('tut-valve-target');
+    v.classList.remove('open'); v.classList.add('closed');
+    timer=setTimeout(()=>{ timer=null; locked=false; go(step+1); }, 600);
+  }
+  function render(){
+    const s=TUT_STEPS[step];
+    el('tut-badge').textContent=(step+1)+'/'+TUT_STEPS.length;
+    el('tut-text').innerHTML=s.text;
+    const target=el('tut-valve-target');
+    if(target) target.classList.toggle('tut-target', !!s.tap);
+    const hint=el('tut-hint');
+    if(s.hint){ hint.style.display='block'; hint.textContent=s.hint; } else hint.style.display='none';
+    const btn=el('tut-next');
+    if(s.btn){ btn.style.display='block'; btn.textContent=s.btn; } else btn.style.display='none';
+  }
+  function go(n){ step=n; if(step>=TUT_STEPS.length) return finish(); render(); }
+  function nextBtn(){ if(TUT_STEPS[step].finish) return finish(); go(step+1); }
+  function clearTimer(){ if(timer){ clearTimeout(timer); timer=null; } }
+  function start(){ clearTimer(); step=0; locked=false; buildBoard(); render(); el('tutorial').classList.add('show'); }
+  function close(){ clearTimer(); locked=false; el('tutorial').classList.remove('show'); }
+  function finish(){ close(); }
+  return { start, close, next:nextBtn };
+})();
+
+/* =========================================================================
+ *  허브 연동 — stage4_voucher.html의 P6 saveStageScore 패턴과 동일
+ * ========================================================================= */
+const SUPA_URL='https://pjagaulfivafamhhiveg.supabase.co';
+const SUPA_KEY='sb_publishable_yck2tAKApEjVSJOJMVSXuQ_AGaNatuI';
+const S6_SAVE_KEY='lv1_s6_progress';
+let _supaDb=null;
+function supaClient(){
+  if(_supaDb) return _supaDb;
+  try{ if(window.supabase && supabase.createClient) _supaDb=supabase.createClient(SUPA_URL, SUPA_KEY); }catch(e){}
+  return _supaDb;
+}
+async function saveStageScore(score, gradeStr, correct, total){
+  try{
+    localStorage.setItem(S6_SAVE_KEY, JSON.stringify({
+      cleared:true, score, grade:gradeStr, correct, total, playedAt:new Date().toISOString()
+    }));
+  }catch(e){}
+  const name=(localStorage.getItem('hub_nickname')||'').trim();
+  if(!name) return;
+  const groupId=localStorage.getItem('hub_group_id') || null;
+  const today=new Date().toISOString().split('T')[0];
+  const rpcParams={ p_game_id:GAME_ID, p_name:name, p_score:score, p_grade:gradeStr, p_combo:0, p_correct:correct, p_date:today };
+  if(groupId) rpcParams.p_group_id=groupId;
+  try{ if(window.Auth){ const uid=await Auth.currentUid(); if(uid) rpcParams.p_uid=uid; } }catch(e){}
+  const db=supaClient();
+  if(!db) return;
+  try{ const {error}=await db.rpc('upsert_score', rpcParams); if(error) console.warn('alloc_lv1 점수 저장 실패:', error); }
+  catch(e){ console.warn('alloc_lv1 점수 저장 예외:', e); }
+}
+function renderResult(){
+  const total=totalQuizCount, wrong=total-correctCnt;
+  const rate=total?correctCnt/total:0;
+  document.getElementById('quiz').style.display='none';
+  const box=document.getElementById('result');
+  box.style.display='block';
+  box.innerHTML=`
+    <span class="em">${rate>=0.6?'🎉':'💪'}</span>
+    <div class="score">${score.toLocaleString()}점</div>
+    <div class="grade">${grade(rate)}</div>
+    <div class="res-row">
+      <div>정답률<span class="v" style="color:var(--blue)">${Math.round(rate*100)}%</span></div>
+      <div>맞힘<span class="v" style="color:var(--green)">${correctCnt}</span></div>
+      <div>틀림<span class="v" style="color:var(--red)">${wrong}</span></div>
+    </div>
+    <div class="res-note">${wrong>0?`틀린 ${wrong}문제가 <b style="color:var(--gold)">오답노트</b>에 저장됐어요.`:'전부 맞혔어요! 완벽합니다 👏'}</div>
+    <div class="btn-row">
+      <button class="primary" onclick="location.reload()">다시 풀기</button>
+      ${wrong>0?'<a href="review.html">오답노트 →</a>':'<a href="index_lv1.html">메인 →</a>'}
+    </div>
+    <div id="my-rank-badge"></div>
+    <div class="rank-title">🏆 TOP 랭킹</div>
+    <div id="rank-box"><div style="padding:22px;color:rgba(255,255,255,.3);font-size:.8rem;text-align:center;">불러오는 중...</div></div>`;
+  box.scrollIntoView({behavior:'smooth',block:'start'});
+  loadRanking();
+}
+async function loadRanking(){
+  const box=document.getElementById('rank-box');
+  const db=supaClient();
+  if(!db){ box.innerHTML='<div style="padding:22px;color:rgba(255,255,255,.3);font-size:.8rem;text-align:center;">랭킹을 불러올 수 없습니다</div>'; return; }
+  const groupId=localStorage.getItem('hub_group_id')||null;
+  const me=(localStorage.getItem('hub_nickname')||'').trim();
+  try{
+    let q=db.from('scores').select('name,score').eq('game_id',GAME_ID).order('score',{ascending:false}).limit(15);
+    if(groupId) q=q.eq('group_id',groupId);
+    const {data,error}=await q;
+    if(error) throw error;
+    const list=data||[];
+    box.innerHTML = list.length
+      ? list.map((r,i)=>{
+          const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'위';
+          return `<div class="rr-row${r.name===me?' me':''}"><span class="rr-num">${medal}</span><span class="rr-name">${esc(r.name)}</span><span class="rr-score">${(r.score||0).toLocaleString()}</span></div>`;
+        }).join('')
+      : '<div style="padding:22px;color:rgba(255,255,255,.3);font-size:.8rem;text-align:center;">아직 기록이 없습니다</div>';
+    if(me){
+      const myRowQ = groupId ? db.from('scores').select('score').eq('game_id',GAME_ID).eq('name',me).eq('group_id',groupId).maybeSingle()
+                              : db.from('scores').select('score').eq('game_id',GAME_ID).eq('name',me).maybeSingle();
+      const {data:myRow}=await myRowQ;
+      if(myRow && Number.isFinite(myRow.score)){
+        let cq=db.from('scores').select('*',{count:'exact',head:true}).eq('game_id',GAME_ID).gt('score',myRow.score);
+        if(groupId) cq=cq.eq('group_id',groupId);
+        const {count}=await cq;
+        const badge=document.getElementById('my-rank-badge');
+        badge.textContent=`🎯 내 순위: ${((count||0)+1).toLocaleString()}위`;
+        badge.style.display='block';
+      }
+    }
+  }catch(e){
+    box.innerHTML='<div style="padding:22px;color:rgba(255,255,255,.3);font-size:.8rem;text-align:center;">랭킹을 불러올 수 없습니다</div>';
+  }
+}
+
+const AD_GAME_COUNT_KEY='hub_ad_game_count';
+const AD_INTERSTITIAL_EVERY=10;
+function incrementGameCount(){
+  const n=parseInt(localStorage.getItem(AD_GAME_COUNT_KEY)||'0')+1;
+  localStorage.setItem(AD_GAME_COUNT_KEY,String(n)); return n;
+}
+function requestInterstitialIfNeeded(afterFn){
+  if(window.AdBridge && typeof AdBridge.isAdsRemoved==='function' && AdBridge.isAdsRemoved()){ afterFn&&afterFn(); return; }
+  window._adAfterFn=afterFn;
+  const count=incrementGameCount();
+  if(count%AD_INTERSTITIAL_EVERY===0 && window.AdBridge && typeof AdBridge.showInterstitial==='function'){
+    AdBridge.showInterstitial();
+  } else { afterFn&&afterFn(); }
+}
+function onInterstitialClosed(){ if(window._adAfterFn){ const f=window._adAfterFn; window._adAfterFn=null; f(); } }
+function onAdsRemoved(){}
+function hideAdPlaceholder(){ if(window.AdBridge && typeof AdBridge.hide==='function') AdBridge.hide(); }
+
+bindStart();
+</script>
+<script src="emoji-icons.js"></script>
+</body>
+</html>

@@ -103,7 +103,7 @@ body{
 }
 
 /* ── 스테이지 노드맵(2급 허브 stagemap과 동일 패턴 — 징검다리 경로) ── */
-.stagemap{ position:relative; max-width:300px; margin:0 auto 34px; aspect-ratio:340/780; }
+.stagemap{ position:relative; max-width:300px; margin:0 auto 34px; aspect-ratio:340/1000; }
 .stagemap svg.trail{ position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
 .trail-dim{ fill:none; stroke:rgba(255,255,255,0.12); stroke-width:5; stroke-linecap:round; }
 .trail-lit{ fill:none; stroke:var(--pu); stroke-width:5; stroke-linecap:round;
@@ -253,12 +253,12 @@ body{
 
   <!-- ── 스테이지 노드맵(2급 허브 stagemap과 동일 패턴, 게임 스테이지만) ── -->
   <div class="stagemap">
-    <svg class="trail" viewBox="0 0 340 780" preserveAspectRatio="none" aria-hidden="true">
-      <path class="trail-dim" d="M240,70 C240,180 100,160 100,270 C100,380 240,360 240,470 C240,580 100,580 100,690"/>
-      <path class="trail-lit" id="trail-lit" d="M240,70 C240,180 100,160 100,270 C100,380 240,360 240,470 C240,580 100,580 100,690"/>
+    <svg class="trail" viewBox="0 0 340 1000" preserveAspectRatio="none" aria-hidden="true">
+      <path class="trail-dim" d="M240,70 C240,180 100,160 100,270 C100,380 240,360 240,470 C240,580 100,580 100,690 C100,800 240,790 240,910"/>
+      <path class="trail-lit" id="trail-lit" d="M240,70 C240,180 100,160 100,270 C100,380 240,360 240,470 C240,580 100,580 100,690 C100,800 240,790 240,910"/>
     </svg>
     <div class="nodes">
-      <a class="stage-node cur" id="node-s1" href="stage1_cost.html" style="left:70%;top:9%; --node-color:var(--pu); --node-glow:rgba(180,79,255,0.4);">
+      <a class="stage-node cur" id="node-s1" href="stage1_cost.html" style="left:70%;top:7%; --node-color:var(--pu); --node-glow:rgba(180,79,255,0.4);">
         <div class="disc">🏭
           <span class="nm-badge clear-badge" title="클리어" style="display:none">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"/></svg>
@@ -267,7 +267,7 @@ body{
         <div class="n-title">STAGE 1<br>원가의 길</div>
         <div class="n-sub" id="sub-s1">자료 0/14</div>
       </a>
-      <a class="stage-node lock" id="node-s3" href="stage3_capital.html" style="left:30%;top:35%; --node-color:var(--cy); --node-glow:rgba(0,242,255,0.4);"
+      <a class="stage-node lock" id="node-s3" href="stage3_capital.html" style="left:30%;top:27%; --node-color:var(--cy); --node-glow:rgba(0,242,255,0.4);"
          onclick="return onNodeClick(event,'s3')">
         <div class="disc">👑
           <span class="nm-badge lock-badge" title="스테이지1 클리어 필요">
@@ -280,7 +280,7 @@ body{
         <div class="n-title">STAGE 2<br>자본의 제왕</div>
         <div class="n-sub" id="sub-s3">스테이지1 클리어 필요</div>
       </a>
-      <a class="stage-node lock" id="node-s4" href="stage4_voucher.html" style="left:70%;top:60%; --node-color:var(--gd); --node-glow:rgba(255,210,74,0.4);"
+      <a class="stage-node lock" id="node-s4" href="stage4_voucher.html" style="left:70%;top:47%; --node-color:var(--gd); --node-glow:rgba(255,210,74,0.4);"
          onclick="return onNodeClick(event,'s4')">
         <div class="disc">🧾
           <span class="nm-badge lock-badge" title="스테이지2 클리어 필요">
@@ -293,7 +293,7 @@ body{
         <div class="n-title">STAGE 3<br>전표의 눈</div>
         <div class="n-sub" id="sub-s4">스테이지2 클리어 필요</div>
       </a>
-      <a class="stage-node lock" id="node-s5" href="stage5_vat.html" style="left:30%;top:88%; --node-color:var(--gn); --node-glow:rgba(0,230,118,0.4);"
+      <a class="stage-node lock" id="node-s5" href="stage5_vat.html" style="left:30%;top:69%; --node-color:var(--gn); --node-glow:rgba(0,230,118,0.4);"
          onclick="return onNodeClick(event,'s5')">
         <div class="disc">🏛️
           <span class="nm-badge lock-badge" title="스테이지3 클리어 필요">
@@ -305,6 +305,19 @@ body{
         </div>
         <div class="n-title">STAGE 4<br>신고의 문</div>
         <div class="n-sub" id="sub-s5">스테이지3 클리어 필요</div>
+      </a>
+      <a class="stage-node lock" id="node-s6" href="stage6_alloc.html" style="left:70%;top:91%; --node-color:var(--pk); --node-glow:rgba(255,45,120,0.4);"
+         onclick="return onNodeClick(event,'s6')">
+        <div class="disc">🔧
+          <span class="nm-badge lock-badge" title="스테이지4 클리어 필요">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          </span>
+          <span class="nm-badge clear-badge" title="클리어" style="display:none">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"/></svg>
+          </span>
+        </div>
+        <div class="n-title">STAGE 5<br>배관의 방</div>
+        <div class="n-sub" id="sub-s6">스테이지4 클리어 필요</div>
       </a>
     </div>
   </div>
@@ -455,12 +468,38 @@ function renderStageMap(){
     }
   }
 
+  // 스테이지5(배관의 방) — 스테이지4(신고의 문) 클리어로 순차 언락
+  let s6Cleared=false, s6Score=0;
+  try{
+    const raw6=localStorage.getItem('lv1_s6_progress');
+    if(raw6){ const s6=JSON.parse(raw6)||{}; s6Cleared=!!s6.cleared; s6Score=s6.score||0; }
+  }catch(e){}
+  const adUnlockS6 = localStorage.getItem('hub_adunlock_s6')==='1';
+  const node6=document.getElementById('node-s6'), sub6=document.getElementById('sub-s6');
+  if(node6){
+    const lockBadge6=node6.querySelector('.lock-badge'), clearBadge6=node6.querySelector('.clear-badge');
+    if(s5Cleared || adUnlockS6){
+      node6.classList.remove('lock');
+      lockBadge6.style.display='none';
+      if(s6Cleared){
+        node6.classList.add('done');
+        clearBadge6.style.display='flex';
+        sub6.textContent=`클리어 · ${s6Score}점`;
+      } else {
+        node6.classList.add('cur');
+        sub6.textContent='도전!';
+      }
+    } else {
+      sub6.textContent='스테이지4 클리어 필요';
+    }
+  }
+
   const lit=document.getElementById('trail-lit');
   if(lit){
     const total=lit.getTotalLength();
     lit.style.strokeDasharray=total;
-    // 4노드(3구간) 경로 — 스테이지1 클리어로 1/3, 스테이지2 클리어로 2/3, 스테이지3 클리어로 끝까지
-    const frac = !cleared ? 0 : (s3Cleared ? (s4Cleared ? 1 : 2/3) : 1/3);
+    // 5노드(4구간) 경로 — 스테이지1 클리어로 1/4, 스테이지2로 2/4, 스테이지3으로 3/4, 스테이지4로 끝까지
+    const frac = !cleared ? 0 : !s3Cleared ? 1/4 : !s4Cleared ? 2/4 : !s5Cleared ? 3/4 : 1;
     lit.style.strokeDashoffset = total*(1-frac);
   }
 }
