@@ -750,6 +750,9 @@ body {
   <div class="hub-footer" id="delete-account-row" style="margin-top:10px;display:none;">
     <button class="logout-btn" onclick="doDeleteAccount()" style="color:var(--pk);border-color:rgba(255,45,120,0.3);">🗑️ &nbsp;회원 탈퇴</button>
   </div>
+  <div class="hub-footer" style="margin-top:6px;">
+    <button class="logout-btn" onclick="resetLv2Progress()" style="color:rgba(255,255,255,0.45);border-color:rgba(255,255,255,0.15);">🔄 &nbsp;데이터 초기화</button>
+  </div>
 
 </div>
 
@@ -858,6 +861,18 @@ function hideAdPlaceholder() {}
 (function restoreBanner() {
   try { if (window.AdBridge && typeof AdBridge.show === 'function') AdBridge.show(); } catch (e) {}
 })();
+
+// ── 게임 데이터 초기화(1급 허브 resetLv1Progress()와 동일 취지 — 로컬 기록만 삭제, 닉네임/계정/클라우드 점수는 유지) ──
+function resetLv2Progress() {
+  if (!confirm('5개 게임의 기기 내 기록(로컬 랭킹·최고점·연속출석 뱃지)을 전부 초기화할까요?\n닉네임과 계정 정보, 서버에 저장된 점수는 그대로 유지됩니다.')) return;
+  ['hub_acid', 'hub_acid_prevRank',
+   'hub_memory', 'hub_memory_myName', 'hub_memory_best', 'hub_memory_prevRank',
+   'accGame_v3', 'accGame_myName', 'hub_debit_prevRank',
+   'hub_factory', 'hub_factory_best', 'hub_factory_prevRank',
+   'hub_flight_hi', 'hub_flight_rank', 'hub_flight_prevRank'
+  ].forEach(function (k) { localStorage.removeItem(k); });
+  alert('✅ 초기화됐어요. 기기 내 게임 기록이 전부 지워졌습니다.');
+}
 
 // ── 로그아웃 ──
 async function doLogout() {
