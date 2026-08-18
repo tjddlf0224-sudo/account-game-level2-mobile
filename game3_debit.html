@@ -1280,6 +1280,7 @@ function showCombo(n) {
 
 function endGame() {
     isPlaying = false;
+    if (window.Growth) Growth.logPlay(GAME_ID);
     if (window.WrongNote) WrongNote.flush('debit');
     clearInterval(timerInterval);
     hideRewardedBtn();

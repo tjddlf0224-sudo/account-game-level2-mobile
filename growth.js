@@ -93,6 +93,22 @@
     } catch (e) {}
   }
 
+  // ── 진짜 플레이 횟수 — 랭킹저장/닉네임 여부와 무관하게 "게임이 끝났다"는 신호만 ──
+  // score_history(=record, 위)는 이름이 있어야(로그인 or 수동입력) 기록되지만, 이건
+  // dau_events처럼 device_id 기준으로 무조건 쌓는다. 유니크 제약을 안 걸어서(dau_events와
+  // 달리) 같은 기기가 하루에 여러 판 하면 그만큼 여러 행이 쌓이는 게 정상 — "그날 방문
+  // 여부"가 아니라 "총 몇 판을 했는지"가 목적이라 중복 자체가 데이터임.
+  var PLAY_TABLE = 'play_events';
+  function logPlay(gameId) {
+    if (!gameId) return;
+    try {
+      var db = client();
+      if (!db) return;
+      var row = { device_id: deviceId(), game_id: gameId, platform: platform() };
+      db.from(PLAY_TABLE).insert(row).then(function () {}, function () {});
+    } catch (e) {}
+  }
+
   // ── 매 판 종료 시 호출 — 로컬 즉시 + Supabase 베스트에포트(예외 안 던짐) ──
   function record(rec) {
     if (!rec || !rec.game) return;
@@ -218,7 +234,7 @@
   }
 
   global.Growth = {
-    record: record, series: series, rename: rename,
+    record: record, series: series, rename: rename, logPlay: logPlay,
     GAME_NAMES: {
       acid: '계정과목 산성비', memory: '계정·뜻 메모리', debit: '분개 차·대변',
       factory: '결산분개 조립', flight: '플라이트 장부조회', theory: '이론 객관식',

@@ -1213,6 +1213,7 @@
             // 마지막 짝 매칭 직후 '그만'을 누르는 등 이중 호출 방지
             if (window._roundOver) return;
             window._roundOver = true;
+            if (window.Growth) Growth.logPlay(GAME_ID);
             stopTimer();
             if (window.WrongNote) WrongNote.flush('memory');
             bgmStop(); // 🎵 게임 종료/포기 시 BGM 페이드 아웃

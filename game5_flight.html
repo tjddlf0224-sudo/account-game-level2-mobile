@@ -812,6 +812,7 @@ const Game={
 
   gameOver(){
     this.state='gameover';
+    if(window.Growth) Growth.logPlay(GAME_ID);
     if(window.WrongNote)WrongNote.flush('flight');
     BGM.stop();
     if(this.score>this.hi){this.hi=this.score;localStorage.setItem('hub_flight_hi',this.hi);

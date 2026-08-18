@@ -481,6 +481,7 @@ async function endQuiz(){
   const rate = totalQuizCount ? correctCnt/totalQuizCount : 0;
   const g = grade(rate);
   if(window.Growth) Growth.record({game:GAME_ID, score:score, grade:g, combo:0, correct:correctCnt});
+  if(window.Growth) Growth.logPlay(GAME_ID);
   try{ await saveStageScore(score, g, correctCnt, totalQuizCount); }catch(e){}
   requestInterstitialIfNeeded(renderResult);
 }

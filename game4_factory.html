@@ -950,6 +950,7 @@ function getGrade(score) {
 
 function endGame() {
     isPlaying = false; clearInterval(timerInterval);
+    if (window.Growth) Growth.logPlay(GAME_ID);
     if (window.WrongNote) WrongNote.flush('factory');
     hideRewardedBtn();
     bgmStop(); // 🎵 게임 종료 시 BGM 페이드 아웃

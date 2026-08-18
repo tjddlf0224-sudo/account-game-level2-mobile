@@ -1206,6 +1206,7 @@
           if(groupId) rpcParams.p_group_id=groupId;
           try{ if(window.Auth){ const uid=await Auth.currentUid(); if(uid) rpcParams.p_uid=uid; } }catch(e){}
           if(window.Growth) Growth.record({ game:GAME_ID, name, score, grade, combo:0, correct });
+          if(window.Growth) Growth.logPlay(GAME_ID);
           const db=supaClient();
           if(!db) return;
           try{ const {error}=await db.rpc('upsert_score', rpcParams); if(error) console.warn('capital_lv1 점수 저장 실패:', error); }
