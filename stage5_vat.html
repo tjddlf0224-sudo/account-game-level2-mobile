@@ -48,22 +48,37 @@
   .progress-track{height:6px;background:rgba(255,255,255,.07);border-radius:6px;overflow:hidden;margin-bottom:14px;}
   .progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--purple));transition:width .3s;}
 
-  /* ── 실시간 신고서 리포트 ── */
-  .report{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-bottom:14px;}
-  .report-title{font-size:.78rem;color:var(--dim);letter-spacing:.05em;margin-bottom:8px;}
-  .report-sec{margin-bottom:8px;}
-  .report-sec-label{font-size:.72rem;font-weight:700;color:var(--dim);margin-bottom:4px;display:flex;align-items:center;gap:6px;}
-  .report-sec-label .dot{width:7px;height:7px;border-radius:50%;}
-  .report-sec-label.sale .dot{background:var(--sale);}
-  .report-sec-label.buy .dot{background:var(--buy);}
-  .rline{display:flex;justify-content:space-between;font-size:.82rem;padding:5px 0;border-bottom:1px dashed rgba(255,255,255,.06);}
-  .rline:last-child{border-bottom:none;}
-  .rline .nm{color:var(--dim);}
-  .rline .amt{font-variant-numeric:tabular-nums;color:var(--txt);}
-  .rline.dim2 .nm, .rline.dim2 .amt{color:rgba(255,255,255,.3);}
-  .rsum{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--line);}
-  .rsum .nm{font-size:.9rem;font-weight:700;}
-  .rsum .amt{font-size:1.15rem;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums;}
+  /* ── 실시간 신고서 (실제 KcLep 부가가치세신고서 화면 참고 — 흰 종이 질감으로 "진짜 서식" 느낌) ── */
+  .report{background:#fff;border-radius:14px;margin-bottom:10px;overflow:hidden;
+    box-shadow:0 8px 24px rgba(0,0,0,.35);}
+  .vform-title{background:#152036;color:#9fb3d6;font-size:.68rem;letter-spacing:.04em;padding:9px 12px;
+    display:flex;justify-content:space-between;}
+  .vform-hd{display:grid;grid-template-columns:24px 1fr 38px 78px;gap:4px;padding:5px 10px;
+    background:#eef1f6;font-size:.62rem;color:#6b7686;font-weight:700;}
+  .vform-hd span:nth-child(3),.vform-hd span:nth-child(4){text-align:right;}
+  .vform-row{display:grid;grid-template-columns:24px 1fr 38px 78px;gap:4px;align-items:center;
+    padding:8px 10px;font-size:.74rem;border-top:1px solid #eef0f4;background:#fff;transition:background .15s;color:#232833;}
+  .vform-row.clickable{cursor:pointer;}
+  .vform-row.clickable:active{background:#f3f6fb;}
+  .vform-row[disabled]{pointer-events:none;}
+  .vform-code{font-size:.6rem;color:#7f8ba0;background:#eef1f6;border-radius:4px;text-align:center;
+    padding:2px 0;font-variant-numeric:tabular-nums;}
+  .vform-nm{line-height:1.3;}
+  .vform-rate{text-align:right;color:#9aa4b4;font-size:.66rem;}
+  .vform-amt{text-align:right;font-variant-numeric:tabular-nums;font-weight:700;}
+  .vform-row.sum{background:#f5f7fb;font-weight:800;}
+  .vform-circ{display:inline-block;font-size:.95rem;line-height:1;margin-right:2px;color:#3d4657;flex:none;}
+  .vform-row.correct{background:rgba(46,204,113,.32)!important;}
+  .vform-row.wrong{background:rgba(255,45,120,.24)!important;}
+  .vform-pay{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:#152036;}
+  .vform-pay .nm{font-size:.8rem;color:#cfe0ff;font-weight:700;}
+  .vform-pay .amt{font-size:1.1rem;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums;}
+  .vform-none{border:1.5px dashed rgba(255,255,255,.28);border-radius:12px;padding:11px;
+    text-align:center;font-size:.8rem;color:var(--dim);cursor:pointer;transition:.15s;margin-bottom:14px;}
+  .vform-none:active{transform:scale(.98);}
+  .vform-none.correct{border-color:var(--green);background:rgba(46,204,113,.14);color:#fff;}
+  .vform-none.wrong{border-color:var(--red);background:rgba(255,45,120,.14);color:#fff;}
+  .vform-hint{font-size:.72rem;color:var(--dim);text-align:center;margin:-4px 0 12px;}
 
   .qcard{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;margin-bottom:14px;}
   .qtag{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap;}
@@ -71,16 +86,6 @@
     padding:4px 9px;border-radius:6px;background:rgba(0,242,255,.14);color:var(--sale);border:1px solid rgba(0,242,255,.3);}
   .qamt{font-family:ui-monospace,monospace;font-size:.8rem;color:var(--gold);}
   .qstem{font-size:1.06rem;line-height:1.65;word-break:keep-all;}
-
-  .dest-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-  .dbtn{background:var(--card2);border:1.5px solid var(--line);border-radius:12px;
-    padding:12px 8px;text-align:center;cursor:pointer;transition:.12s;color:var(--txt);font-size:.82rem;line-height:1.4;}
-  .dbtn:active{transform:scale(.96);}
-  .dbtn[disabled]{cursor:default;}
-  .dbtn.correct{border-color:var(--green);background:rgba(46,204,113,.18);}
-  .dbtn.wrong{border-color:var(--red);background:rgba(255,45,120,.18);}
-  .dbtn.dim{opacity:.35;}
-  .dbtn.none{grid-column:1 / -1;color:var(--none);}
 
   .expl{margin-top:14px;padding:14px;border-radius:13px;background:rgba(0,242,255,.07);
         border:1px solid rgba(0,242,255,.22);font-size:.9rem;line-height:1.6;display:none;}
@@ -132,16 +137,20 @@
     </div>
     <div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
 
-    <div class="report" id="report"></div>
-
     <div id="quiz-body"></div>
+
+    <div class="report" id="report"></div>
+    <div class="vform-hint">👆 신고서에서 이 거래가 찍힐 칸을 눌러보세요</div>
+    <div class="vform-none" id="none-btn">❔ 해당없음 — 이 거래는 신고서에 안 올라감(면세 등)</div>
+
+    <div class="expl" id="expl"></div>
+    <div class="next-wrap" id="next-wrap"><button class="cta" id="next-btn"></button></div>
   </div>
 
   <div id="result"></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="auth.js"></script>
 <script src="wrongnote.js"></script>
 <script src="growth.js"></script>
 <script>
@@ -153,14 +162,14 @@ const GAME_ID='vat_lv1';
    과세표준(공급가액) 자체보다 "이 거래가 신고서 어느 줄에 찍히는가"가 핵심이라
    세율이 있는 칸(A/B/C/E/F/G)은 세액(공급가액×10%)만 누적해서 보여준다. */
 const DESTS = [
-  { key:'A', side:'sale', label:'과세 매출 · 세금계산서 발급분', rate:0.1 },
-  { key:'B', side:'sale', label:'과세 매출 · 신용카드·현금영수증분', rate:0.1 },
-  { key:'C', side:'sale', label:'과세 매출 · 기타(무증빙)', rate:0.1 },
-  { key:'D', side:'sale', label:'영세율 매출분(세액 0)', rate:0 },
-  { key:'E', side:'buy',  label:'매입세액 · 세금계산서 수취분', rate:0.1, deduct:true },
-  { key:'F', side:'buy',  label:'매입세액 · 카드·현금영수증 수취분', rate:0.1, deduct:true },
-  { key:'G', side:'buy',  label:'공제받지못할매입세액(불공제)', rate:0.1, deduct:false },
-  { key:'H', side:'none', label:'해당없음 — 면세 거래(부가세 없음)', rate:0 },
+  { key:'A', side:'sale', code:'1',   label:'세금계산서발급분', rate:0.1, rateTxt:'10%' },
+  { key:'B', side:'sale', code:'3',   label:'신용카드·현금영수증발행분', rate:0.1, rateTxt:'10%' },
+  { key:'C', side:'sale', code:'4',   label:'기타(정규영수증외매출분)', rate:0.1, rateTxt:'10%' },
+  { key:'D', side:'sale', code:'5,6', label:'영세율분(세금계산서·기타)', rate:0, rateTxt:'0%' },
+  { key:'E', side:'buy',  code:'10',  label:'세금계산서 수취분(일반매입)', rate:0.1, rateTxt:'10%', deduct:true },
+  { key:'F', side:'buy',  code:'14',  label:'그 밖의 공제매입세액(카드 등)', rate:0.1, rateTxt:'10%', deduct:true },
+  { key:'G', side:'buy',  code:'16',  label:'공제받지못할매입세액', rate:0.1, rateTxt:'10%', deduct:false },
+  { key:'H', side:'none', code:'—',   label:'해당없음 — 신고서에 기재하지 않음(면세 등)', rate:0, rateTxt:'—' },
 ];
 const DMAP = Object.fromEntries(DESTS.map(d=>[d.key,d]));
 
@@ -218,25 +227,45 @@ function startQuiz(){
   showQ();
 }
 
-function renderReport(){
-  const sale = ['A','B','C','D'];
-  const buy = ['E','F','G'];
-  const saleTotal = sale.reduce((s,k)=>s+(k==='D'?0:placed[k]),0);
-  const buyDeductTotal = ['E','F'].reduce((s,k)=>s+placed[k],0);
+/* flashKey: 방금 고른 칸(옳든 틀리든 잠깐 색을 보여줌), q: 정답 비교용(문제 진행 중일 때만) */
+function renderReport(flashKey, q){
+  const saleRows = ['A','B','C','D'];
+  const buyRows = ['E','F'];
+  const saleTotal = ['A','B','C'].reduce((s,k)=>s+placed[k],0); // D(영세율)는 세액 0
+  const buyDeductTotal = buyRows.reduce((s,k)=>s+placed[k],0);
   const pay = saleTotal - buyDeductTotal;
+  const answered = !!flashKey; // 이번 문제에 이미 답을 골랐는지
+
+  function rowHtml(k, sumRow){
+    const d = DMAP[k];
+    let cls = 'vform-row' + (sumRow?' sum':'') + (!answered && q ? ' clickable':'');
+    if(answered && q){
+      if(k===q.dest) cls+=' correct';
+      else if(k===flashKey) cls+=' wrong';
+    }
+    const amtTxt = k==='D' ? (placed[k]>0?won(0):'—') : won(placed[k]);
+    return `<div class="${cls}" data-key="${k}"><span class="vform-code">${d.code}</span>`
+      + `<span class="vform-nm">${esc(d.label)}</span><span class="vform-rate">${d.rateTxt}</span>`
+      + `<span class="vform-amt">${amtTxt}</span></div>`;
+  }
+
   const box=document.getElementById('report');
   box.innerHTML = `
-    <div class="report-title">📋 부가가치세 신고서 (진행 중)</div>
-    <div class="report-sec">
-      <div class="report-sec-label sale"><span class="dot"></span>매출세액</div>
-      ${sale.map(k=>`<div class="rline${k==='D'?' dim2':''}"><span class="nm">${DMAP[k].label}</span><span class="amt">${k==='D'?'영세율(0원)':won(placed[k])}</span></div>`).join('')}
-    </div>
-    <div class="report-sec">
-      <div class="report-sec-label buy"><span class="dot"></span>매입세액</div>
-      ${buy.map(k=>`<div class="rline${k==='G'?' dim2':''}"><span class="nm">${DMAP[k].label}</span><span class="amt">${won(placed[k])}${k==='G'&&placed[k]>0?' (차감계 제외)':''}</span></div>`).join('')}
-    </div>
-    <div class="rsum"><span class="nm">납부세액</span><span class="amt">${won(pay)}</span></div>
+    <div class="vform-title"><span>부가가치세신고서</span><span>과세표준및매출세액</span></div>
+    <div class="vform-hd"><span></span><span>구분</span><span>세율</span><span>세액</span></div>
+    ${saleRows.map(k=>rowHtml(k,false)).join('')}
+    <div class="vform-row sum"><span class="vform-code"><span class="vform-circ">②</span></span>
+      <span class="vform-nm">매출세액 합계</span><span class="vform-rate"></span><span class="vform-amt">${won(saleTotal)}</span></div>
+    <div class="vform-title" style="margin-top:1px"><span></span><span>매입세액</span></div>
+    ${buyRows.map(k=>rowHtml(k,false)).join('')}
+    ${rowHtml('G',false)}
+    <div class="vform-row sum"><span class="vform-code"><span class="vform-circ">④</span></span>
+      <span class="vform-nm">차감계(공제매입세액)</span><span class="vform-rate"></span><span class="vform-amt">${won(buyDeductTotal)}</span></div>
+    <div class="vform-pay"><span class="nm"><span class="vform-circ" style="color:#cfe0ff">⑨</span>납부(환급)세액(②-④)</span><span class="amt">${won(pay)}</span></div>
   `;
+  if(!answered && q){
+    box.querySelectorAll('.vform-row.clickable').forEach(el=>el.onclick=()=>pick(el.dataset.key,q));
+  }
 }
 
 function showQ(){
@@ -244,27 +273,25 @@ function showQ(){
   document.getElementById('hud-prog').textContent=`${qi+1} / ${QUEUE.length}`;
   document.getElementById('hud-score').textContent=score.toLocaleString();
   document.getElementById('prog-fill').style.width=(qi/QUEUE.length*100)+'%';
-  const destBtns = DESTS.map(d=>`<button class="dbtn${d.key==='H'?' none':''}" data-key="${d.key}">${esc(d.label)}</button>`).join('');
-  const html=`
+  document.getElementById('quiz-body').innerHTML=`
     <div class="qcard">
       <div class="qtag"><span class="cat-badge">${esc(q.type)}</span><span class="qamt">공급가액 ${won(q.amt)}</span></div>
       <div class="qstem">${esc(q.desc)}</div>
-    </div>
-    <div class="dest-grid">${destBtns}</div>
-    <div class="expl" id="expl"></div>
-    <div class="next-wrap" id="next-wrap"><button class="cta" id="next-btn">${qi+1>=QUEUE.length?'결과 보기 🏁':'다음 거래 →'}</button></div>
-  `;
-  document.getElementById('quiz-body').innerHTML=html;
-  document.querySelectorAll('.dbtn').forEach(b=>b.onclick=()=>pick(b.dataset.key,q));
+    </div>`;
+  const expl=document.getElementById('expl'); expl.style.display='none'; expl.innerHTML='';
+  document.getElementById('next-wrap').style.display='none';
+  const noneBtn=document.getElementById('none-btn');
+  noneBtn.className='vform-none'; noneBtn.onclick=()=>pick('H',q);
+  renderReport(null, q);
 }
 
 function pick(key,q){
-  document.querySelectorAll('.dbtn').forEach(b=>{
-    b.disabled=true;
-    if(b.dataset.key===q.dest) b.classList.add('correct');
-    else if(b.dataset.key===key) b.classList.add('wrong');
-    else b.classList.add('dim');
-  });
+  document.getElementById('none-btn').onclick=null;
+  document.querySelectorAll('.vform-row.clickable').forEach(el=>el.onclick=null);
+  renderReport(key, q);
+  const noneBtn=document.getElementById('none-btn');
+  if(q.dest==='H') noneBtn.classList.add('correct');
+  else if(key==='H') noneBtn.classList.add('wrong');
   const ok = key===q.dest;
   const expl=document.getElementById('expl');
   expl.innerHTML = (ok
@@ -273,8 +300,7 @@ function pick(key,q){
   );
   if(ok){
     correctCnt++; score+=100;
-    if(q.dest!=='H' && q.dest!=='D'){ placed[q.dest]+=Math.round(q.amt*0.1); }
-    renderReport();
+    if(q.dest!=='H' && q.dest!=='D'){ placed[q.dest]+=Math.round(q.amt*0.1); renderReport(key,q); }
   } else {
     if(window.WrongNote) WrongNote.add({
       game:GAME_ID, key:'V'+q.id, q:q.desc,
@@ -284,7 +310,9 @@ function pick(key,q){
   }
   document.getElementById('hud-score').textContent=score.toLocaleString();
   expl.style.display='block';
-  document.getElementById('next-wrap').style.display='block';
+  const nextWrap=document.getElementById('next-wrap');
+  nextWrap.style.display='block';
+  document.getElementById('next-btn').textContent = qi+1>=QUEUE.length?'결과 보기 🏁':'다음 거래 →';
   document.getElementById('next-btn').onclick=()=>{ qi++; qi>=QUEUE.length?endQuiz():showQ(); };
   expl.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
