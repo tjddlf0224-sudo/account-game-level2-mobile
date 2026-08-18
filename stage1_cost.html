@@ -312,7 +312,7 @@ body{ font-family:'Noto Sans KR',sans-serif; color:#fff; position:relative; touc
 .quiz-body{ display:flex; gap:14px; align-items:stretch; }
 .quiz-main{ flex:1; min-width:0; }
 .quiz-visual{
-  flex:0 0 38%; max-width:210px;
+  flex:0 0 48%; max-width:260px;
   padding:8px 6px; border-radius:12px;
   background:rgba(255,255,255,0.04); border:1px solid rgba(255,214,0,0.3);
   display:flex; align-items:center;
@@ -776,7 +776,7 @@ const NPC_DATA = {
       hint:'더할 건 운반비랑 하역비, 뺄 건 에누리. 500 + 30 + 10 − 20.',
       ok:'오, 바로 맞히네! 520,000원. 회계팀 밥값은 하겠구마.',
     }],
-    doc:{ id:'doc_invoice', name:'매입 거래명세서', icon:'🧾', values:{'당기원재료매입액':4200000} },
+    doc:{ id:'doc_invoice', name:'매입 거래명세서', icon:'🧾', values:{'당기원재료매입액':1000000} },
     repeat:'사올 때 든 돈은 전부 그 물건 값! 잊지 마라~',
   },
 
@@ -798,15 +798,15 @@ const NPC_DATA = {
       {who:'npc', t:'살 때마다 평균 다시 내면 이동평균법, 기말에 한 방에 평균 내면 총평균법.'},
     ],
     quiz:[{
-      q:'기초 원재료 200,000원, 당기 매입 4,200,000원, 기말 원재료 300,000원. 당기 재료비(소비액)는?',
-      opts:['4,100,000원','4,300,000원','4,500,000원','3,700,000원'], answer:0,
-      hint:'T자를 그려봐. 왼쪽(기초+매입)에서 남은 기말을 빼면 나간 게 나오지. 200 + 4,200 − 300.',
+      q:'기초 원재료 100,000원, 당기 매입 1,000,000원, 기말 원재료 100,000원. 당기 재료비(소비액)는?',
+      opts:['900,000원','1,000,000원','1,100,000원','1,200,000원'], answer:1,
+      hint:'T자를 그려봐. 왼쪽(기초+매입)에서 남은 기말을 빼면 나간 게 나오지. 100 + 1,000 − 100.',
       ok:'…정확해. (처음으로 웃는다) 자네 숫자 감각 있네.',
       taccount:{ title:'원재료 T계정',
-        left:[{label:'기초재고',val:200000},{label:'당기매입',val:4200000}],
-        right:[{label:'당기소비액',unknown:true},{label:'기말재고',val:300000}] },
+        left:[{label:'기초재고',val:100000},{label:'당기매입',val:1000000}],
+        right:[{label:'당기소비액',unknown:true},{label:'기말재고',val:100000}] },
     }],
-    doc:{ id:'doc_material_ledger', name:'원재료 수불부', icon:'📗', values:{'기초원재료':200000,'기말원재료':300000} },
+    doc:{ id:'doc_material_ledger', name:'원재료 수불부', icon:'📗', values:{'기초원재료':100000,'기말원재료':100000} },
     repeat:'왼쪽 들어온 것, 오른쪽 나간 것. T자야, T자.',
   },
 
@@ -830,7 +830,7 @@ const NPC_DATA = {
       hint:'제품에 얼마 들어갔는지 콕 집을 수 있냐 없냐로 갈라요. ④는 파는 데 드는 거라 판관비 쪽이고요.',
       ok:'맞아요 맞아! 접착제랑 사포! 아 신입인데 감 좋다, 이거 오래 하겠는데?',
     }],
-    doc:{ id:'doc_supplies', name:'소모품 출고 대장', icon:'🧾', values:{'간접재료비':180000} },
+    doc:{ id:'doc_supplies', name:'소모품 출고 대장', icon:'🧾', values:{'간접재료비':100000} },
     repeat:'콕 집을 수 있으면 직접, 못 집으면 간접! 근데 둘 다 재료비!',
   },
 
@@ -880,7 +880,7 @@ const NPC_DATA = {
       hint:'제품을 손으로 직접 만지는 사람이 누구예요? 경비 아저씨는 의자 안 만드시잖아요.',
       ok:'정답! 저요 저! ㅋㅋㅋ 아 뿌듯하다.',
     }],
-    doc:{ id:'doc_worktime', name:'작업시간 보고서', icon:'🕐', values:{'직접노무비':2600000} },
+    doc:{ id:'doc_worktime', name:'작업시간 보고서', icon:'🕐', values:{'직접노무비':1000000} },
     repeat:'손으로 직접 만지면 직접노무비! 저처럼요!',
   },
 
@@ -907,19 +907,19 @@ const NPC_DATA = {
       hint:'내가 제품을 만졌나, 안 만졌나. 그리고 내 급여를 특정 제품에 콕 집을 수 있나, 없나.',
       ok:'그래. 정확해. (어깨를 편다) 자네 같은 사람이 계산해주면 우리 공장 숫자는 믿을 만하겠어.',
     }],
-    doc:{ id:'doc_supervisor', name:'감독자 급여 대장', icon:'🧾', values:{'간접노무비':1100000} },
+    doc:{ id:'doc_supervisor', name:'감독자 급여 대장', icon:'🧾', values:{'간접노무비':500000} },
     repeat:'나는 아무것도 안 만들지. 그래서 간접노무비야.',
   },
 
   n_ma:{
     name:'마모진 기사', icon:'⚙️',
     beats:[
-      {who:'npc', t:'(기계에 손을 얹고 있다) …얘가 올해로 7년 됐어요.'},
+      {who:'npc', t:'(기계에 손을 얹고 있다) …얘가 올해로 10년 됐어요.'},
       {who:'npc', t:'처음 왔을 땐 소리가 참 고왔는데. 지금은 좀 쉰 소리가 나요. 늙었죠.'},
       {who:'npc', t:'아, 회계팀. 잘 오셨어요. 저 궁금한 게 있었는데.'},
-      {who:'npc', t:'이 기계 살 때 8,400만 원 줬거든요. 그럼 그해 의자 원가가 폭탄 맞았어야 하는 거 아녜요?'},
-      {who:'npc', t:'근데 안 그랬대요. 왜냐면 이 기계는 7년 동안 계속 의자를 만들 거니까요.'},
-      {who:'npc', t:'그래서 값을 쭉 펴서 나눠 담아요. 7년, 84개월. 한 달에 100만 원씩.'},
+      {who:'npc', t:'이 기계 살 때 1,200만 원 줬거든요. 그럼 그해 의자 원가가 폭탄 맞았어야 하는 거 아녜요?'},
+      {who:'npc', t:'근데 안 그랬대요. 왜냐면 이 기계는 10년 동안 계속 의자를 만들 거니까요.'},
+      {who:'npc', t:'그래서 값을 쭉 펴서 나눠 담아요. 10년, 120개월. 한 달에 10만 원씩.'},
       {who:'npc', t:'그게 감가상각비. 기계가 닳는 만큼을 매달 원가로 인정하는 거죠.'},
       {who:'npc', t:'그리고 이건 재료도 아니고 사람 월급도 아니니까 제조경비로 들어가요.'},
       {who:'npc', t:'아 그리고 경비도 종류가 나뉘어요. 제가 정리해드릴게요. (수첩을 편다)'},
@@ -927,15 +927,15 @@ const NPC_DATA = {
       {who:'npc', t:'측정경비 — 계량기 읽어서 나오는 거. 전기, 수도, 가스. 보일러실 한증기 기사 담당이죠.'},
       {who:'npc', t:'지급경비 — 그때그때 준 돈. 수선비, 운반비.'},
       {who:'npc', t:'발생경비 — 돈은 안 나갔는데 손실이 생긴 거. 재료 감모손실 같은 거요.'},
-      {who:'npc', t:'(다시 기계를 쓰다듬으며) …얘도 3년 뒤엔 장부에서 값이 0이 돼요. 그래도 계속 돌긴 하겠지만.'},
+      {who:'npc', t:'(다시 기계를 쓰다듬으며) …얘도 언젠간 장부에서 값이 0이 돼요. 그래도 계속 돌긴 하겠지만.'},
     ],
     quiz:[{
-      q:'취득원가 84,000,000원, 내용연수 7년, 잔존가치 0원인 공장 기계의 월 감가상각비는? (정액법)',
-      opts:['100,000원','1,000,000원','12,000,000원','7,000,000원'], answer:1,
-      hint:'8,400만을 7년으로 나누면 1년치가 나오죠? 그걸 다시 12로 나누세요.',
-      ok:'맞아요, 한 달에 백만 원. …얘 몸값이 매달 백만 원씩 의자로 옮겨가는 거예요.',
+      q:'취득원가 12,000,000원, 내용연수 10년, 잔존가치 0원인 공장 기계의 월 감가상각비는? (정액법)',
+      opts:['10,000원','100,000원','1,200,000원','120,000원'], answer:1,
+      hint:'1,200만을 10년으로 나누면 1년치가 나오죠? 그걸 다시 12로 나누세요.',
+      ok:'맞아요, 한 달에 10만 원. …얘 몸값이 매달 10만 원씩 의자로 옮겨가는 거예요.',
     }],
-    doc:{ id:'doc_depreciation', name:'기계장치 감가상각 명세', icon:'📄', values:{'감가상각비':1000000,'기타경비':700000} },
+    doc:{ id:'doc_depreciation', name:'기계장치 감가상각 명세', icon:'📄', values:{'감가상각비':100000,'기타경비':500000} },
     repeat:'닳는 만큼 나눠 담는 게 감가상각비. 그리고 그건 제조경비!',
   },
 
@@ -970,7 +970,7 @@ const NPC_DATA = {
       hint:'재공품 200개를 통째로 세면 안 돼요. 60%만큼만 세야죠. 200 × 0.6은 얼마죠?',
       ok:'1,020개. 맞아요. …잘 봤네요, 끝나지 않은 것들까지.',
     }],
-    doc:{ id:'doc_wip', name:'재공품 재고 조사표', icon:'📑', values:{'기초재공품':500000,'기말재공품':800000} },
+    doc:{ id:'doc_wip', name:'재공품 재고 조사표', icon:'📑', values:{'기초재공품':500000,'기말재공품':600000} },
     repeat:'만드는 중이면 재공품. 반만 만들어졌으면 반만 세고요.',
   },
 
@@ -996,15 +996,15 @@ const NPC_DATA = {
       {who:'npc', t:'되돌아가야 해서 좀 귀찮으시겠지만… 안 가면 명세서 숫자가 안 맞아요.'},
     ],
     quiz:[{
-      q:'기초제품 400,000원, 당기제품제조원가 10,780,000원, 기말제품 600,000원. 매출원가는?',
-      opts:['10,180,000원','10,580,000원','10,780,000원','11,780,000원'], answer:1,
-      hint:'T자예요. 있던 거(400) + 들어온 거(10,780) − 남은 거(600). 나간 게 팔린 거죠.',
-      ok:'정확합니다. 10,580,000원. (팔레트 각을 한 번 더 맞춘다) 기분 좋네요, 숫자가 딱 맞으면.',
+      q:'기초제품 500,000원, 당기제품제조원가 4,500,000원, 기말제품 1,000,000원. 매출원가는?',
+      opts:['3,500,000원','4,000,000원','4,500,000원','5,000,000원'], answer:1,
+      hint:'T자예요. 있던 거(50) + 들어온 거(450) − 남은 거(100). 나간 게 팔린 거죠.',
+      ok:'정확합니다. 4,000,000원. (팔레트 각을 한 번 더 맞춘다) 기분 좋네요, 숫자가 딱 맞으면.',
       taccount:{ title:'제품 T계정',
-        left:[{label:'기초제품',val:400000},{label:'당기제품제조원가',val:10780000}],
-        right:[{label:'매출원가',unknown:true},{label:'기말제품',val:600000}] },
+        left:[{label:'기초제품',val:500000},{label:'당기제품제조원가',val:4500000}],
+        right:[{label:'매출원가',unknown:true},{label:'기말제품',val:1000000}] },
     }],
-    doc:{ id:'doc_product', name:'제품 입출고 대장', icon:'📦', values:{'기초제품':400000,'기말제품':600000} },
+    doc:{ id:'doc_product', name:'제품 입출고 대장', icon:'📦', values:{'기초제품':500000,'기말제품':1000000} },
     repeat:'만든 거랑 판 건 달라요. 팔려야 비용이에요.',
   },
 
@@ -1932,8 +1932,26 @@ const World = {
     const halfW=this.viewW/2, halfH=this.viewH/2;
     let camX=this.px*TS-halfW+TS/2, camY=this.py*TS-halfH+TS/2;
     const z=this.curZone;
-    const zx0=z?z.x0*TS:0, zx1=z?(z.x1+1)*TS:WT*TS;
-    const zy0=z?z.y0*TS:0, zy1=z?(z.y1+1)*TS:HT*TS;
+    // 같은 층(ZONE_FLOOR가 같은 구역들, 예: 원재료창고-라인-제품창고)은 문으로
+    // 바로 이어져 있어서 구역 하나하나를 기준으로 클램프하면 문 지날 때마다
+    // 카메라가 다시 갇혀서 부자연스럽다 — 같은 층 전체를 한 덩어리로 클램프해서
+    // 진짜 그 층의 양 끝(원재료창고 왼쪽 끝 / 제품창고 오른쪽 끝)에서만 캐릭터가
+    // 화면 가장자리로 밀리게 한다. 텔레포트로만 오가는 다른 층(공장사무실/보조부문동)은
+    // 원래대로 그 구역 하나만 클램프 대상.
+    const floorKey = z && ZONE_FLOOR[z.id];
+    const group = floorKey ? ZONES.filter(zz=>ZONE_FLOOR[zz.id]===floorKey) : (z?[z]:null);
+    let zx0=0, zx1=WT*TS, zy0=0, zy1=HT*TS;
+    if(group && group.length){
+      zx0=Math.min(...group.map(g=>g.x0))*TS;
+      zx1=(Math.max(...group.map(g=>g.x1))+1)*TS;
+      zy0=Math.min(...group.map(g=>g.y0))*TS;
+      zy1=(Math.max(...group.map(g=>g.y1))+1)*TS;
+    }
+    // 살짝 여유 마진 — 클램프 경계가 방 벽에 딱 붙어있으면 캐릭터가 허공에서
+    // 멈추는 느낌이 나서, 벽이 살짝 보일 정도만 더 보여준다(맵 진짜 끝은 안 넘음).
+    const MARGIN = TS*1.5;
+    zx0=Math.max(0,zx0-MARGIN); zx1=Math.min(WT*TS,zx1+MARGIN);
+    zy0=Math.max(0,zy0-MARGIN); zy1=Math.min(HT*TS,zy1+MARGIN);
     const zoneW=zx1-zx0, zoneH=zy1-zy0;
     camX = zoneW<=this.viewW ? zx0+(zoneW-this.viewW)/2 : Math.max(zx0,Math.min(camX,zx1-this.viewW));
     camY = zoneH<=this.viewH ? zy0+(zoneH-this.viewH)/2 : Math.max(zy0,Math.min(camY,zy1-this.viewH));
@@ -2285,22 +2303,24 @@ const DialogVisuals = {
       <text x="150" y="14" text-anchor="middle" font-family="'Black Han Sans',sans-serif" font-size="12" fill="#fff">원재료 T계정</text>
       <line x1="150" y1="24" x2="150" y2="106" stroke="rgba(255,255,255,0.35)" stroke-width="2"/>
       <line x1="20" y1="24" x2="280" y2="24" stroke="rgba(255,255,255,0.35)" stroke-width="2"/>
-      <text x="85" y="40" text-anchor="middle" font-family="Orbitron,monospace" font-size="9" letter-spacing="1" fill="#00f2ff">← 왼쪽 · 들어온 것</text>
-      <rect x="30" y="48" width="110" height="24" rx="6" fill="rgba(0,242,255,0.16)" stroke="#00f2ff" stroke-width="1.5"/>
-      <text x="85" y="64" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="11" fill="#fff">기초재고 + 당기매입</text>
-      <text x="215" y="40" text-anchor="middle" font-family="Orbitron,monospace" font-size="9" letter-spacing="1" fill="rgba(255,255,255,0.3)">오른쪽 · 나간 것 →</text>
-      <rect x="160" y="48" width="110" height="24" rx="6" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" stroke-dasharray="4 3"/>
-      <text x="215" y="64" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="10" fill="rgba(255,255,255,0.4)">?</text>
+      <text x="85" y="38" text-anchor="middle" font-family="Orbitron,monospace" font-size="9" letter-spacing="1" fill="#00f2ff">← 왼쪽 · 들어온 것</text>
+      <rect x="30" y="44" width="110" height="36" rx="6" fill="rgba(0,242,255,0.16)" stroke="#00f2ff" stroke-width="1.5"/>
+      <text x="85" y="58" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="10.5" fill="#fff">기초재고</text>
+      <text x="85" y="72" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="10.5" fill="#fff">+ 당기매입</text>
+      <text x="215" y="38" text-anchor="middle" font-family="Orbitron,monospace" font-size="9" letter-spacing="1" fill="rgba(255,255,255,0.3)">오른쪽 · 나간 것 →</text>
+      <rect x="160" y="44" width="110" height="36" rx="6" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" stroke-dasharray="4 3"/>
+      <text x="215" y="66" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="10" fill="rgba(255,255,255,0.4)">?</text>
     </svg>`,
   taccount_full: `
     <svg viewBox="0 0 300 116" xmlns="http://www.w3.org/2000/svg">
       <text x="150" y="14" text-anchor="middle" font-family="'Black Han Sans',sans-serif" font-size="12" fill="#fff">원재료 T계정</text>
       <line x1="150" y1="24" x2="150" y2="106" stroke="rgba(255,255,255,0.35)" stroke-width="2"/>
       <line x1="20" y1="24" x2="280" y2="24" stroke="rgba(255,255,255,0.35)" stroke-width="2"/>
-      <text x="85" y="40" text-anchor="middle" font-family="Orbitron,monospace" font-size="9" letter-spacing="1" fill="#00f2ff">왼쪽 · 들어온 것</text>
-      <rect x="30" y="48" width="110" height="24" rx="6" fill="rgba(0,242,255,0.16)" stroke="#00f2ff" stroke-width="1.5"/>
-      <text x="85" y="64" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="11" fill="#fff">기초재고 + 당기매입</text>
-      <text x="215" y="40" text-anchor="middle" font-family="Orbitron,monospace" font-size="9" letter-spacing="1" fill="#ffd600">오른쪽 · 나간 것</text>
+      <text x="85" y="38" text-anchor="middle" font-family="Orbitron,monospace" font-size="9" letter-spacing="1" fill="#00f2ff">왼쪽 · 들어온 것</text>
+      <rect x="30" y="44" width="110" height="36" rx="6" fill="rgba(0,242,255,0.16)" stroke="#00f2ff" stroke-width="1.5"/>
+      <text x="85" y="58" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="10.5" fill="#fff">기초재고</text>
+      <text x="85" y="72" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="10.5" fill="#fff">+ 당기매입</text>
+      <text x="215" y="38" text-anchor="middle" font-family="Orbitron,monospace" font-size="9" letter-spacing="1" fill="#ffd600">오른쪽 · 나간 것</text>
       <rect x="160" y="48" width="52" height="24" rx="6" fill="rgba(255,214,0,0.16)" stroke="#ffd600" stroke-width="1.5"/>
       <text x="186" y="64" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="#fff">투입액</text>
       <rect x="216" y="48" width="54" height="24" rx="6" fill="rgba(255,214,0,0.16)" stroke="#ffd600" stroke-width="1.5"/>
@@ -2327,14 +2347,15 @@ const DialogVisuals = {
       <text x="150" y="14" text-anchor="middle" font-family="'Black Han Sans',sans-serif" font-size="12" fill="#fff">제품 T계정</text>
       <line x1="150" y1="24" x2="150" y2="106" stroke="rgba(255,255,255,0.35)" stroke-width="2"/>
       <line x1="20" y1="24" x2="280" y2="24" stroke="rgba(255,255,255,0.35)" stroke-width="2"/>
-      <text x="85" y="40" text-anchor="middle" font-family="Orbitron,monospace" font-size="9" letter-spacing="1" fill="#00f2ff">왼쪽 · 들어온 것</text>
-      <rect x="30" y="48" width="110" height="24" rx="6" fill="rgba(0,242,255,0.16)" stroke="#00f2ff" stroke-width="1.5"/>
-      <text x="85" y="64" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="11" fill="#fff">기초제품 + 당기제품제조원가</text>
-      <text x="215" y="40" text-anchor="middle" font-family="Orbitron,monospace" font-size="9" letter-spacing="1" fill="#ffd600">오른쪽 · 나간 것</text>
-      <rect x="160" y="48" width="52" height="24" rx="6" fill="rgba(255,45,120,0.12)" stroke="#ff2d78" stroke-width="1.5" stroke-dasharray="4 3"/>
-      <text x="186" y="64" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="#fff">매출원가</text>
-      <rect x="216" y="48" width="54" height="24" rx="6" fill="rgba(255,214,0,0.16)" stroke="#ffd600" stroke-width="1.5"/>
-      <text x="243" y="64" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="#fff">기말제품</text>
+      <text x="85" y="38" text-anchor="middle" font-family="Orbitron,monospace" font-size="9" letter-spacing="1" fill="#00f2ff">왼쪽 · 들어온 것</text>
+      <rect x="30" y="44" width="110" height="36" rx="6" fill="rgba(0,242,255,0.16)" stroke="#00f2ff" stroke-width="1.5"/>
+      <text x="85" y="58" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="10.5" fill="#fff">기초제품</text>
+      <text x="85" y="72" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="#fff">+ 당기제품제조원가</text>
+      <text x="215" y="38" text-anchor="middle" font-family="Orbitron,monospace" font-size="9" letter-spacing="1" fill="#ffd600">오른쪽 · 나간 것</text>
+      <rect x="160" y="44" width="52" height="36" rx="6" fill="rgba(255,45,120,0.12)" stroke="#ff2d78" stroke-width="1.5" stroke-dasharray="4 3"/>
+      <text x="186" y="66" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="#fff">매출원가</text>
+      <rect x="216" y="44" width="54" height="36" rx="6" fill="rgba(255,214,0,0.16)" stroke="#ffd600" stroke-width="1.5"/>
+      <text x="243" y="66" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="#fff">기말제품</text>
       <text x="150" y="98" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="rgba(255,255,255,0.5)">왼쪽 합계 = 오른쪽 합계</text>
     </svg>`,
   taccount_transfer: `
@@ -2671,21 +2692,21 @@ const BUCKETS = [
 
 /* sign: +1 가산 / -1 차감. bucket: 정답 칸. why: 오배치 시 한서준의 설명 */
 const SHEET_CARDS = [
-  { id:'c1',  name:'기초 원재료 재고액',   val:200000,   sign:+1, bucket:'mat',
+  { id:'c1',  name:'기초 원재료 재고액',   val:100000,   sign:+1, bucket:'mat',
     why:'창고에 원래 있던 재료도 이번 달에 쓸 수 있는 재료야. 재료비 칸이지.' },
-  { id:'c2',  name:'당기 원재료 매입액',   val:4200000,  sign:+1, bucket:'mat',
+  { id:'c2',  name:'당기 원재료 매입액',   val:1000000,  sign:+1, bucket:'mat',
     why:'이번 달에 사온 재료. 당연히 재료비다.' },
-  { id:'c3',  name:'기말 원재료 재고액',   val:300000,   sign:-1, bucket:'mat',
+  { id:'c3',  name:'기말 원재료 재고액',   val:100000,   sign:-1, bucket:'mat',
     why:'아직 창고에 남아 있는 건 안 쓴 거야. 재료비에서 빼야지.' },
-  { id:'c4',  name:'간접재료비(소모품)',   val:180000,   sign:+1, bucket:'mat',
+  { id:'c4',  name:'간접재료비(소모품)',   val:100000,   sign:+1, bucket:'mat',
     why:'오지람 주임이 말했지? 간접재료비도 재료비야. 경비 아니고.' },
-  { id:'c5',  name:'직접노무비',           val:2600000,  sign:+1, bucket:'lab',
+  { id:'c5',  name:'직접노무비',           val:1000000,  sign:+1, bucket:'lab',
     why:'제품을 직접 만든 사람 인건비. 노무비 칸이다.' },
-  { id:'c6',  name:'간접노무비(감독자 급여)', val:1100000, sign:+1, bucket:'lab',
+  { id:'c6',  name:'간접노무비(감독자 급여)', val:500000,  sign:+1, bucket:'lab',
     why:'서성일 반장 급여. 간접이어도 공장 사람 인건비니까 노무비야.' },
-  { id:'c7',  name:'공장 기계 감가상각비', val:1000000,  sign:+1, bucket:'exp',
+  { id:'c7',  name:'공장 기계 감가상각비', val:100000,   sign:+1, bucket:'exp',
     why:'재료도 인건비도 아니지. 공장 설비가 닳은 값이니 제조경비다.' },
-  { id:'c8',  name:'전력비 등 기타경비',   val:700000,   sign:+1, bucket:'exp',
+  { id:'c8',  name:'전력비 등 기타경비',   val:500000,   sign:+1, bucket:'exp',
     why:'공장을 돌리는 데 든 그 밖의 비용. 경비 칸이야.' },
   { id:'c9',  name:'식당부문 배분액',      val:600000,   sign:+1, bucket:'exp',
     why:'보조부문 원가는 라인으로 올라와서 제조원가가 돼. 경비로 잡는다.' },
@@ -2693,13 +2714,13 @@ const SHEET_CARDS = [
     why:'보일러실 몫도 결국 의자에 붙어. 경비 칸이다.' },
   { id:'c11', name:'기초 재공품 재고액',   val:500000,   sign:+1, bucket:'wip',
     why:'지난달에 만들다 만 것. 당기총제조비용에 더해서 합계를 낸다.' },
-  { id:'c12', name:'기말 재공품 재고액',   val:800000,   sign:-1, bucket:'wip',
+  { id:'c12', name:'기말 재공품 재고액',   val:600000,   sign:-1, bucket:'wip',
     why:'아직 완성 안 된 건 제품이 아니야. 합계에서 빼야 당기제품제조원가가 나온다.' },
-  { id:'t1',  name:'본사 영업부 급여',     val:1500000,  sign:+1, bucket:'sga', trap:true,
+  { id:'t1',  name:'본사 영업부 급여',     val:500000,   sign:+1, bucket:'sga', trap:true,
     why:'본사 영업부는 공장이 아니야. 판매비와관리비지 제조원가가 아니다.' },
-  { id:'t2',  name:'본사 건물 감가상각비', val:400000,   sign:+1, bucket:'sga', trap:true,
+  { id:'t2',  name:'본사 건물 감가상각비', val:300000,   sign:+1, bucket:'sga', trap:true,
     why:'같은 감가상각비라도 공장 것만 제조경비야. 본사 건물은 판관비.' },
-  { id:'t3',  name:'제품 출하 운임',       val:250000,   sign:+1, bucket:'sga', trap:true,
+  { id:'t3',  name:'제품 출하 운임',       val:100000,   sign:+1, bucket:'sga', trap:true,
     why:'차대한 기사가 말했지? 사올 때 운임은 원가, 팔러 갈 때 운임은 판관비야.' },
 ];
 
