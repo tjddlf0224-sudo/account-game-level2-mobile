@@ -53,7 +53,6 @@
             flex-shrink: 0; gap: 8px;
         }
         .logo { font-family: 'Jua'; font-size: clamp(0.85rem,3.5vw,1.4rem); color: var(--neon-gold); flex-shrink: 0; display:flex; align-items:center; gap:6px; }
-        .logo .stage-tag{ display:block; font-family:'Noto Sans KR',sans-serif; font-size:0.62rem; color:rgba(255,255,255,0.4); letter-spacing:0.03em; font-weight:400; }
         .hud { display: flex; gap: clamp(6px,2vw,20px); align-items: center; flex: 1; justify-content: center; }
         .hud-stat { display: flex; flex-direction: column; align-items: center; min-width: 40px; }
         .hud-label { font-size: clamp(0.55rem,1.8vw,0.7rem); color: rgba(255,255,255,0.4); font-weight: bold; letter-spacing: 1px; }
@@ -73,7 +72,7 @@
         .content-area {
             flex: 1;
             position: relative;
-            padding: 20px;
+            padding: 20px 20px calc(20px + env(safe-area-inset-bottom)) 20px;
             overflow-y: auto;
             display: flex; flex-direction: column;
         }
@@ -220,13 +219,13 @@
             }
 
             /* 콘텐츠 영역 패딩 축소 */
-            .content-area { padding: 15px; }
+            .content-area { padding: 15px 15px calc(15px + env(safe-area-inset-bottom)) 15px; }
 
             /* 1. 폴더 게임: 2열 배치 */
             .folder-grid { grid-template-columns: 1fr 1fr; }
 
             /* 2. 대화창: 꽉 차게 */
-            .char-cutscene { max-height:58%; bottom:118px; }
+            .char-cutscene { max-height:58%; bottom:165px; }
             .dialogue-box { width: 100%; padding: 15px; }
 
             /* 3. 분개 화면: 상하 배치 */
@@ -291,9 +290,7 @@
         <header>
             <div class="logo">
                 <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18M4 20V9l4 3 4-6 4 6 4-3v11"/></svg>
-                <div>자본의 제왕
-                    <span class="stage-tag">STAGE 3 · (주)미래전자 재무팀장</span>
-                </div>
+                <div>자본의 제왕</div>
             </div>
             <div class="hud">
                 <div class="hud-stat"><span class="hud-label">DAY</span><span class="hud-val" id="day-display">0</span></div>
