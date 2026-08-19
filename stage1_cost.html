@@ -513,6 +513,10 @@ body{ font-family:'Noto Sans KR',sans-serif; color:#fff; position:relative; touc
 .tut-top .tt-skip{ margin-left:auto; background:rgba(255,255,255,.1); border:none; color:rgba(255,255,255,.75);
   border-radius:50px; padding:6px 14px; font-size:.8rem; cursor:pointer; }
 .tut-stage{ flex:1; min-height:0; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:6px 16px; position:relative; }
+/* 데모 스틱/버튼은 실제 게임 화면에서의 위치(왼쪽 아래 조이스틱 / 오른쪽 아래 대화버튼)에 맞춰
+   좌우로 붙이고 하단 정렬한다 — 가운데 두면 "왼쪽 아래"라는 안내 문구와 위치가 안 맞아 헷갈린다. */
+#tut-stick-wrap{ align-self:flex-start; margin-top:auto; }
+#tut-act-wrap{ align-self:flex-end; margin-top:auto; }
 .tut-demo-stick{ position:relative; width:120px; height:120px; border-radius:50%; background:rgba(255,255,255,.06); border:2px solid rgba(255,255,255,.15); }
 .tut-demo-knob{ position:absolute; left:50%; top:50%; width:46px; height:46px; margin:-23px 0 0 -23px; border-radius:50%;
   background:var(--pu); box-shadow:0 0 18px rgba(180,79,255,.6); touch-action:none; }
