@@ -84,7 +84,7 @@
         /* 버튼 공통 */
         .btn-action {
             font-family: 'Jua'; font-size: 1.2rem; border: none;
-            border-radius: 8px; color: white; cursor: pointer;
+            border-radius: 8px; color: white; cursor: pointer; white-space: nowrap;
             transition: transform 0.1s, filter 0.2s;
         }
         .btn-action:active { transform: scale(0.96); }
@@ -271,12 +271,16 @@
         .tut-next{ display:block; width:100%; margin-top:14px; padding:15px; border-radius:14px; border:2px solid rgba(255,255,255,.3);
           background:transparent; color:#fff; font-family:'Jua'; font-size:1rem; cursor:pointer; }
 
-        /* ── TOP 랭킹(엔딩화면) ── */
-        .rank-title{ font-family:'Jua'; font-size:.8rem; color:rgba(255,255,255,.35); letter-spacing:2px; margin:18px 0 8px; text-align:center; }
+        /* ── 최종 보고서(엔딩화면) — 2급 게임(game1~5) result-screen과 동일한
+           flex+gap 레이아웃/TOP 랭킹 박스 구성으로 통일 ── */
+        .ending-inner{ display:flex; flex-direction:column; align-items:center; gap:14px; width:100%; max-width:500px; padding:20px 0; }
+        .rank-hdr{ text-align:center; padding:10px 0 6px; font-size:.78rem; color:rgba(255,255,255,.35); letter-spacing:3px; font-family:'Jua'; }
         #my-rank-badge{ display:none; font-family:'Jua'; font-size:.86rem; color:#7fd8ff; background:rgba(127,216,255,.1);
-          border:1px solid rgba(127,216,255,.3); border-radius:50px; padding:6px 16px; margin:0 auto 8px; text-align:center; max-width:max-content; }
-        #rank-box{ background:rgba(255,255,255,.03); border:1px solid #444; border-radius:12px; max-height:170px; overflow-y:auto; padding:4px 0; text-align:left; }
-        .rr-row{ display:grid; grid-template-columns:34px 1fr 70px; gap:6px; padding:8px 12px; font-size:.8rem; border-bottom:1px solid rgba(255,255,255,.06); align-items:center; }
+          border:1px solid rgba(127,216,255,.3); border-radius:50px; padding:7px 20px; text-align:center; max-width:max-content; }
+        #rank-box{ width:100%; background:rgba(255,255,255,.03); border:1px solid #444; border-radius:16px; max-height:300px; overflow-y:auto; padding:4px 0; text-align:left; }
+        #rank-box::-webkit-scrollbar{ width:4px; }
+        #rank-box::-webkit-scrollbar-thumb{ background:rgba(127,216,255,.3); border-radius:2px; }
+        .rr-row{ display:grid; grid-template-columns:34px 1fr 70px; gap:6px; padding:9px 14px; font-size:.88rem; border-bottom:1px solid rgba(255,255,255,.06); align-items:center; }
         .rr-row:last-child{ border-bottom:none; }
         .rr-row.me{ background:rgba(127,216,255,.08); }
         .rr-num{ color:rgba(255,255,255,.35); font-weight:700; }
@@ -378,20 +382,21 @@
             </div>
 
             <div id="screen-ending" class="screen" style="justify-content:center; align-items:center; text-align:center;">
-                <h1 style="color:var(--neon-gold); font-size:2.5rem; margin-bottom:20px;">최종 보고서</h1>
-                <div style="background:#2a2a35; padding:30px; border-radius:20px; width:90%; max-width:500px;">
-                    <p style="font-size:1rem; color:#aaa;">(주)미래전자 2024 회계연도</p>
-                    <hr style="border-color:#444; margin:15px 0;">
-                    <p style="font-size:1.2rem; margin:10px 0;">최종 직급<br><span id="end-rank" style="font-weight:bold; color:white; font-size:1.5rem;"></span></p>
-                    <p style="font-size:1.2rem; margin:10px 0;">업무 평가<br><span id="end-score" style="font-weight:bold; font-size:1.5rem;"></span>점</p>
+                <div class="ending-inner">
+                    <h1 style="color:var(--neon-gold); font-size:2.5rem; margin:0;">최종 보고서</h1>
+                    <div style="background:#2a2a35; padding:30px; border-radius:20px; width:100%;">
+                        <p style="font-size:1rem; color:#aaa;">(주)미래전자 2024 회계연도</p>
+                        <hr style="border-color:#444; margin:15px 0;">
+                        <p style="font-size:1.2rem; margin:10px 0;">최종 직급<br><span id="end-rank" style="font-weight:bold; color:white; font-size:1.5rem;"></span></p>
+                        <p style="font-size:1.2rem; margin:10px 0;">업무 평가<br><span id="end-score" style="font-weight:bold; font-size:1.5rem;"></span>점</p>
+                    </div>
+                    <div style="display:flex; gap:12px;">
+                        <button class="btn-action" style="background:#555; padding:15px 18px;" onclick="location.reload()">처음부터 다시</button>
+                        <button class="btn-action" style="background:var(--neon-gold); color:#000; padding:15px 18px;" onclick="location.href='index_lv1.html'">허브로 돌아가기</button>
+                    </div>
+                    <div id="my-rank-badge"></div>
+                    <div id="rank-box"><div class="rank-hdr">🏆 TOP 랭킹</div><div style="padding:22px;color:rgba(255,255,255,.3);font-size:.8rem;text-align:center;">불러오는 중...</div></div>
                 </div>
-                <div style="display:flex; gap:12px; margin-top:30px;">
-                    <button class="btn-action" style="background:#555; padding:15px 30px;" onclick="location.reload()">처음부터 다시</button>
-                    <button class="btn-action" style="background:var(--neon-gold); color:#000; padding:15px 30px;" onclick="location.href='index_lv1.html'">허브로 돌아가기</button>
-                </div>
-                <div id="my-rank-badge"></div>
-                <div class="rank-title">🏆 TOP 랭킹</div>
-                <div id="rank-box" style="width:90%; max-width:500px;"><div style="padding:22px;color:rgba(255,255,255,.3);font-size:.8rem;text-align:center;">불러오는 중...</div></div>
             </div>
 
         </div>
@@ -1233,12 +1238,12 @@
             const {data,error}=await q;
             if(error) throw error;
             const list=data||[];
-            box.innerHTML = list.length
+            box.innerHTML = '<div class="rank-hdr">🏆 TOP 랭킹</div>' + (list.length
               ? list.map((r,i)=>{
                   const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'위';
                   return `<div class="rr-row${r.name===me?' me':''}"><span class="rr-num">${medal}</span><span class="rr-name">${escHtml(r.name)}</span><span class="rr-score">${(r.score||0).toLocaleString()}</span></div>`;
                 }).join('')
-              : '<div style="padding:22px;color:rgba(255,255,255,.3);font-size:.8rem;text-align:center;">아직 기록이 없습니다</div>';
+              : '<div style="padding:22px;color:rgba(255,255,255,.3);font-size:.8rem;text-align:center;">아직 기록이 없습니다</div>');
             if(me){
               const myRowQ = groupId ? db.from('scores').select('score').eq('game_id',GAME_ID).eq('name',me).eq('group_id',groupId).maybeSingle()
                                       : db.from('scores').select('score').eq('game_id',GAME_ID).eq('name',me).maybeSingle();
