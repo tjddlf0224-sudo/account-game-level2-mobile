@@ -118,6 +118,7 @@
         .dialogue-wrapper {
             flex: 1; position: relative; display: flex; flex-direction: column;
             justify-content: flex-end; align-items: center; width: 100%; overflow: visible;
+            padding-bottom: 28px;
         }
         .char-cutscene {
             position: absolute; left: 50%; bottom: 175px; transform: translate(-50%, 0);
@@ -228,10 +229,13 @@
             .char-cutscene { max-height:58%; bottom:165px; }
             .dialogue-box { width: 100%; padding: 15px; }
 
-            /* 3. 분개 화면: 상하 배치 */
+            /* 3. 분개 화면: 상하 배치 — 차변/대변 칸은 보통 1~2줄만 들어가므로
+               남는 세로 공간을 억지로 채우지 않고 내용만큼만 차지하게 한다. */
             #screen-journal { flex-direction: column; overflow-y: auto; }
             .journal-left { flex: none; height: auto; max-height: 45%; }
-            .journal-right { flex: 1; min-height: 250px; }
+            .journal-right { flex: none; }
+            .journal-board { flex: none; min-height: 110px; }
+            .j-items { min-height: 60px; }
             .journal-problem-box { font-size: 1.02rem; padding: 10px; }
             .acc-card { padding: 11px 6px; font-size: 0.84rem; }
         }
