@@ -34,13 +34,6 @@
 
   .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px;}
   .panel h2{font-size:.92rem;margin:0 0 12px;color:var(--blue);}
-  .chips{display:flex;flex-wrap:wrap;gap:8px;}
-  .chip{border:1.5px solid var(--line);background:var(--card2);color:var(--txt);
-        border-radius:20px;padding:8px 14px;font-size:.86rem;cursor:pointer;transition:.15s;}
-  .chip.on{border-color:var(--blue);background:rgba(0,242,255,.14);color:var(--blue);}
-  .chip .cnt{opacity:.5;font-size:.78rem;margin-left:4px;}
-  .lens{display:flex;gap:8px;margin-top:10px;}
-  .lens .chip{flex:1;text-align:center;}
   .cta{display:block;width:100%;border:none;border-radius:14px;padding:15px;
        font-size:1.05rem;font-weight:700;color:#021;cursor:pointer;
        background:linear-gradient(90deg,var(--blue),var(--green));margin-top:8px;}
@@ -50,11 +43,23 @@
   .legend span{display:inline-flex;align-items:center;gap:5px;}
   .legend i{width:9px;height:9px;border-radius:3px;display:inline-block;}
 
+  /* ── 시작화면 규칙 카드(2급 game3/4 start-screen과 같은 톤) ── */
+  .example-card{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:14px;}
+  .example-card .ex-label{font-size:.72rem;color:var(--dim);letter-spacing:.1em;margin-bottom:6px;}
+  .example-card .ex-stem{font-size:.94rem;line-height:1.55;word-break:keep-all;}
+  .example-card .ex-ans{font-size:.82rem;color:var(--dim);margin-top:8px;}
+  .rule-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .rule-card{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-size:.84rem;line-height:1.6;}
+  .rule-card strong{display:block;color:var(--txt);font-size:.88rem;margin-bottom:4px;}
+
   #quiz{display:none;}
-  .hud{display:flex;justify-content:space-between;align-items:center;font-size:.82rem;color:var(--dim);margin-bottom:10px;}
-  .hud b{color:var(--gold);}
-  .progress-track{height:6px;background:rgba(255,255,255,.07);border-radius:6px;overflow:hidden;margin-bottom:14px;}
-  .progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--purple));transition:width .3s;}
+  .hud{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px;}
+  .hud-time{display:flex;align-items:center;gap:8px;flex:1;min-width:0;}
+  .hud-time b{font-family:ui-monospace,monospace;font-weight:800;font-size:1.05rem;color:var(--txt);flex:none;}
+  .timer-track{flex:1;height:6px;background:rgba(255,255,255,.08);border-radius:6px;overflow:hidden;}
+  .timer-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--gold),var(--red));transition:width 1s linear;}
+  .hud-score{font-size:.82rem;color:var(--dim);white-space:nowrap;flex:none;}
+  .hud-score b{color:var(--gold);}
 
   .qcard{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;margin-bottom:14px;}
   .qtag{display:flex;gap:8px;align-items:center;margin-bottom:10px;}
@@ -91,11 +96,8 @@
   .expl .verdict{font-weight:700;margin-bottom:6px;font-size:.98rem;}
   .expl .kw{display:inline-block;margin-top:8px;padding:4px 10px;border-radius:7px;
     background:rgba(255,210,74,.14);color:var(--gold);font-size:.8rem;font-weight:700;}
-  .next-wrap{margin-top:14px;display:none;}
-
   #result{display:none;text-align:center;}
-  #result .em{font-size:3rem;display:block;margin:8px 0;}
-  #result .score{font-size:2.4rem;color:var(--gold);font-weight:800;}
+  #result .score{font-size:2.4rem;color:var(--gold);font-weight:800;margin-top:8px;}
   #result .grade{font-size:1.1rem;margin:6px 0 2px;}
   .res-row{display:flex;justify-content:space-around;margin:18px 0;font-size:.9rem;}
   .res-row .v{font-size:1.4rem;font-weight:700;display:block;}
@@ -146,41 +148,33 @@
 <div class="wrap">
   <div class="top">
     <a class="back" href="index_lv1.html">←</a>
-    <h1>🧾 매입매출전표 유형 구분 <span class="sub">전산회계 1급 실무 · 기출 거래 기반</span></h1>
+    <h1>매입매출전표 유형 구분 <span class="sub">전산회계 1급 실무 · 기출 거래 기반</span></h1>
   </div>
 
   <div id="home">
     <div class="panel">
-      <h2>① 범위 선택</h2>
-      <div class="chips" id="range-chips">
-        <div class="chip on" data-range="ALL">전체</div>
-        <div class="chip" data-range="매출">매출만</div>
-        <div class="chip" data-range="매입">매입만</div>
+      <div class="example-card">
+        <div class="ex-label">문제 예시</div>
+        <div class="ex-stem">제품을 판매하고 전자세금계산서를 발급하였다.</div>
+        <div class="ex-ans">→ 이 거래가 <b style="color:var(--sale)">11.과세</b> 인지 아래 유형 버튼에서 골라요.</div>
       </div>
-    </div>
-    <div class="panel">
-      <h2>② 문항 수</h2>
-      <div class="lens" id="len-chips">
-        <div class="chip on" data-len="10">10문항</div>
-        <div class="chip" data-len="20">20문항</div>
-        <div class="chip" data-len="0">전체</div>
+      <div class="rule-grid">
+        <div class="rule-card"><strong>제한 시간</strong>60초 동안 계속<br>문제가 나와요.</div>
+        <div class="rule-card"><strong>정답</strong>+100점(콤보 가산)<br>시간 <b style="color:var(--green)">+10초</b></div>
+        <div class="rule-card"><strong>오답</strong>콤보 초기화<br>시간 <b style="color:var(--red)">-5초</b></div>
+        <div class="rule-card"><strong>유형</strong><span style="color:var(--sale)">매출 7종</span> · <span style="color:var(--buy)">매입 8종</span></div>
       </div>
-      <button class="cta" id="start-btn">▶ 시작</button>
-      <button class="guide-btn" id="guide-btn">📖 게임 방법</button>
+      <button class="cta" id="start-btn">시작</button>
+      <button class="guide-btn" id="guide-btn">게임 방법</button>
       <div class="mini" id="pool-info"></div>
-      <div class="legend">
-        <span><i style="background:var(--sale)"></i>매출유형(11~2x번)</span>
-        <span><i style="background:var(--buy)"></i>매입유형(5x~6x번)</span>
-      </div>
     </div>
   </div>
 
   <div id="quiz">
     <div class="hud">
-      <span id="hud-prog">1 / 10</span>
-      <span>점수 <b id="hud-score">0</b> · 연속 <b id="hud-combo">0</b></span>
+      <div class="hud-time"><b id="hud-time">60</b><div class="timer-track"><div class="timer-fill" id="timer-fill" style="width:100%"></div></div></div>
+      <span class="hud-score">점수 <b id="hud-score">0</b> · 연속 <b id="hud-combo">0</b></span>
     </div>
-    <div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
     <div id="quiz-body"></div>
   </div>
 
@@ -189,7 +183,7 @@
   <!-- ── 인터랙티브 튜토리얼(게임 방법) ── -->
   <div id="tutorial" class="tut">
     <div class="tut-top">
-      <span class="tt-title">📖 게임 방법</span>
+      <span class="tt-title">게임 방법</span>
       <span class="tt-badge" id="tut-badge">1/5</span>
       <button class="tt-skip" onclick="Tutorial.close()">건너뛰기</button>
     </div>
@@ -224,7 +218,8 @@ const BUY_TYPES = [
   ['51','과세'],['52','영세'],['53','면세'],['54','불공'],['55','수입'],['57','카과'],['61','현과'],['62','현면'],
 ];
 
-let BANK=[], POOL=[], SEL_RANGE='ALL', SEL_LEN=10;
+const TIME_LIMIT=60, TIME_MAX=90;
+let BANK=[];
 
 function esc(s){return (s==null?'':String(s)).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
@@ -234,41 +229,11 @@ async function load(){
     const d=await r.json();
     BANK=d.questions;
   }catch(e){ document.getElementById('pool-info').textContent='문제 데이터를 불러오지 못했습니다.'; return; }
-  renderRangeChips();
+  document.getElementById('pool-info').textContent=`전체 ${BANK.length}문항 중에서 무작위로 계속 출제돼요 · 틀린 문제는 오답노트에 자동 저장돼요.`;
+  document.getElementById('start-btn').disabled=BANK.length===0;
   bindStart();
-  updatePool();
 }
 
-function renderRangeChips(){
-  const counts={매출:0,매입:0};
-  BANK.forEach(q=>counts[q.category]=(counts[q.category]||0)+1);
-  const box=document.getElementById('range-chips');
-  box.innerHTML = `
-    <div class="chip on" data-range="ALL">전체<span class="cnt">${BANK.length}</span></div>
-    <div class="chip" data-range="매출">매출만<span class="cnt">${counts['매출']||0}</span></div>
-    <div class="chip" data-range="매입">매입만<span class="cnt">${counts['매입']||0}</span></div>
-  `;
-  box.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{
-    box.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));
-    c.classList.add('on'); SEL_RANGE=c.dataset.range; updatePool();
-  });
-  const lb=document.getElementById('len-chips');
-  lb.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{
-    lb.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));
-    c.classList.add('on'); SEL_LEN=parseInt(c.dataset.len); updatePool();
-  });
-}
-
-function poolFor(){
-  if(SEL_RANGE==='ALL') return BANK.slice();
-  return BANK.filter(q=>q.category===SEL_RANGE);
-}
-function updatePool(){
-  POOL=poolFor();
-  const n=SEL_LEN===0?POOL.length:Math.min(SEL_LEN,POOL.length);
-  document.getElementById('pool-info').textContent=`선택 범위 ${POOL.length}문항 중 ${n}문항 출제 · 틀린 문제는 오답노트에 자동 저장돼요.`;
-  document.getElementById('start-btn').disabled=POOL.length===0;
-}
 function bindStart(){
   document.getElementById('start-btn').onclick=startQuiz;
   document.getElementById('guide-btn').onclick=()=>Tutorial.start();
@@ -283,10 +248,10 @@ function bindStart(){
 const TUT_QUIZ = { stem:'제품을 판매하고 전자세금계산서를 발급하였다.', code:'11' };
 const TUT_STEPS = [
   { text:'실제 기출 거래를 읽고, 그 거래가 <b>어느 매입매출전표 유형</b>인지 버튼에서 골라보는 연습이에요.<br>거래 하나로 같이 해볼까요?', btn:'시작 ▶' },
-  { text:'제품을 판매하면서 <b>전자세금계산서를 발급</b>했어요. 세금계산서를 발급한 <b>일반 과세매출</b>은 코드 <b>11.과세</b>예요.<br>아래에서 <b>11.과세</b> 버튼을 찾아 눌러보세요.', tap:'11', hint:'👆 빛나는 버튼을 탭!' },
-  { text:'정답! 정답마다 <b>+100점</b>, 연속으로 맞히면 <b>콤보 보너스</b>가 붙어서 점수가 더 커져요.', glow:true, btn:'다음 ▶' },
+  { text:'제품을 판매하면서 <b>전자세금계산서를 발급</b>했어요. 세금계산서를 발급한 <b>일반 과세매출</b>은 코드 <b>11.과세</b>예요.<br>아래에서 <b>11.과세</b> 버튼을 찾아 눌러보세요.', tap:'11', hint:'빛나는 버튼을 탭하세요' },
+  { text:'정답! 정답마다 <b>+100점</b>(콤보 가산)에 시간도 <b>+10초</b> 늘어나요. 오답이면 콤보가 끊기고 시간이 <b>-5초</b> 줄어요.', glow:true, btn:'다음 ▶' },
   { text:'틀리면 정답과 해설이 바로 나오고, <b>오답노트</b>에 자동 저장돼서 나중에 다시 볼 수 있어요.', btn:'다음 ▶' },
-  { text:'범위(전체/매출만/매입만)와 문항 수를 고르고 시작하면 돼요. 준비됐으면 시작해볼까요?', btn:'시작하기 ▶', finish:true },
+  { text:'제한 시간 60초 동안 문제가 끊임없이 이어져요. 시간이 다 될 때까지 최대한 많이 맞혀보세요!', btn:'시작하기 ▶', finish:true },
 ];
 const Tutorial = (function(){
   let step=0, locked=false, timer=null;
@@ -308,7 +273,7 @@ const Tutorial = (function(){
       locked=true;
       btn.classList.add('wrong');
       el('tut-text').innerHTML='앗, 그건 아니에요. 세금계산서를 발급한 과세매출은 <b>11.과세</b>예요.';
-      el('tut-hint').style.display='block'; el('tut-hint').textContent='👆 다시 골라 보세요';
+      el('tut-hint').style.display='block'; el('tut-hint').textContent='다시 골라 보세요';
       timer=setTimeout(()=>{ timer=null; locked=false; btn.classList.remove('wrong'); render(); }, 1400);
       return;
     }
@@ -343,19 +308,42 @@ const Tutorial = (function(){
   return { start, close, next:nextBtn };
 })();
 
-let QUEUE=[], qi=0, score=0, combo=0, correctCnt=0;
-function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+let curQ=null, prevId=null, score=0, combo=0, maxCombo=0, correctCnt=0, wrongCnt=0;
+let timeLeft=TIME_LIMIT, timerInterval=null, isPlaying=false, nextTimer=null;
+
+function drawQuestion(){
+  let q;
+  do{ q=BANK[Math.floor(Math.random()*BANK.length)]; }while(BANK.length>1 && q.id===prevId);
+  prevId=q.id;
+  return q;
+}
 
 function startQuiz(){
-  const pool=shuffle(poolFor());
-  const n=SEL_LEN===0?pool.length:Math.min(SEL_LEN,pool.length);
-  QUEUE=pool.slice(0,n);
-  qi=0;score=0;combo=0;correctCnt=0;
+  score=0;combo=0;maxCombo=0;correctCnt=0;wrongCnt=0;timeLeft=TIME_LIMIT;prevId=null;
   if(window.WrongNote) WrongNote.reset();
   document.getElementById('home').style.display='none';
   document.getElementById('result').style.display='none';
   document.getElementById('quiz').style.display='block';
+  isPlaying=true;
+  updateTimeHud();
+  clearInterval(timerInterval);
+  timerInterval=setInterval(tick,1000);
+  curQ=drawQuestion();
   showQ();
+}
+
+function tick(){
+  if(!isPlaying) return;
+  timeLeft=Math.max(0,timeLeft-1);
+  updateTimeHud();
+  if(timeLeft<=0) endQuiz();
+}
+
+function updateTimeHud(){
+  document.getElementById('hud-time').textContent=timeLeft;
+  document.getElementById('timer-fill').style.width=Math.max(0,Math.min(100,timeLeft/TIME_LIMIT*100))+'%';
+  document.getElementById('hud-score').textContent=score.toLocaleString();
+  document.getElementById('hud-combo').textContent=combo;
 }
 
 function typeGroupHtml(list, cat){
@@ -368,11 +356,8 @@ function typeGroupHtml(list, cat){
 }
 
 function showQ(){
-  const q=QUEUE[qi];
-  document.getElementById('hud-prog').textContent=`${qi+1} / ${QUEUE.length}`;
-  document.getElementById('hud-score').textContent=score.toLocaleString();
-  document.getElementById('hud-combo').textContent=combo;
-  document.getElementById('prog-fill').style.width=(qi/QUEUE.length*100)+'%';
+  const q=curQ;
+  updateTimeHud();
   const html=`
     <div class="qcard">
       <div class="qtag"><span class="cat-badge ${q.category}">${q.category}</span><span class="qsrc">${esc(q.round)}회 기출 기반</span></div>
@@ -381,13 +366,13 @@ function showQ(){
     ${typeGroupHtml(SALE_TYPES,'매출')}
     ${typeGroupHtml(BUY_TYPES,'매입')}
     <div class="expl" id="expl"></div>
-    <div class="next-wrap" id="next-wrap"><button class="cta" id="next-btn">${qi+1>=QUEUE.length?'결과 보기 🏁':'다음 문제 →'}</button></div>
   `;
   document.getElementById('quiz-body').innerHTML=html;
   document.querySelectorAll('.tbtn').forEach(b=>b.onclick=()=>pick(b.dataset.code,q));
 }
 
 function pick(code,q){
+  if(!isPlaying) return;
   document.querySelectorAll('.tbtn').forEach(b=>{
     b.disabled=true;
     if(b.dataset.code===q.type_code) b.classList.add('correct');
@@ -396,42 +381,56 @@ function pick(code,q){
   });
   const ok = code===q.type_code;
   const expl=document.getElementById('expl');
-  expl.innerHTML = (ok
-    ? `<div class="verdict" style="color:var(--green)">✓ 정답! ${esc(q.type_full)}</div>${esc(q.explain||'')}`
-    : `<div class="verdict" style="color:var(--red)">✗ 오답 — 정답은 ${esc(q.type_full)}</div>${esc(q.explain||'')}`
-  ) + (q.keyword?`<span class="kw">🔑 ${esc(q.keyword)}</span>`:'');
-  if(ok){ combo++; correctCnt++; score+=100+(combo-1)*20; }
-  else{
-    combo=0;
+  let delay;
+  if(ok){
+    combo++; correctCnt++; if(combo>maxCombo) maxCombo=combo;
+    score+=100+(combo-1)*20;
+    timeLeft=Math.min(TIME_MAX, timeLeft+10);
+    expl.innerHTML=`<div class="verdict" style="color:var(--green)">정답! ${esc(q.type_full)}</div>${esc(q.explain||'')}`
+      + (q.keyword?`<span class="kw">${esc(q.keyword)}</span>`:'');
+    delay=1100;
+  }else{
+    combo=0; wrongCnt++;
+    timeLeft=Math.max(0, timeLeft-5);
+    expl.innerHTML=`<div class="verdict" style="color:var(--red)">오답 — 정답은 ${esc(q.type_full)}</div>${esc(q.explain||'')}`
+      + (q.keyword?`<span class="kw">${esc(q.keyword)}</span>`:'');
     if(window.WrongNote) WrongNote.add({
       game:GAME_ID, key:q.id, q:q.stem,
       correct:q.type_full, wrong:(code||'(선택 안 함)'),
       type:q.category
     });
+    delay=2000;
   }
-  document.getElementById('hud-score').textContent=score.toLocaleString();
-  document.getElementById('hud-combo').textContent=combo;
+  updateTimeHud();
   expl.style.display='block';
-  document.getElementById('next-wrap').style.display='block';
-  document.getElementById('next-btn').onclick=()=>{ qi++; qi>=QUEUE.length?endQuiz():showQ(); };
-  expl.scrollIntoView({behavior:'smooth',block:'nearest'});
+  clearTimeout(nextTimer);
+  nextTimer=setTimeout(()=>{
+    if(timeLeft<=0){ endQuiz(); return; }
+    curQ=drawQuestion();
+    showQ();
+  }, delay);
 }
 
 function grade(rate){
-  if(rate>=0.9) return '👑 전표 마스터';
-  if(rate>=0.75) return '🥇 합격 안정권';
-  if(rate>=0.6) return '🥈 합격 가시권';
-  if(rate>=0.4) return '🥉 분발 필요';
-  return '📋 기초 다지기';
+  if(rate>=0.9) return '전표 마스터';
+  if(rate>=0.75) return '합격 안정권';
+  if(rate>=0.6) return '합격 가시권';
+  if(rate>=0.4) return '분발 필요';
+  return '기초 다지기';
 }
 
 async function endQuiz(){
+  if(!isPlaying) return;
+  isPlaying=false;
+  clearInterval(timerInterval);
+  clearTimeout(nextTimer);
   if(window.WrongNote) await WrongNote.flush(GAME_ID);
-  const rate=QUEUE.length?correctCnt/QUEUE.length:0;
+  const answered=correctCnt+wrongCnt;
+  const rate=answered?correctCnt/answered:0;
   const g = grade(rate);
-  if(window.Growth) Growth.record({game:GAME_ID, score:score, grade:g, combo:combo, correct:correctCnt});
+  if(window.Growth) Growth.record({game:GAME_ID, score:score, grade:g, combo:maxCombo, correct:correctCnt});
   if(window.Growth) Growth.logPlay(GAME_ID);
-  try{ await saveStageScore(score, g, correctCnt, QUEUE.length); }catch(e){}
+  try{ await saveStageScore(score, g, correctCnt, answered); }catch(e){}
   requestInterstitialIfNeeded(renderResult);
 }
 
@@ -467,13 +466,12 @@ async function saveStageScore(score, gradeStr, correct, total){
   catch(e){ console.warn('voucher_lv1 점수 저장 예외:', e); }
 }
 function renderResult(){
-  const total=QUEUE.length, wrong=total-correctCnt;
+  const total=correctCnt+wrongCnt, wrong=wrongCnt;
   const rate=total?correctCnt/total:0;
   document.getElementById('quiz').style.display='none';
   const box=document.getElementById('result');
   box.style.display='block';
   box.innerHTML=`
-    <span class="em">${rate>=0.6?'🎉':'💪'}</span>
     <div class="score">${score.toLocaleString()}점</div>
     <div class="grade">${grade(rate)}</div>
     <div class="res-row">
@@ -481,13 +479,13 @@ function renderResult(){
       <div>맞힘<span class="v" style="color:var(--green)">${correctCnt}</span></div>
       <div>틀림<span class="v" style="color:var(--red)">${wrong}</span></div>
     </div>
-    <div class="res-note">${wrong>0?`틀린 ${wrong}문제가 <b style="color:var(--gold)">오답노트</b>에 저장됐어요.`:'전부 맞혔어요! 완벽합니다 👏'}</div>
+    <div class="res-note">${wrong>0?`틀린 ${wrong}문제가 <b style="color:var(--gold)">오답노트</b>에 저장됐어요.`:'전부 맞혔어요. 완벽합니다.'}</div>
     <div class="btn-row">
       <button class="primary" onclick="location.reload()">다시 풀기</button>
       ${wrong>0?'<a href="review.html">오답노트 →</a>':'<a href="index_lv1.html">메인 →</a>'}
     </div>
     <div id="my-rank-badge"></div>
-    <div class="rank-title">🏆 TOP 랭킹</div>
+    <div class="rank-title">TOP 랭킹</div>
     <div id="rank-box"><div style="padding:22px;color:rgba(255,255,255,.3);font-size:.8rem;text-align:center;">불러오는 중...</div></div>`;
   box.scrollIntoView({behavior:'smooth',block:'start'});
   loadRanking();
@@ -508,7 +506,7 @@ async function loadRanking(){
     const list=data||[];
     box.innerHTML = list.length
       ? list.map((r,i)=>{
-          const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'위';
+          const medal=(i+1)+'위';
           return `<div class="rr-row${r.name===me?' me':''}"><span class="rr-num">${medal}</span><span class="rr-name">${esc(r.name)}</span><span class="rr-score">${(r.score||0).toLocaleString()}</span></div>`;
         }).join('')
       : '<div style="padding:22px;color:rgba(255,255,255,.3);font-size:.8rem;text-align:center;">아직 기록이 없습니다</div>';
@@ -521,7 +519,7 @@ async function loadRanking(){
         if(groupId) cq=cq.eq('group_id',groupId);
         const {count}=await cq;
         const badge=document.getElementById('my-rank-badge');
-        badge.textContent=`🎯 내 순위: ${((count||0)+1).toLocaleString()}위`;
+        badge.textContent=`내 순위: ${((count||0)+1).toLocaleString()}위`;
         badge.style.display='block';
       }
     }
