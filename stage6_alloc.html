@@ -83,6 +83,10 @@
     border:1px solid rgba(46,204,113,.3);font-size:.86rem;color:var(--green);line-height:1.55;display:none;font-weight:700;}
   .ok-box.show{display:block;}
 
+  .ref-box{margin-bottom:14px;padding:12px 14px;border-radius:12px;background:rgba(0,242,255,.06);
+    border:1px solid rgba(0,242,255,.22);font-size:.82rem;color:#dff;line-height:1.7;}
+  .ref-box b{color:var(--cy,#00f2ff);}
+
   .qcard{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;margin-bottom:14px;}
   .qstem{font-size:1.0rem;line-height:1.6;word-break:keep-all;margin-bottom:14px;}
   .opt-grid{display:grid;gap:9px;}
@@ -333,7 +337,7 @@ function showStep(){
   document.getElementById('hud-score').textContent=score.toLocaleString();
   document.getElementById('prog-fill').style.width=(qi/queue.length*100)+'%';
   if(item.type==='valve') renderValveStep(item.round);
-  else renderQuizStep(item.q, item.first?item.round:null);
+  else renderQuizStep(item.q, item.first?item.round:null, item.round);
 }
 
 /* ── 밸브 퍼즐 화면 ── */
@@ -421,8 +425,25 @@ function checkValveDone(round){
   }
 }
 
+/* ── 참고 자료 — 확인퀴즈 문제만 보면 계산에 필요한 숫자가 안 보이던 문제 수정.
+   문제 위에 그 라운드에서 실제로 필요한 원가·비율을 항상 띄운다(개념문제인 recip 라운드는 불필요). ── */
+function refDataHtml(round){
+  if(round.key==='direct'){
+    return `<div class="ref-box">
+      <b>🔵 동력부</b> ${won(DATA.power.cost)} — 절단 50 : 조립 30 (교차 파이프 잠가서 수선부 몫 제외)<br>
+      <b>🟣 수선부</b> ${won(DATA.repair.cost)} — 절단 60 : 조립 30 (교차 파이프 잠가서 동력부 몫 제외)
+    </div>`;
+  }
+  if(round.key==='step'){
+    return `<div class="ref-box">
+      <b>🔵 동력부</b> ${won(DATA.power.cost)} — 수선 20% : 절단 50% : 조립 30%<br>
+      <b>🟣 수선부</b> 자기 원가 ${won(DATA.repair.cost)} + 동력부에게 받은 몫(위에서 계산) — 절단 60 : 조립 30
+    </div>`;
+  }
+  return '';
+}
 /* ── 퀴즈(객관식) 화면 ── */
-function renderQuizStep(q, introRound){
+function renderQuizStep(q, introRound, round){
   const opts = q._shuffled || (q._shuffled = shuffle(q.opts.slice()));
   const header = introRound ? `
     <div class="round-badge">${introRound.badge}</div>
@@ -431,6 +452,7 @@ function renderQuizStep(q, introRound){
   document.getElementById('quiz-body').innerHTML = `
     ${header}
     <div class="qcard">
+      ${refDataHtml(round)}
       <div class="qstem">${esc(q.q)}</div>
       <div class="opt-grid" id="opt-grid">
         ${opts.map(o=>`<button class="opt" data-v="${esc(String(o))}">${typeof o==='number'?won(o):esc(o)}</button>`).join('')}
