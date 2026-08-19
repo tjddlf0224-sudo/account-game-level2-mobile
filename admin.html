@@ -289,6 +289,13 @@ body{
 }
 .cert-select option{background:#0a0e16;color:#fff}
 .student-table tr:hover td{background:rgba(255,255,255,0.02)}
+.stu-del-btn{
+  font-size:0.85rem;cursor:pointer;padding:5px 9px;border-radius:8px;line-height:1;
+  border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.4);
+  transition:transform .1s,background .15s,color .15s,border-color .15s;
+}
+.stu-del-btn:hover{background:rgba(231,76,60,0.15);color:#e74c3c;border-color:rgba(231,76,60,0.4)}
+.stu-del-btn:active{transform:scale(0.9)}
 
 /* 게임 점수 셀 */
 .score-cell{
@@ -678,6 +685,7 @@ body{
                 <th>종합</th>
                 <th>합격</th>
                 <th>자격증</th>
+                <th></th>
               </tr></thead>
               <tbody id="student-table-body"></tbody>
             </table>
@@ -1037,6 +1045,31 @@ async function deleteGroup() {
   }
 }
 
+/* ══════════════════════════════════════════
+   학생 삭제 (교수자 전용 — 그룹 비밀번호로 이미 인증된 대시보드 안에서만 노출됨)
+   해당 학생의 점수·기록을 이 그룹 범위에서 전부 영구 삭제한다(2급/1급 전체 game_id 포함).
+══════════════════════════════════════════ */
+async function deleteStudent(name) {
+  if (!currentGid) return;
+  if (!confirm(`정말 "${name}" 학생의 모든 데이터를 삭제할까요?\n\n⚠️ 이 그룹에서의 점수·이론 기록이 전부 영구 삭제되며, 되돌릴 수 없습니다.`)) return;
+
+  try {
+    const [r1, r2, r3, r4] = await Promise.all([
+      db.from('scores').delete().eq('group_id', currentGid).eq('name', name),
+      db.from('score_history').delete().eq('group_id', currentGid).eq('user_name', name),
+      db.from('wrong_answers').delete().eq('group_id', currentGid).eq('user_name', name),
+      db.from('topic_attempts').delete().eq('group_id', currentGid).eq('user_name', name),
+    ]);
+    const err = [r1, r2, r3, r4].find(r => r && r.error);
+    if (err) throw err.error;
+    alert(`"${name}" 학생 데이터가 삭제되었습니다.`);
+    loadDashboard();
+  } catch (e) {
+    console.error(e);
+    alert('삭제에 실패했습니다.\n권한(RLS) 설정 또는 네트워크 문제일 수 있습니다.');
+  }
+}
+
 function enterGroup(gid, group) {
   currentGid = gid;
   currentGroup = group;
@@ -1293,7 +1326,7 @@ function renderDashboard(scores) {
   // ── 학생 상세 분석 테이블 ──
   const tbody = document.getElementById('student-table-body');
   if (!ranked.length) {
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;color:rgba(255,255,255,0.2)">아직 데이터가 없습니다</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:30px;color:rgba(255,255,255,0.2)">아직 데이터가 없습니다</td></tr>';
   } else {
     tbody.innerHTML = ranked.map((r,i) => {
       const gameCells = GAMES.map(g => {
@@ -1339,6 +1372,9 @@ function renderDashboard(scores) {
         </td>
         <td onclick="event.stopPropagation()" style="text-align:center">
           ${certSelect(r.name)}
+        </td>
+        <td onclick="event.stopPropagation()" style="text-align:center">
+          <button class="stu-del-btn" onclick="deleteStudent('${escAttr(r.name)}')" title="학생 데이터 삭제">🗑</button>
         </td>
       </tr>`;
     }).join('');
