@@ -159,8 +159,8 @@
         <div class="ex-ans">→ 이 거래가 <b style="color:var(--sale)">11.과세</b> 인지 아래 유형 버튼에서 골라요.</div>
       </div>
       <div class="rule-grid">
-        <div class="rule-card"><strong>제한 시간</strong>60초 동안 계속<br>문제가 나와요.</div>
-        <div class="rule-card"><strong>정답</strong>+100점(콤보 가산)<br>시간 <b style="color:var(--green)">+10초</b></div>
+        <div class="rule-card"><strong>제한 시간</strong>2분 동안 계속<br>문제가 나와요.</div>
+        <div class="rule-card"><strong>정답</strong>+100점(콤보 가산)<br>시간 <b style="color:var(--green)">+20초</b></div>
         <div class="rule-card"><strong>오답</strong>콤보 초기화<br>시간 <b style="color:var(--red)">-5초</b></div>
         <div class="rule-card"><strong>유형</strong><span style="color:var(--sale)">매출 7종</span> · <span style="color:var(--buy)">매입 8종</span></div>
       </div>
@@ -218,7 +218,7 @@ const BUY_TYPES = [
   ['51','과세'],['52','영세'],['53','면세'],['54','불공'],['55','수입'],['57','카과'],['61','현과'],['62','현면'],
 ];
 
-const TIME_LIMIT=60, TIME_MAX=90;
+const TIME_LIMIT=120, TIME_MAX=180;
 let BANK=[];
 
 function esc(s){return (s==null?'':String(s)).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
@@ -249,9 +249,9 @@ const TUT_QUIZ = { stem:'제품을 판매하고 전자세금계산서를 발급�
 const TUT_STEPS = [
   { text:'실제 기출 거래를 읽고, 그 거래가 <b>어느 매입매출전표 유형</b>인지 버튼에서 골라보는 연습이에요.<br>거래 하나로 같이 해볼까요?', btn:'시작 ▶' },
   { text:'제품을 판매하면서 <b>전자세금계산서를 발급</b>했어요. 세금계산서를 발급한 <b>일반 과세매출</b>은 코드 <b>11.과세</b>예요.<br>아래에서 <b>11.과세</b> 버튼을 찾아 눌러보세요.', tap:'11', hint:'빛나는 버튼을 탭하세요' },
-  { text:'정답! 정답마다 <b>+100점</b>(콤보 가산)에 시간도 <b>+10초</b> 늘어나요. 오답이면 콤보가 끊기고 시간이 <b>-5초</b> 줄어요.', glow:true, btn:'다음 ▶' },
+  { text:'정답! 정답마다 <b>+100점</b>(콤보 가산)에 시간도 <b>+20초</b> 늘어나요. 오답이면 콤보가 끊기고 시간이 <b>-5초</b> 줄어요.', glow:true, btn:'다음 ▶' },
   { text:'틀리면 정답과 해설이 바로 나오고, <b>오답노트</b>에 자동 저장돼서 나중에 다시 볼 수 있어요.', btn:'다음 ▶' },
-  { text:'제한 시간 60초 동안 문제가 끊임없이 이어져요. 시간이 다 될 때까지 최대한 많이 맞혀보세요!', btn:'시작하기 ▶', finish:true },
+  { text:'제한 시간 2분 동안 문제가 끊임없이 이어져요. 시간이 다 될 때까지 최대한 많이 맞혀보세요!', btn:'시작하기 ▶', finish:true },
 ];
 const Tutorial = (function(){
   let step=0, locked=false, timer=null;
@@ -385,7 +385,7 @@ function pick(code,q){
   if(ok){
     combo++; correctCnt++; if(combo>maxCombo) maxCombo=combo;
     score+=100+(combo-1)*20;
-    timeLeft=Math.min(TIME_MAX, timeLeft+10);
+    timeLeft=Math.min(TIME_MAX, timeLeft+20);
     expl.innerHTML=`<div class="verdict" style="color:var(--green)">정답! ${esc(q.type_full)}</div>${esc(q.explain||'')}`
       + (q.keyword?`<span class="kw">${esc(q.keyword)}</span>`:'');
     delay=1100;
