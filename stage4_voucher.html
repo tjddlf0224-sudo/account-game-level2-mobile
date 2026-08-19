@@ -21,20 +21,31 @@
   body{margin:0;background:var(--bg);color:var(--txt);
        font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
        padding:0 0 40px; min-height:100vh;}
-  .wrap{max-width:640px;margin:0 auto;padding:calc(16px + env(safe-area-inset-top)) 16px 16px;}
+  .wrap{max-width:640px;margin:0 auto;padding:16px 16px 16px;}
   @media (min-width:701px){
     body{background:
       radial-gradient(ellipse 50% 40% at 12% 10%, rgba(61,143,122,0.09), transparent 60%),
       radial-gradient(ellipse 45% 35% at 90% 90%, rgba(242,177,52,0.07), transparent 55%),
-      var(--bg);
-      display:flex; flex-direction:column; justify-content:center;}
-    .wrap{padding-top:16px;max-width:820px;width:100%;}
+      var(--bg);}
+    .wrap{max-width:820px;width:100%;margin:0 auto;}
   }
-  .top{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
-  .back{background:var(--card);border:1px solid var(--line);color:var(--txt);
-        border-radius:12px;padding:9px 13px;font-size:.92rem;text-decoration:none;flex:none;}
-  h1{font-size:1.15rem;margin:0;}
-  h1 .sub{display:block;font-size:.72rem;color:var(--dim);font-weight:500;margin-top:3px;}
+
+  /* ── 헤더 — 2급 게임(game1~5)/자본의 제왕과 동일한 구조:
+     로고 + 상시 HUD(시간/점수/연속) + 그만·홈 버튼, 화면 상단 고정 ── */
+  header{display:flex;align-items:center;gap:10px;
+    padding:max(10px,env(safe-area-inset-top)) 16px 10px;
+    background:rgba(0,0,0,.28);border-bottom:1px solid var(--line);
+    position:sticky;top:0;z-index:50;backdrop-filter:blur(8px);}
+  .logo{font-weight:800;font-size:1rem;color:var(--txt);flex-shrink:0;}
+  .status-bar{display:flex;gap:10px;align-items:center;flex:1;justify-content:center;min-width:0;}
+  .stat{display:flex;flex-direction:column;align-items:center;gap:0;flex-shrink:0;min-width:34px;}
+  .stat-label{font-size:.6rem;color:var(--dim);letter-spacing:.06em;}
+  .stat-value{font-family:ui-monospace,monospace;font-weight:800;font-size:1rem;color:var(--txt);line-height:1.2;}
+  .header-btns{display:flex;gap:6px;flex-shrink:0;}
+  .hdr-btn{background:var(--card2);border:1px solid var(--line);color:var(--txt);
+    border-radius:50px;padding:0 13px;height:34px;font-size:.8rem;cursor:pointer;white-space:nowrap;}
+  .hdr-btn:active{transform:scale(.94);}
+  .hdr-sub{font-size:.72rem;color:var(--dim);margin:-4px 0 14px;}
 
   .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px;}
   .panel h2{font-size:.92rem;margin:0 0 12px;color:var(--blue);}
@@ -57,13 +68,8 @@
   .rule-card strong{display:block;color:var(--txt);font-size:.88rem;margin-bottom:4px;}
 
   #quiz{display:none;}
-  .hud{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px;}
-  .hud-time{display:flex;align-items:center;gap:8px;flex:1;min-width:0;}
-  .hud-time b{font-family:ui-monospace,monospace;font-weight:800;font-size:1.05rem;color:var(--txt);flex:none;}
-  .timer-track{flex:1;height:6px;background:rgba(255,255,255,.08);border-radius:6px;overflow:hidden;}
+  .timer-track{flex:1;max-width:90px;height:5px;background:rgba(255,255,255,.1);border-radius:5px;overflow:hidden;}
   .timer-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--gold),var(--red));transition:width 1s linear;}
-  .hud-score{font-size:.82rem;color:var(--dim);white-space:nowrap;flex:none;}
-  .hud-score b{color:var(--gold);}
 
   .qcard{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--line);
     border-radius:12px;padding:20px;margin-bottom:14px;}
@@ -107,15 +113,17 @@
   .expl .continue-hint{margin-top:12px;font-size:.78rem;color:var(--dim);text-align:right;}
   #quiz-body.await-continue{cursor:pointer;}
   #result{display:none;text-align:center;}
-  #result .score{font-size:2.4rem;color:var(--gold);font-weight:800;margin-top:8px;}
-  #result .grade{font-size:1.1rem;margin:6px 0 2px;}
-  .res-row{display:flex;justify-content:space-around;margin:18px 0;font-size:.9rem;}
-  .res-row .v{font-size:1.4rem;font-weight:700;display:block;}
-  .res-note{font-size:.82rem;color:var(--dim);margin-bottom:18px;}
+  #result .result-title{font-size:1.3rem;font-weight:800;letter-spacing:.02em;color:var(--txt);}
+  #result .grade{font-size:1.05rem;color:var(--dim);margin:6px 0 2px;}
+  #result .score{font-size:2.4rem;color:var(--gold);font-weight:800;margin-top:4px;}
+  .res-stats{margin:14px 0 4px;font-size:.9rem;color:var(--dim);}
+  .res-stats b{font-weight:800;}
+  .res-note{font-size:.82rem;color:var(--dim);margin:6px 0 18px;}
   .btn-row{display:flex;gap:10px;}
   .btn-row a,.btn-row button{flex:1;border-radius:13px;padding:13px;font-size:.92rem;font-weight:600;
       border:1px solid var(--line);background:var(--card2);color:var(--txt);cursor:pointer;text-decoration:none;text-align:center;}
   .btn-row .primary{border:none;background:linear-gradient(90deg,var(--blue),var(--green));color:#021;}
+  .review-link{display:block;margin-top:10px;font-size:.84rem;color:var(--gold);text-decoration:none;}
 
   /* ── 게임 방법 튜토리얼 ── */
   .guide-btn{display:block;width:100%;border:1.5px solid var(--line);border-radius:14px;padding:12px;
@@ -155,14 +163,23 @@
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="top">
-    <a class="back" href="index_lv1.html">←</a>
-    <h1>매입매출전표 유형 구분 <span class="sub">전산회계 1급 실무 · 기출 거래 기반</span></h1>
+<header>
+  <div class="logo">매입매출전표</div>
+  <div class="status-bar">
+    <div class="stat"><div class="stat-label">TIME</div><div class="stat-value" id="hud-time">120</div></div>
+    <div class="timer-track"><div class="timer-fill" id="timer-fill" style="width:100%"></div></div>
+    <div class="stat"><div class="stat-label">점수</div><div class="stat-value" id="hud-score">0</div></div>
+    <div class="stat"><div class="stat-label">연속</div><div class="stat-value" id="hud-combo">0</div></div>
   </div>
-
+  <div class="header-btns">
+    <button class="hdr-btn" onclick="quitGame()">그만</button>
+    <button class="hdr-btn" onclick="exitGame()">홈</button>
+  </div>
+</header>
+<div class="wrap">
   <div id="home">
     <div class="panel">
+      <div class="hdr-sub">전산회계 1급 실무 · 기출 거래 기반</div>
       <div class="example-card">
         <div class="ex-label">문제 예시</div>
         <div class="ex-stem">제품을 판매하고 전자세금계산서를 발급하였다.</div>
@@ -181,10 +198,6 @@
   </div>
 
   <div id="quiz">
-    <div class="hud">
-      <div class="hud-time"><b id="hud-time">60</b><div class="timer-track"><div class="timer-fill" id="timer-fill" style="width:100%"></div></div></div>
-      <span class="hud-score">점수 <b id="hud-score">0</b> · 연속 <b id="hud-combo">0</b></span>
-    </div>
     <div id="quiz-body"></div>
   </div>
 
@@ -247,6 +260,18 @@ async function load(){
 function bindStart(){
   document.getElementById('start-btn').onclick=startQuiz;
   document.getElementById('guide-btn').onclick=()=>Tutorial.start();
+}
+
+/* ── 그만(중도 종료 → 지금까지 점수로 결과화면) / 홈(허브로 나가기) ── */
+function quitGame(){
+  if(!isPlaying) return;
+  if(confirm('지금까지 점수로 결과를 볼까요? 남은 시간은 더 진행할 수 없어요.')) endQuiz();
+}
+function exitGame(){
+  if(isPlaying){
+    if(!confirm('허브로 나갈까요? 지금까지의 진행 상황은 저장되지 않습니다.')) return;
+  }
+  location.href='index_lv1.html';
 }
 
 /* =========================================================================
@@ -488,18 +513,16 @@ function renderResult(){
   const box=document.getElementById('result');
   box.style.display='block';
   box.innerHTML=`
-    <div class="score">${score.toLocaleString()}점</div>
+    <div class="result-title">전표 마감</div>
     <div class="grade">${grade(rate)}</div>
-    <div class="res-row">
-      <div>정답률<span class="v" style="color:var(--blue)">${Math.round(rate*100)}%</span></div>
-      <div>맞힘<span class="v" style="color:var(--green)">${correctCnt}</span></div>
-      <div>틀림<span class="v" style="color:var(--red)">${wrong}</span></div>
-    </div>
+    <div class="score">${score.toLocaleString()}점</div>
+    <div class="res-stats">정답 <b style="color:var(--green)">${correctCnt}</b>개 · 오답 <b style="color:var(--red)">${wrong}</b>개 · 최고 연속 <b style="color:var(--gold)">${maxCombo}</b>회</div>
     <div class="res-note">${wrong>0?`틀린 ${wrong}문제가 <b style="color:var(--gold)">오답노트</b>에 저장됐어요.`:'전부 맞혔어요. 완벽합니다.'}</div>
     <div class="btn-row">
-      <button class="primary" onclick="location.reload()">다시 풀기</button>
-      ${wrong>0?'<a href="review.html">오답노트 →</a>':'<a href="index_lv1.html">메인 →</a>'}
+      <button class="primary" onclick="location.reload()">다시 하기</button>
+      <a href="index_lv1.html">메인으로</a>
     </div>
+    ${wrong>0?'<a class="review-link" href="review.html">오답노트에서 다시 보기 →</a>':''}
     <div id="my-rank-badge"></div>
     <div class="rank-title">TOP 랭킹</div>
     <div id="rank-box"><div style="padding:22px;color:rgba(255,255,255,.3);font-size:.8rem;text-align:center;">불러오는 중...</div></div>`;
