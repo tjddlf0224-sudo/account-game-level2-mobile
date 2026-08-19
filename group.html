@@ -363,87 +363,8 @@ body {
   box-shadow: 0 0 0 3px rgba(0,242,255,0.10);
 }
 
-/* 리스트 헤더 */
-.list-header {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 10px;
-}
-.list-count {
-  font-family: 'Orbitron', monospace;
-  font-size: 0.6rem; letter-spacing: 2px;
-  color: rgba(255,255,255,0.3);
-}
-.list-refresh {
-  background: none; border: none;
-  color: rgba(255,255,255,0.25); font-size: 0.85rem;
-  cursor: pointer; transition: color 0.2s, transform 0.3s; padding: 4px;
-}
-.list-refresh:hover { color: var(--cy); transform: rotate(180deg); }
-
-/* 그룹 리스트 */
-.group-list {
-  max-height: 360px;
-  overflow-y: auto;
-  border-radius: 12px;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(0,242,255,0.2) transparent;
-}
-.group-list::-webkit-scrollbar { width: 4px; }
-.group-list::-webkit-scrollbar-track { background: transparent; }
-.group-list::-webkit-scrollbar-thumb { background: rgba(0,242,255,0.2); border-radius: 2px; }
-
-.group-item {
-  display: flex; align-items: center; gap: 14px;
-  padding: 16px 16px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 12px;
-  margin-bottom: 8px;
-  cursor: pointer;
-  transition: all 0.18s;
-}
-.group-item:hover, .group-item:active {
-  background: rgba(0,242,255,0.07);
-  border-color: rgba(0,242,255,0.25);
-  transform: translateX(3px);
-}
-.group-item.selected {
-  background: rgba(0,242,255,0.10);
-  border-color: var(--cy);
-}
-.group-item .gi-icon {
-  width: 40px; height: 40px;
-  display: flex; align-items: center; justify-content: center;
-  background: rgba(0,242,255,0.08);
-  border-radius: 10px;
-  font-size: 1.2rem; flex-shrink: 0;
-}
-.group-item .gi-info { flex: 1; min-width: 0; }
-.group-item .gi-name {
-  font-weight: 700; font-size: 0.95rem;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  margin-bottom: 3px;
-}
-.group-item .gi-meta {
-  font-size: 0.76rem; color: rgba(255,255,255,0.35);
-}
-.group-item .gi-meta span { margin-right: 10px; }
-.group-item .gi-badge {
-  font-family: 'Orbitron', monospace;
-  font-size: 0.6rem; letter-spacing: 1px;
-  color: rgba(0,242,255,0.5);
-  background: rgba(0,242,255,0.07);
-  border: 1px solid rgba(0,242,255,0.15);
-  padding: 3px 9px; border-radius: 50px;
-  white-space: nowrap; flex-shrink: 0;
-}
-
-/* 로딩/빈 상태 */
-.list-loading {
-  text-align: center; padding: 40px 20px;
-  color: rgba(255,255,255,0.3); font-size: 0.9rem;
-}
-.list-loading .spinner {
+/* 명예의 전당 등 로딩 스피너(공용) */
+.spinner {
   width: 28px; height: 28px;
   border: 2px solid rgba(0,242,255,0.15);
   border-top-color: var(--cy);
@@ -452,12 +373,6 @@ body {
   margin: 0 auto 12px;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
-
-.list-empty {
-  text-align: center; padding: 40px 20px;
-  color: rgba(255,255,255,0.25); font-size: 0.88rem;
-  line-height: 1.6;
-}
 
 /* 참여 버튼 */
 .join-btn {
@@ -570,7 +485,7 @@ body {
     <div class="mode-tab join" id="tab-join" onclick="switchTab('join')">
       <div class="tab-icon">🔍</div>
       <div class="tab-name">그룹 참여</div>
-      <div class="tab-desc">학생 · 그룹 검색 후 입장</div>
+      <div class="tab-desc">학생 · 참여 코드로 입장</div>
     </div>
   </div>
 
@@ -637,36 +552,25 @@ body {
   <!-- ── 그룹 참여 패널 ── -->
   <div class="panel" id="panel-join">
     <div class="join-card">
-      <!-- 검색창 -->
+      <!-- 참여 코드 입력 — 아무나 목록을 훑어보고 아무 그룹에나 들어갈 수 없도록,
+           교수자에게 직접 전달받은 코드를 정확히 입력해야만 참여 가능 -->
       <div class="search-wrap">
-        <div class="search-icon">🔍</div>
+        <div class="search-icon">🔑</div>
         <input
           class="search-input"
           type="text"
-          id="search-input"
-          placeholder="그룹명 또는 교수자명 검색..."
+          id="code-input"
+          placeholder="교수자에게 받은 참여 코드 입력..."
           autocomplete="off"
-          oninput="onSearch(this.value)"
+          maxlength="12"
+          style="text-transform:uppercase"
+          onkeydown="if(event.key==='Enter') joinGroup()"
         >
       </div>
 
-      <!-- 리스트 헤더 -->
-      <div class="list-header">
-        <div class="list-count" id="list-count">— 개 그룹</div>
-        <button class="list-refresh" onclick="loadGroups()" title="새로고침">↻</button>
-      </div>
-
-      <!-- 그룹 리스트 -->
-      <div class="group-list" id="group-list">
-        <div class="list-loading">
-          <div class="spinner"></div>
-          그룹 목록 불러오는 중...
-        </div>
-      </div>
-
       <!-- 참여 버튼 -->
-      <button class="join-btn" id="join-btn" onclick="joinGroup()">
-        👥 이 그룹에 참여하기
+      <button class="join-btn show" id="join-btn" onclick="joinGroup()">
+        👥 참여하기
       </button>
 
       <div class="status-msg" id="join-status"></div>
@@ -719,9 +623,6 @@ window.addEventListener('resize',()=>{resize();initStars();});
 /* ═══════════════════════════════════════
    초기화
 ═══════════════════════════════════════ */
-let allGroups = [];
-let selectedGroupId = null;
-let selectedGroupName = null;
 
 window.addEventListener('DOMContentLoaded', () => {
   // 닉네임 표시
@@ -764,7 +665,6 @@ function switchTab(mode) {
   document.getElementById('tab-join').classList.toggle('active', mode === 'join');
   document.getElementById('panel-create').classList.toggle('active', mode === 'create');
   document.getElementById('panel-join').classList.toggle('active', mode === 'join');
-  if (mode === 'join' && allGroups.length === 0) loadGroups();
 }
 
 /* ═══════════════════════════════════════
@@ -855,111 +755,16 @@ function copyCode() {
 }
 
 /* ═══════════════════════════════════════
-   그룹 목록 로드 (Supabase)
+   그룹 참여 — 코드 입력 방식
+   ⚠️ 예전엔 전체 그룹 목록(이름·교수자명·인원수)을 누구나 훑어보고 아무거나
+   클릭해서 참여할 수 있었음(사용자 지적: "아무나 아무 그룹이나 들어가서
+   하지 못하게 해줘") — 목록 자체를 없애고, 교수자에게 직접 전달받은 코드를
+   정확히 입력해야만(groups.id 그대로가 코드) 참여되도록 변경.
 ═══════════════════════════════════════ */
-async function loadGroups() {
-  const listEl = document.getElementById('group-list');
-  listEl.innerHTML = '<div class="list-loading"><div class="spinner"></div>불러오는 중...</div>';
-  selectedGroupId = null; selectedGroupName = null;
-  document.getElementById('join-btn').classList.remove('show');
-
-  try {
-    const { data, error } = await db
-      .from('groups')
-      .select('id, name, teacher_name, member_count, created_at')
-      .order('created_at', { ascending: false })
-      .limit(200);
-
-    if (error) throw error;
-    allGroups = data || [];
-
-    // groups.member_count 컬럼은 아무도 갱신하지 않아 항상 0 —
-    // scores에서 그룹별 실제 참여 닉네임 수를 세어 표시값을 채운다 (실패 시 무시)
-    try {
-      const { data: rows } = await db.from('scores')
-        .select('group_id,name').not('group_id', 'is', null).limit(5000);
-      if (rows && rows.length) {
-        const cnt = {};
-        rows.forEach(r => { (cnt[r.group_id] = cnt[r.group_id] || new Set()).add(r.name); });
-        allGroups.forEach(g => { g.member_count = cnt[g.id] ? cnt[g.id].size : 0; });
-      }
-    } catch (e2) { /* 표시용 — 실패해도 목록은 정상 */ }
-
-    renderGroups(allGroups);
-  } catch(e) {
-    listEl.innerHTML = '<div class="list-empty">⚠️ 목록을 불러올 수 없습니다.<br>네트워크를 확인해주세요.</div>';
-    console.error(e);
-  }
-}
-
-function renderGroups(list) {
-  const listEl = document.getElementById('group-list');
-  const countEl = document.getElementById('list-count');
-  countEl.textContent = list.length + '개 그룹';
-
-  if (!list.length) {
-    listEl.innerHTML = '<div class="list-empty">아직 생성된 그룹이 없습니다.<br>교수자에게 그룹 생성을 요청하세요.</div>';
-    return;
-  }
-
-  const currentGid = localStorage.getItem('hub_group_id');
-  listEl.innerHTML = list.map(g => {
-    const isSelected = selectedGroupId === g.id;
-    const isCurrent = currentGid === g.id;
-    const date = new Date(g.created_at).toLocaleDateString('ko-KR', {month:'numeric',day:'numeric'});
-    return `<div class="group-item${isSelected?' selected':''}" onclick="selectGroup('${escapeAttr(g.id)}','${escapeAttr(g.name)}',this)">
-      <div class="gi-icon">👥</div>
-      <div class="gi-info">
-        <div class="gi-name">${escapeHTML(g.name)}${isCurrent?' ✓':''}</div>
-        <div class="gi-meta">
-          <span>👤 ${escapeHTML(g.teacher_name||'—')}</span>
-          <span>👥 ${g.member_count||0}명</span>
-          <span>📅 ${date}</span>
-        </div>
-      </div>
-      <div class="gi-badge">${escapeHTML(g.id)}</div>
-    </div>`;
-  }).join('');
-}
-
-/* ═══════════════════════════════════════
-   실시간 검색
-═══════════════════════════════════════ */
-let searchTimer = null;
-function onSearch(val) {
-  clearTimeout(searchTimer);
-  searchTimer = setTimeout(() => {
-    const q = val.trim().toLowerCase();
-    if (!q) { renderGroups(allGroups); return; }
-    const filtered = allGroups.filter(g =>
-      g.name.toLowerCase().includes(q) ||
-      (g.teacher_name||'').toLowerCase().includes(q) ||
-      g.id.toLowerCase().includes(q)
-    );
-    renderGroups(filtered);
-    // 검색 후 선택 초기화
-    selectedGroupId = null; selectedGroupName = null;
-    document.getElementById('join-btn').classList.remove('show');
-  }, 120); // 120ms debounce — 거의 실시간
-}
-
-/* ═══════════════════════════════════════
-   그룹 선택 & 참여
-═══════════════════════════════════════ */
-function selectGroup(id, name, el) {
-  selectedGroupId = id;
-  selectedGroupName = name;
-  // 선택 시각 피드백
-  document.querySelectorAll('.group-item').forEach(el => el.classList.remove('selected'));
-  el.classList.add('selected');
-  // 참여 버튼 노출
-  const joinBtn = document.getElementById('join-btn');
-  joinBtn.textContent = `👥 "${name}" 에 참여하기`;
-  joinBtn.classList.add('show');
-}
-
 async function joinGroup() {
-  if (!selectedGroupId) return;
+  const codeEl = document.getElementById('code-input');
+  const code = codeEl.value.trim().toUpperCase();
+  if (!code) { showStatus('join-status', '참여 코드를 입력해주세요.', 'err'); return; }
   const nick = localStorage.getItem('hub_nickname');
   if (!nick) {
     showStatus('join-status', '먼저 닉네임을 설정해주세요.', 'err');
@@ -970,27 +775,26 @@ async function joinGroup() {
   btn.disabled = true; btn.textContent = '참여 중...';
 
   try {
-    // 그룹 존재 확인
     const { data, error } = await db
-      .from('groups').select('id,name').eq('id', selectedGroupId).single();
+      .from('groups').select('id,name').eq('id', code).single();
     if (error || !data) throw new Error('그룹을 찾을 수 없습니다');
 
-    // localStorage에 저장
-    localStorage.setItem('hub_group_id', selectedGroupId);
-    localStorage.setItem('hub_group_name', selectedGroupName);
+    localStorage.setItem('hub_group_id', data.id);
+    localStorage.setItem('hub_group_name', data.name);
 
-    // 현재 그룹 배너 갱신
-    document.getElementById('current-group-name').textContent = selectedGroupName;
+    document.getElementById('current-group-name').textContent = data.name;
     document.getElementById('current-group-bar').classList.add('show');
 
-    showStatus('join-status', `✓ "${selectedGroupName}" 그룹에 참여했습니다! 게임을 시작하세요.`, 'ok');
+    showStatus('join-status', `✓ "${escapeHTML(data.name)}" 그룹에 참여했습니다! 게임을 시작하세요.`, 'ok');
+    codeEl.value = '';
 
     // 2초 후 허브로 이동
     setTimeout(() => { window.location.href = 'index.html'; }, 1800);
 
   } catch(e) {
-    showStatus('join-status', '참여에 실패했습니다. 다시 시도해주세요.', 'err');
-    btn.disabled = false; btn.textContent = `👥 "${selectedGroupName}" 에 참여하기`;
+    showStatus('join-status', '코드가 일치하는 그룹을 찾을 수 없습니다. 다시 확인해주세요.', 'err');
+  } finally {
+    btn.disabled = false; btn.textContent = '👥 참여하기';
   }
 }
 
@@ -1008,14 +812,7 @@ function leaveGroup() {
   localStorage.removeItem('hub_group_id');
   localStorage.removeItem('hub_group_name');
   document.getElementById('current-group-bar').classList.remove('show');
-  selectedGroupId = null; selectedGroupName = null;
-  document.getElementById('join-btn').classList.remove('show');
-  // 리스트 새로고침해서 ✓ 마크 제거
-  if (allGroups.length) renderGroups(
-    document.getElementById('search-input').value.trim()
-      ? allGroups.filter(g => g.name.toLowerCase().includes(document.getElementById('search-input').value.trim().toLowerCase()))
-      : allGroups
-  );
+  document.getElementById('code-input').value = '';
 }
 
 /* ═══════════════════════════════════════
@@ -1187,11 +984,6 @@ function showStatus(id, msg, type) {
 function escapeHTML(s) {
   if (!s) return '';
   return String(s).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-}
-function escapeAttr(s) {
-  // onclick="fn('...')" 같은 HTML 속성 안 JS 문자열용:
-  // JS 이스케이프(\, ') 후 HTML 엔티티 처리 — 큰따옴표로 인한 속성 브레이크아웃(XSS) 방지
-  return escapeHTML(String(s||'').replace(/\\/g, '\\\\').replace(/'/g, "\\'"));
 }
 function hideAdPlaceholder() {}
 </script>
