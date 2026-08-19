@@ -186,6 +186,31 @@ body{ font-family:'Noto Sans KR',sans-serif; color:#fff; position:relative; touc
 .start-btn.primary{ background:rgba(0,242,255,0.18); border-color:rgba(0,242,255,0.5); }
 .start-btn:active{ transform:scale(0.96); }
 
+/* 연습문제 제안 팝업 */
+#pq-offer-panel{
+  width:100%; max-width:400px; margin:0 auto; padding:26px 22px;
+  background:linear-gradient(180deg, rgba(20,16,34,0.98), rgba(8,6,16,0.99));
+  border:1px solid rgba(180,79,255,0.4); border-radius:20px;
+  box-shadow:0 0 50px rgba(180,79,255,0.15); text-align:center;
+}
+#pq-offer-title{ font-family:'Black Han Sans',sans-serif; font-size:1.15rem; color:#fff; margin-bottom:10px; }
+#pq-offer-desc{ font-size:0.82rem; color:rgba(255,255,255,0.6); line-height:1.6; margin-bottom:20px; }
+#pq-offer-desc b{ color:var(--pu); }
+
+/* 연습문제 풀이 화면 — quiz-panel과 동일 톤, 전용 패널 */
+#pq-panel{
+  width:100%; max-width:640px; margin:0 auto; max-height:100%; overflow-y:auto;
+  padding:16px 16px calc(18px + env(safe-area-inset-bottom));
+  background:linear-gradient(180deg, rgba(18,14,32,0.98), rgba(8,6,16,0.99));
+  border-top:2px solid rgba(180,79,255,0.4);
+  box-shadow:0 -8px 30px rgba(0,0,0,0.6);
+  scrollbar-width:none; -ms-overflow-style:none;
+}
+#pq-panel::-webkit-scrollbar{ display:none; width:0; }
+#pq-tag{ color:var(--pu); }
+#pq-finish{ text-align:center; padding:10px 0; }
+#pq-finish-score{ font-family:'Black Han Sans',sans-serif; font-size:1.3rem; color:#fff; margin-bottom:16px; }
+
 /* ── 조이스틱 ── */
 #stick-zone{
   position:absolute; left:0; bottom:0; width:46%; height:46%;
@@ -646,6 +671,40 @@ body{ font-family:'Noto Sans KR',sans-serif; color:#fff; position:relative; touc
     </div>
     <div class="quiz-fb" id="quiz-fb"></div>
     <div class="quiz-next" id="quiz-next"><span>다음</span><span class="arrow">▶</span></div>
+  </div>
+</div>
+
+<!-- 연습문제 제안(NPC 완료/재방문 직후) -->
+<div class="ov center" id="pq-offer-overlay">
+  <div id="pq-offer-panel">
+    <div id="pq-offer-title">잘 배웠나 볼까요?</div>
+    <div id="pq-offer-desc"><b id="pq-offer-npc"></b>와(과) 나눈 이야기, 관련 문제로 몇 번이고 연습할 수 있어요.</div>
+    <div class="start-btns">
+      <button class="start-btn primary" onclick="PracticeQuiz.acceptOffer()">✏️ 연습문제 풀기</button>
+      <button class="start-btn" onclick="PracticeQuiz.declineOffer()">다음에 할게요</button>
+    </div>
+  </div>
+</div>
+
+<!-- 연습문제(주제별 반복 풀이, 서류철/점수와 무관한 순수 연습) -->
+<div class="ov center" id="pq-overlay">
+  <div id="pq-panel">
+    <div class="quiz-tag" id="pq-tag">연습문제</div>
+    <div class="quiz-body">
+      <div class="quiz-main" style="flex:1">
+        <div class="quiz-q" id="pq-q"></div>
+        <div class="quiz-opts" id="pq-opts"></div>
+      </div>
+    </div>
+    <div class="quiz-fb" id="pq-fb"></div>
+    <div class="quiz-next" id="pq-next"><span>다음</span><span class="arrow">▶</span></div>
+    <div id="pq-finish" style="display:none">
+      <div id="pq-finish-score"></div>
+      <div class="start-btns">
+        <button class="start-btn primary" onclick="PracticeQuiz.retry()">🔁 다시 풀기</button>
+        <button class="start-btn" onclick="PracticeQuiz.close()">닫기</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -2554,7 +2613,12 @@ const Dialog = {
     if(this.idx >= this.queue.length){
       document.getElementById('dlg-overlay').classList.remove('show');
       if(this._sawYearend){ EventFX.yearendDim(false); this._sawYearend=false; } // 안전망
-      if(this._repeatMode){ this._repeatMode=false; World.paused=false; return; }
+      if(this._repeatMode){
+        this._repeatMode=false;
+        const topic=NPC_TOPIC_MAP[this.npcKey];
+        if(topic) PracticeQuiz.offer(this.npcKey, topic); else World.paused=false;
+        return;
+      }
       const def=this.npcDef;
       if(def.quiz && def.quiz.length) Quiz.start(this.npcKey, def);
       else this.complete(this.npcKey, def);
@@ -2617,7 +2681,11 @@ const Dialog = {
       } else {
         requestInterstitialIfNeeded(()=>ResultScreen.show());
       }
+      return;
     }
+    // 개념을 다루는 NPC였으면, 완료 직후 "연습문제 풀어볼래?" 제안(숙달용, 반복 가능)
+    const topic = NPC_TOPIC_MAP[key];
+    if(topic) PracticeQuiz.offer(key, topic);
   },
 };
 document.getElementById('dlg-panel').addEventListener('click', ()=>Dialog.next());
@@ -2725,6 +2793,112 @@ const Quiz = {
   },
 };
 document.getElementById('quiz-next').addEventListener('click', ()=>Quiz.next());
+
+/* =========================================================================
+ *  PracticeQuiz — NPC별 개념 연습문제(숙달용, 몇 번이고 반복 가능)
+ *  서류철·클리어 점수와는 완전히 무관한 순수 연습. theory_bank_lv1.json(1급
+ *  이론 문제은행, 405문항)에서 그 NPC가 다루는 주제(topic)만 골라 매번 5문항
+ *  랜덤 출제. 정오답은 Growth.logTopicAttempt로 이론 정답률에도 반영(교수자
+ *  대시보드의 "이론 주제별 분석"에서 이 연습 결과도 같이 잡힘).
+ * ========================================================================= */
+const NPC_TOPIC_MAP = {
+  n_go:'T3', n_wan:'T3',            // 재고자산(원재료·제품 T계정)
+  n_oh:'T8', n_seo:'T8', n_ma:'T8', n_bae:'T8', n_gyul:'T8', // 원가의 기초·원가행태
+  n_jung:'T10', n_lee:'T10', n_mi:'T10',                     // 개별원가계산·종합원가계산
+  n_soon:'T9', n_steam:'T9',                                 // 원가배분(부문별원가계산)
+};
+let THEORY_BANK_LV1 = null;
+fetch('theory_bank_lv1.json').then(r=>r.json()).then(j=>{ THEORY_BANK_LV1 = j.questions||[]; }).catch(()=>{});
+function shuffleArr(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+const PracticeQuiz = {
+  npcKey:null, topic:null, pool:[], idx:0, correct:0, TOTAL:5,
+  _pendingNpc:null, _pendingTopic:null,
+
+  offer(npcKey, topic){
+    World.paused = true;
+    document.getElementById('pq-offer-npc').textContent = NPC_DATA[npcKey].name;
+    this._pendingNpc = npcKey; this._pendingTopic = topic;
+    document.getElementById('pq-offer-overlay').classList.add('show');
+  },
+  declineOffer(){
+    document.getElementById('pq-offer-overlay').classList.remove('show');
+    World.paused = false;
+  },
+  acceptOffer(){
+    document.getElementById('pq-offer-overlay').classList.remove('show');
+    this.start(this._pendingNpc, this._pendingTopic);
+  },
+
+  start(npcKey, topic){
+    if(!THEORY_BANK_LV1 || !THEORY_BANK_LV1.length){
+      alert('문제를 아직 불러오는 중이에요. 잠시 후 다시 시도해주세요.');
+      World.paused=false;
+      return;
+    }
+    this.npcKey=npcKey; this.topic=topic;
+    const all = THEORY_BANK_LV1.filter(q=>q.topic===topic);
+    this.pool = shuffleArr(all).slice(0, Math.min(this.TOTAL, all.length));
+    this.idx=0; this.correct=0;
+    document.getElementById('pq-finish').style.display='none';
+    document.getElementById('pq-panel').querySelector('.quiz-body').style.display='flex';
+    document.getElementById('pq-next').classList.remove('show');
+    document.getElementById('pq-overlay').classList.add('show');
+    this.render();
+  },
+  render(){
+    const q=this.pool[this.idx];
+    document.getElementById('pq-tag').textContent = `연습문제 · ${this.idx+1}/${this.pool.length}`;
+    document.getElementById('pq-q').textContent = q.stem;
+    const opts=document.getElementById('pq-opts');
+    opts.innerHTML='';
+    q.options.forEach((optText,i)=>{
+      const b=document.createElement('button');
+      b.className='quiz-opt'; b.textContent=(i+1)+'. '+optText;
+      b.addEventListener('click', ()=>this.pick(i+1));
+      opts.appendChild(b);
+    });
+    const fb=document.getElementById('pq-fb'); fb.className='quiz-fb'; fb.textContent='';
+    document.getElementById('pq-next').classList.remove('show');
+  },
+  pick(choice){
+    if(this._answered) return;
+    this._answered=true;
+    const q=this.pool[this.idx];
+    const ok = choice===q.answer;
+    if(ok) this.correct++;
+    if(window.Growth) Growth.logTopicAttempt({game:'theory_lv1', topic:q.topicName, correct:ok});
+    const optEls=document.querySelectorAll('#pq-opts .quiz-opt');
+    optEls.forEach((b,i)=>{
+      b.style.pointerEvents='none';
+      if(i+1===q.answer) b.classList.add('right');
+      else if(i+1===choice) b.classList.add('wrong');
+    });
+    const fb=document.getElementById('pq-fb');
+    fb.className = 'quiz-fb '+(ok?'right show':'wrong show');
+    fb.textContent = (ok?'✅ 정답! ':'❌ 정답은 '+q.answer+'번. ') + (q.explanation||'');
+    document.getElementById('pq-next').classList.add('show');
+  },
+  next(){
+    this._answered=false;
+    this.idx++;
+    if(this.idx>=this.pool.length){ this.finish(); return; }
+    this.render();
+  },
+  finish(){
+    document.getElementById('pq-panel').querySelector('.quiz-body').style.display='none';
+    document.getElementById('pq-fb').className='quiz-fb';
+    document.getElementById('pq-next').classList.remove('show');
+    document.getElementById('pq-finish').style.display='block';
+    document.getElementById('pq-finish-score').textContent = `${this.correct} / ${this.pool.length}문제 정답!`;
+  },
+  retry(){ this.start(this.npcKey, this.topic); },
+  close(){
+    document.getElementById('pq-overlay').classList.remove('show');
+    World.paused=false;
+  },
+};
+document.getElementById('pq-next').addEventListener('click', ()=>PracticeQuiz.next());
 
 /* =========================================================================
  *  DocsUI — 서류철 모달(14칸 그리드)
