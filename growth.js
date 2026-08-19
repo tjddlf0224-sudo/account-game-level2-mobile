@@ -109,6 +109,24 @@
     } catch (e) {}
   }
 
+  // ── 이론 문항 1개 풀 때마다(정답/오답 둘 다) 호출 — 주제별 정답률 집계용.
+  // wrong_answers는 오답만 쌓여서 "주제별 정답률"을 못 냄(분모를 모름) — 이건 매 문항마다
+  // 쌓아서 correct=true/false 둘 다 기록, 교수자 대시보드가 정답률=correct건/전체건으로 계산.
+  var TOPIC_TABLE = 'topic_attempts';
+  function logTopicAttempt(opts) {
+    if (!opts || !opts.game || !opts.topic) return;
+    try {
+      var db = client();
+      if (!db) return;
+      var u = user();
+      if (!u) return; // 닉네임 없으면 학생 식별 불가 — 스킵
+      var row = { user_name: u, game_id: opts.game, topic: opts.topic, correct: !!opts.correct };
+      var gid = groupId();
+      if (gid) row.group_id = gid;
+      db.from(TOPIC_TABLE).insert(row).then(function () {}, function () {});
+    } catch (e) {}
+  }
+
   // ── 매 판 종료 시 호출 — 로컬 즉시 + Supabase 베스트에포트(예외 안 던짐) ──
   function record(rec) {
     if (!rec || !rec.game) return;
@@ -234,7 +252,7 @@
   }
 
   global.Growth = {
-    record: record, series: series, rename: rename, logPlay: logPlay,
+    record: record, series: series, rename: rename, logPlay: logPlay, logTopicAttempt: logTopicAttempt,
     GAME_NAMES: {
       acid: '계정과목 산성비', memory: '계정·뜻 메모리', debit: '분개 차·대변',
       factory: '결산분개 조립', flight: '플라이트 장부조회', theory: '이론 객관식',

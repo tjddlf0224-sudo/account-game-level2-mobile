@@ -441,6 +441,7 @@ function pick(choice,q){
     else if(i===choice) b.classList.add('wrong');
   });
   const ok=choice===q.answer;
+  if(window.Growth) Growth.logTopicAttempt({game:'theory', topic:q.topicName, correct:ok});
   const expl=document.getElementById('expl');
   const verdictHtml = ok
     ? `<div class="verdict" style="color:var(--green)">✓ 정답!</div>${esc(q.explanation)||''}`

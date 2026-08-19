@@ -707,9 +707,10 @@ body{
         <div class="radar-bars" id="radar-bars"></div>
       </div>
 
-      <!-- 이론 약점 (주제별 오답, 개인) -->
+      <!-- 이론 주제별 분석(정답률·미풀이 주제, 개인) -->
       <div class="radar-wrap" id="modal-theory-wrap" style="display:none">
-        <div class="radar-title">📝 이론 약점 주제</div>
+        <div class="radar-title">📝 이론 주제별 분석</div>
+        <div style="font-size:0.74rem;color:rgba(255,255,255,0.35);margin:-6px 0 10px">주제별 정답률 · 아직 안 풀어본 주제 확인 — 약한 주제를 짚어 안내해주세요</div>
         <div class="radar-bars" id="modal-theory-bars"></div>
       </div>
 
@@ -807,7 +808,7 @@ async function setLevel(lv){
   THEORY_GAME_ID = lv==='1급' ? 'theory_lv1' : 'theory';
   renderStudentTableHead();
   if(!currentGid) return; // 그룹 선택 전
-  await Promise.all([loadTheoryWeak(currentGid), loadTheoryScores(currentGid)]);
+  await Promise.all([loadTheoryWeak(currentGid), loadTheoryScores(currentGid), loadTopicAttempts(currentGid)]);
   if(dashData) renderDashboard(dashData);
 }
 
@@ -1077,9 +1078,10 @@ async function loadDashboard() {
   try {
     const [scoresRes] = await Promise.all([
       db.from('scores').select('*').eq('group_id', currentGid),
-      loadExam(currentGid),        // 합격여부 병렬 로드
-      loadTheoryWeak(currentGid),  // 이론 주제별 오답 병렬 로드
-      loadTheoryScores(currentGid) // 이론 참여/점수 병렬 로드
+      loadExam(currentGid),          // 합격여부 병렬 로드
+      loadTheoryWeak(currentGid),    // 이론 주제별 오답 병렬 로드
+      loadTheoryScores(currentGid),  // 이론 참여/점수 병렬 로드
+      loadTopicAttempts(currentGid)  // 이론 주제별 정답률(문항 단위 정오답 전체) 병렬 로드
     ]);
     if (scoresRes.error) throw scoresRes.error;
     dashData = scoresRes.data || [];
@@ -1118,6 +1120,27 @@ async function loadTheoryScores(gid) {
       cur.plays += 1;
       if (THEORY_PASS_GRADES.includes(r.grade)) cur.passed = true;
       theoryScoreByStudent[r.user_name] = cur;
+    });
+  } catch (e) { /* 테이블 없거나 오프라인 — 조용히 무시 */ }
+}
+
+// name → { topicName: { correct, total } } — wrong_answers는 오답만 쌓여서 "정답률"의
+// 분모(전체 시도)를 모른다. topic_attempts는 문항 하나 풀 때마다 정오답 둘 다 쌓여서
+// 주제별 정답률·미풀이 주제 파악이 가능하다(growth.js Growth.logTopicAttempt 참고).
+let theoryTopicByStudent = {};
+async function loadTopicAttempts(gid) {
+  theoryTopicByStudent = {};
+  try {
+    const { data, error } = await db.from('topic_attempts')
+      .select('user_name,topic,correct').eq('group_id', gid).eq('game_id', THEORY_GAME_ID).limit(20000);
+    if (error) throw error;
+    (data || []).forEach(r => {
+      const cur = theoryTopicByStudent[r.user_name] || {};
+      const t = cur[r.topic] || { correct: 0, total: 0 };
+      t.total += 1;
+      if (r.correct) t.correct += 1;
+      cur[r.topic] = t;
+      theoryTopicByStudent[r.user_name] = cur;
     });
   } catch (e) { /* 테이블 없거나 오프라인 — 조용히 무시 */ }
 }
@@ -1379,24 +1402,34 @@ function openModal(name) {
     </div>`;
   }).join('');
 
-  // 이론 약점 (주제별 오답, 개인)
+  // 이론 주제별 분석 — 주제별 정답률(topic_attempts, 정오답 전체) + 아직 안 풀어본 주제
   const theoryWrap = document.getElementById('modal-theory-wrap');
-  const theoryTopics = theoryWeakByStudent[name];
-  if (theoryTopics && Object.keys(theoryTopics).length) {
+  const topicStats = theoryTopicByStudent[name]; // { topicName: {correct,total} } | undefined
+  if (theoryScoreByStudent[name]) { // 이론을 한 번이라도 풀었으면 표시(전부 정답이라 오답 0건이어도 표시)
     theoryWrap.style.display = '';
-    const maxCnt = Math.max(...Object.values(theoryTopics));
-    const sorted = TOPIC_ORDER.filter(t => theoryTopics[t]).sort((a,b) => theoryTopics[b]-theoryTopics[a]);
-    document.getElementById('modal-theory-bars').innerHTML = sorted.map((topic,i) => {
-      const cnt = theoryTopics[topic];
-      const pct = Math.round(cnt/maxCnt*100);
-      const col = i===0?'var(--pk)':i===1?'var(--gd)':'var(--cy)';
+    document.getElementById('modal-theory-bars').innerHTML = TOPIC_ORDER.map(topic => {
+      const s = topicStats && topicStats[topic];
+      if (!s) {
+        return `<div class="rb-item">
+          <div class="rb-header">
+            <div class="rb-name" style="color:rgba(255,255,255,0.35)">
+              <span style="background:rgba(255,255,255,0.25);width:8px;height:8px;border-radius:50%;display:inline-block"></span>
+              ${escHTML(topic)}
+            </div>
+            <div class="rb-pct" style="color:rgba(255,255,255,0.35)">미풀이</div>
+          </div>
+          <div class="rb-track"><div class="rb-fill" style="background:rgba(255,255,255,0.15);width:0" data-w="6"></div></div>
+        </div>`;
+      }
+      const pct = Math.round(s.correct/s.total*100);
+      const col = pct>=70?'var(--gn)':pct>=40?'var(--gd)':'var(--pk)';
       return `<div class="rb-item">
         <div class="rb-header">
           <div class="rb-name" style="color:${col}">
             <span style="background:${col};width:8px;height:8px;border-radius:50%;display:inline-block"></span>
             ${escHTML(topic)}
           </div>
-          <div class="rb-pct">오답 ${cnt}건</div>
+          <div class="rb-pct">${pct}% (${s.correct}/${s.total})</div>
         </div>
         <div class="rb-track"><div class="rb-fill" style="background:${col};width:0" data-w="${pct}"></div></div>
       </div>`;
@@ -1581,11 +1614,19 @@ function generateDiagnosis(name, student) {
     lines.push(`<br><br>✅ <strong>강점 영역:</strong> ${strongGames.map(g=>g.icon+' '+g.name).join(', ')} — 해당 부분은 잘 유지되고 있습니다.`);
   }
 
-  // 이론 약점 주제
-  const theoryTopics = theoryWeakByStudent[name];
-  if (theoryTopics && Object.keys(theoryTopics).length) {
-    const topTopic = TOPIC_ORDER.filter(t=>theoryTopics[t]).sort((a,b)=>theoryTopics[b]-theoryTopics[a])[0];
-    lines.push(`<br><br>📝 <strong>이론 최다 오답 주제:</strong> ${escHTML(topTopic)}(${theoryTopics[topTopic]}건) — 이론 객관식에서 해당 주제 위주로 복습을 권장합니다.`);
+  // 이론 주제별 정답률 기반 약점·미풀이 주제 안내
+  const topicStats = theoryTopicByStudent[name];
+  if (topicStats && Object.keys(topicStats).length) {
+    const attempted = TOPIC_ORDER.filter(t=>topicStats[t]);
+    const weakest = attempted.map(t=>({t, pct: topicStats[t].correct/topicStats[t].total}))
+      .filter(x=>x.pct<0.6).sort((a,b)=>a.pct-b.pct)[0];
+    if (weakest) {
+      lines.push(`<br><br>📝 <strong>이론 최약 주제:</strong> ${escHTML(weakest.t)}(정답률 ${Math.round(weakest.pct*100)}%) — 이론 객관식에서 해당 주제 위주로 복습을 권장합니다.`);
+    }
+    const untried = TOPIC_ORDER.filter(t=>!topicStats[t]);
+    if (untried.length) {
+      lines.push(`<br><br>🔍 <strong>아직 안 풀어본 주제:</strong> ${untried.map(escHTML).join(', ')} — 이 주제들도 한 번씩 풀어보도록 안내해주세요.`);
+    }
   }
 
   // 전산회계 급수 진단
