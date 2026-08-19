@@ -104,6 +104,8 @@
   .expl .verdict{font-weight:700;margin-bottom:6px;font-size:.98rem;}
   .expl .kw{display:inline-block;margin-top:8px;padding:4px 10px;border-radius:7px;
     background:rgba(242,177,52,.14);color:var(--gold);font-size:.8rem;font-weight:700;}
+  .expl .continue-hint{margin-top:12px;font-size:.78rem;color:var(--dim);text-align:right;}
+  #quiz-body.await-continue{cursor:pointer;}
   #result{display:none;text-align:center;}
   #result .score{font-size:2.4rem;color:var(--gold);font-weight:800;margin-top:8px;}
   #result .grade{font-size:1.1rem;margin:6px 0 2px;}
@@ -317,7 +319,7 @@ const Tutorial = (function(){
 })();
 
 let curQ=null, prevId=null, score=0, combo=0, maxCombo=0, correctCnt=0, wrongCnt=0;
-let timeLeft=TIME_LIMIT, timerInterval=null, isPlaying=false, nextTimer=null;
+let timeLeft=TIME_LIMIT, timerInterval=null, isPlaying=false;
 
 function drawQuestion(){
   let q;
@@ -340,8 +342,9 @@ function startQuiz(){
   showQ();
 }
 
+let awaitingContinue=false;
 function tick(){
-  if(!isPlaying) return;
+  if(!isPlaying || awaitingContinue) return;
   timeLeft=Math.max(0,timeLeft-1);
   updateTimeHud();
   if(timeLeft<=0) endQuiz();
@@ -381,23 +384,20 @@ function showQ(){
 }
 
 function pick(code,q){
-  if(!isPlaying) return;
+  if(!isPlaying || awaitingContinue) return;
   document.querySelectorAll('.tbtn').forEach(b=>{
-    b.disabled=true;
     if(b.dataset.code===q.type_code) b.classList.add('correct');
     else if(b.dataset.code===code) b.classList.add('wrong');
     else b.classList.add('dim');
   });
   const ok = code===q.type_code;
   const expl=document.getElementById('expl');
-  let delay;
   if(ok){
     combo++; correctCnt++; if(combo>maxCombo) maxCombo=combo;
     score+=100+(combo-1)*20;
     timeLeft=Math.min(TIME_MAX, timeLeft+20);
     expl.innerHTML=`<div class="verdict" style="color:var(--green)">정답! ${esc(q.type_full)}</div>${esc(q.explain||'')}`
       + (q.keyword?`<span class="kw">${esc(q.keyword)}</span>`:'');
-    delay=1100;
   }else{
     combo=0; wrongCnt++;
     timeLeft=Math.max(0, timeLeft-5);
@@ -408,16 +408,24 @@ function pick(code,q){
       correct:q.type_full, wrong:(code||'(선택 안 함)'),
       type:q.category
     });
-    delay=2000;
   }
+  expl.innerHTML += `<div class="continue-hint">터치하면 다음 문제로</div>`;
   updateTimeHud();
   expl.style.display='block';
-  clearTimeout(nextTimer);
-  nextTimer=setTimeout(()=>{
-    if(timeLeft<=0){ endQuiz(); return; }
-    curQ=drawQuestion();
-    showQ();
-  }, delay);
+  awaitingContinue=true;
+  const body=document.getElementById('quiz-body');
+  body.classList.add('await-continue');
+  setTimeout(()=>{ body.addEventListener('click', continueFromFeedback, {once:true}); }, 0);
+}
+
+function continueFromFeedback(){
+  if(!awaitingContinue) return;
+  awaitingContinue=false;
+  document.getElementById('quiz-body').classList.remove('await-continue');
+  if(!isPlaying) return;
+  if(timeLeft<=0){ endQuiz(); return; }
+  curQ=drawQuestion();
+  showQ();
 }
 
 function grade(rate){
@@ -432,7 +440,6 @@ async function endQuiz(){
   if(!isPlaying) return;
   isPlaying=false;
   clearInterval(timerInterval);
-  clearTimeout(nextTimer);
   if(window.WrongNote) await WrongNote.flush(GAME_ID);
   const answered=correctCnt+wrongCnt;
   const rate=answered?correctCnt/answered:0;
