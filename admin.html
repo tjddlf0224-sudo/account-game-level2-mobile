@@ -660,12 +660,20 @@ body{
           <div class="panel-body" style="overflow-x:auto;padding:0">
             <table class="student-table" id="student-table">
               <thead><tr>
-                <th style="padding-left:20px">학생</th>
-                <th>☁️ 산성비<span class="th-sub">10,500↑</span></th>
-                <th>🧩 기억의전당<span class="th-sub">3,500↑</span></th>
-                <th>⚡ 차변대변<span class="th-sub">2,310↑</span></th>
-                <th>🏭 조립공장<span class="th-sub">8,400↑</span></th>
-                <th>🛩 플라이트<span class="th-sub">38,500↑</span></th>
+                <th style="padding-left:20px">
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <span>학생</span>
+                    <select id="level-select" class="cert-select" onchange="setLevel(this.value)" onclick="event.stopPropagation()">
+                      <option value="2급">전산회계2급</option>
+                      <option value="1급">전산회계1급</option>
+                    </select>
+                  </div>
+                </th>
+                <th id="th-game-0"></th>
+                <th id="th-game-1"></th>
+                <th id="th-game-2"></th>
+                <th id="th-game-3"></th>
+                <th id="th-game-4"></th>
                 <th>📝 이론<span class="th-sub">정답률 60%↑</span></th>
                 <th>종합</th>
                 <th>합격</th>
@@ -757,15 +765,51 @@ window.addEventListener('resize',()=>{resize();initStars()});
 ══════════════════════════════════════════ */
 // max = 각 게임 '최고 직위' 점수(만점/숙달 기준). 진단 백분율(score/max)의 분모로 쓰임.
 // 등급 기준(getGradeForSupabase)의 최고 등급 점수와 일치시킬 것.
-const GAMES = [
+const GAMES_2GUP = [
   { id:'acid',    name:'산성비',    icon:'☁️', color:'var(--game1)', max:15000 },  // 👑 전설의 에이스
   { id:'memory',  name:'기억의전당', icon:'🧩', color:'var(--game2)', max:5000  },  // 👑 CEO
   { id:'debit',   name:'차변대변',  icon:'⚡', color:'var(--game3)', max:3300  },  // 👑 전설의 CFO
   { id:'factory', name:'조립공장',  icon:'🏭', color:'var(--game4)', max:12000 },  // 👑 결산 마스터
   { id:'flight',  name:'플라이트',  icon:'🛩', color:'var(--game5)', max:55000 },  // 👑 전설의 에이스
 ];
+// 1급 스테이지 5종 — max는 각 스테이지 파일의 실제 채점식 기준 만점(정답 시 만점 도달 가능한 값)
+//  cost_lv1: 100-감점 방식(최대 100) / capital_lv1: 분류5×10+분개5×20=150(파일 주석 확인)
+//  voucher_lv1: 기본 10문항×콤보보너스 완주 시 이론상 최대 1,900(100+120+...+280) / vat_lv1: 문항 14개×100
+//  alloc_lv1: 확인퀴즈 7문항×150
+const GAMES_LV1 = [
+  { id:'cost_lv1',    name:'원가의 길',   icon:'🏭',  color:'var(--game1)', max:100  },
+  { id:'capital_lv1', name:'자본의 제왕', icon:'👑',  color:'var(--game2)', max:150  },
+  { id:'voucher_lv1', name:'전표의 눈',   icon:'🧾',  color:'var(--game3)', max:1900 },
+  { id:'vat_lv1',     name:'신고의 문',   icon:'🏛️', color:'var(--game4)', max:1400 },
+  { id:'alloc_lv1',   name:'배관의 방',   icon:'🔧',  color:'var(--game5)', max:1050 },
+];
+let currentLevel = '2급';
+let GAMES = GAMES_2GUP;
+let THEORY_GAME_ID = 'theory';
 // 게임 클리어(합격) 기준: 만점의 70% 이상 — 점수 칸이 초록색(sc-high)으로 표시되는 기준과 동일
 const CLEAR_PCT = 70;
+
+/* ── 급수 전환(2급/1급) — 학생별 상세 분석 표 전체가 대상. 표가 그룹 종합랭킹·참여율
+   그래프·약점분석까지 하나의 GAMES 목록을 공유하는 구조라 학생 개별 전환은 종합점수
+   기준이 학생마다 달라져 정렬·비교가 깨짐 — 표 전체(헤더) 단위 토글로 결정함. ── */
+function renderStudentTableHead(){
+  GAMES.forEach((g,i) => {
+    const th = document.getElementById('th-game-'+i);
+    if(!th) return;
+    const threshold = Math.round(g.max * CLEAR_PCT / 100).toLocaleString();
+    th.innerHTML = `${g.icon} ${g.name}<span class="th-sub">${threshold}↑</span>`;
+  });
+}
+async function setLevel(lv){
+  currentLevel = lv;
+  GAMES = lv==='1급' ? GAMES_LV1 : GAMES_2GUP;
+  TOPIC_ORDER = lv==='1급' ? TOPIC_ORDER_LV1 : TOPIC_ORDER_2GUP;
+  THEORY_GAME_ID = lv==='1급' ? 'theory_lv1' : 'theory';
+  renderStudentTableHead();
+  if(!currentGid) return; // 그룹 선택 전
+  await Promise.all([loadTheoryWeak(currentGid), loadTheoryScores(currentGid)]);
+  if(dashData) renderDashboard(dashData);
+}
 
 /* ── 직급 재계산 (학생 화면과 동일한 기준) ──
    scores.grade 에 저장된 문자열을 그대로 쓰지 않고 점수로 다시 계산한다.
@@ -805,6 +849,9 @@ window.addEventListener('DOMContentLoaded', async () => {
   // 닉네임 표시
   const nick = localStorage.getItem('hub_nickname');
   document.getElementById('sb-nick').textContent = nick ? `👤 ${nick}` : '게스트';
+
+  // 학생별 상세 분석 표 헤더(급수 토글 기본값=2급) 초기 렌더
+  renderStudentTableHead();
 
   // 그룹 목록 로드
   await loadGroupNav();
@@ -1049,7 +1096,10 @@ async function loadDashboard() {
 ══════════════════════════════════════════ */
 let theoryWeakByTopic = {};   // topic → count (그룹 전체)
 let theoryWeakByStudent = {}; // name → { topic → count }
-const TOPIC_ORDER = ['회계의 기본원리','당좌자산','재고자산','유형자산','부채','자본','수익과 비용'];
+const TOPIC_ORDER_2GUP = ['회계의 기본원리','당좌자산','재고자산','유형자산','부채','자본','수익과 비용'];
+// 1급 이론뱅크(theory_bank_lv1.json)의 topicName 11종 그대로 — 2급보다 원가회계·부가세가 추가됨
+const TOPIC_ORDER_LV1 = ['회계 기초·재무제표','당좌자산','재고자산','유형자산·무형자산','부채','자본','수익·비용·결산','원가의 기초·원가행태','원가배분(부문별원가계산)','개별원가계산·종합원가계산','부가가치세'];
+let TOPIC_ORDER = TOPIC_ORDER_2GUP;
 
 let theoryScoreByStudent = {}; // name → { bestRate, plays, passed }
 // 이론 합격 기준: 정답률 60%(🥈 합격 가시권) 이상을 한 번이라도 달성 — theory.html의 grade() 등급과 동일
@@ -1059,7 +1109,7 @@ async function loadTheoryScores(gid) {
   theoryScoreByStudent = {};
   try {
     const { data, error } = await db.from('score_history')
-      .select('user_name,score,grade,correct,total').eq('group_id', gid).eq('game_id', 'theory').limit(5000);
+      .select('user_name,score,grade,correct,total').eq('group_id', gid).eq('game_id', THEORY_GAME_ID).limit(5000);
     if (error) throw error;
     (data || []).forEach(r => {
       const cur = theoryScoreByStudent[r.user_name] || { bestRate: 0, plays: 0, passed: false };
@@ -1076,7 +1126,7 @@ async function loadTheoryWeak(gid) {
   theoryWeakByTopic = {}; theoryWeakByStudent = {};
   try {
     const { data, error } = await db.from('wrong_answers')
-      .select('user_name,q_type').eq('group_id', gid).eq('game_id', 'theory').limit(5000);
+      .select('user_name,q_type').eq('group_id', gid).eq('game_id', THEORY_GAME_ID).limit(5000);
     if (error) throw error;
     (data || []).forEach(r => {
       const topic = r.q_type || '기타';
@@ -1375,7 +1425,9 @@ function openModal(name) {
 /* ══════════════════════════════════════════
    학생 성장 그래프 (score_history 시계열)
 ══════════════════════════════════════════ */
-const GROWTH_GAMES = GAMES.concat([{ id:'theory', name:'이론 객관식', icon:'📝', color:'var(--cy)' }]);
+function growthGames(){
+  return GAMES.concat([{ id:THEORY_GAME_ID, name:'이론 객관식', icon:'📝', color:'var(--cy)' }]);
+}
 
 async function loadStudentGrowth(name) {
   const body = document.getElementById('growth-body');
@@ -1406,7 +1458,7 @@ function renderStudentGrowth(rows) {
   const byGame = {};
   rows.forEach(r => { (byGame[r.game_id] = byGame[r.game_id] || []).push(r); });
 
-  const blocks = GROWTH_GAMES.filter(g => byGame[g.id] && byGame[g.id].length).map(g => {
+  const blocks = growthGames().filter(g => byGame[g.id] && byGame[g.id].length).map(g => {
     const arr = byGame[g.id];
     const scores = arr.map(r => r.score || 0);
     const n = scores.length;
@@ -1506,13 +1558,21 @@ function generateDiagnosis(name, student) {
 
   // 약점
   if (weakGames.length) {
-    const advice = {
+    const advice2gup = {
       acid:    '계정과목 암기 반복이 필요합니다. 산성비 게임을 더 플레이하게 하세요.',
       memory:  '계정과목과 의미 연결이 부족합니다. 기억의 전당으로 매핑 훈련을 권장합니다.',
       debit:   '차변·대변 구분 원리가 아직 불안정합니다. 분개 이론을 복습한 뒤 재도전을 권장합니다.',
       factory: '결산분개 조립이 약합니다. 결산 항목별 차·대변 규칙을 표로 정리해 주세요.',
       flight:  '장부조회 실전 감각이 부족합니다. 시험 기출문제와 병행 학습을 권장합니다.',
     };
+    const adviceLv1 = {
+      cost_lv1:    '제조원가 흐름(재료비·노무비·경비→재공품→제품) 정리가 약합니다. 원가의 길을 다시 플레이하며 T계정으로 자료를 재확인하게 하세요.',
+      capital_lv1: '계정과목 분류·분개 정확도가 부족합니다. 자본의 제왕으로 분류·분개 반복 훈련을 권장합니다.',
+      voucher_lv1: '매입매출전표 유형 구분이 아직 불안정합니다. 전표의 눈을 더 플레이하며 유형별 특징을 정리해 주세요.',
+      vat_lv1:     '부가가치세 신고서 작성 실전 감각이 부족합니다. 신고의 문 재도전과 함께 신고서 서식을 복습시키세요.',
+      alloc_lv1:   '보조부문원가 배분(직접·단계·상호배분법) 이해가 약합니다. 배관의 방으로 배분방법별 차이를 다시 확인하게 하세요.',
+    };
+    const advice = currentLevel==='1급' ? adviceLv1 : advice2gup;
     lines.push(`<br><br>⚠️ <strong>집중 보완 필요:</strong><br>${weakGames.map(g=>`• ${g.icon} <strong>${g.name}</strong>: ${advice[g.id]}`).join('<br>')}`);
   }
 
@@ -1528,11 +1588,11 @@ function generateDiagnosis(name, student) {
     lines.push(`<br><br>📝 <strong>이론 최다 오답 주제:</strong> ${escHTML(topTopic)}(${theoryTopics[topTopic]}건) — 이론 객관식에서 해당 주제 위주로 복습을 권장합니다.`);
   }
 
-  // 전산회계 2급 진단
+  // 전산회계 급수 진단
   const readiness = missing.length===0 && weakGames.length===0 ? '합격 가능성 높음 🟢'
     : missing.length===0 && weakGames.length<=1 ? '조금 더 보완 필요 🟡'
     : '추가 학습 필요 🔴';
-  lines.push(`<br><br>🎯 <strong>전산회계 2급 취득 준비도:</strong> ${readiness}`);
+  lines.push(`<br><br>🎯 <strong>전산회계 ${currentLevel} 취득 준비도:</strong> ${readiness}`);
 
   return lines.join('');
 }
