@@ -387,6 +387,8 @@ function renderStageMap(){
     clearBadge.style.display='flex';
     sub.textContent='클리어';
   } else {
+    node.classList.remove('done'); node.classList.add('cur');
+    clearBadge.style.display='none';
     sub.textContent = docs>0 ? `자료 ${docs}/${TOTAL_DOCS}` : '도전!';
   }
 
@@ -408,7 +410,8 @@ function renderStageMap(){
         clearBadge3.style.display='flex';
         sub3.textContent=`클리어 · ${s3Score}점`;
       } else {
-        node3.classList.add('cur');
+        node3.classList.remove('done'); node3.classList.add('cur');
+        clearBadge3.style.display='none';
         sub3.textContent='도전!';
       }
     } else {
@@ -434,7 +437,8 @@ function renderStageMap(){
         clearBadge4.style.display='flex';
         sub4.textContent=`클리어 · ${s4Score}점`;
       } else {
-        node4.classList.add('cur');
+        node4.classList.remove('done'); node4.classList.add('cur');
+        clearBadge4.style.display='none';
         sub4.textContent='도전!';
       }
     } else {
@@ -460,7 +464,8 @@ function renderStageMap(){
         clearBadge5.style.display='flex';
         sub5.textContent=`클리어 · ${s5Score}점`;
       } else {
-        node5.classList.add('cur');
+        node5.classList.remove('done'); node5.classList.add('cur');
+        clearBadge5.style.display='none';
         sub5.textContent='도전!';
       }
     } else {
@@ -486,7 +491,8 @@ function renderStageMap(){
         clearBadge6.style.display='flex';
         sub6.textContent=`클리어 · ${s6Score}점`;
       } else {
-        node6.classList.add('cur');
+        node6.classList.remove('done'); node6.classList.add('cur');
+        clearBadge6.style.display='none';
         sub6.textContent='도전!';
       }
     } else {
@@ -557,12 +563,26 @@ function onRewardedFailed() {
 /* 안드로이드 WebView 광고 배너 자리 확보용 (기존 화면들과 동일 시그니처) */
 function hideAdPlaceholder(){}
 
-/* 스테이지1 진행 데이터 초기화 — 계정/닉네임은 그대로 두고 서류철·클리어·연출 이벤트 기록만 지운다 */
+/* 전 스테이지(1~5) 진행 데이터 초기화 — 계정/닉네임은 그대로 두고 서류철·클리어·점수 기록만 지운다.
+   ⚠️ 스테이지1만 지우던 버그(스테이지3~6 파일이 나중에 추가됐는데 여긴 안 늘려놨었음) 수정 —
+   사용자 지적 + "2급은 초기화해도 게임이 안 잠긴다, 1급도 그래야 한다"는 결정에 따라, 리셋 직전에
+   열려있던 스테이지는 진행기록(점수·클리어)만 지우고 잠그지는 않는다(ad-unlock 플래그로 접근성 보존). */
 function resetLv1Progress(){
-  if(!confirm('스테이지1 진행 상황(서류철·클리어 기록)을 전부 초기화할까요?\n닉네임과 계정 정보는 그대로 유지됩니다.')) return;
-  localStorage.removeItem('lv1_s1_progress');
+  if(!confirm('전 스테이지(1~5)의 진행 상황(서류철·클리어·점수 기록)을 전부 초기화할까요?\n닉네임과 계정 정보는 그대로 유지되고, 이미 열려있던 스테이지는 계속 플레이할 수 있어요.')) return;
+  const clearedOf = key => { try{ return !!JSON.parse(localStorage.getItem(key)||'{}').cleared; }catch(e){ return false; } };
+  const s1Cleared = clearedOf('lv1_s1_progress');
+  const s3Cleared = clearedOf('lv1_s3_progress');
+  const s4Cleared = clearedOf('lv1_s4_progress');
+  const s5Cleared = clearedOf('lv1_s5_progress');
+  // 순차 언락 조건(renderStageMap과 동일 로직)으로 "리셋 직전 시점에 실제로 열려 있었는지" 판정
+  if(s1Cleared || localStorage.getItem('hub_adunlock_s3')==='1') localStorage.setItem('hub_adunlock_s3','1');
+  if(s3Cleared || localStorage.getItem('hub_adunlock_s4')==='1') localStorage.setItem('hub_adunlock_s4','1');
+  if(s4Cleared || localStorage.getItem('hub_adunlock_s5')==='1') localStorage.setItem('hub_adunlock_s5','1');
+  if(s5Cleared || localStorage.getItem('hub_adunlock_s6')==='1') localStorage.setItem('hub_adunlock_s6','1');
+  ['lv1_s1_progress','lv1_s3_progress','lv1_s4_progress','lv1_s5_progress','lv1_s6_progress']
+    .forEach(k=>localStorage.removeItem(k));
   renderStageMap();
-  alert('✅ 초기화됐어요. 스테이지1을 처음부터 다시 플레이할 수 있습니다.');
+  alert('✅ 초기화됐어요. 점수·클리어 기록은 지워지고, 이미 열려있던 스테이지는 계속 플레이할 수 있습니다.');
 }
 
 /* ── 계정 관리: 2급 허브(index.html)와 동일 로직 ── */
