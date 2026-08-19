@@ -169,6 +169,23 @@ body{ font-family:'Noto Sans KR',sans-serif; color:#fff; position:relative; touc
 .result-btn.primary{ background:rgba(255,214,0,0.18); border-color:rgba(255,214,0,0.5); }
 .result-btn:active{ transform:scale(0.96); }
 
+/* 시작 화면(게임 시작/사용방법/나가기) — 다른 스테이지들과 동일한 진입 흐름 */
+#start-overlay{ z-index:75; }
+#start-panel{
+  width:100%; max-width:420px; margin:0 auto; padding:30px 24px;
+  background:linear-gradient(180deg, rgba(20,16,34,0.98), rgba(8,6,16,0.99));
+  border:1px solid rgba(0,242,255,0.35); border-radius:20px;
+  box-shadow:0 0 50px rgba(0,242,255,0.12);
+  text-align:center;
+}
+#start-icon{ font-size:3rem; margin-bottom:6px; filter:drop-shadow(0 0 14px rgba(0,242,255,0.4)); }
+#start-title{ font-family:'Black Han Sans',sans-serif; font-size:1.6rem; color:#fff; margin-bottom:8px; text-shadow:0 0 20px rgba(0,242,255,0.3); }
+#start-desc{ font-size:0.82rem; color:rgba(255,255,255,0.55); line-height:1.6; margin-bottom:22px; }
+.start-btns{ display:flex; flex-direction:column; gap:10px; }
+.start-btn{ padding:14px; border-radius:50px; font-family:'Black Han Sans',sans-serif; font-size:0.92rem; cursor:pointer; border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.06); color:#fff; }
+.start-btn.primary{ background:rgba(0,242,255,0.18); border-color:rgba(0,242,255,0.5); }
+.start-btn:active{ transform:scale(0.96); }
+
 /* ── 조이스틱 ── */
 #stick-zone{
   position:absolute; left:0; bottom:0; width:46%; height:46%;
@@ -462,7 +479,7 @@ body{ font-family:'Noto Sans KR',sans-serif; color:#fff; position:relative; touc
 }
 
 /* ── 게임 방법 튜토리얼 ── */
-.tut{ display:none; position:fixed; inset:0; z-index:9999; flex-direction:column; background:#0a0a12; }
+.tut{ display:none; position:fixed; inset:0; z-index:9999; flex-direction:column; background:rgba(3,2,8,0.72); backdrop-filter:blur(2px); }
 .tut.show{ display:flex; animation:tutPop .25s ease; }
 @keyframes tutPop{ from{opacity:0;transform:scale(.97);} to{opacity:1;transform:scale(1);} }
 .tut-top{ display:flex; align-items:center; gap:9px; padding:calc(12px + env(safe-area-inset-top)) 18px 10px; }
@@ -501,8 +518,21 @@ body{ font-family:'Noto Sans KR',sans-serif; color:#fff; position:relative; touc
   <div class="hud-sp"></div>
   <div class="hud-btns">
     <button class="hbtn" onclick="Stage.openDocs()">서류철 <span class="n" id="doc-count">0/14</span></button>
-    <button class="hbtn" onclick="Tutorial.start()">📖 방법</button>
+    <button class="hbtn" onclick="Stage.quit()">그만</button>
     <button class="hbtn" onclick="Stage.exit()">나가기</button>
+  </div>
+</div>
+
+<div class="ov center" id="start-overlay">
+  <div id="start-panel">
+    <div id="start-icon">🏭</div>
+    <div id="start-title">원가의 길</div>
+    <div id="start-desc">원재료가 제품이 되는 공장을 직접 걸어다니며<br>제조원가의 흐름을 몸으로 익히는 스테이지예요.</div>
+    <div class="start-btns">
+      <button class="start-btn primary" onclick="StartScreen.play()">▶ 게임 시작</button>
+      <button class="start-btn" onclick="Tutorial.start()">📖 사용방법</button>
+      <button class="start-btn" onclick="Stage.exit()">🏠 나가기</button>
+    </div>
   </div>
 </div>
 
@@ -2222,6 +2252,10 @@ const Stage = {
     }
   },
 
+  /* "그만" — 이 스테이지는 탐험형이라 퀴즈처럼 "중간에 끊고 결과화면" 개념이 없고,
+     exit()가 이미 부분 점수 저장까지 다 하므로 그만/나가기 둘 다 같은 동작으로 통일. */
+  quit(){ this.exit(); },
+
   /* 중도 이탈 시 부분 점수 — 그때까지 모은 서류 개수 비율에서 NPC 퀴즈 오답을 감점.
      Stage.state.cleared는 건드리지 않으므로 허브 진행률 표시는 그대로 "미완주"로 남는다. */
   saveProgressScore(){
@@ -3099,10 +3133,24 @@ const Tutorial = (function(){
   return { start, close, next:nextBtn };
 })();
 
+/* ── 시작 화면 — 다른 스테이지들과 동일하게 "게임 시작"을 눌러야 조작이 풀린다.
+   World.loop()는 paused와 무관하게 항상 렌더링하므로(입력만 막힘), 시작화면 뒤로
+   맵·NPC·플레이어가 그대로 보여서 "사용방법"(Tutorial)을 눌러도 진짜 게임 화면
+   위에 데모가 겹쳐 보인다 — 이전엔 시작화면 자체가 없어서 겪던 "검은 화면"·
+   "NPC 안 보임" 문제가 이 구조에서 해결된다. ── */
+const StartScreen = {
+  play(){
+    document.getElementById('start-overlay').classList.remove('show');
+    World.paused = false;
+  },
+};
+
 /* ── 부팅 ── */
 Stage.load();
 lockLandscape();
 World.init();
+World.paused = true;
+document.getElementById('start-overlay').classList.add('show');
 
 // 첫 힌트는 잠시 뒤 사라짐
 setTimeout(()=>{ const h=document.getElementById('hint'); if(h) h.classList.add('hide'); }, 5200);
