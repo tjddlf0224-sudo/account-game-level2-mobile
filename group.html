@@ -513,6 +513,20 @@ body {
         style="margin-bottom:16px;"
       >
 
+      <label class="field-label" for="join-code-input">참여 코드 (선택)</label>
+      <input
+        class="text-input"
+        type="text"
+        id="join-code-input"
+        placeholder="예: 2026, 1교시 — 비워두면 자동 생성된 코드 사용"
+        maxlength="12"
+        autocomplete="off"
+        style="margin-bottom:0; text-transform:uppercase;"
+      >
+      <div style="font-size:0.75rem;color:rgba(255,255,255,0.3);margin-bottom:16px;padding-left:4px;margin-top:6px;">
+        학생들이 그룹 참여 화면에서 입력할 코드예요. 원하는 코드를 직접 정할 수 있어요.
+      </div>
+
       <label class="field-label" for="teacher-pass-input">대시보드 비밀번호 <span style="color:var(--pk)">*</span></label>
       <input
         class="text-input"
@@ -535,12 +549,12 @@ body {
 
       <!-- 생성 완료 결과 -->
       <div class="create-result" id="create-result">
-        <div class="result-label">GROUP CODE</div>
+        <div class="result-label">참여 코드</div>
         <div class="result-code" id="result-code">———</div>
         <div class="result-name" id="result-name">—</div>
         <div class="result-hint">
-          학생들에게 이 코드를 알려주거나<br>
-          그룹 참여에서 그룹명을 검색해 입장하게 하세요
+          학생들에게 이 코드를 알려주세요.<br>
+          그룹 참여 화면에서 이 코드를 입력하면 바로 참여돼요.
         </div>
         <button class="copy-btn" onclick="copyCode()">
           📋 코드 복사
@@ -681,11 +695,13 @@ async function createGroup() {
   const teacherName = document.getElementById('teacher-name-input').value.trim()
     || localStorage.getItem('hub_nickname') || '교수자';
   const teacherPass = document.getElementById('teacher-pass-input').value.trim();
+  const joinCode = document.getElementById('join-code-input').value.trim().toUpperCase();
 
   if (!groupName) { showStatus('create-status', '그룹명을 입력해주세요', 'err'); return; }
   if (groupName.length < 2) { showStatus('create-status', '2글자 이상 입력해주세요', 'err'); return; }
   if (!teacherPass) { showStatus('create-status', '대시보드 비밀번호를 설정해주세요', 'err'); return; }
   if (teacherPass.length < 4) { showStatus('create-status', '비밀번호는 4자 이상으로 설정해주세요', 'err'); return; }
+  if (joinCode && joinCode.length < 2) { showStatus('create-status', '참여 코드는 2글자 이상으로 설정해주세요', 'err'); return; }
 
   const btn = document.getElementById('create-btn');
   btn.disabled = true; btn.textContent = '생성 중...';
@@ -698,7 +714,8 @@ async function createGroup() {
       p_id: code,
       p_name: groupName,
       p_teacher_name: teacherName,
-      p_pass: teacherPass
+      p_pass: teacherPass,
+      p_join_code: joinCode || null
     });
     if (error && error.code === 'PGRST202') {
       // 폴백: 마이그레이션 이전 DB(RPC 없음) — 기존 직접 insert
@@ -707,13 +724,19 @@ async function createGroup() {
         name: groupName,
         teacher_name: teacherName,
         teacher_pass: teacherPass,
-        member_count: 0
+        member_count: 0,
+        join_code: joinCode || null
       }));
     }
 
     if (error) {
-      // 코드 충돌 시 재시도
       if (error.code === '23505') {
+        // 참여 코드를 직접 지정했는데 이미 쓰이고 있는 경우 — 재시도해도 소용없으니 다른 코드를 안내
+        if (error.message && error.message.includes('join code taken')) {
+          btn.disabled = false; btn.textContent = '✨ 그룹 생성하기';
+          showStatus('create-status', '이미 사용 중인 참여 코드예요. 다른 코드를 입력해주세요.', 'err'); return;
+        }
+        // 내부 그룹ID 충돌(6자리 랜덤) — 재시도하면 해결됨
         btn.disabled = false; btn.textContent = '✨ 그룹 생성하기';
         showStatus('create-status', '잠시 후 다시 시도해주세요', 'err'); return;
       }
@@ -726,12 +749,13 @@ async function createGroup() {
     document.getElementById('current-group-name').textContent = groupName;
     document.getElementById('current-group-bar').classList.add('show');
 
-    // 결과 표시
-    document.getElementById('result-code').textContent = code;
+    // 결과 표시 — 참여 코드를 지정했으면 그 코드를, 아니면 자동생성된 내부 코드를 보여준다
+    const shownCode = joinCode || code;
+    document.getElementById('result-code').textContent = shownCode;
     document.getElementById('result-name').textContent = `"${groupName}" · ${teacherName}`;
     document.getElementById('create-result').classList.add('show');
     showStatus('create-status', '✓ 그룹이 생성되었습니다! 코드를 학생들에게 공유하세요.', 'ok');
-    window._createdCode = code;
+    window._createdCode = shownCode;
 
   } catch(e) {
     showStatus('create-status', '오류가 발생했습니다. 다시 시도해주세요.', 'err');
@@ -775,9 +799,13 @@ async function joinGroup() {
   btn.disabled = true; btn.textContent = '참여 중...';
 
   try {
-    const { data, error } = await db
-      .from('groups').select('id,name').eq('id', code).single();
-    if (error || !data) throw new Error('그룹을 찾을 수 없습니다');
+    // 참여코드(join_code)로 우선 조회 — 아직 참여코드를 설정 안 한
+    // 예전 그룹은 기존 그룹ID로도 들어올 수 있게 폴백 유지
+    let { data } = await db.from('groups').select('id,name').eq('join_code', code).maybeSingle();
+    if (!data) {
+      ({ data } = await db.from('groups').select('id,name').eq('id', code).maybeSingle());
+    }
+    if (!data) throw new Error('그룹을 찾을 수 없습니다');
 
     localStorage.setItem('hub_group_id', data.id);
     localStorage.setItem('hub_group_name', data.name);

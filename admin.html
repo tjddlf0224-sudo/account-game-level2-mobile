@@ -513,6 +513,35 @@ body{
   transition: background 0.2s;
 }
 .pb-btn-cancel:hover { background: rgba(255,255,255,0.1); }
+/* 참여코드 설정 팝업 — 비밀번호 팝업과 동일한 톤, id만 분리 */
+#joincode-overlay {
+  display: none; position: fixed; inset: 0; z-index: 9999;
+  background: rgba(2,8,16,0.85); backdrop-filter: blur(8px);
+  align-items: center; justify-content: center;
+}
+#joincode-overlay.open { display: flex; }
+#joincode-box {
+  background: #0d1520; border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 20px; padding: 36px 32px; width: 100%; max-width: 360px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+  animation: fadeInUp 0.25s ease both;
+}
+#joincode-box .pb-desc {
+  font-size: 0.85rem; color: rgba(255,255,255,0.5); margin-bottom: 20px; line-height: 1.5;
+}
+#joincode-input {
+  width: 100%; background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12); border-radius: 12px;
+  padding: 14px 18px; font-size: 1rem; color: #fff; outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s; margin-bottom: 8px;
+  -webkit-appearance: none; text-transform: uppercase;
+}
+#joincode-input:focus { border-color: var(--cy); box-shadow: 0 0 0 3px rgba(0,242,255,0.12); }
+#joincode-err {
+  font-size: 0.78rem; color: var(--pk); min-height: 18px;
+  margin-bottom: 16px; padding-left: 2px; display: none;
+}
+#joincode-err.show { display: block; }
 .pb-btn-ok {
   flex: 2; padding: 13px;
   background: linear-gradient(135deg, var(--cy), var(--pu));
@@ -573,7 +602,7 @@ body{
       <div class="content-header">
         <div class="ch-left">
           <div class="content-header .ch-group-name" id="ch-group-name" style="font-family:'Black Han Sans',sans-serif;font-size:2rem;margin-bottom:4px">—</div>
-          <div class="ch-meta" id="ch-meta">교수자: — · 학생 —명 · 코드: —</div>
+          <div class="ch-meta" id="ch-meta">교수자: — · 학생 —명 · 참여코드: —</div>
         </div>
         <button class="refresh-btn" id="refresh-btn" onclick="loadDashboard()">
           <span class="ri">↻</span> 새로고침
@@ -880,7 +909,7 @@ async function loadGroupNav() {
   try {
     const { data, error } = await db
       .from('groups')
-      .select('id,name,teacher_name,member_count,created_at')
+      .select('id,name,teacher_name,member_count,created_at,join_code')
       .order('created_at', { ascending: false })
       .limit(200);
     if (error) throw error;
@@ -921,6 +950,7 @@ function filterSidebarGroups(q) {
 ══════════════════════════════════════════ */
 // 비밀번호 확인 중인 그룹 임시 저장
 let pendingGid = null;
+let verifiedPass = null; // 방금 검증한 비밀번호(탭 세션 한정) — 참여코드 설정 시 재입력 안 받으려고 보관
 
 async function selectGroup(gid) {
   const group = allGroups.find(g=>g.id===gid) || { id:gid, name:gid, teacher_name:'—', member_count:0 };
@@ -970,6 +1000,7 @@ async function confirmPass() {
     // ※ closePassPopup()이 pendingGid를 null로 만들므로 먼저 지역변수에 확보
     const gid = pendingGid;
     sessionStorage.setItem('verified_group', gid);
+    verifiedPass = input; // 참여코드 설정 팝업에서 비밀번호 재입력 없이 쓰기 위해 메모리에만 보관(탭 닫으면 사라짐)
     closePassPopup();
     const group = allGroups.find(g=>g.id===gid) || { id:gid, name:gid, teacher_name:'—' };
     enterGroup(gid, group);
@@ -982,6 +1013,57 @@ async function confirmPass() {
 function closePassPopup() {
   document.getElementById('pass-overlay').classList.remove('open');
   pendingGid = null;
+}
+
+/* ══════════════════════════════════════════
+   참여 코드 설정 — 아직 참여 코드가 없는 그룹(예전에 만든 그룹)에
+   들어가면 자동으로 뜬다. 이미 비밀번호 인증된 상태라 재입력 안 받고,
+   verifiedPass가 없는 예외 상황(새로고침 등)에서만 다시 물어본다.
+══════════════════════════════════════════ */
+function openJoinCodeModal() {
+  document.getElementById('joincode-group-name').textContent = currentGroup ? currentGroup.name : '—';
+  document.getElementById('joincode-input').value = '';
+  document.getElementById('joincode-err').classList.remove('show');
+  document.getElementById('joincode-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('joincode-input').focus(), 100);
+}
+function closeJoinCodeModal() {
+  document.getElementById('joincode-overlay').classList.remove('open');
+}
+async function confirmJoinCode() {
+  const code = document.getElementById('joincode-input').value.trim().toUpperCase();
+  const errEl = document.getElementById('joincode-err');
+  if (!code) { errEl.textContent = '참여 코드를 입력해주세요'; errEl.classList.add('show'); return; }
+  if (code.length < 2) { errEl.textContent = '2글자 이상 입력해주세요'; errEl.classList.add('show'); return; }
+
+  let pass = verifiedPass;
+  if (!pass) {
+    // 새로고침 등으로 비밀번호가 메모리에 없는 예외 상황만 재입력 요청
+    pass = prompt('대시보드 비밀번호를 다시 입력해주세요:');
+    if (pass === null) return;
+  }
+
+  try {
+    const { data: status, error } = await db.rpc('set_join_code', { p_group_id: currentGid, p_pass: pass, p_join_code: code });
+    if (error) throw error;
+    if (status === 'wrong_pass') {
+      errEl.textContent = '비밀번호가 일치하지 않습니다'; errEl.classList.add('show'); verifiedPass = null; return;
+    }
+    if (status === 'taken') {
+      errEl.textContent = '이미 사용 중인 참여 코드예요. 다른 코드를 입력해주세요.'; errEl.classList.add('show'); return;
+    }
+    if (status === 'invalid') {
+      errEl.textContent = '참여 코드 형식이 올바르지 않습니다'; errEl.classList.add('show'); return;
+    }
+    // 성공
+    if (currentGroup) currentGroup.join_code = code;
+    const g = allGroups.find(g => g.id === currentGid);
+    if (g) g.join_code = code;
+    closeJoinCodeModal();
+    updateHeaderMeta();
+  } catch (e) {
+    errEl.textContent = '오류가 발생했습니다. 다시 시도해주세요'; errEl.classList.add('show');
+  }
 }
 
 /* ══════════════════════════════════════════
@@ -1087,7 +1169,20 @@ function enterGroup(gid, group) {
   document.getElementById('empty-state').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
 
+  // 예전에 만든 그룹이라 참여 코드가 없으면 설정을 요청한다
+  if (!group.join_code) openJoinCodeModal();
+
   loadDashboard();
+}
+
+function updateHeaderMeta(studentCount) {
+  if (!currentGroup) return;
+  document.getElementById('ch-group-name').textContent = currentGroup.name;
+  const joinCode = currentGroup.join_code || currentGroup.id;
+  const parts = [`교수자: ${currentGroup.teacher_name||'—'}`];
+  if (studentCount != null) parts.push(`학생 ${studentCount}명`);
+  parts.push(`참여코드: ${joinCode}`);
+  document.getElementById('ch-meta').textContent = parts.join(' · ');
 }
 
 async function loadDashboard() {
@@ -1096,9 +1191,7 @@ async function loadDashboard() {
   btn.classList.add('spin'); btn.disabled = true;
 
   // 헤더 설정
-  document.getElementById('ch-group-name').textContent = currentGroup.name;
-  document.getElementById('ch-meta').textContent =
-    `교수자: ${currentGroup.teacher_name||'—'} · 코드: ${currentGroup.id}`;
+  updateHeaderMeta();
 
   // 로딩 표시 (tbody에는 tr, div에는 div — 잘못된 마크업 주입 방지)
   ['group-rank-body','student-table-body'].forEach(id =>
@@ -1265,8 +1358,7 @@ function renderDashboard(scores) {
   document.getElementById('sum-weak').textContent = weakGame ? `${weakGame.icon} ${weakGame.name}` : '—';
 
   // 인원수 업데이트
-  document.getElementById('ch-meta').textContent =
-    `교수자: ${currentGroup.teacher_name||'—'} · 학생 ${studentCount}명 · 코드: ${currentGroup.id}`;
+  updateHeaderMeta(studentCount);
 
   // ── 그룹 종합 랭킹 ──
   const ranked = studentNames.map(name => {
@@ -1750,6 +1842,22 @@ function hideAdPlaceholder(){}
     <div class="pb-btns">
       <button class="pb-btn-cancel" onclick="closePassPopup()">취소</button>
       <button class="pb-btn-ok" onclick="confirmPass()">🔓 확인</button>
+    </div>
+  </div>
+</div>
+<div id="joincode-overlay">
+  <div id="joincode-box">
+    <div class="pb-title">참여 코드 설정</div>
+    <div class="pb-name" id="joincode-group-name">—</div>
+    <div class="pb-desc">이 그룹은 아직 참여 코드가 없어요. 학생들이 그룹 참여 화면에서 입력할 코드를 정해주세요.</div>
+    <input type="text" id="joincode-input" placeholder="예: 2026, 1교시"
+      maxlength="12" autocomplete="off"
+      onkeydown="if(event.key==='Enter') confirmJoinCode()"
+    >
+    <div id="joincode-err"></div>
+    <div class="pb-btns">
+      <button class="pb-btn-cancel" onclick="closeJoinCodeModal()">나중에</button>
+      <button class="pb-btn-ok" onclick="confirmJoinCode()">설정</button>
     </div>
   </div>
 </div>
