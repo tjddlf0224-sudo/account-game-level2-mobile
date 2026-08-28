@@ -1356,6 +1356,10 @@ function handleLv2Pick(opt, btnEl){
         hapticWrong();
     }
     nextQTimer = setTimeout(()=>{
+        // 이 지연 시간 안에 라운드가 끝나버리면(그만/시간종료) 이미 결과화면에 반영된
+        // score/combo/correctCount를 뒤늦게 또 건드려서 화면 점수와 실제 저장 점수가
+        // 어긋나는 사고로 이어진다 — nextQuestion()의 기존 가드와 동일하게 여기도 막는다.
+        if (!isPlaying) return;
         document.getElementById('q-hint').textContent = '';
         lv2Round.idx++;
         if (lv2Round.idx < lv2Round.steps.length) {

@@ -890,6 +890,10 @@
         let roundWrongTotal = 0, roundMatchedTotal = 0;
         // 난이도2 전용 상태 — 뜻 카드 1개 + 계정과목 선택지
         let lv2Queue = [], lv2Idx = 0, lv2Locked = false;
+        // 카드/보기 판정의 setTimeout이 끝나기 전에 '그만'→'다시 하기'로 라운드가 바뀌면,
+        // 지난 라운드의 지연 콜백이 새 라운드의 matchedCount 등을 잘못 건드릴 수 있다.
+        // startGame()마다 값을 올려서, 각 콜백이 예약 당시의 라운드인지 확인하게 한다.
+        let roundToken = 0;
 
         const STAGES = [
             null,
@@ -1158,6 +1162,7 @@
             hideAdPlaceholder();
             LV = window.Difficulty ? Difficulty.get(GAME_ID) : 1;
             window._roundOver = false;   // 새 게임 — endGame 재허용
+            roundToken++;                // 지난 라운드의 지연 setTimeout 콜백을 전부 무효화
             document.getElementById('start-screen').style.display = 'none';
             document.getElementById('result-screen').style.display = 'none';
             const unlockEl = document.getElementById('lv-unlock-msg');
@@ -1312,7 +1317,9 @@
                 }
             }
 
+            const myToken = roundToken;
             setTimeout(() => {
+                if (myToken !== roundToken) return; // 그 사이 라운드가 새로 시작됨 — 무시
                 if (correct) { matchedCount++; matchesEl.innerText = matchedCount; }
                 lv2Idx++;
                 if (lv2Idx >= lv2Queue.length) {
@@ -1351,7 +1358,9 @@
             if (c1.dataset.id === c2.dataset.id) {
                 playSound('match');
                 hapticCorrect();
+                const myToken1 = roundToken;
                 setTimeout(() => {
+                    if (myToken1 !== roundToken) return; // 그 사이 라운드가 새로 시작됨 — 무시
                     c1.classList.add('matched'); c2.classList.add('matched');
                     seenCards.delete(c1); seenCards.delete(c2);
                     matchedCount++; matchesEl.innerText = matchedCount;
@@ -1375,7 +1384,9 @@
                 playSound('wrong');
                 hapticWrong();
                 c1.classList.add('wrong-flash'); c2.classList.add('wrong-flash');
+                const myToken2 = roundToken;
                 setTimeout(() => {
+                    if (myToken2 !== roundToken) return; // 그 사이 라운드가 새로 시작됨 — 무시
                     c1.classList.remove('flipped', 'wrong-flash');
                     c2.classList.remove('flipped', 'wrong-flash');
                     flippedCards = [];

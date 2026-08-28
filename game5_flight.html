@@ -940,6 +940,12 @@ const Game={
 
   gameOver(){
     this.state='gameover';
+    // 난이도2 장부조회 모달이 뜬 채로(state='reading') '그만'을 눌러 여기 들어온 경우,
+    // 모달을 안 닫으면 z-index가 더 높아 결과화면 위에 그대로 남아 화면을 막고,
+    // '확인' 버튼도 여전히 살아있어 누르면 게임이 조용히 재개돼버린다.
+    const ldgOverlay = document.getElementById('ldg-overlay');
+    if (ldgOverlay) ldgOverlay.classList.remove('show');
+    this._pendingLedger = null;
     if(window.Growth) Growth.logPlay(GAME_ID);
     if(window.WrongNote)WrongNote.flush('flight');
     BGM.stop();

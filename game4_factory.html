@@ -950,6 +950,9 @@ function handleSlotClick(side) {
     playSound('select');
     if (selectedParts[side]) { selectedParts[side].el.classList.remove('selected'); selectedParts[side] = null; }
     activeSlot = side; renderSlots();
+    // 난이도2: 계정 둘 다 고른 뒤 접어놨던 계정 버튼 그리드를, 슬롯을 지워 다시
+    // 골라야 할 때 복원하지 않으면 고를 버튼이 없어 그 문제가 막혀버린다.
+    if (LV === 2) els.partsContainer.style.display = '';
 }
 
 function handlePartClick(text, btnEl) {

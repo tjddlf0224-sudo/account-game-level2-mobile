@@ -1047,6 +1047,10 @@
 
     function handleWordClick(wordObj) {
         if (wordObj.isDead || !isPlaying || isPaused) return;
+        // 난이도2 — 분류 확인 대기 중에 다른 계정단어를 또 누르면 대기 중이던 첫 단어의
+        // 결과가 조용히 덮어써져 사라지는 문제 방지: 대기 중엔 새 계정단어 탭을 무시한다
+        // (단어는 죽은 처리 안 하고 그대로 둬서, 대기가 끝난 뒤 다시 누를 수 있게 한다).
+        if (LV === 2 && lv2Pending && wordObj.type === 'account') return;
         wordObj.isDead = true;
 
         const x = parseFloat(wordObj.el.style.left);
@@ -1260,6 +1264,11 @@
         activeWords.forEach(w => w.el.remove());
         document.body.classList.remove('danger-mode', 'fever-mode');
         els.board.classList.remove('frozen');
+        // 난이도2 분류확인 바가 뜬 채로 그만두면(광고 대기 등으로 결과화면 전환이 늦어질 때)
+        // 결과화면 위에 그대로 남아 보이던 문제 방지
+        lv2Pending = null;
+        const lv2Catbar = document.getElementById('lv2-catbar');
+        if (lv2Catbar) lv2Catbar.classList.remove('show');
         bgmStop(); // 🎵 게임 종료 시 BGM 페이드 아웃
 
         // 난이도2 해금 판정 — 이번 판 정답률이 기준(70%, 10문항 이상)을 넘기면 열린다
