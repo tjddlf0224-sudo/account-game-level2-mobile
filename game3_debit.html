@@ -493,6 +493,39 @@
             60%  { transform: translateX(6px); }
         }
 
+        /* ── 난이도 선택(시작화면) ── */
+        .diff-toggle { display: flex; gap: 8px; width: 100%; }
+        .diff-btn {
+            flex: 1; padding: 10px 8px; border-radius: 12px; border: 1.5px solid var(--border);
+            background: var(--panel); color: rgba(255,255,255,0.5);
+            font-family: 'Black Han Sans', sans-serif; font-size: 0.85rem; line-height: 1.5;
+            cursor: pointer; transition: all 0.15s; min-height: 48px;
+        }
+        .diff-btn.active { border-color: var(--green); background: rgba(0,230,118,0.12); color: var(--green); }
+        .diff-btn.locked { opacity: 0.45; }
+        .diff-hint { font-size: 0.72rem; color: rgba(255,255,255,0.35); text-align: center; }
+
+        .answer-buttons-area { display: none; flex-direction: column; align-items: center; gap: clamp(10px, 2.5vh, 24px); width: 100%; }
+        .answer-buttons-area.show { display: flex; }
+
+        /* ── 난이도2 — 차변/대변 계정·거래처코드·전표유형을 순서대로 묻는 영역 ── */
+        #lv2-area { display: none; width: 100%; flex-direction: column; align-items: center; gap: 12px; }
+        #lv2-area.show { display: flex; }
+        #lv2-progress {
+            font-family: 'Black Han Sans', sans-serif; font-size: 0.85rem; color: var(--gold);
+            background: rgba(255,214,0,0.12); border-radius: 50px; padding: 4px 18px;
+        }
+        #lv2-ask { font-family: 'Black Han Sans', sans-serif; font-size: clamp(1.05rem,3.5vw,1.35rem); color: #fff; text-align: center; }
+        #lv2-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+        .lv2-opt {
+            padding: 16px 10px; min-height: 58px; border: none; border-radius: 14px;
+            background: rgba(255,255,255,0.08); color: #fff; font-family: 'Black Han Sans', sans-serif;
+            font-size: clamp(0.95rem,3vw,1.15rem); cursor: pointer; transition: all 0.15s;
+        }
+        .lv2-opt:active { transform: scale(0.96); background: rgba(255,255,255,0.16); }
+        .lv2-opt.picked-ok { background: rgba(0,230,118,0.35); box-shadow: 0 0 0 2px var(--green); }
+        .lv2-opt.picked-no { background: rgba(255,45,85,0.35); box-shadow: 0 0 0 2px var(--red); }
+
         /* ── 모바일 전용 조정 ── */
         @media (max-width: 480px) {
             .key-hint { display: none; }
@@ -724,8 +757,10 @@
 
 <button id="rewarded-btn" onclick="requestRewarded()">⏱ +30초 광고 보기</button>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="auth.js"></script>
     <script src="wrongnote.js"></script>
     <script src="growth.js"></script>
+    <script src="difficulty.js"></script>
     <script src="review-prompt.js"></script>
 </head>
 <body>
@@ -775,6 +810,11 @@
             </div>
         </div>
 
+        <div class="diff-toggle" id="diff-toggle" style="max-width:340px;margin:4px auto 0;">
+            <button class="diff-btn" id="diff-btn-1" onclick="selectDifficulty(1)">난이도 1<br><span style="font-size:.72rem;opacity:.7">한쪽 계정만 선택</span></button>
+            <button class="diff-btn locked" id="diff-btn-2" onclick="selectDifficulty(2)">난이도 2 🔒<br><span style="font-size:.72rem;opacity:.7">전표를 통째로 완성</span></button>
+        </div>
+        <div class="diff-hint" id="diff-hint"></div>
         <div class="action-btns" style="align-items:stretch; margin-top:20px; gap:10px;">
             <button class="pill-btn pill-btn-gold" onclick="startGame()">▶ 게임 시작</button>
             <button class="btn-hub" onclick="openGuide()">📖 사용방법</button>
@@ -788,6 +828,7 @@
     <div class="overlay-inner">
         <div class="overlay-title">GAME OVER</div>
         <div id="result-rank" class="result-rank">최종 계급: 신입 사원</div>
+        <div id="lv-unlock-msg" style="display:none; font-family:'Black Han Sans',sans-serif; font-size:1rem; color:#000; background:linear-gradient(135deg,gold,#f39c12); border-radius:50px; padding:8px 22px; text-align:center;">🔓 난이도 2 해금! 이제 전표를 통째로 완성할 수 있어요</div>
         <div id="result-score" class="result-score">0점</div>
         <div class="result-stats">
             정답 <span id="stat-correct">0</span>개 &nbsp;|&nbsp;
@@ -895,6 +936,7 @@
             <div class="q-hint" id="q-hint"></div>
         </div>
 
+        <div class="answer-buttons-area" id="answer-buttons-area">
         <div class="answer-buttons">
             <button class="ans-btn ans-btn-left" onclick="handleAnswer('left')">
                 👈 차변
@@ -922,6 +964,14 @@
         <div class="key-hint">
             <div class="kbd"><span>A</span> 차변</div>
             <div class="kbd"><span>L</span> 대변</div>
+        </div>
+        </div>
+
+        <!-- 난이도2 — 차변/대변 계정·거래처코드·전표유형을 한 단계씩 완성 -->
+        <div class="lv2-area" id="lv2-area">
+            <div id="lv2-progress">1/3</div>
+            <div id="lv2-ask">차변 계정과목은?</div>
+            <div id="lv2-opts"></div>
         </div>
     </div>
 </div>
@@ -1066,10 +1116,71 @@ const questions = [
     { sentence: '건물에 감가상각을 반영하다 → <b class="target-account">감가상각누계액</b>', target: '감가상각누계액', type: 'right', hint: '감가상각누계액(자산차감) 증가 → 대변' },
 ];
 
+/* ═══════════════════════════════════════════════════════
+ *  난이도2 — 한쪽 계정만 맞히면 끝나던 방식에서 "전표 한 장 통째로
+ *  완성"으로 확장. 거래 하나당 ①차변 계정 ②대변 계정 ③(채권채무 계정일
+ *  때만) 거래처코드 ④전표유형(출금/입금/대체)을 순서대로 물어, 전부
+ *  맞혀야 정답 판정한다. 118회 기출 대조 분석 결과 일반전표(24점) 정답률이
+ *  37%였던 이유가 "계정과목 한쪽만 고르면 끝"이었기 때문 — 실제 시험은
+ *  차·대변 둘 다 + 거래처코드 + 전표유형까지 KcLep에 직접 입력해야 함.
+ *  전표유형 판정 규칙(단순화): 현금이 대변(현금 감소)=출금전표,
+ *  현금이 차변(현금 증가)=입금전표, 현금이 아예 없으면=대체전표.
+ * ═══════════════════════════════════════════════════════ */
+const ACCOUNT_POOL = [
+  '현금','보통예금','외상매출금','받을어음','단기대여금','상품','비품','차량운반구',
+  '외상매입금','미지급금','단기차입금','지급어음','예수금','선수금',
+  '급여','임차료','이자비용','통신비','복리후생비',
+  '상품매출','이자수익','임대료',
+];
+function shuffleArr(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function pickFakes(exclude, n){
+  const pool = ACCOUNT_POOL.filter(a=>!exclude.includes(a));
+  return shuffleArr(pool).slice(0, n);
+}
+const VENDOR_CODES = [
+  { name:'가나상사', code:'101' },
+  { name:'다라상사', code:'102' },
+  { name:'마바상사', code:'103' },
+  { name:'사아상사', code:'104' },
+];
+const entriesLv2 = [
+  { sentence:'상품 500,000원을 가나상사에 외상으로 매입하다', debitAcc:'상품', creditAcc:'외상매입금', vendor:'가나상사', vendorCode:'101', voucherType:'대체전표' },
+  { sentence:'상품 300,000원을 현금으로 매입하다', debitAcc:'상품', creditAcc:'현금', vendor:null, voucherType:'출금전표' },
+  { sentence:'다라상사에 상품 700,000원을 외상으로 판매하다', debitAcc:'외상매출금', creditAcc:'상품매출', vendor:'다라상사', vendorCode:'102', voucherType:'대체전표' },
+  { sentence:'상품 400,000원을 현금으로 판매하다', debitAcc:'현금', creditAcc:'상품매출', vendor:null, voucherType:'입금전표' },
+  { sentence:'가나상사에 대한 외상매입금 200,000원을 현금으로 지급하다', debitAcc:'외상매입금', creditAcc:'현금', vendor:'가나상사', vendorCode:'101', voucherType:'출금전표' },
+  { sentence:'다라상사의 외상매출금 350,000원을 현금으로 회수하다', debitAcc:'현금', creditAcc:'외상매출금', vendor:'다라상사', vendorCode:'102', voucherType:'입금전표' },
+  { sentence:'직원 급여 2,000,000원을 현금으로 지급하다', debitAcc:'급여', creditAcc:'현금', vendor:null, voucherType:'출금전표' },
+  { sentence:'은행에서 현금 5,000,000원을 단기로 차입하다', debitAcc:'현금', creditAcc:'단기차입금', vendor:null, voucherType:'입금전표' },
+  { sentence:'마바상사로부터 비품 1,200,000원을 외상으로 구입하다', debitAcc:'비품', creditAcc:'미지급금', vendor:'마바상사', vendorCode:'103', voucherType:'대체전표' },
+  { sentence:'다라상사로부터 받을어음 800,000원을 현금으로 회수하다', debitAcc:'현금', creditAcc:'받을어음', vendor:'다라상사', vendorCode:'102', voucherType:'입금전표' },
+  { sentence:'사무실 임차료 600,000원을 보통예금 계좌에서 이체 지급하다', debitAcc:'임차료', creditAcc:'보통예금', vendor:null, voucherType:'대체전표' },
+  { sentence:'보통예금 계좌에 이자수익 50,000원이 입금되다', debitAcc:'보통예금', creditAcc:'이자수익', vendor:null, voucherType:'대체전표' },
+  { sentence:'마바상사에 상품 900,000원 매입 대금으로 어음을 발행하다', debitAcc:'상품', creditAcc:'지급어음', vendor:'마바상사', vendorCode:'103', voucherType:'대체전표' },
+  { sentence:'상품 250,000원을 판매하고 대금을 현금으로 받다', debitAcc:'현금', creditAcc:'상품매출', vendor:null, voucherType:'입금전표' },
+];
+function buildLv2Steps(entry){
+  const steps = [];
+  steps.push({ ask:'차변 계정과목은?', correct:entry.debitAcc,
+    options: shuffleArr([entry.debitAcc, ...pickFakes([entry.debitAcc, entry.creditAcc], 3)]) });
+  steps.push({ ask:'대변 계정과목은?', correct:entry.creditAcc,
+    options: shuffleArr([entry.creditAcc, ...pickFakes([entry.debitAcc, entry.creditAcc], 3)]) });
+  if (entry.vendor) {
+    const otherCodes = VENDOR_CODES.filter(v=>v.code!==entry.vendorCode).map(v=>v.code);
+    steps.push({ ask:entry.vendor+'의 거래처코드는?', correct:entry.vendorCode,
+      options: shuffleArr([entry.vendorCode, ...shuffleArr(otherCodes).slice(0,3)]) });
+  }
+  steps.push({ ask:'이 거래의 전표유형은?', correct:entry.voucherType,
+    options: shuffleArr(['출금전표','입금전표','대체전표']) });
+  return steps;
+}
+
 // ══════════════════════════════════════
 // 게임 상태
 // ══════════════════════════════════════
 const GAME_TIME = 60;
+let LV = 1; // 1=한쪽 계정만 선택 / 2=전표 통째로 완성(difficulty.js로 해금)
+let lv2Round = null; // {entry, steps, idx, allOk}
 let score = 0, combo = 0, maxCombo = 0;
 let timeLeft = GAME_TIME;
 let timerInterval = null;
@@ -1114,6 +1225,9 @@ function startGame() {
     hideAdPlaceholder();
     getAudio();
     bgmPlay(); // 🎵 게임 시작 시 BGM 재생
+    LV = window.Difficulty ? Difficulty.get(GAME_ID) : 1;
+    document.getElementById('answer-buttons-area').classList.toggle('show', LV !== 2);
+    document.getElementById('lv2-area').classList.toggle('show', LV === 2);
     document.getElementById('start-screen').style.display = 'none';
     document.getElementById('result-screen').style.display = 'none';
     score = 0; combo = 0; maxCombo = 0;
@@ -1181,10 +1295,30 @@ function _drawQ(arr, last) {
     }
     return arr[_qBag.shift()];
 }
+let _eBag = []; // entriesLv2 전용 셔플백(questions와 배열 길이가 달라 _qBag과 공유하면 범위를 벗어난 인덱스를 뽑을 수 있음)
+function _drawEntry(arr, last) {
+    if (_eBag.length === 0) {
+        _eBag = arr.map((_, i) => i);
+        for (let i = _eBag.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [_eBag[i], _eBag[j]] = [_eBag[j], _eBag[i]]; }
+        if (_eBag.length > 1 && arr[_eBag[0]] === last) { [_eBag[0], _eBag[1]] = [_eBag[1], _eBag[0]]; }
+    }
+    return arr[_eBag.shift()];
+}
 function nextQuestion() {
     if (!isPlaying) return;
     nextQTimer = null;
     isLocked = false;
+    if (LV === 2) {
+        const entry = _drawEntry(entriesLv2, currentQ);
+        currentQ = entry;
+        lv2Round = { entry, steps: buildLv2Steps(entry), idx: 0, allOk: true };
+        document.getElementById('q-sentence').textContent = entry.sentence;
+        document.getElementById('q-ask').textContent = '';
+        document.getElementById('q-hint').textContent = '';
+        document.getElementById('question-card').className = 'question-card';
+        renderLv2Step();
+        return;
+    }
     currentQ = _drawQ(questions, currentQ);
     let q = currentQ;
     document.getElementById('q-sentence').innerHTML = q.sentence;
@@ -1193,9 +1327,78 @@ function nextQuestion() {
     document.getElementById('question-card').className = 'question-card';
 }
 
+function renderLv2Step(){
+    const step = lv2Round.steps[lv2Round.idx];
+    document.getElementById('lv2-progress').textContent = (lv2Round.idx+1)+'/'+lv2Round.steps.length;
+    document.getElementById('lv2-ask').textContent = step.ask;
+    const box = document.getElementById('lv2-opts');
+    box.innerHTML = '';
+    step.options.forEach(opt=>{
+        const b=document.createElement('button');
+        b.className='ans-btn lv2-opt'; b.textContent=opt;
+        b.addEventListener('click', ()=>handleLv2Pick(opt, b));
+        box.appendChild(b);
+    });
+}
+
+function handleLv2Pick(opt, btnEl){
+    if (!isPlaying || isLocked) return;
+    isLocked = true;
+    const step = lv2Round.steps[lv2Round.idx];
+    const wasFrozen = freezeLeft > 0; if (wasFrozen) { freezeLeft--; updateHUD(); }
+    const ok = (opt === step.correct);
+    document.querySelectorAll('#lv2-opts .lv2-opt').forEach(b=>b.style.pointerEvents='none');
+    if (ok) {
+        playSound('correct'); btnEl.classList.add('picked-ok'); hapticCorrect();
+    } else {
+        playSound('wrong'); lv2Round.allOk = false; btnEl.classList.add('picked-no');
+        document.getElementById('q-hint').textContent = '💡 정답: ' + step.correct;
+        hapticWrong();
+    }
+    nextQTimer = setTimeout(()=>{
+        document.getElementById('q-hint').textContent = '';
+        lv2Round.idx++;
+        if (lv2Round.idx < lv2Round.steps.length) {
+            isLocked = false;
+            renderLv2Step();
+        } else {
+            finishLv2Round(wasFrozen);
+        }
+    }, ok ? 350 : 900);
+}
+
+function finishLv2Round(wasFrozen){
+    const card = document.getElementById('question-card');
+    if (lv2Round.allOk) {
+        playSound('correct');
+        combo++; if (combo > maxCombo) maxCombo = combo;
+        score += 100 + Math.floor(combo * 10) + 100; // 난이도2는 전표 완성 보너스 +100
+        correctCount++;
+        card.classList.add('correct');
+        showFeedback('ok', combo >= 2 ? `✓ ${combo} COMBO!` : '✓ 전표 완성!');
+        if (combo >= 2) showCombo(combo);
+    } else {
+        combo = 0; wrongCount++;
+        if (!wasFrozen) timeLeft = Math.max(0, timeLeft - 5);
+        const e = lv2Round.entry;
+        if (window.WrongNote) WrongNote.add({ game:'debit', key:e.sentence, q:e.sentence,
+            correct:'(차)'+e.debitAcc+' / (대)'+e.creditAcc+(e.vendor?' / 거래처 '+e.vendor+'('+e.vendorCode+')':'')+' / '+e.voucherType,
+            wrong:'(항목 중 오답 포함)', type:'전표 입력(난이도2)' });
+        card.classList.add('wrong');
+        document.body.classList.add('shake');
+        showFeedback('no', '✗ 오답 (-5초)');
+    }
+    updateHUD();
+    nextQTimer = setTimeout(()=>{
+        card.classList.remove('correct','wrong');
+        document.body.classList.remove('shake');
+        nextQuestion();
+    }, lv2Round.allOk ? 400 : 800);
+}
+
 // 키보드 (데스크탑)
 document.addEventListener('keydown', e => {
-    if (!isPlaying) return;
+    if (!isPlaying || LV === 2) return; // 난이도2는 좌/우 고정 매핑이 없어 버튼 탭으로만 진행
     if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft')  handleAnswer('left');
     if (e.key === 'l' || e.key === 'L' || e.key === 'ArrowRight') handleAnswer('right');
 });
@@ -1204,7 +1407,7 @@ document.addEventListener('keydown', e => {
 let touchStartX = 0;
 document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
 document.addEventListener('touchend', e => {
-    if (!isPlaying) return;
+    if (!isPlaying || LV === 2) return; // 난이도2는 좌/우 고정 매핑이 없어 버튼 탭으로만 진행
     const dx = e.changedTouches[0].clientX - touchStartX;
     // 왼쪽 스와이프 = 차변(왼쪽 버튼), 오른쪽 스와이프 = 대변(오른쪽 버튼) — 버튼 배치와 일치
     if (Math.abs(dx) > 60) handleAnswer(dx < 0 ? 'left' : 'right');
@@ -1285,11 +1488,20 @@ function endGame() {
     clearInterval(timerInterval);
     hideRewardedBtn();
     bgmStop(); // 🎵 게임 종료 시 BGM 페이드 아웃
+
+    // 난이도2 해금 판정 — 이번 판 정답률이 기준(70%, 10문항 이상)을 넘기면 열린다
+    let justUnlocked = false;
+    if (window.Difficulty && LV === 1) {
+        justUnlocked = Difficulty.reportRound(GAME_ID, correctCount, correctCount + wrongCount);
+    }
+    const unlockEl = document.getElementById('lv-unlock-msg');
+    if (unlockEl) unlockEl.style.display = justUnlocked ? 'block' : 'none';
+
     document.getElementById('result-score').textContent = score.toLocaleString() + '점';
     document.getElementById('stat-correct').textContent = correctCount;
     document.getElementById('stat-wrong').textContent = wrongCount;
     document.getElementById('stat-combo').textContent = maxCombo;
-    document.getElementById('result-rank').textContent = '최종 계급: ' + getGrade(score);
+    document.getElementById('result-rank').textContent = '최종 계급: ' + getGrade(score) + (LV === 2 ? ' (난이도2)' : '');
     document.getElementById('player-name').value = localStorage.getItem('hub_nickname') || getMyName();
     showMyRank(document.getElementById('player-name').value || '나', score, { trackDelta: false }); // 랭킹 등록 전 예상 순위 미리보기
     document.getElementById('save-status').textContent = '';
@@ -1500,6 +1712,37 @@ const GRADE_TIERS = [
 function getGrade(score) {
     return (GRADE_TIERS.find(t => score >= t.min) || GRADE_TIERS[GRADE_TIERS.length - 1]).label;
 }
+
+// ── 난이도 선택 UI(시작화면) — difficulty.js(공통 모듈) 연동 ──
+function updateDiffBtns(lv) {
+    const b1 = document.getElementById('diff-btn-1'), b2 = document.getElementById('diff-btn-2');
+    if (b1) b1.classList.toggle('active', lv === 1);
+    if (b2) b2.classList.toggle('active', lv === 2);
+}
+function selectDifficulty(n) {
+    if (!window.Difficulty) return;
+    if (n === 2 && !Difficulty.isUnlocked(GAME_ID)) {
+        alert('난이도 1에서 정답률 ' + Math.round(Difficulty.UNLOCK_ACC * 100) + '% 이상(10문항 이상 플레이)을 달성하면 열려요!\n\n' + Difficulty.hint(GAME_ID));
+        return;
+    }
+    Difficulty.set(GAME_ID, n);
+    updateDiffBtns(n);
+}
+function initDiffUI() {
+    if (!window.Difficulty) return;
+    const unlocked = Difficulty.isUnlocked(GAME_ID);
+    const btn2 = document.getElementById('diff-btn-2');
+    if (btn2) {
+        btn2.classList.toggle('locked', !unlocked);
+        btn2.innerHTML = unlocked
+            ? '난이도 2<br><span style="font-size:.72rem;opacity:.7">전표를 통째로 완성</span>'
+            : '난이도 2 🔒<br><span style="font-size:.72rem;opacity:.7">전표를 통째로 완성</span>';
+    }
+    updateDiffBtns(Difficulty.get(GAME_ID));
+    const hint = document.getElementById('diff-hint');
+    if (hint) hint.textContent = Difficulty.hint(GAME_ID);
+}
+initDiffUI();
 
 
     // ══════════════════════════════════════
