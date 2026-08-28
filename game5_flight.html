@@ -1000,7 +1000,10 @@ const Game={
     document.getElementById('gs').style.display='none';
     const rb=document.getElementById('revive-btn'); if(rb) rb.style.display='none';
     // 부활 후 더 높은 점수를 다시 저장할 수 있도록 저장 UI 리셋
+    // (버튼만 다시 활성화하고 _saved 가드를 안 풀면, 부활 전 이미 저장한 적이 있을 때
+    //  saveScore()가 조용히 아무것도 안 하고 리턴해버려 부활 후 오른 점수가 영영 저장 안 됨)
     document.getElementById('savemsg').textContent='';
+    this._saved=false;
     const sb=document.getElementById('savebtn'); sb.disabled=false; sb.style.opacity='1';
     hideAdPlaceholder();
     // 화면 장애물 정리 + 플레이어 가운데로 (부활 직후 즉사 방지)
