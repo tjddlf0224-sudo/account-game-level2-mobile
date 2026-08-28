@@ -161,6 +161,43 @@
             border: 3px solid var(--accent);
         }
 
+        /* ── 난이도 선택(시작화면) ── */
+        .diff-toggle { display: flex; gap: 8px; width: 100%; max-width: 320px; margin: 4px auto 0; }
+        .diff-btn {
+            flex: 1; padding: 10px 8px; border-radius: 12px; border: 1.5px solid rgba(255,255,255,0.2);
+            background: rgba(0,0,0,0.25); color: rgba(255,255,255,0.5);
+            font-family: 'Jua', sans-serif; font-size: 0.85rem; line-height: 1.5;
+            cursor: pointer; transition: all 0.15s; min-height: 48px;
+        }
+        .diff-btn.active { border-color: var(--green); background: rgba(46,204,113,0.14); color: var(--green); }
+        .diff-btn.locked { opacity: 0.45; }
+        .diff-hint { font-size: 0.72rem; color: rgba(255,255,255,0.35); text-align: center; }
+
+        /* ── 난이도2 — 뜻을 보고 계정과목을 고르는 퀴즈 영역 ── */
+        #lv2-area { display: none; width: 100%; max-width: 420px; flex-direction: column; align-items: center; gap: 14px; padding: 4px 16px 20px; }
+        #lv2-area.show { display: flex; }
+        #lv2-progress {
+            font-family: 'Jua', sans-serif; font-size: 0.85rem; color: #f1c40f;
+            background: rgba(241,196,15,0.14); border-radius: 50px; padding: 4px 18px;
+        }
+        #lv2-card {
+            width: 100%; background: rgba(0,0,0,0.28); border: 3px solid var(--accent2);
+            border-radius: 16px; padding: 22px 18px; text-align: center;
+        }
+        #lv2-card-label { font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-bottom: 8px; letter-spacing: 2px; }
+        #lv2-desc { font-family: 'Jua', sans-serif; font-size: clamp(1.1rem,4vw,1.4rem); color: #fff; word-break: keep-all; line-height: 1.4; }
+        #lv2-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+        .lv2-opt-btn {
+            padding: 16px 10px; min-height: 58px; border: 3px solid var(--accent);
+            border-radius: 14px; background: var(--card-front); color: var(--text-color);
+            font-family: 'Jua', sans-serif; font-size: clamp(0.92rem,3vw,1.1rem);
+            cursor: pointer; transition: all 0.15s; word-break: keep-all;
+        }
+        .lv2-opt-btn:active { transform: scale(0.96); }
+        .lv2-opt-btn.lv2-correct { background: var(--green); border-color: var(--green); color: #fff; }
+        .lv2-opt-btn.lv2-wrong   { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+        .lv2-opt-btn:disabled { cursor: default; }
+
         /* 오버레이 */
         .overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -520,8 +557,10 @@
         }
         </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="auth.js"></script>
     <script src="wrongnote.js"></script>
     <script src="growth.js"></script>
+    <script src="difficulty.js"></script>
     <script src="review-prompt.js"></script>
 </head>
 <body>
@@ -551,6 +590,16 @@
 
     <div class="grid-container" id="grid"></div>
 
+    <!-- 난이도2 — 뜻 보고 계정과목 선택 -->
+    <div id="lv2-area">
+        <div id="lv2-progress">1 / 2</div>
+        <div id="lv2-card">
+            <div id="lv2-card-label">이 뜻을 가진 계정과목은?</div>
+            <div id="lv2-desc"></div>
+        </div>
+        <div id="lv2-opts"></div>
+    </div>
+
     <!-- 시작 화면 -->
     <div id="start-screen" class="overlay">
         <div class="overlay-inner">
@@ -558,9 +607,15 @@
             <p style="margin-bottom:6px;">계정과목과 그 설명이 짝꿍입니다.<br>
                예: <b style="color:var(--blue)">접대비</b> ↔ <b style="color:var(--accent)">거래처 선물</b><br><br>
                <span style="font-size:0.92rem;color:rgba(255,255,255,0.6)">
-                 Stage 1→4 단계 클리어마다 점수 누적<br>Stage 4 이후 2×5판 무한 반복 도전!<br>최고 합산점수로 랭킹!
+                 Stage 1→4 단계 클리어마다 점수 누적<br>Stage 4까지 모두 클리어하면 최종 점수 등록!<br>다시 도전해서 기록을 경신하세요!
                </span>
             </p>
+
+            <div class="diff-toggle" id="diff-toggle">
+                <button class="diff-btn" id="diff-btn-1" onclick="selectDifficulty(1)">난이도 1<br><span style="font-size:.72rem;opacity:.7">카드 뒤집어 짝 맞추기</span></button>
+                <button class="diff-btn locked" id="diff-btn-2" onclick="selectDifficulty(2)">난이도 2 🔒<br><span style="font-size:.72rem;opacity:.7">뜻 보고 계정과목 선택</span></button>
+            </div>
+            <div class="diff-hint" id="diff-hint"></div>
 
             <!-- 계급 기준표 -->
             <div style="
@@ -617,6 +672,8 @@
                 <div class="big-score" id="final-score">0점</div>
                 <div class="score-detail" id="score-detail">0점</div>
             </div>
+
+            <div id="lv-unlock-msg" style="display:none; font-family:'Jua',sans-serif; font-size:1rem; color:#000; background:linear-gradient(135deg,gold,#f39c12); border-radius:50px; padding:8px 22px; text-align:center; margin-top:2px;">🔓 난이도 2 해금! 이제 뜻만 보고 계정과목을 직접 골라야 해요</div>
 
             <!-- 스테이지 클리어 직급 미리보기 -->
             <div id="rank-preview-box" class="rank-preview-box" style="display:none;"></div>
@@ -828,6 +885,11 @@
         let seenCards = new Set();
         let timerInterval = null, startTime = 0, elapsedSeconds = 0;
         let stage = 1, totalScore = 0, usedPairIds = new Set();
+        let LV = 1; // 1=카드 뒤집어 짝맞추기 / 2=뜻 보고 계정과목 선택(difficulty.js로 해금)
+        // 라운드(Stage 1~MAX_STAGE) 전체 누적 — 난이도2 해금 판정(정답률)과 랭킹 저장용
+        let roundWrongTotal = 0, roundMatchedTotal = 0;
+        // 난이도2 전용 상태 — 뜻 카드 1개 + 계정과목 선택지
+        let lv2Queue = [], lv2Idx = 0, lv2Locked = false;
 
         const STAGES = [
             null,
@@ -999,6 +1061,37 @@
             }).join('');
         })();
 
+        // ── 난이도 선택 UI(시작화면) — difficulty.js(공통 모듈) 연동 ──
+        function updateDiffBtns(lv) {
+            const b1 = document.getElementById('diff-btn-1'), b2 = document.getElementById('diff-btn-2');
+            if (b1) b1.classList.toggle('active', lv === 1);
+            if (b2) b2.classList.toggle('active', lv === 2);
+        }
+        function selectDifficulty(n) {
+            if (!window.Difficulty) return;
+            if (n === 2 && !Difficulty.isUnlocked(GAME_ID)) {
+                alert('난이도 1에서 정답률 ' + Math.round(Difficulty.UNLOCK_ACC * 100) + '% 이상(10문항 이상 플레이)을 달성하면 열려요!\n\n' + Difficulty.hint(GAME_ID));
+                return;
+            }
+            Difficulty.set(GAME_ID, n);
+            updateDiffBtns(n);
+        }
+        function initDiffUI() {
+            if (!window.Difficulty) return;
+            const unlocked = Difficulty.isUnlocked(GAME_ID);
+            const btn2 = document.getElementById('diff-btn-2');
+            if (btn2) {
+                btn2.classList.toggle('locked', !unlocked);
+                btn2.innerHTML = unlocked
+                    ? '난이도 2<br><span style="font-size:.72rem;opacity:.7">뜻 보고 계정과목 선택</span>'
+                    : '난이도 2 🔒<br><span style="font-size:.72rem;opacity:.7">뜻 보고 계정과목 선택</span>';
+            }
+            updateDiffBtns(Difficulty.get(GAME_ID));
+            const hint = document.getElementById('diff-hint');
+            if (hint) hint.textContent = Difficulty.hint(GAME_ID);
+        }
+        initDiffUI();
+
         // ── 스테이지 클리어 직급 미리보기 ──
         function getRankPreviewInfo(score) {
             const tiers = RANK_TIERS;
@@ -1063,10 +1156,14 @@
         function startGame() {
             initAudio(); // ← AudioContext resume + BGM 시작
             hideAdPlaceholder();
+            LV = window.Difficulty ? Difficulty.get(GAME_ID) : 1;
             window._roundOver = false;   // 새 게임 — endGame 재허용
             document.getElementById('start-screen').style.display = 'none';
             document.getElementById('result-screen').style.display = 'none';
+            const unlockEl = document.getElementById('lv-unlock-msg');
+            if (unlockEl) unlockEl.style.display = 'none';
             stage = 1; totalScore = 0; usedPairIds = new Set();
+            roundWrongTotal = 0; roundMatchedTotal = 0;
             if (window.WrongNote) WrongNote.reset();
             resetStage();
         }
@@ -1080,12 +1177,16 @@
             const cfg = currentStageConfig();
             matchesEl.innerText = 0;
             document.getElementById('total-pairs').textContent = cfg.pairs;
-            document.getElementById('score-formula').textContent =
-                `Stage ${stage} (${cfg.cols}×${cfg.rows}) — 기본${cfg.baseScore}점 | 누적: ${totalScore}점`;
+            document.getElementById('score-formula').textContent = LV === 2
+                ? `Stage ${stage} (문제 ${cfg.pairs}개) — 기본${cfg.baseScore}점 | 누적: ${totalScore}점`
+                : `Stage ${stage} (${cfg.cols}×${cfg.rows}) — 기본${cfg.baseScore}점 | 누적: ${totalScore}점`;
             setupBoard(cfg);
         }
 
         function setupBoard(cfg) {
+            if (LV === 2) { setupLv2Board(cfg); return; }
+            grid.style.display = '';
+            document.getElementById('lv2-area').classList.remove('show');
             grid.innerHTML = '';
 
             let available = allPairs.filter(p => !usedPairIds.has(p.id));
@@ -1146,6 +1247,80 @@
             card.addEventListener('pointerup',   () => { pressing = false; });
             card.addEventListener('pointercancel',() => { pressing = false; });
             grid.appendChild(card);
+        }
+
+        // ── 난이도2 — 뜻 카드를 보고 계정과목을 4지선다로 고르기 ──
+        // 카드 위치를 외우는 게 아니라 매번 새 보기가 나오므로 위치암기가 통하지 않는다.
+        function setupLv2Board(cfg) {
+            grid.style.display = 'none';
+            document.getElementById('lv2-area').classList.add('show');
+
+            let available = allPairs.filter(p => !usedPairIds.has(p.id));
+            if (available.length < cfg.pairs) { usedPairIds = new Set(); available = [...allPairs]; }
+            let selected = [...available].sort(() => 0.5 - Math.random()).slice(0, cfg.pairs);
+            selected.forEach(p => usedPairIds.add(p.id));
+
+            lv2Queue = selected;
+            lv2Idx = 0;
+            if (!timerInterval) startTimer();
+            renderLv2Question();
+        }
+
+        function renderLv2Question() {
+            const p = lv2Queue[lv2Idx];
+            document.getElementById('lv2-progress').textContent = `${lv2Idx + 1} / ${lv2Queue.length}`;
+            document.getElementById('lv2-desc').textContent = p.b;
+
+            const pool = allPairs.filter(x => x.id !== p.id);
+            const fakes = [...pool].sort(() => 0.5 - Math.random()).slice(0, 3);
+            const options = [...fakes.map(f => f.a), p.a].sort(() => 0.5 - Math.random());
+
+            const wrap = document.getElementById('lv2-opts');
+            wrap.innerHTML = '';
+            options.forEach(optText => {
+                const btn = document.createElement('button');
+                btn.className = 'lv2-opt-btn';
+                btn.textContent = optText;
+                btn.addEventListener('click', () => handleLv2Pick(btn, optText, p));
+                wrap.appendChild(btn);
+            });
+            lv2Locked = false;
+        }
+
+        function handleLv2Pick(btn, picked, pair) {
+            if (lv2Locked) return;
+            lv2Locked = true;
+            const correct = picked === pair.a;
+            const allBtns = document.querySelectorAll('#lv2-opts .lv2-opt-btn');
+            allBtns.forEach(b => { b.disabled = true; });
+
+            if (correct) {
+                playSound('match');
+                hapticCorrect();
+                btn.classList.add('lv2-correct');
+            } else {
+                playSound('wrong');
+                hapticWrong();
+                btn.classList.add('lv2-wrong');
+                wrongCount++;
+                movesEl.innerText = wrongCount;
+                allBtns.forEach(b => { if (b.textContent === pair.a) b.classList.add('lv2-correct'); });
+                if (window.WrongNote) {
+                    WrongNote.add({ game:'memory', key:pair.a,
+                        q:'"'+pair.b+'" 의 뜻을 가진 계정과목은?',
+                        correct:pair.a, wrong:picked, type:'계정과목 뜻(선택형)' });
+                }
+            }
+
+            setTimeout(() => {
+                if (correct) { matchedCount++; matchesEl.innerText = matchedCount; }
+                lv2Idx++;
+                if (lv2Idx >= lv2Queue.length) {
+                    endGame();
+                } else {
+                    renderLv2Question();
+                }
+            }, correct ? 500 : 900);
         }
 
         function flipCard() {
@@ -1226,46 +1401,72 @@
                 ? `포기(${matchedCount}/${cfg.pairs}쌍) — 기본${Math.round(cfg.baseScore*(matchedCount/cfg.pairs))} - 오답${wrongCount}×20 - ${secs}초×0.5 = ${Math.round(stageScore)}점`
                 : `기본${cfg.baseScore} - 오답${wrongCount}×20 - ${secs}초×0.5 = +${stageScore}점`;
 
+            // 라운드(Stage 1~MAX_STAGE) 누적 — 난이도2 해금 판정용 정답률 계산에 사용
+            roundWrongTotal += wrongCount;
+            roundMatchedTotal += matchedCount;
+
+            function reportDifficultyAndUpdateBanner() {
+                const unlockEl = document.getElementById('lv-unlock-msg');
+                if (!window.Difficulty) { if (unlockEl) unlockEl.style.display = 'none'; return; }
+                const justUnlocked = LV === 1
+                    ? Difficulty.reportRound(GAME_ID, roundMatchedTotal, roundMatchedTotal + roundWrongTotal)
+                    : false;
+                if (unlockEl) unlockEl.style.display = justUnlocked ? 'block' : 'none';
+            }
+
             if (quit) {
                 requestInterstitialIfNeeded(function() {
+                    reportDifficultyAndUpdateBanner();
                     showResult(totalScore + Math.round(stageScore), true, detail);
                 });
-            } else {
-                const clearedStage = stage;
-                requestStageInterstitialIfNeeded(clearedStage, function () {
-                    playSound('clear');
-                    totalScore += stageScore;
-                    document.querySelector('#result-screen h2').textContent = `Stage ${clearedStage} CLEAR! 🎉`;
-                    document.getElementById('result-rank').textContent = `+${stageScore}점 획득!`;
-                    document.getElementById('result-rank').style.color = '#2ecc71';
-                    const isEndless = clearedStage >= MAX_STAGE;
-                    document.getElementById('result-msg').textContent = isEndless
-                        ? `누적 점수: ${totalScore}점 — 계속 도전!`
-                        : `누적 점수: ${totalScore}점 — 다음 스테이지로!`;
-                    document.getElementById('final-score').textContent = totalScore + '점';
-                    document.getElementById('score-detail').textContent = detail;
-                    // 원탭 랭킹 등록: 허브 닉네임 자동 사용, 없으면 입력칸 노출
-                    const prefillName = (localStorage.getItem('hub_nickname') || getMyName() || '').trim();
-                    document.getElementById('player-name').value = prefillName;
-                    document.querySelector('.name-row').style.display = prefillName ? 'none' : 'flex';
-                    const stEl = document.getElementById('save-status');
-                    stEl.textContent = ''; stEl.className = 'status-msg'; stEl.style.display = 'block';
-                    // 다른 게임들과 동일한 정확한 랭킹 위젯 사용 (구 미니랭킹의 "20위 밖은 항상 21위" 근사치 버그 제거)
-                    document.getElementById('rank-preview-box').style.display = 'none';
-                    document.getElementById('mini-rank-wrap').style.display = 'none';
-                    document.querySelector('.rank-wrap').style.display = '';
-                    showMyRank(prefillName || '나', totalScore, { trackDelta: false });
-                    loadRanking();
-                    const stageSaveBtn = document.getElementById('stage-save-btn');
-                    stageSaveBtn.style.display = 'inline-block';
-                    stageSaveBtn.disabled = false;
-                    stageSaveBtn.textContent = '🏆 랭킹 등록하기';
-                    document.getElementById('result-screen').style.display = 'flex';
-                    document.getElementById('next-stage-btn').style.display = 'inline-block';
-                    document.getElementById('next-stage-btn').textContent = isEndless ? '계속 도전 ▶' : '다음 스테이지 ▶';
-                    document.getElementById('restart-btn').style.display = 'none';
-                });
+                return;
             }
+
+            const clearedStage = stage;
+
+            // Stage MAX_STAGE 클리어 = 라운드 종료. 예전엔 여기서 stage를 계속 늘리며
+            // 무한 반복이 가능해서(20,055점=약 40회 반복 사례) 점수가 실력과 무관하게
+            // "오래 붙어있으면 이기는" 구조였다 — 여기서 라운드를 확정 종료해 무한누적을 없앤다.
+            if (clearedStage >= MAX_STAGE) {
+                totalScore += stageScore;
+                requestInterstitialIfNeeded(function () {
+                    playSound('clear');
+                    reportDifficultyAndUpdateBanner();
+                    showResult(totalScore, false, `Stage 1~${MAX_STAGE} 누적 — 오답 ${roundWrongTotal}회 · ${secs}초`);
+                });
+                return;
+            }
+
+            requestStageInterstitialIfNeeded(clearedStage, function () {
+                playSound('clear');
+                totalScore += stageScore;
+                document.querySelector('#result-screen h2').textContent = `Stage ${clearedStage} CLEAR! 🎉`;
+                document.getElementById('result-rank').textContent = `+${stageScore}점 획득!`;
+                document.getElementById('result-rank').style.color = '#2ecc71';
+                document.getElementById('result-msg').textContent = `누적 점수: ${totalScore}점 — 다음 스테이지로!`;
+                document.getElementById('final-score').textContent = totalScore + '점';
+                document.getElementById('score-detail').textContent = detail;
+                // 원탭 랭킹 등록: 허브 닉네임 자동 사용, 없으면 입력칸 노출
+                const prefillName = (localStorage.getItem('hub_nickname') || getMyName() || '').trim();
+                document.getElementById('player-name').value = prefillName;
+                document.querySelector('.name-row').style.display = prefillName ? 'none' : 'flex';
+                const stEl = document.getElementById('save-status');
+                stEl.textContent = ''; stEl.className = 'status-msg'; stEl.style.display = 'block';
+                // 다른 게임들과 동일한 정확한 랭킹 위젯 사용 (구 미니랭킹의 "20위 밖은 항상 21위" 근사치 버그 제거)
+                document.getElementById('rank-preview-box').style.display = 'none';
+                document.getElementById('mini-rank-wrap').style.display = 'none';
+                document.querySelector('.rank-wrap').style.display = '';
+                showMyRank(prefillName || '나', totalScore, { trackDelta: false });
+                loadRanking();
+                const stageSaveBtn = document.getElementById('stage-save-btn');
+                stageSaveBtn.style.display = 'inline-block';
+                stageSaveBtn.disabled = false;
+                stageSaveBtn.textContent = '🏆 랭킹 등록하기';
+                document.getElementById('result-screen').style.display = 'flex';
+                document.getElementById('next-stage-btn').style.display = 'inline-block';
+                document.getElementById('next-stage-btn').textContent = '다음 스테이지 ▶';
+                document.getElementById('restart-btn').style.display = 'none';
+            });
         }
 
         function showResult(finalScore, quit, detail) {
@@ -1284,7 +1485,7 @@
             const allClear = finalScore >= targetScore;
             document.querySelector('#result-screen h2').textContent =
                 gaveUp ? '포기... 😢' : (allClear ? 'ALL CLEAR! 🏆' : '게임 종료! 🏁');
-            document.getElementById('result-rank').textContent = rank.title;
+            document.getElementById('result-rank').textContent = rank.title + (LV === 2 ? ' · 난이도2' : '');
             document.getElementById('result-rank').style.color = rank.color;
             document.getElementById('result-msg').innerHTML = gaveUp
                 ? `${rank.msg}<br>지금까지의 점수로 랭킹 등록 가능!` : rank.msg;
@@ -1361,7 +1562,7 @@
 
             const score = parseInt(document.getElementById('final-score').textContent) || 0;
             const today = new Date().toLocaleDateString('ko-KR', {month:'2-digit', day:'2-digit'});
-            const data  = { game: GAME_ID, name, score, combo: stage, correct: matchedCount, date: today };
+            const data  = { game: GAME_ID, name, score, combo: stage, correct: roundMatchedTotal, date: today };
             _lsave(data);
             saveMyName(name);
             showStatus('저장 중...', '');
@@ -1790,7 +1991,7 @@ const GUIDE_STEPS = [
   {
     img: 'guide/g2_4_stage.png',
     title: '🏆 스테이지 & 누적 점수',
-    desc: '점수는 <b>기본점수 − (오답×20) − (걸린초×0.5)</b>로 계산돼요. 스테이지가 클리어될 때마다 <b>점수가 누적</b>됩니다.<br><b>Stage 1→4</b>까지 점점 카드가 많아지고, Stage 4 이후엔 <b>2×5판(10장) 무한 반복</b>으로 점수를 더 쌓을 수 있어요!'
+    desc: '점수는 <b>기본점수 − (오답×20) − (걸린초×0.5)</b>로 계산돼요. 스테이지가 클리어될 때마다 <b>점수가 누적</b>됩니다.<br><b>Stage 1→4</b>까지 점점 카드가 많아지고, <b>Stage 4를 클리어하면 그 라운드는 종료</b>! 다시 도전해서 최고 기록을 경신하세요.<br><br>난이도1에서 정답률 70% 이상(10문항+)을 달성하면 <b>난이도2</b>가 열려요 — 카드 없이 <b>뜻만 보고 계정과목을 직접 골라야</b> 해서 위치를 외워서는 풀 수 없어요!'
   },
   {
     img: 'guide/g2_5_reward.png',
