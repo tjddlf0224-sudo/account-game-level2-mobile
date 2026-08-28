@@ -378,6 +378,38 @@
 
         
 
+        /* ── 난이도 선택(시작화면) ── */
+        .diff-toggle { display: flex; gap: 8px; width: 100%; max-width: 320px; margin: 4px auto 0; }
+        .diff-btn {
+            flex: 1; padding: 10px 8px; border-radius: 12px; border: 1.5px solid var(--border);
+            background: var(--panel); color: rgba(255,255,255,0.5);
+            font-family: 'Jua', sans-serif; font-size: 0.85rem; line-height: 1.5;
+            cursor: pointer; transition: all 0.15s; min-height: 48px;
+        }
+        .diff-btn.active { border-color: var(--neon-green); background: rgba(46,204,113,0.14); color: var(--neon-green); }
+        .diff-btn.locked { opacity: 0.45; }
+        .diff-hint { font-size: 0.72rem; color: rgba(255,255,255,0.35); text-align: center; }
+
+        /* ── 난이도2 — 정답 단어를 탭하면 잠깐 멈추고 분류(자산/부채/자본/수익/비용)를 마저 고르는 바 ── */
+        #lv2-catbar {
+            display: none; position: absolute; left: 0; right: 0; bottom: 0; z-index: 60;
+            background: rgba(0,0,0,0.88); backdrop-filter: blur(6px);
+            padding: 14px 14px calc(14px + env(safe-area-inset-bottom));
+            flex-direction: column; align-items: center; gap: 10px;
+            border-top: 2px solid var(--neon-gold);
+        }
+        #lv2-catbar.show { display: flex; }
+        #lv2-cat-word { font-family: 'Jua', sans-serif; font-size: 1.1rem; color: #fff; text-align: center; }
+        #lv2-cat-word b { color: var(--neon-gold); }
+        #lv2-cat-btns { display: grid; grid-template-columns: repeat(5,1fr); gap: 6px; width: 100%; max-width: 480px; }
+        #lv2-cat-btns button {
+            padding: 10px 4px; border: none; border-radius: 10px; background: rgba(255,255,255,0.1);
+            color: #fff; font-family: 'Jua', sans-serif; font-size: 0.92rem; cursor: pointer; min-height: 50px;
+        }
+        #lv2-cat-btns button:active { transform: scale(0.94); background: rgba(255,255,255,0.2); }
+        #lv2-cat-btns button.picked-ok { background: var(--neon-green); color: #021018; }
+        #lv2-cat-btns button.picked-no { background: var(--neon-red); color: #fff; }
+
         /* ── 공통 애니메이션 ── */
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
         .shake { animation: shake 0.4s; }
@@ -603,8 +635,10 @@
 
 <button id="rewarded-btn" onclick="requestRewarded()">⏱ +15초 광고 보기</button>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="auth.js"></script>
     <script src="wrongnote.js"></script>
     <script src="growth.js"></script>
+    <script src="difficulty.js"></script>
     <script src="review-prompt.js"></script>
 </head>
 <body>
@@ -633,6 +667,17 @@
         <div class="status-badge combo-box" id="combo-display">🔥 0 Combo</div>
         <div class="status-badge score-box">💎 <span id="score">0</span></div>
     </div>
+    <!-- 난이도2 — 정답 단어를 탭하면 잠깐 멈추고 분류를 마저 고른다 -->
+    <div id="lv2-catbar">
+        <div id="lv2-cat-word"></div>
+        <div id="lv2-cat-btns">
+            <button data-cat="자산" onclick="pickCategory('자산')">자산</button>
+            <button data-cat="부채" onclick="pickCategory('부채')">부채</button>
+            <button data-cat="자본" onclick="pickCategory('자본')">자본</button>
+            <button data-cat="수익" onclick="pickCategory('수익')">수익</button>
+            <button data-cat="비용" onclick="pickCategory('비용')">비용</button>
+        </div>
+    </div>
 </div>
 
 <!-- 시작 화면 -->
@@ -659,6 +704,12 @@
         <!-- GRADE_TIERS(단일 소스)에서 렌더링 -->
         <div id="grade-table"></div>
     </div>
+
+    <div class="diff-toggle" id="diff-toggle">
+        <button class="diff-btn" id="diff-btn-1" onclick="selectDifficulty(1)">난이도 1<br><span style="font-size:.72rem;opacity:.7">계정과목만 구분</span></button>
+        <button class="diff-btn locked" id="diff-btn-2" onclick="selectDifficulty(2)">난이도 2 🔒<br><span style="font-size:.72rem;opacity:.7">분류까지 맞히기</span></button>
+    </div>
+    <div class="diff-hint" id="diff-hint"></div>
 
     <div class="action-btns" style="align-items:stretch; margin-top:20px; gap:10px;">
         <button class="big-btn" onclick="startGame()">게임 시작 ▶</button>
@@ -694,6 +745,7 @@
   <div class="overlay-inner">
     <h2>GAME OVER</h2>
     <p id="final-rank" style="color:var(--neon-blue); font-weight:bold; font-size:1.2rem; margin:0;">계급: 인턴</p>
+    <div id="lv-unlock-msg" style="display:none; font-family:'Jua',sans-serif; font-size:1rem; color:#000; background:linear-gradient(135deg,gold,#f39c12); border-radius:50px; padding:8px 22px; text-align:center; margin-top:8px;">🔓 난이도 2 해금! 이제 분류까지 맞혀야 점수가 들어가요</div>
     <div id="final-score">0점</div>
 
     <div class="save-row">
@@ -842,6 +894,8 @@
     ];
 
     // ── 게임 상태 ──
+    let LV = 1; // 1=계정과목만 구분 / 2=분류(자산/부채/자본/수익/비용)까지 맞히기(difficulty.js로 해금)
+    let lv2Pending = null; // {wordObj, x, y, category} — 분류 확인 대기 중인 단어
     let score = 0, combo = 0, maxCombo = 0, correctCount = 0, timeLeft = 30;
     let gameLoopId = null, spawnTimerId = null, countdownTimerId = null;
     let activeWords = [], isPlaying = false, isPaused = false;
@@ -869,10 +923,13 @@
     function startGame() {
         initAudio(); // ← AudioContext resume + BGM 시작
         hideAdPlaceholder();
+        LV = window.Difficulty ? Difficulty.get(GAME_ID) : 1;
         els.start.style.display = 'none'; els.result.style.display = 'none';
         isPlaying = true; isPaused = false;
         score = 0; combo = 0; maxCombo = 0; correctCount = 0; timeLeft = 30;
         activeWords = []; wrongLog = []; freezeTime = 0; isFever = false;
+        lv2Pending = null;
+        document.getElementById('lv2-catbar').classList.remove('show');
         if (window.WrongNote) WrongNote.reset();
         document.body.classList.remove('danger-mode', 'fever-mode');
         els.board.classList.remove('frozen');
@@ -1012,6 +1069,15 @@
             playSound('item'); timeLeft += 10;
             showFloatingText(x, y, "💊 HP +10", "#2ecc71"); wordObj.el.remove();
         } else if (wordObj.type === 'account') {
+            wordObj.el.classList.add('word-correct', 'hit-effect');
+            if (LV === 2) {
+                // 난이도2 — 계정과목인 것까진 맞혔지만, 잠깐 멈추고 분류(자산/부채/자본/수익/비용)를
+                // 마저 골라야 점수가 들어간다. 얼음 아이템과 같은 freezeTime 메커니즘을 그대로 재사용.
+                setTimeout(() => wordObj.el.remove(), 200);
+                startCategoryCheck(wordObj, x, y);
+                updateUI();
+                return;
+            }
             playSound('correct'); combo++;
             if (combo > maxCombo) maxCombo = combo;
             correctCount++;
@@ -1027,7 +1093,6 @@
             const label = isFever ? `🔥+${gain}` : `+${gain}`;
             showFloatingText(x, y, `${label} (+1초)`, isFever ? "#bd00ff" : "#ffd700");
             if (combo > 0 && combo % 10 === 0) { timeLeft += 3; showFloatingText(x, y - 40, "+3초⏱️", "#2ecc71"); }
-            wordObj.el.classList.add('word-correct', 'hit-effect');
             setTimeout(() => wordObj.el.remove(), 400);
             hapticCorrect();
         } else if (wordObj.type === 'fake') {
@@ -1067,6 +1132,49 @@
         updateUI();
     }
 
+    // ── 난이도2: 계정과목 분류(자산/부채/자본/수익/비용) 확인 ──
+    function startCategoryCheck(wordObj, x, y) {
+        lv2Pending = { wordObj, x, y, category: wordObj.category };
+        freezeTime = 5000;
+        els.board.classList.add('frozen');
+        document.getElementById('lv2-cat-word').innerHTML = '<b>' + wordObj.el.innerText + '</b>은(는) 무슨 분류?';
+        document.querySelectorAll('#lv2-cat-btns button').forEach(b => { b.className = ''; b.disabled = false; });
+        document.getElementById('lv2-catbar').classList.add('show');
+    }
+    function pickCategory(cat) {
+        if (!lv2Pending || !isPlaying) return;
+        const p = lv2Pending; lv2Pending = null;
+        freezeTime = 0; els.board.classList.remove('frozen'); els.freezeBar.style.width = '0%';
+        document.getElementById('lv2-catbar').classList.remove('show');
+        document.querySelectorAll('#lv2-cat-btns button').forEach(b => b.disabled = true);
+        const ok = (cat === p.category);
+        if (ok) {
+            playSound('correct'); combo++;
+            if (combo > maxCombo) maxCombo = combo;
+            correctCount++;
+            timeLeft += 1;
+            if (combo >= 3 && !isFever) {
+                isFever = true;
+                document.body.classList.add('fever-mode');
+                bgmSetFever(true);
+            }
+            let gain = 150 + combo * 20; // 난이도2는 분류까지 맞혀야 하니 기본점수를 더 준다
+            if (isFever) gain *= 2;
+            score += gain;
+            showFloatingText(p.x, p.y, (isFever ? `🔥+${gain}` : `+${gain}`) + ' (+1초)', isFever ? "#bd00ff" : "#ffd700");
+            if (combo > 0 && combo % 10 === 0) { timeLeft += 3; showFloatingText(p.x, p.y - 40, "+3초⏱️", "#2ecc71"); }
+            hapticCorrect();
+        } else {
+            wrongLog.push({ word: p.wordObj.el.innerText, type: 'miscat' });
+            if (window.WrongNote) WrongNote.add({ game:'acid', key:p.wordObj.el.innerText+'_cat',
+                q: p.wordObj.el.innerText+'은(는) 무슨 분류인가요?',
+                correct: p.category, wrong: cat, type:'계정 분류(난이도2)' });
+            applyPenalty();
+            hapticWrong();
+        }
+        updateUI();
+    }
+
     function updateUI() {
         els.score.innerText = score.toLocaleString();
         els.timer.innerText = timeLeft;
@@ -1098,6 +1206,37 @@
         return (GRADE_TIERS.find(t => score >= t.min) || GRADE_TIERS[GRADE_TIERS.length - 1]).label;
     }
 
+    // ── 난이도 선택 UI(시작화면) — difficulty.js(공통 모듈) 연동 ──
+    function updateDiffBtns(lv) {
+        const b1 = document.getElementById('diff-btn-1'), b2 = document.getElementById('diff-btn-2');
+        if (b1) b1.classList.toggle('active', lv === 1);
+        if (b2) b2.classList.toggle('active', lv === 2);
+    }
+    function selectDifficulty(n) {
+        if (!window.Difficulty) return;
+        if (n === 2 && !Difficulty.isUnlocked('acid')) {
+            alert('난이도 1에서 정답률 ' + Math.round(Difficulty.UNLOCK_ACC * 100) + '% 이상(10문항 이상 플레이)을 달성하면 열려요!\n\n' + Difficulty.hint('acid'));
+            return;
+        }
+        Difficulty.set('acid', n);
+        updateDiffBtns(n);
+    }
+    function initDiffUI() {
+        if (!window.Difficulty) return;
+        const unlocked = Difficulty.isUnlocked('acid');
+        const btn2 = document.getElementById('diff-btn-2');
+        if (btn2) {
+            btn2.classList.toggle('locked', !unlocked);
+            btn2.innerHTML = unlocked
+                ? '난이도 2<br><span style="font-size:.72rem;opacity:.7">분류까지 맞히기</span>'
+                : '난이도 2 🔒<br><span style="font-size:.72rem;opacity:.7">분류까지 맞히기</span>';
+        }
+        updateDiffBtns(Difficulty.get('acid'));
+        const hint = document.getElementById('diff-hint');
+        if (hint) hint.textContent = Difficulty.hint('acid');
+    }
+    initDiffUI();
+
     // 시작화면 계급 기준표 렌더링 (GRADE_TIERS 단일 소스)
     (function renderGradeTable() {
         const box = document.getElementById('grade-table');
@@ -1123,8 +1262,16 @@
         els.board.classList.remove('frozen');
         bgmStop(); // 🎵 게임 종료 시 BGM 페이드 아웃
 
+        // 난이도2 해금 판정 — 이번 판 정답률이 기준(70%, 10문항 이상)을 넘기면 열린다
+        let justUnlocked = false;
+        if (window.Difficulty && LV === 1) {
+            justUnlocked = Difficulty.reportRound(GAME_ID, correctCount, correctCount + wrongLog.length);
+        }
+        const unlockEl = document.getElementById('lv-unlock-msg');
+        if (unlockEl) unlockEl.style.display = justUnlocked ? 'block' : 'none';
+
         els.finalScore.innerText = score.toLocaleString() + "점";
-        els.finalRank.innerText = "파일럿 등급: " + getGrade(score);
+        els.finalRank.innerText = "파일럿 등급: " + getGrade(score) + (LV === 2 ? ' (난이도2)' : '');
 
         if (wrongLog.length > 0) {
             els.reviewBox.style.display = 'block';
@@ -1133,6 +1280,8 @@
                 wrongLog.map(item =>
                     item.type === 'missed'
                         ? `<span class="review-item review-miss" onclick="openAcctPopup('${item.word}','missed')">놓침: ${item.word}</span>`
+                        : item.type === 'miscat'
+                        ? `<span class="review-item review-miss" onclick="openAcctPopup('${item.word}','miscat')">분류오답: ${item.word}</span>`
                         : `<span class="review-item review-trap" onclick="openAcctPopup('${item.word}','trap')">함정: ${item.word}</span>`
                 ).join('') +
                 "<div class='review-hint'>👆 단어를 누르면 설명을 볼 수 있어요</div>";
@@ -1258,6 +1407,9 @@
         const missNote = document.getElementById('pop-miss-note');
         if (missType === 'missed') {
             missNote.textContent = '⏰ 놓침: 계정과목인데 클릭하지 못했어요. 다음엔 빠르게 선택해보세요!';
+            missNote.style.display = 'block';
+        } else if (missType === 'miscat') {
+            missNote.textContent = '🏷️ 분류오답: 계정과목인 건 맞혔지만 자산·부채·자본·수익·비용 분류를 잘못 골랐어요.';
             missNote.style.display = 'block';
         } else {
             missNote.style.display = 'none';
