@@ -758,6 +758,7 @@ const Game={
     if(window.WrongNote)WrongNote.reset();
     this.state='playing';this.score=0;this.combo=0;this.maxCombo=0;this.okCount=0;this.wrongCount=0;
     this._saving=false;this._saved=false;   // 새 판 — 저장 가드 초기화
+    this._saveEpoch=(this._saveEpoch||0)+1; // 지난 판의 지연된 저장 완료가 이번 판의 _saved를 잘못 세우지 못하게
     this.speed=3.0;this.frame=0;this.gates=[];this.items=[];this.parts=[];
     this.reviveUsed=false;this.pendingRevive=false;
     this.player.shield=false;this.player.magnet=false;this.player.magT=0;
@@ -1004,6 +1005,7 @@ const Game={
     //  saveScore()가 조용히 아무것도 안 하고 리턴해버려 부활 후 오른 점수가 영영 저장 안 됨)
     document.getElementById('savemsg').textContent='';
     this._saved=false;
+    this._saveEpoch=(this._saveEpoch||0)+1; // 부활 전에 저장이 이미 진행 중이었다면, 그 결과가 뒤늦게 와도 이번 판의 _saved를 못 세우게
     const sb=document.getElementById('savebtn'); sb.disabled=false; sb.style.opacity='1';
     hideAdPlaceholder();
     // 화면 장애물 정리 + 플레이어 가운데로 (부활 직후 즉사 방지)
@@ -1023,6 +1025,7 @@ const Game={
     // Enter 키가 버튼 disabled를 우회해 이중 저장(성장 이력 중복)되는 것 방지
     if(this._saving||this._saved)return;
     this._saving=true;
+    const myEpoch=this._saveEpoch; // 저장 도중 부활/재시작이 끼어들면 그 이후 결과는 _saved를 세우지 않는다
     const btn=document.getElementById('savebtn'),msg=document.getElementById('savemsg');
     btn.disabled=true;btn.style.opacity='.5';msg.textContent='저장 중...';msg.style.color='rgba(255,255,255,.4)';
     const today=new Date().toLocaleDateString('ko-KR',{month:'2-digit',day:'2-digit'});
@@ -1030,7 +1033,9 @@ const Game={
     if(false){this._lsave(data);msg.textContent='✓ 로컬 저장 완료';msg.style.color='var(--gd)';this.loadRanking();return}
     try{
       await supabaseSaveScore(data.name, data.score, data.combo||0, data.correct||0, GAME_ID);
-      this._lsave(data);this._saved=true;msg.textContent='✓ 저장 완료! 랭킹에 반영됩니다';msg.style.color='#39ff14';
+      this._lsave(data);
+      if(myEpoch===this._saveEpoch)this._saved=true;
+      msg.textContent='✓ 저장 완료! 랭킹에 반영됩니다';msg.style.color='#39ff14';
       await new Promise(r=>setTimeout(r,800));await this.loadRanking();
       await this.showMyRank(data.name, data.score);
     }catch(e){this._lsave(data);msg.textContent='📴 기기에만 저장됨 (네트워크 오류 — 랭킹 미반영)';msg.style.color='var(--gd)';btn.disabled=false;btn.style.opacity='1';this.loadRanking();await this.showMyRank(data.name, data.score)}
