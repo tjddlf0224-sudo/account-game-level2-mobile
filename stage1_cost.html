@@ -2763,15 +2763,49 @@ document.getElementById('quiz-next').addEventListener('click', ()=>Quiz.next());
 /* =========================================================================
  *  PracticeQuiz — NPC별 개념 연습문제(숙달용, 몇 번이고 반복 가능)
  *  서류철·클리어 점수와는 완전히 무관한 순수 연습. theory_bank_lv1.json(1급
- *  이론 문제은행, 405문항)에서 그 NPC가 다루는 주제(topic)만 골라 매번 5문항
- *  랜덤 출제. 정오답은 Growth.logTopicAttempt로 이론 정답률에도 반영(교수자
- *  대시보드의 "이론 주제별 분석"에서 이 연습 결과도 같이 잡힘).
+ *  이론 문제은행, 405문항 — theory_lv1.html의 진짜 이론 학습 모드와 완전히
+ *  같은 파일)에서 문제를 가져와 매번 5문항 랜덤 출제. 정오답은
+ *  Growth.logTopicAttempt로 이론 정답률에도 반영.
+ *
+ *  ⚠️ 예전엔 topic 코드(T3/T8/T9/T10)만으로 필터링해서, 그 NPC가 실제로
+ *  가르치지 않은(대사에 안 나온) 어려운 기출 문제까지 마구 섞여 나왔다
+ *  ("대화만으로 못 풀겠다"는 지적) — topic이 같아도 같은 topic을 여러 NPC가
+ *  나눠 가르치는 구조라(예: T8은 5명이 각자 다른 조각을 가르침), topic
+ *  전체를 아무 NPC에게나 다 노출하면 안 된다. PRACTICE_WHITELIST에 "그 NPC의
+ *  대사만으로 실제로 풀 수 있는 문제 ID"만 수동으로 큐레이션해 넣었다
+ *  (405문항 은행 자체는 절대 수정/삭제하지 않음 — theory_lv1.html의 기출
+ *  정확도를 그대로 지키기 위함). 큐레이션 과정에서 태그 오류(정말 다른
+ *  주제인데 topic이 잘못 붙은 문제) 몇 건도 같이 발견해 theory_bank_lv1.json
+ *  자체를 바로잡았다(완성품환산량 2건 T3→T10, 부가가치세법 4건 T9/T10→T11).
+ *
+ *  n_ma는 원래 T8(원가의 기초·원가행태)에 묶여 있었지만 실제 대사 내용(정액법
+ *  감가상각·경비 4분류)은 T4(유형자산) 문제라야 풀리길래 T4로 재매핑했다.
+ *  n_lee는 대사 내용(직접노무비, 손으로 만지면 직접/유휴시간 제외)에 맞는
+ *  문제가 T8·T10 어느 풀에도 없어 연습문제 자체를 제공하지 않기로 했다
+ *  (억지로 안 맞는 topic에 끼워 넣는 것보다 나음).
  * ========================================================================= */
 const NPC_TOPIC_MAP = {
-  n_go:'T3', n_wan:'T3',            // 재고자산(원재료·제품 T계정)
-  n_oh:'T8', n_seo:'T8', n_ma:'T8', n_bae:'T8', n_gyul:'T8', // 원가의 기초·원가행태
-  n_jung:'T10', n_lee:'T10', n_mi:'T10',                     // 개별원가계산·종합원가계산
-  n_soon:'T9', n_steam:'T9',                                 // 원가배분(부문별원가계산)
+  n_go:'T3', n_wan:'T3',                    // 재고자산(원재료·제품 T계정)
+  n_oh:'T8', n_seo:'T8', n_bae:'T8', n_gyul:'T8', // 원가의 기초·원가행태
+  n_ma:'T4',                                // 유형자산(정액법 감가상각)
+  n_jung:'T10', n_mi:'T10',                 // 개별원가계산·종합원가계산
+  n_soon:'T9', n_steam:'T9',                // 원가배분(부문별원가계산)
+};
+/* NPC별 대화-solvable 문제 ID 화이트리스트 — 위 주석 참고 */
+const PRACTICE_WHITELIST = {
+  n_go:   ['L104-1','L107-2','L113-8','L118-8','L120-7','L121-7','L123-8'],
+  n_wan:  ['L113-8','L118-8','L120-7','L121-7','L123-8'],
+  n_oh:   ['L121-9','L122-9','L126-11'],
+  n_seo:  ['L118-9','L121-9','L122-9'],
+  n_ma:   ['L112-2'],
+  n_bae:  ['L104-11','L104-12','L117-11','L124-12','L126-11'],
+  n_gyul: ['L105-10','L105-11','L106-9','L107-9','L107-10','L110-10','L111-9','L113-9','L114-9','L115-10','L116-9','L117-10','L119-11','L120-11','L123-9'],
+  n_jung: ['L100-11','L101-10','L105-12','L111-10','L114-12','L119-12','L122-12'],
+  n_mi:   ['L100-11','L101-10','L101-11','L102-11','L105-12','L107-11','L114-11','L114-12','L116-12','L118-10','L119-12','L120-12','L121-10'],
+  // n_soon 대사는 배분기준 선택 개념까지만 가르치고("한 기사한테 직접 들어봐")
+  // 실제 계산법은 옆방 n_steam한테 미루므로, 풀은 둘을 합쳐서 씀.
+  n_soon:  ['L112-11','L102-12','L103-10','L113-10','L115-9','L116-10','L117-12','L121-11','L123-10','L125-11'],
+  n_steam: ['L102-12','L103-10','L113-10','L115-9','L116-10','L117-12','L121-11','L123-10','L125-11'],
 };
 let THEORY_BANK_LV1 = null;
 fetch('theory_bank_lv1.json').then(r=>r.json()).then(j=>{ THEORY_BANK_LV1 = j.questions||[]; }).catch(()=>{});
@@ -2803,7 +2837,8 @@ const PracticeQuiz = {
       return;
     }
     this.npcKey=npcKey; this.topic=topic;
-    const all = THEORY_BANK_LV1.filter(q=>q.topic===topic);
+    const ids = PRACTICE_WHITELIST[npcKey] || [];
+    const all = THEORY_BANK_LV1.filter(q=>ids.includes(q.id));
     this.pool = shuffleArr(all).slice(0, Math.min(this.TOTAL, all.length));
     this.idx=0; this.correct=0;
     document.getElementById('pq-finish').style.display='none';
