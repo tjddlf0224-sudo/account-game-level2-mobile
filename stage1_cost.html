@@ -301,6 +301,12 @@ body{ font-family:'Noto Sans KR',sans-serif; color:#fff; position:relative; touc
   box-shadow:0 -8px 30px rgba(0,0,0,0.6);
 }
 .dlg-top{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.dlg-close{
+  margin-left:auto; width:32px; height:32px; border-radius:50%; flex-shrink:0;
+  background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:rgba(255,255,255,0.7);
+  font-size:1rem; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center;
+}
+.dlg-close:active{ transform:scale(0.92); background:rgba(255,255,255,0.16); }
 .dlg-portrait{
   width:46px; height:46px; border-radius:50%; flex-shrink:0;
   border:2px solid rgba(255,255,255,0.4);
@@ -350,7 +356,7 @@ body{ font-family:'Noto Sans KR',sans-serif; color:#fff; position:relative; touc
   display:flex; align-items:center;
 }
 .quiz-visual svg{ width:100%; height:auto; display:block; }
-.quiz-q{ font-size:1.05rem; line-height:1.6; margin-bottom:12px; color:#fff; }
+.quiz-q{ font-size:1.05rem; line-height:1.6; margin-bottom:12px; color:#fff; white-space:pre-wrap; word-break:keep-all; overflow-wrap:break-word; }
 .quiz-table{ width:100%; border-collapse:collapse; margin-bottom:12px; font-size:0.78rem; }
 .quiz-table th,.quiz-table td{ border:1px solid rgba(255,255,255,0.18); padding:6px 8px; text-align:center; }
 .quiz-table th{ background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.7); }
@@ -579,6 +585,7 @@ body{ font-family:'Noto Sans KR',sans-serif; color:#fff; position:relative; touc
         <div class="dlg-tag" id="dlg-tag">STAGE 1</div>
         <div class="dlg-name" id="dlg-name"></div>
       </div>
+      <button class="dlg-close" onclick="event.stopPropagation(); Dialog.close();">✕</button>
     </div>
     <div class="dlg-visual" id="dlg-visual" style="display:none"></div>
     <div class="dlg-box" id="dlg-text"></div>
@@ -811,8 +818,8 @@ const NPC_DATA = {
       {who:'npc', t:'아니면 기말에 창고 싹 세는 실지재고조사법. 기초 + 매입 − 기말 = 나간 거.', visual:'inventory_method'},
       {who:'npc', t:'(한숨) 근데 그건 누가 몰래 가져가도 모른다는 게 문제야. 그냥 다 쓴 걸로 잡히거든.'},
       {who:'npc', t:'아 그리고, 목재 값이 계속 오르잖아? 3월에 산 거랑 9월에 산 거랑 값이 달라.'},
-      {who:'npc', t:'그럼 지금 나간 게 어느 것 값이냐. 먼저 산 것부터 나간 걸로 치면 선입선출법.'},
-      {who:'npc', t:'살 때마다 평균 다시 내면 이동평균법, 기말에 한 방에 평균 내면 총평균법.'},
+      {who:'npc', t:'그럼 지금 나간 게 어느 것 값이냐. 먼저 산 것부터 나간 걸로 치면 선입선출법.', visual:'inventory_valuation'},
+      {who:'npc', t:'살 때마다 평균 다시 내면 이동평균법, 기말에 한 방에 평균 내면 총평균법.', visual:'inventory_valuation'},
     ],
     quiz:[{
       q:'기초 원재료 100,000원, 당기 매입 1,000,000원, 기말 원재료 100,000원. 당기 재료비(소비액)는?',
@@ -2405,6 +2412,28 @@ const DialogVisuals = {
       <text x="208" y="55" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="7.5" fill="#fff">그대로</text>
       <text x="208" y="67" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="7.5" fill="#fff">들어옴</text>
     </svg>`,
+  inventory_valuation: `
+    <svg viewBox="0 0 300 122" xmlns="http://www.w3.org/2000/svg">
+      <text x="150" y="14" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="rgba(255,255,255,0.6)">같은 목재, 산 시점마다 값이 다르면 — 나간 값을 어떻게 매기나</text>
+      <rect x="8" y="22" width="90" height="92" rx="10" fill="rgba(0,242,255,0.1)" stroke="#00f2ff" stroke-width="1.5"/>
+      <text x="53" y="40" text-anchor="middle" font-family="'Black Han Sans',sans-serif" font-size="11" fill="#00f2ff">선입선출법</text>
+      <text x="53" y="60" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9" fill="#fff">먼저 산 것부터</text>
+      <text x="53" y="73" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9" fill="#fff">나간 걸로</text>
+      <text x="53" y="98" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="8" fill="rgba(255,255,255,0.5)">기말재고 =</text>
+      <text x="53" y="109" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="8" fill="rgba(255,255,255,0.5)">최근 매입분</text>
+      <rect x="105" y="22" width="90" height="92" rx="10" fill="rgba(255,214,0,0.1)" stroke="#ffd600" stroke-width="1.5"/>
+      <text x="150" y="40" text-anchor="middle" font-family="'Black Han Sans',sans-serif" font-size="11" fill="#ffd600">이동평균법</text>
+      <text x="150" y="60" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9" fill="#fff">살 때마다</text>
+      <text x="150" y="73" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9" fill="#fff">평균 다시 냄</text>
+      <text x="150" y="98" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="8" fill="rgba(255,255,255,0.5)">매입 직후</text>
+      <text x="150" y="109" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="8" fill="rgba(255,255,255,0.5)">단가 갱신</text>
+      <rect x="202" y="22" width="90" height="92" rx="10" fill="rgba(255,45,120,0.1)" stroke="#ff2d78" stroke-width="1.5"/>
+      <text x="247" y="40" text-anchor="middle" font-family="'Black Han Sans',sans-serif" font-size="11" fill="#ff2d78">총평균법</text>
+      <text x="247" y="60" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9" fill="#fff">기말에</text>
+      <text x="247" y="73" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9" fill="#fff">한 방에 평균</text>
+      <text x="247" y="98" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="8" fill="rgba(255,255,255,0.5)">전체 매입을</text>
+      <text x="247" y="109" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="8" fill="rgba(255,255,255,0.5)">한 번에 나눔</text>
+    </svg>`,
   alloc_methods: `
     <svg viewBox="0 0 300 122" xmlns="http://www.w3.org/2000/svg">
       <text x="150" y="14" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="rgba(255,255,255,0.6)">보조부문 상호 용역수수, 얼마나 반영하나</text>
@@ -2472,6 +2501,15 @@ function taccountQuizSVG(title, leftItems, rightItems){
  * ========================================================================= */
 const Dialog = {
   queue:[], idx:0, npcKey:null, npcDef:null, _repeatMode:false,
+
+  /* 우측상단 ✕ — 대화 도중 아무 때나 나갈 수 있게. 자연 완료 시 흐르는
+     퀴즈/연습문제/서류 지급으로는 안 이어지고 그냥 닫히기만 한다. */
+  close(){
+    document.getElementById('dlg-overlay').classList.remove('show');
+    if(this._sawYearend){ EventFX.yearendDim(false); this._sawYearend=false; }
+    this._repeatMode=false;
+    World.paused = false;
+  },
 
   open(npcMapId){
     let key = npcMapId;
