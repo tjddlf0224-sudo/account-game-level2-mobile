@@ -293,6 +293,23 @@ body {
 .stage-node .n-sub { font-size:0.64rem; color:var(--card-color, var(--cy)); text-align:center; white-space:nowrap; min-height:1.1em; }
 .stage-node.lock .n-sub { color:rgba(255,255,255,0.3); }
 
+/* ── 난이도1/2 뱃지 겸 전환 스위치 (열린 스테이지에만 노출) ── */
+.lv-pill {
+  display:none; align-items:center; gap:3px;
+  background:rgba(0,0,0,0.35); border-radius:50px; padding:2px;
+}
+.lv-pill.show { display:flex; }
+.lv-seg {
+  font-family:'Orbitron', monospace;
+  font-size:0.56rem; letter-spacing:0.5px;
+  padding:3px 8px; border-radius:50px;
+  color:rgba(255,255,255,0.35);
+  cursor:pointer; transition:all 0.15s;
+  min-width:24px; text-align:center;
+}
+.lv-seg.active { background:var(--card-color, var(--cy)); color:#000; font-weight:700; }
+.lv-seg.locked { opacity:0.4; }
+
 /* ── 푸터 ── */
 .hub-footer {
   text-align:center;
@@ -715,30 +732,50 @@ body {
         <div class="disc">☁️<span class="badge lock-badge" title="잠김"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><span class="badge clear-badge" title="클리어" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"/></svg></span></div>
         <div class="n-title">계정과목 산성비</div>
         <div class="n-sub"></div>
+        <div class="lv-pill" id="lv-pill-acid">
+          <span class="lv-seg" data-lv="1" onclick="onLvSegClick(event,'acid',1)">1</span>
+          <span class="lv-seg locked" data-lv="2" onclick="onLvSegClick(event,'acid',2)">2</span>
+        </div>
       </a>
       <a class="stage-node card-2" id="node-memory" href="game2_memory.html" style="left:30%;top:29%"
          onclick="return onNodeClick(event,'memory')">
         <div class="disc">🧩<span class="badge lock-badge" title="잠김"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><span class="badge clear-badge" title="클리어" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"/></svg></span></div>
         <div class="n-title">기억의 전당</div>
         <div class="n-sub"></div>
+        <div class="lv-pill" id="lv-pill-memory">
+          <span class="lv-seg" data-lv="1" onclick="onLvSegClick(event,'memory',1)">1</span>
+          <span class="lv-seg locked" data-lv="2" onclick="onLvSegClick(event,'memory',2)">2</span>
+        </div>
       </a>
       <a class="stage-node card-3" id="node-debit" href="game3_debit.html" style="left:70%;top:49%"
          onclick="return onNodeClick(event,'debit')">
         <div class="disc">⚡<span class="badge lock-badge" title="잠김"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><span class="badge clear-badge" title="클리어" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"/></svg></span></div>
         <div class="n-title">회계 차변대변</div>
         <div class="n-sub"></div>
+        <div class="lv-pill" id="lv-pill-debit">
+          <span class="lv-seg" data-lv="1" onclick="onLvSegClick(event,'debit',1)">1</span>
+          <span class="lv-seg locked" data-lv="2" onclick="onLvSegClick(event,'debit',2)">2</span>
+        </div>
       </a>
       <a class="stage-node card-4" id="node-factory" href="game4_factory.html" style="left:30%;top:69%"
          onclick="return onNodeClick(event,'factory')">
         <div class="disc">🏭<span class="badge lock-badge" title="잠김"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><span class="badge clear-badge" title="클리어" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"/></svg></span></div>
         <div class="n-title">결산분개 조립공장</div>
         <div class="n-sub"></div>
+        <div class="lv-pill" id="lv-pill-factory">
+          <span class="lv-seg" data-lv="1" onclick="onLvSegClick(event,'factory',1)">1</span>
+          <span class="lv-seg locked" data-lv="2" onclick="onLvSegClick(event,'factory',2)">2</span>
+        </div>
       </a>
       <a class="stage-node card-5" id="node-flight" href="game5_flight.html" style="left:70%;top:89%"
          onclick="return onNodeClick(event,'flight')">
         <div class="disc">🛩<span class="badge lock-badge" title="잠김"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><span class="badge clear-badge" title="클리어" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"/></svg></span></div>
         <div class="n-title">플라이트 장부조회</div>
         <div class="n-sub"></div>
+        <div class="lv-pill" id="lv-pill-flight">
+          <span class="lv-seg" data-lv="1" onclick="onLvSegClick(event,'flight',1)">1</span>
+          <span class="lv-seg locked" data-lv="2" onclick="onLvSegClick(event,'flight',2)">2</span>
+        </div>
       </a>
     </div>
   </div>
@@ -758,7 +795,9 @@ body {
 
 </div>
 
+<script src="difficulty.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth.js"></script>
 <script>
 // ── 로그인 체크 & 유저바 초기화 ──
 (function() {
@@ -1028,6 +1067,7 @@ function renderStageMap() {
             sub.textContent = '도전!';
             if (reachedByChain) litIndex = i;
         }
+        renderLvPill(g.id, open);
         chainOpen = open && cleared;
     });
     const lit = document.getElementById('trail-lit');
@@ -1038,6 +1078,37 @@ function renderStageMap() {
         lit.style.strokeDashoffset = total * (1 - frac);
     }
 }
+// ── 난이도1/2 뱃지 겸 전환 스위치 (스테이지 노드맵 통합) ──
+// 실제 난이도 선택/해금은 각 게임 자체 시작화면(difficulty.js)에서도 되지만,
+// 허브에서 바로 보고 바로 바꿀 수 있게 뱃지+전환 UI를 노드맵에 붙인다.
+function renderLvPill(gid, open) {
+    const pill = document.getElementById('lv-pill-' + gid);
+    if (!pill) return;
+    if (!open || !window.Difficulty) { pill.classList.remove('show'); return; }
+    const unlocked = Difficulty.isUnlocked(gid);
+    const cur = Difficulty.get(gid);
+    const seg1 = pill.querySelector('[data-lv="1"]');
+    const seg2 = pill.querySelector('[data-lv="2"]');
+    if (seg1) seg1.classList.toggle('active', cur === 1);
+    if (seg2) {
+        seg2.classList.toggle('active', cur === 2);
+        seg2.classList.toggle('locked', !unlocked);
+        seg2.textContent = unlocked ? '2' : '2🔒';
+    }
+    pill.classList.add('show');
+}
+function onLvSegClick(e, gid, lv) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!window.Difficulty) return;
+    if (lv === 2 && !Difficulty.isUnlocked(gid)) {
+        alert('난이도 1에서 정답률 ' + Math.round(Difficulty.UNLOCK_ACC * 100) + '% 이상(10문항 이상 플레이)을 달성하면 열려요!\n\n' + Difficulty.hint(gid));
+        return;
+    }
+    Difficulty.set(gid, lv);
+    renderLvPill(gid, true);
+}
+
 renderStageMap();
 
 // ── 계정 기준 "내 최고기록" 동기화 ──
