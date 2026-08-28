@@ -205,6 +205,38 @@
         .part-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.15); }
         .part-btn.selected { opacity: 0; pointer-events: none; transform: scale(0.8); }
 
+        /* ── 난이도 선택(시작화면) ── */
+        .diff-toggle { display: flex; gap: 8px; width: 100%; }
+        .diff-btn {
+            flex: 1; padding: 10px 8px; border-radius: 12px; border: 1.5px solid var(--border);
+            background: var(--panel); color: rgba(255,255,255,0.5);
+            font-family: 'Black Han Sans', sans-serif; font-size: 0.85rem; line-height: 1.5;
+            cursor: pointer; transition: all 0.15s; min-height: 48px;
+        }
+        .diff-btn.active { border-color: var(--green); background: rgba(0,230,118,0.12); color: var(--green); }
+        .diff-btn.locked { opacity: 0.45; }
+        .diff-hint { font-size: 0.72rem; color: rgba(255,255,255,0.35); text-align: center; margin-top: 6px; }
+
+        /* ── 금액 입력(난이도2) ── */
+        .amt-area { display: none; width: 100%; max-width: 600px; flex-direction: column; align-items: center; gap: 8px; }
+        .amt-area.show { display: flex; }
+        .amt-label { font-family: 'Black Han Sans', sans-serif; font-size: clamp(0.85rem,3vw,0.98rem); color: var(--yellow); }
+        .amt-row { display: flex; gap: 8px; align-items: center; width: 100%; max-width: 320px; }
+        .amt-input {
+            flex: 1; min-width: 0; background: rgba(0,0,0,0.4); border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 12px; color: #fff; padding: 12px 14px; font-size: 1.15rem; text-align: right;
+            font-family: 'Black Han Sans', sans-serif; outline: none; -moz-appearance: textfield;
+        }
+        .amt-input::-webkit-outer-spin-button, .amt-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .amt-input:focus { border-color: var(--blue); }
+        .amt-won { color: rgba(255,255,255,0.5); font-size: 1rem; flex-shrink: 0; }
+        .amt-submit {
+            padding: 12px 20px; border-radius: 12px; border: none; background: var(--green); color: #000;
+            font-family: 'Black Han Sans', sans-serif; font-size: 0.95rem; cursor: pointer;
+            min-height: 48px; min-width: 160px;
+        }
+        .amt-submit:active { transform: scale(0.96); }
+
         #flash-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 50; opacity: 0; transition: opacity 0.3s; }
         #flash-overlay.ok  { background: rgba(0,230,118,0.15); opacity: 1; }
         #flash-overlay.bad { background: rgba(255,45,85,0.2);  opacity: 1; }
@@ -446,8 +478,10 @@
 
 <button id="rewarded-btn" onclick="requestRewarded()">⏱ +30초 광고 보기</button>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="auth.js"></script>
     <script src="wrongnote.js"></script>
     <script src="growth.js"></script>
+    <script src="difficulty.js"></script>
     <script src="review-prompt.js"></script>
 </head>
 <body>
@@ -469,6 +503,11 @@
             <div class="scard"><strong>💎 점수 체계</strong>기본 정답: <strong>150점</strong><br>콤보 보너스: +30점/연속</div>
             <div class="scard"><strong>🏆 직급 체계</strong><span id="grade-table"><!-- GRADE_TIERS(단일 소스)에서 렌더링 --></span></div>
         </div>
+        <div class="diff-toggle" id="diff-toggle" style="margin-top:14px;">
+            <button class="diff-btn" id="diff-btn-1" onclick="selectDifficulty(1)">난이도 1<br><span style="font-size:.72rem;opacity:.7">계정만 선택</span></button>
+            <button class="diff-btn locked" id="diff-btn-2" onclick="selectDifficulty(2)">난이도 2 🔒<br><span style="font-size:.72rem;opacity:.7">금액도 직접 계산</span></button>
+        </div>
+        <div class="diff-hint" id="diff-hint"></div>
         <div class="action-btns" style="align-items:stretch; margin-top:20px; gap:10px;">
             <button class="pill pill-start" onclick="startGame()">▶ 공장 가동 시작</button>
             <button class="btn-hub" onclick="openGuide()">📖 사용방법</button>
@@ -515,6 +554,7 @@
     <div class="overlay-inner">
         <div class="ov-title" style="color:var(--yellow);">공장 가동 중단 🏭</div>
         <div id="res-rank" class="res-rank">최종 직급: 인턴</div>
+        <div id="lv-unlock-msg" style="display:none; font-family:'Black Han Sans',sans-serif; font-size:1rem; color:#000; background:linear-gradient(135deg,gold,#f39c12); border-radius:50px; padding:8px 22px; text-align:center;">🔓 난이도 2 해금! 이제 금액도 직접 계산해서 풀 수 있어요</div>
         <div id="res-score" class="res-score">0점</div>
         <div class="res-stats">
             정답 <span id="stat-ok">0</span>문항 &nbsp;|&nbsp;
@@ -574,6 +614,14 @@
         </div>
     </div>
     <div class="parts-area" id="parts-container"></div>
+    <div class="amt-area" id="amt-area">
+        <div class="amt-label">💰 계산해서 금액을 입력하세요</div>
+        <div class="amt-row">
+            <input type="number" id="amt-input" class="amt-input" inputmode="numeric" placeholder="0" onkeydown="if(event.key==='Enter'){event.preventDefault();submitAmount();}">
+            <span class="amt-won">원</span>
+        </div>
+        <button class="amt-submit" onclick="submitAmount()">✔ 확인</button>
+    </div>
 </div>
 <div id="flash-overlay"></div>
 
@@ -698,7 +746,35 @@ const qBank = [
     {q:"내역을 알 수 없어 가수금으로 처리했던 200,000원이\n결산 시 외상매출금 회수액으로 밝혀지다.", hint:"부채제거(차변) / 자산감소(대변)", L:"가수금", R:"외상매출금", fakes:["미수금","선수금"]},
 ];
 
+/* ═══════════════════════════════════════════════════════
+ *  난이도 2 문제은행 — 계정과목 선택뿐 아니라 "금액을 직접 계산해
+ *  입력"해야 정답 처리된다(difficulty.js 참고). 정답 amount는 전부
+ *  공식으로 계산해 생성했다(대손충당금 보충법/정액법 월할상각/
+ *  선급비용 월할안분/단기매매증권 평가손익/소모품 대체) — 118회
+ *  기출 대조 분석에서 결산 문제 정답률이 16%로 가장 낮았던 이유가
+ *  "게임에 숫자 입력창이 0개"였기 때문에 신설.
+ * ═══════════════════════════════════════════════════════ */
+const qBankLv2 = [
+    { q:"기중 소모품 500,000원을 전액 소모품비로 회계처리했다.\n기말 실사 결과 당기 사용액이 320,000원으로 확인되었다.\n미사용분을 결산 반영하시오.", L:"소모품", R:"소모품비", fakes:["선급비용", "잡손실"], amount:180000, hint:"자산증가(차변) / 비용감소(대변)", calc:"미사용액 = 총액 500,000 − 사용액 320,000 = 180,000원" },
+    { q:"기중 소모품 800,000원을 전액 소모품비로 회계처리했다.\n기말 실사 결과 당기 사용액이 550,000원으로 확인되었다.\n미사용분을 결산 반영하시오.", L:"소모품", R:"소모품비", fakes:["선급비용", "잡손실"], amount:250000, hint:"자산증가(차변) / 비용감소(대변)", calc:"미사용액 = 총액 800,000 − 사용액 550,000 = 250,000원" },
+    { q:"기중 소모품 300,000원을 전액 소모품비로 회계처리했다.\n기말 실사 결과 당기 사용액이 90,000원으로 확인되었다.\n미사용분을 결산 반영하시오.", L:"소모품", R:"소모품비", fakes:["선급비용", "잡손실"], amount:210000, hint:"자산증가(차변) / 비용감소(대변)", calc:"미사용액 = 총액 300,000 − 사용액 90,000 = 210,000원" },
+    { q:"단기매매증권 100주(1주당 장부가액 8,000원)를 보유 중이다.\n기말 공정가치는 1주당 9,000원으로 조사되었다.", L:"단기매매증권", R:"단기매매증권평가이익", fakes:["단기매매증권평가손실", "단기매매증권처분이익"], amount:100000, hint:"자산증가(차변) / 평가이익(대변)", calc:"평가이익 = (9,000−8,000)×100주 = 100,000원" },
+    { q:"단기매매증권 200주(1주당 장부가액 5,000원)를 보유 중이다.\n기말 공정가치는 1주당 4,700원으로 조사되었다.", L:"단기매매증권평가손실", R:"단기매매증권", fakes:["단기매매증권평가이익", "단기매매증권처분손실"], amount:60000, hint:"평가손실(차변) / 자산감소(대변)", calc:"평가손실 = (5,000−4,700)×200주 = 60,000원" },
+    { q:"단기매매증권 50주(1주당 장부가액 12,000원)를 보유 중이다.\n기말 공정가치는 1주당 12,800원으로 조사되었다.", L:"단기매매증권", R:"단기매매증권평가이익", fakes:["단기매매증권평가손실", "단기매매증권처분이익"], amount:40000, hint:"자산증가(차변) / 평가이익(대변)", calc:"평가이익 = (12,800−12,000)×50주 = 40,000원" },
+    { q:"기말 매출채권(외상매출금) 잔액은 5,000,000원이다.\n대손율 1%를 보충법으로 설정하며, 결산 전 대손충당금 잔액은 20,000원이다.", L:"대손상각비", R:"대손충당금", fakes:["기타의대손상각비", "대손충당금환입"], amount:30000, hint:"비용발생(차변) / 자산차감(대변)", calc:"설정액 = 5,000,000×1% − 기존잔액 20,000 = 50,000−20,000 = 30,000원" },
+    { q:"기말 매출채권(외상매출금) 잔액은 3,000,000원이다.\n대손율 2%를 보충법으로 설정하며, 결산 전 대손충당금 잔액은 40,000원이다.", L:"대손상각비", R:"대손충당금", fakes:["기타의대손상각비", "대손충당금환입"], amount:20000, hint:"비용발생(차변) / 자산차감(대변)", calc:"설정액 = 3,000,000×2% − 기존잔액 40,000 = 60,000−40,000 = 20,000원" },
+    { q:"기말 매출채권(외상매출금) 잔액은 8,000,000원이다.\n대손율 1%를 보충법으로 설정하며, 결산 전 대손충당금 잔액은 100,000원이다.", L:"대손충당금", R:"대손충당금환입", fakes:["대손상각비", "기타의대손상각비"], amount:20000, hint:"자산차감 감소(차변) / 수익발생(대변)", calc:"환입액 = 기존잔액 100,000 − (8,000,000×1%=80,000) = 20,000원" },
+    { q:"기말 매출채권(외상매출금) 잔액은 4,000,000원이다.\n대손율 1%를 보충법으로 설정하며, 결산 전 대손충당금 잔액은 10,000원이다.", L:"대손상각비", R:"대손충당금", fakes:["기타의대손상각비", "대손충당금환입"], amount:30000, hint:"비용발생(차변) / 자산차감(대변)", calc:"설정액 = 4,000,000×1% − 기존잔액 10,000 = 40,000−10,000 = 30,000원" },
+    { q:"기계장치를 취득원가 12,000,000원(잔존가치 0원, 내용연수 5년, 정액법)에\n당기 중 취득하여 사용했다. 당기 사용월수는 12개월이다(월할상각).", L:"감가상각비", R:"감가상각누계액", fakes:["건물", "기계장치"], amount:2400000, hint:"비용발생(차변) / 자산차감(대변)", calc:"연 감가상각비 = (12,000,000−0)÷5년 = 2,400,000원 → 월할(12/12) = 2,400,000원" },
+    { q:"기계장치를 취득원가 6,000,000원(잔존가치 0원, 내용연수 4년, 정액법)에\n당기 중 취득하여 사용했다. 당기 사용월수는 6개월이다(월할상각).", L:"감가상각비", R:"감가상각누계액", fakes:["건물", "기계장치"], amount:750000, hint:"비용발생(차변) / 자산차감(대변)", calc:"연 감가상각비 = (6,000,000−0)÷4년 = 1,500,000원 → 월할(6/12) = 750,000원" },
+    { q:"기계장치를 취득원가 9,000,000원(잔존가치 0원, 내용연수 3년, 정액법)에\n당기 중 취득하여 사용했다. 당기 사용월수는 9개월이다(월할상각).", L:"감가상각비", R:"감가상각누계액", fakes:["건물", "기계장치"], amount:2250000, hint:"비용발생(차변) / 자산차감(대변)", calc:"연 감가상각비 = (9,000,000−0)÷3년 = 3,000,000원 → 월할(9/12) = 2,250,000원" },
+    { q:"9월 1일 12개월분 임차료 1,200,000원을 전액 지급하고\n임차료로 회계처리했다. 결산일(12월 31일) 기준 차기분을 계상하시오.", L:"선급비용", R:"임차료", fakes:["미지급비용", "선수수익"], amount:800000, hint:"자산증가(차변) / 비용감소(대변)", calc:"경과 4개월 / 선급 8개월 → 1,200,000×8/12 = 800,000원" },
+    { q:"10월 1일 6개월분 임차료 900,000원을 전액 지급하고\n임차료로 회계처리했다. 결산일(12월 31일) 기준 차기분을 계상하시오.", L:"선급비용", R:"임차료", fakes:["미지급비용", "선수수익"], amount:450000, hint:"자산증가(차변) / 비용감소(대변)", calc:"경과 3개월 / 선급 3개월 → 900,000×3/6 = 450,000원" },
+    { q:"8월 1일 12개월분 임차료 600,000원을 전액 지급하고\n임차료로 회계처리했다. 결산일(12월 31일) 기준 차기분을 계상하시오.", L:"선급비용", R:"임차료", fakes:["미지급비용", "선수수익"], amount:350000, hint:"자산증가(차변) / 비용감소(대변)", calc:"경과 5개월 / 선급 7개월 → 600,000×7/12 = 350,000원" },
+];
+
 let currentQ = null, qIndex = 0;
+let LV = 1; // 1=계정만 선택 / 2=계정+금액 직접 계산(difficulty.js로 해금)
 let score = 0, combo = 0, maxCombo = 0;
 let matchCount = 0, wrongCount = 0;
 let timeLeft = 60, isPlaying = false, timerInterval = null, adPaused = false;
@@ -760,6 +836,7 @@ function playSound(type) {
 function startGame() {
     initAudio(); // ← AudioContext resume + BGM 시작
     hideAdPlaceholder();
+    LV = window.Difficulty ? Difficulty.get(GAME_ID) : 1;
     els.screenStart.style.display = 'none';
     els.screenResult.style.display = 'none';
     score = 0; combo = 0; maxCombo = 0; matchCount = 0; wrongCount = 0;
@@ -808,19 +885,24 @@ function grantFreeze() {
 }
 
 // 셔플 백: 전체 문제를 섞어 하나씩 소진, 다 나오면 재셔플(직전 문제 연속 방지)
-let _qBag = [];
-function _drawQ(arr, last) {
-    if (_qBag.length === 0) {
-        _qBag = arr.map((_, i) => i);
-        for (let i = _qBag.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [_qBag[i], _qBag[j]] = [_qBag[j], _qBag[i]]; }
-        if (_qBag.length > 1 && arr[_qBag[0]] === last) { [_qBag[0], _qBag[1]] = [_qBag[1], _qBag[0]]; }
+// 난이도1/2가 서로 다른 배열(qBank/qBankLv2)을 쓰므로 백도 난이도별로 따로 둔다
+// (공유하면 짧은 배열 쪽에서 범위를 벗어난 인덱스를 뽑아 currentQ가 undefined 될 수 있음)
+let _qBags = { 1: [], 2: [] };
+function _drawQ(arr, last, lvKey) {
+    let bag = _qBags[lvKey];
+    if (bag.length === 0) {
+        bag = arr.map((_, i) => i);
+        for (let i = bag.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [bag[i], bag[j]] = [bag[j], bag[i]]; }
+        if (bag.length > 1 && arr[bag[0]] === last) { [bag[0], bag[1]] = [bag[1], bag[0]]; }
+        _qBags[lvKey] = bag;
     }
-    return arr[_qBag.shift()];
+    return arr[bag.shift()];
 }
 function nextQuestion() {
     if (!isPlaying) return;
     judging = false;
-    currentQ = _drawQ(qBank, currentQ);
+    const bank = LV === 2 ? qBankLv2 : qBank;
+    currentQ = _drawQ(bank, currentQ, LV);
     els.qNum.textContent = 'Q.' + qIndex;
     els.qText.innerHTML = currentQ.q.replace(/\n/g, '<br>');
     selectedParts = { L: null, R: null }; activeSlot = 'L';
@@ -828,6 +910,7 @@ function nextQuestion() {
     let options = [currentQ.L, currentQ.R, ...currentQ.fakes];
     options = options.sort(() => Math.random() - 0.5);
     els.partsContainer.innerHTML = '';
+    els.partsContainer.style.display = '';
     options.forEach(opt => {
         const btn = document.createElement('div');
         btn.className = 'part-btn'; btn.textContent = opt;
@@ -836,6 +919,13 @@ function nextQuestion() {
     });
     const hintEl = document.getElementById('q-hint');
     hintEl.style.display = 'none'; hintEl.textContent = '';
+
+    const amtArea = document.getElementById('amt-area');
+    if (amtArea) {
+        amtArea.classList.toggle('show', LV === 2);
+        const amtInput = document.getElementById('amt-input');
+        if (amtInput) amtInput.value = '';
+    }
 }
 
 function renderSlots() {
@@ -871,7 +961,28 @@ function handlePartClick(text, btnEl) {
     if (activeSlot === 'L' && !selectedParts.R) activeSlot = 'R';
     else if (activeSlot === 'R' && !selectedParts.L) activeSlot = 'L';
     renderSlots();
-    if (selectedParts.L && selectedParts.R) { judging = true; setTimeout(checkAnswer, 200); }
+    if (selectedParts.L && selectedParts.R) {
+        if (LV === 2) {
+            // 난이도2는 계정만으로 채점하지 않고, 금액 입력을 마저 기다린다.
+            // 계정 버튼 그리드는 더 필요없으니 접어서 좁은 화면에서 금액칸이 바로 보이게 한다
+            els.partsContainer.style.display = 'none';
+            const amtInput = document.getElementById('amt-input');
+            if (amtInput) { amtInput.scrollIntoView({ block: 'center', behavior: 'smooth' }); amtInput.focus(); }
+        } else {
+            judging = true; setTimeout(checkAnswer, 200);
+        }
+    }
+}
+
+function submitAmount() {
+    if (!isPlaying || judging) return;
+    if (!selectedParts.L || !selectedParts.R) {
+        showFloatingText('계정부터 선택!', 'var(--yellow)');
+        return;
+    }
+    const raw = (document.getElementById('amt-input').value || '').trim();
+    if (!raw) { showFloatingText('금액을 입력하세요', 'var(--yellow)'); return; }
+    judging = true; setTimeout(checkAnswer, 100);
 }
 
 function showFloatingText(text, color) {
@@ -887,9 +998,20 @@ function flashEffect(isOk) {
 
 function checkAnswer() {
     if (!isPlaying || !selectedParts.L || !selectedParts.R) { judging = false; return; }
+    if (LV === 2 && !(document.getElementById('amt-input').value || '').trim()) { judging = false; return; }
     const wasFrozen = freezeLeft > 0; // 이번 문제가 설명타임(정지) 중이었는지 — 가감 면제용
     if (wasFrozen) { freezeLeft--; updateHUD(); }
-    if (selectedParts.L.text === currentQ.L && selectedParts.R.text === currentQ.R) {
+
+    const accOk = selectedParts.L.text === currentQ.L && selectedParts.R.text === currentQ.R;
+    let amtOk = true, typedAmt = NaN;
+    if (LV === 2) {
+        const raw = document.getElementById('amt-input').value;
+        typedAmt = parseInt(String(raw).replace(/[^\d]/g, ''), 10);
+        amtOk = (typedAmt === currentQ.amount);
+    }
+    const ok = accOk && amtOk;
+
+    if (ok) {
         playSound('ok'); flashEffect(true);
         combo++; if (combo > maxCombo) maxCombo = combo; matchCount++;
         const gain = 150 + (combo * 30); score += gain; if (!wasFrozen) timeLeft += 10;
@@ -899,22 +1021,32 @@ function checkAnswer() {
     } else {
         playSound('bad'); flashEffect(false);
         combo = 0; wrongCount++; if (!wasFrozen) timeLeft = Math.max(0, timeLeft - 5);
-        if (window.WrongNote) WrongNote.add({ game:'factory', key:currentQ.q,
-            q:currentQ.q.replace(/\n/g,'<br>'),
-            correct:'(차) '+currentQ.L+' / (대) '+currentQ.R,
-            wrong:'(차) '+(selectedParts.L?selectedParts.L.text:'?')+' / (대) '+(selectedParts.R?selectedParts.R.text:'?'),
-            type:'결산정리분개' });
+        if (window.WrongNote) {
+            const amtTxt = LV === 2 ? ' ' + (isNaN(typedAmt) ? '?' : typedAmt.toLocaleString()) + '원' : '';
+            const amtTxtCorrect = LV === 2 ? ' ' + currentQ.amount.toLocaleString() + '원' : '';
+            WrongNote.add({ game:'factory', key:currentQ.q,
+                q:currentQ.q.replace(/\n/g,'<br>'),
+                correct:'(차) '+currentQ.L+amtTxtCorrect+' / (대) '+currentQ.R,
+                wrong:'(차) '+(selectedParts.L?selectedParts.L.text:'?')+amtTxt+' / (대) '+(selectedParts.R?selectedParts.R.text:'?'),
+                type:'결산정리분개'+(LV===2?'(난이도2)':'') });
+        }
         els.qCard.classList.remove('shake'); void els.qCard.offsetWidth; els.qCard.classList.add('shake');
         els.slotL.classList.add('error'); els.slotR.classList.add('error');
-        showFloatingText('-5초', 'var(--red)');
+        showFloatingText(accOk ? '금액 오답' : '-5초', 'var(--red)');
         const hintEl = document.getElementById('q-hint');
-        if (currentQ.hint) { hintEl.textContent = '💡 ' + currentQ.hint; hintEl.style.display = 'block'; }
+        // 계정을 못 맞혔으면 계정 힌트, 계정은 맞았는데 금액만 틀렸으면 계산식을 보여준다
+        const hintMsg = !accOk ? currentQ.hint : (LV === 2 ? currentQ.calc : '');
+        if (hintMsg) { hintEl.textContent = '💡 ' + hintMsg; hintEl.style.display = 'block'; }
         updateHUD();
         hapticWrong();
         setTimeout(() => {
             if (selectedParts.L) selectedParts.L.el.classList.remove('selected');
             if (selectedParts.R) selectedParts.R.el.classList.remove('selected');
             selectedParts = { L: null, R: null }; activeSlot = 'L';
+            if (LV === 2) {
+                const ai = document.getElementById('amt-input'); if (ai) ai.value = '';
+                els.partsContainer.style.display = ''; // 다시 계정부터 고르게 그리드 복원
+            }
             // 힌트는 지우지 않는다 — 같은 문제에 재도전하는 동안 계속 보여야
             // 튜토리얼이 가르친 '힌트 보고 다시 도전'이 실제로 가능하다.
             // (다음 문제로 넘어갈 때 nextQuestion() 이 알아서 초기화한다)
@@ -948,14 +1080,54 @@ function getGrade(score) {
     el.innerHTML = rows[0] + ' · ' + rows[1] + '<br>' + rows.slice(2).join('<br>');
 })();
 
+// ── 난이도 선택 UI(시작화면) — difficulty.js(공통 모듈) 연동 ──
+function updateDiffBtns(lv) {
+    const b1 = document.getElementById('diff-btn-1'), b2 = document.getElementById('diff-btn-2');
+    if (b1) b1.classList.toggle('active', lv === 1);
+    if (b2) b2.classList.toggle('active', lv === 2);
+}
+function selectDifficulty(n) {
+    if (!window.Difficulty) return;
+    if (n === 2 && !Difficulty.isUnlocked(GAME_ID)) {
+        alert('난이도 1에서 정답률 ' + Math.round(Difficulty.UNLOCK_ACC * 100) + '% 이상(10문항 이상 플레이)을 달성하면 열려요!\n\n' + Difficulty.hint(GAME_ID));
+        return;
+    }
+    Difficulty.set(GAME_ID, n);
+    updateDiffBtns(n);
+}
+function initDiffUI() {
+    if (!window.Difficulty) return;
+    const unlocked = Difficulty.isUnlocked(GAME_ID);
+    const btn2 = document.getElementById('diff-btn-2');
+    if (btn2) {
+        btn2.classList.toggle('locked', !unlocked);
+        btn2.innerHTML = unlocked
+            ? '난이도 2<br><span style="font-size:.72rem;opacity:.7">금액도 직접 계산</span>'
+            : '난이도 2 🔒<br><span style="font-size:.72rem;opacity:.7">금액도 직접 계산</span>';
+    }
+    updateDiffBtns(Difficulty.get(GAME_ID));
+    const hint = document.getElementById('diff-hint');
+    if (hint) hint.textContent = Difficulty.hint(GAME_ID);
+}
+initDiffUI();
+
 function endGame() {
     isPlaying = false; clearInterval(timerInterval);
     if (window.Growth) Growth.logPlay(GAME_ID);
     if (window.WrongNote) WrongNote.flush('factory');
     hideRewardedBtn();
     bgmStop(); // 🎵 게임 종료 시 BGM 페이드 아웃
+
+    // 난이도2 해금 판정 — 이번 판의 정답률이 기준(70%, 10문항 이상)을 넘기면 열린다
+    let justUnlocked = false;
+    if (window.Difficulty && LV === 1) {
+        justUnlocked = Difficulty.reportRound(GAME_ID, matchCount, matchCount + wrongCount);
+    }
+    const unlockEl = document.getElementById('lv-unlock-msg');
+    if (unlockEl) unlockEl.style.display = justUnlocked ? 'block' : 'none';
+
     document.getElementById('res-score').textContent = score.toLocaleString() + '점';
-    document.getElementById('res-rank').textContent  = '최종 직급: ' + getGrade(score);
+    document.getElementById('res-rank').textContent  = '최종 직급: ' + getGrade(score) + (LV === 2 ? ' (난이도2)' : '');
     document.getElementById('stat-ok').textContent    = matchCount;
     document.getElementById('stat-no').textContent    = wrongCount;
     document.getElementById('stat-combo').textContent = maxCombo;
