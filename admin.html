@@ -1812,12 +1812,40 @@ function certSelect(name){
 }
 async function updateCert(name, cert){
   const prev = examMap[name] || { current_cert:'' };
-  examMap[name] = { current_cert: cert };
+  examMap[name] = { current_cert: cert };   // 낙관적 UI
+
+  // 합격여부는 교사 비번 검증 RPC 로만 저장(학생이 anon 키로 직접 조작하던 것 차단).
+  // 참여코드 설정과 동일하게, 이미 인증한 비번(verifiedPass)을 재사용하고 없으면 한 번만 물어본다.
+  let pass = verifiedPass;
+  if (!pass) {
+    const input = prompt('대시보드 비밀번호를 입력해주세요:');
+    if (input === null) { examMap[name] = prev; renderDashboard(dashData); return; }
+    pass = input.trim();
+  }
+
   try {
-    const { error } = await db.from('student_exam').upsert(
-      { group_id: currentGid, name, current_cert: cert || null, updated_at: new Date().toISOString() },
-      { onConflict: 'group_id,name' });
-    if (error) throw error;
+    const { data: status, error } = await db.rpc('set_student_cert', {
+      p_group_id: currentGid, p_pass: pass, p_name: name, p_cert: cert || null
+    });
+    if (error) {
+      if (error.code === 'PGRST202') {
+        // RPC 없는 구DB(마이그레이션 전) 폴백 — 직접 upsert
+        const { error: e2 } = await db.from('student_exam').upsert(
+          { group_id: currentGid, name, current_cert: cert || null, updated_at: new Date().toISOString() },
+          { onConflict: 'group_id,name' });
+        if (e2) throw e2;
+      } else throw error;
+    } else if (status === 'wrong_pass') {
+      verifiedPass = null;
+      examMap[name] = prev; renderDashboard(dashData);
+      alert('비밀번호가 일치하지 않아 저장하지 못했어요.');
+      return;
+    } else if (status === 'invalid') {
+      examMap[name] = prev; renderDashboard(dashData);
+      alert('학생 이름이 올바르지 않습니다.');
+      return;
+    }
+    verifiedPass = pass;   // 성공 — 다음 저장 때 재입력 안 받도록 캐시
   } catch(e){
     examMap[name] = prev; renderDashboard(dashData);
     alert('자격증 저장 실패 — 인터넷 연결을 확인해 주세요.');
