@@ -83,16 +83,26 @@
   }
 
   // 닉네임 유무와 무관하게(신규 유저도 포함) 기기 ID 기준으로 하루 한 번만 기록.
+  // ⚠️ 2026-09-01 경화 2건 (실데이터에서 기록 누락이 확인돼 고침):
+  //  1) 예전엔 가드(LS_DAU_DATE)를 "요청 전에" 먼저 찍었는데, 그러면 client()가 아직
+  //     준비 안 됐거나 요청이 실패한 날은 하루 전체가 통째로 안 찍히고 재시도도 안 됨.
+  //     이제 가드는 upsert가 "성공한 뒤에만" 찍는다 — 실패하면 다음 로드/복귀 때 재시도.
+  //     (문서가 device_id+날짜로 유니크라 중복 호출돼도 같은 행에 upsert될 뿐 안전함)
+  //  2) 네이티브 앱은 백그라운드에 며칠씩 살아있어 페이지 로드가 다시 안 일어난다 —
+  //     로드 시 1회만 부르면 앱을 안 껐다 켠 유저는 이튿날부터 영영 안 찍힘.
+  //     visibilitychange(포그라운드 복귀)에서도 불러서 날짜가 바뀌었으면 다시 찍는다.
   function checkDAU() {
     try {
       var today = todayStr();
       if (localStorage.getItem(LS_DAU_DATE) === today) return; // 오늘 이미 기록함
-      localStorage.setItem(LS_DAU_DATE, today); // 요청 성공 여부와 무관하게 먼저 찍어 중복 방지
       var db = client();
-      if (!db) return;
+      if (!db) return; // 가드를 안 찍었으니 다음 기회(로드/복귀)에 자동 재시도됨
       var row = { device_id: deviceId(), user_name: user() || null, platform: platform(), snapshot_date: today };
       db.from(DAU_TABLE).upsert(row, { onConflict: 'device_id,snapshot_date', ignoreDuplicates: true })
-        .then(function () {}, function () {});
+        .then(function (res) {
+          if (res && res.error) return; // 실패 — 가드 안 찍고 다음 기회에 재시도
+          try { localStorage.setItem(LS_DAU_DATE, today); } catch (e) {}
+        }, function () {});
     } catch (e) {}
   }
 
@@ -266,4 +276,11 @@
   // growth.js는 모든 게임/허브 화면에 공통으로 로드되므로, 로드 시점에 한 번 체크하면
   // 앱 전체에서 자동으로 DAU가 잡힌다(별도 페이지마다 호출부 추가 불필요).
   checkDAU();
+  // 네이티브 앱은 백그라운드에서 며칠씩 살아있어 로드가 다시 안 일어남 — 포그라운드
+  // 복귀 시에도 체크(오늘 이미 찍었으면 checkDAU 안에서 곧바로 리턴하므로 비용 없음).
+  try {
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden) checkDAU();
+    });
+  } catch (e) {}
 })(window);
