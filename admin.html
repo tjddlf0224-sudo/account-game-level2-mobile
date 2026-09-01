@@ -1704,12 +1704,15 @@ function generateDiagnosis(name, student) {
   let lines = [];
 
   // 총평
+  // 학생 이름(name)은 scores.name — anon 키로 누구나 넣을 수 있는 값이라 반드시 escHTML.
+  // (이 진단문은 innerHTML로 들어가고 교사 화면에서 렌더되므로, 미이스케이프 시 저장형 XSS가 교사 브라우저에서 실행됨)
+  const nameH = escHTML(name);
   if (totalPct >= 70) {
-    lines.push(`<strong>${name}</strong> 학생은 전반적으로 높은 성취도를 보이고 있습니다. 🎉`);
+    lines.push(`<strong>${nameH}</strong> 학생은 전반적으로 높은 성취도를 보이고 있습니다. 🎉`);
   } else if (totalPct >= 40) {
-    lines.push(`<strong>${name}</strong> 학생은 기초가 잡혀 있으나 일부 영역 보완이 필요합니다.`);
+    lines.push(`<strong>${nameH}</strong> 학생은 기초가 잡혀 있으나 일부 영역 보완이 필요합니다.`);
   } else {
-    lines.push(`<strong>${name}</strong> 학생은 전반적인 개념 보강이 필요한 상태입니다.`);
+    lines.push(`<strong>${nameH}</strong> 학생은 전반적인 개념 보강이 필요한 상태입니다.`);
   }
 
   // 미참여
