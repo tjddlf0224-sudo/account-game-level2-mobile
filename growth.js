@@ -65,7 +65,10 @@
   var LS_DEVICE = 'hub_device_id';
   var LS_DAU_DATE = 'hub_dau_date';
 
-  function todayStr() { return new Date().toISOString().slice(0, 10); }
+  // toISOString()은 UTC 기준이라 한국시간 자정~오전 9시 사이엔 "어제" 날짜가 찍히는 버그가
+  // 있었다(2026-09-01 발견) — 광고매출(한국시간 기준)과 날짜가 최대 9시간 어긋나서 DAU와
+  // 매출을 같은 날짜로 비교할 수 없게 만듦. +9시간 보정으로 한국시간 날짜를 얻는다.
+  function todayStr() { return new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10); }
 
   function deviceId() {
     try {
