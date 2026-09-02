@@ -326,6 +326,16 @@ body{ font-family:'Noto Sans KR',sans-serif; color:#fff; position:relative; touc
 }
 .dlg-box.player{ color:var(--gd); }
 .dlg-box.narrator{ color:rgba(255,255,255,0.55); font-style:italic; text-align:center; }
+.dlg-nav{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.dlg-prev{
+  visibility:hidden; flex-shrink:0;
+  display:flex; align-items:center; gap:5px;
+  height:42px; border-radius:12px; cursor:pointer;
+  background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.18);
+  color:rgba(255,255,255,0.6); font-family:'Black Han Sans',sans-serif; font-size:0.86rem;
+  padding:0 14px;
+}
+.dlg-prev:active{ transform:scale(0.96); background:rgba(255,255,255,0.12); }
 .dlg-next{
   display:flex; align-items:center; justify-content:flex-end; gap:6px;
   height:42px; border-radius:12px; cursor:pointer;
@@ -589,7 +599,10 @@ body{ font-family:'Noto Sans KR',sans-serif; color:#fff; position:relative; touc
     </div>
     <div class="dlg-visual" id="dlg-visual" style="display:none"></div>
     <div class="dlg-box" id="dlg-text"></div>
-    <div class="dlg-next" id="dlg-next"><span>계속</span><span class="arrow">▶</span></div>
+    <div class="dlg-nav">
+      <button class="dlg-prev" id="dlg-prev" onclick="event.stopPropagation(); Dialog.prev();"><span class="arrow">◀</span><span>이전</span></button>
+      <div class="dlg-next" id="dlg-next"><span>계속</span><span class="arrow">▶</span></div>
+    </div>
   </div>
 </div>
 
@@ -2538,12 +2551,28 @@ const Dialog = {
     this.render();
   },
 
+  /* 뒤로 갈 수 있는 가장 가까운 인덱스 — 'action'(미니게임 트리거) 칸은 표시용 텍스트가
+     없어서 그대로 render()하면 빈 대사가 뜬다. 그런 칸은 이미 지나온 것이므로 더 건너뛴다. */
+  _prevIdx(fromIdx){
+    let i=fromIdx-1;
+    while(i>=0 && this.queue[i] && this.queue[i].who==='action') i--;
+    return i;
+  },
+  prev(){
+    const i=this._prevIdx(this.idx);
+    if(i<0) return;
+    this.idx=i;
+    this.render();
+  },
+
   render(){
     const b = this.queue[this.idx];
     const nameEl=document.getElementById('dlg-name');
     const portrait=document.getElementById('dlg-portrait');
     const tagEl=document.getElementById('dlg-tag');
     const textEl=document.getElementById('dlg-text');
+    const prevEl=document.getElementById('dlg-prev');
+    if(prevEl) prevEl.style.visibility = this._prevIdx(this.idx) >= 0 ? 'visible' : 'hidden';
     textEl.className = 'dlg-box' + (b.who==='player' ? ' player' : b.who==='narrator' ? ' narrator' : '');
     if(b.who==='player'){
       nameEl.textContent='나'; tagEl.textContent='PLAYER';
