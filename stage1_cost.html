@@ -852,11 +852,11 @@ const NPC_DATA = {
     beats:[
       {who:'npc', t:'어! 신입이다! 아 반가워요 반가워, 내가 여기 3년째인데 신입 오는 거 처음 봐요!'},
       {who:'npc', t:'뭐 물어보러 왔어요? 아 됐고 일단 이것 좀 봐요. (선반을 가리킨다)'},
-      {who:'npc', t:'저기 목재 보이죠? 저건 의자 다리가 돼요. 딱 봐도 "아 저게 의자 됐구나" 하잖아요.'},
-      {who:'npc', t:'그런 게 직접재료비예요. 어느 제품에 얼마나 들어갔는지 딱 찍어서 셀 수 있는 거.'},
-      {who:'npc', t:'근데 이쪽 좀 봐요. (다른 선반) 접착제, 사포, 나사, 기계 윤활유…'},
-      {who:'npc', t:'이건 의자 하나에 접착제 몇 그램 들어갔는지… 셀 수 있어요? 못 세죠. 세도 그 비용이 더 들어.'},
-      {who:'npc', t:'이런 게 간접재료비. 제품이 되긴 되는데, 누구한테 얼마인지 콕 집을 수가 없는 거.'},
+      {who:'npc', visual:'direct_indirect_material', t:'저기 목재 보이죠? 저건 의자 다리가 돼요. 딱 봐도 "아 저게 의자 됐구나" 하잖아요.'},
+      {who:'npc', visual:'direct_indirect_material', t:'그런 게 직접재료비예요. 어느 제품에 얼마나 들어갔는지 딱 찍어서 셀 수 있는 거.'},
+      {who:'npc', visual:'direct_indirect_material', t:'근데 이쪽 좀 봐요. (다른 선반) 접착제, 사포, 나사, 기계 윤활유…'},
+      {who:'npc', visual:'direct_indirect_material', t:'이건 의자 하나에 접착제 몇 그램 들어갔는지… 셀 수 있어요? 못 세죠. 세도 그 비용이 더 들어.'},
+      {who:'npc', visual:'direct_indirect_material', t:'이런 게 간접재료비. 제품이 되긴 되는데, 누구한테 얼마인지 콕 집을 수가 없는 거.'},
       {who:'npc', t:'그래서 얘네는 나중에 싹 모아서 제조간접비로 넘겨요. 저기 사무실 배정확 주임이 그거 나누는 사람.'},
       {who:'npc', t:'아 참, 그리고 헷갈리지 마요. 간접재료비도 재료비예요. 경비 아니고!'},
       {who:'npc', t:'명세서 쓸 때 재료비 칸에 같이 들어가요. 이거 시험에… 아니 실무에서 많이 틀려요.'},
@@ -879,11 +879,11 @@ const NPC_DATA = {
       {who:'player', t:'저… 회계팀에서 왔습니다.'},
       {who:'npc', t:'회계. (손을 멈춘다) 그럼 이거 봐라.'},
       {who:'npc', t:'(작업대에 붙은 종이를 가리킨다)\n「작업지시서 #A-101 — 성당 장의자 12석, 주문자 요청 도면 별첨」'},
-      {who:'npc', t:'저쪽 B라인은 똑같은 의자를 하루에 천 개 찍어낸다. 나는 주문 하나에 한 달을 쓴다.'},
-      {who:'npc', t:'그러니 원가도 다르게 센다. 나는 이 주문 하나에 들어간 걸 전부 이 종이에 적는다.'},
-      {who:'npc', t:'오크 목재 몇 재, 내가 몇 시간 잡았는지. 작업원가표라고 부르더라, 회계팀에서는.'},
-      {who:'npc', t:'이렇게 주문별·작업별로 따로 모으는 걸 개별원가계산이라 한다.'},
-      {who:'npc', t:'배 만드는 조선소, 건물 짓는 건설사, 이 늙은이 작업대. 다 같은 방식이다.'},
+      {who:'npc', visual:'job_vs_process', t:'저쪽 B라인은 똑같은 의자를 하루에 천 개 찍어낸다. 나는 주문 하나에 한 달을 쓴다.'},
+      {who:'npc', visual:'job_vs_process', t:'그러니 원가도 다르게 센다. 나는 이 주문 하나에 들어간 걸 전부 이 종이에 적는다.'},
+      {who:'npc', visual:'job_vs_process', t:'오크 목재 몇 재, 내가 몇 시간 잡았는지. 작업원가표라고 부르더라, 회계팀에서는.'},
+      {who:'npc', visual:'job_vs_process', t:'이렇게 주문별·작업별로 따로 모으는 걸 개별원가계산이라 한다.'},
+      {who:'npc', visual:'job_vs_process', t:'배 만드는 조선소, 건물 짓는 건설사, 이 늙은이 작업대. 다 같은 방식이다.'},
       {who:'npc', t:'다만… 전기세는 이 종이에 못 적는다. 내 몫이 얼만지 알 수가 없으니.'},
       {who:'npc', t:'그건 사무실에서 나눠서 내려온다. 나는 그걸 배부라고 배웠다.'},
     ],
@@ -928,13 +928,13 @@ const NPC_DATA = {
       {who:'npc', t:'어, 자네. 회계팀? 그래 잘 왔어. 마침 물어볼 사람이 필요했는데.'},
       {who:'npc', t:'자네가 보기에 나… 지금 일하고 있는 것 같나?'},
       {who:'player', t:'네? 어… 순찰 중이신 것 같은데요.'},
-      {who:'npc', t:'그렇지. 나는 아무것도 안 만들어. 하루 종일 이 라인을 서성이기만 해.'},
-      {who:'npc', t:'근데 내가 없으면? 라인 멈추면 아무도 못 세우고, 불량 나도 아무도 안 잡아.'},
-      {who:'npc', t:'그러니까 나도 필요한 사람은 맞는데… 내 월급을 어느 의자에 붙여야 하나?'},
-      {who:'npc', t:'480개 중에 몇 번째 의자가 내 몫이야? 못 정하지.'},
-      {who:'npc', t:'그래서 나 같은 사람 급여는 간접노무비라고 불러.'},
-      {who:'npc', t:'나, 저 뒤 청소하시는 분, 자재 나르는 지게차 기사, 경비실 아저씨. 다 같은 취급이야.'},
-      {who:'npc', t:'우리 월급은 싹 모아서 제조간접비라는 큰 바구니에 들어가. 그다음에 나눠서 제품에 얹혀.'},
+      {who:'npc', visual:'direct_indirect_labor', t:'그렇지. 나는 아무것도 안 만들어. 하루 종일 이 라인을 서성이기만 해.'},
+      {who:'npc', visual:'direct_indirect_labor', t:'근데 내가 없으면? 라인 멈추면 아무도 못 세우고, 불량 나도 아무도 안 잡아.'},
+      {who:'npc', visual:'direct_indirect_labor', t:'그러니까 나도 필요한 사람은 맞는데… 내 월급을 어느 의자에 붙여야 하나?'},
+      {who:'npc', visual:'direct_indirect_labor', t:'480개 중에 몇 번째 의자가 내 몫이야? 못 정하지.'},
+      {who:'npc', visual:'direct_indirect_labor', t:'그래서 나 같은 사람 급여는 간접노무비라고 불러.'},
+      {who:'npc', visual:'direct_indirect_labor', t:'나, 저 뒤 청소하시는 분, 자재 나르는 지게차 기사, 경비실 아저씨. 다 같은 취급이야.'},
+      {who:'npc', visual:'direct_indirect_labor', t:'우리 월급은 싹 모아서 제조간접비라는 큰 바구니에 들어가. 그다음에 나눠서 제품에 얹혀.'},
       {who:'npc', t:'(씁쓸하게 웃으며) 이수완이랑 나랑 같은 공장에서 같은 시간 일해도, 회계장부에선 자리가 달라.'},
       {who:'npc', t:'서운하냐고? 아니. 정확한 게 좋은 거야. 안 그러면 의자 원가가 거짓말이 되잖아.'},
     ],
@@ -954,16 +954,16 @@ const NPC_DATA = {
       {who:'npc', t:'(기계에 손을 얹고 있다) …얘가 올해로 10년 됐어요.'},
       {who:'npc', t:'처음 왔을 땐 소리가 참 고왔는데. 지금은 좀 쉰 소리가 나요. 늙었죠.'},
       {who:'npc', t:'아, 회계팀. 잘 오셨어요. 저 궁금한 게 있었는데.'},
-      {who:'npc', t:'이 기계 살 때 1,200만 원 줬거든요. 그럼 그해 의자 원가가 폭탄 맞았어야 하는 거 아녜요?'},
-      {who:'npc', t:'근데 안 그랬대요. 왜냐면 이 기계는 10년 동안 계속 의자를 만들 거니까요.'},
-      {who:'npc', t:'그래서 값을 쭉 펴서 나눠 담아요. 10년, 120개월. 한 달에 10만 원씩.'},
-      {who:'npc', t:'그게 감가상각비. 기계가 닳는 만큼을 매달 원가로 인정하는 거죠.'},
+      {who:'npc', visual:'depreciation_bar', t:'이 기계 살 때 1,200만 원 줬거든요. 그럼 그해 의자 원가가 폭탄 맞았어야 하는 거 아녜요?'},
+      {who:'npc', visual:'depreciation_bar', t:'근데 안 그랬대요. 왜냐면 이 기계는 10년 동안 계속 의자를 만들 거니까요.'},
+      {who:'npc', visual:'depreciation_bar', t:'그래서 값을 쭉 펴서 나눠 담아요. 10년, 120개월. 한 달에 10만 원씩.'},
+      {who:'npc', visual:'depreciation_bar', t:'그게 감가상각비. 기계가 닳는 만큼을 매달 원가로 인정하는 거죠.'},
       {who:'npc', t:'그리고 이건 재료도 아니고 사람 월급도 아니니까 제조경비로 들어가요.'},
       {who:'npc', t:'아 그리고 경비도 종류가 나뉘어요. 제가 정리해드릴게요. (수첩을 편다)'},
-      {who:'npc', t:'월할경비 — 1년치를 달로 쪼개는 거. 감가상각비, 보험료, 임차료.'},
-      {who:'npc', t:'측정경비 — 계량기 읽어서 나오는 거. 전기, 수도, 가스. 보일러실 한증기 기사 담당이죠.'},
-      {who:'npc', t:'지급경비 — 그때그때 준 돈. 수선비, 운반비.'},
-      {who:'npc', t:'발생경비 — 돈은 안 나갔는데 손실이 생긴 거. 재료 감모손실 같은 거요.'},
+      {who:'npc', visual:'expense_types_grid', t:'월할경비 — 1년치를 달로 쪼개는 거. 감가상각비, 보험료, 임차료.'},
+      {who:'npc', visual:'expense_types_grid', t:'측정경비 — 계량기 읽어서 나오는 거. 전기, 수도, 가스. 보일러실 한증기 기사 담당이죠.'},
+      {who:'npc', visual:'expense_types_grid', t:'지급경비 — 그때그때 준 돈. 수선비, 운반비.'},
+      {who:'npc', visual:'expense_types_grid', t:'발생경비 — 돈은 안 나갔는데 손실이 생긴 거. 재료 감모손실 같은 거요.'},
       {who:'npc', t:'(다시 기계를 쓰다듬으며) …얘도 언젠간 장부에서 값이 0이 돼요. 그래도 계속 돌긴 하겠지만.'},
     ],
     quiz:[{
@@ -983,14 +983,14 @@ const NPC_DATA = {
       {who:'npc', t:'목재는 아니에요. 이미 잘리고 깎였으니까. 그렇다고 의자도 아니고요. 앉을 수가 없잖아요.'},
       {who:'npc', t:'저는 끝나지 않은 것들의 관리자예요. 이 라인 위 애매한 것들, 전부 제 담당이죠.'},
       {who:'npc', t:'회계에선 얘들을 재공품이라고 불러요. 만드는 중, 이라는 뜻이에요.'},
-      {who:'npc', t:'여기 B라인은 정성한 장인님 쪽이랑 달라요. 우린 똑같은 걸 계속 흘려보내죠.'},
-      {who:'npc', t:'주문서가 없으니 개별로 셀 수가 없어요. 그래서 한 달치를 통째로 계산해요. 종합원가계산이라고 해요.'},
-      {who:'npc', t:'근데 여기서 문제. 완성품 900개랑, 60% 만들어진 재공품 200개가 있어요.'},
-      {who:'npc', t:'이걸 그냥 1,100개로 세면… 안 되겠죠? 반쯤 만든 걸 다 만든 것처럼 세는 거니까.'},
-      {who:'npc', t:'그래서 완성품환산량을 써요. 200개 × 60% = 120개어치. 딱 그만큼만 만들어진 걸로 쳐요.'},
-      {who:'npc', t:'900 + 120 = 1,020개. 이 숫자로 나눠야 개당 원가가 맞아요.'},
-      {who:'npc', t:'아 그리고 재료는 보통 공정 맨 앞에서 다 넣어요. 목재는 처음에 다 들어가니까요.'},
-      {who:'npc', t:'그래서 재료비 기준으론 200개가 이미 100%예요. 가공비만 60%인 거고요. 이거 헷갈리는 사람 많아요.'},
+      {who:'npc', visual:'job_vs_process', t:'여기 B라인은 정성한 장인님 쪽이랑 달라요. 우린 똑같은 걸 계속 흘려보내죠.'},
+      {who:'npc', visual:'job_vs_process', t:'주문서가 없으니 개별로 셀 수가 없어요. 그래서 한 달치를 통째로 계산해요. 종합원가계산이라고 해요.'},
+      {who:'npc', visual:'equivalent_units', t:'근데 여기서 문제. 완성품 900개랑, 60% 만들어진 재공품 200개가 있어요.'},
+      {who:'npc', visual:'equivalent_units', t:'이걸 그냥 1,100개로 세면… 안 되겠죠? 반쯤 만든 걸 다 만든 것처럼 세는 거니까.'},
+      {who:'npc', visual:'equivalent_units', t:'그래서 완성품환산량을 써요. 200개 × 60% = 120개어치. 딱 그만큼만 만들어진 걸로 쳐요.'},
+      {who:'npc', visual:'equivalent_units', t:'900 + 120 = 1,020개. 이 숫자로 나눠야 개당 원가가 맞아요.'},
+      {who:'npc', visual:'material_vs_conversion_pct', t:'아 그리고 재료는 보통 공정 맨 앞에서 다 넣어요. 목재는 처음에 다 들어가니까요.'},
+      {who:'npc', visual:'material_vs_conversion_pct', t:'그래서 재료비 기준으론 200개가 이미 100%예요. 가공비만 60%인 거고요. 이거 헷갈리는 사람 많아요.'},
       {who:'narrator', t:'— 12월 31일 오후 6시. 퇴근 사이렌. —'},
       {who:'narrator', t:'조명이 하나씩 꺼진다. 라인 위, 반쯤 만들어진 의자 200개만 남아 스포트라이트를 받는다.'},
       {who:'npc', t:'(돌아보며) 자, 봐요. 오늘이 마감일이에요.'},
@@ -1069,14 +1069,14 @@ const NPC_DATA = {
       {who:'npc', t:'(식판을 내민다) 일단 먹어. 얘기는 먹으면서 해.'},
       {who:'npc', t:'회계팀에서 왔다고? 그럼 우리 식당 원가는 어디로 가는지 알아?'},
       {who:'npc', t:'우리는 의자를 안 만들어. 밥만 하지. 근데 우리도 공장 원가야.'},
-      {who:'npc', t:'우리 같은 데를 보조부문이라고 하더라고. 물건은 안 만드는데, 없으면 공장이 안 돌아가는 데.'},
-      {who:'npc', t:'라인 사람들 밥 굶기면 의자가 나오겠어? 안 나오지.'},
-      {who:'npc', t:'자, 여기서 중요한 거. (숟가락으로 천장을 가리킨다) 우리 밥값은 저 위로 올라가.'},
-      {who:'npc', t:'바로 위가 라인이잖아. 우리 원가는 이 부엌에서 안 끝나. 위로 올라가서 의자한테 붙어.'},
-      {who:'npc', t:'왜냐? 밥은 결국 의자 만드는 사람이 먹은 거니까. 우리 부엌에서 끝나면 안 되지.'},
+      {who:'npc', visual:'service_dept_flow', t:'우리 같은 데를 보조부문이라고 하더라고. 물건은 안 만드는데, 없으면 공장이 안 돌아가는 데.'},
+      {who:'npc', visual:'service_dept_flow', t:'라인 사람들 밥 굶기면 의자가 나오겠어? 안 나오지.'},
+      {who:'npc', visual:'service_dept_flow', t:'자, 여기서 중요한 거. (숟가락으로 천장을 가리킨다) 우리 밥값은 저 위로 올라가.'},
+      {who:'npc', visual:'service_dept_flow', t:'바로 위가 라인이잖아. 우리 원가는 이 부엌에서 안 끝나. 위로 올라가서 의자한테 붙어.'},
+      {who:'npc', visual:'service_dept_flow', t:'왜냐? 밥은 결국 의자 만드는 사람이 먹은 거니까. 우리 부엌에서 끝나면 안 되지.'},
       {who:'npc', t:'그러니까 자네도 헷갈리지 마. 우리가 의자 다음 순서인 게 아니야. 우리는 줄 밖에서 거들어주는 쪽이지.'},
-      {who:'npc', t:'그럼 A라인이랑 B라인 중에 어디로 얼마나 보내? 그건 밥 먹은 사람 수로 나눠.'},
-      {who:'npc', t:'A라인 20명, B라인 60명이면 우리 밥값도 2대 6으로 갈라지는 거야. 이게 배분기준이라는 거지.'},
+      {who:'npc', visual:'cost_split_bar_simple', t:'그럼 A라인이랑 B라인 중에 어디로 얼마나 보내? 그건 밥 먹은 사람 수로 나눠.'},
+      {who:'npc', visual:'cost_split_bar_simple', t:'A라인 20명, B라인 60명이면 우리 밥값도 2대 6으로 갈라지는 거야. 이게 배분기준이라는 거지.'},
       {who:'npc', t:'전기는 전기 쓴 만큼, 밥은 밥 먹은 만큼. 가장 공평한 걸로 고르는 거야, 그게 요령이야.'},
       {who:'npc', t:'아 참, 근데 우리가 옆방 보일러실 한증기 기사네 20명 밥도 해줘. 그 양반들도 먹어야 하니까.'},
       {who:'npc', t:'그럼 걔들 밥값은 어디로 가야 하나? …그게 좀 골치 아파. 그건 한 기사한테 직접 들어봐.'},
@@ -2484,6 +2484,151 @@ const DialogVisuals = {
       <path d="M110,98 L110,104 M110,98 L284,98 M284,98 L284,104" fill="none" stroke="#ffd600" stroke-width="1.5"/>
       <text x="197" y="118" text-anchor="middle" font-family="'Black Han Sans',sans-serif" font-size="10" fill="#ffd600">가공원가</text>
       <text x="150" y="140" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9" fill="rgba(255,255,255,0.55)">직접노무비만 두 원가 모두에 포함!</text>
+    </svg>`,
+  job_vs_process: `
+    <svg viewBox="0 0 300 120" xmlns="http://www.w3.org/2000/svg">
+      <text x="150" y="12" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="rgba(255,255,255,0.6)">생산방식에 따라 원가 계산법이 다르다</text>
+      <rect x="8" y="20" width="136" height="92" rx="10" fill="rgba(0,242,255,0.08)" stroke="#00f2ff" stroke-width="1.5"/>
+      <text x="76" y="36" text-anchor="middle" font-family="'Black Han Sans',sans-serif" font-size="10" fill="#00f2ff">B라인 · 대량생산</text>
+      <rect x="24" y="44" width="18" height="18" rx="3" fill="rgba(0,242,255,0.3)" stroke="#00f2ff" stroke-width="1"/>
+      <rect x="59" y="44" width="18" height="18" rx="3" fill="rgba(0,242,255,0.3)" stroke="#00f2ff" stroke-width="1"/>
+      <rect x="94" y="44" width="18" height="18" rx="3" fill="rgba(0,242,255,0.3)" stroke="#00f2ff" stroke-width="1"/>
+      <text x="76" y="58" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="7" fill="#fff">동일 제품</text>
+      <path d="M76,66 L76,80" stroke="#00f2ff" stroke-width="1.5"/>
+      <path d="M76,80 L71,72 L81,72 Z" fill="#00f2ff"/>
+      <rect x="20" y="82" width="112" height="24" rx="6" fill="rgba(0,242,255,0.18)" stroke="#00f2ff" stroke-width="1.3"/>
+      <text x="76" y="98" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="#fff">종합원가계산</text>
+      <rect x="156" y="20" width="136" height="92" rx="10" fill="rgba(255,214,0,0.08)" stroke="#ffd600" stroke-width="1.5"/>
+      <text x="224" y="36" text-anchor="middle" font-family="'Black Han Sans',sans-serif" font-size="10" fill="#ffd600">정성한 · 주문제작</text>
+      <text x="188" y="52" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="7.5" fill="#fff">오크목재</text>
+      <text x="260" y="52" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="7.5" fill="#fff">작업시간</text>
+      <path d="M196,56 L216,66 M252,56 L232,66" stroke="#ffd600" stroke-width="1.3"/>
+      <path d="M224,66 L224,80" stroke="#ffd600" stroke-width="1.5"/>
+      <path d="M224,80 L219,72 L229,72 Z" fill="#ffd600"/>
+      <rect x="168" y="82" width="112" height="24" rx="6" fill="rgba(255,214,0,0.18)" stroke="#ffd600" stroke-width="1.3"/>
+      <text x="224" y="98" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="#fff">개별원가계산</text>
+    </svg>`,
+  equivalent_units: `
+    <svg viewBox="0 0 300 136" xmlns="http://www.w3.org/2000/svg">
+      <text x="150" y="14" text-anchor="middle" font-family="'Black Han Sans',sans-serif" font-size="12" fill="#fff">완성품환산량</text>
+      <text x="20" y="32" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="#00f2ff">완성품 900개(100%)</text>
+      <rect x="20" y="38" width="260" height="20" rx="5" fill="rgba(0,242,255,0.28)" stroke="#00f2ff" stroke-width="1.5"/>
+      <text x="20" y="76" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="#ffd600">재공품 200개(완성도 60%)</text>
+      <rect x="20" y="82" width="260" height="20" rx="5" fill="none" stroke="#ffd600" stroke-width="1.5"/>
+      <rect x="20" y="82" width="156" height="20" rx="5" fill="rgba(255,214,0,0.32)" stroke="#ffd600" stroke-width="1.5"/>
+      <text x="150" y="114" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="rgba(255,255,255,0.7)">200 × 60% = 120개(환산량)</text>
+      <text x="150" y="128" text-anchor="middle" font-family="'Black Han Sans',sans-serif" font-size="10" fill="#fff">900 + 120 = 1,020개</text>
+    </svg>`,
+  material_vs_conversion_pct: `
+    <svg viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg">
+      <text x="150" y="14" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9" fill="rgba(255,255,255,0.6)">같은 재공품 200개, 원가 종류에 따라 진행률이 다름</text>
+      <text x="18" y="34" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="#00f2ff">재료비</text>
+      <rect x="60" y="24" width="222" height="14" rx="7" fill="rgba(0,242,255,0.3)" stroke="#00f2ff" stroke-width="1.3"/>
+      <text x="288" y="34" text-anchor="end" font-family="Orbitron,monospace" font-size="9" fill="#00f2ff">100%</text>
+      <text x="18" y="60" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="#ffd600">가공비</text>
+      <rect x="60" y="50" width="222" height="14" rx="7" fill="none" stroke="#ffd600" stroke-width="1.3"/>
+      <rect x="60" y="50" width="133" height="14" rx="7" fill="rgba(255,214,0,0.3)" stroke="#ffd600" stroke-width="1.3"/>
+      <text x="199" y="60" font-family="Orbitron,monospace" font-size="9" fill="#ffd600">60%</text>
+      <text x="150" y="84" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9" fill="rgba(255,255,255,0.55)">재료는 공정 초에 전량 투입 → 재료비만 먼저 100%</text>
+    </svg>`,
+  direct_indirect_labor: `
+    <svg viewBox="0 0 300 124" xmlns="http://www.w3.org/2000/svg">
+      <text x="150" y="14" text-anchor="middle" font-family="'Black Han Sans',sans-serif" font-size="12" fill="#fff">직접노무비 vs 간접노무비</text>
+      <rect x="12" y="24" width="104" height="32" rx="7" fill="rgba(0,242,255,0.16)" stroke="#00f2ff" stroke-width="1.5"/>
+      <text x="64" y="44" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="#fff">이수완(조립공)</text>
+      <path d="M118,40 L166,40" stroke="#00f2ff" stroke-width="2"/>
+      <path d="M166,40 L158,35 L158,45 Z" fill="#00f2ff"/>
+      <rect x="168" y="24" width="120" height="32" rx="7" fill="rgba(0,242,255,0.16)" stroke="#00f2ff" stroke-width="1.5"/>
+      <text x="228" y="44" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="#fff">특정 제품에 추적</text>
+      <text x="150" y="66" text-anchor="middle" font-family="'Black Han Sans',sans-serif" font-size="9.5" fill="#00f2ff">직접노무비 — 손으로 직접 만짐</text>
+      <rect x="12" y="76" width="104" height="32" rx="7" fill="rgba(255,214,0,0.16)" stroke="#ffd600" stroke-width="1.5"/>
+      <text x="64" y="96" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="#fff">서성일(반장)</text>
+      <path d="M118,92 L166,92" stroke="#ffd600" stroke-width="2" stroke-dasharray="4 3"/>
+      <path d="M166,92 L158,87 L158,97 Z" fill="#ffd600"/>
+      <rect x="168" y="76" width="120" height="32" rx="7" fill="rgba(255,214,0,0.16)" stroke="#ffd600" stroke-width="1.5"/>
+      <text x="228" y="96" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="#fff">제조간접비 바구니</text>
+      <text x="150" y="118" text-anchor="middle" font-family="'Black Han Sans',sans-serif" font-size="9.5" fill="#ffd600">간접노무비 — 특정 제품 못 콕 집음</text>
+    </svg>`,
+  direct_indirect_material: `
+    <svg viewBox="0 0 300 124" xmlns="http://www.w3.org/2000/svg">
+      <text x="150" y="14" text-anchor="middle" font-family="'Black Han Sans',sans-serif" font-size="12" fill="#fff">직접재료비 vs 간접재료비</text>
+      <rect x="12" y="24" width="104" height="32" rx="7" fill="rgba(0,242,255,0.16)" stroke="#00f2ff" stroke-width="1.5"/>
+      <text x="64" y="44" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="#fff">목재</text>
+      <path d="M118,40 L166,40" stroke="#00f2ff" stroke-width="2"/>
+      <path d="M166,40 L158,35 L158,45 Z" fill="#00f2ff"/>
+      <rect x="168" y="24" width="120" height="32" rx="7" fill="rgba(0,242,255,0.16)" stroke="#00f2ff" stroke-width="1.5"/>
+      <text x="228" y="44" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="#fff">의자 1개(특정제품)</text>
+      <text x="150" y="66" text-anchor="middle" font-family="'Black Han Sans',sans-serif" font-size="9.5" fill="#00f2ff">직접재료비 — 콕 집어 셀 수 있음</text>
+      <rect x="12" y="76" width="104" height="32" rx="7" fill="rgba(255,214,0,0.16)" stroke="#ffd600" stroke-width="1.5"/>
+      <text x="64" y="92" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9" fill="#fff">접착제·사포</text>
+      <text x="64" y="103" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9" fill="#fff">나사·윤활유</text>
+      <path d="M118,92 L166,92" stroke="#ffd600" stroke-width="2" stroke-dasharray="4 3"/>
+      <path d="M166,92 L158,87 L158,97 Z" fill="#ffd600"/>
+      <rect x="168" y="76" width="120" height="32" rx="7" fill="rgba(255,214,0,0.16)" stroke="#ffd600" stroke-width="1.5"/>
+      <text x="228" y="96" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="#fff">제조간접비로 이전</text>
+      <text x="150" y="118" text-anchor="middle" font-family="'Black Han Sans',sans-serif" font-size="9.5" fill="#ffd600">간접재료비 — 콕 못 집어도 '재료비'</text>
+    </svg>`,
+  depreciation_bar: `
+    <svg viewBox="0 0 300 108" xmlns="http://www.w3.org/2000/svg">
+      <text x="150" y="14" text-anchor="middle" font-family="'Black Han Sans',sans-serif" font-size="11.5" fill="#fff">정액법 감가상각 = 균등 분할</text>
+      <text x="150" y="30" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9" fill="rgba(255,255,255,0.6)">취득원가 12,000,000원</text>
+      <rect x="14" y="36" width="272" height="28" rx="6" fill="rgba(255,214,0,0.12)" stroke="#ffd600" stroke-width="1.5"/>
+      <line x1="41" y1="36" x2="41" y2="64" stroke="rgba(255,214,0,0.4)" stroke-width="1"/>
+      <line x1="68" y1="36" x2="68" y2="64" stroke="rgba(255,214,0,0.4)" stroke-width="1"/>
+      <line x1="95" y1="36" x2="95" y2="64" stroke="rgba(255,214,0,0.4)" stroke-width="1"/>
+      <line x1="122" y1="36" x2="122" y2="64" stroke="rgba(255,214,0,0.4)" stroke-width="1"/>
+      <line x1="149" y1="36" x2="149" y2="64" stroke="rgba(255,214,0,0.4)" stroke-width="1"/>
+      <line x1="176" y1="36" x2="176" y2="64" stroke="rgba(255,214,0,0.4)" stroke-width="1"/>
+      <line x1="203" y1="36" x2="203" y2="64" stroke="rgba(255,214,0,0.4)" stroke-width="1"/>
+      <line x1="230" y1="36" x2="230" y2="64" stroke="rgba(255,214,0,0.4)" stroke-width="1"/>
+      <line x1="257" y1="36" x2="257" y2="64" stroke="rgba(255,214,0,0.4)" stroke-width="1"/>
+      <text x="150" y="54" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9" fill="#fff">10만원 × 120개월</text>
+      <text x="150" y="84" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="rgba(255,255,255,0.7)">= 10년(120개월) 동안 매달 10만원씩</text>
+      <text x="150" y="98" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="8.5" fill="rgba(255,255,255,0.45)">(정액법: 매달 똑같이 나눔)</text>
+    </svg>`,
+  expense_types_grid: `
+    <svg viewBox="0 0 300 140" xmlns="http://www.w3.org/2000/svg">
+      <text x="150" y="12" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="rgba(255,255,255,0.6)">제조경비 4종 — 무엇을 기준으로 나누나</text>
+      <rect x="8" y="20" width="140" height="54" rx="8" fill="rgba(0,242,255,0.1)" stroke="#00f2ff" stroke-width="1.5"/>
+      <text x="78" y="36" text-anchor="middle" font-family="'Black Han Sans',sans-serif" font-size="10.5" fill="#00f2ff">월할경비</text>
+      <text x="78" y="52" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="8.5" fill="#fff">1년치를 달로 쪼갬</text>
+      <text x="78" y="66" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="8" fill="rgba(255,255,255,0.5)">감가상각비·보험료</text>
+      <rect x="152" y="20" width="140" height="54" rx="8" fill="rgba(255,214,0,0.1)" stroke="#ffd600" stroke-width="1.5"/>
+      <text x="222" y="36" text-anchor="middle" font-family="'Black Han Sans',sans-serif" font-size="10.5" fill="#ffd600">측정경비</text>
+      <text x="222" y="52" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="8.5" fill="#fff">계량기로 실측</text>
+      <text x="222" y="66" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="8" fill="rgba(255,255,255,0.5)">전기·수도·가스</text>
+      <rect x="8" y="78" width="140" height="54" rx="8" fill="rgba(255,45,120,0.1)" stroke="#ff2d78" stroke-width="1.5"/>
+      <text x="78" y="94" text-anchor="middle" font-family="'Black Han Sans',sans-serif" font-size="10.5" fill="#ff2d78">지급경비</text>
+      <text x="78" y="110" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="8.5" fill="#fff">그때그때 지급</text>
+      <text x="78" y="124" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="8" fill="rgba(255,255,255,0.5)">수선비·운반비</text>
+      <rect x="152" y="78" width="140" height="54" rx="8" fill="rgba(0,230,118,0.09)" stroke="#00e676" stroke-width="1.5"/>
+      <text x="222" y="94" text-anchor="middle" font-family="'Black Han Sans',sans-serif" font-size="10.5" fill="#00e676">발생경비</text>
+      <text x="222" y="110" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="8.5" fill="#fff">돈 안 나간 손실</text>
+      <text x="222" y="124" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="8" fill="rgba(255,255,255,0.5)">재료감모손실</text>
+    </svg>`,
+  service_dept_flow: `
+    <svg viewBox="0 0 300 108" xmlns="http://www.w3.org/2000/svg">
+      <text x="150" y="14" text-anchor="middle" font-family="'Black Han Sans',sans-serif" font-size="12" fill="#fff">보조부문 원가는 위로 올라간다</text>
+      <rect x="30" y="22" width="90" height="28" rx="7" fill="rgba(0,242,255,0.16)" stroke="#00f2ff" stroke-width="1.5"/>
+      <text x="75" y="41" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="#fff">A라인(제조)</text>
+      <rect x="180" y="22" width="90" height="28" rx="7" fill="rgba(0,242,255,0.16)" stroke="#00f2ff" stroke-width="1.5"/>
+      <text x="225" y="41" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="#fff">B라인(제조)</text>
+      <path d="M120,64 L75,54" stroke="rgba(255,255,255,0.5)" stroke-width="1.8"/>
+      <path d="M75,54 L83,58 L79,49 Z" fill="rgba(255,255,255,0.5)"/>
+      <path d="M180,64 L225,54" stroke="rgba(255,255,255,0.5)" stroke-width="1.8"/>
+      <path d="M225,54 L217,58 L221,49 Z" fill="rgba(255,255,255,0.5)"/>
+      <rect x="100" y="66" width="100" height="28" rx="7" fill="rgba(255,214,0,0.16)" stroke="#ffd600" stroke-width="1.5"/>
+      <text x="150" y="85" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9.5" fill="#fff">식당(보조부문)</text>
+    </svg>`,
+  cost_split_bar_simple: `
+    <svg viewBox="0 0 300 90" xmlns="http://www.w3.org/2000/svg">
+      <text x="150" y="14" text-anchor="middle" font-family="'Black Han Sans',sans-serif" font-size="11.5" fill="#fff">식당원가 배분 — 식수인원 기준</text>
+      <rect x="20" y="26" width="260" height="28" rx="6" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+      <rect x="20" y="26" width="65" height="28" rx="6" fill="rgba(0,242,255,0.24)" stroke="#00f2ff" stroke-width="1.5"/>
+      <text x="52" y="44" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="8.5" fill="#fff">A 150,000</text>
+      <rect x="85" y="26" width="195" height="28" rx="6" fill="rgba(255,214,0,0.24)" stroke="#ffd600" stroke-width="1.5"/>
+      <text x="182" y="44" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="8.5" fill="#fff">B 450,000</text>
+      <text x="150" y="72" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-size="9" fill="rgba(255,255,255,0.6)">총 600,000원을 20명:60명(1:3)으로</text>
     </svg>`,
   cost_behavior_graphs: `
     <svg viewBox="0 0 300 162" xmlns="http://www.w3.org/2000/svg">
