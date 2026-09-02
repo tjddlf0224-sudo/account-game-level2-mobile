@@ -1705,6 +1705,27 @@ function drawCharacter(ctx, cx, cy, s, look, opts){
   if(look.accessory && look.accessory!=='none') drawAccessory(ctx,cx,cy,s,look.accessory,look);
 }
 
+/* ── NPC 그림(제미나이 시트 → assets/npc/) ──
+ *  전신 <key>.png 는 맵 스프라이트로, 얼굴 <key>_face.png 는 대화 초상화로 쓴다.
+ *  전신을 46px 원형 초상화에 그대로 넣으면 얼굴이 3px라 누군지 알아볼 수 없어서
+ *  추출 단계(assets/npc/extract_sheet.py)에서 머리만 따로 잘라 둔다.
+ *  이미지를 못 읽으면(파일 누락·캐시 실패) 아래 도형 캐릭터로 그대로 돌아간다. */
+const ART_ALIAS = { n_truck2:'n_truck' };   // 차대한은 두 구역에 같은 모습으로 선다
+const NPC_ART = {};
+function npcArt(id){
+  const im = NPC_ART[ART_ALIAS[id]||id];
+  return (im && im.complete && im.naturalWidth) ? im : null;
+}
+(function(){
+  for(const id in LOOK){
+    const base = ART_ALIAS[id]||id;
+    if(NPC_ART[base]) continue;
+    const im = new Image();
+    im.src = 'assets/npc/'+base+'.png';
+    NPC_ART[base] = im;
+  }
+})();
+
 /* ── 대화 초상화 프리렌더(96px, NPC_DATA에 data URL 주입) ── */
 let PLAYER_PORTRAIT_IMG = '';
 (function(){
@@ -1722,7 +1743,12 @@ let PLAYER_PORTRAIT_IMG = '';
     const npcId = key.replace(/_intro$|_end$/,'');
     const look = LOOK[npcId];
     if(!look) continue;
-    NPC_DATA[key].portraitImg = render(look);
+    NPC_DATA[key].portraitImg = render(look);      // 폴백부터 넣어 두고
+    // 얼굴 그림이 읽히면 갈아 끼운다. Dialog.render()가 그릴 때마다 이 값을
+    // 다시 읽으므로 늦게 도착해도 다음 대사부터 반영된다.
+    const face = new Image();
+    face.onload = ()=>{ NPC_DATA[key].portraitImg = face.src; };
+    face.src = 'assets/npc/'+(ART_ALIAS[npcId]||npcId)+'_face.png';
   }
   PLAYER_PORTRAIT_IMG = render(PLAYER_LOOK);
 })();
@@ -2151,10 +2177,22 @@ const World = {
       if(n.x<x0-1||n.x>x1+1||n.y<y0-1||n.y>y1+1) continue;
       const cx=n.x*TS-camX+TS/2, cy=n.y*TS-camY+TS/2;
       const look=LOOK[n.id];
-      if(look) drawCharacter(ctx,cx,cy,TS*0.38,look,{shadow:false,dir:'front'});
-      else {
+      // 머리 꼭대기 — 이름표와 느낌표를 이 위에 띄운다. 전신 그림은 도형
+      // 캐릭터보다 훨씬 키가 커서, 예전처럼 cy 기준 고정값으로 두면 겹친다.
+      let topY;
+      const art=npcArt(n.id);
+      if(art){
+        // 발끝을 타일 중심보다 조금 아래에 두어 타일 위에 선 것처럼 보이게 한다.
+        const h=TS*1.25, w=h*art.naturalWidth/art.naturalHeight;
+        topY=cy+TS*0.42-h;
+        ctx.drawImage(art, cx-w/2, topY, w, h);
+      } else if(look){
+        drawCharacter(ctx,cx,cy,TS*0.38,look,{shadow:false,dir:'front'});
+        topY=cy-TS*0.38*0.52;
+      } else {
         ctx.fillStyle=n.color;
         ctx.beginPath(); ctx.arc(cx,cy,TS*0.32,0,7); ctx.fill();
+        topY=cy-TS*0.32;
       }
       // 근처면 이름표 + 느낌표
       if(this.nearNpc && this.nearNpc.id===n.id){
@@ -2163,8 +2201,8 @@ const World = {
         ctx.textAlign='center';
         const label=n.name, w=ctx.measureText(label).width+14;
         ctx.fillStyle='rgba(5,3,16,0.85)';
-        ctx.fillRect(cx-w/2, cy-TS*0.92, w, TS*0.4);
-        ctx.fillStyle='#fff'; ctx.fillText(label, cx, cy-TS*0.62);
+        ctx.fillRect(cx-w/2, topY-TS*0.72, w, TS*0.4);
+        ctx.fillStyle='#fff'; ctx.fillText(label, cx, topY-TS*0.42);
         ctx.restore();
       } else {
         // 대화 가능 표시 — 한서준 대리와 첫 대화 끝내기 전엔 다른 NPC 위엔 안 띄우고(어차피 안내
@@ -2175,7 +2213,7 @@ const World = {
           ctx.fillStyle='rgba(255,214,0,'+(0.55+0.35*Math.sin(this.bob*2))+')';
           ctx.font=`700 ${Math.round(TS*0.42)}px 'Black Han Sans', sans-serif`;
           ctx.textAlign='center';
-          ctx.fillText('!', cx, cy-TS*0.42);
+          ctx.fillText('!', cx, topY-TS*0.22);
         }
       }
     }
