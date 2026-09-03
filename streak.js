@@ -12,8 +12,13 @@
  *  2. **한국시간으로 센다.** growth.js 가 UTC 로 날짜를 재는 바람에 자정~오전 9시
  *     접속이 '어제'로 기록되던 버그가 있었다(2026-09-01에 고침). 같은 실수를
  *     반복하지 않으려고 여기서도 KST 로 맞춘다.
- *  3. **학습을 막지 않는다.** 스트릭이 끊겨도 잠기는 것은 아무것도 없다.
- *     광고는 "안 봐도 되지만 보면 이득"(끊긴 날을 메우는 보충권)으로만 쓴다.
+ *  3. **학습을 막지 않고, 광고도 붙이지 않는다.** 스트릭이 끊겨도 잠기는 것이 없다.
+ *     처음엔 "광고 보고 보충권 받기"를 넣었다가 뺐다 — 다른 보상형 광고(시간 추가·
+ *     부활)는 "지금 더 하고 싶다"는 순간에 뜨지만, 보충권은 **"어제 안 했지"를
+ *     상기시킨 뒤 파는 것**이라 결이 다르다. 학습을 못 한 죄책감을 수익화하는
+ *     구조는 교사가 만든 학습 앱이 할 일이 아니다. 게다가 허브에 상시 노출된다.
+ *     대신 **7일 연속마다 보충권 1개를 그냥 준다**(최대 2개 보관) — 꾸준히 한
+ *     사람의 실수 한 번을 봐주는 장치이지, 광고를 볼 이유가 아니다.
  *
  *  window.Streak 로 노출.
  * ============================================================ */
@@ -74,38 +79,14 @@
     }
     put(K_DAYS, days); put(K_LAST, t);
     if (days > s.best) put(K_BEST, days);
-    return { changed: true, days: days, gained: days - s.days, usedFreeze: usedFreeze };
-  }
-
-  /* ── 보충권(광고) ───────────────────────────────────────────
-     보상형 광고 콜백이 전역 함수 이름(window.onRewardGranted)이라, 이미 걸려
-     있던 것을 지우지 않도록 반드시 체이닝한다. */
-  function offerFreeze(done) {
-    function grant() {
-      put(K_FREEZE, state().freeze + 1);
-      if (typeof done === 'function') done(true);
-      render();
+    // 7일 연속마다 보충권 하나. 쌓아 두고 오래 쉬는 데 쓰이지 않게 2개까지만 보관한다.
+    var gotFreeze = false;
+    if (days > 0 && days % 7 === 0) {
+      var fz = num(K_FREEZE, 0);
+      if (fz < 2) { put(K_FREEZE, fz + 1); gotFreeze = true; }
     }
-    var Ad = global.AdBridge;
-    if (!Ad || !Ad.isRewardedReady || !Ad.isRewardedReady()) {
-      if (global.Ask) Ask.alert('광고를 불러오는 중이에요. 잠시 후 다시 눌러주세요.');
-      if (typeof done === 'function') done(false);
-      return;
-    }
-    var prevOk = global.onRewardGranted, prevNo = global.onRewardedFailed, settled = false;
-    function restore() { global.onRewardGranted = prevOk; global.onRewardedFailed = prevNo; }
-    global.onRewardGranted = function () {
-      if (typeof prevOk === 'function') { try { prevOk.apply(this, arguments); } catch (e) {} }
-      if (settled) return; settled = true;                   // 이벤트와 Promise 가 둘 다 올 수 있다
-      restore(); grant();
-    };
-    global.onRewardedFailed = function () {
-      if (typeof prevNo === 'function') { try { prevNo.apply(this, arguments); } catch (e) {} }
-      if (settled) return; settled = true;
-      restore();
-      if (typeof done === 'function') done(false);
-    };
-    Ad.showRewarded();
+    return { changed: true, days: days, gained: days - s.days,
+             usedFreeze: usedFreeze, gotFreeze: gotFreeze };
   }
 
   /* ── 도장 아이콘(붉은 인장) ─────────────────────────────────
@@ -141,6 +122,7 @@
       '.stk-stat div{flex:1 1 0;min-width:0;background:rgba(255,255,255,.05);border-radius:12px;padding:10px 6px;}',
       '.stk-stat b{display:block;font-size:1.1rem;color:#fff;}',
       '.stk-stat span{font-size:.72rem;color:#98a0b3;}',
+      '.stk-note{font-size:.74rem;color:#8d94a6;line-height:1.6;margin:-4px 0 14px;}',
       '.stk-row{display:flex;gap:10px;}',
       '.stk-row button{flex:1 1 0;min-width:0;padding:12px 0;border-radius:11px;font:700 .9rem/1 inherit;',
       'cursor:pointer;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.07);color:#eef1f7;}',
@@ -176,8 +158,9 @@
           '<div><b>' + s.best + '</b><span>최고 기록</span></div>' +
           '<div><b>' + s.freeze + '</b><span>보충권</span></div>' +
         '</div>' +
+        '<div class="stk-note">7일 연속마다 보충권이 하나 생깁니다. ' +
+        '보충권이 있으면 하루를 빠뜨려도 이어집니다.</div>' +
         '<div class="stk-row">' +
-          '<button id="stk-ad">광고 보고 보충권 받기</button>' +
           '<button id="stk-close" class="primary">닫기</button>' +
         '</div>' +
       '</div>';
@@ -185,9 +168,6 @@
     function close() { if (ov.parentNode) ov.parentNode.removeChild(ov); }
     document.body.appendChild(ov);
     ov.querySelector('#stk-close').addEventListener('click', close);
-    ov.querySelector('#stk-ad').addEventListener('click', function () {
-      offerFreeze(function (ok) { if (ok) { close(); openModal(); } });
-    });
   }
 
   /* 허브에 알약을 심는다. 붙일 자리가 없는 페이지에서는 조용히 아무것도 안 한다. */
@@ -225,6 +205,6 @@
 
   global.Streak = {
     state: state, checkIn: checkIn, render: render,
-    mountPill: mountPill, open: openModal, offerFreeze: offerFreeze
+    mountPill: mountPill, open: openModal
   };
 })(window);
