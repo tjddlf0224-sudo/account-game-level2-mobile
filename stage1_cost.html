@@ -1729,11 +1729,7 @@ function npcArt(id){
 /* ── 주인공 걷기 스프라이트(제미나이 시트 → assets/npc/player_*) ──
  *  방향(front/back/side) × 3장. 0=서기, 1·2=걸음. 고전 RPG처럼
  *  서기 → 1 → 서기 → 2 로 돈다.
- *  옆모습은 오른쪽 향한 것만 있고, 왼쪽으로 갈 때 좌우로 뒤집어 쓴다.
- *  ⚠ 옆모습 1·2는 지금 같은 그림이다 — 제미나이가 옆모습 네 칸을 전부
- *  '오른발이 앞'인 같은 위상으로 그려서 반대 발 프레임이 없다. 그래서
- *  옆으로 걸을 때는 서기↔성큼 2프레임으로 보인다. 시트를 다시 뽑으면
- *  extract_sheet.py의 SPRITES['player']['side']만 고치면 된다. */
+ *  옆모습은 오른쪽 향한 것만 있고, 왼쪽으로 갈 때 좌우로 뒤집어 쓴다. */
 const PLAYER_ART = { front:[], back:[], side:[] };
 (function(){
   for(const d in PLAYER_ART){
