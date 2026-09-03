@@ -12,13 +12,16 @@
  *  2. **한국시간으로 센다.** growth.js 가 UTC 로 날짜를 재는 바람에 자정~오전 9시
  *     접속이 '어제'로 기록되던 버그가 있었다(2026-09-01에 고침). 같은 실수를
  *     반복하지 않으려고 여기서도 KST 로 맞춘다.
- *  3. **학습을 막지 않고, 광고도 붙이지 않는다.** 스트릭이 끊겨도 잠기는 것이 없다.
- *     처음엔 "광고 보고 보충권 받기"를 넣었다가 뺐다 — 다른 보상형 광고(시간 추가·
- *     부활)는 "지금 더 하고 싶다"는 순간에 뜨지만, 보충권은 **"어제 안 했지"를
- *     상기시킨 뒤 파는 것**이라 결이 다르다. 학습을 못 한 죄책감을 수익화하는
- *     구조는 교사가 만든 학습 앱이 할 일이 아니다. 게다가 허브에 상시 노출된다.
- *     대신 **7일 연속마다 보충권 1개를 그냥 준다**(최대 2개 보관) — 꾸준히 한
- *     사람의 실수 한 번을 봐주는 장치이지, 광고를 볼 이유가 아니다.
+ *  3. **학습을 막지 않는다.** 스트릭이 끊겨도 잠기는 것은 아무것도 없다.
+ *  4. **광고는 끊긴 순간에만 한 번 뜬다.**
+ *     처음엔 "광고 보고 보충권 받기"를 항상 띄웠다가 뺐다 — 스트릭이 살아 있는데
+ *     보충권을 파는 것은 **"어제 안 했지"를 상기시킨 뒤 파는 것**이라, 학습을 못 한
+ *     죄책감을 수익화하는 구조가 된다. 게다가 허브에 상시 노출됐다.
+ *     지금은 **실제로 끊긴 그날에만** 되살리기를 제안한다. 이건 게임5의 부활과
+ *     같은 자리다 — "지금 되돌리고 싶다"는 순간이라 결이 다르다.
+ *     · 3일 미만이 끊긴 것은 제안하지 않는다(아까울 것이 없다).
+ *     · 끊긴 그날(한국시간)이 지나면 사라진다. 상시 상점이 되면 안 되므로.
+ *  5. 7일 연속마다 보충권 1개를 그냥 준다(최대 2개) — 광고와 무관한 별개 장치.
  *
  *  window.Streak 로 노출.
  * ============================================================ */
@@ -26,7 +29,9 @@
   'use strict';
 
   var K_DAYS = 'streak_days', K_LAST = 'streak_last',
-      K_BEST = 'streak_best', K_FREEZE = 'streak_freeze';
+      K_BEST = 'streak_best', K_FREEZE = 'streak_freeze',
+      K_LOST = 'streak_lost', K_LOST_AT = 'streak_lost_at';
+  var REVIVE_MIN = 3;        // 이만큼은 쌓였어야 되살리기를 제안한다
 
   /* 한국시간 기준 YYYY-MM-DD. growth.js todayStr() 과 같은 방식으로 맞춘다. */
   function today() {
@@ -44,18 +49,25 @@
   function put(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
 
   function state() {
+    var t = today();
     var last = null;
     try { last = localStorage.getItem(K_LAST); } catch (e) {}
     var days = num(K_DAYS, 0);
-    var gap = (last && dayNum(last) != null) ? dayNum(today()) - dayNum(last) : null;
+    var gap = (last && dayNum(last) != null) ? dayNum(t) - dayNum(last) : null;
     // 오늘 아직 안 했고, 하루라도 비면 끊긴다 → 위험 표시
+    var lostAt = null;
+    try { lostAt = localStorage.getItem(K_LOST_AT); } catch (e) {}
+    var lost = num(K_LOST, 0);
     return {
       days: days,
       best: num(K_BEST, 0),
       freeze: num(K_FREEZE, 0),
       last: last,
       doneToday: gap === 0,
-      atRisk: days > 0 && gap !== 0
+      atRisk: days > 0 && gap !== 0,
+      lost: lost,
+      // 끊긴 그날에만 되살릴 수 있다. 하루가 지나면 그 기록은 없던 것이 된다.
+      canRevive: lost >= REVIVE_MIN && lostAt === t
     };
   }
 
@@ -76,6 +88,8 @@
       put(K_FREEZE, s.freeze - 1);
     } else {
       days = 1;                                              // 끊겼다
+      // 끊긴 그날에만 되살리기를 제안하려고 남겨 둔다. 짧은 것은 남기지 않는다.
+      if (s.days >= REVIVE_MIN) { put(K_LOST, s.days); put(K_LOST_AT, t); }
     }
     put(K_DAYS, days); put(K_LAST, t);
     if (days > s.best) put(K_BEST, days);
@@ -87,6 +101,57 @@
     }
     return { changed: true, days: days, gained: days - s.days,
              usedFreeze: usedFreeze, gotFreeze: gotFreeze };
+  }
+
+  /* ── 되살리기 ───────────────────────────────────────────────
+     끊긴 그날에만 부를 수 있다. 광고 SDK 가 없는 환경(웹 배포판)에서는 이 앱의
+     기존 관례대로(index.html 스테이지 해금과 같다) 그냥 되살려 준다 — 대신
+     단추 문구에서 '광고'를 빼서 없는 광고를 본 것처럼 말하지 않는다. */
+  function adsAvailable() {
+    var Ad = global.AdBridge;
+    return !!(Ad && typeof Ad.showRewarded === 'function');
+  }
+
+  function grantRevive() {
+    var s = state();
+    if (!s.canRevive) return false;
+    var days = s.lost + 1;            // 끊기기 전 기록 + 오늘 한 판
+    put(K_DAYS, days);
+    put(K_LAST, today());
+    if (days > num(K_BEST, 0)) put(K_BEST, days);
+    try { localStorage.removeItem(K_LOST); localStorage.removeItem(K_LOST_AT); } catch (e) {}
+    render();
+    return true;
+  }
+
+  function revive(done) {
+    if (!state().canRevive) { if (done) done(false); return; }
+    if (!adsAvailable()) { if (done) done(grantRevive()); return; }
+
+    var Ad = global.AdBridge;
+    if (typeof Ad.isRewardedReady === 'function' && !Ad.isRewardedReady()) {
+      if (global.Ask) Ask.alert('광고를 불러오는 중이에요. 잠시 후 다시 눌러주세요.');
+      if (done) done(false);
+      return;
+    }
+    // 보상형 콜백이 전역 함수 이름이라, 이미 걸려 있던 것을 지우지 않게 체이닝한다.
+    // 이벤트와 Promise 가 둘 다 올 수 있어 한 번만 처리되도록 settled 로 잠근다.
+    var prevOk = global.onRewardGranted, prevNo = global.onRewardedFailed, settled = false;
+    function restore() { global.onRewardGranted = prevOk; global.onRewardedFailed = prevNo; }
+    global.onRewardGranted = function () {
+      if (typeof prevOk === 'function') { try { prevOk.apply(this, arguments); } catch (e) {} }
+      if (settled) return; settled = true;
+      restore();
+      if (done) done(grantRevive());
+    };
+    global.onRewardedFailed = function () {
+      if (typeof prevNo === 'function') { try { prevNo.apply(this, arguments); } catch (e) {} }
+      if (settled) return; settled = true;
+      restore();
+      if (global.Ask) Ask.alert('광고를 불러올 수 없어요. 잠시 후 다시 시도해주세요.');
+      if (done) done(false);
+    };
+    Ad.showRewarded();
   }
 
   /* ── 도장 아이콘(붉은 인장) ─────────────────────────────────
@@ -112,17 +177,20 @@
       '.stk-ov{position:fixed;inset:0;z-index:99998;display:flex;align-items:center;justify-content:center;',
       'background:rgba(5,3,16,.78);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);}',
       '.stk-box{width:min(400px,86%);max-height:88%;overflow:auto;background:#161a28;color:#eef1f7;',
-      'border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:26px 22px 18px;text-align:center;',
+      'border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:20px 20px 16px;text-align:center;',
       'font-family:"Noto Sans KR",sans-serif;}',
-      '.stk-seal{width:64px;height:64px;margin:0 auto 10px;color:#ff5a4e;}',
-      '.stk-n{font-size:2.6rem;font-weight:800;line-height:1;color:#fff;}',
+      '.stk-seal{width:50px;height:50px;margin:0 auto 8px;color:#ff5a4e;}',
+      '.stk-n{font-size:2.2rem;font-weight:800;line-height:1;color:#fff;}',
       '.stk-n small{font-size:1rem;font-weight:700;margin-left:4px;color:#c7ccd8;}',
-      '.stk-sub{margin-top:8px;font-size:.86rem;color:#aeb4c4;line-height:1.6;}',
-      '.stk-stat{display:flex;gap:10px;margin:18px 0 16px;}',
-      '.stk-stat div{flex:1 1 0;min-width:0;background:rgba(255,255,255,.05);border-radius:12px;padding:10px 6px;}',
+      '.stk-sub{margin-top:7px;font-size:.84rem;color:#aeb4c4;line-height:1.5;}',
+      '.stk-stat{display:flex;gap:10px;margin:14px 0 12px;}',
+      '.stk-stat div{flex:1 1 0;min-width:0;background:rgba(255,255,255,.05);border-radius:12px;padding:8px 6px;}',
       '.stk-stat b{display:block;font-size:1.1rem;color:#fff;}',
       '.stk-stat span{font-size:.72rem;color:#98a0b3;}',
       '.stk-note{font-size:.74rem;color:#8d94a6;line-height:1.6;margin:-4px 0 14px;}',
+      '.stk-lost{font-size:.8rem;color:#ffd6d0;line-height:1.5;margin:-2px 0 12px;',
+      'background:rgba(255,90,78,.12);border:1px solid rgba(255,90,78,.3);',
+      'border-radius:11px;padding:9px 12px;}',
       '.stk-row{display:flex;gap:10px;}',
       '.stk-row button{flex:1 1 0;min-width:0;padding:12px 0;border-radius:11px;font:700 .9rem/1 inherit;',
       'cursor:pointer;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.07);color:#eef1f7;}',
@@ -137,9 +205,10 @@
     var s = state();
     if (s.days <= 0) { pill.style.display = 'none'; return; }   // 0일이면 숨긴다
     pill.style.display = '';
-    pill.className = 'stk-pill' + (s.atRisk ? ' risk' : '');
+    pill.className = 'stk-pill' + (s.canRevive ? ' risk' : (s.atRisk ? ' risk' : ''));
     pill.innerHTML = '<span class="ic">' + SEAL + '</span>' + s.days + '일';
-    pill.title = s.atRisk ? '오늘 아직 안 했어요' : '오늘 출석 완료';
+    pill.title = s.canRevive ? s.lost + '일 연속이 끊겼어요 — 오늘 안에 되살릴 수 있습니다'
+               : s.atRisk ? '오늘 아직 안 했어요' : '오늘 출석 완료';
   }
 
   function openModal() {
@@ -158,16 +227,28 @@
           '<div><b>' + s.best + '</b><span>최고 기록</span></div>' +
           '<div><b>' + s.freeze + '</b><span>보충권</span></div>' +
         '</div>' +
-        '<div class="stk-note">7일 연속마다 보충권이 하나 생깁니다. ' +
-        '보충권이 있으면 하루를 빠뜨려도 이어집니다.</div>' +
-        '<div class="stk-row">' +
-          '<button id="stk-close" class="primary">닫기</button>' +
-        '</div>' +
+        (s.canRevive
+          ? '<div class="stk-lost">' + s.lost + '일 연속이 끊겼어요.<br>' +
+            '오늘 안에 되살릴 수 있습니다.</div>' +
+            '<div class="stk-row">' +
+              '<button id="stk-close">닫기</button>' +
+              '<button id="stk-revive" class="primary">' +
+                (adsAvailable() ? '광고 보고 되살리기' : '되살리기') + '</button>' +
+            '</div>'
+          : '<div class="stk-note">7일 연속마다 보충권이 하나 생깁니다. ' +
+            '보충권이 있으면 하루를 빠뜨려도 이어집니다.</div>' +
+            '<div class="stk-row">' +
+              '<button id="stk-close" class="primary">닫기</button>' +
+            '</div>') +
       '</div>';
     ov.addEventListener('click', function (e) { if (e.target === ov) close(); });
     function close() { if (ov.parentNode) ov.parentNode.removeChild(ov); }
     document.body.appendChild(ov);
     ov.querySelector('#stk-close').addEventListener('click', close);
+    var rv = ov.querySelector('#stk-revive');
+    if (rv) rv.addEventListener('click', function () {
+      revive(function (ok) { if (ok) { close(); openModal(); } });
+    });
   }
 
   /* 허브에 알약을 심는다. 붙일 자리가 없는 페이지에서는 조용히 아무것도 안 한다. */
@@ -205,6 +286,6 @@
 
   global.Streak = {
     state: state, checkIn: checkIn, render: render,
-    mountPill: mountPill, open: openModal
+    mountPill: mountPill, open: openModal, revive: revive
   };
 })(window);
