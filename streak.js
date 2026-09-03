@@ -19,7 +19,8 @@
  *     죄책감을 수익화하는 구조가 된다. 게다가 허브에 상시 노출됐다.
  *     지금은 **실제로 끊긴 그날에만** 되살리기를 제안한다. 이건 게임5의 부활과
  *     같은 자리다 — "지금 되돌리고 싶다"는 순간이라 결이 다르다.
- *     · 3일 미만이 끊긴 것은 제안하지 않는다(아까울 것이 없다).
+ *     · 길이와 무관하게 제안한다 — 이제 막 시작한 사람일수록 한 번 끊기면
+ *       그대로 그만두기 쉽다.
  *     · 끊긴 그날(한국시간)이 지나면 사라진다. 상시 상점이 되면 안 되므로.
  *  5. 7일 연속마다 보충권 1개를 그냥 준다(최대 2개) — 광고와 무관한 별개 장치.
  *
@@ -31,7 +32,9 @@
   var K_DAYS = 'streak_days', K_LAST = 'streak_last',
       K_BEST = 'streak_best', K_FREEZE = 'streak_freeze',
       K_LOST = 'streak_lost', K_LOST_AT = 'streak_lost_at';
-  var REVIVE_MIN = 3;        // 이만큼은 쌓였어야 되살리기를 제안한다
+  // 끊기기만 하면 길이와 무관하게 제안한다(1일짜리도). 처음엔 3일 이상만
+  // 제안했는데, 이제 막 시작한 사람일수록 한 번 끊기면 그대로 그만두기 쉽다.
+  var REVIVE_MIN = 1;
 
   /* 한국시간 기준 YYYY-MM-DD. growth.js todayStr() 과 같은 방식으로 맞춘다. */
   function today() {
@@ -88,7 +91,7 @@
       put(K_FREEZE, s.freeze - 1);
     } else {
       days = 1;                                              // 끊겼다
-      // 끊긴 그날에만 되살리기를 제안하려고 남겨 둔다. 짧은 것은 남기지 않는다.
+      // 끊긴 그날에만 되살리기를 제안하려고 남겨 둔다.
       if (s.days >= REVIVE_MIN) { put(K_LOST, s.days); put(K_LOST_AT, t); }
     }
     put(K_DAYS, days); put(K_LAST, t);
