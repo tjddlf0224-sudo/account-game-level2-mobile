@@ -1726,6 +1726,33 @@ function npcArt(id){
   }
 })();
 
+/* ── 주인공 걷기 스프라이트(제미나이 시트 → assets/npc/player_*) ──
+ *  방향(front/back/side) × 3장. 0=서기, 1·2=걸음. 고전 RPG처럼
+ *  서기 → 1 → 서기 → 2 로 돈다.
+ *  옆모습은 오른쪽 향한 것만 있고, 왼쪽으로 갈 때 좌우로 뒤집어 쓴다.
+ *  ⚠ 옆모습 1·2는 지금 같은 그림이다 — 제미나이가 옆모습 네 칸을 전부
+ *  '오른발이 앞'인 같은 위상으로 그려서 반대 발 프레임이 없다. 그래서
+ *  옆으로 걸을 때는 서기↔성큼 2프레임으로 보인다. 시트를 다시 뽑으면
+ *  extract_sheet.py의 SPRITES['player']['side']만 고치면 된다. */
+const PLAYER_ART = { front:[], back:[], side:[] };
+(function(){
+  for(const d in PLAYER_ART){
+    for(let i=0;i<3;i++){
+      const im = new Image();
+      im.src = 'assets/npc/player_'+d+'_'+i+'.png';
+      PLAYER_ART[d].push(im);
+    }
+  }
+})();
+function playerFrame(dir, walkT, moving){
+  const arr = PLAYER_ART[dir] || PLAYER_ART.front;
+  // 걸음 위상은 몸이 위아래로 흔들리는 값(sin(walkT))과 같은 주기를 쓴다.
+  // 한 주기(2pi)를 넷으로 나눠 서기 → 1 → 서기 → 2.
+  const step = moving ? [0,1,0,2][Math.floor(walkT/(Math.PI/2))%4] : 0;
+  const im = arr[step];
+  return (im && im.complete && im.naturalWidth) ? im : null;
+}
+
 /* ── 대화 초상화 프리렌더(96px, NPC_DATA에 data URL 주입) ── */
 let PLAYER_PORTRAIT_IMG = '';
 (function(){
@@ -1750,7 +1777,10 @@ let PLAYER_PORTRAIT_IMG = '';
     face.onload = ()=>{ NPC_DATA[key].portraitImg = face.src; };
     face.src = 'assets/npc/'+(ART_ALIAS[npcId]||npcId)+'_face.png';
   }
-  PLAYER_PORTRAIT_IMG = render(PLAYER_LOOK);
+  PLAYER_PORTRAIT_IMG = render(PLAYER_LOOK);      // 폴백
+  const pf = new Image();
+  pf.onload = ()=>{ PLAYER_PORTRAIT_IMG = pf.src; };
+  pf.src = 'assets/npc/player_face.png';
 })();
 
 /* ── 구역 판정 ── */
@@ -2224,7 +2254,15 @@ const World = {
       const swing=this.moving ? Math.sin(this.walkT)*TS*0.06 : 0;
       ctx.save();
       ctx.translate(cx,cy+swing);
-      drawCharacter(ctx,0,0,TS*0.38,PLAYER_LOOK,{shadow:false,dir:this.dir,facing:this.facing});
+      const art=playerFrame(this.dir,this.walkT,this.moving);
+      if(art){
+        // NPC와 같은 기준으로 세운다 — 발끝을 타일 중심보다 조금 아래에.
+        const h=TS*1.25, w=h*art.naturalWidth/art.naturalHeight;
+        if(this.dir==='side' && this.facing<0) ctx.scale(-1,1);
+        ctx.drawImage(art, -w/2, TS*0.42-h, w, h);
+      } else {
+        drawCharacter(ctx,0,0,TS*0.38,PLAYER_LOOK,{shadow:false,dir:this.dir,facing:this.facing});
+      }
       ctx.restore();
     }
   },
