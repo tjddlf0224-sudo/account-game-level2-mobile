@@ -15,6 +15,7 @@
 <script src="growth.js?v=1"></script>
 <script src="streak.js?v=1"></script>
 <script src="ask.js?v=1"></script>
+<script src="bgmguard.js?v=1"></script>
 <style>
 :root{
   --cy:#00f2ff; --pu:#b44fff; --or:#ff9800; --gd:#ffd600; --gn:#00e676; --pk:#ff2d78;
@@ -525,11 +526,15 @@ body{ font-family:'Noto Sans KR',sans-serif; color:#fff; position:relative; touc
   </div>
   <div class="hud-sp"></div>
   <div class="hud-btns">
+    <button class="hbtn" id="mute-btn" onclick="toggleMute()" title="음소거">🎵</button>
     <button class="hbtn" onclick="Stage.openDocs()">서류철 <span class="n" id="doc-count">0/14</span></button>
     <button class="hbtn" onclick="Stage.quit()">그만</button>
     <button class="hbtn" onclick="Stage.exit()">나가기</button>
   </div>
 </div>
+
+<audio id="bgm" src="bgm_stage1_map.mp3?v=1" loop preload="auto"></audio>
+<audio id="bgm-sheet" src="bgm_stage1_sheet.mp3?v=1" loop preload="none"></audio>
 
 <div id="minimap-box"><canvas id="minimap"></canvas></div>
 
@@ -3404,6 +3409,7 @@ const Sheet = {
   open(cb){
     this.onDone=cb; this.placed={}; this.sel=null; this.wrong=0; this.phase='place';
     World.paused=true;
+    BGM.swap('sheet');
     document.getElementById('sheet-overlay').classList.add('show');
     document.getElementById('sh-done').classList.remove('show');
     this.renderBuckets();
@@ -3529,6 +3535,7 @@ const Sheet = {
     Stage.state.sheetWrong=this.wrong;
     Stage.save();
     document.getElementById('sheet-overlay').classList.remove('show');
+    BGM.swap('map');
     try{ saveStageScore(score, this.wrong, quizWrong); }catch(e){}
     const cb=this.onDone; this.onDone=null;
     if(cb) cb({cogm, wrong:this.wrong, score});
@@ -3650,6 +3657,52 @@ const ResultScreen = {
   },
 };
 
+
+/* ── BGM ──────────────────────────────────────────────────────
+ *  지도용(bgm_stage1_map)과 명세서 작성용(bgm_stage1_sheet) 두 곡을 쓴다.
+ *  다른 게임과 같은 규칙: 이 화면 전용 키(cost_muted)가 있으면 그게 우선,
+ *  없으면 허브 전역 토글(hub_muted)을 따른다.
+ *  자동재생 정책 때문에 **사용자가 화면을 한 번 만진 뒤**에만 시작한다.
+ * ------------------------------------------------------------ */
+const BGM = {
+  map:null, sheet:null, cur:null, muted:false, started:false,
+  init(){
+    this.map=document.getElementById('bgm');
+    this.sheet=document.getElementById('bgm-sheet');
+    this.map.volume=0.45; this.sheet.volume=0.45;
+    this.muted = localStorage.getItem('cost_muted')!==null
+      ? localStorage.getItem('cost_muted')==='true'
+      : localStorage.getItem('hub_muted')==='true';
+    this.apply();
+    // 첫 터치/클릭/키 한 번이면 시작한다. once 라 그 뒤엔 안 걸린다.
+    const kick=()=>{ this.started=true; this.play(this.map); };
+    ['pointerdown','keydown'].forEach(ev=>
+      document.addEventListener(ev, kick, {once:true, passive:true}));
+  },
+  apply(){
+    if(this.map) this.map.muted=this.muted;
+    if(this.sheet) this.sheet.muted=this.muted;
+    const b=document.getElementById('mute-btn');
+    if(b){ b.textContent=this.muted?'🔇':'🎵'; b.classList.toggle('muted',this.muted); }
+  },
+  play(el){
+    if(!el || !this.started) return;
+    this.cur=el;
+    el.play().catch(()=>{});   // 차단되면 조용히 넘긴다 — 다음 터치에 다시 걸린다
+  },
+  swap(to){
+    const from = to==='sheet' ? this.map : this.sheet;
+    const el   = to==='sheet' ? this.sheet : this.map;
+    if(from && !from.paused){ try{ from.pause(); from.currentTime=0; }catch(e){} }
+    this.play(el);
+  }
+};
+function toggleMute(){
+  BGM.muted=!BGM.muted;
+  localStorage.setItem('cost_muted', BGM.muted);
+  BGM.apply();
+}
+
 /* ── 부팅 — 예전엔 "게임 시작/사용방법/나가기" 시작화면과 인터랙티브 튜토리얼을
    거쳐야 조작이 풀렸지만, 진입 시 잠깐 뜨는 #hint 안내문구만으로 충분하다는 판단으로
    둘 다 제거하고 로드 즉시 바로 시작한다. hideAdPlaceholder()도 여기서 호출 —
@@ -3660,6 +3713,7 @@ lockLandscape();
 World.init();
 World.paused = false;
 hideAdPlaceholder();
+BGM.init();
 
 // 첫 힌트는 잠시 뒤 사라짐
 setTimeout(()=>{ const h=document.getElementById('hint'); if(h) h.classList.add('hide'); }, 5200);
