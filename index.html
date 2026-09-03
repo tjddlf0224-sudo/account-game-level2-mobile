@@ -660,6 +660,7 @@ body {
   <!-- 급수 변경(2급↔1급) — 1급 허브엔 이미 있던 버튼, 2급에는 없어 편도였음 -->
   <a class="group-mode-btn" href="select_level.html" style="color:var(--pu); border-color:rgba(180,79,255,0.3); background:rgba(180,79,255,0.07);">🔀 급수 변경</a>
   <!-- 그룹 모드 버튼 -->
+  <span id="streak-slot"></span>
   <a class="graph-btn" href="group.html" title="그룹 모드" aria-label="그룹 모드">👥</a>
   <!-- 전역 음소거 토글: 켜면 각 게임 로드 시 hub_muted 참조(게임별 기존 설정 있으면 그게 우선) -->
   <button class="graph-btn hub-mute-btn" id="hub-mute-btn" onclick="toggleHubMute()" title="전체 음소거" aria-label="전체 음소거">🎵</button>
@@ -795,9 +796,8 @@ body {
 
 </div>
 
-<script src="difficulty.js"></script>
+<script src="difficulty.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="auth.js"></script>
 <script>
 // ── 로그인 체크 & 유저바 초기화 ──
 (function() {
@@ -1218,8 +1218,9 @@ function onRewardedFailed() {
 </script>
 
 <!-- ── 오답노트: 미니 요약(틀린 문제 수) 표시 (supabase-js는 상단에서 이미 로드됨) ── -->
-<script src="wrongnote.js"></script>
-<script src="growth.js"></script>
+<script src="wrongnote.js?v=1"></script>
+<script src="growth.js?v=1"></script>
+<script src="streak.js?v=1"></script>
 <script>
 (async function(){
   try {
@@ -1346,6 +1347,13 @@ function setExamDate() {
 renderExamDay();
 </script>
 
-<script src="emoji-icons.js"></script>
+<script src="emoji-icons.js?v=1"></script>
+
+<script>
+  // 스트릭 알약 — 붙일 자리가 있을 때만 뜬다. 0일이면 스스로 숨는다.
+  document.addEventListener('DOMContentLoaded', function(){
+    if (window.Streak) Streak.mountPill('#streak-slot');
+  });
+</script>
 </body>
 </html>

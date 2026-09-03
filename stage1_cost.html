@@ -12,8 +12,9 @@
 <title>원가의 길 — 전산회계 1급 스테이지 1</title>
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="auth.js"></script>
-<script src="growth.js"></script>
+<script src="growth.js?v=1"></script>
+<script src="streak.js?v=1"></script>
+<script src="ask.js?v=1"></script>
 <style>
 :root{
   --cy:#00f2ff; --pu:#b44fff; --or:#ff9800; --gd:#ffd600; --gn:#00e676; --pk:#ff2d78;
@@ -2322,8 +2323,10 @@ const Stage = {
     DocsUI.open();
   },
 
-  exit(){
-    if(confirm('허브로 나갈까요? 진행 상황은 저장됩니다.')){
+  async exit(){
+    // confirm() 은 운영체제 창이라 #rotator 의 90도 회전을 안 따라온다
+    // (게임은 가로인데 확인창만 세로로 뜬다). ask.js 로 화면 안에 직접 그린다.
+    if(await Ask.confirm('허브로 나갈까요? 진행 상황은 저장됩니다.', {ok:'나가기', cancel:'계속하기'})){
       if(!this.state.cleared) this.saveProgressScore();
       this.savePosition();
       try{ unlockOrientation(); }catch(e){}
@@ -3250,7 +3253,7 @@ const PracticeQuiz = {
 
   start(npcKey, topic){
     if(!THEORY_BANK_LV1 || !THEORY_BANK_LV1.length){
-      alert('문제를 아직 불러오는 중이에요. 잠시 후 다시 시도해주세요.');
+      Ask.alert('문제를 아직 불러오는 중이에요. 잠시 후 다시 시도해주세요.');
       World.paused=false;
       return;
     }
@@ -3633,8 +3636,9 @@ const ResultScreen = {
     }
   },
 
-  restart(){
-    if(!confirm('처음부터 다시 도전할까요? 지금까지의 진행 상황이 초기화됩니다.')) return;
+  async restart(){
+    if(!await Ask.confirm('처음부터 다시 도전할까요? 지금까지의 진행 상황이 초기화됩니다.',
+                          {ok:'다시 도전', cancel:'취소'})) return;
     try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
     location.reload();
   },
@@ -3705,6 +3709,6 @@ function showInterstitialAlways(afterFn){
 function hideAdPlaceholder(){ if(window.AdBridge) AdBridge.hide(); }
 function showAdPlaceholder(){ if(window.AdBridge) AdBridge.show(); }
 </script>
-<script src="emoji-icons.js"></script>
+<script src="emoji-icons.js?v=1"></script>
 </body>
 </html>
