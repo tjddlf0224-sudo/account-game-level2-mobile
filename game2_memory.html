@@ -557,19 +557,19 @@
         }
         </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="wrongnote.js?v=7"></script>
-    <script src="growth.js?v=7"></script>
-<script src="streak.js?v=7"></script>
-    <script src="difficulty.js?v=7"></script>
-    <script src="review-prompt.js?v=7"></script>
+    <script src="wrongnote.js?v=8"></script>
+    <script src="growth.js?v=8"></script>
+<script src="streak.js?v=8"></script>
+    <script src="difficulty.js?v=8"></script>
+    <script src="review-prompt.js?v=8"></script>
 </head>
 <body>
 
 
 
     <!-- 🎵 BGM 오디오 엘리먼트 -->
-    <audio id="bgm" src="bgm2_memory.mp3?v=7" loop preload="auto"></audio>
-    <script src="bgmguard.js?v=7"></script>
+    <audio id="bgm" src="bgm2_memory.mp3?v=8" loop preload="auto"></audio>
+    <script src="bgmguard.js?v=8"></script>
 
     <header>
         <h1 style="flex:1;text-align:center;">🧩 기억의 전당 🧩</h1>
@@ -1480,7 +1480,21 @@
             });
         }
 
+        /* 스테이지 해금·개인 최고기록은 **플레이했는가**로 판단한다.
+           예전엔 이 갱신이 saveScore() 안(그것도 서버 저장 성공 뒤)에 있어서,
+           ① 랭킹 등록을 안 누르거나 ② 닉네임이 중복이거나 ③ 네트워크가 끊기면
+           점수를 아무리 높게 받아도 다음 스테이지가 영영 안 열렸다.
+           랭킹 등록은 학생의 선택이고 학습 진행과는 별개다. */
+        function recordBest(sc){
+            try{
+                const v = Math.max(0, parseInt(sc,10) || 0);
+                if (v > (parseInt(localStorage.getItem('hub_memory_best')||'0',10)||0))
+                    localStorage.setItem('hub_memory_best', String(v));
+            }catch(e){}
+        }
+
         function showResult(finalScore, quit, detail) {
+            recordBest(finalScore);
             const box = document.getElementById('rank-preview-box'); if(box) box.style.display='none';
             const mw = document.getElementById('mini-rank-wrap'); if(mw) mw.style.display='none';
             const ssb = document.getElementById('stage-save-btn'); if(ssb) ssb.style.display='none';
@@ -2083,6 +2097,6 @@ function guideNext() {
 })();
 </script>
 
-<script src="emoji-icons.js?v=7"></script>
+<script src="emoji-icons.js?v=8"></script>
 </body>
 </html>
