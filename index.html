@@ -796,7 +796,7 @@ body {
 
 </div>
 
-<script src="difficulty.js?v=8"></script>
+<script src="difficulty.js?v=9"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ── 로그인 체크 & 유저바 초기화 ──
@@ -1032,9 +1032,20 @@ const STAGE_GAMES = [
 ];
 
 /* 다음 스테이지가 열리는 기준 점수.
-   실제 플레이 분포의 하위 10% 언저리로 잡았다 — 한 판을 제대로 하면 거의 다 넘고,
+   실제 플레이 분포의 하위 10% 바로 아래로 잡았다 — 한 판을 제대로 하면 거의 다 넘고,
    시작하자마자 그만둔 판은 안 넘는다.
-   (판당 하위10%: 산성비 1,340 · 기억 689 · 차변 818 · 공장 810 · 비행 11,700) */
+   (판당 하위10%: 산성비 1,340 · 기억 689 · 차변 818 · 공장 810 · 비행 11,700)
+
+   실측 검증(score_history, 정답 수와 대조):
+   · '정답 1~3개'인 판(=거의 안 한 판)의 중앙 점수 — 산성비 120 · 기억 199 · 차변 340 · 공장 390
+     → 그런 판이 문턱을 넘은 경우: 산성비 0/25, 기억 0/42, 차변 0/3, 공장 1/9
+   · 반대로 '제대로 했는데(정답 10개 이상) 문턱 미달'은 5개 게임 모두 0건.
+
+   ⚠ 결산 비행(flight)만 예외다. 정답 1~3개인 판도 중앙 10,700점이 나와서(비행 거리·시간으로도
+     점수가 쌓이는 구조) 문턱 8,000 이 그런 판을 거의 못 거른다(16판 중 13판 통과).
+     **그대로 둔다** — 비행은 체인의 마지막이라 이 값이 다음 스테이지를 여는 데 쓰이지 않고,
+     '클리어' 표시에만 영향을 준다. 뒤에 스테이지가 추가되면 이 값을 먼저 다시 정할 것
+     (점수만 보지 말고 정답 수를 함께 조건에 넣어야 한다). */
 const MIN_CLEAR = { acid: 1000, memory: 500, debit: 600, factory: 600, flight: 8000 };
 
 /* ⚠ 기준을 소급 적용하면 **이미 열려 있던 스테이지를 빼앗는다.**
@@ -1239,9 +1250,9 @@ function onRewardedFailed() {
 </script>
 
 <!-- ── 오답노트: 미니 요약(틀린 문제 수) 표시 (supabase-js는 상단에서 이미 로드됨) ── -->
-<script src="wrongnote.js?v=8"></script>
-<script src="growth.js?v=8"></script>
-<script src="streak.js?v=8"></script>
+<script src="wrongnote.js?v=9"></script>
+<script src="growth.js?v=9"></script>
+<script src="streak.js?v=9"></script>
 <script>
 (async function(){
   try {
@@ -1368,7 +1379,7 @@ function setExamDate() {
 renderExamDay();
 </script>
 
-<script src="emoji-icons.js?v=8"></script>
+<script src="emoji-icons.js?v=9"></script>
 
 <script>
   // 스트릭 알약 — 붙일 자리가 있을 때만 뜬다. 0일이면 스스로 숨는다.
