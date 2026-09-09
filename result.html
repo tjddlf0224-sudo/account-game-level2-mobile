@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>팀전 결과 — 전산회계 오락실</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Orbitron:wght@700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="teamscore.js?v=6"></script>
+<style>
+/* 수업이 끝난 뒤 교사가 보고 상을 주는 화면. 전광판과 달리 **읽고 판단하는** 화면이라
+   글자를 키우기보다 정보를 촘촘하게 놓는다. 인쇄해서 게시할 수도 있어야 한다. */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--cy:#00f2ff;--pk:#ff2d78;--gd:#ffd600;--gn:#00e676;--bg:#020810;--line:rgba(255,255,255,.09)}
+body{background:var(--bg);color:#eaf2ff;font-family:'Noto Sans KR',sans-serif;
+  padding:28px 22px 60px;max-width:1100px;margin:0 auto;line-height:1.5}
+h1{font-family:'Black Han Sans',sans-serif;font-size:1.9rem}
+h1 .cls{color:var(--cy)}
+.meta{color:rgba(255,255,255,.4);font-size:.84rem;margin:6px 0 22px}
+h2{font-family:'Orbitron',monospace;font-size:.68rem;letter-spacing:3px;
+  color:rgba(255,255,255,.4);margin:26px 0 10px;display:flex;align-items:center;gap:10px}
+h2 .sub{font-family:'Noto Sans KR',sans-serif;letter-spacing:0;font-weight:400;
+  font-size:.72rem;color:rgba(255,255,255,.28)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.card{background:rgba(255,255,255,.045);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.card.win{background:linear-gradient(135deg,rgba(255,214,0,.16),rgba(255,214,0,.03));border-color:rgba(255,214,0,.5)}
+.card.gwin{background:linear-gradient(135deg,rgba(0,230,118,.14),rgba(0,230,118,.03));border-color:rgba(0,230,118,.45)}
+.ch{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:8px}
+.ch b{font-size:1.05rem}
+.ch .v{font-family:'Orbitron',monospace;font-weight:900;font-size:1.5rem;color:var(--cy)}
+.card.win .ch .v{color:var(--gd)} .card.gwin .ch .v{color:var(--gn)}
+.mem{display:flex;justify-content:space-between;font-size:.82rem;
+  padding:4px 0;border-top:1px solid rgba(255,255,255,.06)}
+.mem span:last-child{font-family:'Orbitron',monospace;color:rgba(255,255,255,.55)}
+.mem .up{color:var(--gn)}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th{text-align:left;font-family:'Orbitron',monospace;font-size:.58rem;letter-spacing:2px;
+  color:rgba(255,255,255,.25);padding:8px;border-bottom:1px solid var(--line)}
+td{padding:8px;border-bottom:1px solid rgba(255,255,255,.05)}
+td.n{font-family:'Orbitron',monospace;text-align:right}
+tr.top td{background:rgba(255,214,0,.06)}
+.gain{color:var(--gn);font-weight:700}
+.zero{color:rgba(255,255,255,.2)}
+.note{margin-top:26px;font-size:.78rem;color:rgba(255,255,255,.35);line-height:1.9;
+  border-top:1px solid var(--line);padding-top:14px}
+.err{padding:60px 20px;text-align:center;color:rgba(255,255,255,.45);line-height:2}
+.bar{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+.bar a,.bar button{background:rgba(255,255,255,.07);border:1px solid var(--line);color:#eaf0ff;
+  border-radius:9px;padding:7px 13px;font-size:.8rem;text-decoration:none;cursor:pointer;font-family:inherit}
+@media print{
+  body{background:#fff;color:#111;max-width:none}
+  .card,table,th,td{border-color:#ccc}
+  .bar{display:none}
+  .card{background:#fafafa}
+  h1 .cls,.ch .v{color:#111}
+}
+</style>
+</head>
+<body>
+<div id="root" style="display:none">
+  <div class="bar">
+    <a href="#" id="b-board">전광판 보기 ↗</a>
+    <button onclick="print()">인쇄 / PDF</button>
+  </div>
+  <h1><span class="cls" id="h-cls">—</span> 팀전 결과</h1>
+  <div class="meta" id="h-meta"></div>
+
+  <h2>팀 순위 <span class="sub">팀원 평균</span></h2>
+  <div class="cards" id="teams"></div>
+
+  <h2>성장 순위 <span class="sub">자기 이전 최고점 대비 오른 만큼 — 하위권이 유리한 판</span></h2>
+  <div class="cards" id="grow"></div>
+
+  <h2>개인 전체</h2>
+  <table>
+    <thead><tr><th>#</th><th>이름</th><th>모둠</th><th style="text-align:right">점수</th>
+      <th style="text-align:right">성장</th><th>기록</th></tr></thead>
+    <tbody id="solo"></tbody>
+  </table>
+
+  <div class="note" id="note"></div>
+</div>
+<div class="err" id="err">불러오는 중…</div>
+
+<script>
+/* result.html?s=<세션코드> — 수업 뒤 교사가 보고 상을 주는 화면.
+   점수 계산은 teamscore.js 를 그대로 쓴다(전광판과 같은 식이어야 한다). */
+const db = supabase.createClient(
+  "https://pjagaulfivafamhhiveg.supabase.co",
+  "sb_publishable_yck2tAKApEjVSJOJMVSXuQ_AGaNatuI");
+const GAME_NAME = {acid:'산성비',memory:'기억의 전당',debit:'차변대변',factory:'분개 공장',
+  flight:'결산 비행',theory:'이론',cost_lv1:'원가의 길',capital_lv1:'자본',
+  voucher_lv1:'전표',vat_lv1:'부가세',alloc_lv1:'배분',theory_lv1:'이론(1급)'};
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const SID = new URLSearchParams(location.search).get('s');
+
+(async function(){
+  const fail = m => { document.getElementById('err').innerHTML = m; };
+  if(!SID){ fail('세션 코드가 없습니다.'); return; }
+
+  const [s,m] = await Promise.all([
+    db.from('team_session').select('*').eq('id',SID).maybeSingle(),
+    db.from('team_member').select('student_name,team_no').eq('session_id',SID)
+  ]);
+  if(s.error || !s.data){ fail('세션을 찾을 수 없습니다.<br><small>'+esc(SID)+'</small>'); return; }
+  const SES=s.data, MEMBERS=m.data||[];
+  if(!MEMBERS.length){ fail('이 세션에 배정된 학생이 없습니다.'); return; }
+
+  const alias = await TeamScore.loadAlias(db, SES.group_id);
+  const base  = await TeamScore.loadBaseline(db, SES, MEMBERS, alias);
+
+  // 종료했으면 그 시각까지만, 진행 중이면 지금까지
+  let q = db.from('score_history').select('user_name,game_id,score,played_at')
+    .eq('group_id',SES.group_id).gte('played_at',SES.started_at).limit(20000);
+  if(SES.ended_at) q = q.lte('played_at', SES.ended_at);
+  const h = await q;
+
+  const R = TeamScore.compute({session:SES, members:MEMBERS, rows:h.data||[], baseline:base, alias});
+
+  document.getElementById('err').style.display='none';
+  document.getElementById('root').style.display='block';
+  document.getElementById('h-cls').textContent = SES.class_label || '전체';
+  document.getElementById('b-board').href = 'board.html?s='+encodeURIComponent(SID);
+
+  const games = (SES.game_ids&&SES.game_ids.length) ? SES.game_ids.map(g=>GAME_NAME[g]||g).join(' · ') : '전체 게임';
+  const st = new Date(SES.started_at), en = SES.ended_at ? new Date(SES.ended_at) : null;
+  const mins = Math.round(((en||new Date()) - st)/60000);
+  document.getElementById('h-meta').textContent =
+    games + ' · ' + st.toLocaleString('ko-KR') + ' · ' + mins + '분' +
+    (en ? '' : ' (진행 중)') + ' · 세션 ' + SID;
+
+  const card = (t,i,key,cls) =>
+    '<div class="card'+(i===0?' '+cls:'')+'">'+
+      '<div class="ch"><b>'+(i+1)+'. '+esc(t.name)+'</b>'+
+        '<span class="v">'+(key==='grow'?'+':'')+t.score.toLocaleString()+'</span></div>'+
+      t.members.map(x=>'<div class="mem"><span>'+esc(x.name)+'</span>'+
+        '<span class="'+(key==='grow'&&x.grow>0?'up':'')+'">'+
+        (key==='grow'?('+'+x.grow):x.score.toLocaleString())+'</span></div>').join('')+
+    '</div>';
+
+  document.getElementById('teams').innerHTML = R.teams.map((t,i)=>card(t,i,'score','win')).join('');
+  document.getElementById('grow').innerHTML  = R.growTeams.map((t,i)=>card(t,i,'grow','gwin')).join('');
+
+  document.getElementById('solo').innerHTML = R.byScore.map((x,i)=>{
+    const rec = Object.keys(x.best).map(g=>(GAME_NAME[g]||g)+' '+x.best[g].toLocaleString()).join(', ');
+    return '<tr'+(i<3?' class="top"':'')+'><td class="n">'+(i+1)+'</td><td>'+esc(x.name)+'</td>'+
+      '<td>'+x.team+'모둠</td><td class="n">'+x.score.toLocaleString()+'</td>'+
+      '<td class="n '+(x.grow>0?'gain':'zero')+'">'+(x.grow>0?'+'+x.grow:'—')+'</td>'+
+      '<td style="color:rgba(255,255,255,.4);font-size:.78rem">'+esc(rec||'기록 없음')+'</td></tr>';
+  }).join('');
+
+  const gTop = R.byGrow[0], played = R.solo.filter(x=>Object.keys(x.best).length).length;
+  document.getElementById('note').innerHTML =
+    '· 참여 <b>'+played+'</b>/'+MEMBERS.length+'명' +
+    (gTop && gTop.grow>0 ? ' · 가장 많이 오른 학생 <b>'+esc(gTop.name)+'</b> (+'+gTop.grow+')' : '') +
+    '<br>· 팀 점수는 <b>팀원 평균</b>입니다. 참여하지 않은 학생은 0점으로 들어가므로 전원이 해야 팀이 오릅니다.' +
+    '<br>· 성장 점수는 <b>자기 이전 최고점 대비 몇 % 올랐는지</b>입니다(게임당 최대 +'+TeamScore.GROW_CAP+
+      '). 이미 최고점이 높은 학생은 오르기 어렵고, 그만큼 하위권이 유리한 판입니다.' +
+    (R.multi ? '<br>· 게임이 여럿이라 점수는 <b>게임마다 그 시간 1등 대비 %</b>로 환산해 합산했습니다.' : '');
+})();
+</script>
+</body>
+</html>

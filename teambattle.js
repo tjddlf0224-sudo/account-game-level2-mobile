@@ -35,6 +35,7 @@
     skill: {},       // {name: 0~100}
     session: null,   // 진행 중 세션
     rosterOpen: false,
+    past: [],        // 끝난 세션(결과 다시 열기)
     edit: {}         // 명단 편집 버퍼 {name:{class_label,alias_of,excluded}}
   };
 
@@ -211,8 +212,26 @@
       '<span class="tb-live-dot"></span>' +
       '<b>진행 중</b> ' + esc(S.session.class_label || '') + ' · 세션 <code>' + esc(S.session.id) + '</code>' +
       '<a class="tb-btn" href="' + esc(url) + '" target="_blank">전광판 열기 ↗</a>' +
+      '<a class="tb-btn" href="' + esc(url.replace('board.html','result.html')) + '" target="_blank">결과 보기 ↗</a>' +
       '<button class="tb-btn" onclick="TeamBattle.finish()">세션 종료</button>' +
       '</div>';
+  }
+
+  /* 지난 세션 — 수업이 끝난 뒤 결과를 다시 열어 상을 줄 수 있어야 한다 */
+  function pastList() {
+    if (!S.past || !S.past.length) return '';
+    var root = location.href.replace(/admin\.html.*$/, '');
+    return '<div class="tb-past"><div class="tb-pt">지난 세션</div>' +
+      S.past.map(function (p) {
+        var d = new Date(p.started_at);
+        var when = (d.getMonth() + 1) + '/' + d.getDate() + ' ' +
+                   String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+        return '<a class="tb-prow" href="' + esc(root) + 'result.html?s=' + encodeURIComponent(p.id) + '" target="_blank">' +
+          '<span class="tb-pw">' + when + '</span>' +
+          '<span class="tb-pn">' + esc(p.class_label || '전체') + ' · ' + esc(p.title || '팀전') + '</span>' +
+          '<span class="tb-pc">' + esc(p.id) + '</span>' +
+          '<span class="tb-pg">결과 ↗</span></a>';
+      }).join('') + '</div>';
   }
 
   function render() {
@@ -288,6 +307,7 @@
       h += '</div>';
     }
     h += rosterPanel();
+    h += pastList();
     host.innerHTML = h;
   }
 
@@ -505,10 +525,12 @@
         return;
       }
       // 아직 안 끝난 세션이 있으면 이어받는다(창을 닫아도 코드를 다시 찾을 수 있게)
-      var live = await sb().from('team_session')
-        .select('id,class_label').eq('group_id', gid()).is('ended_at', null)
-        .order('started_at', { ascending: false }).limit(1);
-      S.session = (live.data && live.data[0]) || null;
+      var ses = await sb().from('team_session')
+        .select('id,class_label,title,started_at,ended_at').eq('group_id', gid())
+        .order('started_at', { ascending: false }).limit(12);
+      var list = ses.data || [];
+      S.session = list.filter(function (x) { return !x.ended_at; })[0] || null;
+      S.past = list.filter(function (x) { return !!x.ended_at; }).slice(0, 8);
 
       S.cls = null; S.teams = []; S.absent = {}; S.locked = {}; S.edit = {};
       render();

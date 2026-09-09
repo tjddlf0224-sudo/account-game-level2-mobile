@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Orbitron:wght@700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="teamscore.js?v=6"></script>
 <style>
 /* ── 교실 전자칠판 전용. 멀리서 보는 화면이라 글자를 크게, 정보를 적게. ──
    순위 '숫자'가 바뀌는 건 아무도 안 본다. **행이 자리를 바꾸며 미끄러져야**
@@ -146,12 +147,6 @@ const SID = new URLSearchParams(location.search).get('s');
 
 let SES=null, MEMBERS=[], BASE={}, ALIAS={}, prevRank={teams:{},grow:{},solo:{}};
 
-/* DB에 찍힌 이름 → 실제 학생.
-   ⚠ 학생이 닉네임을 바꾸면 기록이 다른 이름으로 쌓인다(임형순은 '김군호휴지털이범',
-     박가인은 '가인'으로 저장했다). roster.alias_of 로 되돌리지 않으면 그 학생들이
-     전광판에서 통째로 0점으로 나온다 — 실제로 8/26 기록에서 걸렸다. */
-function real(n){ return ALIAS[n] || n; }
-
 function fail(msg){ document.getElementById('err').innerHTML=msg; document.getElementById('err').style.display='flex'; }
 
 async function init(){
@@ -164,10 +159,8 @@ async function init(){
   SES=s.data; MEMBERS=m.data||[];
   if(!MEMBERS.length){ fail('이 세션에 배정된 학생이 없습니다.'); return; }
 
-  const ros = await db.from('roster').select('name,alias_of').eq('group_id', SES.group_id);
-  if(ros.data) ros.data.forEach(r=>{ if(r.alias_of) ALIAS[r.name]=r.alias_of; });
-
-  await loadBaseline();
+  ALIAS = await TeamScore.loadAlias(db, SES.group_id);
+  BASE  = await TeamScore.loadBaseline(db, SES, MEMBERS, ALIAS);
 
   document.getElementById('err').style.display='none';
   document.getElementById('root').style.display='flex';
@@ -180,44 +173,6 @@ async function init(){
   document.getElementById('f-code').textContent = '세션 ' + SID;
 
   tick(); setInterval(tick, 3000); setInterval(clock, 1000); clock();
-}
-
-/* 세션 '시작 전'까지의 게임별 최고점. 성장 랭킹의 기준선이라 수업 중에는 변하지
-   않으므로 처음에 한 번만 읽는다.
-   ⚠ scores 테이블을 쓰면 안 된다 — upsert_score 가 수업 중에도 최댓값을 갱신해서
-     이미 오늘 점수가 섞여 있다. 반드시 score_history 의 '시작 이전' 것만 본다. */
-async function loadBaseline(){
-  // 별칭으로 남은 기록도 가져와야 하므로 이름으로 거르지 않고 그룹 전체를 읽는다
-  const { data, error } = await db.from('score_history')
-    .select('user_name,game_id,score')
-    .eq('group_id', SES.group_id).lt('played_at', SES.started_at).limit(20000);
-  if(error || !data) return;
-  const inS = {}; MEMBERS.forEach(m=>inS[m.student_name]=1);
-  data.forEach(r=>{
-    const n = real(r.user_name); if(!inS[n]) return;
-    const v=parseInt(r.score,10); if(!isFinite(v)) return;
-    (BASE[n]=BASE[n]||{});
-    if(!(r.game_id in BASE[n]) || v>BASE[n][r.game_id]) BASE[n][r.game_id]=v;
-  });
-}
-
-/* 성장 점수 — 게임마다 **자기 이전 최고점 대비 몇 % 올랐나**.
-   절대 증가분으로 재면 잘하는 학생이 또 이긴다(10만→11만 = +1만 vs 100→200 = +100).
-   비율로 재야 "자기 수준에서 노력한 만큼"이 되어 하위권도 1등을 노릴 수 있다.
-   · 처음 기록하는 게임은 100 점(첫 도전) — 0 으로 나눌 수 없고, 새 게임에 도전한 것도
-     성장이다. 다만 안 하던 게임을 찍어서 무한정 벌지 못하게 상한과 같은 값으로 둔다.
-   · 게임당 100 상한 — 점수를 두 배로 올리면 만점. 상한이 없으면 아주 낮은 기준선
-     하나가 순위를 통째로 뒤집는다(예: 100→5,000 이면 +4,900%). */
-const GROW_CAP = 100;
-function growthOf(name, sessionBest){
-  const base = BASE[name] || {};
-  let g = 0;
-  Object.keys(sessionBest).forEach(gid=>{
-    const now = sessionBest[gid], was = base[gid] || 0;
-    if(was <= 0) g += GROW_CAP;
-    else if(now > was) g += Math.min(GROW_CAP, 100*(now-was)/was);
-  });
-  return Math.round(g);
 }
 
 function clock(){
@@ -247,76 +202,27 @@ async function tick(){
 }
 
 function render(rows){
-  const games = SES.game_ids && SES.game_ids.length ? SES.game_ids : null;
-  const inSession = {}; MEMBERS.forEach(m=>inSession[m.student_name]=m.team_no);
+  const R = TeamScore.compute({ session:SES, members:MEMBERS, rows, baseline:BASE, alias:ALIAS });
 
-  // ① 학생×게임 — 세션 중 최고점
-  const best = {};
-  rows.forEach(r=>{
-    r = { ...r, user_name: real(r.user_name) };
-    if(!(r.user_name in inSession)) return;
-    if(games && games.indexOf(r.game_id)<0) return;
-    if(SES.ended_at && new Date(r.played_at) > new Date(SES.ended_at)) return;
-    const v = parseInt(r.score,10); if(!isFinite(v)) return;
-    (best[r.user_name] = best[r.user_name] || {});
-    if(!(r.game_id in best[r.user_name]) || v > best[r.user_name][r.game_id]) best[r.user_name][r.game_id]=v;
-  });
-
-  // ② 게임별 그 세션 1등 (여러 게임일 때 환산 기준)
-  const top = {};
-  Object.keys(best).forEach(n=>Object.keys(best[n]).forEach(g=>{
-    if(!(g in top) || best[n][g]>top[g]) top[g]=best[n][g];
-  }));
-
-  const multi = !games || games.length>1;
-  const solo = MEMBERS.map(m=>{
-    const b = best[m.student_name] || {};
-    let sc = 0;
-    if(multi){                       // 게임마다 1등 대비 % 합산
-      Object.keys(b).forEach(g=>{ if(top[g]>0) sc += 100*b[g]/top[g]; });
-      sc = Math.round(sc);
-    }else{                           // 게임 하나면 실제 점수 그대로
-      sc = b[games[0]] || 0;
-    }
-    return { name:m.student_name, team:m.team_no, score:sc, grow:growthOf(m.student_name,b) };
-  });
-
-  const byScore = solo.slice().sort((a,b)=>b.score-a.score || a.name.localeCompare(b.name,'ko'));
-  const byGrow  = solo.slice().sort((a,b)=>b.grow -a.grow  || a.name.localeCompare(b.name,'ko'));
-
-  // ③ 팀 = 팀원 평균 (미참여 0점 포함 — 그래야 전원이 해야 팀이 오른다)
-  const byTeam = {};
-  solo.forEach(x=>{ (byTeam[x.team]=byTeam[x.team]||[]).push(x); });
-  const names = SES.team_names || {};
-  function teamRank(key){
-    return Object.keys(byTeam).map(t=>{
-      const list = byTeam[t];
-      const sum = list.reduce((x,m)=>x+m[key],0);
-      return { no:+t, name: names[t] || (t+'모둠'), score: Math.round(sum/list.length),
-               mem: list.slice().sort((a,b)=>b[key]-a[key]).map(m=>m.name).join(' · ') };
-    }).sort((a,b)=>b.score-a.score || a.no-b.no);
-  }
-
-  paint('teams', teamRank('score').map((t,i)=>({
+  paint('teams', R.teams.map(t=>({
     key:'t'+t.no, sc:t.score.toLocaleString(),
     html:'<div class="nmwrap"><div class="nm">'+esc(t.name)+'</div>'+
-         '<div class="mem">'+esc(t.mem)+'</div></div>'
+         '<div class="mem">'+esc(t.members.map(m=>m.name).join(' · '))+'</div></div>'
   })), 11.5, 1.1);
 
-  paint('grow', teamRank('grow').map((t,i)=>({
-    key:'g'+t.no, sc:'+'+t.score,
-    html:'<div class="nm">'+esc(t.name)+'</div>'
+  paint('grow', R.growTeams.map(t=>({
+    key:'g'+t.no, sc:'+'+t.score, html:'<div class="nm">'+esc(t.name)+'</div>'
   })), 7.4, .9);
 
-  paint('solo', byScore.slice(0,6).map((x,i)=>({
+  paint('solo', R.byScore.slice(0,6).map(x=>({
     key:'s'+x.name, sc:x.score.toLocaleString(),
     html:'<div class="nm">'+esc(x.name)+'</div><div class="tag">'+x.team+'모둠</div>'
   })), 5, .8);
 
   // 성장 1등은 따로 알려 준다 — 하위권 학생이 이름을 볼 자리
-  const gTop = byGrow[0];
+  const g = R.byGrow[0];
   document.getElementById('solo-sub').textContent =
-    (gTop && gTop.grow>0) ? '성장 1등 ' + gTop.name + ' +' + gTop.grow : '';
+    (g && g.grow>0) ? '성장 1등 ' + g.name + ' +' + g.grow : '';
 }
 
 /* 행을 지우고 다시 그리면 애니메이션이 안 붙는다. 키로 재사용하고 transform 만 옮긴다. */
