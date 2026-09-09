@@ -79,8 +79,12 @@
 
         /* 헤더 버튼 — 모바일 터치 영역 확보 */
         .header-btns {
-            position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
-            display: flex; gap: 6px;
+            /* ⚠ top:50% + translateY(-50%) 는 **safe-area 패딩까지 포함한 박스**를 기준으로
+               가운데를 잡아, 버튼이 노치·다이내믹아일랜드 위로 올라가 상태바와 겹쳤다.
+               header 와 같은 위/아래 여백을 주고 그 안에서 flex 로 가운데를 잡는다. */
+            position: absolute; right: 8px;
+            top: calc(env(safe-area-inset-top) + 18px); bottom: 10px;
+            display: flex; align-items: center; gap: 6px;
         }
         .pause-btn {
             background: none;
@@ -545,7 +549,11 @@
         #rewarded-btn {
             display: none;
             position: fixed;
-            bottom: 30px;
+            /* ⚠ bottom:30px 고정이라 하단 분류 바(#lv2-catbar) 위에 그대로 얹혔고,
+               z-index 가 999 라 **정답을 누르려던 손가락이 광고를 눌렀다.**
+               분류 바가 열리면 그 높이(--catbar-h)만큼, 배너가 뜨면 그 높이만큼 물러난다. */
+            bottom: calc(30px + env(safe-area-inset-bottom, 0px)
+                         + var(--ad-banner-h, 0px) + var(--catbar-h, 0px));
             left: 50%;
             transform: translateX(-50%);
             z-index: 999;
@@ -635,19 +643,19 @@
 
 <button id="rewarded-btn" onclick="requestRewarded()">⏱ +15초 광고 보기</button>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="wrongnote.js?v=6"></script>
-    <script src="growth.js?v=6"></script>
-<script src="streak.js?v=6"></script>
-    <script src="difficulty.js?v=6"></script>
-    <script src="review-prompt.js?v=6"></script>
+    <script src="wrongnote.js?v=7"></script>
+    <script src="growth.js?v=7"></script>
+<script src="streak.js?v=7"></script>
+    <script src="difficulty.js?v=7"></script>
+    <script src="review-prompt.js?v=7"></script>
 </head>
 <body>
 
 
 
 <!-- 🎵 BGM 오디오 엘리먼트 -->
-<audio id="bgm" src="bgm1_acid.mp3?v=6" loop preload="auto"></audio>
-<script src="bgmguard.js?v=6"></script>
+<audio id="bgm" src="bgm1_acid.mp3?v=7" loop preload="auto"></audio>
+<script src="bgmguard.js?v=7"></script>
 
 <header>
     <h1>💎 전산회계 2급 산성비</h1>
@@ -918,6 +926,14 @@
     // ★ boardHeight: 매번 동적으로 계산 (모바일 주소창 높이 변동 대응)
     function getBoardHeight() { return els.board.clientHeight; }
 
+    /* 분류 바가 열려 있는 동안 광고 버튼을 그 위로 밀어 올린다.
+       높이를 눈대중으로 박으면 글꼴·안전영역에 따라 어긋나므로 실제로 잰다. */
+    function setCatbarOffset(on){
+        const bar = document.getElementById('lv2-catbar');
+        const h = (on && bar) ? bar.offsetHeight : 0;
+        document.documentElement.style.setProperty('--catbar-h', h + 'px');
+    }
+
     function quitGame() { if (isPlaying) endGame(); }
 
     function startGame() {
@@ -930,6 +946,7 @@
         activeWords = []; wrongLog = []; freezeTime = 0; isFever = false;
         lv2Pending = null;
         document.getElementById('lv2-catbar').classList.remove('show');
+        setCatbarOffset(false);
         if (window.WrongNote) WrongNote.reset();
         document.body.classList.remove('danger-mode', 'fever-mode');
         els.board.classList.remove('frozen');
@@ -1144,12 +1161,14 @@
         document.getElementById('lv2-cat-word').innerHTML = '<b>' + wordObj.el.innerText + '</b>은(는) 무슨 분류?';
         document.querySelectorAll('#lv2-cat-btns button').forEach(b => { b.className = ''; b.disabled = false; });
         document.getElementById('lv2-catbar').classList.add('show');
+        setCatbarOffset(true);   // 광고 버튼이 이 바를 덮지 않도록
     }
     function pickCategory(cat) {
         if (!lv2Pending || !isPlaying) return;
         const p = lv2Pending; lv2Pending = null;
         freezeTime = 0; els.board.classList.remove('frozen'); els.freezeBar.style.width = '0%';
         document.getElementById('lv2-catbar').classList.remove('show');
+        setCatbarOffset(false);
         document.querySelectorAll('#lv2-cat-btns button').forEach(b => b.disabled = true);
         const ok = (cat === p.category);
         if (ok) {
@@ -1525,13 +1544,19 @@
         const tierHtml = nextTierHtml(score);
         try {
             const groupId = localStorage.getItem('hub_group_id') || null;
-            const withGroup = (q) => groupId ? q.eq('group_id', groupId) : q;
+            const withGroup = (q) => q;   // 전체 범위(그룹 필터는 아래 반 순위에서만)
 
             const countQ = withGroup(db.from('scores').select('*', { count: 'exact', head: true }).eq('game_id', GAME_ID).gt('score', score));
             const aboveQ = withGroup(db.from('scores').select('name,score').eq('game_id', GAME_ID).gt('score', score).order('score', { ascending: true }).limit(1));
             const belowQ = withGroup(db.from('scores').select('name,score').eq('game_id', GAME_ID).lt('score', score).order('score', { ascending: false }).limit(1));
 
-            const [{ count, error: cErr }, { data: aboveRows }, { data: belowRows }] = await Promise.all([countQ, aboveQ, belowQ]);
+            // 반 순위는 따로 센다 — 전체 순위와 함께 보여 준다
+            const grpQ = groupId
+              ? db.from('scores').select('*', { count: 'exact', head: true })
+                  .eq('game_id', GAME_ID).eq('group_id', groupId).gt('score', score)
+              : Promise.resolve({ count: null });
+            const [{ count, error: cErr }, { data: aboveRows }, { data: belowRows }, grpRes] =
+              await Promise.all([countQ, aboveQ, belowQ, grpQ]);
             if (cErr) throw cErr;
 
             const myRank = (count || 0) + 1;
@@ -1550,7 +1575,9 @@
                 localStorage.setItem(RANK_PREV_KEY, String(myRank));
             }
 
-            badge.innerHTML = `🎯 ${trackDelta ? '내 순위' : '예상 순위'}: ${myRank.toLocaleString()}위 ${deltaHtml}`;
+            const grpRank = (grpRes && grpRes.count != null) ? (grpRes.count + 1) : null;
+            const grpHtml = grpRank ? ` <span style="opacity:.75">· 우리 반 ${grpRank.toLocaleString()}위</span>` : '';
+            badge.innerHTML = `🎯 ${trackDelta ? '내 순위' : '예상 순위'}: 전체 ${myRank.toLocaleString()}위${grpHtml} ${deltaHtml}`;
             badge.style.display = 'block';
 
             const row = (label, r, cls) => r
@@ -1574,7 +1601,7 @@
         box.innerHTML = '<div class="spin-row"><div class="spinner"></div> 불러오는 중...</div>';
         try {
             const res = { json: async () => await supabaseFetchRanking(GAME_ID) };
-            renderRank(mergeRank(await res.json(), getLocalScores()));
+            renderRank(await res.json());
         } catch (e) { renderRank(getLocalScores()); }
     }
 
@@ -1650,14 +1677,18 @@
     }
 
     async function supabaseFetchRanking(gameId) {
-        const groupId = localStorage.getItem('hub_group_id') || null;
+    /* ⚠ 랭킹 범위 — 표와 순위 배지가 **같은 범위**를 봐야 한다.
+       예전엔 표는 "서버(그룹 필터) + 이 기기 로컬기록"을 섞고, 배지는 "서버(그룹 필터)"만
+       세어서, 그룹에 기록이 없으면 **배지는 1위인데 표에서는 2위**로 보였다(실제 제보).
+       이제 기본을 **전체 범위**로 두고, 그룹 순위는 배지에 따로 덧붙인다.
+       로컬 기록은 서버를 못 불러왔을 때(오프라인)만 폴백으로 쓴다 — 교실 공용 기기에서는
+       여러 학생 닉네임이 남아 있어 랭킹에 섞으면 남의 기록처럼 보인다. */
         let query = db
             .from('scores')
             .select()
             .eq('game_id', gameId)
             .order('score', { ascending: false })
             .limit(20);
-        if (groupId) query = query.eq('group_id', groupId);
         const { data, error } = await query;
         if (error) throw error;
         return data;
@@ -2037,5 +2068,5 @@ const Tutorial = (function () {
 function openGuide() { Tutorial.start(); }
 </script>
 
-<script src="emoji-icons.js?v=6"></script>
+<script src="emoji-icons.js?v=7"></script>
 </html>

@@ -294,7 +294,8 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
         #rewarded-btn {
             display: none;
             position: fixed;
-            bottom: 30px;
+            /* 안전영역과 광고 배너 높이를 피한다(하단 버튼은 이 게임엔 없다) */
+            bottom: calc(30px + env(safe-area-inset-bottom, 0px) + var(--ad-banner-h, 0px));
             left: 50%;
             transform: translateX(-50%);
             z-index: 999;
@@ -404,16 +405,16 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
         .tut-next:active { background:var(--cy); color:#000; }
 </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="wrongnote.js?v=6"></script>
-    <script src="growth.js?v=6"></script>
-<script src="streak.js?v=6"></script>
-    <script src="difficulty.js?v=6"></script>
-    <script src="review-prompt.js?v=6"></script>
+    <script src="wrongnote.js?v=7"></script>
+    <script src="growth.js?v=7"></script>
+<script src="streak.js?v=7"></script>
+    <script src="difficulty.js?v=7"></script>
+    <script src="review-prompt.js?v=7"></script>
 </head>
 <body>
 
-<audio id="bgm" src="bgm5_flight.mp3?v=6" loop preload="auto"></audio>
-<script src="bgmguard.js?v=6"></script>
+<audio id="bgm" src="bgm5_flight.mp3?v=7" loop preload="auto"></audio>
+<script src="bgmguard.js?v=7"></script>
 
 
 <div style="position:fixed;inset:0;background:var(--bg);z-index:-1;"></div>
@@ -1048,7 +1049,7 @@ const Game={
     const box=document.getElementById('rkbox');box.style.display='block';
     if(false){this._render(this._lget());return}
     box.innerHTML='<div class="spinrow"><div class="spinner"></div>&nbsp;불러오는 중...</div>';
-    try{const res=await supabaseFetchRanking(GAME_ID);this._render(this._merge(res,this._lget()))}
+    try{const res=await supabaseFetchRanking(GAME_ID);this._render(res)}
     catch(e){this._render(this._lget())}
   },
   _merge(remote,local){const map=new Map();[...(Array.isArray(remote)?remote:[]),...local].forEach(r=>{const p=map.get(r.name);if(!p||(r.score||0)>(p.score||0))map.set(r.name,r)});return[...map.values()].sort((a,b)=>b.score-a.score).slice(0,15)},
@@ -1072,11 +1073,15 @@ const Game={
       :`<div class="next-tier-msg">🎉 최고 등급 달성!</div>`;
     try{
       const groupId=localStorage.getItem('hub_group_id')||null;
-      const withGroup=(q)=>groupId?q.eq('group_id',groupId):q;
+      const withGroup = (q) => q;   // 전체 범위(그룹 필터는 아래 반 순위에서만)
       const countQ=withGroup(db.from('scores').select('*',{count:'exact',head:true}).eq('game_id',GAME_ID).gt('score',score));
       const aboveQ=withGroup(db.from('scores').select('name,score').eq('game_id',GAME_ID).gt('score',score).order('score',{ascending:true}).limit(1));
       const belowQ=withGroup(db.from('scores').select('name,score').eq('game_id',GAME_ID).lt('score',score).order('score',{ascending:false}).limit(1));
-      const [{count,error:cErr},{data:aboveRows},{data:belowRows}]=await Promise.all([countQ,aboveQ,belowQ]);
+      const grpQ = groupId
+        ? db.from('scores').select('*',{count:'exact',head:true})
+            .eq('game_id',GAME_ID).eq('group_id',groupId).gt('score',score)
+        : Promise.resolve({count:null});
+      const [{count,error:cErr},{data:aboveRows},{data:belowRows},grpRes]=await Promise.all([countQ,aboveQ,belowQ,grpQ]);
       if(cErr) throw cErr;
       const myRank=(count||0)+1;
       const above=aboveRows&&aboveRows[0];
@@ -1091,7 +1096,9 @@ const Game={
         else deltaHtml=`<span class="rank-delta flat">− 순위 유지</span>`;
       }
       localStorage.setItem(RANK_PREV_KEY,String(myRank));
-      badge.innerHTML=`🎯 내 순위: ${myRank.toLocaleString()}위 ${deltaHtml}`;
+      const grpRank=(grpRes&&grpRes.count!=null)?(grpRes.count+1):null;
+      const grpHtml=grpRank?` <span style="opacity:.75">· 우리 반 ${grpRank.toLocaleString()}위</span>`:'';
+      badge.innerHTML=`🎯 내 순위: 전체 ${myRank.toLocaleString()}위${grpHtml} ${deltaHtml}`;
       badge.style.display='block';
       const row=(label,r,cls)=>r
         ?`<div class="rn-row ${cls}"><span class="rn-label">${label}</span><span class="rn-name">${escapeHTML(r.name)}</span><span class="rn-score">${(r.score||0).toLocaleString()}</span></div>`
@@ -1295,14 +1302,18 @@ initDiffUI();
     }
 
     async function supabaseFetchRanking(gameId) {
-        const groupId = localStorage.getItem('hub_group_id') || null;
+    /* ⚠ 랭킹 범위 — 표와 순위 배지가 **같은 범위**를 봐야 한다.
+       예전엔 표는 "서버(그룹 필터) + 이 기기 로컬기록"을 섞고, 배지는 "서버(그룹 필터)"만
+       세어서, 그룹에 기록이 없으면 **배지는 1위인데 표에서는 2위**로 보였다(실제 제보).
+       이제 기본을 **전체 범위**로 두고, 그룹 순위는 배지에 따로 덧붙인다.
+       로컬 기록은 서버를 못 불러왔을 때(오프라인)만 폴백으로 쓴다 — 교실 공용 기기에서는
+       여러 학생 닉네임이 남아 있어 랭킹에 섞으면 남의 기록처럼 보인다. */
         let query = db
             .from('scores')
             .select()
             .eq('game_id', gameId)
             .order('score', { ascending: false })
             .limit(20);
-        if (groupId) query = query.eq('group_id', groupId);
         const { data, error } = await query;
         if (error) throw error;
         return data;
@@ -1544,6 +1555,6 @@ const Tutorial = (function () {
 function openGuide() { Tutorial.start(); }
 </script>
 
-<script src="emoji-icons.js?v=6"></script>
+<script src="emoji-icons.js?v=7"></script>
 </body>
 </html>
