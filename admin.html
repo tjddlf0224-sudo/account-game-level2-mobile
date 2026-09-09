@@ -239,6 +239,14 @@ body{
   border-radius:9px;padding:6px;font-size:.8rem;min-width:170px;font-family:inherit}
 .tb-go-r{display:flex;flex-direction:column;gap:9px;flex:1;min-width:220px}
 .tb-hint{font-size:.72rem;color:rgba(255,255,255,.4);line-height:1.6}
+.tb-live{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;
+  padding:10px 14px;border-radius:12px;background:rgba(0,230,118,.10);
+  border:1px solid rgba(0,230,118,.35);font-size:.84rem}
+.tb-live code{font-family:'Orbitron',monospace;color:var(--gn);letter-spacing:1px}
+.tb-live a{text-decoration:none}
+.tb-live-dot{width:8px;height:8px;border-radius:50%;background:var(--gn);
+  box-shadow:0 0 8px var(--gn);animation:tbPulse 1.4s ease-in-out infinite}
+@keyframes tbPulse{0%,100%{opacity:1}50%{opacity:.25}}
 .tb-empty{padding:26px;text-align:center;color:rgba(255,255,255,.35);font-size:.85rem;line-height:1.7}
 
 /* ── 그룹 랭킹 테이블 ── */
@@ -1949,7 +1957,7 @@ function hideAdPlaceholder(){}
     </div>
   </div>
 </div>
-<script src="teambattle.js?v=2"></script>
-<script src="emoji-icons.js?v=2"></script>
+<script src="teambattle.js?v=3"></script>
+<script src="emoji-icons.js?v=3"></script>
 </body>
 </html>

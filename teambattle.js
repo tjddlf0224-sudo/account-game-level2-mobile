@@ -202,6 +202,17 @@
     return { avg: Math.round(s / v.length), lo: Math.min.apply(null, v), hi: Math.max.apply(null, v) };
   }
 
+  function sessionBar() {
+    if (!S.session) return '';
+    var url = location.href.replace(/admin\.html.*$/, '') + 'board.html?s=' + encodeURIComponent(S.session.id);
+    return '<div class="tb-live">' +
+      '<span class="tb-live-dot"></span>' +
+      '<b>진행 중</b> ' + esc(S.session.class_label || '') + ' · 세션 <code>' + esc(S.session.id) + '</code>' +
+      '<a class="tb-btn" href="' + esc(url) + '" target="_blank">전광판 열기 ↗</a>' +
+      '<button class="tb-btn" onclick="TeamBattle.finish()">세션 종료</button>' +
+      '</div>';
+  }
+
   function render() {
     var host = document.getElementById('tb-body');
     if (!host) return;
@@ -217,7 +228,7 @@
     var all = S.cls ? studentsOf(S.cls) : [];
     var present = all.filter(function (n) { return !S.absent[n]; });
 
-    var h = '';
+    var h = sessionBar();
     h += '<div class="tb-bar">';
     h += '<label>반</label><select id="tb-cls" onchange="TeamBattle.setClass(this.value)">' +
          classes.map(function (c) {
@@ -351,7 +362,8 @@
       if (res.data === 'invalid')    { alert('팀 편성이 비어 있습니다.'); return; }
       try { verifiedPass = pass; } catch (x) {}   // 다음 저장 때 재입력 안 받도록
       var url = location.href.replace(/admin\.html.*$/, '') + 'board.html?s=' + encodeURIComponent(res.data);
-      S.session = res.data;
+      S.session = { id: res.data, class_label: S.cls };
+      render();
       if (confirm('세션이 시작됐습니다 (코드 ' + res.data + ').\n전광판을 새 창으로 열까요?')) {
         window.open(url, '_blank');
       }
@@ -359,6 +371,21 @@
       console.error(e);
       alert('세션 시작 실패 — 인터넷 연결을 확인해 주세요.');
     }
+  };
+
+  api.finish = async function () {
+    if (!S.session) return;
+    if (!confirm('세션을 종료할까요? 전광판의 시계가 멈추고 이후 기록은 집계되지 않습니다.')) return;
+    var pass = askPass();
+    if (pass == null) return;
+    try {
+      var res = await sb().rpc('team_session_finish',
+        { p_group_id: gid(), p_pass: pass, p_session_id: S.session.id });
+      if (res.error) throw res.error;
+      if (res.data === 'wrong_pass') { try { verifiedPass = null; } catch (x) {} alert('비밀번호가 일치하지 않습니다.'); return; }
+      try { verifiedPass = pass; } catch (x) {}
+      S.session = null; render();
+    } catch (e) { alert('세션 종료 실패 — 인터넷 연결을 확인해 주세요.'); }
   };
 
   /* ── 진입점 ────────────────────────────────────────────── */
@@ -377,6 +404,12 @@
           '학생 이름에 반을 지정해야 팀을 짤 수 있어요.</div>';
         return;
       }
+      // 아직 안 끝난 세션이 있으면 이어받는다(창을 닫아도 코드를 다시 찾을 수 있게)
+      var live = await sb().from('team_session')
+        .select('id,class_label').eq('group_id', gid()).is('ended_at', null)
+        .order('started_at', { ascending: false }).limit(1);
+      S.session = (live.data && live.data[0]) || null;
+
       S.cls = null; S.teams = []; S.absent = {}; S.locked = {};
       render();
     } catch (e) { console.warn('팀전 로드 실패', e); }
