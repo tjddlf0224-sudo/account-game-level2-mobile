@@ -33,7 +33,9 @@
     locked: {},      // {name:true} 자동 편성 시 자리 고정
     teams: [],       // [[name,...], ...]
     skill: {},       // {name: 0~100}
-    session: null    // 진행 중 세션
+    session: null,   // 진행 중 세션
+    rosterOpen: false,
+    edit: {}         // 명단 편집 버퍼 {name:{class_label,alias_of,excluded}}
   };
 
   /* ⚠ admin.html 의 db·currentGid·dashData·verifiedPass 는 전부 let/const 로 선언돼 있다.
@@ -285,7 +287,73 @@
            '<button class="tb-btn primary" onclick="TeamBattle.start()">세션 시작 ▶</button></div>';
       h += '</div>';
     }
+    h += rosterPanel();
     host.innerHTML = h;
+  }
+
+  /* ── 명단 관리 ─────────────────────────────────────────────
+     교사가 화면에서 반·별칭·제외를 고칠 수 있어야 한다. 안 그러면 새 학생이
+     올 때마다 SQL 을 손대야 한다.
+     **DB에 기록이 있는데 명단에 없는 이름을 맨 위에 띄우는 것**이 핵심이다 —
+     닉네임을 바꿨거나 새로 들어온 학생이 그렇게 드러난다. */
+  function cur(name, field) {
+    if (S.edit[name] && field in S.edit[name]) return S.edit[name][field];
+    var r = S.roster.filter(function (x) { return x.name === name; })[0];
+    return r ? (r[field] || '') : '';
+  }
+
+  function rosterPanel() {
+    if (!S.rosterOpen) return '';
+    // DB(scores)에 있는 이름까지 모두 모은다 — 명단에 없는 새 이름을 찾아내려고
+    var known = {}, all = [];
+    S.roster.forEach(function (r) { if (!known[r.name]) { known[r.name] = 1; all.push(r.name); } });
+    var isNew = {};
+    S.scores.forEach(function (row) {
+      if (!known[row.name]) { known[row.name] = 1; all.push(row.name); isNew[row.name] = 1; }
+    });
+
+    var classes = [];
+    S.roster.forEach(function (r) {
+      if (r.class_label && classes.indexOf(r.class_label) < 0) classes.push(r.class_label);
+    });
+    classes.sort();
+    var reals = S.roster.filter(function (r) { return !r.excluded && !r.alias_of; })
+                        .map(function (r) { return r.name; }).sort();
+
+    // 새 이름 먼저, 그다음 반·이름 순
+    all.sort(function (a, b) {
+      if (!!isNew[a] !== !!isNew[b]) return isNew[a] ? -1 : 1;
+      var ca = cur(a, 'class_label'), cb = cur(b, 'class_label');
+      return (ca === cb) ? a.localeCompare(b, 'ko') : (ca || '힣').localeCompare(cb || '힣', 'ko');
+    });
+
+    var h = '<div class="tb-roster" id="tb-roster">';
+    h += '<div class="tb-rhead"><b>명단 관리</b>' +
+         '<span>반을 지정해야 팀을 짤 수 있습니다. 닉네임을 바꾼 학생은 “실제 주인”을 골라 주세요.</span>' +
+         '<button class="tb-btn primary" onclick="TeamBattle.saveRoster()">명단 저장</button></div>';
+    h += '<table class="tb-rt"><thead><tr><th>이름</th><th>반</th><th>실제 주인(닉네임 변경 시)</th><th>제외</th></tr></thead><tbody>';
+    h += all.map(function (n) {
+      var nk = esc(n).replace(/'/g, "\\'");
+      var al = cur(n, 'alias_of'), exc = !!cur(n, 'excluded');
+      return '<tr' + (isNew[n] ? ' class="new"' : '') + '>' +
+        '<td>' + esc(n) + (isNew[n] ? ' <i class="tb-new">새 이름</i>' : '') + '</td>' +
+        '<td><input list="tb-classes" value="' + esc(cur(n, 'class_label')) + '"' +
+          (al ? ' disabled' : '') +
+          ' onchange="TeamBattle.setRow(\'' + nk + '\',\'class_label\',this.value)"></td>' +
+        '<td><select onchange="TeamBattle.setRow(\'' + nk + '\',\'alias_of\',this.value)">' +
+          '<option value="">— 본인 —</option>' +
+          reals.filter(function (x) { return x !== n; }).map(function (x) {
+            return '<option' + (al === x ? ' selected' : '') + '>' + esc(x) + '</option>';
+          }).join('') + '</select></td>' +
+        '<td style="text-align:center"><input type="checkbox"' + (exc ? ' checked' : '') +
+          ' onchange="TeamBattle.setRow(\'' + nk + '\',\'excluded\',this.checked)"></td></tr>';
+    }).join('');
+    h += '</tbody></table>';
+    h += '<datalist id="tb-classes">' + classes.map(function (c) {
+      return '<option value="' + esc(c) + '">';
+    }).join('') + '</datalist>';
+    h += '</div>';
+    return h;
   }
 
   var GAMES = [
@@ -323,8 +391,18 @@
       render();
     },
     toggleRoster: function () {
-      var el = document.getElementById('tb-roster');
-      if (el) el.style.display = el.style.display === 'none' ? '' : 'none';
+      S.rosterOpen = !S.rosterOpen;
+      render();
+      if (S.rosterOpen) {
+        var el = document.getElementById('tb-roster');
+        if (el) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    },
+    setRow: function (name, field, val) {
+      var r = S.edit[name] || (S.edit[name] = {});
+      r[field] = val;
+      if (field === 'alias_of' && val) { r.class_label = ''; }   // 별칭은 반을 안 갖는다
+      render();
     },
     state: function () { return S; }
   };
@@ -373,6 +451,28 @@
     }
   };
 
+  api.saveRoster = async function () {
+    var pass = askPass();
+    if (pass == null) return;
+    var names = {};
+    S.roster.forEach(function (r) { names[r.name] = 1; });
+    S.scores.forEach(function (r) { names[r.name] = 1; });
+    var rows = Object.keys(names).map(function (n) {
+      return { name: n, class_label: cur(n, 'class_label') || null,
+               alias_of: cur(n, 'alias_of') || null, excluded: !!cur(n, 'excluded') };
+    });
+    try {
+      var res = await sb().rpc('team_roster_set', { p_group_id: gid(), p_pass: pass, p_rows: rows });
+      if (res.error) throw res.error;
+      if (res.data === 'wrong_pass') { try { verifiedPass = null; } catch (x) {} alert('비밀번호가 일치하지 않습니다.'); return; }
+      try { verifiedPass = pass; } catch (x) {}
+      S.edit = {};
+      await api.load();                 // 저장한 명단으로 실력 점수를 다시 계산한다
+      S.rosterOpen = true; render();
+      alert('명단을 저장했습니다.');
+    } catch (e) { console.error(e); alert('명단 저장 실패 — 인터넷 연결을 확인해 주세요.'); }
+  };
+
   api.finish = async function () {
     if (!S.session) return;
     if (!confirm('세션을 종료할까요? 전광판의 시계가 멈추고 이후 기록은 집계되지 않습니다.')) return;
@@ -410,7 +510,7 @@
         .order('started_at', { ascending: false }).limit(1);
       S.session = (live.data && live.data[0]) || null;
 
-      S.cls = null; S.teams = []; S.absent = {}; S.locked = {};
+      S.cls = null; S.teams = []; S.absent = {}; S.locked = {}; S.edit = {};
       render();
     } catch (e) { console.warn('팀전 로드 실패', e); }
   };
