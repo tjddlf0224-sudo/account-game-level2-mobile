@@ -173,30 +173,6 @@
         .diff-btn.locked { opacity: 0.45; }
         .diff-hint { font-size: 0.72rem; color: rgba(255,255,255,0.35); text-align: center; }
 
-        /* ── 난이도2 — 뜻을 보고 계정과목을 고르는 퀴즈 영역 ── */
-        #lv2-area { display: none; width: 100%; max-width: 420px; flex-direction: column; align-items: center; gap: 14px; padding: 4px 16px 20px; }
-        #lv2-area.show { display: flex; }
-        #lv2-progress {
-            font-family: 'Jua', sans-serif; font-size: 0.85rem; color: #f1c40f;
-            background: rgba(241,196,15,0.14); border-radius: 50px; padding: 4px 18px;
-        }
-        #lv2-card {
-            width: 100%; background: rgba(0,0,0,0.28); border: 3px solid var(--accent2);
-            border-radius: 16px; padding: 22px 18px; text-align: center;
-        }
-        #lv2-card-label { font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-bottom: 8px; letter-spacing: 2px; }
-        #lv2-desc { font-family: 'Jua', sans-serif; font-size: clamp(1.1rem,4vw,1.4rem); color: #fff; word-break: keep-all; line-height: 1.4; }
-        #lv2-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
-        .lv2-opt-btn {
-            padding: 16px 10px; min-height: 58px; border: 3px solid var(--accent);
-            border-radius: 14px; background: var(--card-front); color: var(--text-color);
-            font-family: 'Jua', sans-serif; font-size: clamp(0.92rem,3vw,1.1rem);
-            cursor: pointer; transition: all 0.15s; word-break: keep-all;
-        }
-        .lv2-opt-btn:active { transform: scale(0.96); }
-        .lv2-opt-btn.lv2-correct { background: var(--green); border-color: var(--green); color: #fff; }
-        .lv2-opt-btn.lv2-wrong   { background: var(--accent2); border-color: var(--accent2); color: #fff; }
-        .lv2-opt-btn:disabled { cursor: default; }
 
         /* 오버레이 */
         .overlay {
@@ -590,31 +566,20 @@
 
     <div class="grid-container" id="grid"></div>
 
-    <!-- 난이도2 — 뜻 보고 계정과목 선택 -->
-    <div id="lv2-area">
-        <div id="lv2-progress">1 / 2</div>
-        <div id="lv2-card">
-            <div id="lv2-card-label">이 뜻을 가진 계정과목은?</div>
-            <div id="lv2-desc"></div>
-        </div>
-        <div id="lv2-opts"></div>
-    </div>
-
     <!-- 시작 화면 -->
     <div id="start-screen" class="overlay">
         <div class="overlay-inner">
             <h2>기억력 테스트</h2>
             <p style="margin-bottom:6px;">계정과목과 그 설명이 짝꿍입니다.<br>
-               예: <b style="color:var(--blue)">접대비</b> ↔ <b style="color:var(--accent)">거래처 선물</b><br><br>
+               예: <b style="color:var(--blue)">기업업무추진비</b> ↔ <b style="color:var(--accent)">거래처 선물/접대</b><br><br>
                <span style="font-size:0.92rem;color:rgba(255,255,255,0.6)">
-                 Stage 1→4 단계 클리어마다 점수 누적<br>Stage 4까지 모두 클리어하면 최종 점수 등록!<br>다시 도전해서 기록을 경신하세요!
+                 한 판을 다 맞추면 다음 Stage — <b>끝없이 이어집니다</b><br>Stage가 오를수록 카드가 늘고 점수가 쌓여요!
                </span>
             </p>
 
-            <!-- 난이도 2 보류(2026-09-12) — 아래 LV 고정 주석 참고 -->
-            <div class="diff-toggle" id="diff-toggle" style="display:none">
-                <button class="diff-btn" id="diff-btn-1" onclick="selectDifficulty(1)">난이도 1<br><span style="font-size:.72rem;opacity:.7">카드 뒤집어 짝 맞추기</span></button>
-                <button class="diff-btn locked" id="diff-btn-2" onclick="selectDifficulty(2)">난이도 2 🔒<br><span style="font-size:.72rem;opacity:.7">뜻 보고 계정과목 선택</span></button>
+            <div class="diff-toggle" id="diff-toggle">
+                <button class="diff-btn" id="diff-btn-1" onclick="selectDifficulty(1)">난이도 1<br><span style="font-size:.72rem;opacity:.7">계정과목 ↔ 뜻</span></button>
+                <button class="diff-btn locked" id="diff-btn-2" onclick="selectDifficulty(2)">난이도 2 🔒<br><span style="font-size:.72rem;opacity:.7">계정과목 ↔ 분류</span></button>
             </div>
             <div class="diff-hint" id="diff-hint"></div>
 
@@ -674,7 +639,7 @@
                 <div class="score-detail" id="score-detail">0점</div>
             </div>
 
-            <div id="lv-unlock-msg" style="display:none; font-family:'Jua',sans-serif; font-size:1rem; color:#000; background:linear-gradient(135deg,gold,#f39c12); border-radius:50px; padding:8px 22px; text-align:center; margin-top:2px;">🔓 난이도 2 해금! 이제 뜻만 보고 계정과목을 직접 골라야 해요</div>
+            <div id="lv-unlock-msg" style="display:none; font-family:'Jua',sans-serif; font-size:1rem; color:#000; background:linear-gradient(135deg,gold,#f39c12); border-radius:50px; padding:8px 22px; text-align:center; margin-top:2px;">🔓 난이도 2 해금! 이번엔 뜻 대신 <b>분류</b>(자산·부채·자본·수익·비용)와 짝을 맞춰요</div>
 
             <!-- 스테이지 클리어 직급 미리보기 -->
             <div id="rank-preview-box" class="rank-preview-box" style="display:none;"></div>
@@ -819,67 +784,67 @@
         }
 
         const allPairs = [
-            { id:1,  a:"현금",          b:"통화/동전/수표" },
-            { id:2,  a:"보통예금",       b:"입출금 자유" },
-            { id:3,  a:"당좌예금",       b:"당좌수표 발행용 예금" },
-            { id:4,  a:"단기매매증권",   b:"단기 시세차익 주식" },
-            { id:5,  a:"단기대여금",     b:"1년 내 빌려준 돈" },
-            { id:6,  a:"장기대여금",     b:"1년 초과 빌려준 돈" },
-            { id:7,  a:"외상매출금",     b:"상품 외상판매" },
-            { id:8,  a:"받을어음",       b:"약속어음 수령" },
+            { id:1,  a:"현금",          b:"통화/동전/수표", c:"자산" },
+            { id:2,  a:"보통예금",       b:"입출금 자유", c:"자산" },
+            { id:3,  a:"당좌예금",       b:"당좌수표 발행용 예금", c:"자산" },
+            { id:4,  a:"단기매매증권",   b:"단기 시세차익 주식", c:"자산" },
+            { id:5,  a:"단기대여금",     b:"1년 내 빌려준 돈", c:"자산" },
+            { id:6,  a:"장기대여금",     b:"1년 초과 빌려준 돈", c:"자산" },
+            { id:7,  a:"외상매출금",     b:"상품 외상판매", c:"자산" },
+            { id:8,  a:"받을어음",       b:"약속어음 수령", c:"자산" },
             { id:9,  a:"대손충당금",     b:"못 받을 채권 대비" },
-            { id:10, a:"미수금",         b:"상품 외 외상채권" },
-            { id:11, a:"선급금",         b:"계약금 지급" },
-            { id:12, a:"소모품",         b:"아직 안 쓴 소모품" },
-            { id:13, a:"가지급금",       b:"용도 불명 지출금" },
+            { id:10, a:"미수금",         b:"상품 외 외상채권", c:"자산" },
+            { id:11, a:"선급금",         b:"계약금 지급", c:"자산" },
+            { id:12, a:"소모품",         b:"아직 안 쓴 소모품", c:"자산" },
+            { id:13, a:"가지급금",       b:"용도 불명 지출금", c:"자산" },
             { id:14, a:"현금과부족",     b:"현금 장부·실물 차이" },
-            { id:15, a:"상품",           b:"판매 목적 재고자산" },
-            { id:16, a:"투자부동산",     b:"임대·투자용 부동산" },
-            { id:17, a:"토지",           b:"감가상각 안 하는 땅" },
-            { id:18, a:"건물",           b:"사무실/공장 건축물" },
-            { id:19, a:"구축물",         b:"담장/포장도로" },
-            { id:20, a:"기계장치",       b:"생산용 기계설비" },
-            { id:21, a:"차량운반구",     b:"트럭/승용차" },
-            { id:22, a:"비품",           b:"컴퓨터/책상" },
-            { id:23, a:"건설중인자산",   b:"완공 전 공사 원가" },
-            { id:24, a:"영업권",         b:"인수 시 초과지급액" },
-            { id:25, a:"개발비",         b:"제품 개발 지출액" },
-            { id:26, a:"임차보증금",     b:"건물 임차 보증금" },
-            { id:27, a:"외상매입금",     b:"상품 외상구매" },
-            { id:28, a:"지급어음",       b:"약속어음 발행" },
-            { id:29, a:"단기차입금",     b:"1년 내 갚을 대출" },
-            { id:30, a:"미지급금",       b:"법인카드 결제" },
-            { id:31, a:"선수금",         b:"계약금 받음" },
-            { id:32, a:"예수금",         b:"원천징수 보관금" },
-            { id:33, a:"가수금",         b:"용도 불명 입금액" },
-            { id:34, a:"임대보증금",     b:"세입자에게 받은 보증금" },
-            { id:35, a:"장기차입금",     b:"1년 초과 갚을 대출" },
-            { id:36, a:"자본금",         b:"출자한 원금" },
+            { id:15, a:"상품",           b:"판매 목적 재고자산", c:"자산" },
+            { id:16, a:"투자부동산",     b:"임대·투자용 부동산", c:"자산" },
+            { id:17, a:"토지",           b:"감가상각 안 하는 땅", c:"자산" },
+            { id:18, a:"건물",           b:"사무실/공장 건축물", c:"자산" },
+            { id:19, a:"구축물",         b:"담장/포장도로", c:"자산" },
+            { id:20, a:"기계장치",       b:"생산용 기계설비", c:"자산" },
+            { id:21, a:"차량운반구",     b:"트럭/승용차", c:"자산" },
+            { id:22, a:"비품",           b:"컴퓨터/책상", c:"자산" },
+            { id:23, a:"건설중인자산",   b:"완공 전 공사 원가", c:"자산" },
+            { id:24, a:"영업권",         b:"인수 시 초과지급액", c:"자산" },
+            { id:25, a:"개발비",         b:"제품 개발 지출액", c:"자산" },
+            { id:26, a:"임차보증금",     b:"건물 임차 보증금", c:"자산" },
+            { id:27, a:"외상매입금",     b:"상품 외상구매", c:"부채" },
+            { id:28, a:"지급어음",       b:"약속어음 발행", c:"부채" },
+            { id:29, a:"단기차입금",     b:"1년 내 갚을 대출", c:"부채" },
+            { id:30, a:"미지급금",       b:"법인카드 결제", c:"부채" },
+            { id:31, a:"선수금",         b:"계약금 받음", c:"부채" },
+            { id:32, a:"예수금",         b:"원천징수 보관금", c:"부채" },
+            { id:33, a:"가수금",         b:"용도 불명 입금액", c:"부채" },
+            { id:34, a:"임대보증금",     b:"세입자에게 받은 보증금", c:"부채" },
+            { id:35, a:"장기차입금",     b:"1년 초과 갚을 대출", c:"부채" },
+            { id:36, a:"자본금",         b:"출자한 원금", c:"자본" },
             { id:37, a:"인출금",         b:"개인기업 사적 인출" },
-            { id:38, a:"상품매출",       b:"상품 판매 수익" },
-            { id:39, a:"이자수익",       b:"예금 이자 받음" },
-            { id:40, a:"배당금수익",     b:"주식 배당금 받음" },
-            { id:41, a:"임대료",         b:"건물 임대 수익" },
-            { id:42, a:"급여",           b:"직원 월급" },
-            { id:43, a:"복리후생비",     b:"직원 회식/식대" },
-            { id:44, a:"여비교통비",     b:"출장비/택시비" },
-            { id:45, a:"기업업무추진비", b:"거래처 선물/접대" },
-            { id:46, a:"통신비",         b:"전화/인터넷 요금" },
-            { id:47, a:"수도광열비",     b:"가스/전기요금" },
-            { id:48, a:"세금과공과",     b:"재산세/협회비" },
-            { id:49, a:"감가상각비",     b:"자산 가치 감소분" },
-            { id:50, a:"임차료",         b:"건물/장비 사용료" },
-            { id:51, a:"수선비",         b:"자산 수리·유지비" },
-            { id:52, a:"보험료",         b:"화재·자동차 보험" },
-            { id:53, a:"차량유지비",     b:"주유·차량 수리비" },
-            { id:54, a:"운반비",         b:"상품 배송·운송비" },
-            { id:55, a:"교육훈련비",     b:"직원 연수·교육비" },
-            { id:56, a:"도서인쇄비",     b:"책·인쇄물 구입비" },
-            { id:57, a:"소모품비",       b:"사용한 소모품 비용" },
-            { id:58, a:"수수료비용",     b:"은행·중개 수수료" },
-            { id:59, a:"광고선전비",     b:"광고·홍보 비용" },
-            { id:60, a:"이자비용",       b:"대출 이자 지급" },
-            { id:61, a:"기부금",         b:"무상으로 준 금품" },
+            { id:38, a:"상품매출",       b:"상품 판매 수익", c:"수익" },
+            { id:39, a:"이자수익",       b:"예금 이자 받음", c:"수익" },
+            { id:40, a:"배당금수익",     b:"주식 배당금 받음", c:"수익" },
+            { id:41, a:"임대료",         b:"건물 임대 수익", c:"수익" },
+            { id:42, a:"급여",           b:"직원 월급", c:"비용" },
+            { id:43, a:"복리후생비",     b:"직원 회식/식대", c:"비용" },
+            { id:44, a:"여비교통비",     b:"출장비/택시비", c:"비용" },
+            { id:45, a:"기업업무추진비", b:"거래처 선물/접대", c:"비용" },
+            { id:46, a:"통신비",         b:"전화/인터넷 요금", c:"비용" },
+            { id:47, a:"수도광열비",     b:"가스/전기요금", c:"비용" },
+            { id:48, a:"세금과공과",     b:"재산세/협회비", c:"비용" },
+            { id:49, a:"감가상각비",     b:"자산 가치 감소분", c:"비용" },
+            { id:50, a:"임차료",         b:"건물/장비 사용료", c:"비용" },
+            { id:51, a:"수선비",         b:"자산 수리·유지비", c:"비용" },
+            { id:52, a:"보험료",         b:"화재·자동차 보험", c:"비용" },
+            { id:53, a:"차량유지비",     b:"주유·차량 수리비", c:"비용" },
+            { id:54, a:"운반비",         b:"상품 배송·운송비", c:"비용" },
+            { id:55, a:"교육훈련비",     b:"직원 연수·교육비", c:"비용" },
+            { id:56, a:"도서인쇄비",     b:"책·인쇄물 구입비", c:"비용" },
+            { id:57, a:"소모품비",       b:"사용한 소모품 비용", c:"비용" },
+            { id:58, a:"수수료비용",     b:"은행·중개 수수료", c:"비용" },
+            { id:59, a:"광고선전비",     b:"광고·홍보 비용", c:"비용" },
+            { id:60, a:"이자비용",       b:"대출 이자 지급", c:"비용" },
+            { id:61, a:"기부금",         b:"무상으로 준 금품", c:"비용" },
         ];
 
         let flippedCards = [], matchedCount = 0, wrongCount = 0, isLocked = false;
@@ -889,8 +854,6 @@
         let LV = 1; // 1=카드 뒤집어 짝맞추기 / 2=뜻 보고 계정과목 선택(difficulty.js로 해금)
         // 라운드(Stage 1~MAX_STAGE) 전체 누적 — 난이도2 해금 판정(정답률)과 랭킹 저장용
         let roundWrongTotal = 0, roundMatchedTotal = 0;
-        // 난이도2 전용 상태 — 뜻 카드 1개 + 계정과목 선택지
-        let lv2Queue = [], lv2Idx = 0, lv2Locked = false;
         // 카드/보기 판정의 setTimeout이 끝나기 전에 '그만'→'다시 하기'로 라운드가 바뀌면,
         // 지난 라운드의 지연 콜백이 새 라운드의 matchedCount 등을 잘못 건드릴 수 있다.
         // startGame()마다 값을 올려서, 각 콜백이 예약 당시의 라운드인지 확인하게 한다.
@@ -1087,9 +1050,8 @@
             const btn2 = document.getElementById('diff-btn-2');
             if (btn2) {
                 btn2.classList.toggle('locked', !unlocked);
-                btn2.innerHTML = unlocked
-                    ? '난이도 2<br><span style="font-size:.72rem;opacity:.7">뜻 보고 계정과목 선택</span>'
-                    : '난이도 2 🔒<br><span style="font-size:.72rem;opacity:.7">뜻 보고 계정과목 선택</span>';
+                btn2.innerHTML = (unlocked ? '난이도 2' : '난이도 2 🔒')
+                    + '<br><span style="font-size:.72rem;opacity:.7">계정과목 ↔ 분류</span>';
             }
             updateDiffBtns(Difficulty.get(GAME_ID));
             const hint = document.getElementById('diff-hint');
@@ -1161,13 +1123,12 @@
         function startGame() {
             initAudio(); // ← AudioContext resume + BGM 시작
             hideAdPlaceholder();
-            /* 난이도 2 보류(2026-09-12, 사용자 지시).
-               뜻을 보고 4지선다로 고르는 방식이라 **이 게임의 정체성인 카드 뒤집기를 버렸다.**
-               위치 암기를 막으려다 게임을 바꿔 버린 것이 문제였다.
-               더 나은 안이 정해질 때까지 LV 을 1로 고정한다 — 이미 해금된 학생이
-               저장값(hub_lv_memory=2) 때문에 계속 LV2 를 만나는 일도 막는다.
-               LV2 코드 자체는 남겨 둔다(되살릴 때 쓰려고). */
-            LV = 1;
+            /* ⚠ 난이도2 는 **카드 뒤집기를 그대로 둔 채 짝의 정의만** 바꾼다.
+               (LV1 = 계정과목↔뜻, LV2 = 계정과목↔분류)
+               2026-09-12 에 한 번 4지선다 퀴즈로 바꿨다가 되돌렸다 —
+               위치 암기를 막으려다 이 게임의 정체성인 카드 뒤집기를 버린 것이 문제였다.
+               난이도는 카드 위에 얹는 것이지, 카드를 치우는 게 아니다. */
+            LV = window.Difficulty ? Difficulty.get(GAME_ID) : 1;
             window._roundOver = false;   // 새 게임 — endGame 재허용
             roundToken++;                // 지난 라운드의 지연 setTimeout 콜백을 전부 무효화
             document.getElementById('start-screen').style.display = 'none';
@@ -1195,21 +1156,47 @@
             setupBoard(cfg);
         }
 
+        /* 이번 판에 쓸 문항 고르기.
+           난이도2 는 분류 카드가 짝이므로 (1) 분류가 명확한 과목만 쓰고,
+           (2) 한 판에 같은 분류가 3장 이상 깔리지 않게 막는다 —
+           같은 분류가 많으면 아무 거나 맞아 버려서 판이 쉬워진다. */
+        function pickPairs(n) {
+            const pool = (LV === 2) ? allPairs.filter(p => p.c) : allPairs;
+            let available = pool.filter(p => !usedPairIds.has(p.id));
+            if (available.length < n) { usedPairIds = new Set(); available = [...pool]; }
+            const shuffled = [...available].sort(() => 0.5 - Math.random());
+            if (LV !== 2) return shuffled.slice(0, n);
+
+            const out = [], used = {};
+            for (const p of shuffled) {
+                if ((used[p.c] || 0) >= 2) continue;
+                used[p.c] = (used[p.c] || 0) + 1;
+                out.push(p);
+                if (out.length === n) break;
+            }
+            // 제약 때문에 못 채우면(자본 계정이 하나뿐인 경우 등) 제약 없이 마저 채운다
+            for (const p of shuffled) {
+                if (out.length >= n) break;
+                if (out.indexOf(p) === -1) out.push(p);
+            }
+            return out;
+        }
+
         function setupBoard(cfg) {
-            if (LV === 2) { setupLv2Board(cfg); return; }
             grid.style.display = '';
-            document.getElementById('lv2-area').classList.remove('show');
             grid.innerHTML = '';
 
-            let available = allPairs.filter(p => !usedPairIds.has(p.id));
-            if (available.length < cfg.pairs) { usedPairIds = new Set(); available = [...allPairs]; }
-            let selected = [...available].sort(() => 0.5 - Math.random()).slice(0, cfg.pairs);
+            const selected = pickPairs(cfg.pairs);
             selected.forEach(p => usedPairIds.add(p.id));
 
+            /* mk = 짝 판정 키. 난이도1 은 문항 id, 난이도2 는 분류명이다.
+               난이도2 에서 같은 분류 카드가 두 쌍 깔리면 서로 엇갈려 맞아도 정답인데,
+               분류가 같으면 실제로 맞는 말이므로 그게 맞다. */
             let cardData = [];
             selected.forEach(p => {
-                cardData.push({ id: p.id, text: p.a, type: 'account' });
-                cardData.push({ id: p.id, text: p.b, type: 'desc' });
+                const mk = (LV === 2) ? p.c : String(p.id);
+                cardData.push({ id: p.id, mk: mk, text: p.a, type: 'account' });
+                cardData.push({ id: p.id, mk: mk, text: (LV === 2 ? p.c : p.b), type: 'pair' });
             });
             cardData.sort(() => 0.5 - Math.random());
 
@@ -1241,6 +1228,8 @@
             const card = document.createElement('div');
             card.classList.add('card');
             card.dataset.id = data.id;
+            card.dataset.mk = data.mk;
+            card.dataset.type = data.type;
             card.innerHTML = `
                 <div class="card-inner">
                     <div class="card-back">?</div>
@@ -1259,82 +1248,6 @@
             card.addEventListener('pointerup',   () => { pressing = false; });
             card.addEventListener('pointercancel',() => { pressing = false; });
             grid.appendChild(card);
-        }
-
-        // ── 난이도2 — 뜻 카드를 보고 계정과목을 4지선다로 고르기 ──
-        // 카드 위치를 외우는 게 아니라 매번 새 보기가 나오므로 위치암기가 통하지 않는다.
-        function setupLv2Board(cfg) {
-            grid.style.display = 'none';
-            document.getElementById('lv2-area').classList.add('show');
-
-            let available = allPairs.filter(p => !usedPairIds.has(p.id));
-            if (available.length < cfg.pairs) { usedPairIds = new Set(); available = [...allPairs]; }
-            let selected = [...available].sort(() => 0.5 - Math.random()).slice(0, cfg.pairs);
-            selected.forEach(p => usedPairIds.add(p.id));
-
-            lv2Queue = selected;
-            lv2Idx = 0;
-            if (!timerInterval) startTimer();
-            renderLv2Question();
-        }
-
-        function renderLv2Question() {
-            const p = lv2Queue[lv2Idx];
-            document.getElementById('lv2-progress').textContent = `${lv2Idx + 1} / ${lv2Queue.length}`;
-            document.getElementById('lv2-desc').textContent = p.b;
-
-            const pool = allPairs.filter(x => x.id !== p.id);
-            const fakes = [...pool].sort(() => 0.5 - Math.random()).slice(0, 3);
-            const options = [...fakes.map(f => f.a), p.a].sort(() => 0.5 - Math.random());
-
-            const wrap = document.getElementById('lv2-opts');
-            wrap.innerHTML = '';
-            options.forEach(optText => {
-                const btn = document.createElement('button');
-                btn.className = 'lv2-opt-btn';
-                btn.textContent = optText;
-                btn.addEventListener('click', () => handleLv2Pick(btn, optText, p));
-                wrap.appendChild(btn);
-            });
-            lv2Locked = false;
-        }
-
-        function handleLv2Pick(btn, picked, pair) {
-            if (lv2Locked) return;
-            lv2Locked = true;
-            const correct = picked === pair.a;
-            const allBtns = document.querySelectorAll('#lv2-opts .lv2-opt-btn');
-            allBtns.forEach(b => { b.disabled = true; });
-
-            if (correct) {
-                playSound('match');
-                hapticCorrect();
-                btn.classList.add('lv2-correct');
-            } else {
-                playSound('wrong');
-                hapticWrong();
-                btn.classList.add('lv2-wrong');
-                wrongCount++;
-                movesEl.innerText = wrongCount;
-                allBtns.forEach(b => { if (b.textContent === pair.a) b.classList.add('lv2-correct'); });
-                if (window.WrongNote) {
-                    WrongNote.add({ game:'memory', key:pair.a,
-                        q:'"'+pair.b+'" 의 뜻을 가진 계정과목은?',
-                        correct:pair.a, wrong:picked, type:'계정과목 뜻(선택형)' });
-                }
-            }
-
-            const myToken = roundToken;
-            setTimeout(() => {
-                if (myToken !== roundToken) return; // 그 사이 라운드가 새로 시작됨 — 무시
-                if (correct) { matchedCount++; matchesEl.innerText = matchedCount; }
-                lv2Idx++;
-                if (lv2Idx >= lv2Queue.length) {
-                    endGame();
-                } else {
-                    renderLv2Question();
-                }
-            }, correct ? 500 : 900);
         }
 
         function flipCard() {
@@ -1362,7 +1275,7 @@
             seenCards.add(c1);
             seenCards.add(c2);
 
-            if (c1.dataset.id === c2.dataset.id) {
+            if (c1.dataset.mk === c2.dataset.mk && c1.dataset.type !== c2.dataset.type) {
                 playSound('match');
                 hapticCorrect();
                 const myToken1 = roundToken;
@@ -1382,7 +1295,11 @@
                     if (window.WrongNote) {
                         [c1, c2].forEach(function(c){
                             var p = allPairs.find(function(x){ return String(x.id) === String(c.dataset.id); });
-                            if (p) WrongNote.add({ game:'memory', key:p.a,
+                            if (!p) return;
+                            if (LV === 2) WrongNote.add({ game:'memory', key:p.a,
+                                q:'"<b class="target-account">'+p.a+'</b>" 은(는) 어느 분류?',
+                                correct:p.c, wrong:null, type:'계정과목 분류' });
+                            else WrongNote.add({ game:'memory', key:p.a,
                                 q:'"<b class="target-account">'+p.a+'</b>" 의 뜻은?',
                                 correct:p.b, wrong:null, type:'계정과목 뜻' });
                         });
@@ -1425,7 +1342,6 @@
 
             function reportDifficultyAndUpdateBanner() {
                 const unlockEl = document.getElementById('lv-unlock-msg');
-                if (unlockEl) unlockEl.style.display = 'none';   // 난이도2 보류 — 해금 안내 끔
                 if (!window.Difficulty) { if (unlockEl) unlockEl.style.display = 'none'; return; }
                 const justUnlocked = LV === 1
                     ? Difficulty.reportRound(GAME_ID, roundMatchedTotal, roundMatchedTotal + roundWrongTotal)
@@ -2041,7 +1957,7 @@ const GUIDE_STEPS = [
   {
     img: 'guide/g2_4_stage.png',
     title: '🏆 스테이지 & 누적 점수',
-    desc: '점수는 <b>기본점수 − (오답×20) − (걸린초×0.5)</b>로 계산돼요. 스테이지가 클리어될 때마다 <b>점수가 누적</b>됩니다.<br><b>Stage 1→4</b>까지 점점 카드가 많아지고, <b>Stage 4를 클리어하면 그 라운드는 종료</b>! 다시 도전해서 최고 기록을 경신하세요.<br><br>난이도1에서 정답률 70% 이상(10문항+)을 달성하면 <b>난이도2</b>가 열려요 — 카드 없이 <b>뜻만 보고 계정과목을 직접 골라야</b> 해서 위치를 외워서는 풀 수 없어요!'
+    desc: '점수는 <b>기본점수 − (오답×20) − (걸린초×0.5)</b>로 계산돼요. 스테이지가 클리어될 때마다 <b>점수가 누적</b>됩니다.<br><b>Stage 1→4</b>로 갈수록 카드가 많아지고, 그 뒤로는 같은 크기(5쌍)로 <b>끝없이 이어집니다</b> — 그만두기 전까지 점수가 계속 쌓여요.<br><br>난이도1에서 정답률 70% 이상(10문항+)을 달성하면 <b>난이도2</b>가 열려요 — 카드 뒤집기는 그대로지만 짝이 <b>뜻이 아니라 분류(자산·부채·자본·수익·비용)</b>로 바뀝니다!'
   },
   {
     img: 'guide/g2_5_reward.png',
