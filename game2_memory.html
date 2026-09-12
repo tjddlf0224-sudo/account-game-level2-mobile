@@ -557,19 +557,19 @@
         }
         </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="wrongnote.js?v=9"></script>
-    <script src="growth.js?v=9"></script>
-<script src="streak.js?v=9"></script>
-    <script src="difficulty.js?v=9"></script>
-    <script src="review-prompt.js?v=9"></script>
+    <script src="wrongnote.js?v=10"></script>
+    <script src="growth.js?v=10"></script>
+<script src="streak.js?v=10"></script>
+    <script src="difficulty.js?v=10"></script>
+    <script src="review-prompt.js?v=10"></script>
 </head>
 <body>
 
 
 
     <!-- 🎵 BGM 오디오 엘리먼트 -->
-    <audio id="bgm" src="bgm2_memory.mp3?v=9" loop preload="auto"></audio>
-    <script src="bgmguard.js?v=9"></script>
+    <audio id="bgm" src="bgm2_memory.mp3?v=10" loop preload="auto"></audio>
+    <script src="bgmguard.js?v=10"></script>
 
     <header>
         <h1 style="flex:1;text-align:center;">🧩 기억의 전당 🧩</h1>
@@ -1435,26 +1435,22 @@
 
             const clearedStage = stage;
 
-            // Stage MAX_STAGE 클리어 = 라운드 종료. 예전엔 여기서 stage를 계속 늘리며
-            // 무한 반복이 가능해서(20,055점=약 40회 반복 사례) 점수가 실력과 무관하게
-            // "오래 붙어있으면 이기는" 구조였다 — 여기서 라운드를 확정 종료해 무한누적을 없앤다.
-            if (clearedStage >= MAX_STAGE) {
-                totalScore += stageScore;
-                requestInterstitialIfNeeded(function () {
-                    playSound('clear');
-                    reportDifficultyAndUpdateBanner();
-                    showResult(totalScore, false, `Stage 1~${MAX_STAGE} 누적 — 오답 ${roundWrongTotal}회 · ${secs}초`);
-                });
-                return;
-            }
-
+            /* ⚠ 여기서 Stage MAX_STAGE 에 라운드를 끝내지 말 것.
+               2026-08-29(커밋 d5d3cd2)에 내가 '점수 무한누적 버그'로 오인해 4스테이지에서
+               강제 종료시켰다가 되돌렸다. **무한 진행은 원래 의도된 설계다** —
+               카드 수만 보기 좋게 상한을 두고(Stage 4 배치 유지) 스테이지는 계속 이어진다.
+               d764726(08-14) 의 '10스테이지마다 전면광고' 도 그 전제 위에 있었고,
+               지운 코드에는 isEndless 변수와 '계속 도전 ▶' 버튼까지 있었다. */
             requestStageInterstitialIfNeeded(clearedStage, function () {
                 playSound('clear');
                 totalScore += stageScore;
                 document.querySelector('#result-screen h2').textContent = `Stage ${clearedStage} CLEAR! 🎉`;
                 document.getElementById('result-rank').textContent = `+${stageScore}점 획득!`;
                 document.getElementById('result-rank').style.color = '#2ecc71';
-                document.getElementById('result-msg').textContent = `누적 점수: ${totalScore}점 — 다음 스테이지로!`;
+                const isEndless = clearedStage >= MAX_STAGE;   // 그 뒤로는 같은 판 크기로 계속 이어진다
+                document.getElementById('result-msg').textContent = isEndless
+                    ? `누적 점수: ${totalScore}점 — 계속 도전!`
+                    : `누적 점수: ${totalScore}점 — 다음 스테이지로!`;
                 document.getElementById('final-score').textContent = totalScore + '점';
                 document.getElementById('score-detail').textContent = detail;
                 // 원탭 랭킹 등록: 허브 닉네임 자동 사용, 없으면 입력칸 노출
@@ -1475,7 +1471,7 @@
                 stageSaveBtn.textContent = '🏆 랭킹 등록하기';
                 document.getElementById('result-screen').style.display = 'flex';
                 document.getElementById('next-stage-btn').style.display = 'inline-block';
-                document.getElementById('next-stage-btn').textContent = '다음 스테이지 ▶';
+                document.getElementById('next-stage-btn').textContent = isEndless ? '계속 도전 ▶' : '다음 스테이지 ▶';
                 document.getElementById('restart-btn').style.display = 'none';
             });
         }
@@ -1497,7 +1493,7 @@
             recordBest(finalScore);
             const box = document.getElementById('rank-preview-box'); if(box) box.style.display='none';
             const mw = document.getElementById('mini-rank-wrap'); if(mw) mw.style.display='none';
-            const ssb = document.getElementById('stage-save-btn'); if(ssb) ssb.style.display='none';
+            const ssb = document.getElementById('stage-save-btn');
             const rank = getRank(finalScore);
             // 이 게임은 스테이지가 무한 반복이라 '그만'이 유일한 종료 수단이다.
             // 그래서 quit=true 를 실패로 취급하면, 끝까지 잘 하고 랭킹에 올리려는 학생까지
@@ -1517,11 +1513,20 @@
             document.getElementById('final-score').textContent = finalScore + '점';
             document.getElementById('score-detail').textContent = detail;
             document.getElementById('save-status').textContent = '';
-            document.getElementById('player-name').value = localStorage.getItem('hub_nickname') || getMyName();
+            const prefill = (localStorage.getItem('hub_nickname') || getMyName() || '').trim();
+            document.getElementById('player-name').value = prefill;
             const saveBtn = document.getElementById('save-btn');
             if (saveBtn) saveBtn.disabled = false;
-            showMyRank(document.getElementById('player-name').value || '나', finalScore, { trackDelta: false }); // 랭킹 등록 전 예상 순위 미리보기
-            document.querySelector('.name-row').style.display = 'flex';
+            showMyRank(prefill || '나', finalScore, { trackDelta: false }); // 랭킹 등록 전 예상 순위 미리보기
+            /* 닉네임이 이미 있으면 스테이지 클리어 화면과 똑같이 **큼직한 등록 버튼**을 준다.
+               예전엔 최종 화면에만 닉네임 칸 옆 작은 '등록 📝' 이라, 학생이 랭킹 등록
+               버튼이 없다고 여겼다(실제 제보). 닉네임이 없을 때만 입력칸을 연다. */
+            document.querySelector('.name-row').style.display = prefill ? 'none' : 'flex';
+            if (ssb) {
+                ssb.style.display = 'inline-block';
+                ssb.disabled = false;
+                ssb.textContent = '🏆 랭킹 등록하기';
+            }
             document.getElementById('save-status').style.display = 'block';
             document.getElementById('next-stage-btn').style.display = 'none';
             document.getElementById('restart-btn').style.display = 'inline-block';
@@ -2097,6 +2102,6 @@ function guideNext() {
 })();
 </script>
 
-<script src="emoji-icons.js?v=9"></script>
+<script src="emoji-icons.js?v=10"></script>
 </body>
 </html>
