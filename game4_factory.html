@@ -236,6 +236,23 @@
             min-height: 48px; min-width: 160px;
         }
         .amt-submit:active { transform: scale(0.96); }
+        /* 계산 힌트 — 처음 계산을 배우는 학습자용(2026-09-13) */
+        .amt-hint-btn {
+            background: rgba(255,214,0,0.12); border: 1px solid rgba(255,214,0,0.40);
+            color: var(--yellow); border-radius: 999px; padding: 8px 18px; min-height: 40px;
+            font-family: 'Noto Sans KR', sans-serif; font-size: 0.82rem; font-weight: 700;
+            cursor: pointer; white-space: nowrap;
+        }
+        .amt-hint-btn:active { transform: scale(0.96); }
+        .amt-hint {
+            display: none; width: 100%; max-width: 460px;
+            background: rgba(255,214,0,0.08); border: 1px solid rgba(255,214,0,0.25);
+            border-radius: 12px; padding: 11px 14px;
+            font-size: clamp(0.78rem,2.8vw,0.9rem); line-height: 1.65;
+            color: rgba(255,255,255,0.88); text-align: center; word-break: keep-all;
+        }
+        .amt-hint.show { display: block; }
+        .amt-hint b { color: var(--yellow); }
 
         #flash-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 50; opacity: 0; transition: opacity 0.3s; }
         #flash-overlay.ok  { background: rgba(0,230,118,0.15); opacity: 1; }
@@ -617,6 +634,8 @@
     <div class="parts-area" id="parts-container"></div>
     <div class="amt-area" id="amt-area">
         <div class="amt-label">💰 계산해서 금액을 입력하세요</div>
+        <button class="amt-hint-btn" id="amt-hint-btn" onclick="toggleCalcHint()">💡 계산 힌트 보기</button>
+        <div class="amt-hint" id="amt-hint"></div>
         <div class="amt-row">
             <input type="number" id="amt-input" class="amt-input" inputmode="numeric" placeholder="0" onkeydown="if(event.key==='Enter'){event.preventDefault();submitAmount();}">
             <span class="amt-won">원</span>
@@ -926,7 +945,44 @@ function nextQuestion() {
         amtArea.classList.toggle('show', LV === 2);
         const amtInput = document.getElementById('amt-input');
         if (amtInput) amtInput.value = '';
+        resetCalcHint();   // 문제가 바뀌면 힌트는 다시 접어 둔다
     }
+}
+
+/* ── 난이도2 계산 힌트 (2026-09-13, 사용자 요청) ──
+   "처음 계산해야 하는 학습자들은 어려울거야. 힌트창을 만들어줘."
+
+   ⚠ 문제은행의 calc 에는 계산 과정이 **정답 금액까지 포함해서** 들어 있다
+     (예: "미사용액 = 총액 500,000 − 사용액 320,000 = 180,000원").
+     그대로 보여주면 힌트가 아니라 정답 버튼이 된다.
+     그래서 정답과 같은 숫자는 전부 ??? 로 가리고 **푸는 방법만** 남긴다.
+     마지막 항만 가려선 안 된다 — 중간 계산에도 정답과 같은 수가 나오는 문제가 있다
+     (감가상각 월할 12/12 처럼 연액과 답이 같은 경우). */
+function maskedCalc(q) {
+    if (!q || !q.calc) return '';
+    const ans = Number(q.amount);
+    if (!isFinite(ans)) return q.calc;
+    let out = q.calc;
+    [ans.toLocaleString(), String(ans)].forEach(t => { if (t) out = out.split(t).join('<b>?</b>'); });
+    return out;
+}
+function resetCalcHint() {
+    const box = document.getElementById('amt-hint');
+    const btn = document.getElementById('amt-hint-btn');
+    if (box) { box.classList.remove('show'); box.innerHTML = ''; }
+    if (btn) btn.textContent = '💡 계산 힌트 보기';
+}
+function toggleCalcHint() {
+    const box = document.getElementById('amt-hint');
+    const btn = document.getElementById('amt-hint-btn');
+    if (!box || !btn) return;
+    const on = !box.classList.contains('show');
+    box.classList.toggle('show', on);
+    if (on) {
+        box.innerHTML = maskedCalc(currentQ) ||
+            '이 문제는 따로 계산할 게 없어요 — 문제에 적힌 금액을 그대로 넣으면 돼요.';
+    }
+    btn.textContent = on ? '💡 힌트 닫기' : '💡 계산 힌트 보기';
 }
 
 function renderSlots() {
