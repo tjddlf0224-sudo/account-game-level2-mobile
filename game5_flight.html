@@ -413,8 +413,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 </head>
 <body>
 
-<audio id="bgm" src="bgm5_flight.mp3?v=11" loop preload="auto"></audio>
-<script src="bgmguard.js?v=11"></script>
+<script src="bgm.js?v=12"></script>
 
 
 <div style="position:fixed;inset:0;background:var(--bg);z-index:-1;"></div>
@@ -554,7 +553,7 @@ const GAME_ID="flight";
 function escapeHTML(str) { if (!str) return ''; return str.replace(/[&<>'"]/g, function(tag) { const chars = { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }; return chars[tag] || tag; }); }
 
 const BGM={
-  el:document.getElementById('bgm'),
+  el:BGMAudio.create('bgm5_flight.mp3?v=11'),
   // 게임별 키(flight_muted)가 있으면 우선, 없으면 허브 전역 토글(hub_muted) 참조
   _muted:localStorage.getItem('flight_muted')!==null?localStorage.getItem('flight_muted')==='true':localStorage.getItem('hub_muted')==='true',
   _fadeTimer:null,

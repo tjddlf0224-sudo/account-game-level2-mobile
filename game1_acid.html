@@ -654,8 +654,7 @@
 
 
 <!-- 🎵 BGM 오디오 엘리먼트 -->
-<audio id="bgm" src="bgm1_acid.mp3?v=11" loop preload="auto"></audio>
-<script src="bgmguard.js?v=11"></script>
+<script src="bgm.js?v=12"></script>
 
 <header>
     <h1>💎 전산회계 2급 산성비</h1>
@@ -780,7 +779,7 @@
     // ══════════════════════════════════════
     // 🎵 BGM 관리
     // ══════════════════════════════════════
-    const bgm = document.getElementById('bgm');
+    const bgm = BGMAudio.create('bgm1_acid.mp3?v=11');
     bgm.volume = 0.5;
 
     // 음소거 상태: localStorage에 저장해서 다음 게임에도 유지

@@ -15,7 +15,6 @@
 <script src="growth.js?v=11"></script>
 <script src="streak.js?v=11"></script>
 <script src="ask.js?v=11"></script>
-<script src="bgmguard.js?v=11"></script>
 <style>
 :root{
   --cy:#00f2ff; --pu:#b44fff; --or:#ff9800; --gd:#ffd600; --gn:#00e676; --pk:#ff2d78;
@@ -533,8 +532,8 @@ body{ font-family:'Noto Sans KR',sans-serif; color:#fff; position:relative; touc
   </div>
 </div>
 
-<audio id="bgm" src="bgm_stage1_map.mp3?v=11" loop preload="auto"></audio>
-<audio id="bgm-sheet" src="bgm_stage1_sheet.mp3?v=11" loop preload="none"></audio>
+<script src="bgm.js?v=12"></script>
+
 
 <div id="minimap-box"><canvas id="minimap"></canvas></div>
 
@@ -3697,8 +3696,8 @@ const ResultScreen = {
 const BGM = {
   map:null, sheet:null, cur:null, muted:false, started:false,
   init(){
-    this.map=document.getElementById('bgm');
-    this.sheet=document.getElementById('bgm-sheet');
+    this.map=BGMAudio.create('bgm_stage1_map.mp3?v=11');
+    this.sheet=BGMAudio.create('bgm_stage1_sheet.mp3?v=11');
     this.map.volume=0.45; this.sheet.volume=0.45;
     this.muted = localStorage.getItem('cost_muted')!==null
       ? localStorage.getItem('cost_muted')==='true'
