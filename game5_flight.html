@@ -75,7 +75,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
   overflow-y:auto;
   overflow-x:hidden;
   -webkit-overflow-scrolling:touch;
-  padding:max(20px,env(safe-area-inset-top)) 16px calc(20px + var(--ad-banner-h, 0px));
+  padding:max(20px,env(safe-area-inset-top)) 16px calc(20px + max(var(--ad-banner-h, 0px), var(--ad-safe-h, 0px)));
 }
 .ovl-inner{
   display:flex;

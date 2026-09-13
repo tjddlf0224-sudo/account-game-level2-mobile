@@ -44,7 +44,7 @@
             background: rgba(10,13,20,0.95); backdrop-filter: blur(8px);
             display: flex; flex-direction: column; align-items: center;
             justify-content: flex-start; overflow-y: auto;
-            padding: max(20px,env(safe-area-inset-top)) 16px calc(40px + var(--ad-banner-h, 0px));
+            padding: max(20px,env(safe-area-inset-top)) 16px calc(40px + max(var(--ad-banner-h, 0px), var(--ad-safe-h, 0px)));
             touch-action: pan-y;
             overscroll-behavior: contain;
         }
