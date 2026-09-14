@@ -429,7 +429,8 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
         <div class="gc b"><strong>⚡ 특수 아이템</strong>🛡️ 방어막 — 오답 1회 보호<br>🧲 자석 — 코인 자동 흡입<br>💰 코인 — +100점</div>
         <div class="gc c"><strong>🏆 점수 체계</strong>정답 통과: <b style="color:var(--gd)">+500점</b><br>콤보 보너스: +50점/연속<br>오답 → 방어막 없으면 종료!</div>
       </div>
-      <div class="diff-toggle" id="diff-toggle" style="max-width:340px;margin:4px auto 0;">
+      <!-- 난이도 2 보류(2026-09-14) — 위 LV 고정 주석 참고 -->
+      <div class="diff-toggle" id="diff-toggle" style="display:none;max-width:340px;margin:4px auto 0;">
         <button class="diff-btn" id="diff-btn-1" onclick="selectDifficulty(1)">난이도 1<br><span style="font-size:.72rem;opacity:.7">장부만 선택</span></button>
         <button class="diff-btn locked" id="diff-btn-2" onclick="selectDifficulty(2)">난이도 2 🔒<br><span style="font-size:.72rem;opacity:.7">숫자도 직접 조회</span></button>
       </div>
@@ -751,8 +752,8 @@ const Game={
 
   mkStar(init=false){return{x:Math.random()*this.w,y:init?Math.random()*this.h:-2,s:Math.random()*2+.3,v:Math.random()*14+4,c:Math.random()>.85?'#00f2ff':Math.random()>.7?'#b44fff':'#fff'}},
 
-  start(){SFX.init();BGM.play();hideAdPlaceholder();LV=window.Difficulty?Difficulty.get(GAME_ID):1;document.getElementById('ss').style.display='none';this._reset()},
-  restart(){BGM.play();hideAdPlaceholder();LV=window.Difficulty?Difficulty.get(GAME_ID):1;document.getElementById('gs').style.display='none';this._reset()},
+  start(){SFX.init();BGM.play();hideAdPlaceholder();/* 난이도2 보류(2026-09-14, 사용자 지시). 장부 화면에 '유동자산 14,500,000원'이 그대로 보이는데 그 숫자를 받아쓰라는 문제라, 회계가 아니라 받아쓰기였다. 더 나은 안이 정해질 때까지 LV 을 1로 고정한다 — 이미 해금된 학생이 저장값(hub_lv_flight=2) 때문에 계속 LV2 를 만나는 일도 막는다. LV2 코드는 남겨 둔다. */LV=1;document.getElementById('ss').style.display='none';this._reset()},
+  restart(){BGM.play();hideAdPlaceholder();LV=1;   /* 위 start() 주석 참고 — 난이도2 보류 */document.getElementById('gs').style.display='none';this._reset()},
 
   _reset(){
     if(window.WrongNote)WrongNote.reset();
@@ -960,7 +961,7 @@ const Game={
       justUnlocked=Difficulty.reportRound(GAME_ID,this.okCount,this.okCount+this.wrongCount);
     }
     const unlockEl=document.getElementById('lv-unlock-msg');
-    if(unlockEl) unlockEl.style.display=justUnlocked?'block':'none';
+    if(unlockEl) unlockEl.style.display='none';   // 난이도2 보류 — 해금 안내 끔
 
     document.getElementById('go-score').textContent=this.score.toLocaleString()+'점';
     document.getElementById('go-ok').textContent=this.okCount;
