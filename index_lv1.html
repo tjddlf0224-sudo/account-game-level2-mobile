@@ -184,12 +184,61 @@ body{
   .examday-box .ed-dday{ font-size:1.05rem; }
   .stagemap{ max-width:260px; }
 }
+/* 좁은 화면에선 장식용 'PLAYER' 라벨을 감춘다(2026-09-14, 사용자 선택).
+   390px 에서 .ub-nick 이 flex:1 로 폭 0 까지 찌그러지는데 이 라벨은 flex-shrink:0 이라
+   밖으로 삐져나와 옆 그룹 칩 위에 겹쳐 그려졌다. 정작 닉네임은 안 보이고 라벨만 보였다.
+   버튼 글자는 하나도 안 건드린다 — 600px 이상에선 라벨도 그대로 보인다.
+   (아래 340px 블록은 더 좁은 폰 전용이라 390px 에선 안 걸린다 — 그래서 따로 둔다) */
+@media (max-width:600px){
+  .ub-label{ display:none; }
+}
 /* 좁은 폰에서 상단바가 넘치지 않도록 */
 @media (max-width:340px){
   .user-bar{ padding-left:10px; padding-right:10px; gap:5px; }
   .group-mode-btn{ font-size:0.58rem; padding:7px 12px; }
   .ub-group{ max-width:100px; font-size:0.68rem; }
 }
+/* ── 설정 패널(2026-09-14, 사용자 요청) ──
+   상단바 맨 오른쪽 톱니바퀴에 모아 둔다: 배경음악 · 닉네임 변경 · 로그아웃 ·
+   회원 탈퇴 · 데이터 초기화. 예전엔 음악만 상단바에 있고 나머지는 허브 맨 아래에
+   흩어져 있어서, 스테이지 목록을 끝까지 내려야 로그아웃을 찾을 수 있었다. */
+.set-ov{
+  display:none; position:fixed; inset:0; z-index:9998;
+  background:rgba(2,6,14,0.72); backdrop-filter:blur(6px);
+  align-items:center; justify-content:center; padding:20px;
+}
+.set-ov.show{ display:flex; }
+.set-box{
+  width:min(340px,100%); max-height:86vh; overflow-y:auto;
+  background:#121826; border:1px solid rgba(255,255,255,0.12); border-radius:18px;
+  padding:16px 16px 14px; box-shadow:0 20px 60px rgba(0,0,0,0.5);
+}
+.set-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; }
+.set-title{ font-family:'Orbitron',monospace; font-size:0.72rem; letter-spacing:3px; color:rgba(255,255,255,0.55); }
+.set-x{
+  width:32px; height:32px; border-radius:9px; border:1px solid rgba(255,255,255,0.14);
+  background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.7); font-size:0.9rem; cursor:pointer;
+}
+.set-who{
+  display:flex; align-items:baseline; gap:8px; padding:8px 2px 12px;
+  border-bottom:1px solid rgba(255,255,255,0.08); margin-bottom:10px;
+}
+.set-who-label{ font-family:'Orbitron',monospace; font-size:0.54rem; letter-spacing:2px; color:rgba(255,255,255,0.35); }
+.set-who b{ font-size:0.98rem; color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.set-item{
+  display:flex; align-items:center; gap:12px; width:100%;
+  padding:13px 12px; margin-bottom:7px; min-height:48px;
+  background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.10);
+  border-radius:12px; color:#eaf0ff; font-family:inherit; font-size:0.9rem;
+  text-align:left; cursor:pointer; transition:background .15s, border-color .15s;
+}
+.set-item:active{ background:rgba(255,255,255,0.12); }
+.set-item .set-ico{ font-size:1.05rem; width:22px; text-align:center; flex-shrink:0; }
+.set-item .set-label{ flex:1; min-width:0; }
+.set-item.muted{ color:rgba(255,255,255,0.45); }
+.set-item.danger{ color:#ff5b8a; border-color:rgba(255,45,120,0.28); }
+.set-item.quiet{ color:rgba(255,255,255,0.45); border-color:rgba(255,255,255,0.10); }
+
 </style>
 </head>
 <body>
@@ -206,7 +255,6 @@ body{
   <a class="group-mode-btn" href="select_level.html" style="color:var(--or); border-color:rgba(255,152,0,0.3); background:rgba(255,152,0,0.07);">🔀 급수 변경</a>
   <span id="streak-slot"></span>
   <a class="graph-btn" href="group.html" title="그룹 모드" aria-label="그룹 모드">👥</a>
-  <button class="graph-btn hub-mute-btn" id="hub-mute-btn" onclick="toggleHubMute()" title="전체 음소거" aria-label="전체 음소거">🎵</button>
   <a class="graph-btn" href="growth.html" title="내 성장 그래프" aria-label="내 성장 그래프">
     <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor"
          stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -215,6 +263,7 @@ body{
     </svg>
     <span class="gdot" id="growth-dot"></span>
   </a>
+  <button class="graph-btn" id="settings-btn" onclick="openSettings()" title="설정" aria-label="설정">⚙️</button>
 </div>
 
 <div class="wrap">
@@ -323,16 +372,6 @@ body{
     </div>
   </div>
 
-  <div class="hub-footer">
-    <button class="logout-btn" onclick="changeNickname()">✏️ &nbsp;닉네임 변경</button>
-    <button class="logout-btn" onclick="doLogout()">⏻ &nbsp;로그아웃</button>
-  </div>
-  <div class="hub-footer" id="delete-account-row" style="margin-top:6px;display:none;">
-    <button class="logout-btn" onclick="doDeleteAccount()" style="color:var(--pk);border-color:rgba(255,45,120,0.3);">🗑️ &nbsp;회원 탈퇴</button>
-  </div>
-  <div class="hub-footer" style="margin-top:6px;">
-    <button class="logout-btn" onclick="resetLv1Progress()" style="color:rgba(255,255,255,0.45);border-color:rgba(255,255,255,0.15);">🔄 &nbsp;데이터 초기화</button>
-  </div>
 
 </div>
 
@@ -348,28 +387,47 @@ body{
       document.getElementById('ub-group-name').textContent=gname;
       document.getElementById('ub-group-el').classList.add('show');
     }
-    if(localStorage.getItem('hub_uid')){
-      const row=document.getElementById('delete-account-row');
-      if(row) row.style.display='block';
-    }
+    // 탈퇴 버튼 노출 판정은 openSettings() 에서 한다(패널이 body 맨 끝이라 여기선 아직 없다)
   }catch(e){}
 })();
 
-/* 전역 음소거 토글(hub_muted) — 2급 허브와 동일 */
-(function(){
-  const btn=document.getElementById('hub-mute-btn');
-  if(!btn) return;
-  const isHubMuted=localStorage.getItem('hub_muted')==='true';
-  btn.textContent=isHubMuted?'🔇':'🎵';
-  btn.classList.toggle('muted', isHubMuted);
-})();
-function toggleHubMute(){
-  const muted=localStorage.getItem('hub_muted')==='true';
-  const next=!muted;
-  localStorage.setItem('hub_muted', next);
-  const btn=document.getElementById('hub-mute-btn');
-  if(btn){ btn.textContent=next?'🔇':'🎵'; btn.classList.toggle('muted', next); }
+/* 전역 음소거(hub_muted): 게임별 *_muted 키는 그대로 두고, 없을 때만 이 값을 참조한다.
+   버튼이 상단바 아이콘에서 설정 패널의 글자 행으로 옮겨져서, 이모지만 갈아끼우던
+   예전 방식(textContent 교체)으로는 라벨까지 지워진다 — 아이콘/라벨을 따로 갱신한다. */
+function applyHubMuteUI() {
+  const btn = document.getElementById('hub-mute-btn');
+  if (!btn) return;
+  const muted = localStorage.getItem('hub_muted') === 'true';
+  btn.classList.toggle('muted', muted);
+  const ico = btn.querySelector('.set-ico'), lab = btn.querySelector('.set-label');
+  if (ico) ico.textContent = muted ? '🔇' : '🎵';
+  if (lab) lab.textContent = muted ? '배경음악 꺼짐' : '배경음악 켜짐';
 }
+
+/* ── 설정 패널 열고 닫기 ── */
+function openSettings() {
+  const el = document.getElementById('set-nick');
+  if (el) el.textContent = localStorage.getItem('hub_nickname') || '—';
+  /* 회원 탈퇴는 소셜(Firebase) 계정일 때만 — 애플/구글 심사 요건상 "계정 생성"을
+     제공하면 앱 내 탈퇴 경로도 반드시 있어야 한다.
+     ⚠ 로그인 체크 IIFE 는 페이지 위쪽에서 돌고 이 패널은 body 맨 끝에 있어서,
+        거기서 미리 켜 두면 요소가 아직 없어 조용히 실패한다(실제로 한 번 그랬다).
+        열 때마다 판정하는 게 순서에 안 휘둘린다. */
+  const del = document.getElementById('delete-account-row');
+  if (del) del.style.display = localStorage.getItem('hub_uid') ? '' : 'none';
+  applyHubMuteUI();
+  document.getElementById('settings-ov').classList.add('show');
+}
+function closeSettings() {
+  document.getElementById('settings-ov').classList.remove('show');
+}
+document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeSettings(); });
+function toggleHubMute() {
+  localStorage.setItem('hub_muted', String(localStorage.getItem('hub_muted') !== 'true'));
+  applyHubMuteUI();
+}
+applyHubMuteUI();
+
 
 /* 스테이지1 진행률 — 서류철 수집 개수(총 14) 기준, 노드맵 상태 반영 */
 function renderStageMap(){
@@ -753,5 +811,34 @@ renderExamDay();
     if (window.Streak) Streak.mountPill('#streak-slot');
   });
 </script>
+<!-- ── 설정 패널 — 상단바 톱니바퀴로 연다 ── -->
+<div class="set-ov" id="settings-ov" onclick="if(event.target===this)closeSettings()">
+  <div class="set-box" role="dialog" aria-modal="true" aria-label="설정">
+    <div class="set-head">
+      <span class="set-title">SETTINGS</span>
+      <button class="set-x" onclick="closeSettings()" aria-label="닫기">✕</button>
+    </div>
+    <div class="set-who"><span class="set-who-label">PLAYER</span><b id="set-nick">—</b></div>
+
+    <button class="set-item" id="hub-mute-btn" onclick="toggleHubMute()">
+      <span class="set-ico">🎵</span><span class="set-label">배경음악 켜짐</span>
+    </button>
+    <button class="set-item" onclick="closeSettings();changeNickname()">
+      <span class="set-ico">✏️</span><span class="set-label">닉네임 변경</span>
+    </button>
+    <button class="set-item" onclick="closeSettings();doLogout()">
+      <span class="set-ico">⏻</span><span class="set-label">로그아웃</span>
+    </button>
+    <!-- 소셜(Firebase) 계정으로 로그인했을 때만 노출 — 애플/구글 심사 요건상
+         "계정 생성"을 제공하면 앱 내 탈퇴 경로도 반드시 있어야 한다. -->
+    <button class="set-item danger" id="delete-account-row" style="display:none" onclick="closeSettings();doDeleteAccount()">
+      <span class="set-ico">🗑️</span><span class="set-label">회원 탈퇴</span>
+    </button>
+    <button class="set-item quiet" onclick="closeSettings();resetLv1Progress()">
+      <span class="set-ico">🔄</span><span class="set-label">데이터 초기화</span>
+    </button>
+  </div>
+</div>
+
 </body>
 </html>
