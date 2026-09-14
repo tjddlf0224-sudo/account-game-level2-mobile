@@ -77,8 +77,36 @@
     if (this._loading) return this._loading;
     var c = ac();
     if (!c) return Promise.reject(new Error('no AudioContext'));
-    this._loading = fetch(this.src)
-      .then(function (r) { if (!r.ok) throw new Error('fetch ' + r.status); return r.arrayBuffer(); })
+    /* ── 왜 fetch 가 아니라 XMLHttpRequest 인가 (2026-09-14) ─────────────
+       앱에서만 BGM 이 안 났다. 웹(GitHub Pages)에서는 멀쩡하고, 앱에서도 효과음은
+       났다 — 효과음은 createOscillator() 합성이라 파일을 안 받기 때문이다.
+
+       iOS 시뮬레이터에 실제로 올려서 capacitor://localhost 안에서 재본 결과:
+           fetch('theory_bank.json')   → HTTP 200, 282,078 chars   ✅
+           fetch('bgm2_memory.mp3')    → HTTP 0                    ❌
+           XHR  ('bgm2_memory.mp3')    → 1,030,853 bytes           ✅
+           XHR  ('bgm2_memory.mp3?v=11') → 1,030,853 bytes         ✅
+       즉 쿼리스트링 문제가 아니고(처음엔 그렇게 짐작했다가 틀렸다), Capacitor 의
+       로컬 스킴 핸들러가 **fetch 로 오는 mp3 요청만** 못 돌려준다. JSON 은 된다.
+       XHR 은 쿼리가 붙어도 정확한 바이트수로 잘 읽는다.
+
+       ⚠ capacitor:// 는 HTTP 가 아니라서 XHR status 가 **0 으로 온다.** 200 만
+         성공으로 치면 앱에서 전부 실패한다 — 아래 판정식을 건드리지 말 것. */
+    function loadArrayBuffer(url) {
+      return new Promise(function (res, rej) {
+        var x = new XMLHttpRequest();
+        x.open('GET', url, true);
+        x.responseType = 'arraybuffer';
+        x.onload = function () {
+          var okStatus = (x.status === 200 || x.status === 0);
+          if (okStatus && x.response && x.response.byteLength) res(x.response);
+          else rej(new Error('XHR ' + x.status + ' ' + url));
+        };
+        x.onerror = function () { rej(new Error('XHR error ' + url)); };
+        x.send();
+      });
+    }
+    this._loading = loadArrayBuffer(this.src)
       .then(function (ab) {
         return new Promise(function (res, rej) {
           // 구형 사파리는 콜백형만 지원하던 시절이 있어 양쪽 다 받는다
