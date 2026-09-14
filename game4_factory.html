@@ -12,8 +12,15 @@
 <meta property="og:title" content="결산분개 조립공장 | 전산회계 2급 마스터">
 <meta property="og:description" content="결산 거래의 차변·대변을 직접 조립! 전산회계 2급 게임으로 공부하기">
 <meta property="og:type" content="website">
-    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
     <style>
+:root{
+  /* 앱에서 하단 광고 배너가 가릴 수 있는 최대 높이. JS(--ad-safe-h)가 안 걸려도
+     이 값 덕분에 오버레이는 항상 스크롤 여지를 갖는다(2026-09-14). 웹에서는
+     스크롤 끝에 빈 공간이 조금 더 생길 뿐이라 손해가 없다. */
+  --ad-reserve: 96px;
+}
+
         :root {
             --green:  #00e676;
             --blue:   #00c2ff;
@@ -44,7 +51,7 @@
             background: rgba(10,13,20,0.95); backdrop-filter: blur(8px);
             display: flex; flex-direction: column; align-items: center;
             justify-content: flex-start; overflow-y: auto;
-            padding: max(20px,env(safe-area-inset-top)) 16px calc(40px + max(var(--ad-banner-h, 0px), var(--ad-safe-h, 0px)));
+            padding: max(20px,env(safe-area-inset-top)) 16px calc(40px + env(safe-area-inset-bottom, 0px) + max(var(--ad-banner-h, 0px), var(--ad-safe-h, 0px), var(--ad-reserve)));
             touch-action: pan-y;
             overscroll-behavior: contain;
         }
@@ -299,7 +306,7 @@
             border: 2px solid rgba(0,230,118,0.7);
             background: rgba(0,230,118,0.12);
             color: #00e676;
-            font-family: 'Black Han Sans', 'Jua', sans-serif;
+            font-family: 'Black Han Sans', 'Black Han Sans', sans-serif;
             font-size: 1rem;
             cursor: pointer;
             transition: all 0.18s;
@@ -312,7 +319,7 @@
             border: 1.5px solid rgba(255,255,255,0.25);
             background: rgba(255,255,255,0.08);
             color: rgba(255,255,255,0.75);
-            font-family: 'Black Han Sans', 'Jua', sans-serif;
+            font-family: 'Black Han Sans', 'Black Han Sans', sans-serif;
             font-size: 1rem;
             cursor: pointer;
             transition: all 0.18s;
@@ -359,7 +366,7 @@
         .fanfare-emoji { font-size: 3.2rem; margin-bottom: 10px; animation: bounce 0.6s ease infinite alternate; }
         @keyframes bounce { from { transform:translateY(0) } to { transform:translateY(-8px) } }
         .fanfare-title {
-            font-family: 'Jua', 'Black Han Sans', sans-serif;
+            font-family:'Black Han Sans', 'Black Han Sans', sans-serif;
             font-size: 1.7rem; color: gold;
             text-shadow: 0 0 20px rgba(255,215,0,0.8);
             margin-bottom: 6px; line-height: 1.2;
@@ -376,7 +383,7 @@
             background: linear-gradient(135deg, gold, #f39c12);
             border: none; border-radius: 50px;
             padding: 12px 32px;
-            font-family: 'Jua', sans-serif; font-size: 1rem;
+            font-family: 'Black Han Sans', sans-serif; font-size: 1rem;
             color: #000; cursor: pointer;
             transition: transform 0.15s, box-shadow 0.15s;
             box-shadow: 0 4px 16px rgba(255,215,0,0.4);
@@ -492,6 +499,54 @@
         .tut-next { display:block; width:100%; margin-top:14px; padding:15px; border-radius:14px; border:2px solid rgba(255,255,255,0.3);
             color:#000; background:var(--green); box-shadow:0 4px 16px rgba(0,230,118,0.35);
             font-family:'Black Han Sans', sans-serif; font-size:1.15rem; cursor:pointer; }
+/* 랭킹 열 이름 — 5개 게임 공통(2026-09-14 사용자 지시: "게임2의 순위/이름/직급/점수가
+   HALL OF FAME 보다 낫다"). 각 게임 .rank-row 와 같은 grid 를 그대로 상속받아 열이 맞는다.
+   스크롤 컨테이너 **바깥**에 두어 목록을 내려도 열 이름이 남는다. */
+.rank-colhdr {
+  width: 100%; box-sizing: border-box;
+  display: grid; grid-template-columns: 40px minmax(46px,1fr) minmax(0,90px) minmax(40px,70px);
+  padding: 8px 14px; gap: 6px;
+  background: rgba(0,0,0,0.35);
+  border-radius: 12px 12px 0 0;
+  font-size: 0.8rem; font-weight: 700; text-align: center;
+  color: rgba(255,255,255,0.5); letter-spacing: 1px;
+}
+.rank-colhdr + #rank-box, .rank-colhdr + .rank-box,
+.rank-colhdr + .rank-container, .rank-colhdr + #rkbox { border-radius: 0 0 16px 16px; margin-top: 0; }
+
+/*BTNUNI-START*/
+/* ── 화면 버튼 규격 통일 (2026-09-14 사용자 지시: "제각각인 크기를 통일시켜") ──
+   시작화면(게임 시작/사용방법/메인으로)과 결과화면(다시 하기/메인으로)이 게임마다
+   폭·높이·글자크기가 다 달랐다. 한 줄에 하나씩, 오버레이 폭에 꽉 차게, 높이 52px 로 맞춘다. */
+.overlay .action-btns, .ovl .action-btns, .overlay .brow, .ovl .brow {
+  display: flex; flex-direction: column; align-items: stretch;
+  gap: 10px; width: 100%; max-width: none;
+}
+.overlay .action-btns > button, .overlay .action-btns > a,
+.ovl .action-btns > button, .ovl .action-btns > a,
+.overlay .brow > button, .ovl .brow > button,
+.overlay .btn-restart, .overlay .btn-hub, .overlay .sbtn, .overlay .revive-btn, .overlay .btn, .overlay .pill,
+.ovl .btn-restart, .ovl .btn-hub, .ovl .sbtn, .ovl .revive-btn, .ovl .btn, .ovl .pill,
+.overlay .big-btn, .ovl .big-btn, .overlay .pill-btn, .ovl .pill-btn {
+  width: 100%; max-width: none; box-sizing: border-box;
+  min-height: 52px; height: auto; padding: 13px 20px;
+  border-radius: 50px;
+  font-size: clamp(1rem, 3.6vw, 1.15rem);
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+/* 저장 행은 [입력칸][저장] 가로 배치라 예외 — 버튼만 폭을 줄인다 */
+.overlay .save-row, .ovl .save-row, .overlay #savesec .brow, .ovl #savesec .brow { flex-direction: row; }
+.overlay .save-row > button, .ovl .save-row > button,
+.overlay #savesec .brow > button, .ovl #savesec .brow > button { width: auto; min-width: 104px; flex: 0 0 auto; }
+/*BTNUNI-END*/
+
+/*FONTUNI*/
+/* ── 폰트 통일 (2026-09-14) ──
+   제목·버튼 = Black Han Sans / 본문 = Noto Sans KR. 둘 다 OFL 이라 상업 배포에 제약이 없다.
+   ⚠ Orbitron 은 **라틴 전용**이라 한글에 쓰면 시스템 폰트로 대체되고 자간만 벌어져
+     "회계 플라이트"처럼 멋없게 나온다(사용자 지적). 숫자·영문 전용으로만 쓴다.
+   Jua 는 게임마다 섞여 있어 걷어냈다. */
+.gtitle, .logo, .ov-title, .overlay-title, h1, h2 { font-family: 'Black Han Sans', 'Noto Sans KR', sans-serif !important; }
 </style>
 
 <button id="rewarded-btn" onclick="requestRewarded()">⏱ +30초 광고 보기</button>
@@ -585,7 +640,7 @@
         <div id="save-status"></div>
         <div id="my-rank-badge" style="display:none; font-family:'Black Han Sans',sans-serif; font-size:1rem; color:var(--blue); background:rgba(0,194,255,0.12); border:1px solid rgba(0,194,255,0.3); border-radius:50px; padding:7px 20px; text-align:center; margin-top:4px;"></div>
         <div id="my-rank-neighbors"></div>
-        <div style="font-family:'Black Han Sans';font-size:0.95rem;color:rgba(255,255,255,0.28);letter-spacing:2px;">🏆 TOP 랭킹</div>
+        <div class="rank-colhdr"><span>순위</span><span>이름</span><span>직급</span><span>점수</span></div>
         <div class="rank-box" id="rank-box"><div class="loading-row"><div class="spinner"></div>&nbsp;불러오는 중...</div></div>
         <div class="action-btns" style="align-items:center;">
             <button class="btn-restart" onclick="startGame()">↺ 다시 하기</button>

@@ -12,8 +12,15 @@
 <meta property="og:title" content="기억의 전당 | 전산회계 2급 마스터">
 <meta property="og:description" content="계정과목과 뜻을 카드로 매칭! 전산회계 2급 게임으로 공부하기">
 <meta property="og:type" content="website">
-    <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
     <style>
+:root{
+  /* 앱에서 하단 광고 배너가 가릴 수 있는 최대 높이. JS(--ad-safe-h)가 안 걸려도
+     이 값 덕분에 오버레이는 항상 스크롤 여지를 갖는다(2026-09-14). 웹에서는
+     스크롤 끝에 빈 공간이 조금 더 생길 뿐이라 손해가 없다. */
+  --ad-reserve: 96px;
+}
+
         :root {
             --bg-color: #2c3e50;
             --card-back: #34495e;
@@ -44,13 +51,13 @@
             width: 100%; position: relative;
         }
         h1 {
-            margin: 0; font-family: 'Jua';
+            margin: 0; font-family:'Black Han Sans','Noto Sans KR',sans-serif;
             color: var(--accent); text-shadow: 2px 2px 0 #000;
             font-size: clamp(1.5rem, 5vw, 2.4rem);
             flex: 1; text-align: center;
         }
         .hub-link {
-            font-family: 'Jua'; font-size: 0.95rem; color: rgba(255,255,255,0.7);
+            font-family:'Black Han Sans','Noto Sans KR',sans-serif; font-size: 0.95rem; color: rgba(255,255,255,0.7);
             text-decoration: none; border: 1px solid rgba(255,255,255,0.3);
             padding: 7px 14px; border-radius: 50px; background: rgba(0,0,0,0.2);
             transition: all 0.18s; white-space: nowrap; min-height: 44px;
@@ -154,7 +161,7 @@
             background-color: var(--card-front);
             color: var(--text-color);
             transform: rotateY(180deg);
-            font-family: 'Jua';
+            font-family:'Black Han Sans','Noto Sans KR',sans-serif;
             font-size: clamp(1rem,3.5vw,1.35rem);
             word-break: keep-all;
             line-height: 1.3;
@@ -166,7 +173,7 @@
         .diff-btn {
             flex: 1; padding: 10px 8px; border-radius: 12px; border: 1.5px solid rgba(255,255,255,0.2);
             background: rgba(0,0,0,0.25); color: rgba(255,255,255,0.5);
-            font-family: 'Jua', sans-serif; font-size: 0.85rem; line-height: 1.5;
+            font-family: 'Black Han Sans', sans-serif; font-size: 0.85rem; line-height: 1.5;
             cursor: pointer; transition: all 0.15s; min-height: 48px;
         }
         .diff-btn.active { border-color: var(--green); background: rgba(46,204,113,0.14); color: var(--green); }
@@ -180,7 +187,7 @@
             background: rgba(22,32,42,0.97);
             display: flex; flex-direction: column;
             justify-content: flex-start; align-items: center;
-            z-index: 100; padding: max(20px,env(safe-area-inset-top)) 20px calc(20px + max(var(--ad-banner-h, 0px), var(--ad-safe-h, 0px)));
+            z-index: 100; padding: max(20px,env(safe-area-inset-top)) 20px calc(24px + env(safe-area-inset-bottom, 0px) + max(var(--ad-banner-h, 0px), var(--ad-safe-h, 0px), var(--ad-reserve)));
             overflow-y: auto;
             touch-action: pan-y;
             overscroll-behavior: contain;
@@ -191,12 +198,12 @@
             width: 100%; max-width: 480px;
             margin: auto;
         }
-        .overlay h2 { color: var(--accent); font-family: 'Jua'; font-size: clamp(1.6rem,5vw,2.6rem); margin-bottom: 4px; text-align: center; }
+        .overlay h2 { color: var(--accent); font-family:'Black Han Sans','Noto Sans KR',sans-serif; font-size: clamp(1.6rem,5vw,2.6rem); margin-bottom: 4px; text-align: center; }
         .overlay p  { font-size: clamp(0.95rem,3vw,1.2rem); color: #ecf0f1; text-align: center; line-height: 1.7; word-break: keep-all; }
 
         .btn {
             background: var(--accent); color: white; border: none;
-            padding: 14px 40px; font-size: clamp(1.2rem,4vw,1.5rem); font-family: 'Jua';
+            padding: 14px 40px; font-size: clamp(1.2rem,4vw,1.5rem); font-family:'Black Han Sans','Noto Sans KR',sans-serif;
             border-radius: 50px; cursor: pointer; box-shadow: 0 5px 18px rgba(0,0,0,0.4);
             transition: transform 0.1s, background 0.2s;
             min-height: 52px; touch-action: manipulation;
@@ -226,11 +233,11 @@
         .rank-preview-title {
             font-size: 0.75rem;
             color: rgba(255,255,255,0.35);
-            font-family: 'Jua', sans-serif;
+            font-family: 'Black Han Sans', sans-serif;
             letter-spacing: 2px;
         }
         .rank-preview-grade {
-            font-family: 'Jua', sans-serif;
+            font-family: 'Black Han Sans', sans-serif;
             font-size: clamp(1.1rem, 4vw, 1.5rem);
             font-weight: bold;
             text-align: center;
@@ -264,7 +271,7 @@
         .mini-rank-title {
             font-size: 0.72rem;
             color: rgba(255,255,255,0.3);
-            font-family: 'Jua', sans-serif;
+            font-family: 'Black Han Sans', sans-serif;
             letter-spacing: 2px;
             text-align: center;
             margin-bottom: 4px;
@@ -287,9 +294,9 @@
             background: rgba(46,204,113,0.15);
             border: 1px solid rgba(46,204,113,0.4);
         }
-        .mini-rank-num { font-family:'Jua'; width: 28px; text-align:center; flex-shrink:0; }
+        .mini-rank-num { font-family:'Black Han Sans','Noto Sans KR',sans-serif; width: 28px; text-align:center; flex-shrink:0; }
         .mini-rank-name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:rgba(255,255,255,0.8); }
-        .mini-rank-score { font-family:'Jua'; color:#f1c40f; white-space:nowrap; font-size:0.8rem; }
+        .mini-rank-score { font-family:'Black Han Sans','Noto Sans KR',sans-serif; color:#f1c40f; white-space:nowrap; font-size:0.8rem; }
         .mini-rank-loading { text-align:center; padding:8px; color:rgba(255,255,255,0.3); font-size:0.8rem; }
 
         /* 결과 점수 */
@@ -299,7 +306,7 @@
             text-align: center; border: 2px solid var(--accent);
             width: 100%;
         }
-        .result-score-box .big-score   { font-family: 'Jua'; font-size: clamp(2rem,7vw,3rem); color: #f1c40f; }
+        .result-score-box .big-score   { font-family:'Black Han Sans','Noto Sans KR',sans-serif; font-size: clamp(2rem,7vw,3rem); color: #f1c40f; }
         .result-score-box .score-detail{ font-size: clamp(0.78rem,2.5vw,0.95rem); color: rgba(255,255,255,0.6); margin-top: 4px; }
 
         /* 이름 등록 */
@@ -346,11 +353,11 @@
             font-size: clamp(0.82rem,2.5vw,0.96rem); text-align: center; align-items: center;
         }
         .rank-row .rank-name, .rank-row .rank-grade { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .rank-row .rank-num        { font-family: 'Jua'; }
+        .rank-row .rank-num        { font-family:'Black Han Sans','Noto Sans KR',sans-serif; }
         .rank-row .rank-num.gold   { color: #f1c40f; }
         .rank-row .rank-num.silver { color: #bdc3c7; }
         .rank-row .rank-num.bronze { color: #cd7f32; }
-        .rank-row .rank-score      { color: #f1c40f; font-weight: bold; font-family: 'Jua'; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .rank-row .rank-score      { color: #f1c40f; font-weight: bold; font-family:'Black Han Sans','Noto Sans KR',sans-serif; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .rank-me { background: rgba(52,152,219,0.15); }
         .rank-delta { font-size:0.72rem; margin-left:6px; padding:2px 9px; border-radius:20px; font-weight:700; }
         .rank-delta.up { color:#2ecc71; background:rgba(46,204,113,0.14); }
@@ -394,7 +401,7 @@
             border: 2px solid rgba(0,230,118,0.7);
             background: rgba(0,230,118,0.12);
             color: #00e676;
-            font-family: 'Black Han Sans', 'Jua', sans-serif;
+            font-family: 'Black Han Sans', 'Black Han Sans', sans-serif;
             font-size: 1rem;
             cursor: pointer;
             transition: all 0.18s;
@@ -407,7 +414,7 @@
             border: 1.5px solid rgba(255,255,255,0.25);
             background: rgba(255,255,255,0.08);
             color: rgba(255,255,255,0.75);
-            font-family: 'Black Han Sans', 'Jua', sans-serif;
+            font-family: 'Black Han Sans', 'Black Han Sans', sans-serif;
             font-size: 1rem;
             cursor: pointer;
             transition: all 0.18s;
@@ -454,7 +461,7 @@
         .fanfare-emoji { font-size: 3.2rem; margin-bottom: 10px; animation: bounce 0.6s ease infinite alternate; }
         @keyframes bounce { from { transform:translateY(0) } to { transform:translateY(-8px) } }
         .fanfare-title {
-            font-family: 'Jua', 'Black Han Sans', sans-serif;
+            font-family:'Black Han Sans', 'Black Han Sans', sans-serif;
             font-size: 1.7rem; color: gold;
             text-shadow: 0 0 20px rgba(255,215,0,0.8);
             margin-bottom: 6px; line-height: 1.2;
@@ -471,7 +478,7 @@
             background: linear-gradient(135deg, gold, #f39c12);
             border: none; border-radius: 50px;
             padding: 12px 32px;
-            font-family: 'Jua', sans-serif; font-size: 1rem;
+            font-family: 'Black Han Sans', sans-serif; font-size: 1rem;
             color: #000; cursor: pointer;
             transition: transform 0.15s, box-shadow 0.15s;
             box-shadow: 0 4px 16px rgba(255,215,0,0.4);
@@ -509,7 +516,7 @@
             display: flex; align-items: center; gap: 8px;
             padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.08);
         }
-        .guide-title { font-family:'Jua',sans-serif; font-size: 1.1rem; color:#00f2ff; flex: 1; }
+        .guide-title { font-family:'Black Han Sans',sans-serif; font-size: 1.1rem; color:#00f2ff; flex: 1; }
         .guide-count { font-size: .85rem; color:#8aa; font-weight:700; }
         .guide-x {
             background: rgba(255,255,255,0.08); border: none; color:#fff;
@@ -521,7 +528,7 @@
             border-radius: 14px; border: 1px solid rgba(255,255,255,0.1);
             background:#060c14; display:block; margin: 0 auto 14px;
         }
-        .guide-step-title { font-family:'Jua',sans-serif; font-size: 1.15rem; color:#ffd700; margin-bottom: 8px; }
+        .guide-step-title { font-family:'Black Han Sans',sans-serif; font-size: 1.15rem; color:#ffd700; margin-bottom: 8px; }
         .guide-step-desc { font-size: .95rem; line-height: 1.65; color:#dfe7ef; word-break: keep-all; }
         .guide-step-desc b { color:#00f2ff; }
         .guide-dots { display:flex; gap:7px; justify-content:center; padding: 4px 0 2px; }
@@ -536,7 +543,40 @@
         .guide-btn-next {
             background: linear-gradient(135deg,#00f2ff,#0084ff); border:none; color:#021018;
         }
-        </style>
+        /*BTNUNI-START*/
+/* ── 화면 버튼 규격 통일 (2026-09-14 사용자 지시: "제각각인 크기를 통일시켜") ──
+   시작화면(게임 시작/사용방법/메인으로)과 결과화면(다시 하기/메인으로)이 게임마다
+   폭·높이·글자크기가 다 달랐다. 한 줄에 하나씩, 오버레이 폭에 꽉 차게, 높이 52px 로 맞춘다. */
+.overlay .action-btns, .ovl .action-btns, .overlay .brow, .ovl .brow {
+  display: flex; flex-direction: column; align-items: stretch;
+  gap: 10px; width: 100%; max-width: none;
+}
+.overlay .action-btns > button, .overlay .action-btns > a,
+.ovl .action-btns > button, .ovl .action-btns > a,
+.overlay .brow > button, .ovl .brow > button,
+.overlay .btn-restart, .overlay .btn-hub, .overlay .sbtn, .overlay .revive-btn, .overlay .btn, .overlay .pill,
+.ovl .btn-restart, .ovl .btn-hub, .ovl .sbtn, .ovl .revive-btn, .ovl .btn, .ovl .pill,
+.overlay .big-btn, .ovl .big-btn, .overlay .pill-btn, .ovl .pill-btn {
+  width: 100%; max-width: none; box-sizing: border-box;
+  min-height: 52px; height: auto; padding: 13px 20px;
+  border-radius: 50px;
+  font-size: clamp(1rem, 3.6vw, 1.15rem);
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+/* 저장 행은 [입력칸][저장] 가로 배치라 예외 — 버튼만 폭을 줄인다 */
+.overlay .save-row, .ovl .save-row, .overlay #savesec .brow, .ovl #savesec .brow { flex-direction: row; }
+.overlay .save-row > button, .ovl .save-row > button,
+.overlay #savesec .brow > button, .ovl #savesec .brow > button { width: auto; min-width: 104px; flex: 0 0 auto; }
+/*BTNUNI-END*/
+
+/*FONTUNI*/
+/* ── 폰트 통일 (2026-09-14) ──
+   제목·버튼 = Black Han Sans / 본문 = Noto Sans KR. 둘 다 OFL 이라 상업 배포에 제약이 없다.
+   ⚠ Orbitron 은 **라틴 전용**이라 한글에 쓰면 시스템 폰트로 대체되고 자간만 벌어져
+     "회계 플라이트"처럼 멋없게 나온다(사용자 지적). 숫자·영문 전용으로만 쓴다.
+   Jua 는 게임마다 섞여 있어 걷어냈다. */
+.gtitle, .logo, .ov-title, .overlay-title, h1, h2 { font-family: 'Black Han Sans', 'Noto Sans KR', sans-serif !important; }
+</style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="wrongnote.js?v=11"></script>
     <script src="growth.js?v=11"></script>
@@ -556,7 +596,7 @@
         <div style="display:flex;gap:6px;flex-shrink:0;">
             <!-- 🎵 음소거 버튼 -->
             <button class="mute-btn" id="mute-btn" onclick="toggleMute()" title="BGM 음소거">🎵</button>
-            <button onclick="quitGame()" style="font-family:'Jua';font-size:0.9rem;color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.3);padding:7px 12px;border-radius:50px;background:rgba(0,0,0,0.2);cursor:pointer;min-height:44px;">그만</button>
+            <button onclick="quitGame()" style="font-family:'Black Han Sans','Noto Sans KR',sans-serif;font-size:0.9rem;color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.3);padding:7px 12px;border-radius:50px;background:rgba(0,0,0,0.2);cursor:pointer;min-height:44px;">그만</button>
             <a class="hub-link" href="index.html">홈</a>
         </div>
     </header>
@@ -573,7 +613,7 @@
     <!-- 시작 화면 -->
     <div id="start-screen" class="overlay">
         <div class="overlay-inner">
-            <h2>기억력 테스트</h2>
+            <h2>🧩 기억의 전당</h2>
             <p style="margin-bottom:6px;">계정과목과 그 설명이 짝꿍입니다.<br>
                예: <b style="color:var(--blue)">기업업무추진비</b> ↔ <b style="color:var(--accent)">거래처 선물/접대</b><br><br>
                <span style="font-size:0.92rem;color:rgba(255,255,255,0.6)">
@@ -597,7 +637,7 @@
                 font-size:0.82rem;
                 line-height:2;
             ">
-                <div style="text-align:center;color:#f39c12;font-family:'Jua';font-size:0.88rem;margin-bottom:4px;letter-spacing:2px;">📊 직급 기준 (누적 점수)</div>
+                <div style="text-align:center;color:#f39c12;font-family:'Black Han Sans','Noto Sans KR',sans-serif;font-size:0.88rem;margin-bottom:4px;letter-spacing:2px;">📊 직급 기준 (누적 점수)</div>
                 <!-- RANK_TIERS(단일 소스)에서 렌더링 -->
                 <div id="grade-table"></div>
             </div>
@@ -635,7 +675,7 @@
     <div id="result-screen" class="overlay" style="display:none;">
         <div class="overlay-inner">
             <h2>CLEAR! 🎉</h2>
-            <div id="result-rank" style="font-family:'Jua';font-size:clamp(1.4rem,5vw,2rem);margin-bottom:4px;">직급</div>
+            <div id="result-rank" style="font-family:'Black Han Sans','Noto Sans KR',sans-serif;font-size:clamp(1.4rem,5vw,2rem);margin-bottom:4px;">직급</div>
             <p id="result-msg" style="margin-bottom:8px;">훌륭한 기억력입니다!</p>
 
             <div class="result-score-box">
@@ -643,7 +683,7 @@
                 <div class="score-detail" id="score-detail">0점</div>
             </div>
 
-            <div id="lv-unlock-msg" style="display:none; font-family:'Jua',sans-serif; font-size:1rem; color:#000; background:linear-gradient(135deg,gold,#f39c12); border-radius:50px; padding:8px 22px; text-align:center; margin-top:2px;">🔓 난이도 2 해금! 이번엔 뜻 대신 <b>분류</b>(자산·부채·자본·수익·비용)와 짝을 맞춰요</div>
+            <div id="lv-unlock-msg" style="display:none; font-family:'Black Han Sans',sans-serif; font-size:1rem; color:#000; background:linear-gradient(135deg,gold,#f39c12); border-radius:50px; padding:8px 22px; text-align:center; margin-top:2px;">🔓 난이도 2 해금! 이번엔 뜻 대신 <b>분류</b>(자산·부채·자본·수익·비용)와 짝을 맞춰요</div>
 
             <!-- 스테이지 클리어 직급 미리보기 -->
             <div id="rank-preview-box" class="rank-preview-box" style="display:none;"></div>
@@ -659,7 +699,7 @@
                 <button id="save-btn" onclick="saveScore()">등록 📝</button>
             </div>
             <div class="status-msg" id="save-status"></div>
-            <div id="my-rank-badge" style="display:none; font-family:'Jua',sans-serif; font-size:0.95rem; color:var(--blue); background:rgba(52,152,219,0.12); border:1px solid rgba(52,152,219,0.3); border-radius:50px; padding:6px 18px; text-align:center;"></div>
+            <div id="my-rank-badge" style="display:none; font-family:'Black Han Sans',sans-serif; font-size:0.95rem; color:var(--blue); background:rgba(52,152,219,0.12); border:1px solid rgba(52,152,219,0.3); border-radius:50px; padding:6px 18px; text-align:center;"></div>
             <div id="my-rank-neighbors"></div>
 
             <div class="rank-wrap">
@@ -1675,7 +1715,7 @@
                 return `<div class="rank-row${escapeHTML(r.name) === escapeHTML(me) ? ' rank-me' : ''}">
                     <span class="rank-num ${colors[i] || ''}">${i + 1}위</span>
                     <span class="rank-name">${escapeHTML(r.name)}</span>
-                    <span class="rank-grade" style="color:${rk.color};font-family:'Jua';font-size:0.85rem;">${escapeHTML(rk.title)}</span>
+                    <span class="rank-grade" style="color:${rk.color};font-family:'Black Han Sans','Noto Sans KR',sans-serif;font-size:0.85rem;">${escapeHTML(rk.title)}</span>
                     <span class="rank-score">${(r.score||0).toLocaleString()}점</span>
                 </div>`;
             }).join('');

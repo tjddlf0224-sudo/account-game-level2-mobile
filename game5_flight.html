@@ -12,11 +12,22 @@
 <meta property="og:title" content="플라이트 장부조회 | 전산회계 2급 마스터">
 <meta property="og:description" content="비행기를 조종해 올바른 장부 통과! 전산회계 2급 게임으로 공부하기">
 <meta property="og:type" content="website">
-<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
+:root{
+  /* 앱에서 하단 광고 배너가 가릴 수 있는 최대 높이. JS(--ad-safe-h)가 안 걸려도
+     이 값 덕분에 오버레이는 항상 스크롤 여지를 갖는다(2026-09-14). 웹에서는
+     스크롤 끝에 빈 공간이 조금 더 생길 뿐이라 손해가 없다. */
+  --ad-reserve: 96px;
+}
+
 :root{--cy:#00f2ff;--pk:#ff2d78;--gd:#ffd600;--gn:#39ff14;--pu:#b44fff;--bg:#020810;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{height:100%}
-body{background:var(--bg);font-family:'Noto Sans KR',sans-serif;overflow:hidden;user-select:none;touch-action:none;height:100dvh;}
+body{background:var(--bg);font-family:'Noto Sans KR',sans-serif;overflow:hidden;user-select:none;height:100dvh;}
+/* ⚠ body 에 touch-action:none 을 걸지 말 것 — 조상 값과 교집합이라 오버레이의 pan-y 가
+   무력화되어 iOS 에서 시작/결과 화면이 아예 안 스크롤된다(2026-09-14 실기기 제보).
+   비행 조작은 캔버스에만 건다. */
+#canvas-wrap,canvas{touch-action:none;}
 canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 
 
@@ -75,7 +86,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
   overflow-y:auto;
   overflow-x:hidden;
   -webkit-overflow-scrolling:touch;
-  padding:max(20px,env(safe-area-inset-top)) 16px calc(20px + max(var(--ad-banner-h, 0px), var(--ad-safe-h, 0px)));
+  padding:max(20px,env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom, 0px) + max(var(--ad-banner-h, 0px), var(--ad-safe-h, 0px), var(--ad-reserve)));
 }
 .ovl-inner{
   display:flex;
@@ -89,7 +100,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 }
 
 #ss{background:radial-gradient(ellipse at 50% 38%,#071530 0%,#020912 65%)}
-.logo{font-family:'Orbitron',monospace;font-size:clamp(1.8rem,7vw,3.5rem);font-weight:900;color:var(--cy);letter-spacing:clamp(2px,1vw,5px);text-align:center;text-shadow:0 0 32px var(--cy),0 0 64px rgba(0,242,255,.22)}
+.logo{font-family:'Black Han Sans','Noto Sans KR',sans-serif;font-size:clamp(1.8rem,7vw,3.5rem);font-weight:900;color:var(--cy);letter-spacing:clamp(2px,1vw,5px);text-align:center;text-shadow:0 0 32px var(--cy),0 0 64px rgba(0,242,255,.22)}
 .sub{font-family:'Black Han Sans';font-size:clamp(.85rem,3vw,1.15rem);color:rgba(255,255,255,.42);letter-spacing:3px;text-align:center}
 .ggrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%}
 .gc{background:rgba(255,255,255,.04);border:1px solid rgba(0,242,255,.18);border-radius:14px;padding:clamp(10px,3vw,16px) clamp(12px,3vw,20px);font-size:clamp(.75rem,2.5vw,.95rem);color:rgba(255,255,255,.65);line-height:1.6}
@@ -103,7 +114,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 #gs{background:rgba(2,8,20,.96);backdrop-filter:blur(10px);display:none;touch-action:pan-y}
 #gs .ovl-inner{touch-action:pan-y}
 
-.gtitle{font-family:'Orbitron';font-size:clamp(2rem,8vw,3.5rem);font-weight:900;color:var(--pk);letter-spacing:4px;text-shadow:0 0 30px var(--pk)}
+.gtitle{font-family:'Black Han Sans','Noto Sans KR',sans-serif;font-size:clamp(2rem,8vw,3.5rem);font-weight:900;color:var(--pk);letter-spacing:4px;text-shadow:0 0 30px var(--pk)}
 .gscore{font-family:'Orbitron';font-size:clamp(2.5rem,10vw,4.2rem);font-weight:900;color:var(--gd);text-shadow:0 0 22px var(--gd);line-height:1}
 .ggrade{font-family:'Black Han Sans';font-size:clamp(.95rem,3.5vw,1.2rem);color:var(--cy);background:rgba(0,242,255,.1);padding:8px 22px;border-radius:50px;border:1px solid rgba(0,242,255,.3);text-align:center}
 .gstats{ box-sizing:border-box; width:100%;display:flex;gap:clamp(12px,4vw,32px);flex-wrap:wrap;justify-content:center;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:12px clamp(16px,4vw,32px);font-size:clamp(.8rem,2.5vw,.95rem);color:rgba(255,255,255,.5)}
@@ -201,7 +212,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
             border: 2px solid rgba(0,230,118,0.7);
             background: rgba(0,230,118,0.12);
             color: #00e676;
-            font-family: 'Black Han Sans', 'Jua', sans-serif;
+            font-family: 'Black Han Sans', 'Black Han Sans', sans-serif;
             font-size: 1rem;
             cursor: pointer;
             transition: all 0.18s;
@@ -214,7 +225,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
             border: 1.5px solid rgba(255,255,255,0.25);
             background: rgba(255,255,255,0.08);
             color: rgba(255,255,255,0.75);
-            font-family: 'Black Han Sans', 'Jua', sans-serif;
+            font-family: 'Black Han Sans', 'Black Han Sans', sans-serif;
             font-size: 1rem;
             cursor: pointer;
             transition: all 0.18s;
@@ -256,7 +267,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
         .fanfare-emoji { font-size: 3.2rem; margin-bottom: 10px; animation: bounce 0.6s ease infinite alternate; }
         @keyframes bounce { from { transform:translateY(0) } to { transform:translateY(-8px) } }
         .fanfare-title {
-            font-family: 'Jua', 'Black Han Sans', sans-serif;
+            font-family:'Black Han Sans', 'Black Han Sans', sans-serif;
             font-size: 1.7rem; color: gold;
             text-shadow: 0 0 20px rgba(255,215,0,0.8);
             margin-bottom: 6px; line-height: 1.2;
@@ -273,7 +284,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
             background: linear-gradient(135deg, gold, #f39c12);
             border: none; border-radius: 50px;
             padding: 12px 32px;
-            font-family: 'Jua', sans-serif; font-size: 1rem;
+            font-family: 'Black Han Sans', sans-serif; font-size: 1rem;
             color: #000; cursor: pointer;
             transition: transform 0.15s, box-shadow 0.15s;
             box-shadow: 0 4px 16px rgba(255,215,0,0.4);
@@ -403,6 +414,54 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
             color:var(--cy); background:transparent; box-shadow:0 0 16px rgba(0,242,255,.2);
             font-family:'Black Han Sans',sans-serif; font-size:1.15rem; cursor:pointer; }
         .tut-next:active { background:var(--cy); color:#000; }
+/* 랭킹 열 이름 — 5개 게임 공통(2026-09-14 사용자 지시: "게임2의 순위/이름/직급/점수가
+   HALL OF FAME 보다 낫다"). 각 게임 .rank-row 와 같은 grid 를 그대로 상속받아 열이 맞는다.
+   스크롤 컨테이너 **바깥**에 두어 목록을 내려도 열 이름이 남는다. */
+.rank-colhdr {
+  width: 100%; box-sizing: border-box;
+  display: grid; grid-template-columns: 44px minmax(46px,1fr) minmax(0,100px) minmax(40px,70px);
+  padding: 8px 14px; gap: 6px;
+  background: rgba(0,0,0,0.35);
+  border-radius: 12px 12px 0 0;
+  font-size: 0.8rem; font-weight: 700; text-align: center;
+  color: rgba(255,255,255,0.5); letter-spacing: 1px;
+}
+.rank-colhdr + #rank-box, .rank-colhdr + .rank-box,
+.rank-colhdr + .rank-container, .rank-colhdr + #rkbox { border-radius: 0 0 16px 16px; margin-top: 0; }
+
+/*BTNUNI-START*/
+/* ── 화면 버튼 규격 통일 (2026-09-14 사용자 지시: "제각각인 크기를 통일시켜") ──
+   시작화면(게임 시작/사용방법/메인으로)과 결과화면(다시 하기/메인으로)이 게임마다
+   폭·높이·글자크기가 다 달랐다. 한 줄에 하나씩, 오버레이 폭에 꽉 차게, 높이 52px 로 맞춘다. */
+.overlay .action-btns, .ovl .action-btns, .overlay .brow, .ovl .brow {
+  display: flex; flex-direction: column; align-items: stretch;
+  gap: 10px; width: 100%; max-width: none;
+}
+.overlay .action-btns > button, .overlay .action-btns > a,
+.ovl .action-btns > button, .ovl .action-btns > a,
+.overlay .brow > button, .ovl .brow > button,
+.overlay .btn-restart, .overlay .btn-hub, .overlay .sbtn, .overlay .revive-btn, .overlay .btn, .overlay .pill,
+.ovl .btn-restart, .ovl .btn-hub, .ovl .sbtn, .ovl .revive-btn, .ovl .btn, .ovl .pill,
+.overlay .big-btn, .ovl .big-btn, .overlay .pill-btn, .ovl .pill-btn {
+  width: 100%; max-width: none; box-sizing: border-box;
+  min-height: 52px; height: auto; padding: 13px 20px;
+  border-radius: 50px;
+  font-size: clamp(1rem, 3.6vw, 1.15rem);
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+/* 저장 행은 [입력칸][저장] 가로 배치라 예외 — 버튼만 폭을 줄인다 */
+.overlay .save-row, .ovl .save-row, .overlay #savesec .brow, .ovl #savesec .brow { flex-direction: row; }
+.overlay .save-row > button, .ovl .save-row > button,
+.overlay #savesec .brow > button, .ovl #savesec .brow > button { width: auto; min-width: 104px; flex: 0 0 auto; }
+/*BTNUNI-END*/
+
+/*FONTUNI*/
+/* ── 폰트 통일 (2026-09-14) ──
+   제목·버튼 = Black Han Sans / 본문 = Noto Sans KR. 둘 다 OFL 이라 상업 배포에 제약이 없다.
+   ⚠ Orbitron 은 **라틴 전용**이라 한글에 쓰면 시스템 폰트로 대체되고 자간만 벌어져
+     "회계 플라이트"처럼 멋없게 나온다(사용자 지적). 숫자·영문 전용으로만 쓴다.
+   Jua 는 게임마다 섞여 있어 걷어냈다. */
+.gtitle, .logo, .ov-title, .overlay-title, h1, h2 { font-family: 'Black Han Sans', 'Noto Sans KR', sans-serif !important; }
 </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="wrongnote.js?v=11"></script>
@@ -461,7 +520,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
       </div>
       <div id="my-rank-badge" style="display:none; font-family:'Orbitron',sans-serif; font-size:1rem; color:var(--cy); background:rgba(0,242,255,0.1); border:1px solid rgba(0,242,255,0.3); border-radius:50px; padding:7px 20px; text-align:center; margin-top:4px;"></div>
       <div id="my-rank-neighbors"></div>
-      <div style="font-family:'Orbitron';font-size:.75rem;color:rgba(0,242,255,.38);letter-spacing:3px">🏆 HALL OF FAME</div>
+      <div class="rank-colhdr"><span>순위</span><span>이름</span><span>직급</span><span>점수</span></div>
       <div id="rkbox"></div>
       <div class="brow">
         <button class="revive-btn" id="revive-btn" onclick="Game.requestReviveAd()" style="display:none;">📺 광고 보고 부활하기</button>
@@ -1058,7 +1117,7 @@ const Game={
     const box=document.getElementById('rkbox');
     if(!list||!list.length){box.innerHTML='<div style="text-align:center;padding:20px;color:rgba(255,255,255,.3)">아직 기록이 없습니다</div>';return}
     const me=document.getElementById('pname').value.trim();
-    box.innerHTML='<div class="rkhdr">🏆 HALL OF FAME</div>'+list.map((r,i)=>{
+    box.innerHTML=list.map((r,i)=>{
       const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'위';
       return`<div class="rkrow ${escapeHTML(r.name)===escapeHTML(me)?'rkme':''}"><div class="rkn ${i<3?'top':''}">${medal}</div><div class="rknm">${escapeHTML(r.name)}</div><div class="rkgr">${escapeHTML(r.grade||this._grade(r.score))}</div><div class="rksc">${(r.score||0).toLocaleString()}</div></div>`;
     }).join('');

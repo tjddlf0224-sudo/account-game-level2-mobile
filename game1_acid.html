@@ -12,8 +12,15 @@
 <meta property="og:title" content="계정과목 산성비 | 전산회계 2급 마스터">
 <meta property="og:description" content="떨어지는 단어 중 계정과목만 클릭! 전산회계 2급 게임으로 공부하기">
 <meta property="og:type" content="website">
-    <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
     <style>
+:root{
+  /* 앱에서 하단 광고 배너가 가릴 수 있는 최대 높이. JS(--ad-safe-h)가 안 걸려도
+     이 값 덕분에 오버레이는 항상 스크롤 여지를 갖는다(2026-09-14). 웹에서는
+     스크롤 끝에 빈 공간이 조금 더 생길 뿐이라 손해가 없다. */
+  --ad-reserve: 96px;
+}
+
         :root {
             --neon-blue: #00f2ff; --neon-red: #ff0055; --neon-gold: #ffd700;
             --neon-green: #2ecc71; --neon-purple: #bd00ff;
@@ -69,7 +76,7 @@
         }
         h1 {
             margin: 0;
-            font-family: 'Jua', sans-serif;
+            font-family: 'Black Han Sans', sans-serif;
             font-size: 1.3rem;
             background: linear-gradient(to right, var(--neon-blue), var(--neon-green));
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
@@ -94,7 +101,7 @@
             padding: 0 12px;
             height: 44px; /* 터치 최소 44px */
             font-size: 0.85rem;
-            font-family: 'Jua', sans-serif;
+            font-family: 'Black Han Sans', sans-serif;
             cursor: pointer;
             display: flex; align-items: center; justify-content: center;
             white-space: nowrap;
@@ -139,7 +146,7 @@
         /* 피버 텍스트 */
         #fever-indicator {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            font-family: 'Jua'; font-size: 4rem; color: rgba(255,255,255,0.1);
+            font-family:'Black Han Sans','Noto Sans KR',sans-serif; font-size: 4rem; color: rgba(255,255,255,0.1);
             pointer-events: none; z-index: 0; display: none;
             text-shadow: 0 0 20px var(--neon-purple);
         }
@@ -166,7 +173,7 @@
         }
         .timer-box { color: var(--neon-red); }
         .score-box { color: var(--neon-gold); }
-        .combo-box { color: var(--neon-blue); font-family: 'Jua'; display: none; font-size: 0.9rem; }
+        .combo-box { color: var(--neon-blue); font-family:'Black Han Sans','Noto Sans KR',sans-serif; display: none; font-size: 0.9rem; }
         .fever-active .combo-box { color: var(--neon-purple); text-shadow: 0 0 10px var(--neon-purple); animation: shake 0.5s infinite; }
 
         /* ── 떨어지는 단어 ── */
@@ -175,7 +182,7 @@
             /* 모바일: 패딩/폰트 키워서 터치 영역 확보 */
             padding: 14px 18px;
             border-radius: 14px;
-            font-family: 'Jua';
+            font-family:'Black Han Sans','Noto Sans KR',sans-serif;
             font-size: 1.25rem;
             color: white;
             cursor: pointer;
@@ -203,7 +210,7 @@
 
         /* ── 점수 팝업 텍스트 ── */
         .floating-text {
-            position: absolute; font-family: 'Jua'; font-weight: bold; pointer-events: none;
+            position: absolute; font-family:'Black Han Sans','Noto Sans KR',sans-serif; font-weight: bold; pointer-events: none;
             animation: floatUp 0.8s forwards; z-index: 30; text-shadow: 0 0 5px black;
             font-size: 1.3rem;
         }
@@ -219,7 +226,7 @@
             display: flex; flex-direction: column;
             align-items: center; justify-content: flex-start;
             z-index: 100; backdrop-filter: blur(10px);
-            padding: max(env(safe-area-inset-top), 20px) 20px calc(env(safe-area-inset-bottom, 16px) + max(var(--ad-banner-h, 0px), var(--ad-safe-h, 0px)));
+            padding: max(env(safe-area-inset-top), 20px) 20px calc(24px + env(safe-area-inset-bottom, 0px) + max(var(--ad-banner-h, 0px), var(--ad-safe-h, 0px), var(--ad-reserve)));
             overflow-y: auto;
             touch-action: pan-y;
             overscroll-behavior: contain;
@@ -232,14 +239,14 @@
         }
         .overlay h2 {
             font-size: 2rem; margin: 0 0 16px 0;
-            color: var(--neon-gold); font-family: 'Jua';
+            color: var(--neon-gold); font-family:'Black Han Sans','Noto Sans KR',sans-serif;
         }
         .overlay p {
             font-size: 0.95rem; color: #ccc;
             margin-bottom: 16px; text-align: center; line-height: 1.6;
         }
         .big-btn {
-            padding: 14px 44px; font-size: 1.3rem; font-family: 'Jua';
+            padding: 14px 44px; font-size: 1.3rem; font-family:'Black Han Sans','Noto Sans KR',sans-serif;
             background: var(--neon-green); color: #000;
             border: none; border-radius: 50px;
             box-shadow: 0 0 20px var(--neon-green);
@@ -287,7 +294,7 @@
             display: flex; align-items: center; justify-content: space-between;
         }
         #acct-popup .pop-word {
-            font-family: 'Jua', sans-serif; font-size: 1.5rem; color: #fff;
+            font-family: 'Black Han Sans', sans-serif; font-size: 1.5rem; color: #fff;
         }
         #acct-popup .pop-type-badge {
             font-size: 0.72rem; padding: 4px 12px; border-radius: 50px;
@@ -377,7 +384,7 @@
         /* ── 최종 점수 표시 ── */
         #final-score {
             font-size: 3rem; margin: 8px 0;
-            color: var(--neon-gold); font-family: 'Jua';
+            color: var(--neon-gold); font-family:'Black Han Sans','Noto Sans KR',sans-serif;
         }
 
         
@@ -387,7 +394,7 @@
         .diff-btn {
             flex: 1; padding: 10px 8px; border-radius: 12px; border: 1.5px solid var(--border);
             background: var(--panel); color: rgba(255,255,255,0.5);
-            font-family: 'Jua', sans-serif; font-size: 0.85rem; line-height: 1.5;
+            font-family: 'Black Han Sans', sans-serif; font-size: 0.85rem; line-height: 1.5;
             cursor: pointer; transition: all 0.15s; min-height: 48px;
         }
         .diff-btn.active { border-color: var(--neon-green); background: rgba(46,204,113,0.14); color: var(--neon-green); }
@@ -403,12 +410,12 @@
             border-top: 2px solid var(--neon-gold);
         }
         #lv2-catbar.show { display: flex; }
-        #lv2-cat-word { font-family: 'Jua', sans-serif; font-size: 1.1rem; color: #fff; text-align: center; }
+        #lv2-cat-word { font-family: 'Black Han Sans', sans-serif; font-size: 1.1rem; color: #fff; text-align: center; }
         #lv2-cat-word b { color: var(--neon-gold); }
         #lv2-cat-btns { display: grid; grid-template-columns: repeat(5,1fr); gap: 6px; width: 100%; max-width: 480px; }
         #lv2-cat-btns button {
             padding: 10px 4px; border: none; border-radius: 10px; background: rgba(255,255,255,0.1);
-            color: #fff; font-family: 'Jua', sans-serif; font-size: 0.92rem; cursor: pointer; min-height: 50px;
+            color: #fff; font-family: 'Black Han Sans', sans-serif; font-size: 0.92rem; cursor: pointer; min-height: 50px;
         }
         #lv2-cat-btns button:active { transform: scale(0.94); background: rgba(255,255,255,0.2); }
         #lv2-cat-btns button.picked-ok { background: var(--neon-green); color: #021018; }
@@ -450,7 +457,7 @@
             border: 2px solid rgba(0,230,118,0.7);
             background: rgba(0,230,118,0.12);
             color: #00e676;
-            font-family: 'Black Han Sans', 'Jua', sans-serif;
+            font-family: 'Black Han Sans', 'Black Han Sans', sans-serif;
             font-size: 1rem;
             cursor: pointer;
             transition: all 0.18s;
@@ -463,7 +470,7 @@
             border: 1.5px solid rgba(255,255,255,0.25);
             background: rgba(255,255,255,0.08);
             color: rgba(255,255,255,0.75);
-            font-family: 'Black Han Sans', 'Jua', sans-serif;
+            font-family: 'Black Han Sans', 'Black Han Sans', sans-serif;
             font-size: 1rem;
             cursor: pointer;
             transition: all 0.18s;
@@ -510,7 +517,7 @@
         .fanfare-emoji { font-size: 3.2rem; margin-bottom: 10px; animation: bounce 0.6s ease infinite alternate; }
         @keyframes bounce { from { transform:translateY(0) } to { transform:translateY(-8px) } }
         .fanfare-title {
-            font-family: 'Jua', 'Black Han Sans', sans-serif;
+            font-family:'Black Han Sans', 'Black Han Sans', sans-serif;
             font-size: 1.7rem; color: gold;
             text-shadow: 0 0 20px rgba(255,215,0,0.8);
             margin-bottom: 6px; line-height: 1.2;
@@ -527,7 +534,7 @@
             background: linear-gradient(135deg, gold, #f39c12);
             border: none; border-radius: 50px;
             padding: 12px 32px;
-            font-family: 'Jua', sans-serif; font-size: 1rem;
+            font-family: 'Black Han Sans', sans-serif; font-size: 1rem;
             color: #000; cursor: pointer;
             transition: transform 0.15s, box-shadow 0.15s;
             box-shadow: 0 4px 16px rgba(255,215,0,0.4);
@@ -581,13 +588,13 @@
         .tut.show { display:flex; animation: tutPop .25s ease; }
         @keyframes tutPop { from{opacity:0} to{opacity:1} }
         .tut-top { display:flex; align-items:center; gap:9px; padding:calc(12px + env(safe-area-inset-top)) 18px 10px; }
-        .tut-top .tt-title { font-family:'Jua',sans-serif; font-size:1.05rem; color: var(--neon-blue); }
+        .tut-top .tt-title { font-family:'Black Han Sans',sans-serif; font-size:1.05rem; color: var(--neon-blue); }
         .tut-top .tt-badge { font-size:.8rem; font-weight:800; color:#021018; background: var(--neon-gold); border-radius:50px; padding:3px 12px; }
         .tut-top .tt-skip { margin-left:auto; background:rgba(255,255,255,0.08); border:none; color:#ccc;
             font-family:'Noto Sans KR',sans-serif; font-weight:800; font-size:.82rem; padding:8px 14px; border-radius:50px; cursor:pointer; }
         .tut-stage { flex:1; min-height:0; overflow-y:auto; display:flex; flex-direction:column; align-items:center; justify-content:safe center; gap:16px; padding:10px 20px 4px; }
         .tut-status { display:flex; align-items:center; gap:9px;
-            font-family:'Jua',sans-serif; font-size:1.05rem; color:#fff; background: var(--panel);
+            font-family:'Black Han Sans',sans-serif; font-size:1.05rem; color:#fff; background: var(--panel);
             border:2px solid var(--border); border-radius:50px; padding:8px 22px;
             box-shadow: 0 0 12px rgba(0,242,255,0.15); transition:.3s; }
         .tut-status b { display:inline-block; min-width:1.7em; text-align:center; color: var(--neon-green); }
@@ -605,7 +612,7 @@
         .tut-sky.tut-danger { box-shadow: inset 0 0 46px rgba(255,0,85,0.35), 0 0 20px rgba(0,242,255,0.12); }
         @media (max-width:360px){ .tut-sky{ height:206px; } }
         .tut-word { align-self:flex-start; pointer-events:none;
-            padding:11px 16px; border-radius:14px; font-family:'Jua',sans-serif; font-size:1.1rem;
+            padding:11px 16px; border-radius:14px; font-family:'Black Han Sans',sans-serif; font-size:1.1rem;
             color:#fff; background: var(--panel); border:2px solid var(--border);
             box-shadow: 0 0 10px rgba(0,242,255,0.1);
             white-space:nowrap; transition:opacity .3s, filter .3s;
@@ -624,7 +631,7 @@
             box-shadow: 0 0 12px rgba(255,0,85,0.5); animation:shake .4s; }
         @keyframes tutFloat { 0%,100%{ transform:translateY(-3px) } 50%{ transform:translateY(3px) } }
         @keyframes tutPulse { 0%,100%{ transform:scale(1) } 50%{ transform:scale(1.055) } }
-        .tut-float { position:absolute; font-family:'Jua',sans-serif; font-size:1.05rem; font-weight:bold;
+        .tut-float { position:absolute; font-family:'Black Han Sans',sans-serif; font-size:1.05rem; font-weight:bold;
             pointer-events:none; z-index:5; animation:floatUp .8s forwards;
             color:#fff; text-shadow: 0 0 6px rgba(0,0,0,0.8); }
         .tut-bubble { background: linear-gradient(180deg, #16213e, #0a0a14); border-top:2px solid var(--border);
@@ -633,12 +640,79 @@
         .tut-bubble-text { font-size:1rem; line-height:1.6; color:#dfe7ef; word-break:keep-all; text-align:center;
             min-height:3.2em; display:block; }
         .tut-bubble-text b { color: var(--neon-blue); }
-        .tut-hint { text-align:center; font-family:'Jua',sans-serif; color: var(--neon-gold); font-size:1rem; margin-top:10px;
+        .tut-hint { text-align:center; font-family:'Black Han Sans',sans-serif; color: var(--neon-gold); font-size:1rem; margin-top:10px;
             animation:tutBlink 1s ease-in-out infinite; }
         @keyframes tutBlink { 0%,100%{ opacity:1 } 50%{ opacity:.4 } }
         .tut-next { display:block; width:100%; margin-top:14px; padding:15px; border-radius:14px; border:2px solid var(--neon-blue);
             color:#021018; background: linear-gradient(135deg, var(--neon-blue), #0084ff); box-shadow: 0 0 16px rgba(0,242,255,0.4);
-            font-family:'Jua',sans-serif; font-size:1.15rem; cursor:pointer; }
+            font-family:'Black Han Sans',sans-serif; font-size:1.15rem; cursor:pointer; }
+/* 랭킹 열 이름 — 5개 게임 공통(2026-09-14 사용자 지시: "게임2의 순위/이름/직급/점수가
+   HALL OF FAME 보다 낫다"). 각 게임 .rank-row 와 같은 grid 를 그대로 상속받아 열이 맞는다.
+   스크롤 컨테이너 **바깥**에 두어 목록을 내려도 열 이름이 남는다. */
+.rank-colhdr {
+  width: 100%; box-sizing: border-box;
+  display: grid; grid-template-columns: 44px minmax(46px,1fr) minmax(0,110px) minmax(40px,70px);
+  padding: 8px 14px; gap: 6px;
+  background: rgba(0,0,0,0.35);
+  border-radius: 12px 12px 0 0;
+  font-size: 0.8rem; font-weight: 700; text-align: center;
+  color: rgba(255,255,255,0.5); letter-spacing: 1px;
+}
+.rank-colhdr + #rank-box, .rank-colhdr + .rank-box,
+.rank-colhdr + .rank-container, .rank-colhdr + #rkbox { border-radius: 0 0 16px 16px; margin-top: 0; }
+
+/* ── 화면 버튼 규격 통일 (2026-09-14 사용자 지시: "제각각인 크기를 통일시켜") ──
+   시작화면(게임 시작/사용방법/메인으로)과 결과화면(다시 하기/메인으로)이 게임마다
+   폭·높이·글자크기가 다 달랐다. 한 줄에 하나씩, 오버레이 폭에 꽉 차게, 높이 52px 로 맞춘다. */
+.overlay .action-btns, .ovl .action-btns, .overlay .brow, .ovl .brow,
+.overlay #savesec .brow, .ovl #savesec .brow {
+  display: flex; flex-direction: column; align-items: stretch;
+  gap: 10px; width: 100%; max-width: none;
+}
+.overlay .action-btns > *, .ovl .action-btns > *,
+.overlay .btn-restart, .overlay .btn-hub, .ovl .btn-restart, .ovl .btn-hub,
+.overlay .sbtn, .ovl .sbtn, .overlay .revive-btn, .ovl .revive-btn,
+.overlay .btn, .ovl .btn {
+  width: 100%; max-width: none; box-sizing: border-box;
+  min-height: 52px; padding: 13px 20px;
+  border-radius: 50px;
+  font-size: clamp(1rem, 3.6vw, 1.15rem);
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+
+/*BTNUNI-START*/
+/* ── 화면 버튼 규격 통일 (2026-09-14 사용자 지시: "제각각인 크기를 통일시켜") ──
+   시작화면(게임 시작/사용방법/메인으로)과 결과화면(다시 하기/메인으로)이 게임마다
+   폭·높이·글자크기가 다 달랐다. 한 줄에 하나씩, 오버레이 폭에 꽉 차게, 높이 52px 로 맞춘다. */
+.overlay .action-btns, .ovl .action-btns, .overlay .brow, .ovl .brow {
+  display: flex; flex-direction: column; align-items: stretch;
+  gap: 10px; width: 100%; max-width: none;
+}
+.overlay .action-btns > button, .overlay .action-btns > a,
+.ovl .action-btns > button, .ovl .action-btns > a,
+.overlay .brow > button, .ovl .brow > button,
+.overlay .btn-restart, .overlay .btn-hub, .overlay .sbtn, .overlay .revive-btn, .overlay .btn, .overlay .pill,
+.ovl .btn-restart, .ovl .btn-hub, .ovl .sbtn, .ovl .revive-btn, .ovl .btn, .ovl .pill,
+.overlay .big-btn, .ovl .big-btn, .overlay .pill-btn, .ovl .pill-btn {
+  width: 100%; max-width: none; box-sizing: border-box;
+  min-height: 52px; height: auto; padding: 13px 20px;
+  border-radius: 50px;
+  font-size: clamp(1rem, 3.6vw, 1.15rem);
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+/* 저장 행은 [입력칸][저장] 가로 배치라 예외 — 버튼만 폭을 줄인다 */
+.overlay .save-row, .ovl .save-row, .overlay #savesec .brow, .ovl #savesec .brow { flex-direction: row; }
+.overlay .save-row > button, .ovl .save-row > button,
+.overlay #savesec .brow > button, .ovl #savesec .brow > button { width: auto; min-width: 104px; flex: 0 0 auto; }
+/*BTNUNI-END*/
+
+/*FONTUNI*/
+/* ── 폰트 통일 (2026-09-14) ──
+   제목·버튼 = Black Han Sans / 본문 = Noto Sans KR. 둘 다 OFL 이라 상업 배포에 제약이 없다.
+   ⚠ Orbitron 은 **라틴 전용**이라 한글에 쓰면 시스템 폰트로 대체되고 자간만 벌어져
+     "회계 플라이트"처럼 멋없게 나온다(사용자 지적). 숫자·영문 전용으로만 쓴다.
+   Jua 는 게임마다 섞여 있어 걷어냈다. */
+.gtitle, .logo, .ov-title, .overlay-title, h1, h2 { font-family: 'Black Han Sans', 'Noto Sans KR', sans-serif !important; }
 </style>
 
 <button id="rewarded-btn" onclick="requestRewarded()">⏱ +15초 광고 보기</button>
@@ -707,7 +781,7 @@
         font-size: 0.85rem;
         line-height: 2;
     ">
-        <div style="text-align:center; color:var(--neon-gold); font-family:'Jua'; font-size:0.9rem; margin-bottom:6px; letter-spacing:2px;">📊 파일럿 계급 기준</div>
+        <div style="text-align:center; color:var(--neon-gold); font-family:'Black Han Sans','Noto Sans KR',sans-serif; font-size:0.9rem; margin-bottom:6px; letter-spacing:2px;">📊 파일럿 계급 기준</div>
         <!-- GRADE_TIERS(단일 소스)에서 렌더링 -->
         <div id="grade-table"></div>
     </div>
@@ -752,7 +826,7 @@
   <div class="overlay-inner">
     <h2>GAME OVER</h2>
     <p id="final-rank" style="color:var(--neon-blue); font-weight:bold; font-size:1.2rem; margin:0;">계급: 인턴</p>
-    <div id="lv-unlock-msg" style="display:none; font-family:'Jua',sans-serif; font-size:1rem; color:#000; background:linear-gradient(135deg,gold,#f39c12); border-radius:50px; padding:8px 22px; text-align:center; margin-top:8px;">🔓 난이도 2 해금! 이제 분류까지 맞혀야 점수가 들어가요</div>
+    <div id="lv-unlock-msg" style="display:none; font-family:'Black Han Sans',sans-serif; font-size:1rem; color:#000; background:linear-gradient(135deg,gold,#f39c12); border-radius:50px; padding:8px 22px; text-align:center; margin-top:8px;">🔓 난이도 2 해금! 이제 분류까지 맞혀야 점수가 들어가요</div>
     <div id="final-score">0점</div>
 
     <div class="save-row">
@@ -761,10 +835,11 @@
         <button id="save-btn" onclick="saveScore()">저장</button>
     </div>
 
-    <div id="my-rank-badge" style="display:none; font-family:'Jua',sans-serif; font-size:1rem; color:var(--neon-blue); background:rgba(0,242,255,0.1); border:1px solid rgba(0,242,255,0.3); border-radius:50px; padding:7px 20px; text-align:center; margin-top:4px;"></div>
+    <div id="my-rank-badge" style="display:none; font-family:'Black Han Sans',sans-serif; font-size:1rem; color:var(--neon-blue); background:rgba(0,242,255,0.1); border:1px solid rgba(0,242,255,0.3); border-radius:50px; padding:7px 20px; text-align:center; margin-top:4px;"></div>
     <div id="my-rank-neighbors"></div>
     <div class="result-container">
         <div id="review-box" class="review-box" style="display: none;"></div>
+        <div class="rank-colhdr"><span>순위</span><span>이름</span><span>직급</span><span>점수</span></div>
         <div id="rank-box"></div>
     </div>
 
@@ -1636,7 +1711,7 @@
             box.innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.3)">아직 기록이 없습니다</div>';
             return;
         }
-        box.innerHTML = '<div class="rank-hdr">🏆 HALL OF FAME</div>' + list.map((r, i) => {
+        box.innerHTML = list.map((r, i) => {
             const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1) + '위';
             const gradeText = r.grade || getGrade(r.score);
             return `<div class="rank-row ${escapeHTML(r.name) === escapeHTML(me) ? 'rank-me' : ''}">
