@@ -147,7 +147,58 @@
     '💼': svg(CYAN, CYANG, '<rect x="3" y="8" width="18" height="12" rx="2"/><path d="M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 13h18"/>'),
     '📱': svg(CYAN, CYANG, '<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 19h2"/>'),
     '📴': svg(GRAY, GRAYG, '<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M4 4l16 16"/>'),
-    '📺': svg(CYAN, CYANG, '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M8 21h8M9 6l3-3 3 3"/>')
+    '📺': svg(CYAN, CYANG, '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M8 21h8M9 6l3-3 3 3"/>'),
+
+    /* ── 2026-09-14 추가분 ──────────────────────────────────────────
+       그때까지 66종만 치환되고 있어서 나머지는 OS 기본 이모지가 그대로
+       튀어나왔다(사용자 지적: 원가의 길 결과창의 "🚪 중도 이탈").
+       기기·OS 마다 모양이 달라 화면 톤이 깨진다. 아래는 실제로 쓰이는데
+       빠져 있던 것들 — 같은 24x24 라인 스타일로 맞췄다.
+       ⚠ 체크·엑스·화살표(✓ ✅ ✗ ✕ ❌ ★ ✔ ☰ ➕ ⬆ ⬇ 🔁)는 파일 머리말대로
+         **타이포그래픽 기호라 일부러 제외한다** — 건드리지 말 것. */
+
+    // 스테이지 · 장소
+    '🏭': svg(PURPLE, PURPLEG, '<path d="M3 21V10l5 3V10l5 3V10l5 3V21z"/><path d="M18 13V4h3v9"/><path d="M7 17h2M12 17h2M17 17h2"/>'),
+    '🏛': svg(ICEBLUE, ICEBLUEG, '<path d="M3 9l9-5 9 5"/><path d="M5 9v9M10 9v9M14 9v9M19 9v9"/><path d="M3 21h18M4 18h16"/>'),
+    '🚪': svg(GOLD, GOLDG, '<rect x="5" y="3" width="14" height="18" rx="1"/><path d="M9 3v18"/><circle cx="12.5" cy="12" r="1" fill="' + GOLD + '" stroke="none"/>'),
+    '☁': svg(ICEBLUE, ICEBLUEG, '<path d="M7 18h10a4 4 0 0 0 .4-8A6 6 0 0 0 6 11.5 3.5 3.5 0 0 0 7 18z"/>'),
+    '🌙': svg(ICEBLUE, ICEBLUEG, '<path d="M20 14.5A8.5 8.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5z"/>'),
+
+    // 운송 · 물류
+    '🛩': svg(CYAN, CYANG, '<path d="M12 3c1 0 1.6 1.2 1.6 3v4.2l7.4 4v2.3l-7.4-2.2v3.9l2.4 1.7v1.6L12 20.3l-4 1.2v-1.6l2.4-1.7v-3.9L3 16.5v-2.3l7.4-4V6c0-1.8.6-3 1.6-3z"/>'),
+    '🚚': svg(GOLD, GOLDG, '<path d="M2 6h11v10H2z"/><path d="M13 9h4l3 3.5V16h-7z"/><circle cx="6.5" cy="18" r="2"/><circle cx="16.5" cy="18" r="2"/>'),
+    '📦': svg(GOLD, GOLDG, '<path d="M3 8l9-4 9 4v9l-9 4-9-4z"/><path d="M3 8l9 4 9-4M12 12v9"/>'),
+    '🚶': svg(WHITE, WHITEG, '<circle cx="13" cy="4.5" r="2"/><path d="M13 8l-3 4 1 4-2 4"/><path d="M13 8l3 3 2 4"/><path d="M10 12L7 10"/>'),
+
+    // 도구 · 사물
+    '🔒': svg(GRAY, GRAYG, '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>'),
+    '🔑': svg(GOLD, GOLDG, '<circle cx="8" cy="8" r="4.5"/><path d="M11.2 11.2L20 20"/><path d="M17 17l2-2M15 15l2-2"/>'),
+    '⚙': svg(GRAY, GRAYG, '<circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M21.5 12h-3M5.5 12h-3M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1M18.7 18.7l-2.1-2.1M7.4 7.4L5.3 5.3"/>'),
+    '🔧': svg(GRAY, GRAYG, '<path d="M15.5 3a6 6 0 0 0-5.2 9L3 19.3 4.7 21l7.3-7.3A6 6 0 0 0 21 8.5l-3.3 3.3-2.5-2.5L18.5 6A6 6 0 0 0 15.5 3z"/>'),
+    '🪚': svg(GRAY, GRAYG, '<path d="M3 8h13l4 4-4 4"/><path d="M4 12h1.5M7 12h1.5M10 12h1.5M13 12h1.5"/><path d="M3 8v8"/>'),
+    '🔌': svg(GOLD, GOLDG, '<path d="M9 3v6M15 3v6"/><path d="M6 9h12v3a6 6 0 0 1-12 0z"/><path d="M12 18v3"/>'),
+    '🔔': svg(GOLD, GOLDG, '<path d="M6 17V11a6 6 0 0 1 12 0v6l2 2H4z"/><path d="M10 21a2 2 0 0 0 4 0"/>'),
+    '🧴': svg(ICEBLUE, ICEBLUEG, '<path d="M9 3h4v3H9z"/><path d="M8 6h6a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3z"/><path d="M5 12h12"/>'),
+    '☕': svg(BRONZE, BRONZEG, '<path d="M4 8h13v6a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M17 10h2a2.5 2.5 0 0 1 0 5h-2"/><path d="M7 3v2M11 3v2"/>'),
+    '🍚': svg(WHITE, WHITEG, '<path d="M4 12h16a8 8 0 0 1-8 7 8 8 0 0 1-8-7z"/><path d="M8 9c1-2 2.5-3 4-3s3 1 4 3"/>'),
+    '⚔': svg(RED, REDG, '<path d="M4 4l9 9M20 4l-9 9"/><path d="M3 18l3 3 3-3-3-3z"/><path d="M21 18l-3 3-3-3 3-3z"/>'),
+    '🧩': svg(GREEN, GREENG, '<path d="M4 5h5a2 2 0 1 1 4 0h5v5a2 2 0 1 0 0 4v5h-5a2 2 0 1 0-4 0H4v-5a2 2 0 1 1 0-4z"/>'),
+    '🏷': svg(PINK, PINKG, '<path d="M3 11V4h7l11 11-7 7z"/><circle cx="7" cy="8" r="1.4"/>'),
+    '📐': svg(CYAN, CYANG, '<path d="M4 4v16h16z"/><path d="M4 12h5M4 16h9"/>'),
+    '⚡': svg(GOLD, GOLDG, '<path d="M13 2L4 14h6l-1 8 9-12h-6z"/>'),
+    '🕐': svg(CYAN, CYANG, '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>'),
+    '🙂': svg(WHITE, WHITEG, '<circle cx="12" cy="12" r="9"/><path d="M9 10h.01M15 10h.01"/><path d="M8.5 14.5c1 1.2 2.2 1.8 3.5 1.8s2.5-.6 3.5-1.8"/>'),
+    '❔': svg(GRAY, GRAYG, '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.4 2.3c-.6.3-.9.9-.9 1.6v.6"/><path d="M12 17.5h.01"/>'),
+
+    // 서류(원가의 길 수집물)
+    '📄': svg(WHITE, WHITEG, '<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 12h6M9 16h6"/>'),
+    '📑': svg(PURPLE, PURPLEG, '<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 11h6M9 15h4"/><path d="M3 7v13a1 1 0 0 0 1 1h11"/>'),
+    '📗': svg(GREEN, GREENG, '<path d="M5 4a2 2 0 0 1 2-2h12v18H7a2 2 0 0 0-2 2z"/><path d="M5 4v16"/><path d="M15 2v7l-2-1.5L11 9V2"/>'),
+    '🧾': svg(CYAN, CYANG, '<path d="M5 3h14v18l-2.3-1.6L14.4 21l-2.4-1.6L9.6 21l-2.3-1.6L5 21z"/><path d="M8 8h8M8 12h8M8 16h5"/>'),
+
+    // 상태 점(🟢🟡🔴 과 같은 계열)
+    '🟣': dot(PURPLE, PURPLEG),
+    '🔵': dot(BLUE, BLUEG)
   };
 
   var KEYS = Object.keys(ICONS).sort(function (a, b) { return b.length - a.length; });

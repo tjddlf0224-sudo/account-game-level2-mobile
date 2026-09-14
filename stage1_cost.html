@@ -18,6 +18,24 @@
 <style>
 :root{
   --cy:#00f2ff; --pu:#b44fff; --or:#ff9800; --gd:#ffd600; --gn:#00e676; --pk:#ff2d78;
+  /* 앱 하단 광고 배너가 가릴 수 있는 최대 높이. JS(--ad-safe-h)가 안 걸려도
+     이 값 덕분에 모달은 항상 스크롤 여지를 갖는다. 웹에선 스크롤 끝에 빈 공간이
+     조금 더 생길 뿐이라 손해가 없다. (게임 5종과 같은 값 — 2026-09-14) */
+  --ad-reserve: 96px;
+}
+
+/*ADSPACER*/
+/* ── 하단 배너 안전영역을 padding 이 아니라 **실제 요소**로 잡는다 (2026-09-14) ──
+   iOS WKWebView 는 스크롤 컨테이너의 padding-bottom 을 스크롤 영역(scrollable
+   overflow)에 넣어 주지 않는 경우가 있다. 그러면 배너가 버튼을 덮고 있는데도
+   "더 내릴 것이 없다"고 보고 스크롤이 아예 안 생긴다. Chromium 은 제대로
+   처리해서 자동 테스트로는 안 잡혔다(게임 5종에서 먼저 겪었다).
+   ::after 는 진짜 박스라 scrollable overflow 에 반드시 포함된다.
+   ⚠ 이 패널들은 flex 가 아니라 블록이라 flex:0 0 auto 대신 그냥 높이를 준다. */
+#result-panel::after, #pq-panel::after, #dlg-panel::after,
+#quiz-panel::after, #docs-panel::after{
+  content:''; display:block; width:100%;
+  height: calc(env(safe-area-inset-bottom, 0px) + max(var(--ad-banner-h, 0px), var(--ad-safe-h, 0px), var(--ad-reserve)));
 }
 *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;
    -webkit-user-select:none; user-select:none; touch-action:manipulation; }
@@ -144,7 +162,7 @@ body{ font-family:'Noto Sans KR',sans-serif; color:#fff; position:relative; }
 #result-overlay{ z-index:70; }
 #result-panel{
   width:100%; max-width:480px; margin:0 auto; max-height:100%; overflow-y:auto;
-  padding:26px 22px calc(24px + env(safe-area-inset-bottom));
+  padding:26px 22px 24px;   /* 배너 자리는 ::after 스페이서가 잡는다 */
   background:linear-gradient(180deg, rgba(20,16,34,0.98), rgba(8,6,16,0.99));
   border:1px solid rgba(255,214,0,0.4); border-radius:20px;
   box-shadow:0 0 50px rgba(255,214,0,0.12);
@@ -192,7 +210,7 @@ body{ font-family:'Noto Sans KR',sans-serif; color:#fff; position:relative; }
 /* 연습문제 풀이 화면 — quiz-panel과 동일 톤, 전용 패널 */
 #pq-panel{
   width:100%; max-width:640px; margin:0 auto; max-height:100%; overflow-y:auto;
-  padding:16px 16px calc(18px + env(safe-area-inset-bottom));
+  padding:16px 16px 18px;   /* 배너·노치 자리는 ::after 스페이서가 잡는다 */
   background:linear-gradient(180deg, rgba(18,14,32,0.98), rgba(8,6,16,0.99));
   border-top:2px solid rgba(180,79,255,0.4);
   box-shadow:0 -8px 30px rgba(0,0,0,0.6);
@@ -297,7 +315,7 @@ body{ font-family:'Noto Sans KR',sans-serif; color:#fff; position:relative; }
 #dlg-panel{
   width:100%; max-width:640px; margin:0 auto;
   max-height:100%; overflow-y:auto;
-  padding:14px 16px calc(18px + env(safe-area-inset-bottom));
+  padding:14px 16px 18px;   /* 배너·노치 자리는 ::after 스페이서가 잡는다 */
   background:linear-gradient(180deg, rgba(18,14,32,0.98), rgba(8,6,16,0.99));
   border-top:2px solid rgba(180,79,255,0.4);
   box-shadow:0 -8px 30px rgba(0,0,0,0.6);
@@ -353,7 +371,7 @@ body{ font-family:'Noto Sans KR',sans-serif; color:#fff; position:relative; }
 #quiz-panel{
   width:100%; max-width:640px; margin:0 auto;
   max-height:100%; overflow-y:auto;
-  padding:16px 16px calc(18px + env(safe-area-inset-bottom));
+  padding:16px 16px 18px;   /* 배너·노치 자리는 ::after 스페이서가 잡는다 */
   background:linear-gradient(180deg, rgba(18,14,32,0.98), rgba(8,6,16,0.99));
   border-top:2px solid rgba(255,214,0,0.4);
   box-shadow:0 -8px 30px rgba(0,0,0,0.6);
