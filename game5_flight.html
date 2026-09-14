@@ -106,15 +106,15 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 .gtitle{font-family:'Orbitron';font-size:clamp(2rem,8vw,3.5rem);font-weight:900;color:var(--pk);letter-spacing:4px;text-shadow:0 0 30px var(--pk)}
 .gscore{font-family:'Orbitron';font-size:clamp(2.5rem,10vw,4.2rem);font-weight:900;color:var(--gd);text-shadow:0 0 22px var(--gd);line-height:1}
 .ggrade{font-family:'Black Han Sans';font-size:clamp(.95rem,3.5vw,1.2rem);color:var(--cy);background:rgba(0,242,255,.1);padding:8px 22px;border-radius:50px;border:1px solid rgba(0,242,255,.3);text-align:center}
-.gstats{display:flex;gap:clamp(12px,4vw,32px);flex-wrap:wrap;justify-content:center;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:12px clamp(16px,4vw,32px);font-size:clamp(.8rem,2.5vw,.95rem);color:rgba(255,255,255,.5)}
+.gstats{ box-sizing:border-box; width:100%;display:flex;gap:clamp(12px,4vw,32px);flex-wrap:wrap;justify-content:center;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:12px clamp(16px,4vw,32px);font-size:clamp(.8rem,2.5vw,.95rem);color:rgba(255,255,255,.5)}
 .gstats span{color:#fff;font-weight:700}
-#savesec{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%;max-width:340px}
+#savesec{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%;}
 #savesec label{font-size:.9rem;color:rgba(0,242,255,.7);letter-spacing:1px}
-#pname{padding:10px 18px;background:rgba(0,242,255,.07);border:2px solid rgba(0,242,255,.35);border-radius:12px;color:#fff;font-size:1rem;text-align:center;font-family:'Noto Sans KR';width:100%;outline:none;transition:border-color .2s;min-height:48px}
+#pname{box-sizing:border-box;padding:10px 18px;background:rgba(0,242,255,.07);border:2px solid rgba(0,242,255,.35);border-radius:12px;color:#fff;font-size:1rem;text-align:center;font-family:'Noto Sans KR';width:100%;outline:none;transition:border-color .2s;min-height:48px}
 #pname:focus{border-color:var(--cy);box-shadow:0 0 14px rgba(0,242,255,.3)}
 #pname::placeholder{color:rgba(255,255,255,.28)}
 #savemsg{font-size:.85rem;color:rgba(255,255,255,.4);min-height:16px;text-align:center}
-#rkbox{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(0,242,255,.2);border-radius:16px;padding:4px 0;max-height:200px;overflow-y:auto;display:none}
+#rkbox{ box-sizing:border-box;width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(0,242,255,.2);border-radius:16px;padding:4px 0;max-height:200px;overflow-y:auto;display:none}
 #rkbox::-webkit-scrollbar{width:4px}
 #rkbox::-webkit-scrollbar-thumb{background:rgba(0,242,255,.3);border-radius:2px}
 .rkhdr{text-align:center;padding:10px 0 6px;font-family:'Orbitron';font-size:.75rem;color:rgba(0,242,255,.42);letter-spacing:3px}
@@ -126,7 +126,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 .rank-delta.up{color:#39ff14;background:rgba(57,255,20,.14)}
 .rank-delta.down{color:#ff4757;background:rgba(255,71,87,.14)}
 .rank-delta.flat{color:rgba(255,255,255,.4);background:rgba(255,255,255,.06)}
-#my-rank-neighbors{display:none;margin-top:8px;border-radius:14px;border:1px solid rgba(0,242,255,.2)}
+#my-rank-neighbors{ box-sizing:border-box;display:none; width:100%;margin-top:8px;border-radius:14px;border:1px solid rgba(0,242,255,.2)}
 .rn-row{display:flex;align-items:center;padding:8px 14px;font-size:.82rem;background:rgba(255,255,255,.02);gap:8px}
 .rn-row.rn-me{background:rgba(0,242,255,.12);font-weight:700}
 .rn-label{color:rgba(255,255,255,.35);font-size:.68rem;width:52px;flex-shrink:0}
@@ -136,10 +136,10 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 .spinrow{display:flex;align-items:center;justify-content:center;gap:10px;padding:20px;color:rgba(255,255,255,.3);font-size:.9rem}
 .spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.12);border-top-color:var(--cy);border-radius:50%;animation:sp .7s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
-.brow{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.brow{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;width:100%}   /* 결과화면 카드들과 같은 폭 */
 /* 시작화면: 세로 가운데 정렬 + 버튼 크기 통일 (비행시작·사용방법·메인으로 나가기) */
 #ss{justify-content:safe center}
-#ss .brow{flex-direction:column;align-items:stretch;gap:10px;width:100%;max-width:340px;margin:0 auto}
+#ss .brow{flex-direction:column;align-items:stretch;gap:10px;width:100%;margin:0 auto}
 #ss .brow > button{width:100%;box-sizing:border-box;padding:14px 20px;min-height:56px;font-size:1.15rem}
 .pill{padding:clamp(10px,2.5vw,12px) clamp(24px,5vw,36px);border:2px solid;border-radius:50px;font-family:'Black Han Sans';font-size:clamp(.95rem,3.5vw,1.1rem);cursor:pointer;transition:all .18s;min-height:48px}
 .pill.cy{color:var(--cy);border-color:var(--cy);background:transparent}.pill.cy:active{background:var(--cy);color:#000}
@@ -192,7 +192,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
             flex-direction: column;
             gap: 10px;
             width: 100%;
-            max-width: 320px;
+            
             margin-top: 16px;
         }
         .btn-restart {

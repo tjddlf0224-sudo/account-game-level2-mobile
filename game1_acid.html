@@ -346,7 +346,7 @@
         .rank-delta.up { color:#39ff14; background:rgba(57,255,20,0.14); }
         .rank-delta.down { color:#ff4757; background:rgba(255,71,87,0.14); }
         .rank-delta.flat { color:rgba(255,255,255,0.4); background:rgba(255,255,255,0.06); }
-        #my-rank-neighbors { display:none; margin-top:8px; border-radius:14px; border:1px solid rgba(0,242,255,0.2); }
+        #my-rank-neighbors { box-sizing:border-box; display:none; width:100%; margin-top:8px; border-radius:14px; border:1px solid rgba(0,242,255,0.2); }
         .next-tier-msg { text-align:center; font-size:0.78rem; color:rgba(255,255,255,0.75); padding:9px 14px; background:rgba(255,255,255,0.03); }
         .rn-row { display:flex; align-items:center; padding:8px 14px; font-size:0.82rem; background:rgba(255,255,255,0.02); gap:8px; }
         .rn-row.rn-me { background:rgba(0,242,255,0.12); font-weight:700; }
@@ -357,7 +357,7 @@
         .spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.12); border-top-color: var(--neon-blue); border-radius: 50%; animation: sp 0.7s linear infinite; }
 
         /* ── 이름 입력 + 저장 버튼 ── */
-        .save-row { display: flex; gap: 10px; margin-bottom: 16px; width: 100%; max-width: 340px; }
+        .save-row { display: flex; gap: 10px; margin-bottom: 16px; width: 100%;  }
         .save-row input {
             width: 0; flex: 1; min-width: 0; padding: 12px 10px;
             border-radius: 10px; border: 2px solid var(--neon-blue);
@@ -441,7 +441,7 @@
             flex-direction: column;
             gap: 10px;
             width: 100%;
-            max-width: 320px;
+            
             margin-top: 16px;
         }
         .btn-restart {

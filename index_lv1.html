@@ -481,7 +481,18 @@ function closeSettings() {
 }
 document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeSettings(); });
 function toggleHubMute() {
-  localStorage.setItem('hub_muted', String(localStorage.getItem('hub_muted') !== 'true'));
+  const next = localStorage.getItem('hub_muted') !== 'true';
+  localStorage.setItem('hub_muted', String(next));
+  /* ⚠ 게임마다 자체 🎵 버튼이 있고 그게 `<게임>_muted` 를 쓴다. 게임은 그 키가 있으면
+     그걸 우선 보고, 없을 때만 hub_muted 를 본다. 그래서 여기서 hub_muted 만 바꾸면
+     **한 번이라도 게임 안에서 음소거한 게임은 영영 못 켠다** — 설정엔 '배경음악 켜짐'
+     인데 소리는 안 나는 상태가 된다(2026-09-14 제보). 전역 토글은 말 그대로 전역이어야
+     하므로, 개별 설정을 지워서 모든 게임이 이 값을 따르게 한다. */
+  try {
+    Object.keys(localStorage)
+      .filter(k => /_muted$/.test(k) && k !== 'hub_muted')
+      .forEach(k => localStorage.removeItem(k));
+  } catch (e) {}
   applyHubMuteUI();
 }
 applyHubMuteUI();
