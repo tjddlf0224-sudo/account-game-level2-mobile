@@ -479,6 +479,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 .gtitle, .logo, .ov-title, .overlay-title, h1, h2 { font-family: 'Black Han Sans', 'Noto Sans KR', sans-serif !important; }
 </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="ask.js?v=13"></script>
     <script src="wrongnote.js?v=11"></script>
     <script src="growth.js?v=11"></script>
 <script src="streak.js?v=11"></script>
@@ -559,7 +560,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
     <div class="hud-btns">
       <button class="mute-btn" id="mute-btn" onclick="BGM.toggleMute()" title="BGM 음소거">🎵</button>
       <button class="hdb hdb-quit" onclick="if(Game.state==='playing'||Game.state==='reading') Game.gameOver()">그만</button>
-      <button class="hdb hdb-home" onclick="if(Game.state==='playing'||Game.state==='reading'){if(!confirm('게임을 종료하고 메인으로 나가시겠어요?'))return;}location.href='index.html'">홈</button>
+      <button class="hdb hdb-home" onclick="(async()=>{if(Game.state==='playing'||Game.state==='reading'){if(!await Ask.confirm('게임을 종료하고 메인으로 나가시겠어요?'))return;}location.href='index.html'})()">홈</button>
     </div>
   </div>
 

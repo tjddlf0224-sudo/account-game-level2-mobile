@@ -235,6 +235,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="ask.js?v=13"></script>
 <script src="wrongnote.js?v=11"></script>
 <script src="growth.js?v=11"></script>
 <script src="streak.js?v=11"></script>
@@ -273,13 +274,13 @@ function bindStart(){
 }
 
 /* ── 그만(중도 종료 → 지금까지 점수로 결과화면) / 홈(허브로 나가기) ── */
-function quitGame(){
+async function quitGame(){
   if(!isPlaying) return;
-  if(confirm('지금까지 점수로 결과를 볼까요? 남은 시간은 더 진행할 수 없어요.')) endQuiz();
+  if(await Ask.confirm('지금까지 점수로 결과를 볼까요? 남은 시간은 더 진행할 수 없어요.')) endQuiz();
 }
-function exitGame(){
+async function exitGame(){
   if(isPlaying){
-    if(!confirm('허브로 나갈까요? 지금까지의 진행 상황은 저장되지 않습니다.')) return;
+    if(!await Ask.confirm('허브로 나갈까요? 지금까지의 진행 상황은 저장되지 않습니다.')) return;
   }
   location.href='index_lv1.html';
 }

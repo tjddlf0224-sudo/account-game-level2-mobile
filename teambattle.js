@@ -462,7 +462,7 @@
       var url = location.href.replace(/admin\.html.*$/, '') + 'board.html?s=' + encodeURIComponent(res.data);
       S.session = { id: res.data, class_label: S.cls };
       render();
-      if (confirm('세션이 시작됐습니다 (코드 ' + res.data + ').\n전광판을 새 창으로 열까요?')) {
+      if (await Ask.confirm('세션이 시작됐습니다 (코드 ' + res.data + ').\n전광판을 새 창으로 열까요?')) {
         window.open(url, '_blank');
       }
     } catch (e) {
@@ -495,7 +495,7 @@
 
   api.finish = async function () {
     if (!S.session) return;
-    if (!confirm('세션을 종료할까요? 전광판의 시계가 멈추고 이후 기록은 집계되지 않습니다.')) return;
+    if (!await Ask.confirm('세션을 종료할까요? 전광판의 시계가 멈추고 이후 기록은 집계되지 않습니다.')) return;
     var pass = askPass();
     if (pass == null) return;
     try {
