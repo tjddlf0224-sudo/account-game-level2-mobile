@@ -593,6 +593,7 @@
 .gtitle, .logo, .ov-title, .overlay-title, h1, h2 { font-family: 'Black Han Sans', 'Noto Sans KR', sans-serif !important; }
 </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="ask.js?v=13"></script>
     <script src="wrongnote.js?v=11"></script>
     <script src="growth.js?v=11"></script>
 <script src="streak.js?v=11"></script>
@@ -1097,7 +1098,7 @@
         function selectDifficulty(n) {
             if (!window.Difficulty) return;
             if (n === 2 && !Difficulty.isUnlocked(GAME_ID)) {
-                alert('난이도 1에서 정답률 ' + Math.round(Difficulty.UNLOCK_ACC * 100) + '% 이상(10문항 이상 플레이)을 달성하면 열려요!\n\n' + Difficulty.hint(GAME_ID));
+                Ask.alert('난이도 1에서 정답률 ' + Math.round(Difficulty.UNLOCK_ACC * 100) + '% 이상(10문항 이상 플레이)을 달성하면 열려요!\n\n' + Difficulty.hint(GAME_ID));
                 return;
             }
             Difficulty.set(GAME_ID, n);
@@ -1813,7 +1814,7 @@
         if (window.AdBridge && AdBridge.isRewardedReady()) {
             AdBridge.showRewarded();
         } else {
-            alert('광고를 불러오는 중이에요. 잠시 후 다시 눌러주세요!');
+            Ask.alert('광고를 불러오는 중이에요. 잠시 후 다시 눌러주세요!');
         }
     }
     // Kotlin → JS 콜백: 보상 지급
@@ -1821,7 +1822,7 @@
         // 각 게임 파일에서 오버라이드
     }
     function onRewardedFailed() {
-        alert('광고를 불러올 수 없어요. 잠시 후 다시 시도해주세요.');
+        Ask.alert('광고를 불러올 수 없어요. 잠시 후 다시 시도해주세요.');
     }
 
 

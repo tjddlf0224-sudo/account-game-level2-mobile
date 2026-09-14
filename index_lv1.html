@@ -694,7 +694,7 @@ function onRewardedFailed() {
   localStorage.setItem('hub_adunlock_' + window._unlockTarget, '1');
   window._unlockTarget = null;
   renderStageMap();
-  alert('광고를 불러오지 못했지만 스테이지를 열어드렸어요!');
+  Ask.alert('광고를 불러오지 못했지만 스테이지를 열어드렸어요!');
 }
 
 /* 안드로이드 WebView 광고 배너 자리 확보용 (기존 화면들과 동일 시그니처) */
@@ -719,7 +719,7 @@ async function resetLv1Progress(){
   ['lv1_s1_progress','lv1_s3_progress','lv1_s4_progress','lv1_s5_progress','lv1_s6_progress']
     .forEach(k=>localStorage.removeItem(k));
   renderStageMap();
-  alert('✅ 초기화됐어요. 점수·클리어 기록은 지워지고, 이미 열려있던 스테이지는 계속 플레이할 수 있습니다.');
+  await Ask.alert('✅ 초기화됐어요. 점수·클리어 기록은 지워지고, 이미 열려있던 스테이지는 계속 플레이할 수 있습니다.');
 }
 
 /* ── 계정 관리: 2급 허브(index.html)와 동일 로직 ── */
@@ -735,18 +735,18 @@ async function doLogout(){
 
 async function doDeleteAccount(){
   const btn=event && event.target ? event.target : null;
-  const typed=prompt('정말 탈퇴하시겠어요?\n계정과 모든 기록이 영구히 삭제됩니다.\n\n계속하려면 아래에 "탈퇴"라고 입력해주세요.');
+  const typed=await Ask.prompt('정말 탈퇴하시겠어요?\n계정과 모든 기록이 영구히 삭제됩니다.\n\n계속하려면 아래에 "탈퇴"라고 입력해주세요.');
   if(typed===null) return;
-  if(typed.trim()!=='탈퇴'){ alert('입력한 내용이 "탈퇴"와 일치하지 않아 취소했어요.'); return; }
+  if(typed.trim()!=='탈퇴'){ await Ask.alert('입력한 내용이 "탈퇴"와 일치하지 않아 취소했어요.'); return; }
   if(!window.Auth || !Auth.socialAvailable()) return;
   try{
     if(btn) btn.textContent='삭제 중...';
     await Auth.deleteAccount();
-    alert('계정이 삭제됐어요. 그동안 함께해줘서 고마워요!');
+    await Ask.alert('계정이 삭제됐어요. 그동안 함께해줘서 고마워요!');
     const base=location.pathname.replace(/[^/]*$/, '');
     window.location.replace(base+'login.html');
   }catch(e){
-    alert('탈퇴에 실패했어요. 네트워크를 확인하고 다시 시도해주세요.');
+    await Ask.alert('탈퇴에 실패했어요. 네트워크를 확인하고 다시 시도해주세요.');
     if(btn) btn.textContent='🗑️  회원 탈퇴';
   }
 }
@@ -759,18 +759,18 @@ function _sbClient(){
 }
 async function changeNickname(){
   const oldName=(localStorage.getItem('hub_nickname')||'').trim();
-  const input=prompt('새 닉네임을 입력하세요 (2~12글자)', oldName);
+  const input=await Ask.prompt('새 닉네임을 입력하세요 (2~12글자)', oldName);
   if(input===null) return;
   const name=input.trim();
-  if(name.length<2){ alert('2글자 이상 입력해주세요'); return; }
-  if(name.length>12){ alert('12글자 이하로 입력해주세요'); return; }
+  if(name.length<2){ await Ask.alert('2글자 이상 입력해주세요'); return; }
+  if(name.length>12){ await Ask.alert('12글자 이하로 입력해주세요'); return; }
   if(name===oldName) return;
 
   const db=_sbClient();
   if(db){
     try{
       const {data}=await db.from('scores').select('name').eq('name',name).limit(1);
-      if(data && data.length){ alert('⚠️ 이미 사용 중인 닉네임입니다. 다른 닉네임을 입력해주세요.'); return; }
+      if(data && data.length){ await Ask.alert('⚠️ 이미 사용 중인 닉네임입니다. 다른 닉네임을 입력해주세요.'); return; }
     }catch(e){}
   }
   if(db){
@@ -780,9 +780,9 @@ async function changeNickname(){
         const {error:e2}=await db.from('scores').update({name:name}).eq('name',oldName);
         if(e2) throw e2;
       } else if(error){ throw error; }
-      else if(renamed!==true){ alert('⚠️ 서버에서 닉네임 변경이 거부되었어요. (이미 사용 중인 이름일 수 있어요)'); return; }
+      else if(renamed!==true){ await Ask.alert('⚠️ 서버에서 닉네임 변경이 거부되었어요. (이미 사용 중인 이름일 수 있어요)'); return; }
     }catch(e){
-      alert('⚠️ 네트워크 문제로 닉네임을 변경하지 못했어요. 잠시 후 다시 시도해주세요.');
+      await Ask.alert('⚠️ 네트워크 문제로 닉네임을 변경하지 못했어요. 잠시 후 다시 시도해주세요.');
       return;
     }
   }
@@ -795,7 +795,7 @@ async function changeNickname(){
   }
   const el=document.getElementById('ub-name');
   if(el) el.textContent=name;
-  alert('✅ 닉네임이 "'+name+'"(으)로 변경되었어요.\n기존 점수와 오답노트도 함께 이동했습니다.');
+  await Ask.alert('✅ 닉네임이 "'+name+'"(으)로 변경되었어요.\n기존 점수와 오답노트도 함께 이동했습니다.');
 }
 </script>
 <script src="growth.js?v=11"></script>
@@ -854,13 +854,13 @@ async function renderExamDay(){
   if(goalFill) goalFill.style.width=pct+'%';
   if(goalTxt) goalTxt.textContent=(played>=DAILY_GOAL_PLAYS?'🎉 ':'')+'오늘 '+played+'/'+DAILY_GOAL_PLAYS+'판';
 }
-function setExamDate(){
+async function setExamDate(){
   const cur=localStorage.getItem('hub_examdate')||'';
-  const input=prompt('전산회계 1급 시험일을 입력하세요 (예: 2026-08-15)', cur);
+  const input=await Ask.prompt('전산회계 1급 시험일을 입력하세요 (예: 2026-08-15)', cur);
   if(input===null) return;
   const v=input.trim();
   if(!v){ localStorage.removeItem('hub_examdate'); renderExamDay(); return; }
-  if(!/^\d{4}-\d{2}-\d{2}$/.test(v) || isNaN(new Date(v+'T00:00:00').getTime())){ alert('날짜 형식이 올바르지 않아요. 예: 2026-08-15'); return; }
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(v) || isNaN(new Date(v+'T00:00:00').getTime())){ await Ask.alert('날짜 형식이 올바르지 않아요. 예: 2026-08-15'); return; }
   localStorage.setItem('hub_examdate', v);
   renderExamDay();
 }

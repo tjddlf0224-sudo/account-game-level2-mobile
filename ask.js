@@ -48,12 +48,20 @@
       'background:rgba(255,255,255,.07);color:#eef1f7;font-family:inherit;}',
       '.ask-row button.primary{background:linear-gradient(135deg,#00c2d6,#0090c8);',
       'border-color:transparent;color:#04121a;}',
-      '.ask-row button:active{transform:translateY(1px);}'
+      '.ask-row button:active{transform:translateY(1px);}',
+      /* prompt 용 입력창 — 메시지와 버튼 사이에 들어간다 */
+      '.ask-input{width:100%;box-sizing:border-box;margin:-8px 0 16px;padding:12px 14px;',
+      'border-radius:11px;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.28);',
+      'color:#eef1f7;font-size:1rem;font-family:inherit;outline:none;}',
+      '.ask-input:focus{border-color:#00c2d6;}'
     ].join('');
     document.head.appendChild(s);
   }
 
-  function open(msg, labels) {
+  /* opts.input 이 있으면 입력창을 넣는다. 그때 '확인'의 value 는 입력값이 되고,
+     비우거나 취소하면 null 을 돌려준다(원래 prompt() 와 같은 약속). */
+  function open(msg, labels, opts) {
+    opts = opts || {};
     ensureStyle();
     return new Promise(function (resolve) {
       var ov = document.createElement('div');
@@ -65,7 +73,18 @@
       p.textContent = msg;                       // 텍스트로 넣는다(HTML 주입 방지)
       var row = document.createElement('div');
       row.className = 'ask-row';
-      box.appendChild(p); box.appendChild(row);
+      box.appendChild(p);
+
+      var inp = null;
+      if (opts.input) {
+        inp = document.createElement('input');
+        inp.className = 'ask-input';
+        inp.type = opts.password ? 'password' : 'text';   // 비밀번호는 가린다(원래 prompt 는 평문이었다)
+        if (opts.placeholder) inp.placeholder = opts.placeholder;
+        if (opts.value) inp.value = opts.value;
+        box.appendChild(inp);
+      }
+      box.appendChild(row);
       ov.appendChild(box);
 
       function done(v) {
@@ -73,22 +92,31 @@
         if (ov.parentNode) ov.parentNode.removeChild(ov);
         resolve(v);
       }
+      /* 입력창이 있으면 '확인'(primary)은 고정값이 아니라 입력값을 돌려준다 */
+      function valueOf(l) {
+        if (!inp) return l.value;
+        if (l.value === false) return null;          // 취소
+        var v = inp.value.trim();
+        return v === '' ? null : v;
+      }
       labels.forEach(function (l) {
         var b = document.createElement('button');
         b.textContent = l.text;
         if (l.primary) b.className = 'primary';
-        b.addEventListener('click', function (e) { e.stopPropagation(); done(l.value); });
+        b.addEventListener('click', function (e) { e.stopPropagation(); done(valueOf(l)); });
         row.appendChild(b);
       });
       function onKey(e) {
-        if (e.key === 'Escape') { e.stopPropagation(); done(false); }
-        else if (e.key === 'Enter') { e.stopPropagation(); done(labels[labels.length - 1].value); }
+        if (e.key === 'Escape') { e.stopPropagation(); done(inp ? null : false); }
+        else if (e.key === 'Enter') { e.stopPropagation(); done(valueOf(labels[labels.length - 1])); }
       }
       document.addEventListener('keydown', onKey, true);
       // 뒷배경 클릭이 게임(대화창 넘기기 등)에 새지 않게 막는다.
       ov.addEventListener('click', function (e) { e.stopPropagation(); });
 
       host().appendChild(ov);
+      // 키보드가 바로 올라오도록. iOS 는 사용자 제스처 흐름 안이라 먹는다.
+      if (inp) setTimeout(function () { try { inp.focus(); inp.select(); } catch (e) {} }, 30);
     });
   }
 
@@ -103,6 +131,16 @@
     alert: function (msg, opts) {
       opts = opts || {};
       return open(msg, [{ text: opts.ok || '확인', value: true, primary: true }]);
+    },
+    /* 원래 prompt() 와 같은 약속: 확인하면 입력 문자열, 취소하거나 비우면 null.
+       두 번째 인자로 기본값을 준다(prompt(msg, defaultValue) 와 같은 자리). */
+    prompt: function (msg, def, opts) {
+      opts = opts || {};
+      return open(msg, [
+        { text: opts.cancel || '취소', value: false },
+        { text: opts.ok || '확인', value: true, primary: true }
+      ], { input: true, value: def == null ? '' : String(def),
+           placeholder: opts.placeholder, password: !!opts.password });
     }
   };
 })(window);

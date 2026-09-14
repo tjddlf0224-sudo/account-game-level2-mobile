@@ -1328,7 +1328,7 @@
     function selectDifficulty(n) {
         if (!window.Difficulty) return;
         if (n === 2 && !Difficulty.isUnlocked('acid')) {
-            alert('난이도 1에서 정답률 ' + Math.round(Difficulty.UNLOCK_ACC * 100) + '% 이상(10문항 이상 플레이)을 달성하면 열려요!\n\n' + Difficulty.hint('acid'));
+            Ask.alert('난이도 1에서 정답률 ' + Math.round(Difficulty.UNLOCK_ACC * 100) + '% 이상(10문항 이상 플레이)을 달성하면 열려요!\n\n' + Difficulty.hint('acid'));
             return;
         }
         Difficulty.set('acid', n);
@@ -1628,7 +1628,7 @@
         const saveBtn = document.getElementById('save-btn');
         saveBtn.textContent = type === 'err' ? '저장' : (type === 'ok' ? '저장 완료 ✓' : '저장 중…');
         if (type !== 'ok') { saveBtn.disabled = false; els.input.disabled = false; }
-        if (type === 'err') alert(msg);
+        if (type === 'err') Ask.alert(msg);
     }
 
     const RANK_PREV_KEY = 'hub_acid_prevRank';
@@ -1854,7 +1854,7 @@
             armResumeOnReturn(); // 광고 닫고 게임으로 '돌아왔을 때' 재개 예약
             AdBridge.showRewarded();
         } else {
-            alert('광고를 불러오는 중이에요. 잠시 후 다시 눌러주세요!');
+            Ask.alert('광고를 불러오는 중이에요. 잠시 후 다시 눌러주세요!');
         }
     }
     // Kotlin → JS 콜백: 보상 지급 (※ 광고가 아직 떠 있는 도중에 호출됨 → 여기서 재개 X)
@@ -1905,11 +1905,14 @@
         const btn = document.getElementById('rewarded-btn');
         if (btn) btn.style.display = 'none';
     }
-    function onRewardedFailed() {
+    async function onRewardedFailed() {
         // 광고가 뜨지도 않은 경우 → 복귀 이벤트가 안 오므로 즉시 재개
         _wantResume = false;
         if (window._resumeSafety) clearTimeout(window._resumeSafety);
-        alert('광고를 불러올 수 없어요. 잠시 후 다시 시도해주세요.');
+        // ⚠ await 를 빼면 안 된다 — 네이티브 alert 은 블로킹이라 사용자가 확인을
+        //   누른 뒤에 게임이 재개됐다. Ask.alert 는 비동기라 안 기다리면 창이 뜬 채로
+        //   게임이 먼저 돌아간다(2026-09-15 전환 때 실제로 이 자리만 달랐다).
+        await Ask.alert('광고를 불러올 수 없어요. 잠시 후 다시 시도해주세요.');
         isPaused = false;
         if (isPlaying) { cancelAnimationFrame(gameLoopId); gameLoopId = requestAnimationFrame(gameLoop); } // 멈춘 애니메이션 루프 재가동
     }

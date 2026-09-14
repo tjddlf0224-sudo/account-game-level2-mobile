@@ -1027,7 +1027,7 @@ async function resetLv2Progress() {
    'hub_factory', 'hub_factory_best', 'hub_factory_prevRank',
    'hub_flight_hi', 'hub_flight_rank', 'hub_flight_prevRank'
   ].forEach(function (k) { localStorage.removeItem(k); });
-  alert('✅ 초기화됐어요. 기기 내 게임 기록이 전부 지워졌습니다.');
+  await Ask.alert('✅ 초기화됐어요. 기기 내 게임 기록이 전부 지워졌습니다.');
 }
 
 // ── 로그아웃 ──
@@ -1052,21 +1052,21 @@ async function doDeleteAccount() {
   const btn = event && event.target ? event.target : null;
   // 한 번 더 탭하는 것만으로는 의도치 않게(연타 등) 눌릴 수 있어서, 되돌릴 수 없는
   // 작업인 탈퇴만큼은 "탈퇴"라는 글자를 직접 입력해야만 진행되게 한다.
-  const typed = prompt('정말 탈퇴하시겠어요?\n계정과 모든 기록이 영구히 삭제됩니다.\n\n계속하려면 아래에 "탈퇴"라고 입력해주세요.');
+  const typed = await Ask.prompt('정말 탈퇴하시겠어요?\n계정과 모든 기록이 영구히 삭제됩니다.\n\n계속하려면 아래에 "탈퇴"라고 입력해주세요.');
   if (typed === null) return;               // 취소
   if (typed.trim() !== '탈퇴') {
-    alert('입력한 내용이 "탈퇴"와 일치하지 않아 취소했어요.');
+    await Ask.alert('입력한 내용이 "탈퇴"와 일치하지 않아 취소했어요.');
     return;
   }
   if (!window.Auth || !Auth.socialAvailable()) return;
   try {
     if (btn) btn.textContent = '삭제 중...';
     await Auth.deleteAccount();
-    alert('계정이 삭제됐어요. 그동안 함께해줘서 고마워요!');
+    await Ask.alert('계정이 삭제됐어요. 그동안 함께해줘서 고마워요!');
     const base = location.pathname.replace(/[^/]*$/, '');
     window.location.replace(base + 'login.html');
   } catch (e) {
-    alert('탈퇴에 실패했어요. 네트워크를 확인하고 다시 시도해주세요.');
+    await Ask.alert('탈퇴에 실패했어요. 네트워크를 확인하고 다시 시도해주세요.');
     if (btn) btn.textContent = '🗑️  회원 탈퇴';
   }
 }
@@ -1080,11 +1080,11 @@ function _sbClient() {
 }
 async function changeNickname() {
   const oldName = (localStorage.getItem('hub_nickname') || '').trim();
-  const input = prompt('새 닉네임을 입력하세요 (2~12글자)', oldName);
+  const input = await Ask.prompt('새 닉네임을 입력하세요 (2~12글자)', oldName);
   if (input === null) return;                 // 취소
   const name = input.trim();
-  if (name.length < 2) { alert('2글자 이상 입력해주세요'); return; }
-  if (name.length > 12) { alert('12글자 이하로 입력해주세요'); return; }
+  if (name.length < 2) { await Ask.alert('2글자 이상 입력해주세요'); return; }
+  if (name.length > 12) { await Ask.alert('12글자 이하로 입력해주세요'); return; }
   if (name === oldName) return;
 
   const db = _sbClient();
@@ -1092,7 +1092,7 @@ async function changeNickname() {
   if (db) {
     try {
       const { data } = await db.from('scores').select('name').eq('name', name).limit(1);
-      if (data && data.length) { alert('⚠️ 이미 사용 중인 닉네임입니다. 다른 닉네임을 입력해주세요.'); return; }
+      if (data && data.length) { await Ask.alert('⚠️ 이미 사용 중인 닉네임입니다. 다른 닉네임을 입력해주세요.'); return; }
     } catch (e) { /* 오프라인이면 검사 생략 */ }
   }
 
@@ -1109,11 +1109,11 @@ async function changeNickname() {
       } else if (error) {
         throw error;
       } else if (renamed !== true) {
-        alert('⚠️ 서버에서 닉네임 변경이 거부되었어요. (이미 사용 중인 이름일 수 있어요)');
+        await Ask.alert('⚠️ 서버에서 닉네임 변경이 거부되었어요. (이미 사용 중인 이름일 수 있어요)');
         return;
       }
     } catch (e) {
-      alert('⚠️ 네트워크 문제로 닉네임을 변경하지 못했어요. 잠시 후 다시 시도해주세요.');
+      await Ask.alert('⚠️ 네트워크 문제로 닉네임을 변경하지 못했어요. 잠시 후 다시 시도해주세요.');
       return;
     }
   }
@@ -1129,7 +1129,7 @@ async function changeNickname() {
   }
   const el = document.getElementById('ub-name-el');
   if (el) el.textContent = name;
-  alert('✅ 닉네임이 "' + name + '"(으)로 변경되었어요.\n기존 점수와 오답노트도 함께 이동했습니다.');
+  await Ask.alert('✅ 닉네임이 "' + name + '"(으)로 변경되었어요.\n기존 점수와 오답노트도 함께 이동했습니다.');
 }
 </script>
 
@@ -1255,7 +1255,7 @@ function onLvSegClick(e, gid, lv) {
     e.stopPropagation();
     if (!window.Difficulty) return;
     if (lv === 2 && !Difficulty.isUnlocked(gid)) {
-        alert('난이도 1에서 정답률 ' + Math.round(Difficulty.UNLOCK_ACC * 100) + '% 이상(10문항 이상 플레이)을 달성하면 열려요!\n\n' + Difficulty.hint(gid));
+        Ask.alert('난이도 1에서 정답률 ' + Math.round(Difficulty.UNLOCK_ACC * 100) + '% 이상(10문항 이상 플레이)을 달성하면 열려요!\n\n' + Difficulty.hint(gid));
         return;
     }
     Difficulty.set(gid, lv);
@@ -1366,7 +1366,7 @@ function onRewardedFailed() {
     localStorage.setItem('hub_adunlock_' + window._unlockTarget, '1');
     window._unlockTarget = null;
     renderStageMap();
-    alert('광고를 불러오지 못했지만 스테이지를 열어드렸어요!');
+    Ask.alert('광고를 불러오지 못했지만 스테이지를 열어드렸어요!');
 }
 </script>
 
@@ -1484,14 +1484,14 @@ async function renderExamDay() {
   if (goalFill) goalFill.style.width = pct + '%';
   if (goalTxt) goalTxt.textContent = (played >= DAILY_GOAL_PLAYS ? '🎉 ' : '') + '오늘 ' + played + '/' + DAILY_GOAL_PLAYS + '판';
 }
-function setExamDate() {
+async function setExamDate() {
   var cur = localStorage.getItem('hub_examdate') || '';
-  var input = prompt('전산회계 2급 시험일을 입력하세요 (예: 2026-08-15)', cur);
+  var input = await Ask.prompt('전산회계 2급 시험일을 입력하세요 (예: 2026-08-15)', cur);
   if (input === null) return; // 취소
   var v = input.trim();
   if (!v) { localStorage.removeItem('hub_examdate'); renderExamDay(); return; }
   if (!/^\d{4}-\d{2}-\d{2}$/.test(v) || isNaN(new Date(v + 'T00:00:00').getTime())) {
-    alert('날짜 형식이 올바르지 않아요. 예: 2026-08-15');
+    await Ask.alert('날짜 형식이 올바르지 않아요. 예: 2026-08-15');
     return;
   }
   localStorage.setItem('hub_examdate', v);

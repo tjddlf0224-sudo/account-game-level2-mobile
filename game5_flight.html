@@ -1067,7 +1067,7 @@ const Game={
       this.pendingRevive=true;          // 이 광고의 보상은 '부활'임을 표시
       AdBridge.showRewarded();
     } else {
-      alert('광고를 불러오는 중이에요. 잠시 후 다시 눌러주세요!');
+      Ask.alert('광고를 불러오는 중이에요. 잠시 후 다시 눌러주세요!');
     }
   },
 
@@ -1097,8 +1097,8 @@ const Game={
 
   async saveScore(){
     const name=document.getElementById('pname').value.trim();
-    if(!name){alert('이름을 입력하세요');return}
-    if(name.length<2){alert('2글자 이상 입력해주세요');return}
+    if(!name){Ask.alert('이름을 입력하세요');return}
+    if(name.length<2){Ask.alert('2글자 이상 입력해주세요');return}
     // Enter 키가 버튼 disabled를 우회해 이중 저장(성장 이력 중복)되는 것 방지
     if(this._saving||this._saved)return;
     this._saving=true;
@@ -1267,7 +1267,7 @@ const Game={
         if (window.AdBridge && AdBridge.isRewardedReady()) {
             AdBridge.showRewarded();
         } else {
-            alert('광고를 불러오는 중이에요. 잠시 후 다시 눌러주세요!');
+            Ask.alert('광고를 불러오는 중이에요. 잠시 후 다시 눌러주세요!');
         }
     }
     // Kotlin → JS 콜백: 보상 지급 → 부활 처리
@@ -1276,7 +1276,7 @@ const Game={
     }
     function onRewardedFailed() {
         if (typeof Game !== 'undefined') Game.pendingRevive = false;
-        alert('광고를 불러올 수 없어요. 잠시 후 다시 시도해주세요.');
+        Ask.alert('광고를 불러올 수 없어요. 잠시 후 다시 시도해주세요.');
     }
 
 
@@ -1315,7 +1315,7 @@ function updateDiffBtns(lv) {
 function selectDifficulty(n) {
     if (!window.Difficulty) return;
     if (n === 2 && !Difficulty.isUnlocked(GAME_ID)) {
-        alert('난이도 1에서 정답률 ' + Math.round(Difficulty.UNLOCK_ACC * 100) + '% 이상(10문항 이상 플레이)을 달성하면 열려요!\n\n' + Difficulty.hint(GAME_ID));
+        Ask.alert('난이도 1에서 정답률 ' + Math.round(Difficulty.UNLOCK_ACC * 100) + '% 이상(10문항 이상 플레이)을 달성하면 열려요!\n\n' + Difficulty.hint(GAME_ID));
         return;
     }
     Difficulty.set(GAME_ID, n);

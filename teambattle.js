@@ -430,15 +430,15 @@
   /* ── 저장 ──────────────────────────────────────────────── */
 
   // 교사 비번은 admin.html 의 verifiedPass 를 재사용하고, 없을 때만 한 번 묻는다
-  function askPass() {
+  async function askPass() {
     if (typeof verifiedPass !== 'undefined' && verifiedPass) return verifiedPass;
-    var p = prompt('대시보드 비밀번호를 입력해주세요:');
+    var p = await Ask.prompt('대시보드 비밀번호를 입력해주세요:', '', { password: true });
     return p == null ? null : p.trim();
   }
 
   api.start = async function () {
-    if (!S.teams.length) { alert('먼저 팀을 편성해주세요.'); return; }
-    var pass = askPass();
+    if (!S.teams.length) { await Ask.alert('먼저 팀을 편성해주세요.'); return; }
+    var pass = await askPass();
     if (pass == null) return;
 
     var members = [];
@@ -456,8 +456,8 @@
         p_members: members
       });
       if (res.error) throw res.error;
-      if (res.data === 'wrong_pass') { try { verifiedPass = null; } catch (x) {} alert('비밀번호가 일치하지 않습니다.'); return; }
-      if (res.data === 'invalid')    { alert('팀 편성이 비어 있습니다.'); return; }
+      if (res.data === 'wrong_pass') { try { verifiedPass = null; } catch (x) {} await Ask.alert('비밀번호가 일치하지 않습니다.'); return; }
+      if (res.data === 'invalid')    { await Ask.alert('팀 편성이 비어 있습니다.'); return; }
       try { verifiedPass = pass; } catch (x) {}   // 다음 저장 때 재입력 안 받도록
       var url = location.href.replace(/admin\.html.*$/, '') + 'board.html?s=' + encodeURIComponent(res.data);
       S.session = { id: res.data, class_label: S.cls };
@@ -467,12 +467,12 @@
       }
     } catch (e) {
       console.error(e);
-      alert('세션 시작 실패 — 인터넷 연결을 확인해 주세요.');
+      await Ask.alert('세션 시작 실패 — 인터넷 연결을 확인해 주세요.');
     }
   };
 
   api.saveRoster = async function () {
-    var pass = askPass();
+    var pass = await askPass();
     if (pass == null) return;
     var names = {};
     S.roster.forEach(function (r) { names[r.name] = 1; });
@@ -484,28 +484,28 @@
     try {
       var res = await sb().rpc('team_roster_set', { p_group_id: gid(), p_pass: pass, p_rows: rows });
       if (res.error) throw res.error;
-      if (res.data === 'wrong_pass') { try { verifiedPass = null; } catch (x) {} alert('비밀번호가 일치하지 않습니다.'); return; }
+      if (res.data === 'wrong_pass') { try { verifiedPass = null; } catch (x) {} await Ask.alert('비밀번호가 일치하지 않습니다.'); return; }
       try { verifiedPass = pass; } catch (x) {}
       S.edit = {};
       await api.load();                 // 저장한 명단으로 실력 점수를 다시 계산한다
       S.rosterOpen = true; render();
-      alert('명단을 저장했습니다.');
-    } catch (e) { console.error(e); alert('명단 저장 실패 — 인터넷 연결을 확인해 주세요.'); }
+      await Ask.alert('명단을 저장했습니다.');
+    } catch (e) { console.error(e); await Ask.alert('명단 저장 실패 — 인터넷 연결을 확인해 주세요.'); }
   };
 
   api.finish = async function () {
     if (!S.session) return;
     if (!await Ask.confirm('세션을 종료할까요? 전광판의 시계가 멈추고 이후 기록은 집계되지 않습니다.')) return;
-    var pass = askPass();
+    var pass = await askPass();
     if (pass == null) return;
     try {
       var res = await sb().rpc('team_session_finish',
         { p_group_id: gid(), p_pass: pass, p_session_id: S.session.id });
       if (res.error) throw res.error;
-      if (res.data === 'wrong_pass') { try { verifiedPass = null; } catch (x) {} alert('비밀번호가 일치하지 않습니다.'); return; }
+      if (res.data === 'wrong_pass') { try { verifiedPass = null; } catch (x) {} await Ask.alert('비밀번호가 일치하지 않습니다.'); return; }
       try { verifiedPass = pass; } catch (x) {}
       S.session = null; render();
-    } catch (e) { alert('세션 종료 실패 — 인터넷 연결을 확인해 주세요.'); }
+    } catch (e) { await Ask.alert('세션 종료 실패 — 인터넷 연결을 확인해 주세요.'); }
   };
 
   /* ── 진입점 ────────────────────────────────────────────── */
