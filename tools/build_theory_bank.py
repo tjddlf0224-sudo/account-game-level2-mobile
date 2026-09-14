@@ -1,4 +1,16 @@
 # =============================================================================
+#  ⛔ 이 스크립트는 **낡았습니다(2026-09-14 확인). 그냥 실행하면 문제은행이 날아갑니다.**
+#
+#  이 빌더는 56문항(O001~O056)을 만들던 초기 버전입니다. 그 뒤 theory_bank.json 은
+#  **기출 변형 225문항(O111-1~O126-15)으로 통째로 교체**됐고, 빌더는 그때 같이
+#  갱신되지 않았습니다. 지금 이걸 실행하면 225문항 → 56문항으로 덮어씁니다.
+#  (2026-09-14 에 실제로 한 번 밟았고 백업에서 복구했습니다. git 저장소가 아니라
+#   되돌릴 방법이 백업뿐입니다.)
+#
+#  → theory_bank.json 을 고쳐야 하면 **JSON 을 직접 편집**하세요.
+#  → 이 빌더를 다시 쓰려면 먼저 225문항을 여기 소스로 옮겨와야 합니다.
+#  실행을 막아 두었습니다. 정말 재생성하려면 ALLOW_OVERWRITE=1 을 주세요.
+#
 #  전산회계 2급 이론 — 원작(변형) 문제은행 빌더
 #  ../theory_bank.json 을 생성한다. (theory.html 이 이 파일을 fetch)
 #
@@ -16,6 +28,7 @@
 #  출제비중 가이드(기출 14회 실측): T1~30% T3 16% T4 13% T7 11% T2 10% T5 6% T6 5%
 # =============================================================================
 import json
+import sys
 
 TOPIC={'T1':'회계의 기본원리','T2':'당좌자산','T3':'재고자산','T4':'유형자산',
        'T5':'부채','T6':'자본','T7':'수익과 비용'}
@@ -247,6 +260,20 @@ out={
 }
 import os
 p=os.path.join(os.path.dirname(os.path.abspath(__file__)),'..','theory_bank.json')
+
+# ⛔ 안전장치 — 맨 위 주석 참고. 기존 파일이 이 빌더 산출물보다 많으면 덮어쓰지 않는다.
+if os.path.exists(p) and not os.environ.get('ALLOW_OVERWRITE'):
+    try:
+        _n = len(json.load(open(p, encoding='utf-8'))['questions'])
+    except Exception:
+        _n = 0
+    if _n > len(Q):
+        sys.stderr.write(
+            "\n⛔ 중단: theory_bank.json 에 이미 %d문항이 있는데 이 빌더는 %d문항만 만듭니다.\n"
+            "   이 빌더는 낡았습니다(파일 맨 위 주석 참고). 실행하면 기출 문항이 날아갑니다.\n"
+            "   정말 재생성하려면:  ALLOW_OVERWRITE=1 python3 tools/build_theory_bank.py\n\n" % (_n, len(Q)))
+        sys.exit(1)
+
 json.dump(out,open(p,'w'),ensure_ascii=False,indent=1)
 print(f"생성: {len(Q)}문항  ({os.path.getsize(p)//1024} KB)")
 print("주제분포:", dict(Counter(q['topic'] for q in Q)))

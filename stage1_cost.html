@@ -3270,7 +3270,7 @@ document.getElementById('quiz-next').addEventListener('click', ()=>Quiz.next());
 /* =========================================================================
  *  PracticeQuiz — NPC별 개념 연습문제(숙달용, 몇 번이고 반복 가능)
  *  서류철·클리어 점수와는 완전히 무관한 순수 연습. theory_bank_lv1.json(1급
- *  이론 문제은행, 405문항 — theory_lv1.html의 진짜 이론 학습 모드와 완전히
+ *  이론 문제은행, 404문항 — theory_lv1.html의 진짜 이론 학습 모드와 완전히
  *  같은 파일)에서 문제를 가져와 매번 5문항 랜덤 출제. 정오답은
  *  Growth.logTopicAttempt로 이론 정답률에도 반영.
  *
@@ -3280,7 +3280,7 @@ document.getElementById('quiz-next').addEventListener('click', ()=>Quiz.next());
  *  나눠 가르치는 구조라(예: T8은 5명이 각자 다른 조각을 가르침), topic
  *  전체를 아무 NPC에게나 다 노출하면 안 된다. PRACTICE_WHITELIST에 "그 NPC의
  *  대사만으로 실제로 풀 수 있는 문제 ID"만 수동으로 큐레이션해 넣었다
- *  (405문항 은행 자체는 절대 수정/삭제하지 않음 — theory_lv1.html의 기출
+ *  (은행 자체는 큐레이션 과정에서 수정/삭제하지 않음 — theory_lv1.html의 기출
  *  정확도를 그대로 지키기 위함). 큐레이션 과정에서 태그 오류(정말 다른
  *  주제인데 topic이 잘못 붙은 문제) 몇 건도 같이 발견해 theory_bank_lv1.json
  *  자체를 바로잡았다(완성품환산량 2건 T3→T10, 부가가치세법 4건 T9/T10→T11).
