@@ -21,6 +21,21 @@
   --ad-reserve: 96px;
 }
 
+/*ADSPACER*/
+/* ── 하단 배너 안전영역을 padding 이 아니라 **실제 요소**로 잡는다 (2026-09-14) ──
+   iOS WKWebView 는 flex 스크롤 컨테이너의 padding-bottom 을 스크롤 영역
+   (scrollable overflow)에 넣어 주지 않는 경우가 있다. 그러면 배너가 버튼을 덮고
+   있는데도 브라우저는 "더 내릴 것이 없다"고 보고 **스크롤 자체가 안 생긴다**.
+   Chromium 은 제대로 처리해서 자동 테스트만으로는 안 잡혔다.
+   실기기 제보(b69, 기억의 전당 시작화면): '메인으로 나가기'가 배너에 잘린 채
+   손가락으로 내려지지 않았다. 사용자 진단 그대로 — "아래에 공란을 만들어 달라".
+   ::after 는 진짜 박스라 scrollable overflow 에 반드시 포함된다.
+   flex:0 0 auto 가 없으면 내용이 넘칠 때 이 여백부터 찌그러져서 의미가 없다. */
+.overlay::after, .ovl::after{
+  content:''; display:block; flex:0 0 auto; width:100%;
+  height: calc(env(safe-area-inset-bottom, 0px) + max(var(--ad-banner-h, 0px), var(--ad-safe-h, 0px), var(--ad-reserve)));
+}
+
 :root{--cy:#00f2ff;--pk:#ff2d78;--gd:#ffd600;--gn:#39ff14;--pu:#b44fff;--bg:#020810;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{height:100%}
 body{background:var(--bg);font-family:'Noto Sans KR',sans-serif;overflow:hidden;user-select:none;height:100dvh;}
@@ -86,7 +101,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
   overflow-y:auto;
   overflow-x:hidden;
   -webkit-overflow-scrolling:touch;
-  padding:max(20px,env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom, 0px) + max(var(--ad-banner-h, 0px), var(--ad-safe-h, 0px), var(--ad-reserve)));
+  padding:max(20px,env(safe-area-inset-top)) 16px 24px;   /* 배너 자리는 .ovl::after 스페이서가 잡는다 */
 }
 .ovl-inner{
   display:flex;
