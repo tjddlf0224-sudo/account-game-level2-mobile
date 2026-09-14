@@ -177,6 +177,7 @@
       'gap:1px;height:40px;padding:0 11px;border-radius:12px;background:rgba(255,255,255,.07);',
       'border:1px solid rgba(255,255,255,.16);color:#eaf0ff;',
       'font:700 .72rem/1 "Noto Sans KR",sans-serif;cursor:pointer;}',
+      '.stk-pill{white-space:nowrap;}',   /* 좁은 폰에서 "연속" 이 두 줄로 접히던 것 방지 */
       '.stk-pill .stk-d{font-size:.76rem;font-weight:800;}',
       '.stk-pill .stk-c{font-size:.55rem;font-weight:500;opacity:.5;letter-spacing:.5px;}',
       '.stk-pill.risk{animation:stkPulse 1.6s ease-in-out infinite;}',
