@@ -334,6 +334,11 @@
             font-size: 0.82rem; color: rgba(255,255,255,0.5);
             font-weight: bold; text-align: center;
         }
+        /* 본문만 스크롤한다 — 헤더(순위/이름/직급/점수)는 고정.
+           예전엔 상한이 없어 목록이 15행 통째로 늘어나고 스크롤도 안 됐다(2026-09-14 제보). */
+        #rank-body { max-height: 300px; overflow-y: auto; }
+        #rank-body::-webkit-scrollbar { width: 4px; }
+        #rank-body::-webkit-scrollbar-thumb { background: rgba(52,152,219,0.35); border-radius: 2px; }
         .rank-row {
             display: grid; grid-template-columns: 44px minmax(46px,1fr) minmax(0,70px) minmax(40px,70px);
             padding: 9px 12px;
