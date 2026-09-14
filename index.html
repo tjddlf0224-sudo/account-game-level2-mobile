@@ -705,7 +705,7 @@ body {
     <span id="ub-group-name">—</span>
   </div>
   <!-- 급수 변경(2급↔1급) — 1급 허브엔 이미 있던 버튼, 2급에는 없어 편도였음 -->
-  <a class="group-mode-btn" href="select_level.html" style="color:var(--pu); border-color:rgba(180,79,255,0.3); background:rgba(180,79,255,0.07);">🔀 급수 변경</a>
+  <a class="group-mode-btn" href="select_level.html" style="color:var(--pu); border-color:rgba(180,79,255,0.3); background:rgba(180,79,255,0.07);">🔀 급수</a>
   <!-- 그룹 모드 버튼 -->
   <span id="streak-slot"></span>
   <a class="graph-btn" href="group.html" title="그룹 모드" aria-label="그룹 모드">👥</a>
@@ -718,7 +718,7 @@ body {
     </svg>
     <span class="gdot" id="growth-dot"></span>
   </a>
-  <button class="graph-btn" id="settings-btn" onclick="openSettings()" title="설정" aria-label="설정">⚙️</button>
+  <button class="graph-btn" id="settings-btn" onclick="openSettings()" title="설정" aria-label="설정"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2.3"/><path d="M18 12h3M16.24 7.76l2.12-2.12M12 6V3M7.76 7.76L5.64 5.64M6 12H3M7.76 16.24l-2.12 2.12M12 18v3M16.24 16.24l2.12 2.12"/></svg></button>
 </div>
 
 
@@ -1161,9 +1161,15 @@ function renderStageMap() {
 // ── 난이도1/2 뱃지 겸 전환 스위치 (스테이지 노드맵 통합) ──
 // 실제 난이도 선택/해금은 각 게임 자체 시작화면(difficulty.js)에서도 되지만,
 // 허브에서 바로 보고 바로 바꿀 수 있게 뱃지+전환 UI를 노드맵에 붙인다.
+/* 난이도2 가 실제로 없는 게임 — 노드에 1/2 스위치를 띄우지 않는다.
+   단계가 하나뿐인데 "1 2" 가 보이면 잠긴 2단계가 있는 줄 안다(사용자 지적, 2026-09-14).
+   flight: 장부 화면에 보이는 숫자를 그대로 받아쓰는 문제라 난이도2 를 내렸다. */
+const NO_LV2 = ['flight'];
+
 function renderLvPill(gid, open) {
     const pill = document.getElementById('lv-pill-' + gid);
     if (!pill) return;
+    if (NO_LV2.indexOf(gid) >= 0) { pill.classList.remove('show'); return; }
     if (!open || !window.Difficulty) { pill.classList.remove('show'); return; }
     const unlocked = Difficulty.isUnlocked(gid);
     const cur = Difficulty.get(gid);
@@ -1300,7 +1306,7 @@ function onRewardedFailed() {
 <!-- ── 오답노트: 미니 요약(틀린 문제 수) 표시 (supabase-js는 상단에서 이미 로드됨) ── -->
 <script src="wrongnote.js?v=11"></script>
 <script src="growth.js?v=11"></script>
-<script src="streak.js?v=11"></script>
+<script src="streak.js?v=12"></script>
 <script>
 (async function(){
   try {

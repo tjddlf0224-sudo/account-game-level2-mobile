@@ -24,7 +24,11 @@
 body{
   font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:#fff;
   min-height:100vh; min-height:100dvh;
-  padding-bottom:calc(40px + var(--ad-banner-h,0px));
+  /* 하단 여백은 --ad-banner-h(배너를 띄우려는 의사)와 --ad-safe-h(배너가 있을 수도 있는
+     자리) 중 큰 값을 쓴다. 의사만 보면, 플러그인 프록시가 늦게 붙거나 이전 페이지에서 띄운
+     배너가 남아 있을 때 여백이 0 이 돼 하단 버튼이 배너에 깔린 채 스크롤 여지도 없어진다
+     (2026-09-14 전 화면 감사에서 그룹 43px·1급허브 10px·문의 5px 모자람 확인). */
+  padding-bottom:calc(40px + max(var(--ad-banner-h,0px), var(--ad-safe-h,0px)));
   background-image:
     radial-gradient(ellipse 60% 40% at 20% 10%, rgba(180,79,255,0.10) 0%, transparent 60%),
     radial-gradient(ellipse 50% 35% at 85% 75%, rgba(255,152,0,0.07) 0%, transparent 55%);
@@ -252,7 +256,7 @@ body{
     <div class="ug-dot"></div>
     <span id="ub-group-name">—</span>
   </div>
-  <a class="group-mode-btn" href="select_level.html" style="color:var(--or); border-color:rgba(255,152,0,0.3); background:rgba(255,152,0,0.07);">🔀 급수 변경</a>
+  <a class="group-mode-btn" href="select_level.html" style="color:var(--or); border-color:rgba(255,152,0,0.3); background:rgba(255,152,0,0.07);">🔀 급수</a>
   <span id="streak-slot"></span>
   <a class="graph-btn" href="group.html" title="그룹 모드" aria-label="그룹 모드">👥</a>
   <a class="graph-btn" href="growth.html" title="내 성장 그래프" aria-label="내 성장 그래프">
@@ -263,7 +267,7 @@ body{
     </svg>
     <span class="gdot" id="growth-dot"></span>
   </a>
-  <button class="graph-btn" id="settings-btn" onclick="openSettings()" title="설정" aria-label="설정">⚙️</button>
+  <button class="graph-btn" id="settings-btn" onclick="openSettings()" title="설정" aria-label="설정"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2.3"/><path d="M18 12h3M16.24 7.76l2.12-2.12M12 6V3M7.76 7.76L5.64 5.64M6 12H3M7.76 16.24l-2.12 2.12M12 18v3M16.24 16.24l2.12 2.12"/></svg></button>
 </div>
 
 <div class="wrap">
@@ -721,7 +725,7 @@ async function changeNickname(){
 }
 </script>
 <script src="growth.js?v=11"></script>
-<script src="streak.js?v=11"></script>
+<script src="streak.js?v=12"></script>
 <script>
 /* 성장 그래프 버튼: 기록 있으면 초록 점(2급 허브와 동일 — growth.js 로드 후 실행) */
 (async function(){

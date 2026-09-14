@@ -170,10 +170,15 @@
     var s = document.createElement('style');
     s.id = STYLE_ID;
     s.textContent = [
-      '.stk-pill{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;',
-      'border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);',
-      'color:#ffd6d0;font:700 .82rem/1 "Noto Sans KR",sans-serif;cursor:pointer;}',
-      '.stk-pill .ic{width:16px;height:16px;color:#ff5a4e;display:block;}',
+      /* 상단바 아이콘 버튼(40px 정사각)과 키·모양을 맞춘 2줄 칩 — "3일 / 연속".
+         예전엔 빨간 체크 아이콘 + "3일" 한 줄이었는데, 빨간색이 경고처럼 읽혀서 뺐다
+         (2026-09-14 사용자 지시). 위험 상태는 아이콘 색이 아니라 .risk 점멸로만 알린다. */
+      '.stk-pill{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;',
+      'gap:1px;height:40px;padding:0 11px;border-radius:12px;background:rgba(255,255,255,.07);',
+      'border:1px solid rgba(255,255,255,.16);color:#eaf0ff;',
+      'font:700 .72rem/1 "Noto Sans KR",sans-serif;cursor:pointer;}',
+      '.stk-pill .stk-d{font-size:.76rem;font-weight:800;}',
+      '.stk-pill .stk-c{font-size:.55rem;font-weight:500;opacity:.5;letter-spacing:.5px;}',
       '.stk-pill.risk{animation:stkPulse 1.6s ease-in-out infinite;}',
       '@keyframes stkPulse{0%,100%{opacity:1}50%{opacity:.5}}',
       '@media (prefers-reduced-motion:reduce){.stk-pill.risk{animation:none}}',
@@ -209,7 +214,7 @@
     if (s.days <= 0) { pill.style.display = 'none'; return; }   // 0일이면 숨긴다
     pill.style.display = '';
     pill.className = 'stk-pill' + (s.canRevive ? ' risk' : (s.atRisk ? ' risk' : ''));
-    pill.innerHTML = '<span class="ic">' + SEAL + '</span>' + s.days + '일';
+    pill.innerHTML = '<span class="stk-d">' + s.days + '일</span><span class="stk-c">연속</span>';
     pill.title = s.canRevive ? s.lost + '일 연속이 끊겼어요 — 오늘 안에 되살릴 수 있습니다'
                : s.atRisk ? '오늘 아직 안 했어요' : '오늘 출석 완료';
   }

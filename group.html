@@ -72,7 +72,11 @@ body {
   position: relative; z-index: 1;
   max-width: 640px;
   margin: 0 auto;
-  padding: 36px 24px calc(60px + var(--ad-banner-h, 0px));
+  /* 하단 여백은 --ad-banner-h(배너를 띄우려는 의사)와 --ad-safe-h(배너가 있을 수도 있는
+     자리) 중 큰 값을 쓴다. 의사만 보면, 플러그인 프록시가 늦게 붙거나 이전 페이지에서 띄운
+     배너가 남아 있을 때 여백이 0 이 돼 하단 버튼이 배너에 깔린 채 스크롤 여지도 없어진다
+     (2026-09-14 전 화면 감사에서 그룹 43px·1급허브 10px·문의 5px 모자람 확인). */
+  padding: 36px 24px calc(60px + max(var(--ad-banner-h, 0px), var(--ad-safe-h, 0px)));
 }
 
 /* 내 닉네임 표시 */
@@ -512,7 +516,7 @@ body {
 .admin-link-btn:hover { background: rgba(0,242,255,0.1); border-color: rgba(0,242,255,0.4); color: var(--cy); }
 
 @media (max-width: 480px) {
-  .page-wrap { padding: 24px 16px calc(48px + var(--ad-banner-h, 0px)); }
+  .page-wrap { padding: 24px 16px calc(48px + max(var(--ad-banner-h, 0px), var(--ad-safe-h, 0px))); }
   .top-bar { padding: calc(14px + env(safe-area-inset-top)) 16px; }
   .mode-tab { padding: 16px 12px; }
   .mode-tab .tab-icon { font-size: 1.6rem; }

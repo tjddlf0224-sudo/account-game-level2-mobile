@@ -434,7 +434,8 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
         <button class="diff-btn" id="diff-btn-1" onclick="selectDifficulty(1)">난이도 1<br><span style="font-size:.72rem;opacity:.7">장부만 선택</span></button>
         <button class="diff-btn locked" id="diff-btn-2" onclick="selectDifficulty(2)">난이도 2 🔒<br><span style="font-size:.72rem;opacity:.7">숫자도 직접 조회</span></button>
       </div>
-      <div class="diff-hint" id="diff-hint"></div>
+      <!-- 난이도 2 보류(2026-09-14) — 해금 안내도 같이 끈다. 위 LV 고정 주석 참고 -->
+      <div class="diff-hint" id="diff-hint" style="display:none"></div>
       <div class="brow">
         <button class="sbtn" onclick="Game.start()">▶ 비행 시작</button>
         <button class="btn-hub" onclick="openGuide()">📖 사용방법</button>
