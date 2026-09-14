@@ -262,9 +262,9 @@
   window.__amReleaseAudio = releaseAll;
   window.__amResumeAudio  = resumeAll;
 
-  window.BGMAudio = {
-    create: function (url) { return new Track(url); },
-    release: releaseAll,
-    resume: resumeAll
-  };
+  /* release/resume 은 window.__amReleaseAudio/__amResumeAudio 로만 부른다
+     (네이티브 AppDelegate 가 그 이름으로 찾는다). BGMAudio 에도 같은 걸
+     달아 뒀었는데 **아무도 안 썼다** — 같은 기능이 두 이름으로 있으면
+     나중에 한쪽만 고치게 된다. create 하나만 남긴다(2026-09-14). */
+  window.BGMAudio = { create: function (url) { return new Track(url); } };
 })();
