@@ -268,7 +268,15 @@ body{
    좁힐수록 닉네임이 먼저 사라지고 그룹 칩은 점 하나만 남는 식으로 계속 무언가를 잃었다.
    윗줄=조작부(오른쪽 정렬), 아랫줄=누구인지. 이제 어느 폭에서도 아무것도 안 접는다. */
 .user-bar { flex-direction: column; align-items: stretch; gap: 6px; }
-.user-bar .ub-controls { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+/* 윗줄: 왼쪽에 그룹(아이콘+이름), 오른쪽에 나머지 조작부 */
+.user-bar .ub-controls { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.user-bar .ub-actions { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+/* 그룹 아이콘과 이름을 한 덩어리 링크로 — 아랫줄 닉네임과 세로로 맞는다 */
+.user-bar .ub-grouplink {
+  display: flex; align-items: center; gap: 8px;
+  flex: 0 1 auto; min-width: 0; text-decoration: none;
+}
+.user-bar .ub-grouplink .graph-btn { flex: 0 0 auto; }
 .user-bar .ub-nick {
   display: flex; align-items: center; gap: 8px;
   flex: 0 0 auto; min-width: 0; overflow: hidden;
@@ -287,29 +295,32 @@ body{
 <body>
 
 <div class="user-bar" id="user-bar">
-  <!-- 윗줄: 조작부 -->
+  <!-- 윗줄 왼쪽: 그룹(아이콘+이름) / 오른쪽: 나머지 조작부
+       아랫줄: 닉네임. 그룹과 이름이 세로로 맞아떨어지게 한 배치다(2026-09-14 사용자 지시). -->
   <div class="ub-controls">
-    <a class="group-mode-btn" href="select_level.html" style="color:var(--or); border-color:rgba(255,152,0,0.3); background:rgba(255,152,0,0.07);">급수 변경</a>
-    <span id="streak-slot"></span>
-    <a class="graph-btn" href="group.html" title="그룹 모드" aria-label="그룹 모드">👥</a>
-    <a class="graph-btn" href="growth.html" title="내 성장 그래프" aria-label="내 성장 그래프">
-      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-           stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
-        <polyline points="17 6 23 6 23 12"></polyline>
-      </svg>
-      <span class="gdot" id="growth-dot"></span>
-    </a>
-    <button class="graph-btn" id="settings-btn" onclick="openSettings()" title="설정" aria-label="설정"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2.3"/><path d="M18 12h3M16.24 7.76l2.12-2.12M12 6V3M7.76 7.76L5.64 5.64M6 12H3M7.76 16.24l-2.12 2.12M12 18v3M16.24 16.24l2.12 2.12"/></svg></button>
-  </div>
-  <!-- 아랫줄: 누구인지 (2026-09-14 — 한 줄에 7개는 무리라 두 줄로 나눴다) -->
-  <div class="ub-nick">
-    <span class="ub-label">PLAYER</span>
-    <span class="ub-name" id="ub-name">게스트</span>
-    <div class="ub-group" id="ub-group-el">
+    <a class="ub-grouplink" href="group.html" title="그룹 모드" aria-label="그룹 모드">
+      <span class="graph-btn">👥</span>
+      <div class="ub-group" id="ub-group-el">
       <div class="ug-dot"></div>
       <span id="ub-group-name">—</span>
+      </div>
+    </a>
+    <div class="ub-actions">
+      <a class="group-mode-btn" href="select_level.html" style="color:var(--or); border-color:rgba(255,152,0,0.3); background:rgba(255,152,0,0.07);">급수 변경</a>
+      <span id="streak-slot"></span>
+      <a class="graph-btn" href="growth.html" title="내 성장 그래프" aria-label="내 성장 그래프">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+      <polyline points="17 6 23 6 23 12"></polyline>
+      </svg>
+      <span class="gdot" id="growth-dot"></span>
+      </a>
+      <button class="graph-btn" id="settings-btn" onclick="openSettings()" title="설정" aria-label="설정"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2.3"/><path d="M18 12h3M16.24 7.76l2.12-2.12M12 6V3M7.76 7.76L5.64 5.64M6 12H3M7.76 16.24l-2.12 2.12M12 18v3M16.24 16.24l2.12 2.12"/></svg></button>
     </div>
+  </div>
+  <div class="ub-nick">
+    <span class="ub-name" id="ub-name">게스트</span>
   </div>
 </div>
 
