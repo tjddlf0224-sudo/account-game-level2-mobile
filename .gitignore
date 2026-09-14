@@ -1,2 +1,10 @@
-
 .claude/
+.DS_Store
+
+# ── 라이브 웹에 올라가면 안 되는 것들 (2026-09-14) ──
+# 이 저장소는 GitHub Pages 라 **여기 있는 파일은 전부 인터넷에 공개**된다.
+# 과거에 Supabase 스키마·RLS 정책 SQL 과 개발용 파이썬이 그대로 노출돼 있었다.
+# 개발 문서·스크립트는 앱 소스 쪽(AccountingMaster-Capacitor-v2/docs, /tools)에 둔다.
+*.sql
+*.md
+tools/
