@@ -19,8 +19,13 @@
     --txt:#eef3fb; --dim:rgba(238,243,251,.55);
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  
+  /* 본문 글꼴은 전 게임 공통으로 Noto Sans KR 이 먼저다(2026-09-15).
+     전엔 -apple-system 이 앞이라 **웹폰트를 불러놓고도 iOS 에선 애플 기본 글꼴**이
+     나왔다 — 게임 5종·원가의 길과 글자 모양이 달라 보이던 이유다.
+     시스템 글꼴은 뒤에 남겨 웹폰트가 늦거나 막혀도 한글이 깨지지 않게 한다. */
   body{margin:0;background:var(--bg);color:var(--txt);
-       font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+       font-family:'Noto Sans KR',-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
        padding:0 0 40px; min-height:100vh;}
   .wrap{max-width:640px;margin:0 auto;padding:calc(16px + env(safe-area-inset-top)) 16px 16px;}
   @media (min-width:701px){
@@ -127,8 +132,12 @@
   .res-stats{margin:14px 0 4px;font-size:.9rem;color:var(--dim);}
   .res-stats b{font-weight:800;}
   .res-note{font-size:.82rem;color:var(--dim);margin:6px 0 18px;}
-  .btn-row{display:flex;gap:10px;}
-  .btn-row a,.btn-row button{flex:1;border-radius:13px;padding:13px;font-size:.92rem;font-weight:600;
+  /* 결과화면 버튼 — 2급 게임 5종의 BTNUNI 규격과 같게(2026-09-15, "UI 통일성 있어야 한다니까").
+     한 줄에 하나씩, 폭 꽉 차게, 높이 52px, 알약 모양. 가로 2열이던 것을 세로로. */
+  .btn-row{display:flex;flex-direction:column;gap:10px;width:100%;margin-top:6px;}
+  .btn-row a,.btn-row button{width:100%;box-sizing:border-box;min-height:52px;border-radius:50px;padding:13px 20px;
+      font-family:'Black Han Sans','Noto Sans KR',sans-serif;font-size:clamp(1rem,3.6vw,1.15rem);font-weight:600;
+      display:flex;align-items:center;justify-content:center;gap:8px;
       border:1px solid var(--line);background:var(--card2);color:var(--txt);cursor:pointer;text-decoration:none;text-align:center;}
   .review-link{display:block;margin-top:10px;font-size:.84rem;color:var(--gold);text-decoration:none;}
   .btn-row .primary{border:none;background:linear-gradient(90deg,var(--blue),var(--green));color:#021;}
@@ -159,7 +168,8 @@
   /* ── TOP 랭킹(결과화면) ── */
   .rank-title{font-size:.72rem;color:rgba(255,255,255,.35);letter-spacing:2px;margin:18px 0 8px;text-align:center;}
   #my-rank-badge{display:none;font-size:.82rem;color:var(--blue);background:rgba(47,111,237,.12);border:1px solid rgba(47,111,237,.35);
-    border-radius:50px;padding:6px 16px;margin:0 auto 8px;text-align:center;max-width:max-content;}
+    border-radius:50px;padding:6px 16px;margin:18px auto 8px;   /* 위 18px: 버튼에 바짝 붙어 있던 것을 띄움(2026-09-15 제보) */
+    text-align:center;max-width:max-content;}
   #rank-box{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:12px;max-height:180px;overflow-y:auto;padding:4px 0;text-align:left;}
   .rr-row{display:grid;grid-template-columns:34px 1fr 70px;gap:6px;padding:8px 12px;font-size:.8rem;border-bottom:1px solid rgba(255,255,255,.05);align-items:center;}
   .rr-row:last-child{border-bottom:none;}
@@ -254,6 +264,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="pausewatch.js?v=13"></script>
 <script src="ask.js?v=13"></script>
 <script src="wrongnote.js?v=11"></script>
 <script src="growth.js?v=11"></script>
@@ -436,6 +447,11 @@ function startQuiz(){
 
 function tick(){
   if(!isPlaying || awaitingContinue) return;
+  /* 화면이 가려져 있으면(전면광고·전화·홈버튼) 시간을 깎지 않는다.
+     실기기 제보 2026-09-15: 신고의 문에서 전면광고가 덮은 채로 제한 시간이 흘러 죽었다.
+     판단은 pausewatch.js 한 곳에서 한다 — WKWebView 는 visibilitychange 가 안 올 때가 있어
+     Capacitor appStateChange 까지 같이 본다. */
+  if (window.AMPause && AMPause.hidden()) return;
   timeLeft=Math.max(0,timeLeft-1);
   updateTimeHud();
   if(timeLeft<=0) endQuiz();
@@ -624,8 +640,8 @@ function renderResult(){
     <div class="res-stats">정답 <b style="color:var(--green)">${correctCnt}</b>개 · 오답 <b style="color:var(--red)">${wrong}</b>개 · 최고 연속 <b style="color:var(--gold)">${maxCombo}</b>회</div>
     <div class="res-note">${wrong>0?`틀린 ${wrong}문제가 <b style="color:var(--gold)">오답노트</b>에 저장됐어요.`:'전부 맞혔어요. 완벽합니다.'}</div>
     <div class="btn-row">
-      <button class="primary" onclick="location.reload()">다시 하기</button>
-      <a href="index_lv1.html">메인으로</a>
+      <button class="primary" onclick="location.reload()">↺ 다시 하기</button>
+      <a href="index_lv1.html">🏠 메인으로 나가기</a>
     </div>
     ${wrong>0?'<a class="review-link" href="review.html">오답노트에서 다시 보기 →</a>':''}
     <div id="my-rank-badge"></div>

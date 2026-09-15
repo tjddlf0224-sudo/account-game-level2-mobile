@@ -566,6 +566,7 @@
 
 <button id="rewarded-btn" onclick="requestRewarded()">⏱ +30초 광고 보기</button>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="pausewatch.js?v=13"></script>
     <script src="ask.js?v=13"></script>
     <script src="wrongnote.js?v=11"></script>
     <script src="growth.js?v=11"></script>
@@ -937,6 +938,11 @@ function startGame() {
     clearInterval(timerInterval);
     timerInterval = setInterval(() => {
         if (!isPlaying || adPaused || freezeLeft > 0) return; // 광고 시청/설명타임 중엔 시간 멈춤
+        /* 화면이 가려져 있으면(전면광고·전화·홈버튼) 시간을 깎지 않는다.
+           실기기 제보 2026-09-15: 신고의 문에서 전면광고가 덮은 채로 제한 시간이 흘러 죽었다.
+           판단은 pausewatch.js 한 곳에서 한다 — WKWebView 는 visibilitychange 가 안 올 때가 있어
+           Capacitor appStateChange 까지 같이 본다. */
+        if (window.AMPause && AMPause.hidden()) return;
         timeLeft--; updateHUD();
         if (timeLeft <= 15 && timeLeft > 0) showRewardedBtn();
         if (timeLeft <= 0) endGame();

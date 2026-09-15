@@ -12,8 +12,13 @@
     --txt:#eaf2ff; --dim:rgba(234,242,255,.55);
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  
+  /* 본문 글꼴은 전 게임 공통으로 Noto Sans KR 이 먼저다(2026-09-15).
+     전엔 -apple-system 이 앞이라 **웹폰트를 불러놓고도 iOS 에선 애플 기본 글꼴**이
+     나왔다 — 게임 5종·원가의 길과 글자 모양이 달라 보이던 이유다.
+     시스템 글꼴은 뒤에 남겨 웹폰트가 늦거나 막혀도 한글이 깨지지 않게 한다. */
   body{margin:0;background:var(--bg);color:var(--txt);
-       font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+       font-family:'Noto Sans KR',-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
        padding:0 0 calc(60px + var(--ad-banner-h, 0px));
        min-height:100vh;}
   .wrap{max-width:640px;margin:0 auto;padding:calc(18px + env(safe-area-inset-top)) 16px 18px;}

@@ -412,9 +412,10 @@
                         <p style="font-size:1.2rem; margin:10px 0;">최종 직급<br><span id="end-rank" style="font-weight:bold; color:white; font-size:1.5rem;"></span></p>
                         <p style="font-size:1.2rem; margin:10px 0;">업무 평가<br><span id="end-score" style="font-weight:bold; font-size:1.5rem;"></span>점</p>
                     </div>
-                    <div style="display:flex; gap:12px;">
-                        <button class="btn-action" style="background:#555; padding:15px 18px;" onclick="location.reload()">처음부터 다시</button>
-                        <button class="btn-action" style="background:var(--neon-gold); color:#000; padding:15px 18px;" onclick="location.href='index_lv1.html'">허브로 돌아가기</button>
+                    <!-- 2급 게임 결과화면과 같은 구성·문구(2026-09-15 UI 통일) -->
+                    <div style="display:flex; flex-direction:column; gap:10px; width:100%;">
+                        <button class="btn-action" style="background:#555; height:52px; line-height:1.2; padding:0 20px; border-radius:50px;" onclick="location.reload()">↺ 다시 하기</button>
+                        <button class="btn-action" style="background:var(--neon-gold); color:#000; height:52px; line-height:1.2; padding:0 20px; border-radius:50px;" onclick="location.href='index_lv1.html'">🏠 메인으로 나가기</button>
                     </div>
                     <div id="my-rank-badge"></div>
                     <div id="rank-box"><div class="rank-hdr">🏆 TOP 랭킹</div><div style="padding:22px;color:rgba(255,255,255,.3);font-size:.8rem;text-align:center;">불러오는 중...</div></div>
