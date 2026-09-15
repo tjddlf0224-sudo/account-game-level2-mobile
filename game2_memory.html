@@ -511,53 +511,75 @@
             100% { opacity:0; transform: translate(var(--tx), var(--ty)) scale(0); }
         }
 
-        /* ── 사용방법 안내 오버레이 ── */
-        .guide-overlay {
-            display: none; position: fixed; inset: 0; z-index: 9999;
-            background: rgba(2,8,16,0.88); backdrop-filter: blur(6px);
-            align-items: center; justify-content: center; padding: 16px;
-        }
-        .guide-overlay.show { display: flex; }
-        .guide-card {
-            width: 100%; max-width: 380px; max-height: 92vh;
-            background: linear-gradient(180deg,#0d1830,#0a1120);
-            border: 1px solid rgba(0,242,255,0.25); border-radius: 20px;
-            box-shadow: 0 0 40px rgba(0,242,255,0.18);
-            display: flex; flex-direction: column; overflow: hidden;
-            animation: guidePop .25s ease;
-        }
-        @keyframes guidePop { from{transform:scale(.92);opacity:0} to{transform:scale(1);opacity:1} }
-        .guide-head {
-            display: flex; align-items: center; gap: 8px;
-            padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.08);
-        }
-        .guide-title { font-family:'Black Han Sans',sans-serif; font-size: 1.1rem; color:#00f2ff; flex: 1; }
-        .guide-count { font-size: .85rem; color:#8aa; font-weight:700; }
-        .guide-x {
-            background: rgba(255,255,255,0.08); border: none; color:#fff;
-            width: 30px; height: 30px; border-radius: 50%; font-size: .9rem; cursor: pointer;
-        }
-        .guide-body { padding: 16px; overflow-y: auto; text-align: center; }
-        .guide-img {
-            width: 100%; max-height: 44vh; object-fit: contain;
-            border-radius: 14px; border: 1px solid rgba(255,255,255,0.1);
-            background:#060c14; display:block; margin: 0 auto 14px;
-        }
-        .guide-step-title { font-family:'Black Han Sans',sans-serif; font-size: 1.15rem; color:#ffd700; margin-bottom: 8px; }
-        .guide-step-desc { font-size: .95rem; line-height: 1.65; color:#dfe7ef; word-break: keep-all; }
-        .guide-step-desc b { color:#00f2ff; }
-        .guide-dots { display:flex; gap:7px; justify-content:center; padding: 4px 0 2px; }
-        .guide-dots .dot { width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,0.22); transition:.2s; }
-        .guide-dots .dot.on { background:#00f2ff; width:20px; border-radius:5px; }
-        .guide-nav { display:flex; gap:10px; padding: 12px 16px 16px; }
-        .guide-btn {
-            flex:1; padding: 13px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.15);
-            background: rgba(255,255,255,0.06); color:#fff; font-size: 1rem; font-weight:700; cursor:pointer;
-        }
-        .guide-btn:disabled { opacity:.35; }
-        .guide-btn-next {
-            background: linear-gradient(135deg,#00f2ff,#0084ff); border:none; color:#021018;
-        }
+        /* ── 인터랙티브 튜토리얼 (사용방법) ──────────────────────────────
+           2026-09-15: 게임2만 옛 스크린샷 방식(guide/g2_*.png)을 쓰고 있었다.
+           나머지 네 게임은 이미 "직접 눌러 보는" 튜토리얼로 바뀌어 있었는데
+           게임2만 남아 UI 가 어긋났다(사용자 지적: "게임2는 왜 아직도 옛
+           스크린샷 방식이지?"). game1_acid 의 구조를 그대로 따르되, 카드는
+           이 게임의 실제 카드(뒤집기·짝맞춤)를 흉내 낸다. */
+        .tut { display:none; position:fixed; inset:0; z-index:9999; flex-direction:column;
+            background: rgba(2,8,16,0.92); backdrop-filter: blur(6px); }
+        .tut.show { display:flex; animation: tutPop .25s ease; }
+        @keyframes tutPop { from{opacity:0} to{opacity:1} }
+        .tut-top { display:flex; align-items:center; gap:9px; padding:calc(12px + env(safe-area-inset-top)) 18px 10px; }
+        .tut-top .tt-title { font-family:'Black Han Sans',sans-serif; font-size:1.05rem; color:#00f2ff; }
+        .tut-top .tt-badge { font-size:.8rem; font-weight:800; color:#021018; background:#ffd700; border-radius:50px; padding:3px 12px; }
+        .tut-top .tt-skip { margin-left:auto; background:rgba(255,255,255,0.08); border:none; color:#ccc;
+            font-family:'Noto Sans KR',sans-serif; font-weight:800; font-size:.82rem; padding:8px 14px; border-radius:50px; cursor:pointer; }
+        .tut-stage { flex:1; min-height:0; overflow-y:auto; display:flex; flex-direction:column;
+            align-items:center; justify-content:safe center; gap:16px; padding:10px 20px 4px; }
+        .tut-status { display:flex; align-items:center; gap:9px;
+            font-family:'Black Han Sans',sans-serif; font-size:1.05rem; color:#fff;
+            background:linear-gradient(180deg,#0d1830,#0a1120);
+            border:2px solid rgba(0,242,255,0.25); border-radius:50px; padding:8px 22px;
+            box-shadow: 0 0 12px rgba(0,242,255,0.15); transition:.3s; }
+        .tut-status b { display:inline-block; min-width:1.5em; text-align:center; color:#2ecc71; }
+        .tut-status .tt-bar { color:#8aa; }
+        .tut-status.tut-hurt { animation:shakeCard .4s; }
+        .tut-status.tut-hurt b { color:#e74c3c; }
+
+        /* 실제 카드판을 흉내낸 미니 그리드 (3×2) */
+        .tut-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px;
+            width:100%; max-width:330px; }
+        .tut-card { perspective:900px; height:78px; }
+        .tut-card.tut-live { cursor:pointer; }
+        .tut-ci { position:relative; width:100%; height:100%; transition:transform .38s;
+            transform-style:preserve-3d; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.35); }
+        .tut-card.flip .tut-ci { transform:rotateY(180deg); }
+        .tut-cb, .tut-cf { position:absolute; inset:0; border-radius:12px; padding:5px;
+            -webkit-backface-visibility:hidden; backface-visibility:hidden;
+            display:flex; align-items:center; justify-content:center; text-align:center; }
+        .tut-cb { background:#34495e; color:#7f8c8d; font-size:1.6rem; border:2px solid #5d6d7e; }
+        .tut-cf { background:#ecf0f1; transform:rotateY(180deg); border:3px solid #e67e22;
+            font-family:'Black Han Sans','Noto Sans KR',sans-serif; font-size:.8rem;
+            line-height:1.25; word-break:keep-all; }
+        .tut-card.tut-target .tut-ci { box-shadow:0 0 0 4px #ffd700, 0 0 18px rgba(255,215,0,0.5);
+            animation:tutPulse 1.05s ease-in-out infinite; }
+        .tut-card.tut-ok { opacity:.55; }
+        .tut-card.tut-ok .tut-cf { border-color:#2ecc71; }
+        .tut-card.tut-bad .tut-ci { animation:shakeCard .4s ease; }
+        .tut-card.tut-bad .tut-cf { border-color:#e74c3c; }
+        @keyframes tutPulse { 0%,100%{ transform:scale(1) } 50%{ transform:scale(1.05) } }
+        @media (max-width:360px){ .tut-card{ height:68px; } .tut-cf{ font-size:.72rem; } }
+
+        .tut-float { position:absolute; font-family:'Black Han Sans',sans-serif; font-size:1.05rem;
+            font-weight:bold; pointer-events:none; z-index:5; animation:tutFloatUp .9s forwards;
+            color:#fff; text-shadow:0 0 6px rgba(0,0,0,0.8); }
+        @keyframes tutFloatUp { 0%{opacity:1;transform:translateY(0)} 100%{opacity:0;transform:translateY(-26px)} }
+        .tut-bubble { background: linear-gradient(180deg,#0d1830,#0a1120); border-top:2px solid rgba(0,242,255,0.25);
+            border-radius:20px 20px 0 0; box-shadow: 0 -4px 18px rgba(0,242,255,0.1);
+            padding:20px 22px calc(18px + env(safe-area-inset-bottom)); }
+        .tut-bubble-text { font-size:1rem; line-height:1.6; color:#dfe7ef; word-break:keep-all;
+            text-align:center; min-height:3.2em; display:block; }
+        .tut-bubble-text b { color:#00f2ff; }
+        .tut-hint { text-align:center; font-family:'Black Han Sans',sans-serif; color:#ffd700;
+            font-size:1rem; margin-top:10px; animation:tutBlink 1s ease-in-out infinite; }
+        @keyframes tutBlink { 0%,100%{ opacity:1 } 50%{ opacity:.4 } }
+        .tut-next { display:block; width:100%; margin-top:14px; padding:15px; border-radius:14px;
+            border:2px solid #00f2ff; color:#021018;
+            background: linear-gradient(135deg,#00f2ff,#0084ff); box-shadow: 0 0 16px rgba(0,242,255,0.4);
+            font-family:'Black Han Sans',sans-serif; font-size:1.15rem; cursor:pointer; }
+
         /*BTNUNI-START*/
 /* ── 화면 버튼 규격 통일 (2026-09-14 사용자 지시: "제각각인 크기를 통일시켜") ──
    시작화면(게임 시작/사용방법/메인으로)과 결과화면(다시 하기/메인으로)이 게임마다
@@ -666,24 +688,25 @@
         </div>
     </div>
 
-    <!-- ── 사용방법 안내 오버레이 ── -->
-    <div id="guide-overlay" class="guide-overlay" onclick="if(event.target===this)closeGuide()">
-      <div class="guide-card">
-        <div class="guide-head">
-          <span class="guide-title">📖 게임 방법</span>
-          <span class="guide-count"><span id="guide-cur">1</span>/<span id="guide-total">5</span></span>
-          <button class="guide-x" onclick="closeGuide()">✕</button>
+    <!-- ── 인터랙티브 튜토리얼 (사용방법) ── -->
+    <div id="tutorial" class="tut">
+      <div class="tut-top">
+        <span class="tt-title">📖 게임 방법</span>
+        <span class="tt-badge" id="tut-badge">1/6</span>
+        <button class="tt-skip" onclick="Tutorial.close()">건너뛰기</button>
+      </div>
+      <div class="tut-stage">
+        <div class="tut-status" id="tut-status">
+          <span>❌ 오답 <b id="tut-wrong">0</b></span>
+          <span class="tt-bar">|</span>
+          <span>✅ 성공 <b id="tut-match">0</b>/3</span>
         </div>
-        <div class="guide-body" id="guide-body">
-          <img id="guide-img" class="guide-img" alt="게임 화면">
-          <div class="guide-step-title" id="guide-step-title"></div>
-          <div class="guide-step-desc" id="guide-step-desc"></div>
-        </div>
-        <div class="guide-dots" id="guide-dots"></div>
-        <div class="guide-nav">
-          <button class="guide-btn" id="guide-prev" onclick="guideGo(-1)">◀ 이전</button>
-          <button class="guide-btn guide-btn-next" id="guide-next" onclick="guideNext()">다음 ▶</button>
-        </div>
+        <div class="tut-grid" id="tut-grid"></div>
+      </div>
+      <div class="tut-bubble">
+        <div class="tut-bubble-text" id="tut-text"></div>
+        <div class="tut-hint" id="tut-hint" style="display:none"></div>
+        <button class="tut-next" id="tut-next" onclick="Tutorial.next()">다음 ▶</button>
       </div>
     </div>
 
@@ -1997,93 +2020,200 @@
 </div>
 
 <script>
-/* ── 사용방법 안내 ── */
-const GUIDE_STEPS = [
-  {
-    img: 'guide/g2_1_goal.png',
-    title: '🎯 짝을 찾는 기억력 게임',
-    desc: '카드가 모두 <b>?</b>로 뒤집혀 있어요. 카드를 탭하면 뒷면이 열려요. <b>계정과목</b>(파란 글씨)과 <b>그 설명</b>(빨간 글씨)이 짝꿍이에요.<br>예: <b>접대비</b> ↔ <b>거래처 선물</b>. 짝이 되는 카드 2장을 모두 찾는 게 목표예요!'
-  },
-  {
-    img: 'guide/g2_2_flip.png',
-    title: '👆 카드 2장을 뒤집어 비교',
-    desc: '한 번에 카드를 <b>2장</b>까지 뒤집을 수 있어요. 한 장은 <b>계정과목</b>, 한 장은 <b>설명</b>! 두 장이 진짜 짝이면 매칭 성공이에요.<br>이미 본 카드 2장을 또 틀리면 <b>오답 횟수</b>가 올라가니, 카드 위치를 잘 기억하세요!'
-  },
-  {
-    img: 'guide/g2_3_match.png',
-    title: '✅ 짝 맞추기 성공!',
-    desc: '짝이 맞으면 두 카드가 <b>흐려지며 고정</b>돼요. 위쪽 <b>성공 2/3</b>처럼 맞춘 짝의 개수가 올라가요.<br>판의 모든 짝을 다 맞추면 그 <b>스테이지 클리어</b>! 빠르게, 오답 없이 맞출수록 점수가 높아요.'
-  },
-  {
-    img: 'guide/g2_4_stage.png',
-    title: '🏆 스테이지 & 누적 점수',
-    desc: '점수는 <b>기본점수 − (오답×20) − (걸린초×0.5)</b>로 계산돼요. 스테이지가 클리어될 때마다 <b>점수가 누적</b>됩니다.<br><b>Stage 1→4</b>로 갈수록 카드가 많아지고, 그 뒤로는 같은 크기(5쌍)로 <b>끝없이 이어집니다</b> — 그만두기 전까지 점수가 계속 쌓여요.<br><br>난이도1에서 정답률 70% 이상(10문항+)을 달성하면 <b>난이도2</b>가 열려요 — 카드 뒤집기는 그대로지만 짝이 <b>뜻이 아니라 분류(자산·부채·자본·수익·비용)</b>로 바뀝니다!'
-  },
-  {
-    img: 'guide/g2_5_reward.png',
-    title: '📝 직급 & 랭킹 등록',
-    desc: '누적 점수에 따라 <b>사원 → 대리 → 과장 → 부장 → CEO</b> 직급이 올라가요. 게임을 마치면 <b>닉네임으로 점수를 등록</b>해 다른 친구들과 랭킹 대결을 할 수 있어요. 최고 점수에 도전해 보세요!'
-  }
-];
-let guideIdx = 0;
+/* ── 인터랙티브 튜토리얼 (사용방법) ─────────────────────────────────
+   2026-09-15: 게임2만 옛 스크린샷 방식(guide/g2_*.png 5장)을 쓰고 있었다.
+   나머지 네 게임은 이미 "직접 눌러 보는" 방식으로 바뀌었는데 게임2만 남아
+   UI 가 어긋났다. game1_acid 의 Tutorial 구조를 그대로 따른다.
 
-function openGuide() {
-  guideIdx = 0;
-  document.getElementById('guide-total').textContent = GUIDE_STEPS.length;
-  buildGuideDots();
-  renderGuide();
-  document.getElementById('guide-overlay').classList.add('show');
-}
-function closeGuide() {
-  document.getElementById('guide-overlay').classList.remove('show');
-}
-function buildGuideDots() {
-  const wrap = document.getElementById('guide-dots');
-  wrap.innerHTML = '';
-  GUIDE_STEPS.forEach((_, i) => {
-    const d = document.createElement('div');
-    d.className = 'dot' + (i === 0 ? ' on' : '');
-    wrap.appendChild(d);
-  });
-}
-function renderGuide() {
-  const s = GUIDE_STEPS[guideIdx];
-  document.getElementById('guide-img').src = s.img;
-  document.getElementById('guide-step-title').innerHTML = s.title;
-  document.getElementById('guide-step-desc').innerHTML = s.desc;
-  document.getElementById('guide-cur').textContent = guideIdx + 1;
-  document.getElementById('guide-body').scrollTop = 0;
-  document.querySelectorAll('#guide-dots .dot').forEach((d, i) => d.classList.toggle('on', i === guideIdx));
-  document.getElementById('guide-prev').disabled = (guideIdx === 0);
-  const next = document.getElementById('guide-next');
-  next.textContent = (guideIdx === GUIDE_STEPS.length - 1) ? '게임 시작 ▶' : '다음 ▶';
-}
-function guideGo(delta) {
-  const n = guideIdx + delta;
-  if (n < 0 || n >= GUIDE_STEPS.length) return;
-  guideIdx = n;
-  renderGuide();
-}
-function guideNext() {
-  if (guideIdx === GUIDE_STEPS.length - 1) {
-    closeGuide();
-    if (window.startGame) startGame();
-  } else {
-    guideGo(1);
+   각 단계가 **화면의 완성된 상태**(matched/open/wrongN)를 통째로 들고 있다.
+   누적 변수로 굴리면 건너뛰기→재진입 때 카드가 어긋나는데, 이렇게 두면
+   render() 가 언제 불려도 같은 그림이 나온다(게임1에서 얻은 교훈). */
+const Tutorial = (function () {
+  // 3×2. 짝을 일부러 떨어뜨려 놓아 실제 섞인 판처럼 보이게 한다.
+  const CARDS = [
+    { text:'접대비',          kind:'account' },  // 0 ↔ 3
+    { text:'건물 가치 감소분', kind:'desc'    },  // 1 ↔ 4
+    { text:'보험료',          kind:'account' },  // 2 ↔ 5
+    { text:'거래처 선물값',    kind:'desc'    },  // 3 ↔ 0
+    { text:'감가상각비',       kind:'account' },  // 4 ↔ 1
+    { text:'화재보험 든 돈',   kind:'desc'    }   // 5 ↔ 2
+  ];
+  const STEPS = [
+    { text:'<b>계정과목</b>과 그 <b>설명</b>이 짝꿍인 게임이에요.<br>카드가 모두 <b>?</b> 로 덮여 있습니다.',
+      matched:[], open:[], wrongN:0, btn:'시작 ▶' },
+
+    { text:'빛나는 카드를 <b>탭</b>해서 뒤집어 보세요.',
+      matched:[], open:[], wrongN:0, tapSlot:0, result:'open', hint:'빛나는 카드를 탭!' },
+
+    { text:'<b>접대비</b>가 나왔어요. <b>파란 글씨</b>는 계정과목이에요.<br>이제 그 뜻을 풀어 쓴 <b>빨간 카드</b>를 찾으면 됩니다.',
+      matched:[], open:[0], wrongN:0, tapSlot:3, result:'match', pair:[0,3], hint:'짝이 되는 설명을 탭!' },
+
+    { text:'짝이 맞으면 <b>열린 채로 남아요</b>.<br>이번엔 <b>감가상각비</b>를 열어 뒀습니다. 빛나는 카드를 눌러 보세요.',
+      matched:[0,3], open:[4], wrongN:0, tapSlot:5, result:'wrong', pair:[4,5], hint:'빛나는 카드를 탭!' },
+
+    { text:'짝이 아니면 <b>다시 덮이고 오답이 1 올라가요</b>.<br>그래서 <b>카드 위치를 기억</b>하는 게 핵심이에요.<br>이번엔 직접 골라 보세요 — <b>감가상각비</b>의 설명은?',
+      matched:[0,3], open:[4], wrongN:1, tapSlot:1, trapSlot:5, quiz:true,
+      result:'match', pair:[4,1], hint:'감가상각비의 설명을 탭!' },
+
+    { text:'정확해요! 모든 짝을 찾으면 끝납니다.<br><b>빨리 끝낼수록</b>, <b>오답이 적을수록</b> 점수가 높아요.<br>단계가 올라가면 카드가 더 많아집니다.',
+      matched:[0,3,4,1], open:[], wrongN:1, btn:'게임 시작 ▶', finish:true }
+  ];
+
+  let step = 0, busy = false;
+  let timers = [];   // 예약된 연출 — close() 에서 전부 취소(안 하면 재진입 시 단계가 튄다)
+
+  function el(id){ return document.getElementById(id); }
+  function cardAt(i){ return el('tut-grid').children[i]; }
+  function after(ms, fn){ const t = setTimeout(function(){ fn(); }, ms); timers.push(t); return t; }
+  function clearTimers(){ timers.forEach(clearTimeout); timers = []; }
+  function beep(type){ try { if (window.playSound) playSound(type); } catch (e) {} }
+  function buzz(p){ try { if (navigator.vibrate) navigator.vibrate(p); } catch (e) {} }
+
+  function buildGrid() {
+    const g = el('tut-grid');
+    g.innerHTML = '';
+    CARDS.forEach(function (c, i) {
+      const node = document.createElement('div');
+      node.className = 'tut-card';
+      node.dataset.slot = i;
+      node.innerHTML =
+        '<div class="tut-ci">' +
+          '<div class="tut-cb">?</div>' +
+          '<div class="tut-cf" style="color:' + (c.kind === 'account' ? '#2980b9' : '#c0392b') + '">' +
+            c.text +
+          '</div>' +
+        '</div>';
+      // click 이 안 먹은 전례가 있어 이 프로젝트는 pointerdown 으로 받는다
+      node.addEventListener('pointerdown', function (e) { e.preventDefault(); onTap(i, node); });
+      g.appendChild(node);
+    });
   }
-}
-// 스와이프(모바일) 지원
-(function() {
-  let x0 = null;
-  const ov = document.getElementById('guide-overlay');
-  ov.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
-  ov.addEventListener('touchend', e => {
-    if (x0 === null) return;
-    const dx = e.changedTouches[0].clientX - x0;
-    if (Math.abs(dx) > 45) guideGo(dx < 0 ? 1 : -1);
-    x0 = null;
-  }, { passive: true });
+
+  function floatText(node, msg, color) {
+    const f = document.createElement('div');
+    f.className = 'tut-float';
+    f.textContent = msg;
+    f.style.color = color;
+    f.style.left = Math.max(4, node.offsetLeft) + 'px';
+    f.style.top  = Math.max(0, node.offsetTop - 6) + 'px';
+    el('tut-grid').appendChild(f);
+    after(900, function () { f.remove(); });
+  }
+
+  function onTap(slot, node) {
+    const s = STEPS[step];
+    if (!s || busy) return;
+
+    if (s.tapSlot === slot) {
+      busy = true;
+      node.classList.add('flip');
+      node.classList.remove('tut-target');
+
+      if (s.result === 'open') {                       // 그냥 한 장 열어 보는 단계
+        beep('flip'); buzz(12);
+        after(780, function () { busy = false; go(step + 1); });
+        return;
+      }
+
+      if (s.result === 'match') {                      // 짝이 맞았다
+        after(430, function () {
+          beep('correct'); buzz(15);
+          s.pair.forEach(function (i) { cardAt(i).classList.add('tut-ok'); });
+          el('tut-match').textContent = String(s.matched.length / 2 + 1);
+          floatText(node, '짝 성공!', '#2ecc71');
+          after(820, function () { busy = false; go(step + 1); });
+        });
+        return;
+      }
+
+      if (s.result === 'wrong') {                      // 일부러 틀려 보는 단계
+        after(520, function () {
+          beep('wrong'); buzz([30, 40, 30]);
+          s.pair.forEach(function (i) { cardAt(i).classList.add('tut-bad'); });
+          el('tut-wrong').textContent = String(s.wrongN + 1);
+          const st = el('tut-status');
+          st.classList.add('tut-hurt');
+          floatText(node, '짝이 아니에요', '#e74c3c');
+          after(430, function () { st.classList.remove('tut-hurt'); });
+          after(620, function () {
+            s.pair.forEach(function (i) {
+              cardAt(i).classList.remove('tut-bad', 'flip');
+            });
+          });
+          after(1150, function () { busy = false; go(step + 1); });
+        });
+        return;
+      }
+    }
+
+    if (s.trapSlot === slot) {                         // 함정은 눌러 보게 두되 왜 아닌지 바로 알려준다
+      busy = true;
+      node.classList.add('flip');
+      after(450, function () {
+        beep('wrong'); buzz([30, 40, 30]);
+        node.classList.add('tut-bad');
+        floatText(node, '짝이 아니에요', '#e74c3c');
+        el('tut-hint').textContent = '👆 화재보험 든 돈은 보험료의 설명이에요. 다시 골라 보세요';
+        after(600, function () { node.classList.remove('tut-bad', 'flip'); busy = false; });
+      });
+    }
+  }
+
+  function render() {
+    const s = STEPS[step];
+    el('tut-badge').textContent = (step + 1) + '/' + STEPS.length;
+    el('tut-text').innerHTML = s.text;
+    el('tut-wrong').textContent = String(s.wrongN);
+    el('tut-match').textContent = String(s.matched.length / 2);
+    el('tut-status').classList.remove('tut-hurt');
+
+    CARDS.forEach(function (_, i) {
+      const node = cardAt(i);
+      node.className = 'tut-card';
+      if (s.matched.indexOf(i) >= 0) node.classList.add('flip', 'tut-ok');
+      else if (s.open.indexOf(i) >= 0) node.classList.add('flip');
+    });
+    // quiz 단계에선 금빛 링을 빼서 정답이 눈으로 드러나지 않게 한다 — 탭은 그대로 가능
+    if (s.tapSlot != null) {
+      const tn = cardAt(s.tapSlot);
+      tn.classList.add('tut-live');
+      if (!s.quiz) tn.classList.add('tut-target');
+    }
+    if (s.trapSlot != null) cardAt(s.trapSlot).classList.add('tut-live');
+
+    const hint = el('tut-hint');
+    if (s.hint) { hint.style.display = 'block'; hint.textContent = '👆 ' + s.hint; }
+    else { hint.style.display = 'none'; }
+    const btn = el('tut-next');
+    if (s.btn) { btn.style.display = 'block'; btn.textContent = s.btn; }
+    else { btn.style.display = 'none'; }
+  }
+
+  function go(n) { step = n; if (step >= STEPS.length) return finish(); render(); }
+  function nextBtn() { if (STEPS[step].finish) return finish(); go(step + 1); }
+
+  function start() {
+    /* 게임 방법(튜토리얼) 중에도 배너를 내린다 — 실기기 제보(2026-09-15).
+       닫을 때 되살리는 것은 close() 에서만. finish() 는 close() 뒤 게임을 시작하므로
+       거기서 show 를 하면 게임 중에 배너가 다시 올라온다. */
+    if (typeof hideAdPlaceholder === 'function') hideAdPlaceholder();
+    clearTimers(); busy = false; step = 0;
+    buildGrid(); render();
+    el('tutorial').classList.add('show');
+  }
+  function close() {
+    if (typeof showAdPlaceholder === 'function') showAdPlaceholder();
+    clearTimers(); busy = false;
+    el('tutorial').classList.remove('show');
+  }
+  function finish() { close(); if (window.startGame) startGame(); }
+
+  return { start:start, close:close, next:nextBtn };
 })();
+
+// 시작화면 '📖 사용방법' 버튼 → 인터랙티브 튜토리얼
+function openGuide() { Tutorial.start(); }
+
 </script>
 
 <script src="emoji-icons.js?v=15"></script>
