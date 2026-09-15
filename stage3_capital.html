@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+    <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
+         **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
+         이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
+    <script src="safestore.js?v=19"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>자본의 제왕 — 전산회계 1급 스테이지 2</title>
@@ -56,9 +60,24 @@
             flex-shrink: 0; gap: 8px;
         }
         .logo { font-family:'Black Han Sans','Noto Sans KR',sans-serif; font-size: clamp(0.85rem,3.5vw,1.4rem); color: var(--neon-gold); flex-shrink: 0; display:flex; align-items:center; gap:6px; }
-        .hud { display: flex; gap: clamp(6px,2vw,20px); align-items: center; flex: 1; justify-content: center; }
-        .hud-stat { display: flex; flex-direction: column; align-items: center; min-width: 40px; }
-        .hud-label { font-size: clamp(0.55rem,1.8vw,0.7rem); color: rgba(255,255,255,0.4); font-weight: bold; letter-spacing: 1px; }
+        /* min-width:0 이 없으면 flex 항목이 내용보다 작아지지 못해, 줄어드는 대신
+           **옆 버튼을 화면 밖으로 밀어낸다**(2026-09-16 검토에서 잡힌 원인). */
+        .hud { display: flex; gap: clamp(6px,2vw,20px); align-items: center; flex: 1 1 0; min-width: 0; justify-content: center; }
+        .hud-stat { display: flex; flex-direction: column; align-items: center; min-width: 0; }
+        .hud-label { font-size: clamp(0.55rem,1.8vw,0.7rem); color: rgba(255,255,255,0.4); font-weight: bold; letter-spacing: 1px; white-space: nowrap; }
+        .hud-val { white-space: nowrap; }
+
+        /* 좁은 폰에서 헤더가 넘치는 것 방지 — game4_factory 와 같은 규칙.
+           2026-09-16 검토: 이 파일에는 이 블록이 **아예 없어서** 320~350px 에서
+           '그만'·'홈' 버튼이 화면 밖으로 30px 밀려나 있었다. 자연 폭이 355px 이다. */
+        @media(max-width:359px) {
+            header { padding-left: 8px; padding-right: 8px; gap: 4px; }
+            .header-btns { gap: 4px; }
+            .quit-btn { padding: 0 8px; font-size: 0.75rem; }
+            .hud { gap: clamp(4px,1.5vw,20px); }
+            .logo { font-size: 0.8rem; gap: 4px; }
+            .logo .icon { width: 16px; height: 16px; }
+        }
         .hud-val { font-family:'Black Han Sans','Noto Sans KR',sans-serif; font-size: clamp(1.05rem,3.5vw,1.4rem); color: white; line-height: 1; }
         #hud-price{ color: var(--neon-gold); }
         #hud-day{ color: #7fd8ff; }
@@ -1538,9 +1557,9 @@
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="emoji-icons.js?v=18"></script>
-    <script src="ask.js?v=18"></script>
-    <script src="growth.js?v=18"></script>
-<script src="streak.js?v=18"></script>
+    <script src="emoji-icons.js?v=19"></script>
+    <script src="ask.js?v=19"></script>
+    <script src="growth.js?v=19"></script>
+<script src="streak.js?v=19"></script>
 </body>
 </html>
