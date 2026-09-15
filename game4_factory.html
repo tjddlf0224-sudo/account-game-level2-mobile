@@ -1849,8 +1849,14 @@ const Tutorial = (function () {
   function go(n) { step = n; if (step >= STEPS.length) return finish(); render(); }
   function nextBtn() { if (STEPS[step].finish) return finish(); go(step + 1); }
   function clearTimer() { if (timer) { clearTimeout(timer); timer = null; } }
-  function start() { clearTimer(); step = 0; locked = false; buildBoard(); render(); el('tutorial').classList.add('show'); }
-  function close() { clearTimer(); locked = false; el('tutorial').classList.remove('show'); }
+  function start() {
+    /* 게임 방법(튜토리얼) 중에도 배너를 내린다 — 실기기 제보(2026-09-15).
+       닫을 때는 곧바로 되돌리지 않는다: finish() 는 close() 뒤에 게임을 시작하는데,
+       거기서 show 를 해 버리면 게임 중에 배너가 다시 올라온다. 대신 시작화면으로
+       돌아가는 경우만 되살리도록 startGame/startQuiz 쪽 hide 와 짝을 맞춰 뒀다. */
+    if (typeof hideAdPlaceholder === 'function') hideAdPlaceholder(); clearTimer(); step = 0; locked = false; buildBoard(); render(); el('tutorial').classList.add('show'); }
+  function close() {
+    if (typeof showAdPlaceholder === 'function') showAdPlaceholder(); clearTimer(); locked = false; el('tutorial').classList.remove('show'); }
   function finish() { close(); if (window.startGame) startGame(); }
 
   return { start:start, close:close, next:nextBtn };
