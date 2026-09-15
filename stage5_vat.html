@@ -13,6 +13,9 @@
      신고서(KcLep 실제 화면 재현, 건드리지 않음) 자체의 남색 헤더바·
      금색 세액 표시와 톤이 자연스럽게 이어지도록 맞춤. */
   :root{
+    /* 앱 하단 광고 배너가 가릴 수 있는 최대 높이 — 게임 5종·전표의 눈과 같은 값(2026-09-15).
+       시작화면이 길어지면서 맨 아래 버튼이 배너에 가렸다(layout 테스트 34px). */
+    --ad-reserve: 96px;
     --bg:#070c14; --card:#101a2c; --card2:#16223a; --line:rgba(160,190,255,.13);
     --blue:#2f6fed; --green:#34c77b; --red:#ef4444; --gold:#d4af37;
     --sale:#2f6fed;
@@ -28,6 +31,10 @@
        font-family:'Noto Sans KR',-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
        padding:0 0 40px; min-height:100vh;}
   .wrap{max-width:640px;margin:0 auto;padding:calc(16px + env(safe-area-inset-top)) 16px 16px;}
+  /* 하단 여백은 padding 이 아니라 ::after 스페이서로 — iOS WKWebView 가 padding-bottom 을
+     스크롤 영역에 안 넣어 주는 경우가 있다(게임 5종에서 먼저 겪음). */
+  .wrap::after{content:'';display:block;width:100%;
+    height:calc(env(safe-area-inset-bottom, 0px) + max(var(--ad-banner-h, 0px), var(--ad-safe-h, 0px), var(--ad-reserve)));}
   @media (min-width:701px){
     body{background:
       radial-gradient(ellipse 50% 40% at 12% 10%, rgba(47,111,237,0.09), transparent 60%),

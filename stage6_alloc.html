@@ -8,6 +8,9 @@
 <meta name="description" content="파이프 밸브를 잠그고 열며 직접배분법·단계배분법·상호배분법의 차이를 몸으로 익히는 연습">
 <style>
   :root{
+    /* 앱 하단 광고 배너가 가릴 수 있는 최대 높이 — 게임 5종·전표의 눈과 같은 값(2026-09-15).
+       시작화면이 길어지면서 맨 아래 버튼이 배너에 가렸다(layout 테스트 34px). */
+    --ad-reserve: 96px;
     --bg:#020810; --card:#0c1626; --card2:#11203a; --line:rgba(255,255,255,.08);
     --blue:#00f2ff; --purple:#b44fff; --green:#2ecc71; --red:#ff2d78; --gold:#ffd24a;
     --pipe-on:#00f2ff; --pipe-off:#3a4658;
@@ -23,6 +26,10 @@
        font-family:'Noto Sans KR',-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
        padding:0 0 40px; min-height:100vh;}
   .wrap{max-width:640px;margin:0 auto;padding:calc(16px + env(safe-area-inset-top)) 16px 16px;}
+  /* 하단 여백은 padding 이 아니라 ::after 스페이서로 — iOS WKWebView 가 padding-bottom 을
+     스크롤 영역에 안 넣어 주는 경우가 있다(게임 5종에서 먼저 겪음). */
+  .wrap::after{content:'';display:block;width:100%;
+    height:calc(env(safe-area-inset-bottom, 0px) + max(var(--ad-banner-h, 0px), var(--ad-safe-h, 0px), var(--ad-reserve)));}
   @media (min-width:701px){
     body{background:
       radial-gradient(ellipse 50% 40% at 12% 10%, rgba(180,79,255,0.07), transparent 60%),
