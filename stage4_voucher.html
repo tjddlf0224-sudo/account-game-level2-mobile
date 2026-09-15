@@ -139,6 +139,8 @@
     font-size:.86rem;line-height:1.6;color:var(--txt);word-break:keep-all;}
   .hint-box.on{display:block;animation:hintIn .25s ease;}
   .hint-box b{color:var(--gold);margin-right:6px;}
+  .rule-line{margin-top:10px;padding:10px 12px;border-radius:10px;background:rgba(242,177,52,.08);border-left:3px solid var(--gold);font-size:.84rem;line-height:1.55;color:var(--txt);word-break:keep-all;}
+  .rule-line b{color:var(--gold);}
   @keyframes hintIn{ from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:none} }
 
   .type-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px;}
@@ -535,6 +537,30 @@ function hintPieces(kw){
   return String(kw||'').replace(/\(.*?\)/g,' ').split(/[+\u00b7,/]/)
     .join(' ').split(/\s+/).map(w=>w.trim()).filter(w=>w.length>=2);
 }
+/* 📌 "이런 단서면 이 유형" — 정답을 보여줄 때 함께 알려 주는 규칙(2026-09-15 사용자 요청:
+   "계산서면 면세, 세금계산서면 과세 이런 거"). 142문항의 keyword 를 유형별로 세어 뽑았다. */
+const TYPE_RULES = {
+  '11':'전자세금계산서를 <b>발급</b>했다 → 과세 매출',
+  '51':'전자세금계산서를 <b>받았다</b> → 과세 매입',
+  '12':'구매확인서·내국신용장으로 <b>영세율</b>세금계산서를 발급 → 영세 매출',
+  '52':'구매확인서·내국신용장으로 <b>영세율</b>세금계산서를 받음 → 영세 매입',
+  '13':'세금계산서가 아니라 <b>계산서</b>를 발급(면세품·토지) → 면세 매출',
+  '53':'세금계산서가 아니라 <b>계산서</b>를 받음(면세품·리스·교육) → 면세 매입',
+  '14':'세금계산서도 카드도 현금영수증도 <b>없는</b> 과세 매출·간주공급 → 건별',
+  '16':'해외로 <b>직수출</b>(세금계산서 없음) → 수출',
+  '17':'<b>신용카드</b>로 결제받았다 → 카과(매출)',
+  '57':'<b>신용카드</b>로 결제했다(과세 매입) → 카과(매입)',
+  '22':'<b>현금영수증</b>을 발급했다 → 현과(매출)',
+  '61':'<b>현금영수증</b>을 받았다(지출증빙) → 현과(매입)',
+  '62':'현금영수증인데 <b>면세</b> 품목 → 현면',
+  '54':'세금계산서는 받았지만 <b>접대비·비영업용승용차·토지·업무무관</b> → 불공(매입세액 공제 안 됨)',
+  '55':'<b>세관</b>이 발급한 수입세금계산서 → 수입',
+};
+function ruleHtml(code){
+  const r=TYPE_RULES[code]; if(!r) return '';
+  return '<div class="rule-line">📌 <b>규칙</b> '+r+'</div>';
+}
+
 function showHint(q){
   const box=document.getElementById('hint-box'), btn=document.getElementById('hint-btn');
   if(!box || box.classList.contains('on')) return;         // 한 문제에 한 번이면 충분하다
@@ -567,16 +593,17 @@ function pick(code,q){
   });
   const ok = code===q.type_code;
   const expl=document.getElementById('expl');
+  showHint(q);   // 정답 공개 때도 지문의 단서를 색·반짝임으로 짚어 준다(이미 눌렀으면 그대로)
   if(ok){
     combo++; correctCnt++; if(combo>maxCombo) maxCombo=combo;
     score+=100+(combo-1)*20;
     timeLeft=Math.min(TIME_MAX, timeLeft+20);
-    expl.innerHTML=`<div class="verdict" style="color:var(--green)">정답! ${esc(q.type_full)}</div>${esc(q.explain||'')}`
+    expl.innerHTML=`<div class="verdict" style="color:var(--green)">정답! ${esc(q.type_full)}</div>${esc(q.explain||'')}`+ruleHtml(q.type_code)
       + (q.keyword?`<span class="kw">${esc(q.keyword)}</span>`:'');
   }else{
     combo=0; wrongCnt++;
     timeLeft=Math.max(0, timeLeft-5);
-    expl.innerHTML=`<div class="verdict" style="color:var(--red)">오답 — 정답은 ${esc(q.type_full)}</div>${esc(q.explain||'')}`
+    expl.innerHTML=`<div class="verdict" style="color:var(--red)">오답 — 정답은 ${esc(q.type_full)}</div>${esc(q.explain||'')}`+ruleHtml(q.type_code)
       + (q.keyword?`<span class="kw">${esc(q.keyword)}</span>`:'');
     if(window.WrongNote) WrongNote.add({
       game:GAME_ID, key:q.id, q:q.stem,
