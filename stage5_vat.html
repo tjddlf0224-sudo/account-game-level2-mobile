@@ -72,6 +72,23 @@
   .example-card .ex-label{font-size:.72rem;color:var(--dim);letter-spacing:.1em;margin-bottom:6px;}
   .example-card .ex-stem{font-size:.94rem;line-height:1.55;word-break:keep-all;}
   .example-card .ex-ans{font-size:.82rem;color:var(--dim);margin-top:8px;}
+  /* ── 시작화면(2급 게임과 같은 구성, 2026-09-15 UI 통일) ─────────────────── */
+  .home-title{font-family:'Black Han Sans','Noto Sans KR',sans-serif;
+    font-size:clamp(1.7rem,7vw,2.4rem);color:var(--gold);text-align:center;
+    margin:8px 0 6px;text-shadow:0 0 18px rgba(255,214,0,.25);}
+  .home-sub{font-size:.82rem;color:var(--dim);text-align:center;margin-bottom:18px;line-height:1.6;word-break:keep-all;}
+  .start-grid{display:grid;grid-template-columns:1fr;gap:10px;margin:14px 0 4px;}
+  @media (min-width:520px){ .start-grid{grid-template-columns:1fr 1fr 1fr;} }
+  .info-card{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:13px 15px;font-size:.8rem;color:var(--dim);line-height:1.65;}
+  .info-card strong{display:block;color:var(--txt);font-size:.9rem;margin-bottom:5px;}
+  .home-actions{display:flex;flex-direction:column;gap:10px;margin-top:20px;}
+  .pill-btn{display:block;width:100%;border:none;border-radius:50px;padding:15px;min-height:52px;
+    font-family:'Black Han Sans','Noto Sans KR',sans-serif;font-size:1.05rem;cursor:pointer;color:#021;
+    background:linear-gradient(90deg,var(--blue),var(--green));}
+  .pill-btn:disabled{opacity:.45;} .pill-btn:active{transform:scale(.98);}
+  .btn-hub{display:block;width:100%;border:1.5px solid var(--line);border-radius:50px;padding:14px;min-height:52px;
+    font-family:'Black Han Sans','Noto Sans KR',sans-serif;font-size:1rem;color:var(--dim);background:var(--card2);cursor:pointer;}
+  .btn-hub:active{transform:scale(.98);}
   .rule-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
   .rule-card{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-size:.84rem;line-height:1.6;}
   .rule-card strong{display:block;color:var(--txt);font-size:.88rem;margin-bottom:4px;}
@@ -105,8 +122,9 @@
   .vform-pay{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:#152036;}
   .vform-pay .nm{font-size:.8rem;color:#cfe0ff;font-weight:700;}
   .vform-pay .amt{font-size:1.1rem;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums;}
-  .vform-none{border:1.5px dashed rgba(255,255,255,.28);border-radius:12px;padding:11px;
-    text-align:center;font-size:.8rem;color:var(--dim);cursor:pointer;transition:.15s;margin-bottom:14px;}
+  /* 해당없음 칸 — 신고서의 다른 칸처럼 누르는 것이라 같은 흰 종이로(2026-09-15 사용자 요청) */
+  .vform-none{border:1.5px solid #c8d0dc;border-radius:12px;padding:11px;background:#fff;
+    text-align:center;font-size:.8rem;color:#2b3446;font-weight:600;cursor:pointer;transition:.15s;margin-bottom:14px;}
   .vform-none:active{transform:scale(.98);}
   .vform-none.correct{border-color:var(--green);background:rgba(52,199,123,.14);color:#fff;}
   .vform-none.wrong{border-color:var(--red);background:rgba(239,68,68,.14);color:#fff;}
@@ -204,27 +222,23 @@
 </header>
 <div class="wrap">
   <div id="home">
-    <div class="panel">
-      <div class="hdr-sub">전산회계 1급 실무 · 부가가치세 신고서</div>
-      <div class="example-card">
-        <div class="ex-label">문제 예시</div>
-        <div class="ex-stem">제품을 판매하고 전자세금계산서를 발급했다.</div>
-        <div class="ex-ans">→ 이 거래가 신고서의 <b style="color:var(--sale)">세금계산서발급분</b> 칸 어디에 찍히는지 골라요.</div>
-      </div>
-      <div class="rule-grid">
-        <div class="rule-card"><strong>제한 시간</strong>60초 동안 계속<br>거래가 나와요.</div>
-        <div class="rule-card"><strong>정답</strong>+100점(콤보 가산)<br>신고서 칸이 채워져요.</div>
-        <div class="rule-card"><strong>오답</strong>콤보 초기화<br>시간 <b style="color:var(--red)">-5초</b></div>
-        <div class="rule-card"><strong>신고서</strong>매출 4칸 · 매입 3칸<br>+ 해당없음</div>
-      </div>
-      <div class="mini">
-        <svg class="ic-tip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="7.6" r="1" fill="currentColor" stroke="none"/></svg>
-        세금계산서를 받아도 접대비·비영업용승용차 등은 <b style="color:#fff">불공제</b>(공제 안 됨) ·
-        <svg class="ic-tip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="7.6" r="1" fill="currentColor" stroke="none"/></svg>
-        면세 거래는 부가세 자체가 없어 신고서에 아예 올라가지 않음
-      </div>
-      <button class="cta" id="start-btn">▶ 시작</button>
-      <button class="guide-btn" id="guide-btn">게임 방법</button>
+    <!-- 2급 게임 시작화면과 같은 구성(2026-09-15 UI 통일). 큰 제목 → 설명 → 예시 → 정보 카드 3장 → 큰 버튼 3개 -->
+    <div class="home-title">🚪 신고의 문</div>
+    <div class="home-sub">전산회계 1급 · 거래를 보고 부가가치세 신고서의 어느 칸에 찍히는지 찾기</div>
+    <div class="example-card">
+      <div class="ex-label">📌 문제 예시</div>
+      <div class="ex-stem">제품을 판매하고 전자세금계산서를 발급했다.</div>
+      <div class="ex-ans">→ 이 거래가 신고서의 <b style="color:var(--sale)">세금계산서발급분</b> 칸 어디에 찍히는지 골라요</div>
+    </div>
+    <div class="start-grid">
+      <div class="info-card"><strong>⏱️ 규칙</strong>제한 시간 <b style="color:var(--gold)">60초</b><br>오답 <b style="color:var(--red)">-5초</b> · 시간이 남는 한 계속 출제</div>
+      <div class="info-card"><strong>🎯 점수</strong>정답 <b style="color:var(--green)">+100점</b><br>연속 정답이면 콤보 가산<br>맞힐 때마다 신고서 칸이 채워져요</div>
+      <div class="info-card"><strong>🧾 신고서</strong>매출 4칸 · 매입 3칸 + <b style="color:var(--gold)">해당없음</b><br>접대비·비영업용승용차는 <b>불공제</b><br>면세 거래는 신고서에 아예 안 올라가요</div>
+    </div>
+    <div class="home-actions">
+      <button class="pill-btn" id="start-btn">▶ 게임 시작</button>
+      <button class="btn-hub" id="guide-btn">📖 사용방법</button>
+      <button class="btn-hub" onclick="location.href='index_lv1.html'">🏠 메인으로 나가기</button>
     </div>
   </div>
 

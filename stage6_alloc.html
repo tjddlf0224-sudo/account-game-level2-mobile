@@ -37,6 +37,27 @@
   h1{font-size:1.15rem;margin:0;}
   h1 .sub{display:block;font-size:.72rem;color:var(--dim);font-weight:500;margin-top:3px;}
 
+  .example-card{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:14px;}
+  .example-card .ex-label{font-size:.72rem;color:var(--dim);letter-spacing:.1em;margin-bottom:6px;}
+  .example-card .ex-stem{font-size:.94rem;line-height:1.55;word-break:keep-all;}
+  .example-card .ex-ans{font-size:.82rem;color:var(--dim);margin-top:8px;}
+  /* ── 시작화면(2급 게임과 같은 구성, 2026-09-15 UI 통일) ─────────────────── */
+  .home-title{font-family:'Black Han Sans','Noto Sans KR',sans-serif;
+    font-size:clamp(1.7rem,7vw,2.4rem);color:var(--gold);text-align:center;
+    margin:8px 0 6px;text-shadow:0 0 18px rgba(255,214,0,.25);}
+  .home-sub{font-size:.82rem;color:var(--dim);text-align:center;margin-bottom:18px;line-height:1.6;word-break:keep-all;}
+  .start-grid{display:grid;grid-template-columns:1fr;gap:10px;margin:14px 0 4px;}
+  @media (min-width:520px){ .start-grid{grid-template-columns:1fr 1fr 1fr;} }
+  .info-card{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:13px 15px;font-size:.8rem;color:var(--dim);line-height:1.65;}
+  .info-card strong{display:block;color:var(--txt);font-size:.9rem;margin-bottom:5px;}
+  .home-actions{display:flex;flex-direction:column;gap:10px;margin-top:20px;}
+  .pill-btn{display:block;width:100%;border:none;border-radius:50px;padding:15px;min-height:52px;
+    font-family:'Black Han Sans','Noto Sans KR',sans-serif;font-size:1.05rem;cursor:pointer;color:#021;
+    background:linear-gradient(90deg,var(--blue),var(--green));}
+  .pill-btn:disabled{opacity:.45;} .pill-btn:active{transform:scale(.98);}
+  .btn-hub{display:block;width:100%;border:1.5px solid var(--line);border-radius:50px;padding:14px;min-height:52px;
+    font-family:'Black Han Sans','Noto Sans KR',sans-serif;font-size:1rem;color:var(--dim);background:var(--card2);cursor:pointer;}
+  .btn-hub:active{transform:scale(.98);}
   .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px;}
   .panel h2{font-size:.92rem;margin:0 0 10px;color:var(--blue);}
   .panel p{font-size:.88rem;line-height:1.65;color:var(--dim);margin:0 0 8px;}
@@ -176,12 +197,23 @@
   </div>
 
   <div id="home">
-    <div class="panel">
-      <h2>보조부문원가, 어떻게 나눠 낼까?</h2>
-      <p>동력부·수선부 같은 보조부문은 제품을 직접 안 만들지만, 없으면 공장이 안 돌아가요. 이 부문의 원가를 절단부·조립부 같은 제조부문에 어떻게 배분하느냐에 따라 방법이 3가지로 갈립니다.</p>
-      <p>파이프 밸브를 직접 잠그고 열면서 <b style="color:#fff">직접배분법 → 단계배분법 → 상호배분법(개념)</b> 순서로 차이를 몸으로 익혀봐요.</p>
-      <button class="cta" id="start-btn">▶ 시작</button>
-      <button class="guide-btn" id="guide-btn">📖 게임 방법</button>
+    <!-- 2급 게임 시작화면과 같은 구성(2026-09-15 UI 통일) -->
+    <div class="home-title">🔧 배관의 방</div>
+    <div class="home-sub">전산회계 1급 · 보조부문원가를 제조부문에 나눠 보내기</div>
+    <div class="example-card">
+      <div class="ex-label">📌 이런 걸 해요</div>
+      <div class="ex-stem">동력부·수선부는 제품을 직접 안 만들지만, 없으면 공장이 안 돌아가요.</div>
+      <div class="ex-ans">→ 그 원가를 절단부·조립부로 <b style="color:var(--gold)">파이프 밸브를 잠그고 열며</b> 보내요</div>
+    </div>
+    <div class="start-grid">
+      <div class="info-card"><strong>🔵 라운드 1</strong><b style="color:var(--txt)">직접배분법</b><br>보조부문끼리는 없는 셈 친다</div>
+      <div class="info-card"><strong>🟣 라운드 2</strong><b style="color:var(--txt)">단계배분법</b><br>순서를 정해서 한 번씩만</div>
+      <div class="info-card"><strong>🎯 라운드 3</strong><b style="color:var(--txt)">상호배분법(개념)</b><br>시험은 계산보다 차이를 물어요</div>
+    </div>
+    <div class="home-actions">
+      <button class="pill-btn" id="start-btn">▶ 게임 시작</button>
+      <button class="btn-hub" id="guide-btn">📖 사용방법</button>
+      <button class="btn-hub" onclick="location.href='index_lv1.html'">🏠 메인으로 나가기</button>
     </div>
   </div>
 
