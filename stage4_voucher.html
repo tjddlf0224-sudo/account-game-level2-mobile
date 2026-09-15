@@ -140,6 +140,10 @@
   .hint-box.on{display:block;animation:hintIn .25s ease;}
   .hint-box b{color:var(--gold);margin-right:6px;}
   .rule-line{margin-top:10px;padding:10px 12px;border-radius:10px;background:rgba(242,177,52,.08);border-left:3px solid var(--gold);font-size:.84rem;line-height:1.55;color:var(--txt);word-break:keep-all;}
+  /* 라벨('📌 규칙')을 제 줄에 두고 본문을 아래로 내린다 — 2026-09-15 사용자 지적:
+     "규칙 다음에 줄바꿈했으면 좋겠어. 띄어쓰기로만 구분하니까 가독성이 떨어지고 잘 구분이 안돼" */
+  .rule-line .rule-label{display:block;color:var(--gold);font-weight:700;margin-bottom:4px;letter-spacing:.3px;}
+  .rule-line .rule-body{display:block;}
   .rule-line b{color:var(--gold);}
   @keyframes hintIn{ from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:none} }
 
@@ -320,11 +324,11 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="pausewatch.js?v=15"></script>
-<script src="ask.js?v=15"></script>
-<script src="wrongnote.js?v=15"></script>
-<script src="growth.js?v=15"></script>
-<script src="streak.js?v=15"></script>
+<script src="pausewatch.js?v=16"></script>
+<script src="ask.js?v=16"></script>
+<script src="wrongnote.js?v=16"></script>
+<script src="growth.js?v=16"></script>
+<script src="streak.js?v=16"></script>
 <script>
 (function(){ if(!(localStorage.getItem('hub_nickname')||'').trim()){ location.replace('login.html'); } })();
 
@@ -558,7 +562,7 @@ const TYPE_RULES = {
 };
 function ruleHtml(code){
   const r=TYPE_RULES[code]; if(!r) return '';
-  return '<div class="rule-line">📌 <b>규칙</b> '+r+'</div>';
+  return '<div class="rule-line"><span class="rule-label">📌 규칙</span><span class="rule-body">'+r+'</span></div>';
 }
 
 function showHint(q){
@@ -768,6 +772,6 @@ function showAdPlaceholder(){ if(window.AdBridge && typeof AdBridge.show==='func
 
 load();
 </script>
-<script src="emoji-icons.js?v=15"></script>
+<script src="emoji-icons.js?v=16"></script>
 </body>
 </html>

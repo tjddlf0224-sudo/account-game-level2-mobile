@@ -73,7 +73,11 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 .gq{font-size:clamp(.85rem,3vw,1.4rem);font-weight:900;color:#eef0ff;text-align:center;text-shadow:0 2px 10px rgba(0,0,0,.95),0 0 6px rgba(0,0,0,.8);max-width:90vw;line-height:1.4;background:rgba(2,8,20,.82);padding:8px clamp(12px,4vw,30px);border-radius:12px;border:1px solid rgba(255,255,255,.1)}
 .gk{font-family:'Black Han Sans',sans-serif;font-size:clamp(.78rem,2.5vw,1.1rem);color:var(--gd);text-shadow:0 0 14px rgba(255,214,0,.75),0 2px 8px rgba(0,0,0,.9);animation:kP 1s infinite alternate}
 @keyframes kP{from{transform:scale(1)}to{transform:scale(1.05)}}
-.gchoices{position:relative;display:flex;justify-content:space-between;width:100%;padding:0 clamp(14px,5vw,80px);top:clamp(-60px,-8vw,-40px)}
+/* 장부 이름(좌·우 선택지) 위치. 2026-09-15 실기기 제보: "문제가 길면 장부이름과 겹치네.
+   장부 이름을 살짝 아래로 내려야겠어." 문제가 2줄이 되면 모든 폭(360·390·430)에서
+   정확히 13px 겹쳤다. -40px → -14~-17px 로 내려 10~13px 여유를 준다.
+   판정은 g.y 와 기체 x좌표로만 하므로(update() 참고) 이 값은 순전히 보이는 위치다. */
+.gchoices{position:relative;display:flex;justify-content:space-between;width:100%;padding:0 clamp(14px,5vw,80px);top:clamp(-40px,-4vw,-14px)}
 .gchoice{font-family:'Black Han Sans',sans-serif;font-size:clamp(.9rem,3.5vw,1.4rem);padding:clamp(7px,2vw,11px) clamp(16px,4vw,34px);border-radius:50px;border:2.5px solid;backdrop-filter:blur(4px)}
 .gchoice.left{color:var(--pk);border-color:var(--pk);background:rgba(255,45,120,.1);text-shadow:0 0 10px var(--pk);box-shadow:0 0 18px rgba(255,45,120,.2)}
 .gchoice.right{color:var(--gn);border-color:var(--gn);background:rgba(57,255,20,.07);text-shadow:0 0 10px var(--gn);box-shadow:0 0 18px rgba(57,255,20,.14)}
@@ -479,16 +483,16 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 .gtitle, .logo, .ov-title, .overlay-title, h1, h2 { font-family: 'Black Han Sans', 'Noto Sans KR', sans-serif !important; }
 </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="ask.js?v=15"></script>
-    <script src="wrongnote.js?v=15"></script>
-    <script src="growth.js?v=15"></script>
-<script src="streak.js?v=15"></script>
-    <script src="difficulty.js?v=15"></script>
-    <script src="review-prompt.js?v=15"></script>
+    <script src="ask.js?v=16"></script>
+    <script src="wrongnote.js?v=16"></script>
+    <script src="growth.js?v=16"></script>
+<script src="streak.js?v=16"></script>
+    <script src="difficulty.js?v=16"></script>
+    <script src="review-prompt.js?v=16"></script>
 </head>
 <body>
 
-<script src="bgm.js?v=15"></script>
+<script src="bgm.js?v=16"></script>
 
 
 <div style="position:fixed;inset:0;background:var(--bg);z-index:-1;"></div>
@@ -630,7 +634,7 @@ const GAME_ID="flight";
 function escapeHTML(str) { if (!str) return ''; return str.replace(/[&<>'"]/g, function(tag) { const chars = { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }; return chars[tag] || tag; }); }
 
 const BGM={
-  el:BGMAudio.create('bgm5_flight.mp3?v=15'),
+  el:BGMAudio.create('bgm5_flight.mp3?v=16'),
   // 게임별 키(flight_muted)가 있으면 우선, 없으면 허브 전역 토글(hub_muted) 참조
   _muted:localStorage.getItem('flight_muted')!==null?localStorage.getItem('flight_muted')==='true':localStorage.getItem('hub_muted')==='true',
   _fadeTimer:null,
@@ -1637,6 +1641,6 @@ const Tutorial = (function () {
 function openGuide() { Tutorial.start(); }
 </script>
 
-<script src="emoji-icons.js?v=15"></script>
+<script src="emoji-icons.js?v=16"></script>
 </body>
 </html>
