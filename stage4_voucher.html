@@ -7,7 +7,7 @@
 <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
      **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
      이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-<script src="safestore.js?v=19"></script>
+<script src="safestore.js?v=20"></script>
 <title>전표의 눈 — 전산회계 1급 스테이지 3</title>
 <meta name="description" content="실제 기출 거래를 보고 매입매출전표 유형(과세·영세·면세·불공·카과 등)을 맞히는 연습">
 <style>
@@ -95,6 +95,12 @@
   .info-card strong{display:block;color:var(--txt);font-size:.9rem;margin-bottom:5px;}
   /* 버튼 크기는 전 게임 공통 규칙에 맞춘다 — 제각각 크기를 쓰지 않는다 */
   .home-actions{display:flex;flex-direction:column;gap:10px;margin-top:20px;}
+  /* 시작화면에서는 상단 바를 감춘다 — 아직 시작도 안 했는데 TIME·'그만' 이 보이고,
+     상단 바 이름과 본문 큰 제목이 같은 이름을 두 번 보여 줬다(2026-09-16 UI 통일).
+     2급 게임 5종은 시작화면이 전체를 덮어 원래 이렇게 보인다.
+     '다시 하기' 는 location.reload() 라 이 상태가 저절로 되돌아온다. */
+  body.home-mode header { display: none; }
+
   .pill-btn{display:block;width:100%;border:none;border-radius:50px;padding:15px;
     font-family:'Black Han Sans','Noto Sans KR',sans-serif;font-size:1.05rem;
     cursor:pointer;color:#021;background:linear-gradient(90deg,var(--blue),var(--green));}
@@ -243,7 +249,7 @@
 </style>
   <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 </head>
-<body>
+<body class="home-mode">
 <header>
   <div class="logo">전표의 눈</div>
   <div class="status-bar">
@@ -328,11 +334,11 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="pausewatch.js?v=19"></script>
-<script src="ask.js?v=19"></script>
-<script src="wrongnote.js?v=19"></script>
-<script src="growth.js?v=19"></script>
-<script src="streak.js?v=19"></script>
+<script src="pausewatch.js?v=20"></script>
+<script src="ask.js?v=20"></script>
+<script src="wrongnote.js?v=20"></script>
+<script src="growth.js?v=20"></script>
+<script src="streak.js?v=20"></script>
 <script>
 (function(){ if(!(localStorage.getItem('hub_nickname')||'').trim()){ location.replace('login.html'); } })();
 
@@ -476,6 +482,7 @@ function startQuiz(){
   score=0;combo=0;maxCombo=0;correctCnt=0;wrongCnt=0;timeLeft=TIME_LIMIT;prevId=null;
   if(window.WrongNote) WrongNote.reset();
   document.getElementById('home').style.display='none';
+  document.body.classList.remove('home-mode');   // 이제 상단 바를 보여 준다
   document.getElementById('result').style.display='none';
   document.getElementById('quiz').style.display='block';
   isPlaying=true;
@@ -776,6 +783,6 @@ function showAdPlaceholder(){ if(window.AdBridge && typeof AdBridge.show==='func
 
 load();
 </script>
-<script src="emoji-icons.js?v=19"></script>
+<script src="emoji-icons.js?v=20"></script>
 </body>
 </html>
