@@ -87,27 +87,70 @@
   .round-title{font-size:1.02rem;font-weight:700;margin-bottom:6px;}
   .round-desc{font-size:.86rem;color:var(--dim);line-height:1.6;margin-bottom:14px;word-break:keep-all;}
 
-  /* ── 배관도(탱크+밸브 칩) ── */
-  .plant{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px;}
-  .tank{margin-bottom:16px;}
-  .tank:last-child{margin-bottom:0;}
-  .tank-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
-  .tank-name{font-weight:700;font-size:.98rem;}
-  .tank-cost{font-family:ui-monospace,monospace;font-weight:700;color:var(--gold);font-size:.92rem;}
-  .tank-cost.zero{color:rgba(255,255,255,.25);text-decoration:line-through;}
-  .pipe-row{display:flex;gap:8px;flex-wrap:wrap;margin-left:14px;padding-left:14px;border-left:2px dashed var(--pipe-off);}
-  .valve{position:relative;flex:1;min-width:96px;border:1.5px solid var(--pipe-off);border-radius:12px;
-    padding:9px 8px;text-align:center;cursor:pointer;transition:.15s;background:var(--card2);}
-  .valve .vname{display:block;font-size:.78rem;color:var(--dim);}
-  .valve .vamt{display:block;font-size:.72rem;font-family:ui-monospace,monospace;color:rgba(255,255,255,.35);margin-top:2px;}
-  .valve.open{border-color:var(--pipe-on);background:rgba(0,242,255,.12);box-shadow:0 0 0 2px rgba(0,242,255,.15);}
-  .valve.open .vname{color:var(--blue);font-weight:700;}
-  .valve.open .vamt{color:var(--blue);}
-  .valve.closed{opacity:.55;}
-  .valve.closed::after{content:'✕';position:absolute;top:4px;right:6px;color:var(--red);font-size:.7rem;font-weight:900;}
-  .valve.locked{cursor:default;}
-  .valve.fixed-open{border-color:var(--green);background:rgba(46,204,113,.1);cursor:default;}
-  .valve.fixed-open .vname{color:var(--green);}
+  /* ── 배관도(SVG) ─────────────────────────────────────────────────────
+     2026-09-15 사용자 지적: "칸 크기가 다르니까 헷갈려. 동력부 내에서 수선부,
+     절단부, 조립부 모두 똑같아야지. (…) 상자와 상자를 연결하는 파이프를 만들어서
+     그걸 잠그거나 여는 식의 ui를 만들어야 이쁘지. 다시 기획해봐."
+
+     전에는 밸브가 .pipe-row{flex-wrap} 안의 카드 3장이라, 폭이 좁으면 2장+1장으로
+     접혀서 세 번째만 가로로 길어졌다("칸 크기가 다르다"). "파이프"라면서 실제
+     그림은 왼쪽 점선 세로줄 하나뿐이라 어디서 어디로 흐르는지도 안 보였다.
+
+     이제 **상자도 파이프도 SVG 한 장** 안에 있다. viewBox 가 통째로 늘어나므로
+     화면 폭이 어떻든 네 상자는 **항상 같은 크기**고 접히지 않는다. 밸브는
+     파이프 한가운데 놓인 동그란 손잡이다. 설계는 docs/배관의_방_재기획.md 참고. */
+  .plant{background:var(--card);border:1px solid var(--line);border-radius:18px;
+    padding:12px 10px;margin-bottom:14px;}
+  .plant svg{display:block;width:100%;height:auto;}
+
+  .dept-box{fill:var(--card2);stroke:var(--line);stroke-width:1.2;}
+  .dept-box.support{stroke:rgba(180,79,255,.45);}
+  .dept-box.making{stroke:rgba(46,204,113,.4);}
+  .dept-name{fill:var(--txt);font-size:13px;font-weight:700;text-anchor:middle;
+    font-family:'Black Han Sans','Noto Sans KR',sans-serif;}
+  .dept-amt{fill:var(--gold);font-size:11.5px;text-anchor:middle;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:700;}
+  .dept-amt.zero{fill:rgba(255,255,255,.25);}
+  .dept-amt.up{fill:var(--green);}
+
+  /* 파이프는 두 겹이다: 굵은 몸통(.pipe) 위에 흐르는 점선(.flow) */
+  .pipe{fill:none;stroke:var(--pipe-off);stroke-width:7;stroke-linecap:round;stroke-linejoin:round;
+    transition:stroke .25s;}
+  .pipe.on{stroke:rgba(0,242,255,.22);}
+  .pipe.off{stroke:rgba(255,255,255,.10);stroke-dasharray:4 7;stroke-width:4;}
+  .flow{fill:none;stroke:var(--pipe-on);stroke-width:3.2;stroke-linecap:round;
+    stroke-dasharray:5 13;animation:pipeFlow 1.1s linear infinite;}
+  @keyframes pipeFlow{ to{ stroke-dashoffset:-18; } }
+  .flow.hidden{display:none;}
+
+  /* 흐름 방향 화살표 — 동력부→수선부와 수선부→동력부를 눈으로 구분하게 한다 */
+  .arrow{transition:fill .25s;}
+  .arrow.on{fill:var(--pipe-on);}
+  .arrow.off{fill:rgba(255,255,255,.18);}
+
+  .pct-label{fill:var(--dim);font-size:9.5px;text-anchor:middle;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+  .pct-label.on{fill:var(--blue);}
+  .pct-label.off{fill:rgba(255,255,255,.28);}
+
+  /* 밸브 — 전부 같은 지름. 손가락이 닿는 투명 원(.vhit)을 따로 둬 44px 을 확보한다.
+     360px 화면에서 SVG 가 약 0.85 배로 줄므로 viewBox 지름 52 가 실제 44px 이다.
+     밸브끼리 이 원이 겹치면 옆 것이 눌리므로 (vx,vy) 를 최소 52 이상 떼어 놓았다. */
+  .valve-g{cursor:pointer;}
+  .valve-g.fixed{cursor:default;}
+  .vhit{fill:transparent;}
+  .vbody{fill:var(--card);stroke:var(--pipe-off);stroke-width:2;transition:stroke .2s,fill .2s;}
+  .valve-g.open .vbody{stroke:var(--pipe-on);fill:rgba(0,242,255,.12);}
+  .valve-g.closed .vbody{stroke:var(--red);fill:rgba(255,45,120,.10);}
+  .valve-g.fixed .vbody{stroke:rgba(46,204,113,.5);fill:rgba(46,204,113,.08);}
+  /* 손잡이: 열리면 파이프와 나란히(0°), 잠그면 90° 돌아간다 */
+  .vhandle{stroke:var(--pipe-on);stroke-width:3;stroke-linecap:round;
+    transition:transform .3s cubic-bezier(.4,1.4,.5,1);transform-box:fill-box;transform-origin:center;}
+  .valve-g.closed .vhandle{stroke:var(--red);transform:rotate(90deg);}
+  .vlock{fill:rgba(46,204,113,.75);font-size:11px;text-anchor:middle;}
+  .valve-g.shake{animation:vShake .4s;}
+  @keyframes vShake{ 0%,100%{transform:translateX(0)} 25%{transform:translateX(-3px)}
+                     75%{transform:translateX(3px)} }
 
   .hint-box{margin-top:12px;padding:12px 14px;border-radius:12px;background:rgba(255,210,74,.08);
     border:1px solid rgba(255,210,74,.25);font-size:.84rem;color:var(--gold);line-height:1.55;display:none;}
@@ -164,7 +207,9 @@
     border-radius:50px;padding:6px 14px;font-size:.8rem;cursor:pointer;}
   .tut-stage{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;padding:6px 16px 0;overflow-y:auto;}
   .tut-stage .plant{width:100%;max-width:480px;}
-  .tut .valve.tut-target{position:relative;box-shadow:0 0 0 3px rgba(255,210,74,.4);animation:tutGlow 1s ease-in-out infinite;}
+  /* 튜토리얼에서 눌러야 할 밸브를 금빛으로 가리킨다 */
+  .tut .valve-g.tut-target .vbody{stroke:var(--gold);stroke-width:2.6;}
+  .tut .valve-g.tut-target{animation:tutGlow 1s ease-in-out infinite;}
   @keyframes tutGlow{0%,100%{box-shadow:0 0 0 3px rgba(255,210,74,.4);}50%{box-shadow:0 0 0 7px rgba(255,210,74,.12);}}
   .tut-bubble{background:rgba(0,0,0,.35);border-top:1px solid var(--line);padding:16px 18px calc(16px + env(safe-area-inset-bottom));}
   .tut-bubble-text{font-size:.98rem;line-height:1.6;color:#e0e6ed;word-break:keep-all;text-align:center;}
@@ -243,12 +288,9 @@
       <button class="tt-skip" onclick="Tutorial.close()">건너뛰기</button>
     </div>
     <div class="tut-stage">
-      <div class="plant">
-        <div class="tank">
-          <div class="tank-head"><span class="tank-name">🔵 동력부</span><span class="tank-cost">900,000원</span></div>
-          <div class="pipe-row" id="tut-valves"></div>
-        </div>
-      </div>
+      <!-- 본게임과 **같은 배관도**를 쓴다(2026-09-15). 전에는 튜토리얼만 옛 밸브 칩
+           3장이라, 배우고 들어가면 화면이 달라 다시 헤맸다. -->
+      <div id="tut-plant"></div>
     </div>
     <div class="tut-bubble">
       <div class="tut-bubble-text" id="tut-text"></div>
@@ -259,9 +301,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="wrongnote.js?v=16"></script>
-<script src="growth.js?v=16"></script>
-<script src="streak.js?v=16"></script>
+<script src="wrongnote.js?v=17"></script>
+<script src="growth.js?v=17"></script>
+<script src="streak.js?v=17"></script>
 <script>
 (function(){ if(!(localStorage.getItem('hub_nickname')||'').trim()){ location.replace('login.html'); } })();
 
@@ -404,89 +446,215 @@ function showStep(){
   else renderQuizStep(item.q, item.first?item.round:null, item.round);
 }
 
-/* ── 밸브 퍼즐 화면 ── */
-function valveHtml(round){
-  if(round.key==='direct'){
-    return `
-    <div class="plant">
-      <div class="tank">
-        <div class="tank-head"><span class="tank-name">🔵 동력부</span><span class="tank-cost" id="pw-cost">${won(DATA.power.cost)}</span></div>
-        <div class="pipe-row">
-          <div class="valve open" data-src="power" data-dst="repair"><span class="vname">→ 수선부</span><span class="vamt">교차</span></div>
-          <div class="valve fixed-open" data-src="power" data-dst="cut"><span class="vname">→ 절단부</span><span class="vamt">고정</span></div>
-          <div class="valve fixed-open" data-src="power" data-dst="assemble"><span class="vname">→ 조립부</span><span class="vamt">고정</span></div>
-        </div>
-      </div>
-      <div class="tank">
-        <div class="tank-head"><span class="tank-name">🟣 수선부</span><span class="tank-cost" id="rp-cost">${won(DATA.repair.cost)}</span></div>
-        <div class="pipe-row">
-          <div class="valve open" data-src="repair" data-dst="power"><span class="vname">→ 동력부</span><span class="vamt">교차</span></div>
-          <div class="valve fixed-open" data-src="repair" data-dst="cut"><span class="vname">→ 절단부</span><span class="vamt">고정</span></div>
-          <div class="valve fixed-open" data-src="repair" data-dst="assemble"><span class="vname">→ 조립부</span><span class="vamt">고정</span></div>
-        </div>
-      </div>
-    </div>
-    <div class="hint-box" id="valve-hint">👆 교차 파이프(동력부→수선부, 수선부→동력부) 2개를 탭해서 잠가보세요.</div>
-    <div class="ok-box" id="valve-ok">✓ 교차 파이프를 다 잠갔어요! 이제 동력부·수선부 원가는 절단부·조립부로만 흘러갑니다.</div>
-    <div class="next-wrap"><button class="cta" id="valve-next-btn" disabled>다음 →</button></div>`;
+/* ── 밸브 퍼즐 화면 — SVG 배관도 ─────────────────────────────────────
+   상자 네 개와 파이프 여섯 개가 **SVG 한 장** 안에 있다. viewBox 가 통째로
+   늘어나므로 화면 폭이 어떻든 상자는 항상 같은 크기고, 절대 접히지 않는다.
+   (전에는 밸브가 flex-wrap 카드라 좁으면 2+1 로 접혀 조립부만 길어졌다.)
+   설계 근거: docs/배관의_방_재기획.md */
+
+const VB = { w:360, h:262 };
+const BOX = { w:104, h:62 };
+const DEPT_POS = {           // 왼쪽 열 = 보조부문(원천), 오른쪽 열 = 제조부문(도착)
+  power:   { x:6,   y:20,  cls:'support', icon:'🔵', name:'동력부' },
+  repair:  { x:6,   y:180, cls:'support', icon:'🟣', name:'수선부' },
+  cut:     { x:250, y:20,  cls:'making',  icon:'✂',  name:'절단부' },
+  assemble:{ x:250, y:180, cls:'making',  icon:'🔩', name:'조립부' },
+};
+
+/* 파이프 6개. d 는 경로, (vx,vy) 는 밸브(파이프 한가운데 손잡이) 자리,
+   ang 은 손잡이가 '열림'일 때 파이프와 나란해지도록 하는 각도다. */
+const PIPES = [
+  { id:'power-repair',    from:'power',  to:'repair',   pct:20,
+    d:'M40,82 V180',                vx:40,  vy:104, ang:90, cross:true,
+    lx:17,  ly:108, ax:40,  ay:172, arot:90 },
+  { id:'repair-power',    from:'repair', to:'power',    pct:10,
+    d:'M76,180 V82',                vx:76,  vy:158, ang:90, cross:true,
+    lx:99,  ly:162, ax:76,  ay:90,  arot:-90 },
+  { id:'power-cut',       from:'power',  to:'cut',      pct:50,
+    d:'M110,36 H250',               vx:180, vy:36,  ang:0,
+    lx:180, ly:22,  ax:242, ay:36,  arot:0 },
+  { id:'power-assemble',  from:'power',  to:'assemble', pct:30,
+    d:'M110,66 H165 V206 H250',     vx:165, vy:155, ang:90,
+    lx:188, ly:159, ax:242, ay:206, arot:0 },
+  { id:'repair-cut',      from:'repair', to:'cut',      pct:60,
+    d:'M110,196 H210 V56 H250',     vx:210, vy:105, ang:90,
+    lx:233, ly:109, ax:242, ay:56,  arot:0 },
+  { id:'repair-assemble', from:'repair', to:'assemble', pct:30,
+    d:'M110,226 H250',              vx:180, vy:226, ang:0,
+    lx:146, ly:242, ax:242, ay:226, arot:0 },
+];
+
+/* 라운드별로 어떤 밸브를 잠글 수 있고, 무엇이 정답인가.
+   여기 없는 파이프는 '고정'(자물쇠) — 탭하면 흔들리며 이유를 알려 준다. */
+const VALVE_ROUNDS = {
+  direct:{ closeable:['power-repair','repair-power'], goal:['power-repair','repair-power'],
+           fixedMsg:'이 파이프는 제조부문으로 가는 길이라 항상 열려 있어요.' },
+  step:  { closeable:['repair-power'],                goal:['repair-power'],
+           fixedMsg:'1단계에서 동력부는 수선부까지 포함해 전부 배분해요. 이 파이프는 열어 둡니다.' },
+};
+
+let valveState = {};   // pipeId → 'open' | 'closed' | 'fixed'
+
+/* 지금 열려 있는 파이프만으로 각 부문이 받는 금액을 계산한다.
+   한 부문에서 나가는 열린 파이프들의 비율 합으로 다시 나눈다 —
+   교차 파이프를 잠그면 분모가 줄어 제조부문 몫이 커지는 것이 눈에 보인다. */
+function computeFlow(roundKey){
+  const amt = { power:DATA.power.cost, repair:DATA.repair.cost, cut:0, assemble:0 };
+  const sendFrom = (src, total) => {
+    const outs = PIPES.filter(p => p.from===src && valveState[p.id]!=='closed');
+    const sum = outs.reduce((a,p)=>a+p.pct, 0) || 1;
+    const got = {};
+    outs.forEach(p => { got[p.id] = total * p.pct / sum; });
+    return got;
+  };
+  if(roundKey==='step'){
+    // 1단계: 동력부가 원래 비율 그대로 전부 배분(수선부 포함) → 동력부는 0 이 된다
+    const g1 = sendFrom('power', DATA.power.cost);
+    amt.power = 0;
+    amt.repair = DATA.repair.cost + (g1['power-repair']||0);
+    amt.cut += g1['power-cut']||0;
+    amt.assemble += g1['power-assemble']||0;
+    // 2단계: 수선부가 (자기 원가 + 받은 것)을 배분
+    const g2 = sendFrom('repair', amt.repair);
+    amt.cut += g2['repair-cut']||0;
+    amt.assemble += g2['repair-assemble']||0;
+  } else {
+    const gp = sendFrom('power',  DATA.power.cost);
+    const gr = sendFrom('repair', DATA.repair.cost);
+    amt.cut      += (gp['power-cut']||0)      + (gr['repair-cut']||0);
+    amt.assemble += (gp['power-assemble']||0) + (gr['repair-assemble']||0);
   }
-  // step
-  return `
-    <div class="plant">
-      <div class="tank">
-        <div class="tank-head"><span class="tank-name">🔵 동력부 (1단계 · 먼저 배분)</span><span class="tank-cost" id="pw-cost">${won(DATA.power.cost)}</span></div>
-        <div class="pipe-row">
-          <div class="valve fixed-open" data-src="power" data-dst="repair"><span class="vname">→ 수선부</span><span class="vamt">${won(S.powerToRepair)}</span></div>
-          <div class="valve fixed-open" data-src="power" data-dst="cut"><span class="vname">→ 절단부</span><span class="vamt">${won(S.powerToCut)}</span></div>
-          <div class="valve fixed-open" data-src="power" data-dst="assemble"><span class="vname">→ 조립부</span><span class="vamt">${won(S.powerToAssemble)}</span></div>
-        </div>
-      </div>
-      <div class="tank">
-        <div class="tank-head"><span class="tank-name">🟣 수선부 (2단계)</span><span class="tank-cost" id="rp-cost">${won(DATA.repair.cost)}</span></div>
-        <div class="pipe-row">
-          <div class="valve open" data-src="repair" data-dst="power"><span class="vname">→ 동력부</span><span class="vamt">이미 끝남</span></div>
-          <div class="valve fixed-open" data-src="repair" data-dst="cut"><span class="vname">→ 절단부</span><span class="vamt">?</span></div>
-          <div class="valve fixed-open" data-src="repair" data-dst="assemble"><span class="vname">→ 조립부</span><span class="vamt">?</span></div>
-        </div>
-      </div>
-    </div>
-    <div class="hint-box" id="valve-hint">👆 동력부는 이미 1단계에서 다 배분했어요. 수선부→동력부 파이프를 탭해서 잠그세요(이미 끝난 부문으로는 다시 못 갑니다).</div>
-    <div class="ok-box" id="valve-ok">✓ 맞아요! 수선부는 자기 원가 600,000원 + 동력부한테 받은 180,000원 = 780,000원을 절단부·조립부에만 나눕니다.</div>
-    <div class="next-wrap"><button class="cta" id="valve-next-btn" disabled>다음 →</button></div>`;
+  return amt;
 }
+
+function boxSvg(key){
+  const d = DEPT_POS[key];
+  return `<rect class="dept-box ${d.cls}" x="${d.x}" y="${d.y}" width="${BOX.w}" height="${BOX.h}" rx="12"/>
+    <text class="dept-name" x="${d.x+BOX.w/2}" y="${d.y+26}">${d.icon} ${d.name}</text>
+    <text class="dept-amt" id="amt-${key}" x="${d.x+BOX.w/2}" y="${d.y+45}">0원</text>`;
+}
+
+function pipeSvg(p){
+  const st = valveState[p.id];
+  const on = st!=='closed';
+  const handle = (st==='fixed')
+    ? `<text class="vlock" x="${p.vx}" y="${p.vy+4}">🔒</text>`
+    : `<line class="vhandle" x1="${p.vx-6}" y1="${p.vy}" x2="${p.vx+6}" y2="${p.vy}"
+             transform="rotate(${p.ang} ${p.vx} ${p.vy})"/>`;
+  return `<g class="pipe-g" data-pipe="${p.id}">
+      <path class="pipe ${on?'on':'off'}" id="pipe-${p.id}" d="${p.d}"/>
+      <path class="flow ${on?'':'hidden'}" id="flow-${p.id}" d="${p.d}"/>
+      <polygon class="arrow ${on?'on':'off'}" id="arrow-${p.id}" points="0,-4.5 7,0 0,4.5"
+               transform="translate(${p.ax} ${p.ay}) rotate(${p.arot})"/>
+      <text class="pct-label ${on?'on':'off'}" id="pct-${p.id}" x="${p.lx}" y="${p.ly}">${on?p.pct+'%':'—'}</text>
+      <g class="valve-g ${st}" id="valve-${p.id}" data-pipe="${p.id}">
+        <circle class="vhit" cx="${p.vx}" cy="${p.vy}" r="26"/>
+        <circle class="vbody" cx="${p.vx}" cy="${p.vy}" r="11"/>
+        ${handle}
+      </g>
+    </g>`;
+}
+
+function plantSvg(round){
+  const cfg = VALVE_ROUNDS[round.key];
+  valveState = {};
+  PIPES.forEach(p => { valveState[p.id] = cfg.closeable.includes(p.id) ? 'open' : 'fixed'; });
+  return `<div class="plant">
+    <svg viewBox="0 0 ${VB.w} ${VB.h}" role="img" aria-label="보조부문에서 제조부문으로 이어진 배관도">
+      ${PIPES.map(pipeSvg).join('')}
+      ${Object.keys(DEPT_POS).map(boxSvg).join('')}
+    </svg>
+  </div>`;
+}
+
+function paintAmounts(roundKey, animate){
+  const amt = computeFlow(roundKey);
+  Object.keys(DEPT_POS).forEach(k => {
+    const el = document.getElementById('amt-'+k);
+    if(!el) return;
+    const v = Math.round(amt[k]);
+    const before = el.textContent;
+    el.textContent = won(v);
+    el.classList.toggle('zero', v===0);
+    if(animate && before!==el.textContent && (k==='cut'||k==='assemble')){
+      el.classList.add('up');
+      setTimeout(()=>el.classList.remove('up'), 900);
+    }
+  });
+}
+
+function setPipeVisual(id){
+  const on = valveState[id]!=='closed';
+  const pipe=document.getElementById('pipe-'+id), flow=document.getElementById('flow-'+id),
+        pct=document.getElementById('pct-'+id), vg=document.getElementById('valve-'+id);
+  const p = PIPES.find(x=>x.id===id);
+  if(pipe){ pipe.classList.toggle('on', on); pipe.classList.toggle('off', !on); }
+  if(flow) flow.classList.toggle('hidden', !on);
+  const arw=document.getElementById('arrow-'+id);
+  if(arw){ arw.classList.toggle('on', on); arw.classList.toggle('off', !on); }
+  if(pct){ pct.textContent = on ? p.pct+'%' : '—'; pct.classList.toggle('on',on); pct.classList.toggle('off',!on); }
+  if(vg){ vg.classList.toggle('open', valveState[id]==='open'); vg.classList.toggle('closed', valveState[id]==='closed'); }
+}
+
 function renderValveStep(round){
   document.getElementById('quiz-body').innerHTML = `
     <div class="round-badge">${round.badge}</div>
     <div class="round-title">${round.title}</div>
     <div class="round-desc">${round.desc}</div>
-    ${valveHtml(round)}`;
-  const crossKey = round.key==='direct' ? null : 'repair-power';
-  document.querySelectorAll('.valve.open').forEach(v=>{
-    v.addEventListener('click', ()=>{
-      v.classList.remove('open'); v.classList.add('closed');
-      checkValveDone(round);
-    });
+    ${plantSvg(round)}
+    <div class="hint-box" id="valve-hint">${round.key==='direct'
+      ? '👆 동력부↔수선부를 잇는 <b>교차 파이프 2개</b>의 동그란 손잡이를 눌러 잠가보세요.'
+      : '👆 <b>수선부→동력부</b> 파이프의 손잡이를 눌러 잠그세요. 이미 배분이 끝난 부문으로는 다시 못 갑니다.'}</div>
+    <div class="ok-box" id="valve-ok">${round.key==='direct'
+      ? '✓ 교차 파이프를 다 잠갔어요! 이제 동력부·수선부 원가는 절단부·조립부로만 흘러갑니다. 잠그기 전보다 제조부문이 받는 금액이 <b>늘어난 것</b>을 보세요.'
+      : '✓ 맞아요! 수선부는 자기 원가 600,000원 + 동력부한테 받은 180,000원 = 780,000원을 절단부·조립부에만 나눕니다.'}</div>
+    <div class="next-wrap"><button class="cta" id="valve-next-btn" disabled>다음 →</button></div>`;
+
+  document.querySelectorAll('.valve-g').forEach(vg => {
+    vg.addEventListener('click', () => onValveTap(vg.dataset.pipe, round));
   });
+  paintAmounts(round.key, false);
   document.getElementById('valve-hint').classList.add('show');
-}
-function checkValveDone(round){
-  const remainOpen = document.querySelectorAll('.plant .valve.open').length;
-  if(remainOpen===0){
-    document.getElementById('valve-hint').classList.remove('show');
-    document.getElementById('valve-ok').classList.add('show');
-    document.getElementById('valve-next-btn').disabled=false;
-    document.getElementById('valve-next-btn').onclick=()=>{ qi++; showStep(); };
-    if(round.key==='step'){
-      document.getElementById('pw-cost').textContent=won(0);
-      document.getElementById('pw-cost').classList.add('zero');
-      document.querySelectorAll('.plant .valve[data-dst="cut"], .plant .valve[data-dst="assemble"]').forEach(v=>{
-        if(v.dataset.src==='repair'){
-          const amt = v.dataset.dst==='cut' ? S.repairToCut : S.repairToAssemble;
-          v.querySelector('.vamt').textContent = won(Math.round(amt));
-        }
-      });
+
+  /* 라운드2 는 "동력부를 먼저 배분한다"가 핵심이라, 들어오자마자
+     동력부가 비워지고 수선부가 불어나는 것을 눈으로 보여 준다. */
+  if(round.key==='step'){
+    const pw=document.getElementById('amt-power'), rp=document.getElementById('amt-repair');
+    if(pw&&rp){
+      pw.textContent=won(DATA.power.cost); pw.classList.remove('zero');
+      rp.textContent=won(DATA.repair.cost);
+      setTimeout(()=>{ paintAmounts('step', true); rp.classList.add('up');
+                       setTimeout(()=>rp.classList.remove('up'), 1200); }, 700);
     }
   }
+}
+
+function onValveTap(id, round){
+  const cfg = VALVE_ROUNDS[round.key];
+  const vg = document.getElementById('valve-'+id);
+  if(valveState[id]==='fixed'){          // 못 잠그는 파이프 — 막지 말고 이유를 알려 준다
+    vg.classList.remove('shake'); void vg.getBBox();
+    vg.classList.add('shake');
+    setTimeout(()=>vg.classList.remove('shake'), 420);
+    const h=document.getElementById('valve-hint');
+    h.classList.add('show'); h.innerHTML='🔒 '+cfg.fixedMsg;
+    return;
+  }
+  valveState[id] = (valveState[id]==='open') ? 'closed' : 'open';
+  setPipeVisual(id);
+  paintAmounts(round.key, true);
+  checkValveDone(round);
+}
+
+function checkValveDone(round){
+  const cfg = VALVE_ROUNDS[round.key];
+  const done = cfg.goal.every(id => valveState[id]==='closed')
+            && cfg.closeable.every(id => cfg.goal.includes(id) || valveState[id]==='open');
+  document.getElementById('valve-hint').classList.toggle('show', !done);
+  document.getElementById('valve-ok').classList.toggle('show', done);
+  const btn=document.getElementById('valve-next-btn');
+  btn.disabled = !done;
+  if(done) btn.onclick=()=>{ qi++; showStep(); };
 }
 
 /* ── 참고 자료 — 확인퀴즈 문제만 보면 계산에 필요한 숫자가 안 보이던 문제 수정.
@@ -578,35 +746,46 @@ async function endQuiz(){
  * ========================================================================= */
 const TUT_STEPS = [
   { text:'보조부문원가를 제조부문에 나눠주는 <b>배관</b>을 밸브로 직접 잠그고 열면서 배분방법 차이를 익히는 게임이에요.', btn:'시작 ▶' },
-  { text:'<b>직접배분법</b>은 보조부문끼리 주고받는 건 없는 셈 쳐요. 동력부→수선부로 가는 <b>교차 파이프</b>를 탭해서 잠가보세요.', tap:true, hint:'👆 빛나는 밸브를 탭!' },
-  { text:'맞아요! 이렇게 교차 파이프를 잠그면, 동력부 원가는 절단부·조립부로만 흘러가요.', glow:true, btn:'다음 ▶' },
+  { text:'<b>직접배분법</b>은 보조부문끼리 주고받는 건 없는 셈 쳐요. 동력부에서 수선부로 내려가는 <b>교차 파이프</b>의 동그란 손잡이를 눌러 잠가보세요.', tap:true, hint:'👆 금빛 손잡이를 탭!' },
+  { text:'맞아요! 파이프가 잠기면 흐름이 멈추고, 그만큼 <b>절단부·조립부가 받는 금액이 늘어나요</b>. 오른쪽 상자의 숫자가 바뀐 걸 보세요.', glow:true, btn:'다음 ▶' },
   { text:'그다음엔 계산 문제로 실제 배분액을 직접 확인해요. 오답이어도 바로 해설이 나오니 걱정 마세요.', btn:'다음 ▶' },
   { text:'직접배분법 → 단계배분법 → 상호배분법(개념) 순서로 이어져요. 준비되면 시작해볼까요?', btn:'시작하기 ▶', finish:true },
 ];
 const Tutorial = (function(){
   let step=0, locked=false, timer=null;
   function el(id){ return document.getElementById(id); }
+  const TUT_PIPE = 'power-repair';        // 튜토리얼에서 잠가 볼 교차 파이프
   function buildBoard(){
-    el('tut-valves').innerHTML = `
-      <div class="valve open" id="tut-valve-target"><span class="vname">→ 수선부</span><span class="vamt">교차</span></div>
-      <div class="valve fixed-open"><span class="vname">→ 절단부</span><span class="vamt">고정</span></div>
-      <div class="valve fixed-open"><span class="vname">→ 조립부</span><span class="vamt">고정</span></div>`;
-    el('tut-valve-target').addEventListener('pointerdown', e=>{ e.preventDefault(); onTap(); });
+    // 본게임과 같은 함수로 그린다 — 배우고 들어갔을 때 화면이 똑같아야 한다
+    el('tut-plant').innerHTML = plantSvg(ROUNDS[0]);
+    paintAmounts('direct', false);
+    document.querySelectorAll('#tut-plant .valve-g').forEach(vg => {
+      vg.addEventListener('click', () => onTap(vg.dataset.pipe));
+    });
   }
-  function onTap(){
+  function onTap(pipeId){
     const s=TUT_STEPS[step];
     if(locked || !s || !s.tap) return;
+    if(pipeId !== TUT_PIPE){                 // 고정 파이프나 다른 밸브를 눌렀을 때
+      const vg=el('valve-'+pipeId);
+      if(vg){ vg.classList.remove('shake'); void vg.getBBox(); vg.classList.add('shake');
+              setTimeout(()=>vg.classList.remove('shake'), 420); }
+      el('tut-hint').style.display='block';
+      el('tut-hint').textContent='👆 동력부 → 수선부 교차 파이프의 손잡이를 누르세요';
+      return;
+    }
     locked=true;
-    const v=el('tut-valve-target');
-    v.classList.remove('open'); v.classList.add('closed');
-    timer=setTimeout(()=>{ timer=null; locked=false; go(step+1); }, 600);
+    valveState[TUT_PIPE]='closed';
+    setPipeVisual(TUT_PIPE);
+    paintAmounts('direct', true);
+    timer=setTimeout(()=>{ timer=null; locked=false; go(step+1); }, 700);
   }
   function render(){
     const s=TUT_STEPS[step];
     el('tut-badge').textContent=(step+1)+'/'+TUT_STEPS.length;
     el('tut-text').innerHTML=s.text;
-    const target=el('tut-valve-target');
-    if(target) target.classList.toggle('tut-target', !!s.tap);
+    document.querySelectorAll('#tut-plant .valve-g').forEach(vg =>
+      vg.classList.toggle('tut-target', !!s.tap && vg.dataset.pipe===TUT_PIPE));
     const hint=el('tut-hint');
     if(s.hint){ hint.style.display='block'; hint.textContent=s.hint; } else hint.style.display='none';
     const btn=el('tut-next');
@@ -743,6 +922,6 @@ function showAdPlaceholder(){ if(window.AdBridge && typeof AdBridge.show==='func
 
 bindStart();
 </script>
-<script src="emoji-icons.js?v=16"></script>
+<script src="emoji-icons.js?v=17"></script>
 </body>
 </html>
