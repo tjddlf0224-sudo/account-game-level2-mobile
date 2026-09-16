@@ -4,23 +4,29 @@
     <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
          **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
          이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-    <script src="safestore.js?v=24"></script>
+    <script src="safestore.js?v=25"></script>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- viewport-fit=cover 가 있어야 env(safe-area-inset-*) 이 실제 값을 준다.
+     이게 빠져서 제목이 노치에 가렸다(2026-09-16 제보). -->
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>팀전 결과 — 전산회계 오락실</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Orbitron:wght@700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="emoji-icons.js?v=24"></script>
-<script src="teamscore.js?v=24"></script>
+<script src="emoji-icons.js?v=25"></script>
+<script src="teamscore.js?v=25"></script>
 <style>
 /* 수업이 끝난 뒤 교사가 보고 상을 주는 화면. 전광판과 달리 **읽고 판단하는** 화면이라
    글자를 키우기보다 정보를 촘촘하게 놓는다. 인쇄해서 게시할 수도 있어야 한다. */
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--cy:#00f2ff;--pk:#ff2d78;--gd:#ffd600;--gn:#00e676;--bg:#020810;--line:rgba(255,255,255,.09)}
 body{background:var(--bg);color:#eaf2ff;font-family:'Noto Sans KR',sans-serif;
-  padding:28px 22px 60px;max-width:1100px;margin:0 auto;line-height:1.5}
+  /* 노치·홈바를 피한다. 앱에서 제목이 노치에 가려 안 보였다(2026-09-16 제보).
+     '돌아가기' 버튼도 이 자리를 쓰므로 그만큼 더 내려 준다. */
+  padding:calc(28px + env(safe-area-inset-top)) calc(22px + env(safe-area-inset-right))
+          calc(60px + env(safe-area-inset-bottom)) calc(22px + env(safe-area-inset-left));
+  max-width:1100px;margin:0 auto;line-height:1.5}
 h1{font-family:'Black Han Sans',sans-serif;font-size:1.9rem}
 h1 .cls{color:var(--cy)}
 .meta{color:rgba(255,255,255,.4);font-size:.84rem;margin:6px 0 22px}
@@ -40,7 +46,29 @@ h2 .sub{font-family:'Noto Sans KR',sans-serif;letter-spacing:0;font-weight:400;
   padding:4px 0;border-top:1px solid rgba(255,255,255,.06)}
 .mem span:last-child{font-family:'Orbitron',monospace;color:rgba(255,255,255,.55)}
 .mem .up{color:var(--gn)}
+/* 좁은 화면에서는 표를 욱여넣지 말고 옆으로 밀어 보게 한다.
+   '기록' 칸이 길어서 이름·모둠 칸이 '안/민/서' 처럼 한 글자씩 접혔다(2026-09-16 제보). */
+.tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;
+  /* 아직 더 밀 게 남았다는 걸 오른쪽 끝 그림자로 알려 준다 */
+  background:linear-gradient(90deg,var(--bg) 30%,transparent),
+             linear-gradient(90deg,transparent,var(--bg) 70%) right,
+             radial-gradient(farthest-side at 0 50%,rgba(0,0,0,.5),transparent),
+             radial-gradient(farthest-side at 100% 50%,rgba(0,0,0,.5),transparent) right;
+  background-repeat:no-repeat;background-size:36px 100%,36px 100%,14px 100%,14px 100%;
+  background-attachment:local,local,scroll,scroll}
+.tscroll::-webkit-scrollbar{height:8px}
+.tscroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18);border-radius:8px}
+
 table{width:100%;border-collapse:collapse;font-size:.85rem}
+/* 이름·모둠·점수는 절대 접히지 않는다. '기록'만 여러 줄로 늘어난다. */
+th,td{white-space:nowrap}
+td.rec,th.rec{white-space:normal;min-width:15em}
+td.who{font-weight:700}
+td.team{color:rgba(255,255,255,.55)}
+@media(max-width:760px){
+  table{min-width:640px}          /* 이보다 좁으면 옆으로 민다 */
+  td.rec,th.rec{min-width:17em}
+}
 th{text-align:left;font-family:'Orbitron',monospace;font-size:.58rem;letter-spacing:2px;
   color:rgba(255,255,255,.25);padding:8px;border-bottom:1px solid var(--line)}
 td{padding:8px;border-bottom:1px solid rgba(255,255,255,.05)}
@@ -86,11 +114,13 @@ tr.top td{background:rgba(255,214,0,.06)}
   <div class="cards" id="grow"></div>
 
   <h2>개인 전체</h2>
-  <table>
-    <thead><tr><th>#</th><th>이름</th><th>모둠</th><th style="text-align:right">점수</th>
-      <th style="text-align:right">성장</th><th>기록</th></tr></thead>
-    <tbody id="solo"></tbody>
-  </table>
+  <div class="tscroll">
+    <table>
+      <thead><tr><th>#</th><th>이름</th><th>모둠</th><th style="text-align:right">점수</th>
+        <th style="text-align:right">성장</th><th class="rec">기록</th></tr></thead>
+      <tbody id="solo"></tbody>
+    </table>
+  </div>
 
   <div class="note" id="note"></div>
 </div>
@@ -175,10 +205,12 @@ const SID = new URLSearchParams(location.search).get('s');
         ? '<span class="bestrec"><span class="crown">👑</span>' + esc(label) + '</span>'
         : esc(label);
     }).join('<span class="recsep">·</span>');
-    return '<tr'+(i<3?' class="top"':'')+'><td class="n">'+(i+1)+'</td><td>'+esc(x.name)+'</td>'+
-      '<td>'+x.team+'모둠</td><td class="n">'+x.score.toLocaleString()+'</td>'+
+    return '<tr'+(i<3?' class="top"':'')+'><td class="n">'+(i+1)+'</td>'+
+      '<td class="who">'+esc(x.name)+'</td>'+
+      '<td class="team">'+x.team+'모둠</td><td class="n">'+x.score.toLocaleString()+'</td>'+
       '<td class="n '+(x.grow>0?'gain':'zero')+'">'+(x.grow>0?'+'+x.grow:'—')+'</td>'+
-      '<td style="color:rgba(255,255,255,.4);font-size:.78rem;line-height:1.9">'+(rec||'기록 없음')+'</td></tr>';
+      '<td class="rec" style="color:rgba(255,255,255,.4);font-size:.78rem;line-height:1.9">'+
+        (rec||'기록 없음')+'</td></tr>';
   }).join('');
 
   const gTop = R.byGrow[0], played = R.solo.filter(x=>Object.keys(x.best).length).length;
@@ -213,7 +245,9 @@ const SID = new URLSearchParams(location.search).get('s');
 </script>
 <script>
 /* 앱에서 열렸으면 되돌아가기 버튼을 띄운다(2026-09-16).
-   브라우저는 새 탭이라 필요 없고, 앱은 같은 창에서 이동하므로 길을 터 줘야 한다. */
+   브라우저는 새 탭이라 필요 없고, 앱은 같은 창에서 이동하므로 길을 터 줘야 한다.
+   이미 상단 버튼 줄(.bar)이 있으면 **그 줄 안에** 넣는다 — 따로 띄웠더니
+   '전광판 보기' 위에 포개졌다(제보 스크린샷). */
 (function(){
   function inApp(){
     try{ if(window.Capacitor && typeof Capacitor.isNativePlatform==='function')
@@ -224,12 +258,16 @@ const SID = new URLSearchParams(location.search).get('s');
   var b=document.createElement('button');
   b.textContent='← 돌아가기';
   b.setAttribute('aria-label','교수자 대시보드로 돌아가기');
+  b.onclick=function(){ history.back(); };
+
+  var bar=document.querySelector('.bar');
+  if(bar){ bar.insertBefore(b, bar.firstChild); return; }   // 줄 안에 끼우면 스타일도 따라온다
+
   b.style.cssText='position:fixed;left:calc(10px + env(safe-area-inset-left));'+
     'top:calc(10px + env(safe-area-inset-top));z-index:99999;'+
     'padding:9px 14px;border-radius:11px;border:1px solid rgba(255,255,255,.25);'+
     'background:rgba(10,14,22,.88);color:#fff;font-size:.85rem;font-weight:700;'+
     'cursor:pointer;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)';
-  b.onclick=function(){ history.back(); };
   document.body.appendChild(b);
 })();
 </script>
