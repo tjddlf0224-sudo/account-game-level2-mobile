@@ -141,6 +141,31 @@
     } catch (e) {}
   }
 
+  // ── 2급 게임 한 판 끝날 때마다(저장 버튼과 무관) — 그 판을 몇 단계로 했는지 기록 ──
+  // 교수자 대시보드의 게임별 1단계/2단계 통과 현황용. score_history 는 저장 버튼을 눌러야만
+  // 쌓이고 단계 구분도 없어서 따로 둔다. level 은 호출부(Difficulty.logRound)가 게임의
+  // LV 값을 그대로 넘긴다 — 1·2 이외의 값은 여기서도 한 번 더 버린다(DB 에도 check 제약).
+  var ROUND_TABLE = 'level_rounds';
+  function logRound(opts) {
+    try {
+      if (!opts || !opts.game) return;
+      var level = opts.level === 2 ? 2 : (opts.level === 1 ? 1 : 0);
+      if (!level) return;
+      var total = Math.max(0, parseInt(opts.total, 10) || 0);
+      var correct = Math.min(total, Math.max(0, parseInt(opts.correct, 10) || 0));
+      if (!total) return;                       // 한 문항도 안 푼 판(시작 직후 종료)은 기록하지 않는다
+      var u = user();
+      if (!u) return;                           // 닉네임 없으면 학생 식별 불가 — 스킵
+      var db = client();
+      if (!db) return;
+      var row = { user_name: u.slice(0, 30), game_id: opts.game, level: level,
+                  correct: correct, total: total, unlocked: !!opts.unlocked, source: platform() };
+      var gid = groupId();
+      if (gid) row.group_id = gid;
+      db.from(ROUND_TABLE).insert(row).then(function () {}, function () {});
+    } catch (e) {}
+  }
+
   // ── 매 판 종료 시 호출 — 로컬 즉시 + Supabase 베스트에포트(예외 안 던짐) ──
   function record(rec) {
     if (!rec || !rec.game) return;
@@ -266,7 +291,7 @@
   }
 
   global.Growth = {
-    record: record, series: series, rename: rename, logPlay: logPlay, logTopicAttempt: logTopicAttempt,
+    record: record, series: series, rename: rename, logPlay: logPlay, logTopicAttempt: logTopicAttempt, logRound: logRound,
     GAME_NAMES: {
       acid: '계정과목 산성비', memory: '계정·뜻 메모리', debit: '분개 차·대변',
       factory: '결산분개 조립', flight: '플라이트 장부조회', theory: '이론 객관식',

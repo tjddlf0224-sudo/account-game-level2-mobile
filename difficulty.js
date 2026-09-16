@@ -79,6 +79,22 @@
       return false;
     },
 
+    /* 한 판이 끝날 때마다 게임이 호출(1단계·2단계 모두) — 서버에 "이 판은 몇 단계였나"를 남긴다.
+       ⚠ level 은 반드시 게임이 그 판에 실제로 쓴 LV 를 넘긴다. this.get() 으로 추정하지 않는 이유:
+         플라이트처럼 저장값(hub_lv_*)은 2인데 게임이 LV 를 1로 고정하는 경우가 있고, 해금 여부와
+         무관하게 학생이 1단계를 골라 할 수도 있다. 화면을 그린 변수와 기록하는 변수를 같게 둬야
+         둘이 어긋나지 않는다.
+       해금 판정(reportRound)과는 완전히 별개 — 여기서 실패해도 해금·결과화면에 영향이 없다. */
+    logRound: function (g, level, correct, total) {
+      try {
+        if (level !== 1 && level !== 2) return;
+        if (window.Growth && Growth.logRound) {
+          Growth.logRound({ game: g, level: level, correct: correct, total: total,
+                            unlocked: this.isUnlocked(g) });
+        }
+      } catch (e) {}
+    },
+
     /* 기억의 전당처럼 정답률로 재기 어려운 게임용 — 완주 조건으로 해금 */
     unlockByClear: function (g) {
       if (this.isUnlocked(g)) return false;
