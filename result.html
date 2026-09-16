@@ -4,7 +4,7 @@
     <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
          **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
          이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-    <script src="safestore.js?v=23"></script>
+    <script src="safestore.js?v=24"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>팀전 결과 — 전산회계 오락실</title>
@@ -12,8 +12,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Orbitron:wght@700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="emoji-icons.js?v=23"></script>
-<script src="teamscore.js?v=23"></script>
+<script src="emoji-icons.js?v=24"></script>
+<script src="teamscore.js?v=24"></script>
 <style>
 /* 수업이 끝난 뒤 교사가 보고 상을 주는 화면. 전광판과 달리 **읽고 판단하는** 화면이라
    글자를 키우기보다 정보를 촘촘하게 놓는다. 인쇄해서 게시할 수도 있어야 한다. */
@@ -209,6 +209,28 @@ const SID = new URLSearchParams(location.search).get('s');
   const first = await fetchRows();
   render(first.data||[]);
   if(!SES.ended_at) timer = setInterval(tick, 3000);
+})();
+</script>
+<script>
+/* 앱에서 열렸으면 되돌아가기 버튼을 띄운다(2026-09-16).
+   브라우저는 새 탭이라 필요 없고, 앱은 같은 창에서 이동하므로 길을 터 줘야 한다. */
+(function(){
+  function inApp(){
+    try{ if(window.Capacitor && typeof Capacitor.isNativePlatform==='function')
+           return Capacitor.isNativePlatform(); }catch(e){}
+    return /^(capacitor|ionic|file):/.test(location.protocol);
+  }
+  if(!inApp() || history.length <= 1) return;
+  var b=document.createElement('button');
+  b.textContent='← 돌아가기';
+  b.setAttribute('aria-label','교수자 대시보드로 돌아가기');
+  b.style.cssText='position:fixed;left:calc(10px + env(safe-area-inset-left));'+
+    'top:calc(10px + env(safe-area-inset-top));z-index:99999;'+
+    'padding:9px 14px;border-radius:11px;border:1px solid rgba(255,255,255,.25);'+
+    'background:rgba(10,14,22,.88);color:#fff;font-size:.85rem;font-weight:700;'+
+    'cursor:pointer;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)';
+  b.onclick=function(){ history.back(); };
+  document.body.appendChild(b);
 })();
 </script>
 </body>

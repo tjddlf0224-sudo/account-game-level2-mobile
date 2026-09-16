@@ -7,7 +7,7 @@
 <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
      **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
      이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-<script src="safestore.js?v=23"></script>
+<script src="safestore.js?v=24"></script>
 <title>신고의 문 | 전산회계 1급</title>
 <meta name="description" content="거래를 부가가치세 신고서의 올바른 칸에 배치하며 신고서 구조를 익히는 연습">
 <style>
@@ -252,7 +252,7 @@
     <div class="start-grid">
       <div class="info-card"><strong>⏱️ 규칙</strong>제한 시간 <b style="color:var(--gold)">60초</b><br>오답 <b style="color:var(--red)">-5초</b> · 시간이 남는 한 계속 출제</div>
       <div class="info-card"><strong>🎯 점수</strong>정답 <b style="color:var(--green)">+100점</b><br>연속 정답이면 콤보 가산<br>맞힐 때마다 신고서 칸이 채워져요</div>
-      <div class="info-card"><strong>🧾 신고서</strong>매출 4칸 · 매입 3칸 + <b style="color:var(--gold)">해당없음</b><br>접대비·비영업용승용차는 <b>불공제</b><br>면세 거래는 신고서에 아예 안 올라가요</div>
+      <div class="info-card"><strong>🧾 신고서</strong>매출 4칸 · 매입 3칸 + <b style="color:var(--gold)">해당없음</b><br>기업업무추진비·비영업용승용차는 <b>불공제</b><br>면세 거래는 신고서에 아예 안 올라가요</div>
     </div>
     <div class="home-actions">
       <button class="pill-btn" id="start-btn">▶ 게임 시작</button>
@@ -297,11 +297,11 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="pausewatch.js?v=23"></script>
-<script src="ask.js?v=23"></script>
-<script src="wrongnote.js?v=23"></script>
-<script src="growth.js?v=23"></script>
-<script src="streak.js?v=23"></script>
+<script src="pausewatch.js?v=24"></script>
+<script src="ask.js?v=24"></script>
+<script src="wrongnote.js?v=24"></script>
+<script src="growth.js?v=24"></script>
+<script src="streak.js?v=24"></script>
 <script>
 (function(){ if(!(localStorage.getItem('hub_nickname')||'').trim()){ location.replace('login.html'); } })();
 
@@ -749,6 +749,6 @@ function hideAdPlaceholder(){ if(window.AdBridge && typeof AdBridge.hide==='func
    게임 5종·stage3 에는 둘 다 있는데 여기 셋만 빠져 있었다. */
 function showAdPlaceholder(){ if(window.AdBridge && typeof AdBridge.show==='function') AdBridge.show(); }
 </script>
-<script src="emoji-icons.js?v=23"></script>
+<script src="emoji-icons.js?v=24"></script>
 </body>
 </html>

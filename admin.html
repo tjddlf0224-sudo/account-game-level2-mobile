@@ -4,7 +4,7 @@
     <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
          **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
          이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-    <script src="safestore.js?v=23"></script>
+    <script src="safestore.js?v=24"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
@@ -252,7 +252,33 @@ body{
 .tb-live-dot{width:8px;height:8px;border-radius:50%;background:var(--gn);
   box-shadow:0 0 8px var(--gn);animation:tbPulse 1.4s ease-in-out infinite}
 @keyframes tbPulse{0%,100%{opacity:1}50%{opacity:.25}}
-.tb-roster{margin-top:16px;padding-top:14px;border-top:1px solid var(--border)}
+/* ── 팀전 모달(명단 관리 · 지난 세션) ──
+   본문 어디까지 스크롤했든 화면 한가운데에 떠야 하므로 fixed 다. */
+.tb-ov{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;
+  padding:max(16px,env(safe-area-inset-top)) 16px max(16px,env(safe-area-inset-bottom));
+  background:rgba(4,7,12,.72);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+.tb-mo{display:flex;flex-direction:column;width:min(860px,100%);max-height:100%;
+  background:var(--card,#0e1420);border:1px solid var(--border);border-radius:16px;
+  box-shadow:0 24px 70px rgba(0,0,0,.6);overflow:hidden}
+.tb-mh{flex:none;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;
+  padding:15px 18px;border-bottom:1px solid var(--border)}
+.tb-mh b{font-size:1rem}
+.tb-mh span{flex:1 1 200px;min-width:0;font-size:.75rem;color:rgba(255,255,255,.4);line-height:1.5}
+.tb-x{flex:none;margin-left:auto;width:32px;height:32px;border-radius:9px;cursor:pointer;
+  border:1px solid var(--border);background:rgba(255,255,255,.05);color:#fff;font-size:.95rem}
+.tb-x:hover{background:rgba(255,255,255,.12)}
+/* 내용만 스크롤한다 — 머리줄과 버튼줄은 늘 보인다. 스마트폰 손 스크롤도 함께 켠다. */
+.tb-mb{flex:1 1 auto;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;padding:14px 18px}
+.tb-mf{flex:none;display:flex;gap:8px;justify-content:flex-end;
+  padding:12px 18px;border-top:1px solid var(--border);background:rgba(255,255,255,.02)}
+.tb-more{margin-top:8px;width:100%;justify-content:center}
+.tb-plist{display:flex;flex-direction:column;gap:2px}
+@media(max-width:600px){
+  .tb-mh{padding:13px 14px} .tb-mb{padding:12px 14px} .tb-mf{padding:11px 14px}
+}
+
+.tb-roster{margin:0}
 .tb-rhead{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
 .tb-rhead b{font-size:.9rem}
 .tb-rhead span{font-size:.72rem;color:rgba(255,255,255,.35);flex:1;min-width:200px;line-height:1.6}
@@ -260,6 +286,9 @@ body{
 .tb-rt th{text-align:left;padding:7px 8px;font-family:'Orbitron',monospace;font-size:.58rem;
   letter-spacing:2px;color:rgba(255,255,255,.25);border-bottom:1px solid var(--border)}
 .tb-rt td{padding:5px 8px;border-bottom:1px solid rgba(255,255,255,.05)}
+/* 이름이 '학생\n01' 처럼 접히면 누구 줄인지 읽기 어렵다 — 이름과 머리줄은 한 줄로 */
+.tb-rt th,.tb-rt td:first-child{white-space:nowrap}
+.tb-rt td:first-child{max-width:9em;overflow:hidden;text-overflow:ellipsis}
 .tb-rt tr.new td{background:rgba(255,214,0,.07)}
 .tb-rt input[type=text],.tb-rt input:not([type]),.tb-rt select{
   background:rgba(255,255,255,.06);border:1px solid var(--border);color:#eaf0ff;
@@ -286,7 +315,19 @@ body{
 .tb-empty{padding:26px;text-align:center;color:rgba(255,255,255,.35);font-size:.85rem;line-height:1.7}
 
 /* ── 그룹 랭킹 테이블 ── */
+/* 표가 길면 카드가 화면을 통째로 삼킨다 — 10명쯤 보이는 높이로 자르고 안에서 스크롤한다.
+   머리줄은 붙여 두고, 스마트폰에서 손으로 밀 수 있게 터치 스크롤을 명시한다(2026-09-16). */
+.tbl-scroll{overflow-y:auto;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  touch-action:pan-x pan-y;overscroll-behavior:contain;}
+.tbl-scroll::-webkit-scrollbar{width:9px;height:9px}
+.tbl-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.16);border-radius:9px}
+.tbl-scroll::-webkit-scrollbar-track{background:transparent}
+/* 10행 남짓 — 행 높이가 표마다 달라 각자 잡는다 */
+#group-rank-scroll{max-height:452px}
+#student-table-scroll{max-height:470px}
+
 .rank-table{width:100%;border-collapse:collapse}
+.rank-table thead th{position:sticky;top:0;z-index:2;background:var(--card,#0e1420)}
 .rank-table th{
   font-family:'Orbitron',monospace;font-size:0.58rem;
   letter-spacing:2px;color:rgba(255,255,255,0.25);
@@ -342,7 +383,17 @@ body{
 }
 
 /* ── 학생 상세 분석 테이블 ── */
-.student-table{width:100%;border-collapse:collapse}
+/* 가로로 밀어도 누구 줄인지 알아야 하므로 학생 이름 칸을 왼쪽에 고정한다.
+   머리줄(위)과 이름칸(왼쪽)이 겹치는 첫 칸은 z-index 를 더 높여 준다. */
+.student-table{width:100%;border-collapse:separate;border-spacing:0}
+.student-table thead th{position:sticky;top:0;z-index:2;background:var(--card,#0e1420)}
+.student-table th:first-child,
+.student-table td:first-child{position:sticky;left:0;z-index:1;background:var(--card,#0e1420);
+  box-shadow:1px 0 0 rgba(255,255,255,.07);
+  /* 폭을 안 잡아 주면 좁은 화면에서 '학생' 이 '학/생' 으로 세로로 접힌다 */
+  min-width:124px}
+.student-table thead th:first-child{z-index:3}
+.student-table tbody tr:hover td:first-child{background:#141b28}
 .student-table th{
   font-family:'Orbitron',monospace;font-size:0.55rem;
   letter-spacing:1.5px;color:rgba(255,255,255,0.25);
@@ -690,6 +741,10 @@ body{
         <button class="refresh-btn" id="refresh-btn" onclick="loadDashboard()">
           <span class="ri">↻</span> 새로고침
         </button>
+        <button class="refresh-btn" id="auto-btn" onclick="toggleAuto()"
+          title="3초마다 바뀐 게 있는지 확인해서, 바뀌었을 때만 다시 불러옵니다">
+          <span id="auto-dot">🟢</span> <span id="auto-label">자동 갱신 켜짐</span>
+        </button>
         <button class="refresh-btn" id="delete-group-btn" onclick="deleteGroup()"
           style="background:rgba(255,70,70,0.12);color:#ff7b7b;margin-left:8px">
           <span>🗑</span> 그룹 삭제
@@ -744,13 +799,15 @@ body{
           <div class="panel-header">
             <div class="panel-title"><div class="pt-dot"></div>그룹 종합 랭킹</div>
           </div>
-          <div class="panel-body">
+          <div class="panel-body" style="padding:0">
+            <div class="tbl-scroll" id="group-rank-scroll">
             <table class="rank-table" id="group-rank-table">
               <thead><tr>
                 <th>#</th><th>학생</th><th style="text-align:right">총점</th><th style="text-align:center">클리어</th>
               </tr></thead>
               <tbody id="group-rank-body"></tbody>
             </table>
+            </div>
           </div>
         </div>
 
@@ -792,7 +849,8 @@ body{
             </div>
             <span style="font-size:0.72rem;color:rgba(255,255,255,0.25)">클릭 → 개인 진단</span>
           </div>
-          <div class="panel-body" style="overflow-x:auto;padding:0">
+          <div class="panel-body" style="padding:0">
+            <div class="tbl-scroll" id="student-table-scroll">
             <table class="student-table" id="student-table">
               <thead><tr>
                 <th style="padding-left:20px">
@@ -817,6 +875,7 @@ body{
               </tr></thead>
               <tbody id="student-table-body"></tbody>
             </table>
+            </div>
           </div>
         </div>
       </div>
@@ -1284,21 +1343,25 @@ function updateHeaderMeta(studentCount) {
   document.getElementById('ch-meta').textContent = parts.join(' · ');
 }
 
-async function loadDashboard() {
+/* quiet=true 면 표를 비우지 않고 조용히 갈아끼운다.
+   자동 갱신이 3초마다 표를 통째로 지웠다 그리면 교수자가 읽던 줄이 계속 사라진다. */
+async function loadDashboard(quiet) {
   if (!currentGid) return;
   const btn = document.getElementById('refresh-btn');
-  btn.classList.add('spin'); btn.disabled = true;
+  if (!quiet) { btn.classList.add('spin'); btn.disabled = true; }
 
   // 헤더 설정
   updateHeaderMeta();
 
-  // 로딩 표시 (tbody에는 tr, div에는 div — 잘못된 마크업 주입 방지)
-  ['group-rank-body','student-table-body'].forEach(id =>
-    document.getElementById(id).innerHTML =
-      '<tr><td colspan="10" style="text-align:center;padding:30px;color:rgba(255,255,255,0.2)"><div class="spinner" style="margin:0 auto"></div></td></tr>'
-  );
-  document.getElementById('game-bar-list').innerHTML =
-    '<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.2)"><div class="spinner" style="margin:0 auto"></div></div>';
+  if (!quiet) {
+    // 로딩 표시 (tbody에는 tr, div에는 div — 잘못된 마크업 주입 방지)
+    ['group-rank-body','student-table-body'].forEach(id =>
+      document.getElementById(id).innerHTML =
+        '<tr><td colspan="10" style="text-align:center;padding:30px;color:rgba(255,255,255,0.2)"><div class="spinner" style="margin:0 auto"></div></td></tr>'
+    );
+    document.getElementById('game-bar-list').innerHTML =
+      '<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.2)"><div class="spinner" style="margin:0 auto"></div></div>';
+  }
 
   try {
     const [scoresRes] = await Promise.all([
@@ -1317,8 +1380,77 @@ async function loadDashboard() {
     console.error(e);
   } finally {
     btn.classList.remove('spin'); btn.disabled = false;
+    markAutoRefreshed();
   }
 }
+
+/* ══════════════════════════════════════════
+   자동 갱신 — 전송량을 아끼는 방식
+   ──────────────────────────────────────────
+   Supabase 무료 플랜은 요청 **건수**에 상한이 없다. 걸리는 것은 전송량(월 5GB)이라,
+   3초마다 전체 표(가장 큰 그룹 기준 약 41KB)를 받으면 켜 둔 채 잊었을 때 한 달에
+   몇 GB가 나간다. 그래서 3초마다는 **"바뀌었나?" 한 줄만** 묻고(약 60바이트),
+   바뀌었을 때만 전체를 다시 받는다. 아무도 안 하고 있으면 사실상 공짜다.
+══════════════════════════════════════════ */
+const AUTO_MS = 3000;           // 확인 주기
+const AUTO_IDLE_STOP_MS = 30 * 60 * 1000;  // 30분간 아무 변화 없으면 스스로 멈춘다
+let autoOn = true, autoTimer = null, autoMark = null, autoLastChange = Date.now();
+
+/* 이 그룹에서 가장 최근에 들어온 기록의 시각. 이것만 바뀌면 누군가 점수를 올린 것이다.
+   scores(최고점 갱신)와 score_history(판마다 쌓임)를 둘 다 본다 — 최고점이 안 깨져도
+   판을 돈 것은 팀전 성장 점수에 반영되기 때문이다. */
+async function autoProbe() {
+  const [a, b] = await Promise.all([
+    db.from('scores').select('updated_at').eq('group_id', currentGid)
+      .order('updated_at', { ascending: false }).limit(1),
+    db.from('score_history').select('played_at').eq('group_id', currentGid)
+      .order('played_at', { ascending: false }).limit(1),
+  ]);
+  if (a.error || b.error) return null;          // 잠깐 끊긴 것 — 화면은 그대로 둔다
+  return ((a.data && a.data[0] && a.data[0].updated_at) || '') + '|' +
+         ((b.data && b.data[0] && b.data[0].played_at) || '');
+}
+
+async function autoTick() {
+  if (!autoOn || !currentGid) return;
+  if (document.hidden) return;                  // 안 보는 화면은 조회하지 않는다
+  try {
+    const mark = await autoProbe();
+    if (mark == null) return;
+    if (autoMark === null) { autoMark = mark; return; }   // 첫 확인은 기준만 잡는다
+    if (mark !== autoMark) {
+      autoMark = mark; autoLastChange = Date.now();
+      await loadDashboard(true);                // 바뀐 것을 확인했을 때만 전부 받는다
+    } else if (Date.now() - autoLastChange > AUTO_IDLE_STOP_MS) {
+      // 수업이 끝났는데 창만 열려 있는 경우 — 스스로 멈춘다
+      setAuto(false, '30분째 변화 없음');
+    }
+  } catch (e) { /* 네트워크가 잠깐 끊겨도 화면은 그대로 */ }
+}
+
+function markAutoRefreshed() {
+  const el = document.getElementById('auto-label');
+  if (!el || !autoOn) return;
+  const t = new Date();
+  el.textContent = '자동 갱신 · ' +
+    String(t.getHours()).padStart(2,'0') + ':' + String(t.getMinutes()).padStart(2,'0') +
+    ':' + String(t.getSeconds()).padStart(2,'0');
+}
+
+function setAuto(on, why) {
+  autoOn = on;
+  const dot = document.getElementById('auto-dot'), label = document.getElementById('auto-label');
+  if (dot) dot.textContent = on ? '🟢' : '⏸';
+  if (label) label.textContent = on ? '자동 갱신 켜짐' : ('자동 갱신 꺼짐' + (why ? ' · ' + why : ''));
+  if (on) { autoLastChange = Date.now(); autoMark = null; }
+}
+function toggleAuto() { setAuto(!autoOn); }
+
+document.addEventListener('visibilitychange', () => {
+  // 다시 화면으로 돌아오면 그동안 쌓인 것을 한 번에 따라잡는다
+  if (!document.hidden && autoOn && currentGid) { autoLastChange = Date.now(); autoTick(); }
+});
+if (!autoTimer) autoTimer = setInterval(autoTick, AUTO_MS);
 
 /* ══════════════════════════════════════════
    이론 약점 분석 (주제별 오답, wrong_answers game_id='theory')
@@ -1993,8 +2125,8 @@ function hideAdPlaceholder(){}
     </div>
   </div>
 </div>
-<script src="ask.js?v=23"></script>
-<script src="teambattle.js?v=23"></script>
-<script src="emoji-icons.js?v=23"></script>
+<script src="ask.js?v=24"></script>
+<script src="teambattle.js?v=24"></script>
+<script src="emoji-icons.js?v=24"></script>
 </body>
 </html>

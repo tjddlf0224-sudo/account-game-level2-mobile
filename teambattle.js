@@ -17,7 +17,8 @@
  *  ④ 단순 평균            못하는 게임도 세야 전 게임을 고루 한다(교사 확정)
  *  ⑤ 무기록 학생은 0      최하위로 보고 상위권과 한 팀이 되게 한다
  *
- *  ⚠ 이 앱의 점수는 학생이 **저장 버튼을 눌러야만** 기록된다. 그래서 총점·판수는
+ *  ⚠ 이 앱의 점수는 **결과화면까지 가야** 기록된다(2026-09-16부터 2급도 닉네임이
+ *    있으면 자동 저장 — 그 전에는 저장 버튼을 눌러야만 했다). 그래서 총점·판수는
  *    실력이 아니라 '저장 습관'을 재는 값이다. 비교 가능한 건 최고점뿐이다.
  *
  *  window.TeamBattle 로 노출. admin.html 의 db / currentGid / verifiedPass 를 쓴다.
@@ -36,6 +37,7 @@
     session: null,   // 진행 중 세션
     rosterOpen: false,
     past: [],        // 끝난 세션(결과 다시 열기)
+    pastOpen: false, // 지난 세션 모달
     edit: {}         // 명단 편집 버퍼 {name:{class_label,alias_of,excluded}}
   };
 
@@ -205,33 +207,86 @@
     return { avg: Math.round(s / v.length), lo: Math.min.apply(null, v), hi: Math.max.apply(null, v) };
   }
 
+  /* 앱 안인가. Capacitor 는 네이티브에서만 이 값을 true 로 준다.
+     (파일 스킴으로 열어 본 경우까지 대비해 주소도 함께 본다.) */
+  function inApp() {
+    try {
+      if (window.Capacitor && typeof Capacitor.isNativePlatform === 'function') {
+        return Capacitor.isNativePlatform();
+      }
+    } catch (e) {}
+    return /^(capacitor|ionic|file):/.test(location.protocol);
+  }
+
+  /* 링크 속성 — 브라우저는 새 탭, 앱은 같은 창.
+     앱에서 target="_blank" 를 쓰면 WKWebView 가 새 창 요청을 iOS 에 넘기는데
+     capacitor:// 는 iOS 가 열 수 없는 스킴이라 **아무 일도 일어나지 않는다**. */
+  function openAttrs(url) {
+    var u = esc(url);
+    return inApp()
+      ? ' href="' + u + '"'
+      : ' href="' + u + '" target="_blank" rel="noopener"';
+  }
+
   function sessionBar() {
     if (!S.session) return '';
     var url = location.href.replace(/admin\.html.*$/, '') + 'board.html?s=' + encodeURIComponent(S.session.id);
     return '<div class="tb-live">' +
       '<span class="tb-live-dot"></span>' +
       '<b>진행 중</b> ' + esc(S.session.class_label || '') + ' · 세션 <code>' + esc(S.session.id) + '</code>' +
-      '<a class="tb-btn" href="' + esc(url) + '" target="_blank">전광판 열기 ↗</a>' +
-      '<a class="tb-btn" href="' + esc(url.replace('board.html','result.html')) + '" target="_blank">결과 보기 ↗</a>' +
+      '<a class="tb-btn"' + openAttrs(url) + '>전광판 열기 ↗</a>' +
+      '<a class="tb-btn"' + openAttrs(url.replace('board.html', 'result.html')) + '>결과 보기 ↗</a>' +
       '<button class="tb-btn" onclick="TeamBattle.finish()">세션 종료</button>' +
       '</div>';
   }
 
-  /* 지난 세션 — 수업이 끝난 뒤 결과를 다시 열어 상을 줄 수 있어야 한다 */
+  /* 지난 세션 — 수업이 끝난 뒤 결과를 다시 열어 상을 줄 수 있어야 한다.
+     수업을 할수록 쌓이므로 자리에는 최근 3개만 두고 나머지는 모달로 뺀다. */
+  var PAST_INLINE = 3;
+
+  function pastRow(p) {
+    var root = location.href.replace(/admin\.html.*$/, '');
+    var d = new Date(p.started_at);
+    var when = (d.getMonth() + 1) + '/' + d.getDate() + ' ' +
+               String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+    return '<a class="tb-prow"' + openAttrs(root + 'result.html?s=' + encodeURIComponent(p.id)) + '>' +
+      '<span class="tb-pw">' + when + '</span>' +
+      '<span class="tb-pn">' + esc(p.class_label || '전체') + ' · ' + esc(p.title || '팀전') + '</span>' +
+      '<span class="tb-pc">' + esc(p.id) + '</span>' +
+      '<span class="tb-pg">결과 ↗</span></a>';
+  }
+
   function pastList() {
     if (!S.past || !S.past.length) return '';
-    var root = location.href.replace(/admin\.html.*$/, '');
+    var rest = S.past.length - PAST_INLINE;
     return '<div class="tb-past"><div class="tb-pt">지난 세션</div>' +
-      S.past.map(function (p) {
-        var d = new Date(p.started_at);
-        var when = (d.getMonth() + 1) + '/' + d.getDate() + ' ' +
-                   String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
-        return '<a class="tb-prow" href="' + esc(root) + 'result.html?s=' + encodeURIComponent(p.id) + '" target="_blank">' +
-          '<span class="tb-pw">' + when + '</span>' +
-          '<span class="tb-pn">' + esc(p.class_label || '전체') + ' · ' + esc(p.title || '팀전') + '</span>' +
-          '<span class="tb-pc">' + esc(p.id) + '</span>' +
-          '<span class="tb-pg">결과 ↗</span></a>';
-      }).join('') + '</div>';
+      S.past.slice(0, PAST_INLINE).map(pastRow).join('') +
+      (rest > 0
+        ? '<button class="tb-btn tb-more" onclick="TeamBattle.openPast()">지난 세션 ' +
+          rest + '개 더보기 →</button>'
+        : '') +
+      '</div>';
+  }
+
+  function pastModal() {
+    if (!S.pastOpen) return '';
+    return modalShell('past', '지난 세션 ' + S.past.length + '개',
+      '끝난 세션의 결과를 다시 열어 볼 수 있습니다.',
+      '<div class="tb-plist">' + S.past.map(pastRow).join('') + '</div>', '');
+  }
+
+  /* 모달 껍데기 — 명단 관리와 지난 세션이 같은 모양을 쓴다.
+     닫기는 ✕ 과 바깥 클릭 둘 다 되게 한다. */
+  function modalShell(key, title, desc, body, footBtns) {
+    return '<div class="tb-ov" onclick="if(event.target===this)TeamBattle.closeModal(\'' + key + '\')">' +
+      '<div class="tb-mo" role="dialog" aria-modal="true">' +
+        '<div class="tb-mh"><b>' + esc(title) + '</b>' +
+          (desc ? '<span>' + esc(desc) + '</span>' : '') +
+          '<button class="tb-x" title="닫기" onclick="TeamBattle.closeModal(\'' + key + '\')">✕</button></div>' +
+        '<div class="tb-mb">' + body + '</div>' +
+        '<div class="tb-mf">' + footBtns +
+          '<button class="tb-btn" onclick="TeamBattle.closeModal(\'' + key + '\')">닫기</button></div>' +
+      '</div></div>';
   }
 
   function render() {
@@ -306,9 +361,19 @@
            '<button class="tb-btn primary" onclick="TeamBattle.start()">세션 시작 ▶</button></div>';
       h += '</div>';
     }
-    h += rosterPanel();
     h += pastList();
     host.innerHTML = h;
+
+    /* 모달은 body 바로 밑에 그린다.
+       .main 이 position:relative; z-index:1 로 쌓임 맥락을 만들기 때문에,
+       그 안에 두면 z-index 를 아무리 올려도 사이드바(z-index:50) 뒤로 깔린다. */
+    var mroot = document.getElementById('tb-modal-root');
+    if (!mroot) {
+      mroot = document.createElement('div');
+      mroot.id = 'tb-modal-root';
+      document.body.appendChild(mroot);
+    }
+    mroot.innerHTML = rosterPanel() + pastModal();
   }
 
   /* ── 명단 관리 ─────────────────────────────────────────────
@@ -347,11 +412,7 @@
       return (ca === cb) ? a.localeCompare(b, 'ko') : (ca || '힣').localeCompare(cb || '힣', 'ko');
     });
 
-    var h = '<div class="tb-roster" id="tb-roster">';
-    h += '<div class="tb-rhead"><b>명단 관리</b>' +
-         '<span>반을 지정해야 팀을 짤 수 있습니다. 닉네임을 바꾼 학생은 “실제 주인”을 골라 주세요.</span>' +
-         '<button class="tb-btn primary" onclick="TeamBattle.saveRoster()">명단 저장</button></div>';
-    h += '<table class="tb-rt"><thead><tr><th>이름</th><th>반</th><th>실제 주인(닉네임 변경 시)</th><th>제외</th></tr></thead><tbody>';
+    var h = '<table class="tb-rt"><thead><tr><th>이름</th><th>반</th><th>실제 주인(닉네임 변경 시)</th><th>제외</th></tr></thead><tbody>';
     h += all.map(function (n) {
       var nk = esc(n).replace(/'/g, "\\'");
       var al = cur(n, 'alias_of'), exc = !!cur(n, 'excluded');
@@ -372,8 +433,10 @@
     h += '<datalist id="tb-classes">' + classes.map(function (c) {
       return '<option value="' + esc(c) + '">';
     }).join('') + '</datalist>';
-    h += '</div>';
-    return h;
+    return modalShell('roster', '명단 관리',
+      '반을 지정해야 팀을 짤 수 있습니다. 닉네임을 바꾼 학생은 “실제 주인”을 골라 주세요.',
+      '<div class="tb-roster" id="tb-roster">' + h + '</div>',
+      '<button class="tb-btn primary" onclick="TeamBattle.saveRoster()">명단 저장</button>');
   }
 
   var GAMES = [
@@ -410,13 +473,15 @@
       dragging = null;
       render();
     },
+    openPast: function () { S.pastOpen = true; render(); },
+    closeModal: function (key) {
+      if (key === 'past') S.pastOpen = false; else S.rosterOpen = false;
+      render();
+    },
+    /* 이제 모달이라 화면 가운데에 뜬다 — 예전처럼 스크롤해서 찾아갈 필요가 없다 */
     toggleRoster: function () {
       S.rosterOpen = !S.rosterOpen;
       render();
-      if (S.rosterOpen) {
-        var el = document.getElementById('tb-roster');
-        if (el) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-      }
     },
     setRow: function (name, field, val) {
       var r = S.edit[name] || (S.edit[name] = {});
@@ -527,10 +592,10 @@
       // 아직 안 끝난 세션이 있으면 이어받는다(창을 닫아도 코드를 다시 찾을 수 있게)
       var ses = await sb().from('team_session')
         .select('id,class_label,title,started_at,ended_at').eq('group_id', gid())
-        .order('started_at', { ascending: false }).limit(12);
+        .order('started_at', { ascending: false }).limit(40);   // 모달에서 전부 볼 수 있으므로 넉넉히
       var list = ses.data || [];
       S.session = list.filter(function (x) { return !x.ended_at; })[0] || null;
-      S.past = list.filter(function (x) { return !!x.ended_at; }).slice(0, 8);
+      S.past = list.filter(function (x) { return !!x.ended_at; }).slice(0, 40);
 
       S.cls = null; S.teams = []; S.absent = {}; S.locked = {}; S.edit = {};
       render();
