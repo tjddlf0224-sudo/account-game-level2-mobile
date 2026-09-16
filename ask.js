@@ -33,7 +33,13 @@
     var s = document.createElement('style');
     s.id = STYLE_ID;
     s.textContent = [
-      '.ask-ov{position:absolute;inset:0;z-index:99999;display:flex;',
+      /* ⚠ fixed 여야 한다. absolute 는 **문서** 기준이라, 페이지를 아래로 스크롤한 상태에서
+         확인창을 띄우면 모달이 문서 맨 위에 남아 화면 밖으로 사라진다
+         (2026-09-16 실기기 제보: 신고의 문에서 아래쪽 '그만' 을 눌렀더니
+          "위로 스크롤 올리면 위쪽에 모달 창이 떠있긴 해").
+         transform 을 쓰는 조상이 있으면 fixed 는 그 조상 기준이 되는데,
+         원가의 길(#rotator 회전)에서는 그게 오히려 회전 화면 한가운데라 맞다. */
+      '.ask-ov{position:fixed;inset:0;z-index:99999;display:flex;',
       'align-items:center;justify-content:center;background:rgba(5,3,16,.72);',
       '-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);',
       'font-family:"Noto Sans KR",-apple-system,sans-serif;}',

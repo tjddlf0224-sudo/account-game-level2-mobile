@@ -7,7 +7,7 @@
 <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
      **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
      이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-<script src="safestore.js?v=22"></script>
+<script src="safestore.js?v=23"></script>
 <title>전표의 눈 — 전산회계 1급 스테이지 3</title>
 <meta name="description" content="실제 기출 거래를 보고 매입매출전표 유형(과세·영세·면세·불공·카과 등)을 맞히는 연습">
 <style>
@@ -38,6 +38,9 @@
      (게임 5종·원가의 길에서 먼저 겪었다). 여긴 문서 스크롤이라 덜 위험하지만
      규칙을 같게 둔다. */
   .wrap{max-width:640px;margin:0 auto;padding:16px 16px 16px;}
+  /* 시작화면은 헤더를 숨기므로(body.home-mode) 헤더가 갖고 있던 상단 세이프티
+     여백이 사라진다 — 노치에 제목이 가린다. 여기서 대신 준다(2026-09-16). */
+  body.home-mode .wrap{padding-top:calc(16px + env(safe-area-inset-top));}
   .wrap::after{content:'';display:block;width:100%;
     height:calc(env(safe-area-inset-bottom, 0px)
       + max(var(--ad-banner-h, 0px), var(--ad-safe-h, 0px), var(--ad-reserve)));}
@@ -131,6 +134,11 @@
   .cat-badge.매입{background:rgba(61,143,122,.14);color:var(--buy);border:1px solid rgba(61,143,122,.3);}
   .qsrc{font-size:.68rem;color:var(--dim);opacity:.6;}
   .qstem{font-size:1.06rem;line-height:1.65;word-break:keep-all;}
+  /* 문제와 유형 목록 사이 지시문 — 무엇을 하라는 건지 한 줄로 알려 준다
+     (2026-09-16 실기기 제보: "문제에 해당하는 유형을 고르시오. 라는 게
+      문제 카드 아래에 나오면 이해하기 더 좋겠어"). */
+  .q-ask{text-align:center;font-size:.92rem;font-weight:700;color:var(--gold);
+    margin:12px 0 10px;letter-spacing:.2px;word-break:keep-all;}
   /* 힌트로 짚어 준 말 — 색을 바꾸고 은은하게 깜박인다 */
   .qstem mark.kw-hit{background:transparent;color:var(--gold);font-weight:800;
     padding:0 1px;border-radius:3px;animation:kwGlow 1.1s ease-in-out infinite;}
@@ -334,11 +342,11 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="pausewatch.js?v=22"></script>
-<script src="ask.js?v=22"></script>
-<script src="wrongnote.js?v=22"></script>
-<script src="growth.js?v=22"></script>
-<script src="streak.js?v=22"></script>
+<script src="pausewatch.js?v=23"></script>
+<script src="ask.js?v=23"></script>
+<script src="wrongnote.js?v=23"></script>
+<script src="growth.js?v=23"></script>
+<script src="streak.js?v=23"></script>
 <script>
 (function(){ if(!(localStorage.getItem('hub_nickname')||'').trim()){ location.replace('login.html'); } })();
 
@@ -531,6 +539,7 @@ function showQ(){
       <div class="qstem">${esc(q.stem)}</div>
     </div>
     <div class="tear-line"></div>
+    <div class="q-ask">문제에 해당하는 유형을 고르시오.</div>
     ${typeGroupHtml(SALE_TYPES,'매출')}
     ${typeGroupHtml(BUY_TYPES,'매입')}
     <button class="hint-btn" id="hint-btn" type="button">💡 힌트 보기</button>
@@ -772,7 +781,13 @@ function requestInterstitialIfNeeded(afterFn){
   const count=incrementGameCount();
   if(count%AD_INTERSTITIAL_EVERY===0 && window.AdBridge && typeof AdBridge.showInterstitial==='function'){
     AdBridge.showInterstitial();
-  } else { afterFn&&afterFn(); }
+  } else {
+    /* 광고를 안 띄우고 그냥 넘어가는 길. 예약해 둔 함수를 **반드시 지우고** 부른다 —
+       안 지우면 다음에 뒤늦은 광고 닫힘 신호가 왔을 때 지난 함수가 한 번 더 불린다
+       (결과화면에서 난데없이 화면이 넘어가는 증상, 2026-09-16 정리). */
+    window._adAfterFn = null;
+    afterFn && afterFn();
+  }
 }
 function onInterstitialClosed(){ if(window._adAfterFn){ const f=window._adAfterFn; window._adAfterFn=null; f(); } }
 function onAdsRemoved(){}
@@ -783,6 +798,6 @@ function showAdPlaceholder(){ if(window.AdBridge && typeof AdBridge.show==='func
 
 load();
 </script>
-<script src="emoji-icons.js?v=22"></script>
+<script src="emoji-icons.js?v=23"></script>
 </body>
 </html>
