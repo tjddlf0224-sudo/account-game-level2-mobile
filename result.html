@@ -4,7 +4,7 @@
     <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
          **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
          이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-    <script src="safestore.js?v=20"></script>
+    <script src="safestore.js?v=21"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>팀전 결과 — 전산회계 오락실</title>
@@ -12,8 +12,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Orbitron:wght@700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="emoji-icons.js?v=20"></script>
-<script src="teamscore.js?v=20"></script>
+<script src="emoji-icons.js?v=21"></script>
+<script src="teamscore.js?v=21"></script>
 <style>
 /* 수업이 끝난 뒤 교사가 보고 상을 주는 화면. 전광판과 달리 **읽고 판단하는** 화면이라
    글자를 키우기보다 정보를 촘촘하게 놓는다. 인쇄해서 게시할 수도 있어야 한다. */
@@ -116,13 +116,19 @@ const SID = new URLSearchParams(location.search).get('s');
   const alias = await TeamScore.loadAlias(db, SES.group_id);
   const base  = await TeamScore.loadBaseline(db, SES, MEMBERS, alias);
 
-  // 종료했으면 그 시각까지만, 진행 중이면 지금까지
-  let q = db.from('score_history').select('user_name,game_id,score,played_at')
-    .eq('group_id',SES.group_id).gte('played_at',SES.started_at).limit(20000);
-  if(SES.ended_at) q = q.lte('played_at', SES.ended_at);
-  const h = await q;
+  /* ── 3초마다 자동 갱신 (2026-09-16 사용자 요청: "결과 보기도 3초마다 자동 갱신되게 해줘")
+     세션 정보·별칭·기준선은 세션 내내 안 바뀌므로 위에서 **한 번만** 읽는다.
+     매번 다시 읽는 것은 점수 기록과 '세션이 끝났는지' 둘뿐이다 — 전광판과 같은 방식.
+     ⚠ 이미 끝난 세션을 열어 본 것이면 더 볼 것이 없으므로 타이머를 걸지 않는다. */
+  async function fetchRows(){
+    let q = db.from('score_history').select('user_name,game_id,score,played_at')
+      .eq('group_id',SES.group_id).gte('played_at',SES.started_at).limit(20000);
+    if(SES.ended_at) q = q.lte('played_at', SES.ended_at);
+    return q;
+  }
 
-  const R = TeamScore.compute({session:SES, members:MEMBERS, rows:h.data||[], baseline:base, alias});
+  function render(rows){
+  const R = TeamScore.compute({session:SES, members:MEMBERS, rows:rows||[], baseline:base, alias});
 
   document.getElementById('err').style.display='none';
   document.getElementById('root').style.display='block';
@@ -134,7 +140,7 @@ const SID = new URLSearchParams(location.search).get('s');
   const mins = Math.round(((en||new Date()) - st)/60000);
   document.getElementById('h-meta').textContent =
     games + ' · ' + st.toLocaleString('ko-KR') + ' · ' + mins + '분' +
-    (en ? '' : ' (진행 중)') + ' · 세션 ' + SID;
+    (en ? '' : ' (진행 중 · 3초마다 자동 갱신)') + ' · 세션 ' + SID;
 
   const card = (t,i,key,cls) =>
     '<div class="card'+(i===0?' '+cls:'')+'">'+
@@ -164,6 +170,26 @@ const SID = new URLSearchParams(location.search).get('s');
     '<br>· 성장 점수는 <b>자기 이전 최고점 대비 몇 % 올랐는지</b>입니다(게임당 최대 +'+TeamScore.GROW_CAP+
       '). 이미 최고점이 높은 학생은 오르기 어렵고, 그만큼 하위권이 유리한 판입니다.' +
     (R.multi ? '<br>· 게임이 여럿이라 점수는 <b>게임마다 그 시간 1등 대비 %</b>로 환산해 합산했습니다.' : '');
+  }
+
+  let timer = null;
+  async function tick(){
+    try{
+      // 교사가 대시보드에서 세션을 끝낼 수 있다 — 끝났으면 그 시각까지만 집계하고 타이머를 멈춘다
+      const sRes = await db.from('team_session').select('ended_at').eq('id',SID).maybeSingle();
+      if(sRes.data && sRes.data.ended_at && !SES.ended_at){
+        SES.ended_at = sRes.data.ended_at;
+        if(timer){ clearInterval(timer); timer = null; }
+      }
+      const h = await fetchRows();
+      if(h.error) return;            // 네트워크가 잠깐 끊겨도 화면은 그대로 둔다
+      render(h.data||[]);
+    }catch(e){ /* 같은 이유로 조용히 넘긴다 */ }
+  }
+
+  const first = await fetchRows();
+  render(first.data||[]);
+  if(!SES.ended_at) timer = setInterval(tick, 3000);
 })();
 </script>
 </body>
