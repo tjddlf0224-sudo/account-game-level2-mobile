@@ -4,7 +4,7 @@
     <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
          **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
          이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-    <script src="safestore.js?v=27"></script>
+    <script src="safestore.js?v=28"></script>
 <meta charset="utf-8">
 <!-- viewport-fit=cover 가 있어야 env(safe-area-inset-*) 이 실제 값을 준다.
      이게 빠져서 제목이 노치에 가렸다(2026-09-16 제보). -->
@@ -14,8 +14,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Orbitron:wght@700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="emoji-icons.js?v=27"></script>
-<script src="teamscore.js?v=27"></script>
+<script src="emoji-icons.js?v=28"></script>
+<script src="teamscore.js?v=28"></script>
+<script src="celebrate.js?v=28"></script>
 <style>
 /* 수업이 끝난 뒤 교사가 보고 상을 주는 화면. 전광판과 달리 **읽고 판단하는** 화면이라
    글자를 키우기보다 정보를 촘촘하게 놓는다. 인쇄해서 게시할 수도 있어야 한다. */
@@ -90,6 +91,7 @@ tr.top td{background:rgba(255,214,0,.06)}
 .bar a,.bar button{background:rgba(255,255,255,.07);border:1px solid var(--line);color:#eaf0ff;
   border-radius:9px;padding:7px 13px;font-size:.8rem;text-decoration:none;cursor:pointer;font-family:inherit}
 @media print{
+  .cel-btn{display:none!important}
   body{background:#fff;color:#111;max-width:none}
   .card,table,th,td{border-color:#ccc}
   .bar{display:none}
@@ -102,6 +104,7 @@ tr.top td{background:rgba(255,214,0,.06)}
 <div id="root" style="display:none">
   <div class="bar">
     <a href="#" id="b-board">전광판 보기 ↗</a>
+    <span id="b-cel"></span>
     <button onclick="print()">인쇄 / PDF</button>
   </div>
   <h1><span class="cls" id="h-cls">—</span> 팀전 결과</h1>
@@ -166,6 +169,9 @@ const SID = new URLSearchParams(location.search).get('s');
 
   function render(rows){
   const R = TeamScore.compute({session:SES, members:MEMBERS, rows:rows||[], baseline:base, alias});
+  window.__TB_LAST = R;   // 우승 발표(celebrate.js)용
+  if (window.Celebrate && !document.querySelector('#b-cel .cel-btn'))
+    Celebrate.button(document.getElementById('b-cel'), () => window.__TB_LAST);
 
   document.getElementById('err').style.display='none';
   document.getElementById('root').style.display='block';
