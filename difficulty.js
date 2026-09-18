@@ -85,12 +85,12 @@
          무관하게 학생이 1단계를 골라 할 수도 있다. 화면을 그린 변수와 기록하는 변수를 같게 둬야
          둘이 어긋나지 않는다.
        해금 판정(reportRound)과는 완전히 별개 — 여기서 실패해도 해금·결과화면에 영향이 없다. */
-    logRound: function (g, level, correct, total) {
+    logRound: function (g, level, correct, total, score) {
       try {
         if (level !== 1 && level !== 2) return;
         if (window.Growth && Growth.logRound) {
           Growth.logRound({ game: g, level: level, correct: correct, total: total,
-                            unlocked: this.isUnlocked(g) });
+                            unlocked: this.isUnlocked(g), score: score });
         }
       } catch (e) {}
     },

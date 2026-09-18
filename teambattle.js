@@ -81,9 +81,11 @@
       if (!owner || !inClass[owner]) return;
       var v = parseInt(row.score, 10);
       if (!isFinite(v)) return;
+      // 난이도2('<게임>_d2')는 같은 게임으로 접어 높은 쪽만 — 따로 세면 2단계를 한 학생만 항목이 하나 더 생긴다
+      var gid = String(row.game_id || '').replace(/_d2$/, '');
       if (!best[owner]) best[owner] = {};
-      if (!(row.game_id in best[owner]) || v > best[owner][row.game_id]) {
-        best[owner][row.game_id] = v;
+      if (!(gid in best[owner]) || v > best[owner][gid]) {
+        best[owner][gid] = v;
       }
     });
 

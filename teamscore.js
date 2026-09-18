@@ -31,6 +31,11 @@
 
   var GROW_CAP = 100;
 
+  /* 난이도2 점수는 '<게임>_d2' 로 따로 저장된다(2026-09-18). 팀전에서는 **같은 게임으로 합쳐
+     1·2단계 중 높은 쪽**을 센다(사용자 결정: "팀전 점수에도 난이도2 넣어"). 세션의 game_ids 는
+     기본 게임 이름('acid' 등)만 담으므로 여기서 먼저 접어 두어야 필터에 걸리지 않는다. */
+  function baseGame(id) { return String(id || '').replace(/_d2$/, ''); }
+
   /* rows(세션 중 기록) → best[학생][게임] = 최고점 */
   function bestOf(rows, opt) {
     var games = (opt.session.game_ids && opt.session.game_ids.length) ? opt.session.game_ids : null;
@@ -41,12 +46,13 @@
     (rows || []).forEach(function (r) {
       var n = alias[r.user_name] || r.user_name;
       if (!inS[n]) return;
-      if (games && games.indexOf(r.game_id) < 0) return;
+      var gid = baseGame(r.game_id);
+      if (games && games.indexOf(gid) < 0) return;
       if (end && new Date(r.played_at) > end) return;      // 종료 후 기록은 안 센다
       var v = parseInt(r.score, 10);
       if (!isFinite(v)) return;
       if (!best[n]) best[n] = {};
-      if (!(r.game_id in best[n]) || v > best[n][r.game_id]) best[n][r.game_id] = v;
+      if (!(gid in best[n]) || v > best[n][gid]) best[n][gid] = v;
     });
     return best;
   }
@@ -125,8 +131,9 @@
       if (!inS[n]) return;
       var v = parseInt(r.score, 10);
       if (!isFinite(v)) return;
+      var gid = baseGame(r.game_id);
       if (!out[n]) out[n] = {};
-      if (!(r.game_id in out[n]) || v > out[n][r.game_id]) out[n][r.game_id] = v;
+      if (!(gid in out[n]) || v > out[n][gid]) out[n][gid] = v;
     });
     return out;
   }

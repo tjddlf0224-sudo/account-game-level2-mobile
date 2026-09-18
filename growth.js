@@ -160,6 +160,9 @@
       if (!db) return;
       var row = { user_name: u.slice(0, 30), game_id: opts.game, level: level,
                   correct: correct, total: total, unlocked: !!opts.unlocked, source: platform() };
+      // 그 판의 최종 점수(2026-09-18) — 저장 버튼과 무관하게 단계별 점수 분포를 보려고 남긴다
+      var sc = parseInt(opts.score, 10);
+      if (isFinite(sc) && sc >= 0) row.score = Math.min(sc, 2000000000);
       var gid = groupId();
       if (gid) row.group_id = gid;
       db.from(ROUND_TABLE).insert(row).then(function () {}, function () {});
@@ -295,6 +298,7 @@
     GAME_NAMES: {
       acid: '계정과목 산성비', memory: '계정·뜻 메모리', debit: '분개 차·대변',
       factory: '결산분개 조립', flight: '플라이트 장부조회', theory: '이론 객관식',
+      acid_d2: '계정과목 산성비 · 난이도2', memory_d2: '계정·뜻 메모리 · 난이도2', debit_d2: '분개 차·대변 · 난이도2', factory_d2: '결산분개 조립 · 난이도2',
       cost_lv1: '원가의 길', capital_lv1: '자본의 제왕', theory_lv1: '이론 객관식(1급)', voucher_lv1: '매입매출전표 유형', vat_lv1: '신고의 문', alloc_lv1: '배관의 방'
     }
   };

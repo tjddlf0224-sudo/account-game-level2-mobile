@@ -5,7 +5,7 @@
 <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
      **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
      이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-<script src="safestore.js?v=26"></script>
+<script src="safestore.js?v=27"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
@@ -831,18 +831,18 @@
 
 <button id="rewarded-btn" onclick="requestRewarded()">⏱ +30초 광고 보기</button>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="pausewatch.js?v=26"></script>
-    <script src="ask.js?v=26"></script>
-    <script src="wrongnote.js?v=26"></script>
-    <script src="growth.js?v=26"></script>
-<script src="streak.js?v=26"></script>
-    <script src="difficulty.js?v=26"></script>
-    <script src="review-prompt.js?v=26"></script>
+    <script src="pausewatch.js?v=27"></script>
+    <script src="ask.js?v=27"></script>
+    <script src="wrongnote.js?v=27"></script>
+    <script src="growth.js?v=27"></script>
+<script src="streak.js?v=27"></script>
+    <script src="difficulty.js?v=27"></script>
+    <script src="review-prompt.js?v=27"></script>
 </head>
 <body>
 
 <!-- 🎵 BGM 오디오 엘리먼트 -->
-<script src="bgm.js?v=26"></script>
+<script src="bgm.js?v=27"></script>
 
 
 
@@ -917,6 +917,7 @@
         <div id="save-status"></div>
         <div id="my-rank-badge" style="display:none; font-family:'Black Han Sans',sans-serif; font-size:1rem; color:var(--blue); background:rgba(0,194,255,0.12); border:1px solid rgba(0,194,255,0.3); border-radius:50px; padding:7px 20px; text-align:center;"></div>
         <div id="my-rank-neighbors"></div>
+        <div id="rank-lv-label" style="text-align:center;font-size:.78rem;font-weight:700;letter-spacing:.5px;color:rgba(255,255,255,.55);margin:6px 0 4px;"></div>
         <div class="rank-colhdr"><span>순위</span><span>이름</span><span>직급</span><span>점수</span></div>
         <div class="rank-container" id="rank-container">
             <div class="loading" style="justify-content:center;padding:20px 0;">
@@ -1062,10 +1063,17 @@ const SUPABASE_URL = "https://pjagaulfivafamhhiveg.supabase.co";
     const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 const GAME_ID   = "debit";
 
+    // ── 난이도2 점수는 따로 저장하고 따로 랭킹을 낸다(2026-09-18, 사용자 요청).
+    //    game_id 는 '<게임>_d2'. 랭킹·내 순위는 결과 화면에만 있고, LV 는 다음 판을 시작할 때까지
+    //    방금 끝낸 판의 값을 유지하므로 LV 하나로 저장·조회 대상을 정한다.
+    //    (허브 스테이지 해금용 hub_<게임>_best 는 단계와 무관하게 그대로 둔다 — 2단계로 잘해도 다음 게임은 열려야 한다.)
+    function scoreIdFor(lv) { return lv === 2 ? GAME_ID + '_d2' : GAME_ID; }
+    function rankId() { return scoreIdFor(typeof LV !== 'undefined' ? LV : 1); }
+
 // ══════════════════════════════════════
 // 🎵 BGM 관리
 // ══════════════════════════════════════
-const bgm = BGMAudio.create('bgm3_debit.mp3?v=26');
+const bgm = BGMAudio.create('bgm3_debit.mp3?v=27');
 bgm.volume = 0.5;
 
 // 음소거 상태: localStorage에 저장해서 다음 게임에도 유지
@@ -1590,7 +1598,7 @@ function endGame() {
         justUnlocked = Difficulty.reportRound(GAME_ID, correctCount, correctCount + wrongCount);
     }
     // 판별 단계 기록 — 해금 판정 블록 밖에서, 1·2단계 모두. LV 는 이 판의 화면을 그린 값 그대로.
-    if (window.Difficulty && Difficulty.logRound) Difficulty.logRound(GAME_ID, LV, correctCount, correctCount + wrongCount);
+    if (window.Difficulty && Difficulty.logRound) Difficulty.logRound(GAME_ID, LV, correctCount, correctCount + wrongCount, score);
     const unlockEl = document.getElementById('lv-unlock-msg');
     if (unlockEl) unlockEl.style.display = justUnlocked ? 'block' : 'none';
 
@@ -1651,7 +1659,7 @@ async function saveScore() {
         let existingList = [];
         try {
             if (true) {
-                const res = { json: async () => await supabaseFetchRanking(GAME_ID) };
+                const res = { json: async () => await supabaseFetchRanking(rankId()) };
                 existingList = await res.json();
             }
         } catch(e) {}
@@ -1666,7 +1674,7 @@ async function saveScore() {
     }
 
     const today = new Date().toLocaleDateString('ko-KR', { month:'2-digit', day:'2-digit' });
-    const data = { game: GAME_ID, name, score, combo: maxCombo, correct: correctCount, date: today };
+    const data = { game: scoreIdFor(LV), name, score, combo: maxCombo, correct: correctCount, date: today };
 
     if (false) {
         saveLocal(data);
@@ -1681,7 +1689,7 @@ async function saveScore() {
         const _g3best = parseInt(localStorage.getItem('hub_debit_best')||'0');
         if((data.score||0) > _g3best) { localStorage.setItem('hub_debit_best', String(data.score||0));
           if (window.Review) Review.maybeAsk(); }   // 최고기록 갱신 = 만족스러운 순간
-        await supabaseSaveScore(data.name, data.score, data.combo||0, data.correct||0, GAME_ID);
+        await supabaseSaveScore(data.name, data.score, data.combo||0, data.correct||0, scoreIdFor(LV));
         saveLocal(data);
         saveMyName(name);
         showSaveStatus('✓ 등록 완료!', 'ok');
@@ -1720,14 +1728,14 @@ async function showMyRank(name, score, opts) {
         const groupId = localStorage.getItem('hub_group_id') || null;
         const withGroup = (q) => q;   // 전체 범위(그룹 필터는 아래 반 순위에서만)
 
-        const countQ = withGroup(db.from('scores').select('*', { count: 'exact', head: true }).eq('game_id', GAME_ID).gt('score', score));
-        const aboveQ = withGroup(db.from('scores').select('name,score').eq('game_id', GAME_ID).gt('score', score).order('score', { ascending: true }).limit(1));
-        const belowQ = withGroup(db.from('scores').select('name,score').eq('game_id', GAME_ID).lt('score', score).order('score', { ascending: false }).limit(1));
+        const countQ = withGroup(db.from('scores').select('*', { count: 'exact', head: true }).eq('game_id', rankId()).gt('score', score));
+        const aboveQ = withGroup(db.from('scores').select('name,score').eq('game_id', rankId()).gt('score', score).order('score', { ascending: true }).limit(1));
+        const belowQ = withGroup(db.from('scores').select('name,score').eq('game_id', rankId()).lt('score', score).order('score', { ascending: false }).limit(1));
 
         // 반 순위는 따로 센다 — 전체 순위와 함께 보여 준다
         const grpQ = groupId
           ? db.from('scores').select('*', { count: 'exact', head: true })
-              .eq('game_id', GAME_ID).eq('group_id', groupId).gt('score', score)
+              .eq('game_id', rankId()).eq('group_id', groupId).gt('score', score)
           : Promise.resolve({ count: null });
         const [{ count, error: cErr }, { data: aboveRows }, { data: belowRows }, grpRes] =
           await Promise.all([countQ, aboveQ, belowQ, grpQ]);
@@ -1739,14 +1747,14 @@ async function showMyRank(name, score, opts) {
 
         let deltaHtml = '';
         if (trackDelta) {
-            const prevRank = parseInt(localStorage.getItem(RANK_PREV_KEY) || '0', 10);
+            const prevRank = parseInt(localStorage.getItem(RANK_PREV_KEY + (LV === 2 ? '_d2' : '')) || '0', 10);
             if (prevRank > 0) {
                 const diff = prevRank - myRank;
                 if (diff > 0) deltaHtml = `<span class="rank-delta up">▲ ${diff}계단 상승</span>`;
                 else if (diff < 0) deltaHtml = `<span class="rank-delta down">▼ ${Math.abs(diff)}계단 하락</span>`;
                 else deltaHtml = `<span class="rank-delta flat">− 순위 유지</span>`;
             }
-            localStorage.setItem(RANK_PREV_KEY, String(myRank));
+            localStorage.setItem(RANK_PREV_KEY + (LV === 2 ? '_d2' : ''), String(myRank));
         }
 
         const grpRank = (grpRes && grpRes.count != null) ? (grpRes.count + 1) : null;
@@ -1780,11 +1788,12 @@ function saveMyName(name) { localStorage.setItem('accGame_myName', name); }
 function getMyName() { return localStorage.getItem('accGame_myName') || ''; }
 
 async function loadRanking() {
+        { const _l = document.getElementById('rank-lv-label'); if (_l) _l.textContent = (LV === 2 ? '🔥 난이도2 랭킹' : '난이도1 랭킹'); }
     const container = document.getElementById('rank-container');
     if (false) { renderRankList(getLocal()); return; }
     container.innerHTML = '<div class="loading" style="justify-content:center;padding:20px 0;"><div class="spinner"></div>&nbsp;불러오는 중...</div>';
     try {
-        const res = { json: async () => await supabaseFetchRanking(GAME_ID) };
+        const res = { json: async () => await supabaseFetchRanking(rankId()) };
         renderRankList(await res.json());
     } catch(e) { renderRankList(getLocal()); }
 }
@@ -2024,13 +2033,13 @@ initDiffUI();
             factory: [[12000,"👑 결산 마스터"],[7000,"🥇 숙련 경리"],[4000,"🥈 견습 경리"],[1500,"🥉 수습생"],[0,"📋 인턴"]],
             flight:  [[55000,"👑 전설의 에이스"],[40000,"🥇 베테랑 파일럿"],[30000,"🥈 숙련 파일럿"],[18000,"🥉 정규 파일럿"],[0,"🛩 견습 파일럿"]]
         };
-        const tiers = scales[gameId] || scales.flight;
+        const tiers = scales[String(gameId).replace(/_d2$/, '')] || scales.flight;
         return (tiers.find(([min]) => score >= min) || tiers[tiers.length-1])[1];
     }
 
     async function supabaseSaveScore(name, score, combo, correct, gameId, retry = 0) {
         const maxScore = {acid:99999999,memory:99999999,debit:99999999,factory:99999999,flight:99999999};
-        const safeScore = Math.min(Math.max(score,0), maxScore[gameId]||999999);
+        const safeScore = Math.min(Math.max(score,0), maxScore[String(gameId).replace(/_d2$/, '')]||999999);
         const safeName = String(name).replace(/<[^>]*>/g,'').substring(0,30).trim();
         if (!safeName) return;
         const today = new Date().toISOString().split('T')[0];
@@ -2284,6 +2293,6 @@ const Tutorial = (function () {
 function openGuide() { Tutorial.start(); }
 </script>
 
-<script src="emoji-icons.js?v=26"></script>
+<script src="emoji-icons.js?v=27"></script>
 </body>
 </html>

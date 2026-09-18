@@ -4,7 +4,7 @@
     <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
          **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
          이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-    <script src="safestore.js?v=26"></script>
+    <script src="safestore.js?v=27"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
@@ -449,6 +449,7 @@ body{
 .lv-pass{color:var(--gn)}
 .lv-try{color:var(--gd)}
 .lv-open{color:var(--cy)}
+.lv-d2{color:#ff9f43}
 .gbi-lv{margin-top:5px;font-size:0.68rem;color:rgba(255,255,255,0.4);display:flex;gap:10px;flex-wrap:wrap}
 .gbi-lv b{color:rgba(255,255,255,0.75);font-weight:700}
 
@@ -1577,7 +1578,7 @@ async function loadLevelRounds(gid) {
   levelByStudent = {};
   try {
     const { data, error } = await db.from('level_rounds')
-      .select('user_name,game_id,level,correct,total,unlocked')
+      .select('user_name,game_id,level,correct,total,unlocked,score')
       .eq('group_id', gid).in('game_id', LV2_GAMES).limit(20000);
     if (error) throw error;
     (data || []).forEach(r => {
@@ -1585,13 +1586,15 @@ async function loadLevelRounds(gid) {
       const st = levelByStudent[r.user_name] || (levelByStudent[r.user_name] = {});
       const g = st[r.game_id] || (st[r.game_id] = {
         unlocked: false,
-        l1: { rounds: 0, best: 0, passed: false },
-        l2: { rounds: 0, best: 0, passed: false },
+        l1: { rounds: 0, best: 0, passed: false, bestScore: 0 },
+        l2: { rounds: 0, best: 0, passed: false, bestScore: 0 },
       });
       // 2단계 판이 하나라도 있으면 해금된 것이다(해금 전엔 2단계를 고를 수 없다)
       if (r.unlocked || r.level === 2) g.unlocked = true;
       const b = r.level === 2 ? g.l2 : g.l1;
       b.rounds += 1;
+      // 판별 점수(2026-09-18~, 옛 기록은 null) — 저장 버튼을 안 누른 판도 포함한 그 단계 최고점
+      if (r.score != null && r.score > b.bestScore) b.bestScore = r.score;
       if (r.total >= LV_PASS_MIN) {
         const acc = r.correct / r.total;
         if (acc > b.best) b.best = acc;
@@ -1602,6 +1605,14 @@ async function loadLevelRounds(gid) {
 }
 // 1단계 통과 = 해금됨. 해금은 학생 기기에만 저장되므로, 이 기능 이전에 해금한 학생도
 // 적용 후 한 판을 하면 unlocked=true 로 잡힌다.
+// 난이도2 저장 점수(scores 의 '<게임>_d2' 행) — renderDashboard 가 매번 채운다
+let d2SavedBest = {};   // name → baseGameId → score
+function d2Best(name, gameId) {
+  const saved = (d2SavedBest[name] || {})[gameId] || 0;
+  const g = lvInfo(name, gameId);
+  const played = g ? g.l2.bestScore : 0;
+  return Math.max(saved, played);
+}
 function lvInfo(name, gameId) {
   const st = levelByStudent[name];
   return st ? st[gameId] || null : null;
@@ -1610,7 +1621,12 @@ function lvCellHTML(name, gameId) {
   if (currentLevel !== '2급' || !LV2_GAMES.includes(gameId)) return '';
   const g = lvInfo(name, gameId);
   const pct = x => Math.round(x * 100) + '%';
-  if (!g) return `<div class="lv-lines"><span class="lv-line">단계 기록 없음</span></div>`;
+  if (!g) {
+    const b2only = d2Best(name, gameId);
+    return b2only > 0
+      ? `<div class="lv-lines"><span class="lv-line lv-d2">🔥 2단계 최고 <b>${b2only.toLocaleString()}</b></span></div>`
+      : `<div class="lv-lines"><span class="lv-line">단계 기록 없음</span></div>`;
+  }
   const l1 = g.unlocked || g.l1.passed
     ? `<span class="lv-line lv-pass">1단계 <b>통과</b></span>`
     : `<span class="lv-line lv-try">1단계 도전중${g.l1.best ? ' ' + pct(g.l1.best) : ''}</span>`;
@@ -1619,7 +1635,9 @@ function lvCellHTML(name, gameId) {
   else if (g.l2.rounds)     l2 = `<span class="lv-line lv-try">2단계 도전중${g.l2.best ? ' ' + pct(g.l2.best) : ''}</span>`;
   else if (g.unlocked)      l2 = `<span class="lv-line lv-open">2단계 해금 · 미도전</span>`;
   else                      l2 = `<span class="lv-line">2단계 잠김</span>`;
-  return `<div class="lv-lines">${l1}${l2}</div>`;
+  const b2 = d2Best(name, gameId);
+  const l2s = b2 > 0 ? `<span class="lv-line lv-d2">🔥 2단계 최고 <b>${b2.toLocaleString()}</b></span>` : '';
+  return `<div class="lv-lines">${l1}${l2}${l2s}</div>`;
 }
 
 /* ══════════════════════════════════════════
@@ -1637,14 +1655,28 @@ function lvBarHTML(gameId, names) {
     if (g.l2.passed) p2++;
   });
   const pc = x => n ? Math.round(x / n * 100) : 0;
+  let topName = '', topScore = 0;
+  names.forEach(name => { const v = d2Best(name, gameId); if (v > topScore) { topScore = v; topName = name; } });
+  const top = topScore > 0 ? `<span>🔥 2단계 1위 <b>${escHTML(topName)} ${topScore.toLocaleString()}점</b></span>` : '';
   return `<div class="gbi-lv">
     <span>1단계 통과 <b>${p1}/${n}명</b> (${pc(p1)}%)</span>
     <span>2단계 통과 <b>${p2}/${n}명</b> (${pc(p2)}%)</span>
     <span>2단계 도전 ${tried2}명</span>
+    ${top}
   </div>`;
 }
 
 function renderDashboard(scores) {
+  const allScoreRows = scores.length;   // 요약 카드 '기록 수'는 난이도2 행까지 센다
+  // 난이도2 저장 점수('<게임>_d2')는 종합 랭킹·합격 판정(1단계 기준)에 섞지 않고 따로 모은다
+  d2SavedBest = {};
+  scores = scores.filter(s => {
+    if (!/_d2$/.test(s.game_id || '')) return true;
+    const base = s.game_id.replace(/_d2$/, '');
+    const m = d2SavedBest[s.name] || (d2SavedBest[s.name] = {});
+    if (!(base in m) || s.score > m[base]) m[base] = s.score;
+    return false;
+  });
   // 학생별로 집계
   const students = {}; // name → { acid, memory, debit, factory, flight }
   scores.forEach(s => {
@@ -1657,7 +1689,7 @@ function renderDashboard(scores) {
     if (!students[name]) students[name] = {};
   });
   // 판만 하고 저장은 안 한 학생도 단계 기록이 있으면 명단에 넣는다(저장은 자발적이라서)
-  if (currentLevel === '2급') Object.keys(levelByStudent).forEach(name => {
+  if (currentLevel === '2급') Object.keys(levelByStudent).concat(Object.keys(d2SavedBest)).forEach(name => {
     if (!students[name]) students[name] = {};
   });
   const studentNames = Object.keys(students);
@@ -1665,7 +1697,7 @@ function renderDashboard(scores) {
 
   // 요약 카드
   document.getElementById('sum-students').textContent = studentCount;
-  document.getElementById('sum-plays').textContent = scores.length;
+  document.getElementById('sum-plays').textContent = allScoreRows;
 
   // 게임별 평균 점수 (참여자 기준)
   let avgScores = [];
@@ -1919,7 +1951,11 @@ function openModal(name) {
    학생 성장 그래프 (score_history 시계열)
 ══════════════════════════════════════════ */
 function growthGames(){
-  return GAMES.concat([{ id:THEORY_GAME_ID, name:'이론 객관식', icon:'📝', color:'var(--cy)' }]);
+  const base = GAMES.concat([{ id:THEORY_GAME_ID, name:'이론 객관식', icon:'📝', color:'var(--cy)' }]);
+  if (currentLevel !== '2급') return base;
+  // 난이도2 성장 곡선은 따로(2026-09-18) — score_history 에 '<게임>_d2' 로 쌓인다
+  return base.concat(GAMES.filter(g => LV2_GAMES.includes(g.id)).map(g =>
+    ({ id: g.id + '_d2', name: g.name + ' · 난이도2', icon: '🔥', color: '#ff9f43', max: g.max })));
 }
 
 async function loadStudentGrowth(name) {
@@ -2224,8 +2260,8 @@ function hideAdPlaceholder(){}
     </div>
   </div>
 </div>
-<script src="ask.js?v=26"></script>
-<script src="teambattle.js?v=26"></script>
-<script src="emoji-icons.js?v=26"></script>
+<script src="ask.js?v=27"></script>
+<script src="teambattle.js?v=27"></script>
+<script src="emoji-icons.js?v=27"></script>
 </body>
 </html>
