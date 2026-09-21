@@ -4,7 +4,7 @@
     <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
          **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
          이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-    <script src="safestore.js?v=28"></script>
+    <script src="safestore.js?v=29"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1617,22 +1617,30 @@ function lvInfo(name, gameId) {
   const st = levelByStudent[name];
   return st ? st[gameId] || null : null;
 }
+/* 판별 기록(level_rounds) + 저장된 난이도2 점수(scores '<게임>_d2')를 합친 그 학생의 단계 현황.
+   ⚠ 저장된 난이도2 점수는 **2단계를 했다는 증거**다. 판별 기록이 없어도 — 기억의전당처럼 스테이지를
+   깨며 이어 가다 '포기' 없이 나가면 판별 기록이 안 남는다(2026-09-21 박수현: 2단계 5스테이지 저장했는데
+   "해금·미도전"으로 나옴) — 해금·도전으로 본다. 그래야 과거 기록도 함께 바로잡힌다. */
+function lvEff(name, gameId) {
+  const g = lvInfo(name, gameId);
+  const saved = (d2SavedBest[name] || {})[gameId] || 0;
+  if (!g && !saved) return null;
+  const zero = () => ({ rounds: 0, best: 0, passed: false, bestScore: 0 });
+  const base = g || { unlocked: false, l1: zero(), l2: zero() };
+  return { unlocked: base.unlocked || saved > 0, l1: base.l1, l2: base.l2,
+           tried2: base.l2.rounds > 0 || saved > 0 };
+}
 function lvCellHTML(name, gameId) {
   if (currentLevel !== '2급' || !LV2_GAMES.includes(gameId)) return '';
-  const g = lvInfo(name, gameId);
+  const g = lvEff(name, gameId);
   const pct = x => Math.round(x * 100) + '%';
-  if (!g) {
-    const b2only = d2Best(name, gameId);
-    return b2only > 0
-      ? `<div class="lv-lines"><span class="lv-line lv-d2">🔥 2단계 최고 <b>${b2only.toLocaleString()}</b></span></div>`
-      : `<div class="lv-lines"><span class="lv-line">단계 기록 없음</span></div>`;
-  }
+  if (!g) return `<div class="lv-lines"><span class="lv-line">단계 기록 없음</span></div>`;
   const l1 = g.unlocked || g.l1.passed
     ? `<span class="lv-line lv-pass">1단계 <b>통과</b></span>`
     : `<span class="lv-line lv-try">1단계 도전중${g.l1.best ? ' ' + pct(g.l1.best) : ''}</span>`;
   let l2;
   if (g.l2.passed)          l2 = `<span class="lv-line lv-pass">2단계 <b>통과</b> ${pct(g.l2.best)}</span>`;
-  else if (g.l2.rounds)     l2 = `<span class="lv-line lv-try">2단계 도전중${g.l2.best ? ' ' + pct(g.l2.best) : ''}</span>`;
+  else if (g.tried2)        l2 = `<span class="lv-line lv-try">2단계 도전중${g.l2.best ? ' ' + pct(g.l2.best) : ''}</span>`;
   else if (g.unlocked)      l2 = `<span class="lv-line lv-open">2단계 해금 · 미도전</span>`;
   else                      l2 = `<span class="lv-line">2단계 잠김</span>`;
   const b2 = d2Best(name, gameId);
@@ -1648,10 +1656,10 @@ function lvBarHTML(gameId, names) {
   const n = names.length;
   let p1 = 0, p2 = 0, tried2 = 0;
   names.forEach(name => {
-    const g = lvInfo(name, gameId);
+    const g = lvEff(name, gameId);
     if (!g) return;
     if (g.unlocked || g.l1.passed) p1++;
-    if (g.l2.rounds) tried2++;
+    if (g.tried2) tried2++;
     if (g.l2.passed) p2++;
   });
   const pc = x => n ? Math.round(x / n * 100) : 0;
@@ -2260,8 +2268,8 @@ function hideAdPlaceholder(){}
     </div>
   </div>
 </div>
-<script src="ask.js?v=28"></script>
-<script src="teambattle.js?v=28"></script>
-<script src="emoji-icons.js?v=28"></script>
+<script src="ask.js?v=29"></script>
+<script src="teambattle.js?v=29"></script>
+<script src="emoji-icons.js?v=29"></script>
 </body>
 </html>
