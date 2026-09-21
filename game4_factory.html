@@ -5,7 +5,7 @@
 <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
      **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
      이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-<script src="safestore.js?v=30"></script>
+<script src="safestore.js?v=31"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
@@ -576,18 +576,18 @@
 
 <button id="rewarded-btn" onclick="requestRewarded()">⏱ +30초 광고 보기</button>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="pausewatch.js?v=30"></script>
-    <script src="ask.js?v=30"></script>
-    <script src="wrongnote.js?v=30"></script>
-    <script src="growth.js?v=30"></script>
-<script src="streak.js?v=30"></script>
-    <script src="difficulty.js?v=30"></script>
-    <script src="review-prompt.js?v=30"></script>
+    <script src="pausewatch.js?v=31"></script>
+    <script src="ask.js?v=31"></script>
+    <script src="wrongnote.js?v=31"></script>
+    <script src="growth.js?v=31"></script>
+<script src="streak.js?v=31"></script>
+    <script src="difficulty.js?v=31"></script>
+    <script src="review-prompt.js?v=31"></script>
 </head>
 <body>
 
 <!-- 🎵 BGM 오디오 엘리먼트 -->
-<script src="bgm.js?v=30"></script>
+<script src="bgm.js?v=31"></script>
 
 
 
@@ -747,7 +747,7 @@ const GAME_ID = "factory";
 // ══════════════════════════════════════
 // 🎵 BGM 관리
 // ══════════════════════════════════════
-const bgm = BGMAudio.create('bgm4_factory.mp3?v=30');
+const bgm = BGMAudio.create('bgm4_factory.mp3?v=31');
 bgm.volume = 0.5;
 
 // 게임별 키(factory_muted)가 있으면 우선, 없으면 허브 전역 토글(hub_muted) 참조
@@ -1273,6 +1273,8 @@ function initDiffUI() {
     if (hint) hint.textContent = Difficulty.hint(GAME_ID);
 }
 initDiffUI();
+// 서버 기록으로 해금이 복원되면(다른 기기에서 해금한 학생) 잠금 표시를 다시 그린다
+window.addEventListener('difficulty-synced', function () { try { initDiffUI(); } catch (e) {} });
 
     /* 스테이지 해금·개인 최고기록은 **플레이했는가**로 판단한다.
        예전엔 이 갱신이 saveScore() 안(그것도 서버 저장 성공 뒤)에 있어서,
@@ -1923,6 +1925,6 @@ const Tutorial = (function () {
 // 사용방법 버튼 → 인터랙티브 튜토리얼
 function openGuide() { Tutorial.start(); }
 </script>
-<script src="emoji-icons.js?v=30"></script>
+<script src="emoji-icons.js?v=31"></script>
 </body>
 </html>

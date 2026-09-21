@@ -169,6 +169,28 @@
     } catch (e) {}
   }
 
+  // ── 이 학생의 서버 판별 기록 조회(2026-09-21) — 해금 여부를 계정 기준으로 되살리는 데 쓴다 ──
+  // 해금 여부는 localStorage(기기별)라 다른 기기·재설치에서 잠겨 있었다. level_rounds 에는 학생별로
+  // "몇 단계를 몇 문항 중 몇 개 맞혔고 그때 해금돼 있었나"가 이미 쌓이므로 그걸 읽어 판정한다(서버 구조 변경 없음).
+  // 그룹이 있으면 그 그룹(또는 그룹 없이 남긴 기록), 없으면 그룹 없는 기록만 — 닉네임이 같은 타 그룹 학생과 섞이지 않게.
+  // 실패하면 cb(null). 예외는 던지지 않는다.
+  function fetchUnlockRows(games, cb) {
+    try {
+      var u = user();
+      var db = client();
+      if (!u || !db) { cb(null); return; }
+      var gid = groupId();
+      db.from(ROUND_TABLE).select('game_id,level,correct,total,unlocked,group_id')
+        .eq('user_name', u.slice(0, 30)).in('game_id', games)
+        .or('unlocked.eq.true,total.gte.10')
+        .order('played_at', { ascending: false }).limit(1000)
+        .then(function (r) {
+          if (!r || r.error || !r.data) { cb(null); return; }
+          cb(r.data.filter(function (x) { return gid ? (x.group_id === gid || x.group_id == null) : x.group_id == null; }));
+        }, function () { cb(null); });
+    } catch (e) { try { cb(null); } catch (e2) {} }
+  }
+
   // ── 매 판 종료 시 호출 — 로컬 즉시 + Supabase 베스트에포트(예외 안 던짐) ──
   function record(rec) {
     if (!rec || !rec.game) return;
@@ -294,7 +316,7 @@
   }
 
   global.Growth = {
-    record: record, series: series, rename: rename, logPlay: logPlay, logTopicAttempt: logTopicAttempt, logRound: logRound,
+    record: record, series: series, rename: rename, logPlay: logPlay, logTopicAttempt: logTopicAttempt, logRound: logRound, fetchUnlockRows: fetchUnlockRows,
     GAME_NAMES: {
       acid: '계정과목 산성비', memory: '계정·뜻 메모리', debit: '분개 차·대변',
       factory: '결산분개 조립', flight: '플라이트 장부조회', theory: '이론 객관식',
