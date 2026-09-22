@@ -5,7 +5,7 @@
 <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
      **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
      이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-<script src="safestore.js?v=37"></script>
+<script src="safestore.js?v=38"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
@@ -129,7 +129,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 .logo{font-family:'Black Han Sans','Noto Sans KR',sans-serif;font-size:clamp(1.8rem,7vw,3.5rem);font-weight:900;color:var(--cy);letter-spacing:clamp(2px,1vw,5px);text-align:center;text-shadow:0 0 32px var(--cy),0 0 64px rgba(0,242,255,.22)}
 .sub{font-family:'Black Han Sans';font-size:clamp(.85rem,3vw,1.15rem);color:rgba(255,255,255,.42);letter-spacing:3px;text-align:center}
 .ggrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%}
-.gc{background:rgba(255,255,255,.04);border:1px solid rgba(0,242,255,.18);border-radius:14px;padding:clamp(10px,3vw,16px) clamp(12px,3vw,20px);font-size:clamp(.75rem,2.5vw,.95rem);color:rgba(255,255,255,.65);line-height:1.6}
+.gc{background:rgba(255,255,255,.04);border:1px solid rgba(0,242,255,.18);border-radius:14px;padding:clamp(10px,3vw,16px) clamp(12px,3vw,20px);font-size:clamp(.75rem,2.5vw,.95rem);color:rgba(255,255,255,.65);line-height:1.75}
 .gc strong{color:#fff;display:block;font-size:clamp(.78rem,2.5vw,1.02rem);margin-bottom:4px}
 .gc.a{border-left:3px solid var(--cy)}.gc.b{border-left:3px solid var(--pk)}.gc.c{border-left:3px solid var(--gd)}
 .sbtn{padding:clamp(12px,3vw,16px) clamp(36px,8vw,60px);background:transparent;border:3px solid var(--cy);border-radius:50px;cursor:pointer;font-family:'Black Han Sans';font-size:clamp(1.2rem,5vw,1.6rem);color:var(--cy);letter-spacing:2px;text-shadow:0 0 12px var(--cy);box-shadow:0 0 30px rgba(0,242,255,.25),inset 0 0 20px rgba(0,242,255,.05);transition:all .2s;animation:sbP 2s infinite;min-height:52px}
@@ -498,16 +498,16 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 .gtitle, .logo, .ov-title, .overlay-title, h1, h2 { font-family: 'Black Han Sans', 'Noto Sans KR', sans-serif !important; }
 </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="ask.js?v=37"></script>
-    <script src="wrongnote.js?v=37"></script>
-    <script src="growth.js?v=37"></script>
-<script src="streak.js?v=37"></script>
-    <script src="difficulty.js?v=37"></script>
-    <script src="review-prompt.js?v=37"></script>
+    <script src="ask.js?v=38"></script>
+    <script src="wrongnote.js?v=38"></script>
+    <script src="growth.js?v=38"></script>
+<script src="streak.js?v=38"></script>
+    <script src="difficulty.js?v=38"></script>
+    <script src="review-prompt.js?v=38"></script>
 </head>
 <body>
 
-<script src="bgm.js?v=37"></script>
+<script src="bgm.js?v=38"></script>
 
 
 <div style="position:fixed;inset:0;background:var(--bg);z-index:-1;"></div>
@@ -649,7 +649,7 @@ const GAME_ID="flight";
 function escapeHTML(str) { if (!str) return ''; return str.replace(/[&<>'"]/g, function(tag) { const chars = { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }; return chars[tag] || tag; }); }
 
 const BGM={
-  el:BGMAudio.create('bgm5_flight.mp3?v=37'),
+  el:BGMAudio.create('bgm5_flight.mp3?v=38'),
   // 게임별 키(flight_muted)가 있으면 우선, 없으면 허브 전역 토글(hub_muted) 참조
   _muted:localStorage.getItem('flight_muted')!==null?localStorage.getItem('flight_muted')==='true':localStorage.getItem('hub_muted')==='true',
   _fadeTimer:null,
@@ -1681,8 +1681,8 @@ const Tutorial = (function () {
 function openGuide() { Tutorial.start(); }
 </script>
 
-<script src="emoji-icons.js?v=37"></script>
+<script src="emoji-icons.js?v=38"></script>
 <!-- 웹 전용 광고(시작·결과 화면만, 앱에선 adsense.js 가 스스로 멈춘다) -->
-<script src="adsense.js?v=37"></script>
+<script src="adsense.js?v=38"></script>
 </body>
 </html>
