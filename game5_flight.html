@@ -5,7 +5,7 @@
 <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
      **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
      이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-<script src="safestore.js?v=32"></script>
+<script src="safestore.js?v=33"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
@@ -52,7 +52,10 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 
 
 #hud{position:absolute;top:0;left:0;width:100%;box-sizing:border-box;z-index:20;display:flex;justify-content:space-between;align-items:center;gap:6px;padding:max(10px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 10px max(14px,env(safe-area-inset-left));pointer-events:none;background:linear-gradient(to bottom,rgba(2,8,16,.7) 0%,transparent 100%)}
-.hud-left{display:flex;gap:clamp(12px,4vw,30px);align-items:center}
+.hud-left{display:flex;gap:clamp(12px,4vw,30px);align-items:center;
+  /* 2026-09-22 Android 제보("그만 옆에 홈 단추가 잘리네"): 폰 글자 크기를 키우면(글꼴 130%) 점수·아이템·콤보가
+     넓어져 오른쪽 버튼을 화면 밖으로 밀었다(360dp 실측: 홈 389~428). 왼쪽이 먼저 줄어들게 한다 — 버튼은 flex-shrink:0 */
+  flex:1 1 auto;min-width:0;overflow:hidden}
 .hb{display:flex;flex-direction:column;align-items:center;gap:2px}
 .hl{font-family:'Orbitron',monospace;font-size:clamp(.55rem,.18vw+.5rem,.72rem);color:rgba(0,242,255,.5);letter-spacing:2px;text-transform:uppercase}
 .hv{font-family:'Orbitron',monospace;font-size:clamp(1.1rem,3.8vw,1.8rem);font-weight:900;color:#fff;text-shadow:0 0 14px var(--cy);line-height:1}
@@ -212,6 +215,14 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 
 @media(max-width:480px){.ggrid{grid-template-columns:1fr}}
 /* 좁은 폰(iPhone SE 등 320px대)에서 HUD 버튼들이 넘치는 것 방지 — 기본 디자인은 그대로 */
+/* 360~400dp 안드로이드(갤럭시 기본)에서도 여유가 적어 한 단계 줄인다 */
+@media(max-width:400px){
+  .hud-left{gap:8px}
+  .irow{gap:4px}
+  .hud-left .hl{letter-spacing:0;font-size:.46rem}
+  .hud-left .hb:nth-child(2) > div:last-child{display:none}   /* 'ITEMS' 작은 글씨 — 장식이라 좁을 땐 뺀다 */
+  .hdb{padding:0 10px}
+}
 @media(max-width:340px){
   .hud-btns{gap:2px}
   .hdb{padding:0 8px;font-size:.68rem;height:32px}
@@ -487,16 +498,16 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 .gtitle, .logo, .ov-title, .overlay-title, h1, h2 { font-family: 'Black Han Sans', 'Noto Sans KR', sans-serif !important; }
 </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="ask.js?v=32"></script>
-    <script src="wrongnote.js?v=32"></script>
-    <script src="growth.js?v=32"></script>
-<script src="streak.js?v=32"></script>
-    <script src="difficulty.js?v=32"></script>
-    <script src="review-prompt.js?v=32"></script>
+    <script src="ask.js?v=33"></script>
+    <script src="wrongnote.js?v=33"></script>
+    <script src="growth.js?v=33"></script>
+<script src="streak.js?v=33"></script>
+    <script src="difficulty.js?v=33"></script>
+    <script src="review-prompt.js?v=33"></script>
 </head>
 <body>
 
-<script src="bgm.js?v=32"></script>
+<script src="bgm.js?v=33"></script>
 
 
 <div style="position:fixed;inset:0;background:var(--bg);z-index:-1;"></div>
@@ -638,7 +649,7 @@ const GAME_ID="flight";
 function escapeHTML(str) { if (!str) return ''; return str.replace(/[&<>'"]/g, function(tag) { const chars = { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }; return chars[tag] || tag; }); }
 
 const BGM={
-  el:BGMAudio.create('bgm5_flight.mp3?v=32'),
+  el:BGMAudio.create('bgm5_flight.mp3?v=33'),
   // 게임별 키(flight_muted)가 있으면 우선, 없으면 허브 전역 토글(hub_muted) 참조
   _muted:localStorage.getItem('flight_muted')!==null?localStorage.getItem('flight_muted')==='true':localStorage.getItem('hub_muted')==='true',
   _fadeTimer:null,
@@ -1670,6 +1681,6 @@ const Tutorial = (function () {
 function openGuide() { Tutorial.start(); }
 </script>
 
-<script src="emoji-icons.js?v=32"></script>
+<script src="emoji-icons.js?v=33"></script>
 </body>
 </html>

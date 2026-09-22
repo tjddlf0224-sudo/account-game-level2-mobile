@@ -4,7 +4,7 @@
     <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
          **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
          이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-    <script src="safestore.js?v=32"></script>
+    <script src="safestore.js?v=33"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
@@ -454,8 +454,8 @@ body{
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="ask.js?v=32"></script>
-<script src="adsense.js?v=32"></script>
+<script src="ask.js?v=33"></script>
+<script src="adsense.js?v=33"></script>
 <script>
 /* 닉네임/그룹 표시 + 탈퇴 버튼 노출(2급 허브와 동일 로직 — 통일감) */
 (function(){
@@ -693,8 +693,19 @@ function unlockStage(gid) {
     return;
   }
   window._unlockTarget = gid;
-  AdBridge.showRewarded();
+  showRewardedWhenReady();
 }
+/* 광고가 아직 로딩 중이면 최대 5초 기다렸다가 띄운다(2026-09-22). 허브에 막 들어와 누르면 로드가 안 끝나
+   곧장 "광고를 불러오지 못했지만…"으로 넘어가던 것(Android 게임3·게임5 제보). 끝내 준비 안 되면 기존대로 열어 준다. */
+function showRewardedWhenReady() {
+  var t0 = Date.now();
+  (function wait() {
+    if (AdBridge.isRewardedReady && AdBridge.isRewardedReady()) { AdBridge.showRewarded(); return; }
+    if (Date.now() - t0 > 5000) { AdBridge.showRewarded(); return; }   // 준비 안 됐으면 showRewarded 가 onRewardedFailed 로 열어 준다
+    setTimeout(wait, 250);
+  })();
+}
+
 // Kotlin/Swift → JS 콜백 (게임 화면들과 동일한 이름 규약)
 function onRewardGranted() {
   if (!window._unlockTarget) return;
@@ -811,8 +822,8 @@ async function changeNickname(){
   await Ask.alert('✅ 닉네임이 "'+name+'"(으)로 변경되었어요.\n기존 점수와 오답노트도 함께 이동했습니다.');
 }
 </script>
-<script src="growth.js?v=32"></script>
-<script src="streak.js?v=32"></script>
+<script src="growth.js?v=33"></script>
+<script src="streak.js?v=33"></script>
 <script>
 /* 성장 그래프 버튼: 기록 있으면 초록 점(2급 허브와 동일 — growth.js 로드 후 실행) */
 (async function(){
@@ -879,7 +890,7 @@ async function setExamDate(){
 }
 renderExamDay();
 </script>
-<script src="wrongnote.js?v=32"></script>
+<script src="wrongnote.js?v=33"></script>
 <script>
 /* 오답노트 카드에 미니 요약(틀린 문제 수) 표시(2급 허브와 동일) */
 (async function(){
@@ -894,7 +905,7 @@ renderExamDay();
   }catch(e){}
 })();
 </script>
-<script src="emoji-icons.js?v=32"></script>
+<script src="emoji-icons.js?v=33"></script>
 
 <script>
   // 스트릭 알약 — 붙일 자리가 있을 때만 뜬다. 0일이면 스스로 숨는다.
@@ -931,5 +942,12 @@ renderExamDay();
   </div>
 </div>
 
+<script>
+/* 하단 배너 복구 — 2급 허브(index.html restoreBanner)와 같은 취지. 1급 허브는 show()를 한 번도 안 불러서
+   게임에서 hide() 된 배너가 그대로 숨은 채였다(2026-09-22 Android 실측: 허브 하단 광고 안 나옴). */
+(function restoreBanner() {
+  try { if (window.AdBridge && typeof AdBridge.show === 'function') AdBridge.show(); } catch (e) {}
+})();
+</script>
 </body>
 </html>

@@ -35,7 +35,11 @@
   var blurred = false;        // 창이 포커스를 잃음
 
   function hidden() {
-    return nativeHidden || blurred || (typeof document !== 'undefined' && document.hidden === true);
+    // __amFullscreenAd: capacitor-bridge.js 가 전면·보상형이 떠 있는 동안 켠다.
+    // Android 는 광고가 웹뷰를 덮어도 visibility·blur·appStateChange 가 전혀 안 와서(2026-09-22 실측)
+    // 아래 신호들만으로는 가려진 걸 몰랐다.
+    return global.__amFullscreenAd === true || nativeHidden || blurred ||
+      (typeof document !== 'undefined' && document.hidden === true);
   }
 
   function setNative(isActive) { nativeHidden = !isActive; }
