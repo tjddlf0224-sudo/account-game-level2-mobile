@@ -65,6 +65,21 @@ body{
 
 .sb-divider{height:1px;background:var(--border);margin:0 22px 16px}
 
+/* 학생 접속 링크 — 실습실에서 선생님이 바로 공유할 수 있게(2026-09-22) */
+.sb-link-box{margin:0 14px 16px;padding:12px 14px;background:rgba(0,242,255,0.05);
+  border:1px solid rgba(0,242,255,0.18);border-radius:12px}
+.sb-link-label{font-family:'Orbitron',monospace;font-size:0.58rem;letter-spacing:2px;
+  color:rgba(0,242,255,0.6);margin-bottom:8px}
+.sb-link-row{display:flex;gap:6px}
+.sb-link-input{flex:1;min-width:0;background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:7px 9px;
+  font-size:0.7rem;color:rgba(255,255,255,0.75);outline:none;
+  font-family:'Noto Sans KR',sans-serif;}
+.sb-link-copy{flex-shrink:0;background:rgba(0,242,255,0.12);border:1px solid rgba(0,242,255,0.3);
+  border-radius:8px;padding:0 12px;font-size:0.75rem;color:var(--cy);cursor:pointer;
+  font-family:'Noto Sans KR',sans-serif;white-space:nowrap;transition:background 0.15s;}
+.sb-link-copy:active{background:rgba(0,242,255,0.22)}
+
 /* 그룹 선택 영역 */
 .sb-section-label{
   font-family:'Orbitron',monospace;font-size:0.58rem;letter-spacing:2.5px;
@@ -736,6 +751,17 @@ body{
     <div class="sb-nick" id="sb-nick">—</div>
   </div>
   <div class="sb-divider"></div>
+
+  <!-- 학생 접속 링크 — 실습실에서 학생들에게 바로 공유(사용자 요청 2026-09-22) -->
+  <div class="sb-link-box">
+    <div class="sb-link-label">🔗 학생 접속 링크</div>
+    <div class="sb-link-row">
+      <input class="sb-link-input" id="student-link" type="text" readonly
+             value="https://tjddlf0224-sudo.github.io/account-game-level2-mobile/login.html"
+             onclick="this.select()">
+      <button class="sb-link-copy" onclick="copyStudentLink()">복사</button>
+    </div>
+  </div>
 
   <div class="sb-section-label">MY GROUPS</div>
   <div class="group-search-wrap">
@@ -2221,6 +2247,23 @@ document.addEventListener('keydown', function (e) {
   if (pm && pm.classList.contains('open')) { pm.classList.remove('open'); return; }
   if (studentFullEl) closeStudentFull();
 });
+
+/* ══════════════════════════════════════════
+   학생 접속 링크 복사 (group.html copyCode() 와 같은 패턴)
+══════════════════════════════════════════ */
+function copyStudentLink() {
+  const url = document.getElementById('student-link').value;
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = document.querySelector('.sb-link-copy');
+    const prev = btn.textContent;
+    btn.textContent = '✓ 복사됨';
+    setTimeout(() => btn.textContent = prev, 2000);
+  }).catch(() => {
+    // 클립보드 API 미지원 대비 — input이 readonly 라 직접 선택해서 복사하게 안내
+    document.getElementById('student-link').select();
+    Ask.alert('링크가 선택됐어요. ⌘C(또는 Ctrl+C)로 복사해주세요.');
+  });
+}
 
 /* ══════════════════════════════════════════
    사이드바 토글 (모바일)
