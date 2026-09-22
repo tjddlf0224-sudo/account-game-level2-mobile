@@ -83,5 +83,31 @@
     if (box) box.classList.add('rd-open');
   });
 
-  global.Readable = { split: split, html: html, lines: lines, esc: esc, css: css };
+  /* 대사 한 줄이 너무 길면(기본 48자 초과) 문장 경계에서 둘로 나눠 **연달아 두 번** 보여 준다.
+     대사 작법: "권장 40자 이내, 최대 50자. 넘으면 두 줄로 쪼갠다." 원본 대본은 그대로 두고 보여 줄 때만 나눈다.
+     field: 대사 글자가 든 속성 이름('t' 등). 나머지 속성(who·visual 등)은 두 조각에 똑같이 붙는다. */
+  function splitBeat(b, field, max) {
+    var t = b && b[field];
+    if (typeof t !== 'string' || t.length <= max || t.indexOf('\n') !== -1) return [b];
+    var best = -1, mid = t.length / 2;
+    for (var i = 0; i < t.length - 1; i++) {
+      var c = t.charAt(i), n = t.charAt(i + 1);
+      if (!((c === '.' || c === '?' || c === '!' || c === '…') && n === ' ')) continue;
+      if (i + 1 < 12 || t.length - i - 2 < 10) continue;   // 한쪽이 너무 짧으면 안 나눈다
+      if (best === -1 || Math.abs(i - mid) < Math.abs(best - mid)) best = i;
+    }
+    if (best === -1) return [b];
+    var a = {}, z = {}, k;
+    for (k in b) if (Object.prototype.hasOwnProperty.call(b, k)) { a[k] = b[k]; z[k] = b[k]; }
+    a[field] = t.slice(0, best + 1).trim();
+    z[field] = t.slice(best + 1).trim();
+    return splitBeat(a, field, max).concat(splitBeat(z, field, max));
+  }
+  function splitBeats(arr, field, max) {
+    var out = [];
+    (arr || []).forEach(function (b) { out = out.concat(splitBeat(b, field || 't', max || 48)); });
+    return out;
+  }
+
+  global.Readable = { split: split, html: html, lines: lines, esc: esc, css: css, splitBeats: splitBeats };
 })(window);

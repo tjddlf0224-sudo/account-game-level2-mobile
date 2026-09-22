@@ -4,7 +4,7 @@
     <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
          **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
          이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-    <script src="safestore.js?v=36"></script>
+    <script src="safestore.js?v=37"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
@@ -907,9 +907,9 @@ body {
 
 </div>
 
-<script src="ask.js?v=36"></script>
-<script src="difficulty.js?v=36"></script>
-<script src="adsense.js?v=36"></script>
+<script src="ask.js?v=37"></script>
+<script src="difficulty.js?v=37"></script>
+<script src="adsense.js?v=37"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ── 로그인 체크 & 유저바 초기화 ──
@@ -1292,7 +1292,7 @@ function onLvSegClick(e, gid, lv) {
     e.stopPropagation();
     if (!window.Difficulty) return;
     if (lv === 2 && !Difficulty.isUnlocked(gid)) {
-        Ask.alert('난이도 1에서 정답률 ' + Math.round(Difficulty.UNLOCK_ACC * 100) + '% 이상(10문항 이상 플레이)을 달성하면 열려요!\n\n' + Difficulty.hint(gid));
+        Ask.alert('난이도 1에서 정답률 ' + Math.round(Difficulty.UNLOCK_ACC * 100) + '%를 넘기면 열려요!\n(10문항 이상 풀었을 때)\n\n' + Difficulty.hint(gid));
         return;
     }
     Difficulty.set(gid, lv);
@@ -1419,9 +1419,9 @@ function onRewardedFailed() {
 </script>
 
 <!-- ── 오답노트: 미니 요약(틀린 문제 수) 표시 (supabase-js는 상단에서 이미 로드됨) ── -->
-<script src="wrongnote.js?v=36"></script>
-<script src="growth.js?v=36"></script>
-<script src="streak.js?v=36"></script>
+<script src="wrongnote.js?v=37"></script>
+<script src="growth.js?v=37"></script>
+<script src="streak.js?v=37"></script>
 <script>
 (async function(){
   try {
@@ -1548,7 +1548,7 @@ async function setExamDate() {
 renderExamDay();
 </script>
 
-<script src="emoji-icons.js?v=36"></script>
+<script src="emoji-icons.js?v=37"></script>
 
 <script>
   // 스트릭 알약 — 붙일 자리가 있을 때만 뜬다. 0일이면 스스로 숨는다.

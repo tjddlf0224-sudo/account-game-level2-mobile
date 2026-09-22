@@ -5,7 +5,7 @@
 <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
      **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
      이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-<script src="safestore.js?v=36"></script>
+<script src="safestore.js?v=37"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
@@ -573,7 +573,7 @@
         .tut-bubble { background: linear-gradient(180deg,#0d1830,#0a1120); border-top:2px solid rgba(0,242,255,0.25);
             border-radius:20px 20px 0 0; box-shadow: 0 -4px 18px rgba(0,242,255,0.1);
             padding:20px 22px calc(18px + env(safe-area-inset-bottom)); }
-        .tut-bubble-text { font-size:1rem; line-height:1.6; color:#dfe7ef; word-break:keep-all;
+        .tut-bubble-text { font-size:1rem; line-height:1.8; color:#dfe7ef; word-break:keep-all;
             text-align:center; min-height:3.2em; display:block; }
         .tut-bubble-text b { color:#00f2ff; }
         .tut-hint { text-align:center; font-family:'Black Han Sans',sans-serif; color:#ffd700;
@@ -619,19 +619,19 @@
 .gtitle, .logo, .ov-title, .overlay-title, h1, h2 { font-family: 'Black Han Sans', 'Noto Sans KR', sans-serif !important; }
 </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="ask.js?v=36"></script>
-    <script src="wrongnote.js?v=36"></script>
-    <script src="growth.js?v=36"></script>
-<script src="streak.js?v=36"></script>
-    <script src="difficulty.js?v=36"></script>
-    <script src="review-prompt.js?v=36"></script>
+    <script src="ask.js?v=37"></script>
+    <script src="wrongnote.js?v=37"></script>
+    <script src="growth.js?v=37"></script>
+<script src="streak.js?v=37"></script>
+    <script src="difficulty.js?v=37"></script>
+    <script src="review-prompt.js?v=37"></script>
 </head>
 <body>
 
 
 
     <!-- 🎵 BGM 오디오 엘리먼트 -->
-    <script src="bgm.js?v=36"></script>
+    <script src="bgm.js?v=37"></script>
 
     <header>
         <h1 style="flex:1;text-align:center;">🧩 기억의 전당 🧩</h1>
@@ -656,10 +656,10 @@
     <div id="start-screen" class="overlay">
         <div class="overlay-inner">
             <h2>🧩 기억의 전당</h2>
-            <p style="margin-bottom:6px;">계정과목과 그 설명이 짝꿍입니다.<br>
+            <p style="margin-bottom:6px;line-height:1.8;">계정과목과 설명이 짝꿍이에요.<br>
                예: <b style="color:var(--blue)">기업업무추진비</b> ↔ <b style="color:var(--accent)">거래처 선물/접대</b><br><br>
                <span style="font-size:0.92rem;color:rgba(255,255,255,0.6)">
-                 한 판을 다 맞추면 다음 Stage — <b>끝없이 이어집니다</b><br>Stage가 오를수록 카드가 늘고 점수가 쌓여요!
+                 한 판을 다 맞추면 다음 Stage!<br><b>끝없이 이어지고</b>, 카드와 점수가 늘어요.
                </span>
             </p>
 
@@ -779,7 +779,7 @@
         // ══════════════════════════════════════
         // 🎵 BGM 관리
         // ══════════════════════════════════════
-        const bgm = BGMAudio.create('bgm2_memory.mp3?v=36');
+        const bgm = BGMAudio.create('bgm2_memory.mp3?v=37');
         bgm.volume = 0.5;
 
         // 음소거 상태: localStorage에 저장해서 다음 게임에도 유지
@@ -1139,7 +1139,7 @@
         function selectDifficulty(n) {
             if (!window.Difficulty) return;
             if (n === 2 && !Difficulty.isUnlocked(GAME_ID)) {
-                Ask.alert('난이도 1에서 정답률 ' + Math.round(Difficulty.UNLOCK_ACC * 100) + '% 이상(10문항 이상 플레이)을 달성하면 열려요!\n\n' + Difficulty.hint(GAME_ID));
+                Ask.alert('난이도 1에서 정답률 ' + Math.round(Difficulty.UNLOCK_ACC * 100) + '%를 넘기면 열려요!\n(10문항 이상 풀었을 때)\n\n' + Difficulty.hint(GAME_ID));
                 return;
             }
             Difficulty.set(GAME_ID, n);
@@ -2118,23 +2118,23 @@ const Tutorial = (function () {
     { text:'화재보험 든 돈',   kind:'desc'    }   // 5 ↔ 2
   ];
   const STEPS = [
-    { text:'<b>계정과목</b>과 그 <b>설명</b>이 짝꿍인 게임이에요.<br>카드가 모두 <b>?</b> 로 덮여 있습니다.',
+    { text:'<b>계정과목</b>과 <b>설명</b>이 짝꿍이에요.<br>카드는 모두 <b>?</b>로 덮여 있어요.',
       matched:[], open:[], wrongN:0, btn:'시작 ▶' },
 
     { text:'빛나는 카드를 <b>탭</b>해서 뒤집어 보세요.',
       matched:[], open:[], wrongN:0, tapSlot:0, result:'open', hint:'빛나는 카드를 탭!' },
 
-    { text:'<b>기업업무추진비</b>가 나왔어요. <b>파란 글씨</b>는 계정과목이에요.<br>이제 그 뜻을 풀어 쓴 <b>빨간 카드</b>를 찾으면 됩니다.',
+    { text:'<b>기업업무추진비</b>가 나왔어요!<br><b>파란 글씨</b> = 계정과목.<br>이제 뜻이 적힌 <b>빨간 카드</b>를 찾아요.',
       matched:[], open:[0], wrongN:0, tapSlot:3, result:'match', pair:[0,3], hint:'짝이 되는 설명을 탭!' },
 
-    { text:'짝이 맞으면 <b>열린 채로 남아요</b>.<br>이번엔 <b>감가상각비</b>를 열어 뒀습니다. 빛나는 카드를 눌러 보세요.',
+    { text:'짝이 맞으면 <b>열린 채로 남아요</b>.<br><b>감가상각비</b>를 열어 뒀어요.<br>빛나는 카드를 눌러 봐요.',
       matched:[0,3], open:[4], wrongN:0, tapSlot:5, result:'wrong', pair:[4,5], hint:'빛나는 카드를 탭!' },
 
-    { text:'짝이 아니면 <b>다시 덮이고 오답이 1 올라가요</b>.<br>그래서 <b>카드 위치를 기억</b>하는 게 핵심이에요.<br>이번엔 직접 골라 보세요 — <b>감가상각비</b>의 설명은?',
+    { text:'짝이 아니면 <b>다시 덮여요</b>. 오답 +1.<br><b>카드 위치를 기억</b>하는 게 핵심!<br><b>감가상각비</b>의 설명은 어디 있을까요?',
       matched:[0,3], open:[4], wrongN:1, tapSlot:1, trapSlot:5, quiz:true,
       result:'match', pair:[4,1], hint:'감가상각비의 설명을 탭!' },
 
-    { text:'정확해요! 모든 짝을 찾으면 끝납니다.<br><b>빨리 끝낼수록</b>, <b>오답이 적을수록</b> 점수가 높아요.<br>단계가 올라가면 카드가 더 많아집니다.',
+    { text:'정확해요! 짝을 다 찾으면 끝.<br><b>빨리</b>, <b>덜 틀릴수록</b> 점수가 높아요.<br>단계가 오르면 카드도 늘어나요.',
       matched:[0,3,4,1], open:[], wrongN:1, btn:'게임 시작 ▶', finish:true }
   ];
 
@@ -2295,8 +2295,8 @@ function openGuide() { Tutorial.start(); }
 
 </script>
 
-<script src="emoji-icons.js?v=36"></script>
+<script src="emoji-icons.js?v=37"></script>
 <!-- 웹 전용 광고(시작·결과 화면만, 앱에선 adsense.js 가 스스로 멈춘다) -->
-<script src="adsense.js?v=36"></script>
+<script src="adsense.js?v=37"></script>
 </body>
 </html>

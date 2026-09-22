@@ -7,7 +7,8 @@
 <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
      **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
      이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-<script src="safestore.js?v=36"></script>
+<script src="safestore.js?v=37"></script>
+<script src="readable.js?v=37"></script>
 <title>신고의 문 | 전산회계 1급</title>
 <meta name="description" content="거래를 부가가치세 신고서의 올바른 칸에 배치하며 신고서 구조를 익히는 연습">
 <style>
@@ -196,7 +197,7 @@
   @keyframes tutRowGlow{0%,100%{box-shadow:inset 0 0 0 2px var(--gold);}50%{box-shadow:inset 0 0 0 2px var(--gold),inset 0 0 12px rgba(212,175,55,.4);}}
   .vform-row.tut-dim{opacity:.4;}
   .tut-bubble{background:rgba(0,0,0,.35);border-top:1px solid var(--line);padding:16px 18px calc(16px + env(safe-area-inset-bottom));}
-  .tut-bubble-text{font-size:.98rem;line-height:1.6;color:#e0e6ed;word-break:keep-all;text-align:center;}
+  .tut-bubble-text{font-size:.98rem;line-height:1.8;color:#e0e6ed;word-break:keep-all;text-align:center;}
   .tut-bubble-text b{color:var(--blue);}
   .tut-hint{text-align:center;font-weight:800;color:var(--gold);font-size:.92rem;margin-top:8px;}
   .tut-next{display:block;width:100%;margin-top:14px;padding:15px;border-radius:14px;border:2px solid rgba(255,255,255,.3);
@@ -297,11 +298,11 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="pausewatch.js?v=36"></script>
-<script src="ask.js?v=36"></script>
-<script src="wrongnote.js?v=36"></script>
-<script src="growth.js?v=36"></script>
-<script src="streak.js?v=36"></script>
+<script src="pausewatch.js?v=37"></script>
+<script src="ask.js?v=37"></script>
+<script src="wrongnote.js?v=37"></script>
+<script src="growth.js?v=37"></script>
+<script src="streak.js?v=37"></script>
 <script>
 (function(){ if(!(localStorage.getItem('hub_nickname')||'').trim()){ location.replace('login.html'); } })();
 
@@ -332,13 +333,13 @@ const TX = [
   { id:3,  type:'22.현과', desc:'제품을 판매하고 지출증빙용 현금영수증을 발급했다.', amt:800000, dest:'B',
     explain:'현금영수증을 발급한 과세매출도 카드매출과 같은 "신용카드·현금영수증 발행분"에 합산됩니다.' },
   { id:4,  type:'14.건별', desc:'비사업자에게 제품을 판매하고 증빙 없이 현금을 받았다.', amt:300000, dest:'C',
-    explain:'세금계산서·카드·현금영수증 어느 증빙도 없는 과세매출 → "기타(정규영수증 외 매출분)"에 찍힙니다.' },
+    explain:'세금계산서·카드·현금영수증 모두 없는 과세매출.\n→ "기타(정규영수증 외 매출분)"에 찍혀요.' },
   { id:5,  type:'12.영세', desc:'내국신용장에 의해 제품을 공급하고 영세율 세금계산서를 발급했다.', amt:2000000, dest:'D',
-    explain:'영세율 적용 매출 → 세율 0%라 매출세액은 0원이지만, 영세율분 칸에는 반드시 집계해야 합니다.' },
+    explain:'영세율 매출은 세율 0%라 매출세액은 0원.\n그래도 영세율분 칸에는 꼭 집계해요.' },
   { id:6,  type:'16.수출', desc:'해외 거래처에 제품을 직수출했다.', amt:3000000, dest:'D',
     explain:'직수출도 영세율 매출 → 세금계산서 발급 여부와 무관하게 영세율분 칸에 집계됩니다.' },
   { id:7,  type:'13.면세', desc:'도서를 판매하고 계산서를 발급했다.', amt:500000, dest:'H',
-    explain:'면세 재화의 공급은 애초에 부가가치세 과세 대상이 아니므로, 세금계산서가 아닌 계산서를 발급하고 부가세 신고서 자체에는 올라가지 않습니다.' },
+    explain:'면세 재화는 부가세 과세 대상이 아니에요.\n세금계산서 대신 계산서를 발급하고\n신고서에는 올라가지 않아요.' },
   { id:8,  type:'51.과세', desc:'원재료를 매입하고 전자세금계산서를 수취했다.', amt:4000000, dest:'E',
     explain:'세금계산서를 받은 일반 과세매입 → 매입세액이 전액 공제됩니다.' },
   { id:9,  type:'57.카과', desc:'사무용품을 구입하고 법인카드로 결제했다.', amt:200000, dest:'F',
@@ -346,16 +347,18 @@ const TX = [
   { id:10, type:'61.현과', desc:'소모품을 구입하고 지출증빙용 현금영수증을 수취했다.', amt:150000, dest:'F',
     explain:'현금영수증을 받은 과세매입도 카드매입과 같은 공제 칸에 합산됩니다.' },
   { id:11, type:'54.불공', desc:'거래처 접대를 위해 선물세트를 구입하고 세금계산서를 수취했다.', amt:500000, dest:'G',
-    explain:'세금계산서는 받았지만 접대(기업업무추진비) 관련 매입이라 매입세액이 공제되지 않습니다 — "공제받지못할매입세액"에 별도 집계.' },
+    explain:'세금계산서는 받았지만 접대(기업업무추진비) 매입.\n매입세액을 공제받지 못해요.\n→ "공제받지못할매입세액"에 따로 집계.' },
   { id:12, type:'54.불공', desc:'업무와 무관한 비영업용 소형승용차(2,000cc)를 구입하고 세금계산서를 수취했다.', amt:20000000, dest:'G',
     explain:'비영업용 소형승용차(개별소비세 과세대상)는 세금계산서를 받아도 매입세액 불공제 대상입니다.' },
   { id:13, type:'53.면세', desc:'도서를 구입하고 계산서를 수취했다.', amt:100000, dest:'H',
-    explain:'면세 매입은 애초에 매입세액이라는 게 존재하지 않아 신고서에 올라가지 않습니다(계산서 수취, 세금계산서 아님).' },
+    explain:'면세 매입엔 매입세액 자체가 없어요.\n(세금계산서가 아닌 계산서를 받아요)\n그래서 신고서에 올라가지 않아요.' },
   { id:14, type:'62.현면', desc:'직원 휴게실 간식(과일)을 구입하고 지출증빙용 현금영수증을 수취했다.', amt:80000, dest:'H',
     explain:'면세 품목은 현금영수증을 받아도 부가세가 없어 신고서에 올라가지 않습니다.' },
 ];
 
 function esc(s){return (s==null?'':String(s)).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+// 해설은 문장·줄마다 나눠 보여 준다(readable.js, 2026-09-23 가독성)
+function rdx(t){ return window.Readable ? Readable.html(t||'',{keep:0}) : esc(t||'').replace(/\n/g,'<br>'); }
 function won(n){ return Math.round(n).toLocaleString('ko-KR')+'원'; }
 
 document.getElementById('start-btn').onclick=startQuiz;
@@ -367,11 +370,11 @@ document.getElementById('guide-btn').onclick=()=>Tutorial.start();
  *  칸(.vform-row)이라는 점만 다름 — DESTS/rowHtml 재사용.
  * ========================================================================= */
 const TUT_STEPS = [
-  { text:'이 스테이지는 문제를 읽고 <b>부가가치세 신고서의 실제 칸</b>을 직접 눌러서 답하는 방식이에요.<br>거래 하나로 같이 해볼까요?', btn:'시작 ▶' },
-  { text:'제품을 팔면서 <b>전자세금계산서를 발급</b>했어요. 세금계산서를 발급한 과세매출은 신고서의 <b>"세금계산서발급분"</b> 칸에 찍혀요.<br>아래 신고서에서 그 칸을 찾아 눌러보세요.', tap:'A', hint:'👆 빛나는 칸을 탭!' },
-  { text:'정답! 누르는 순간 그 칸의 <b>세액(공급가액×10%)이 실시간으로 채워지고</b>, 매출세액 합계·납부세액까지 자동으로 갱신돼요. <b>+100점</b>(콤보 가산)도 붙어요.', glow:true, btn:'다음 ▶' },
-  { text:'면세 거래처럼 <b>신고서에 아예 안 올라가는</b> 경우는, 신고서 아래 점선 박스 <b>"해당없음"</b>을 누르면 돼요. 오답이면 콤보가 끊기고 시간이 <b>-5초</b> 줄어요.', btn:'다음 ▶' },
-  { text:'제한 시간 60초 동안 거래가 끊임없이 이어져요. 시간이 다 될 때까지 최대한 많이 맞혀보세요!', btn:'시작하기 ▶', finish:true },
+  { text:'문제를 읽고 <b>부가세 신고서의 실제 칸</b>을<br>직접 눌러 답해요.<br>거래 하나로 같이 해 봐요.', btn:'시작 ▶' },
+  { text:'제품을 팔고 <b>전자세금계산서</b>를 발급했어요.<br>→ 신고서 <b>"세금계산서발급분"</b> 칸!<br>아래 신고서에서 찾아 눌러 봐요.', tap:'A', hint:'👆 빛나는 칸을 탭!' },
+  { text:'정답! 그 칸의 <b>세액(공급가액×10%)</b>이 채워지고<br>합계·납부세액도 바로 바뀌어요.<br><b>+100점</b>(콤보 가산)!', glow:true, btn:'다음 ▶' },
+  { text:'면세처럼 <b>신고서에 안 올라가는</b> 거래는<br>아래 점선 박스 <b>"해당없음"</b>을 눌러요.<br>오답이면 콤보가 끊기고 <b>−5초</b>.', btn:'다음 ▶' },
+  { text:'제한 시간은 60초.<br>거래가 계속 이어져요. 최대한 많이!', btn:'시작하기 ▶', finish:true },
 ];
 const Tutorial = (function(){
   let step=0, locked=false, timer=null;
@@ -403,7 +406,7 @@ const Tutorial = (function(){
       locked=true;
       const orig=rowEl.querySelector('.vform-amt').textContent;
       rowEl.style.background='rgba(239,68,68,.25)';
-      el('tut-text').innerHTML='앗, 그건 아니에요. 세금계산서를 발급한 과세매출은 <b>"세금계산서발급분"</b> 칸이에요.';
+      el('tut-text').innerHTML='앗, 아니에요.<br>세금계산서 발급 과세매출은<br><b>"세금계산서발급분"</b> 칸이에요.';
       el('tut-hint').style.display='block'; el('tut-hint').textContent='👆 다시 골라 보세요';
       timer=setTimeout(()=>{ timer=null; locked=false; rowEl.style.background=''; render(); }, 1400);
       return;
@@ -579,7 +582,7 @@ function pick(key,q){
     combo++; correctCnt++; if(combo>maxCombo) maxCombo=combo;
     score+=100+Math.floor(combo*10);
     if(q.dest!=='H' && q.dest!=='D'){ placed[q.dest]+=Math.round(q.amt*0.1); renderReport(key,q); }
-    expl.innerHTML = `<div class="verdict" style="color:var(--green)">정답! ${esc(DMAP[q.dest].label)}</div>${esc(q.explain||'')}`;
+    expl.innerHTML = `<div class="verdict" style="color:var(--green)">정답! ${esc(DMAP[q.dest].label)}</div>${rdx(q.explain)}`;
   } else {
     combo=0; wrongCnt++;
     timeLeft=Math.max(0, timeLeft-5);
@@ -588,7 +591,7 @@ function pick(key,q){
       correct:DMAP[q.dest].label, wrong:(DMAP[key]?DMAP[key].label:'(선택 안 함)'),
       type:q.type
     });
-    expl.innerHTML = `<div class="verdict" style="color:var(--red)">오답 — 정답은 "${esc(DMAP[q.dest].label)}"</div>${esc(q.explain||'')}`;
+    expl.innerHTML = `<div class="verdict" style="color:var(--red)">오답 — 정답은 "${esc(DMAP[q.dest].label)}"</div>${rdx(q.explain)}`;
   }
   expl.innerHTML += `<div class="continue-hint">터치하면 다음 거래로</div>`;
   updateTimeHud();
@@ -749,8 +752,8 @@ function hideAdPlaceholder(){ if(window.AdBridge && typeof AdBridge.hide==='func
    게임 5종·stage3 에는 둘 다 있는데 여기 셋만 빠져 있었다. */
 function showAdPlaceholder(){ if(window.AdBridge && typeof AdBridge.show==='function') AdBridge.show(); }
 </script>
-<script src="emoji-icons.js?v=36"></script>
+<script src="emoji-icons.js?v=37"></script>
 <!-- 웹 전용 광고(시작·결과 화면만, 앱에선 adsense.js 가 스스로 멈춘다) -->
-<script src="adsense.js?v=36"></script>
+<script src="adsense.js?v=37"></script>
 </body>
 </html>

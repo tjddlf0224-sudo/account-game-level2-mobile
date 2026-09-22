@@ -5,7 +5,7 @@
 <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
      **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
      이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-<script src="safestore.js?v=36"></script>
+<script src="safestore.js?v=37"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
@@ -262,7 +262,7 @@
         }
         .overlay p {
             font-size: 0.95rem; color: #ccc;
-            margin-bottom: 16px; text-align: center; line-height: 1.6;
+            margin-bottom: 16px; text-align: center; line-height: 1.75;
         }
         .big-btn {
             padding: 14px 44px; font-size: 1.3rem; font-family:'Black Han Sans','Noto Sans KR',sans-serif;
@@ -656,7 +656,7 @@
         .tut-bubble { background: linear-gradient(180deg, #16213e, #0a0a14); border-top:2px solid var(--border);
             border-radius:20px 20px 0 0; box-shadow: 0 -4px 18px rgba(0,242,255,0.1);
             padding:20px 22px calc(18px + env(safe-area-inset-bottom)); }
-        .tut-bubble-text { font-size:1rem; line-height:1.6; color:#dfe7ef; word-break:keep-all; text-align:center;
+        .tut-bubble-text { font-size:1rem; line-height:1.8; color:#dfe7ef; word-break:keep-all; text-align:center;
             min-height:3.2em; display:block; }
         .tut-bubble-text b { color: var(--neon-blue); }
         .tut-hint { text-align:center; font-family:'Black Han Sans',sans-serif; color: var(--neon-gold); font-size:1rem; margin-top:10px;
@@ -736,22 +736,22 @@
 
 <button id="rewarded-btn" onclick="requestRewarded()">⏱ +15초 광고 보기</button>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="pausewatch.js?v=36"></script>
-    <script src="ask.js?v=36"></script>
-    <script src="wrongnote.js?v=36"></script>
-    <script src="growth.js?v=36"></script>
-<script src="streak.js?v=36"></script>
-    <script src="difficulty.js?v=36"></script>
-    <script src="readable.js?v=36"></script>
-    <script src="stepmode.js?v=36"></script>
-    <script src="review-prompt.js?v=36"></script>
+    <script src="pausewatch.js?v=37"></script>
+    <script src="ask.js?v=37"></script>
+    <script src="wrongnote.js?v=37"></script>
+    <script src="growth.js?v=37"></script>
+<script src="streak.js?v=37"></script>
+    <script src="difficulty.js?v=37"></script>
+    <script src="readable.js?v=37"></script>
+    <script src="stepmode.js?v=37"></script>
+    <script src="review-prompt.js?v=37"></script>
 </head>
 <body>
 
 
 
 <!-- 🎵 BGM 오디오 엘리먼트 -->
-<script src="bgm.js?v=36"></script>
+<script src="bgm.js?v=37"></script>
 
 <header>
     <h1>💎 전산회계 2급 산성비</h1>
@@ -879,7 +879,7 @@
     // ══════════════════════════════════════
     // 🎵 BGM 관리
     // ══════════════════════════════════════
-    const bgm = BGMAudio.create('bgm1_acid.mp3?v=36');
+    const bgm = BGMAudio.create('bgm1_acid.mp3?v=37');
     bgm.volume = 0.5;
 
     // 음소거 상태: localStorage에 저장해서 다음 게임에도 유지
@@ -1348,7 +1348,7 @@
     function selectDifficulty(n) {
         if (!window.Difficulty) return;
         if (n === 2 && !Difficulty.isUnlocked('acid')) {
-            Ask.alert('난이도 1에서 정답률 ' + Math.round(Difficulty.UNLOCK_ACC * 100) + '% 이상(10문항 이상 플레이)을 달성하면 열려요!\n\n' + Difficulty.hint('acid'));
+            Ask.alert('난이도 1에서 정답률 ' + Math.round(Difficulty.UNLOCK_ACC * 100) + '%를 넘기면 열려요!\n(10문항 이상 풀었을 때)\n\n' + Difficulty.hint('acid'));
             return;
         }
         Difficulty.set('acid', n);
@@ -2164,17 +2164,17 @@ const Tutorial = (function () {
     { slot:2, kind:'account', text:'외상매출금', align:'a-mid' }
   ];
   const STEPS = [
-    { text:'하늘에서 낱말이 떨어지는 게임이에요.<br>그중 <b>진짜 계정과목</b>만 골라 탭하면 됩니다.',
+    { text:'하늘에서 낱말이 떨어져요.<br>그중 <b>진짜 계정과목</b>만 골라 탭!',
       show:[0], btn:'시작 ▶' },
     { text:'빛나는 <b>현금</b>을 탭해 보세요.',
       show:[0], tapSlot:0, hint:'빛나는 낱말을 탭!' },
-    { text:'정답이에요. <b>현금</b>은 계정과목이 맞아요.<br>맞힐 때마다 점수가 오르고 <b>시간도 1초</b> 늘어납니다.',
+    { text:'정답! <b>현금</b>은 계정과목이에요.<br>맞힐 때마다 점수가 오르고<br><b>시간도 1초</b> 늘어나요.',
       show:[0], btn:'다음 ▶', glow:true },
-    { text:'하지만 <b>회식비</b>는 계정과목이 아니에요.<br>이런 <b>함정 낱말</b>을 누르면 시간이 <b>3초</b> 깎입니다. 계정과목을 그냥 놓쳐도 3초가 깎여요.',
+    { text:'그런데 <b>회식비</b>는 계정과목이 아니에요.<br><b>함정 낱말</b>을 누르면 <b>3초</b> 깎여요.<br>계정과목을 놓쳐도 3초!',
       show:[1], warnSlot:1, btn:'다음 ▶', danger:true },
-    { text:'이번엔 직접 골라 보세요.<br>둘 중 <b>계정과목</b>만 탭하면 됩니다.',
+    { text:'이번엔 직접 골라 봐요.<br>둘 중 <b>계정과목</b>만 탭!',
       show:[1,2], tapSlot:2, trapSlot:1, quiz:true, hint:'계정과목만 탭!' },
-    { text:'좋아요. 연달아 맞히면 <b>콤보</b>가 쌓이고, <b>3콤보</b>부터는 FEVER 모드로 점수가 2배가 됩니다.<br>💣폭탄 ❄️얼음 💊회복 아이템도 가끔 떨어져요.',
+    { text:'좋아요! 연달아 맞히면 <b>콤보</b>.<br><b>3콤보</b>부터 FEVER — 점수 2배!<br>💣폭탄 ❄️얼음 💊회복도 가끔 떨어져요.',
       show:[0,1,2], btn:'게임 시작 ▶', finish:true }
   ];
   let step = 0, tScore = 0, tTime = 30, trapHit = false;
@@ -2295,7 +2295,7 @@ const Tutorial = (function () {
 function openGuide() { Tutorial.start(); }
 </script>
 
-<script src="emoji-icons.js?v=36"></script>
+<script src="emoji-icons.js?v=37"></script>
 <!-- 웹 전용 광고(시작·결과 화면만, 앱에선 adsense.js 가 스스로 멈춘다) -->
-<script src="adsense.js?v=36"></script>
+<script src="adsense.js?v=37"></script>
 </html>

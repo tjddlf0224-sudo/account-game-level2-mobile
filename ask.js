@@ -46,7 +46,7 @@
       '.ask-box{width:min(420px,84%);background:#1b1f2e;color:#eef1f7;',
       'border:1px solid rgba(255,255,255,.14);border-radius:16px;',
       'box-shadow:0 18px 48px rgba(0,0,0,.55);padding:22px 22px 16px;}',
-      '.ask-msg{font-size:.98rem;line-height:1.6;white-space:pre-wrap;margin-bottom:18px;}',
+      '.ask-msg{font-size:.98rem;line-height:1.8;white-space:pre-wrap;margin-bottom:18px;}',
       '.ask-row{display:flex;gap:10px;}',
       /* 버튼은 같은 크기로 나란히 — 제각각 크기를 쓰지 않는다. */
       '.ask-row button{flex:1 1 0;min-width:0;padding:12px 0;border-radius:11px;',
