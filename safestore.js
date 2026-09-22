@@ -103,3 +103,36 @@
     console.info('[safestore] 브라우저 저장소가 막혀 있어 이번 판에만 유지되는 임시 저장소를 씁니다:', patched.join(', '));
   }
 })(window);
+
+/* ============================================================
+ *  웹은 로그인 없이 바로 시작 (2026-09-22 사용자 요청)
+ *  "지금의 로그인 창 없이 그냥 바로 랜덤 닉네임을 줘버려. 허브에서 닉네임 부분을 누르면
+ *   설정할 수 있게. 누구나 바로 게임을 할 수 있게."
+ *
+ *  모든 페이지가 이 파일을 **가장 먼저** 불러오므로 여기서 닉네임을 채워 두면, 페이지마다 있는
+ *  "닉네임 없으면 login.html 로" 검사(index·오답노트·이론·스테이지…)를 한 군데도 안 고쳐도 통과한다.
+ *  AdSense 심사 크롤러도 이 덕에 로그인 폼이 아니라 실제 허브·콘텐츠 화면을 보게 된다
+ *  (거절 사유 "게시자 콘텐츠 없는 화면"의 원인이 로그인으로 튕기는 것이었다).
+ *
+ *  ⚠ 네이티브 앱은 그대로 둔다 — 앱엔 구글/애플 로그인(계정 연동·탈퇴 심사 요건)이 있다.
+ *    Capacitor 는 페이지 스크립트보다 먼저 window.Capacitor 를 심으므로 여기서 판별된다.
+ *  숫자를 네 자리로 한 건 동명이인 방지 — 랭킹·기록이 이름 기준이라 10~99 두 자리(9천 개)로는
+ *  한 반에서도 겹칠 수 있다. 네 자리면 90만 개.
+ * ============================================================ */
+(function (w) {
+  'use strict';
+  try {
+    var C = w.Capacitor;
+    if (C && C.isNativePlatform && C.isNativePlatform()) return;
+    var ls = w.localStorage;
+    if ((ls.getItem('hub_nickname') || '').trim()) return;
+    var adjs = ['빠른','날쌘','용감한','현명한','영리한','멋진','강한','날렵한','꼼꼼한','침착한'];
+    var nouns = ['호랑이','독수리','사자','늑대','팬더','여우','매','치타','용','phoenix'];
+    var name = adjs[Math.floor(Math.random() * adjs.length)] +
+               nouns[Math.floor(Math.random() * nouns.length)] +
+               (Math.floor(Math.random() * 9000) + 1000);
+    ls.setItem('hub_nickname', name);
+    ls.setItem('hub_nick_auto', '1');   // 자동으로 받은 이름 — 허브에서 "눌러서 바꾸기" 안내에 쓴다
+    ['acid', 'memory', 'debit', 'factory'].forEach(function (g) { ls.setItem('hub_' + g + '_myName', name); });
+  } catch (e) {}
+})(window);

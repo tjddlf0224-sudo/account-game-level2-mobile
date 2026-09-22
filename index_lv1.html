@@ -4,7 +4,7 @@
     <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
          **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
          이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-    <script src="safestore.js?v=33"></script>
+    <script src="safestore.js?v=34"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
@@ -303,6 +303,13 @@ body{
 
 .ad-slot { margin: 28px auto 10px; max-width: 728px; text-align: center; }
 .ad-slot-label { font-size: .68rem; color: rgba(255,255,255,.35); margin-bottom: 4px; letter-spacing: .05em; }
+
+/* 닉네임을 눌러 바꾸기(2026-09-22 — 웹은 로그인 창 없이 자동 이름으로 시작) */
+.ub-nick-btn{ background:none; border:0; padding:2px 0; margin:0; color:inherit; font:inherit; cursor:pointer;
+  display:inline-flex; align-items:center; gap:6px; max-width:100%; text-align:left; -webkit-tap-highlight-color:transparent; }
+.ub-nick-btn .ub-edit{ font-size:0.72rem; opacity:.55; flex-shrink:0; }
+.ub-nick-btn .ub-hint{ font-size:0.68rem; color:rgba(0,242,255,.75); white-space:nowrap; flex-shrink:0; }
+.ub-nick-btn:focus-visible{ outline:2px solid rgba(0,242,255,.6); outline-offset:2px; border-radius:6px; }
 </style>
 </head>
 <body>
@@ -333,7 +340,7 @@ body{
     </div>
   </div>
   <div class="ub-nick">
-    <span class="ub-name" id="ub-name">게스트</span>
+    <button type="button" class="ub-nick-btn" onclick="changeNickname()" title="닉네임 바꾸기" aria-label="닉네임 바꾸기"><span class="ub-name" id="ub-name">게스트</span><span class="ub-edit" aria-hidden="true">✏️</span><span class="ub-hint" id="ub-hint" style="display:none">눌러서 이름 바꾸기</span></button>
   </div>
 </div>
 
@@ -454,8 +461,8 @@ body{
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="ask.js?v=33"></script>
-<script src="adsense.js?v=33"></script>
+<script src="ask.js?v=34"></script>
+<script src="adsense.js?v=34"></script>
 <script>
 /* 닉네임/그룹 표시 + 탈퇴 버튼 노출(2급 허브와 동일 로직 — 통일감) */
 (function(){
@@ -781,6 +788,17 @@ function _sbClient(){
   try{ return (window.supabase && supabase.createClient) ? supabase.createClient(_SB_URL,_SB_KEY) : null; }
   catch(e){ return null; }
 }
+/* 이미 서버에 있는 닉네임 — 로그인 창이 없어진 웹에서 학생이 **다른 컴퓨터에서 예전 기록을 이어 하는 유일한 길**이다
+   (2026-09-22, login.html 의 "한 번 더 누르면 이어서 진행"과 같은 규칙). 서버 기록은 건드리지 않고 이 기기의 이름만 바꾼다.
+   지금 쓰던(자동) 이름의 기록은 그 이름으로 남는다. */
+async function switchToExistingName(name){
+  if(!(await Ask.confirm('"'+name+'"은(는) 이미 기록이 있는 닉네임이에요.\n\n예전에 쓰던 본인 닉네임이 맞으면 [확인]을 눌러 그 기록으로 이어서 하세요.\n다른 사람 닉네임이면 [취소] 후 새로 지어 주세요.'))) return false;
+  localStorage.setItem('hub_nickname', name);
+  localStorage.removeItem('hub_nick_auto');
+  ['acid','memory','debit','factory'].forEach(function(g){ localStorage.setItem('hub_'+g+'_myName', name); });
+  location.reload();
+  return true;
+}
 async function changeNickname(){
   const oldName=(localStorage.getItem('hub_nickname')||'').trim();
   const input=await Ask.prompt('새 닉네임을 입력하세요 (2~12글자)', oldName);
@@ -794,7 +812,7 @@ async function changeNickname(){
   if(db){
     try{
       const {data}=await db.from('scores').select('name').eq('name',name).limit(1);
-      if(data && data.length){ await Ask.alert('⚠️ 이미 사용 중인 닉네임입니다. 다른 닉네임을 입력해주세요.'); return; }
+      if(data && data.length){ await switchToExistingName(name); return; }
     }catch(e){}
   }
   if(db){
@@ -813,6 +831,7 @@ async function changeNickname(){
   if(window.WrongNote && WrongNote.rename){ try{ await WrongNote.rename(oldName,name); }catch(e){} }
   if(window.Growth && Growth.rename){ try{ await Growth.rename(oldName,name); }catch(e){} }
   localStorage.setItem('hub_nickname', name);
+  localStorage.removeItem('hub_nick_auto');
   for(let i=0;i<localStorage.length;i++){
     const k=localStorage.key(i);
     if(k && k.endsWith('_myName') && localStorage.getItem(k)===oldName) localStorage.setItem(k,name);
@@ -822,8 +841,8 @@ async function changeNickname(){
   await Ask.alert('✅ 닉네임이 "'+name+'"(으)로 변경되었어요.\n기존 점수와 오답노트도 함께 이동했습니다.');
 }
 </script>
-<script src="growth.js?v=33"></script>
-<script src="streak.js?v=33"></script>
+<script src="growth.js?v=34"></script>
+<script src="streak.js?v=34"></script>
 <script>
 /* 성장 그래프 버튼: 기록 있으면 초록 점(2급 허브와 동일 — growth.js 로드 후 실행) */
 (async function(){
@@ -890,7 +909,7 @@ async function setExamDate(){
 }
 renderExamDay();
 </script>
-<script src="wrongnote.js?v=33"></script>
+<script src="wrongnote.js?v=34"></script>
 <script>
 /* 오답노트 카드에 미니 요약(틀린 문제 수) 표시(2급 허브와 동일) */
 (async function(){
@@ -905,7 +924,7 @@ renderExamDay();
   }catch(e){}
 })();
 </script>
-<script src="emoji-icons.js?v=33"></script>
+<script src="emoji-icons.js?v=34"></script>
 
 <script>
   // 스트릭 알약 — 붙일 자리가 있을 때만 뜬다. 0일이면 스스로 숨는다.
@@ -948,6 +967,10 @@ renderExamDay();
 (function restoreBanner() {
   try { if (window.AdBridge && typeof AdBridge.show === 'function') AdBridge.show(); } catch (e) {}
 })();
+</script>
+<script>
+/* 자동으로 받은 이름이면 "눌러서 바꾸기" 안내를 붙인다 */
+(function(){ try{ if(localStorage.getItem('hub_nick_auto')==='1'){ var h=document.getElementById('ub-hint'); if(h) h.style.display=''; } }catch(e){} })();
 </script>
 </body>
 </html>
