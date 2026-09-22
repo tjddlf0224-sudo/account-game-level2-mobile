@@ -171,26 +171,31 @@
       '#am-step .st-wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:14px}',
       '#am-step .st-card{background:#0f1f36;border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:18px 16px}',
       '#am-step .st-stepno{font-size:.72rem;opacity:.6;margin-bottom:6px;letter-spacing:.04em}',
-      '#am-step .st-prompt{font-size:1.02rem;line-height:1.6;white-space:pre-line}',
+      '#am-step .st-prompt{font-size:1.02rem;line-height:1.75;white-space:pre-line}',
       '#am-step .st-prompt .big{display:block;font-size:1.6rem;font-weight:800;text-align:center;margin:6px 0 2px;white-space:normal}',
       '#am-step .st-opts{display:flex;flex-direction:column;gap:10px}',
-      '#am-step .st-opt{min-height:52px;text-align:left;background:#12284a;border:1.5px solid rgba(120,170,255,.25);color:#eaf2ff;border-radius:14px;padding:12px 14px;font-size:.98rem;line-height:1.45}',
+      '#am-step .st-opt{min-height:52px;text-align:left;background:#12284a;border:1.5px solid rgba(120,170,255,.25);color:#eaf2ff;border-radius:14px;padding:13px 15px;font-size:.98rem;line-height:1.6}',
       '#am-step .st-opt:disabled{opacity:.35}',
       '#am-step .st-opt.ok{border-color:#3ddc97;background:rgba(61,220,151,.14);opacity:1}',
       '#am-step .st-opt.no{border-color:#ff6b8a;background:rgba(255,107,138,.12)}',
       '#am-step .st-opt.show{border-color:#ffd166;box-shadow:0 0 0 2px rgba(255,209,102,.35)}',
       '#am-step .st-hints{display:flex;flex-direction:column;gap:8px}',
       '#am-step .st-hbtn{align-self:flex-start;background:none;border:1px dashed rgba(255,209,102,.6);color:#ffd166;border-radius:12px;padding:9px 14px;font-size:.88rem}',
-      '#am-step .st-hint{background:rgba(255,209,102,.08);border-left:3px solid #ffd166;border-radius:8px;padding:10px 12px;font-size:.9rem;line-height:1.55}',
-      '#am-step .st-exp{background:#0c2a24;border:1px solid rgba(61,220,151,.3);border-radius:14px;padding:14px;font-size:.92rem;line-height:1.65}',
+      '#am-step .st-hint{background:rgba(255,209,102,.08);border-left:3px solid #ffd166;border-radius:8px;padding:12px 14px;font-size:.92rem;line-height:1.8}',
+      '#am-step .st-hl{font-size:.74rem;font-weight:700;color:#ffd166;margin-bottom:4px;letter-spacing:.03em}',
+      '#am-step .st-exp{background:#0c2a24;border:1px solid rgba(61,220,151,.3);border-radius:14px;padding:16px;font-size:.95rem;line-height:1.8}',
       '#am-step .st-exp.bad{background:#2a1020;border-color:rgba(255,107,138,.35)}',
-      '#am-step .st-exp b.v{display:block;font-size:1rem;margin-bottom:6px}',
+      '#am-step .st-exp b.v{display:block;font-size:1rem;margin-bottom:10px}',
+      '#am-step .st-exp .dim{opacity:.72;font-size:.88rem}',
+      '#am-step .st-exp .key{color:#ffd166;font-weight:800}',
+      '#am-step .st-intro{margin:6px 0 0;padding:0;list-style:none;line-height:1.8;font-size:.95rem}',
+      '#am-step .st-intro li{margin-bottom:6px}',
       '#am-step .st-go{min-height:50px;border:none;border-radius:14px;background:#3ddc97;color:#062016;font-weight:800;font-size:1rem}',
-      '#am-step .st-note{font-size:.78rem;opacity:.6;line-height:1.5}',
-      '#am-step .st-list{margin:6px 0 0;padding-left:18px;line-height:1.7;font-size:.92rem}',
+      '#am-step .st-note{font-size:.82rem;opacity:.65;line-height:1.75}',
+      '#am-step .st-list{margin:8px 0 0;padding-left:18px;line-height:1.9;font-size:.95rem}',
       '#am-step h3{margin:0 0 6px;font-size:1rem}',
       '.am-step-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;min-height:44px;margin-top:10px;background:rgba(80,200,140,.1);border:1.5px solid rgba(80,200,140,.45);color:#9fe3c0;border-radius:12px;font-size:.9rem;font-weight:700;font-family:inherit}',
-      '.am-step-sug{margin-top:8px;background:rgba(255,209,102,.08);border:1px solid rgba(255,209,102,.35);border-radius:12px;padding:10px 12px;font-size:.84rem;line-height:1.5;color:#ffe6a6;text-align:left}',
+      '.am-step-sug{margin-top:8px;background:rgba(255,209,102,.08);border:1px solid rgba(255,209,102,.35);border-radius:12px;padding:12px 14px;font-size:.86rem;line-height:1.75;color:#ffe6a6;text-align:left}',
       '.am-step-sug .row{display:flex;gap:8px;margin-top:8px}',
       '.am-step-sug button{flex:1;min-height:38px;border-radius:10px;font-size:.84rem;font-family:inherit;border:1px solid rgba(255,255,255,.2);background:none;color:#eaf2ff}',
       '.am-step-sug button.y{background:#3ddc97;color:#062016;border:none;font-weight:700}'
@@ -253,9 +258,9 @@
   function intro() {
     var w = wrap();
     w.innerHTML = '<div class="st-card"><h3>천천히, 하나씩 풀어 봐요</h3>' +
-      '<div class="st-note" style="opacity:.85;font-size:.9rem">⏳ 시간 제한이 없어요.<br>💡 막히면 힌트를 한 단계씩 열어 보세요.<br>' +
-      '📘 틀려도 괜찮아요. 왜 그런지 설명을 보고 다시 골라요.<br>🔁 틀린 문제는 조금 뒤에 한 번 더 나와요.</div></div>' +
-      '<div class="st-note">차근차근 모드 기록은 점수·랭킹·팀전 점수에 들어가지 않아요. 틀린 문제는 내 오답노트에만 남아요.</div>' +
+      '<ul class="st-intro"><li>⏳ 시간 제한이 없어요.</li><li>💡 막히면 힌트를 하나씩 열어요.</li>' +
+      '<li>📘 틀려도 괜찮아요.<br>이유를 보고 다시 골라요.</li><li>🔁 틀린 문제는 조금 뒤에 또 나와요.</li></ul></div>' +
+      '<div class="st-note">점수·랭킹·팀전에는 들어가지 않아요.<br>틀린 문제는 내 오답노트에만 남아요.</div>' +
       '<button class="st-go" type="button">시작하기 (' + R.list.length + '문제)</button>';
     w.querySelector('.st-go').onclick = function () { showItem(); };
   }
@@ -292,7 +297,7 @@
 
   function hintList(st) {
     var hs = (st.hints || []).slice(0, 2).map(function (h) { return typeof h === 'string' ? { text: h } : h; });
-    hs.push({ text: '정답을 표시했어요. 표시된 보기를 눌러 보세요.', reveal: true });
+    hs.push({ text: '정답에 노란 테두리를 쳤어요.<br>눌러서 확인해 봐요.', reveal: true });
     return hs;
   }
 
@@ -300,7 +305,7 @@
     var it = R.list[R.i], st = it.q.steps[it.si], hs = hintList(st);
     var box = wrap().querySelector('.st-hints');
     var h = '';
-    for (var k = 0; k < it.used; k++) h += '<div class="st-hint">💡 ' + (k + 1) + '. ' + hs[k].text + '</div>';
+    for (var k = 0; k < it.used; k++) h += '<div class="st-hint"><div class="st-hl">💡 힌트 ' + (k + 1) + '</div>' + hs[k].text + '</div>';
     if (it.used < hs.length) {
       var lab = hs[it.used].reveal ? '👀 정답 보기' : '💡 힌트 ' + (it.used + 1) + ' 보기';
       h += '<button class="st-hbtn" type="button">' + lab + '</button>';
@@ -354,7 +359,7 @@
     } else {
       btn.classList.add('no'); btn.disabled = true;
       it.wrongTries++; it.stepWrong = true; it.cleanAll = false; R.cards++;
-      after.innerHTML = '<div class="st-exp bad"><b class="v">✗ 아쉬워요. 이유를 보고 다시 골라 봐요</b>' + body + '</div>' +
+      after.innerHTML = '<div class="st-exp bad"><b class="v">✗ 아쉬워요! 이유를 보고 다시 골라요</b>' + body + '</div>' +
         '<button class="st-go" type="button" style="margin-top:12px;width:100%;background:#ffd166;color:#2a1d00">알겠어요</button>';
       wrap().querySelectorAll('.st-opt').forEach(function (b) { b.style.pointerEvents = 'none'; });
       after.querySelector('.st-go').onclick = function () {
@@ -424,7 +429,7 @@
   function finish(completed) {
     if (!R) return close();
     if (!completed && R.answers.length) {
-      var ask = global.Ask && Ask.confirm ? Ask.confirm('여기까지 할까요? 지금까지 푼 것은 저장돼요.') : Promise.resolve(global.confirm('여기까지 할까요?'));
+      var ask = global.Ask && Ask.confirm ? Ask.confirm('여기까지 할까요?\n지금까지 푼 건 저장돼요.') : Promise.resolve(global.confirm('여기까지 할까요?'));
       Promise.resolve(ask).then(function (y) { if (y) summary(false); });
       return;
     }
@@ -444,7 +449,7 @@
     var h = '<div class="st-card"><h3>🌱 오늘 익힌 것</h3>' +
       (learned.length ? '<ul class="st-list">' + learned.slice(0, 5).map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' +
         (learned.length > 5 ? '<div class="st-note">외 ' + (learned.length - 5) + '개</div>' : '')
-        : '<div class="st-note" style="font-size:.9rem">아직 없어요. 힌트 없이 한 번 맞히면 여기에 쌓여요.</div>') + '</div>';
+        : '<div class="st-note" style="font-size:.9rem">아직 없어요.<br>힌트 없이 맞히면 여기 쌓여요.</div>') + '</div>';
     if (again.length) h += '<div class="st-card"><h3>🔁 다시 볼 것</h3><ul class="st-list">' +
       again.slice(0, 3).map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' +
       '<div class="st-note">오답노트에서 다시 볼 수 있어요.</div></div>';
@@ -487,7 +492,7 @@
     if (!reason || lsGet(DISMISS_KEY + opt.game) === today()) return;
     var sug = document.createElement('div');
     sug.className = 'am-step-sug';
-    sug.innerHTML = '이 부분이 계속 헷갈리네요. 차근차근 모드로 천천히 연습해 볼까요?' +
+    sug.innerHTML = '요즘 이 게임이 좀 헷갈리죠?<br>차근차근 모드로 천천히 연습해 볼까요?' +
       '<div class="row"><button type="button" class="n">괜찮아요</button><button type="button" class="y">해 볼게요</button></div>';
     host.appendChild(sug);
     var logged = false;
@@ -504,64 +509,64 @@
   var DATA = {};
 
   /* 산성비 함정 단어 → 장부에 쓰는 공식 이름과 이유 (2026-09-23 초안, 성일님 검토 대상)
-     지금까지 팝업은 "일상 용어예요"라고만 해서, 무엇으로 적어야 하는지 알려 주지 않았다. */
-  var PROOF = '거래가 있었다는 걸 보여 주는 서류(증빙)예요. 장부에는 서류 이름이 아니라, 서류에 적힌 거래를 계정과목으로 적어요.';
+     지금까지 팝업은 "일상 용어예요"라고만 해서, 무엇으로 적어야 하는지 알려 주지 않았다.
+     문구 규칙(대사_작법.md): 한 줄 30자 안쪽, 줄은 \n 으로 나눈다, 상황 → 이름 순서. */
   DATA.acidFake = {
-    '월급':       { name: '급여', why: '직원에게 주는 월급은 장부에 \'급여\'(비용)로 적어요.' },
-    '보너스':     { name: '상여금 (급여)', why: '직원 보너스는 \'상여금\' 또는 급여(비용)로 적어요.' },
-    '식대':       { name: '복리후생비 / 기업업무추진비', why: '직원 식사는 복리후생비, 거래처 접대 식사는 기업업무추진비예요.' },
-    '밥값':       { name: '복리후생비 / 기업업무추진비', why: '누구랑 먹었는지로 나눠요. 직원이면 복리후생비, 거래처면 기업업무추진비.' },
-    '회식비':     { name: '복리후생비', why: '직원 회식은 복리후생비예요. 거래처와 먹었다면 기업업무추진비.' },
-    '기름값':     { name: '차량유지비', why: '업무용 차에 넣은 주유비는 차량유지비예요.' },
-    '차비':       { name: '여비교통비', why: '버스·택시·출장 교통비는 여비교통비예요.' },
-    '교통비':     { name: '여비교통비', why: '공식 이름은 앞에 \'여비\'가 붙은 여비교통비예요.' },
-    '월세':       { name: '임차료', why: '빌려 쓰고 내는 쪽은 임차료(비용), 빌려주고 받는 쪽은 임대료(수익)예요.' },
-    '가불금':     { name: '단기대여금', why: '직원에게 미리 빌려준 돈은 나중에 돌려받을 돈이라 자산(단기대여금)이에요.' },
-    '외상값':     { name: '외상매출금 / 외상매입금', why: '상품을 외상으로 팔고 받을 돈은 외상매출금(자산), 사고 갚을 돈은 외상매입금(부채)이에요.' },
-    '카드대금':   { name: '미지급금 (상품이면 외상매입금)', why: '카드로 사고 나중에 갚을 돈이라 부채예요. 상품이 아닌 물건이면 미지급금, 상품을 샀으면 외상매입금.' },
-    '통장잔액':   { name: '보통예금', why: '통장에 든 돈은 보통예금(자산)이에요. \'잔액\'은 금액일 뿐 계정 이름이 아니에요.' },
-    '수리비':     { name: '수선비', why: '건물·기계를 고친 돈의 공식 이름은 수선비예요. (업무용 차 수리는 차량유지비)' },
-    '축의금':     { name: '복리후생비 / 기업업무추진비', why: '직원 경조사비는 복리후생비, 거래처 경조사비는 기업업무추진비예요.' },
-    '영수증':     { name: '증빙서류', why: PROOF },
-    '청구서':     { name: '증빙서류', why: '돈을 달라고 보내는 서류예요. ' + PROOF },
-    '견적서':     { name: '증빙서류', why: '가격을 미리 알려 주는 서류예요. 아직 거래가 아니라서 분개하지 않아요.' },
-    '주문서':     { name: '증빙서류', why: '주문만으로는 회계상 거래가 아니라 분개하지 않아요. 상품을 주고받을 때 적어요.' },
-    '계약서':     { name: '증빙서류', why: '계약만으로는 회계상 거래가 아니에요. 돈(계약금)이 오가면 그때 선급금·선수금 등으로 적어요.' },
-    '세금계산서': { name: '증빙서류', why: '부가세가 붙은 거래의 증빙이에요. 그 안의 세금은 부가세예수금·부가세대급금으로 적어요.' },
-    '거래명세서': { name: '증빙서류', why: '무엇을 얼마나 주고받았는지 적은 서류예요. ' + PROOF },
-    '현금영수증': { name: '증빙서류', why: '현금으로 냈다는 증빙이에요. ' + PROOF },
-    '부가가치세': { name: '부가세예수금 / 부가세대급금', why: '팔 때 받아 둔 부가세는 부가세예수금(부채), 살 때 낸 부가세는 부가세대급금(자산)이에요.' },
-    '시산표':     { name: '장부(표) 이름', why: '계정 잔액이 맞는지 확인하려고 만드는 표예요. 계정과목이 아니에요.' },
-    '재무상태표': { name: '재무제표 이름', why: '자산·부채·자본을 보여 주는 보고서예요. 그 안에 적힌 항목들이 계정과목이에요.' },
-    '손익계산서': { name: '재무제표 이름', why: '수익·비용을 보여 주는 보고서예요. 그 안에 적힌 항목들이 계정과목이에요.' },
-    '총계정원장': { name: '장부 이름', why: '계정과목별로 모아 적는 장부예요.' },
-    '분개장':     { name: '장부 이름', why: '거래를 차변·대변으로 나눠 날짜 순서대로 적는 장부예요.' },
-    '순이익':     { name: '계산 결과(이익)', why: '수익에서 비용을 빼서 나오는 결과예요. 따로 적는 계정과목이 아니에요.' },
-    '매출총이익': { name: '계산 결과(이익)', why: '매출액 − 매출원가로 계산한 결과예요. 계정과목이 아니에요.' },
-    '영업이익':   { name: '계산 결과(이익)', why: '매출총이익 − 판매비와관리비로 계산한 결과예요. 계정과목이 아니에요.' },
-    '당기순이익': { name: '계산 결과(이익)', why: '이번 기간 수익 − 비용의 결과예요. 손익계산서 맨 아래 나오는 값이지 계정과목이 아니에요.' },
-    '법인카드':   { name: '결제 수단', why: '카드는 돈을 내는 방법일 뿐이에요. 쓴 곳에 따라 비용 계정으로, 갚을 돈은 미지급금으로 적어요.' },
-    '사장님':     { name: '사람 (계정 아님)', why: '사장이 회사 돈을 개인적으로 가져가면 그 돈을 인출금(자본)으로 적어요.' },
-    '거래처':     { name: '상대방 (계정 아님)', why: '돈을 주고받는 상대 회사예요. 계정과목이 아니라 거래처원장에서 따로 관리해요.' },
-    '약속어음':   { name: '받을어음 / 지급어음', why: '어음을 받으면 받을어음(자산), 내가 발행해 주면 지급어음(부채)이에요.' },
-    '수표':       { name: '현금 / 당좌예금', why: '남이 발행한 수표를 받으면 현금이에요. 내가 수표를 발행하면 당좌예금이 줄어요.' },
-    '마이너스통장': { name: '단기차입금 (당좌차월)', why: '은행에서 한도만큼 빌려 쓰는 것이라 부채예요. 결산 때 단기차입금으로 나타내요.' },
-    '비상금':     { name: '현금', why: '회사가 가진 돈이면 그냥 현금이에요.' }
+    '월급':       { name: '급여', why: '직원에게 주는 월급.\n장부에는 \'급여\'라고 적어요.' },
+    '보너스':     { name: '상여금', why: '명절·성과 보너스는\n\'상여금\'(급여의 한 종류)이에요.' },
+    '식대':       { name: '복리후생비 / 기업업무추진비', why: '누구랑 먹었나가 갈라요.\n직원끼리면 복리후생비,\n거래처 접대면 기업업무추진비.' },
+    '밥값':       { name: '복리후생비 / 기업업무추진비', why: '누구랑 먹었나가 갈라요.\n직원끼리면 복리후생비,\n거래처 접대면 기업업무추진비.' },
+    '회식비':     { name: '복리후생비', why: '직원 회식은 복리후생비.\n거래처와 먹었다면 기업업무추진비.' },
+    '기름값':     { name: '차량유지비', why: '업무용 차에 넣은 기름.\n차를 굴리는 돈이라 차량유지비예요.' },
+    '차비':       { name: '여비교통비', why: '버스·택시비는\n여비교통비로 적어요.' },
+    '교통비':     { name: '여비교통비', why: '앞에 \'여비\'가 붙어요.\n공식 이름은 여비교통비!' },
+    '월세':       { name: '임차료', why: '빌려 쓰고 내는 돈 → 임차료(비용).\n빌려주고 받는 돈 → 임대료(수익).' },
+    '가불금':     { name: '단기대여금', why: '직원에게 미리 빌려준 돈.\n돌려받을 돈이라 자산이에요.' },
+    '외상값':     { name: '외상매출금 / 외상매입금', why: '팔고 받을 외상 → 외상매출금(자산).\n사고 갚을 외상 → 외상매입금(부채).' },
+    '카드대금':   { name: '미지급금', why: '카드로 사고 나중에 갚을 돈. 부채예요.\n상품을 샀다면 외상매입금!' },
+    '통장잔액':   { name: '보통예금', why: '통장에 든 돈은 보통예금.\n\'잔액\'은 금액일 뿐 이름이 아니에요.' },
+    '수리비':     { name: '수선비', why: '건물·기계를 고친 돈은 수선비.\n차 수리는 차량유지비예요.' },
+    '축의금':     { name: '복리후생비 / 기업업무추진비', why: '직원 축의금 → 복리후생비.\n거래처 축의금 → 기업업무추진비.' },
+    '영수증':     { name: '증빙서류', why: '돈을 냈다는 종이(증빙)예요.\n장부엔 종이에 적힌 거래를 적어요.' },
+    '청구서':     { name: '증빙서류', why: '돈을 달라고 보내는 종이예요.\n장부엔 그 거래를 적어요.' },
+    '견적서':     { name: '증빙서류', why: '가격을 미리 알려 주는 종이.\n아직 거래가 아니라 분개도 안 해요.' },
+    '주문서':     { name: '증빙서류', why: '주문만으론 거래가 아니에요.\n물건이 오갈 때 적어요.' },
+    '계약서':     { name: '증빙서류', why: '계약만으론 거래가 아니에요.\n계약금이 오가면 선급금·선수금!' },
+    '세금계산서': { name: '증빙서류', why: '부가세 붙은 거래의 증빙이에요.\n세금은 부가세예수금·대급금으로.' },
+    '거래명세서': { name: '증빙서류', why: '무엇을 얼마나 주고받았나 적은 종이.\n장부엔 그 거래를 적어요.' },
+    '현금영수증': { name: '증빙서류', why: '현금으로 냈다는 증빙이에요.\n장부엔 쓴 곳을 계정으로 적어요.' },
+    '부가가치세': { name: '부가세예수금 / 부가세대급금', why: '팔 때 받아 둔 부가세 → 부가세예수금.\n살 때 낸 부가세 → 부가세대급금.' },
+    '시산표':     { name: '장부(표) 이름', why: '잔액이 맞는지 맞춰 보는 표예요.\n계정과목은 그 표 안에 있어요.' },
+    '재무상태표': { name: '재무제표 이름', why: '자산·부채·자본을 보여 주는 보고서.\n그 안의 항목이 계정과목이에요.' },
+    '손익계산서': { name: '재무제표 이름', why: '수익·비용을 보여 주는 보고서.\n그 안의 항목이 계정과목이에요.' },
+    '총계정원장': { name: '장부 이름', why: '계정과목별로 모아 적는\n장부예요.' },
+    '분개장':     { name: '장부 이름', why: '거래를 차변·대변으로 나눠\n날짜 순으로 적는 장부예요.' },
+    '순이익':     { name: '계산 결과', why: '수익 − 비용으로 나오는 값.\n따로 적는 계정이 아니에요.' },
+    '매출총이익': { name: '계산 결과', why: '매출액 − 매출원가.\n계산해서 나오는 값이에요.' },
+    '영업이익':   { name: '계산 결과', why: '매출총이익 − 판매비와관리비.\n계산해서 나오는 값이에요.' },
+    '당기순이익': { name: '계산 결과', why: '이번 기간의 수익 − 비용.\n손익계산서 맨 아래 값이에요.' },
+    '법인카드':   { name: '결제 수단', why: '돈을 내는 방법일 뿐이에요.\n쓴 곳은 비용, 갚을 돈은 미지급금.' },
+    '사장님':     { name: '사람 (계정 아님)', why: '사람은 계정이 아니에요.\n사장이 가져간 돈은 인출금!' },
+    '거래처':     { name: '상대방 (계정 아님)', why: '돈을 주고받는 상대 회사예요.\n거래처원장에서 따로 관리해요.' },
+    '약속어음':   { name: '받을어음 / 지급어음', why: '어음을 받으면 → 받을어음(자산).\n내가 써 주면 → 지급어음(부채).' },
+    '수표':       { name: '현금 / 당좌예금', why: '남이 쓴 수표를 받으면 현금.\n내가 쓰면 당좌예금이 줄어요.' },
+    '마이너스통장': { name: '단기차입금', why: '은행에서 빌려 쓰는 돈이라 부채.\n결산 땐 단기차입금으로 적어요.' },
+    '비상금':     { name: '현금', why: '회사가 가진 돈이면\n그냥 현금이에요.' }
   };
 
   /* 조립공장 결산 유형 카드 */
   DATA.factoryTypes = {
-    '선급비용':   { rule: '돈은 이미 냈는데, 그중 내년 몫이 남았다', how: '내년 몫을 자산(선급비용)으로 옮기고, 그만큼 올해 비용을 줄인다.', je: '(차) 선급비용 / (대) 보험료·임차료 등' },
-    '선수수익':   { rule: '돈은 이미 받았는데, 그중 내년 몫이 섞였다', how: '내년 몫은 아직 번 게 아니라 부채(선수수익)로 옮기고, 그만큼 올해 수익을 줄인다.', je: '(차) 임대료·이자수익 등 / (대) 선수수익' },
-    '미수수익':   { rule: '올해 벌었는데, 돈은 아직 못 받았다', how: '받을 권리를 자산(미수수익)으로 적고 올해 수익을 올린다.', je: '(차) 미수수익 / (대) 이자수익·임대료 등' },
-    '미지급비용': { rule: '올해 썼는데, 돈은 아직 안 냈다', how: '갚을 의무를 부채(미지급비용)로 적고 올해 비용을 올린다.', je: '(차) 이자비용·급여·임차료 등 / (대) 미지급비용' },
-    '감가상각':   { rule: '건물·차량·비품의 가치가 한 해 동안 줄었다', how: '줄어든 만큼 비용(감가상각비)으로 올리고, 자산을 직접 깎지 않고 감가상각누계액에 모은다.', je: '(차) 감가상각비 / (대) 감가상각누계액' },
-    '대손충당금': { rule: '외상값·대여금 중 못 받을 것 같은 돈을 미리 준비한다', how: '매출채권(외상매출금·받을어음)이면 대손상각비, 그 밖의 채권(대여금·미수금)이면 기타의대손상각비. 이미 충분히 쌓여 있으면 남는 만큼 대손충당금환입.', je: '(차) 대손상각비 / (대) 대손충당금' },
-    '소모품':     { rule: '사 둔 소모품 중 쓴 것과 남은 것을 나눈다', how: '살 때 자산(소모품)으로 적었으면 쓴 만큼 소모품비로, 비용(소모품비)으로 적었으면 남은 만큼 소모품으로 옮긴다.', je: '(차) 소모품비 / (대) 소모품  또는 반대' },
-    '유가증권평가': { rule: '갖고 있는 단기매매증권의 시가가 바뀌었다', how: '오르면 단기매매증권을 늘리고 평가이익, 내리면 평가손실을 적고 단기매매증권을 줄인다.', je: '(차) 단기매매증권 / (대) 단기매매증권평가이익' },
-    '현금과부족': { rule: '현금이 장부와 안 맞는데 끝까지 이유를 모른다', how: '모자라면 잡손실, 남으면 잡이익으로 정리한다.', je: '(차) 잡손실 / (대) 현금과부족' },
-    '가계정정리': { rule: '임시로 적어 둔 가지급금·가수금의 정체가 밝혀졌다', how: '임시 계정을 없애고 원래 계정(여비교통비·외상매출금 등)으로 바꿔 적는다.', je: '(차) 여비교통비 / (대) 가지급금' },
-    '유동성대체': { rule: '장기차입금의 만기가 1년 안으로 다가왔다', how: '장기부채를 줄이고 유동부채(유동성장기부채)로 옮긴다.', je: '(차) 장기차입금 / (대) 유동성장기부채' }
+    '선급비용':   { rule: '돈은 냈는데, 내년 몫이 남았다', how: '내년 몫 → 자산(선급비용)으로.\n그만큼 올해 비용은 줄여요.', je: '(차) 선급비용 / (대) 보험료 등' },
+    '선수수익':   { rule: '돈은 받았는데, 내년 몫이 섞였다', how: '내년 몫은 아직 번 게 아니에요.\n부채(선수수익)로 옮기고 수익을 줄여요.', je: '(차) 임대료 등 / (대) 선수수익' },
+    '미수수익':   { rule: '올해 벌었는데, 돈은 아직 못 받았다', how: '받을 권리 → 자산(미수수익).\n올해 수익도 올려요.', je: '(차) 미수수익 / (대) 이자수익 등' },
+    '미지급비용': { rule: '올해 썼는데, 돈은 아직 안 냈다', how: '갚을 의무 → 부채(미지급비용).\n올해 비용도 올려요.', je: '(차) 이자비용 등 / (대) 미지급비용' },
+    '감가상각':   { rule: '건물·차·비품이 한 해 동안 낡았다', how: '줄어든 가치 → 감가상각비(비용).\n자산은 누계액에 모아서 깎아요.', je: '(차) 감가상각비 / (대) 감가상각누계액' },
+    '대손충당금': { rule: '외상값 중 못 받을 돈을 미리 대비', how: '외상매출금·받을어음 → 대손상각비.\n대여금·미수금 → 기타의대손상각비.\n이미 넉넉하면 → 대손충당금환입.', je: '(차) 대손상각비 / (대) 대손충당금' },
+    '소모품':     { rule: '사 둔 소모품, 쓴 것과 남은 것', how: '자산으로 샀으면 → 쓴 만큼 소모품비로.\n비용으로 샀으면 → 남은 만큼 소모품으로.', je: '(차) 소모품비 / (대) 소모품 (또는 반대)' },
+    '유가증권평가': { rule: '단기매매증권 시가가 바뀌었다', how: '오르면 → 평가이익.\n내리면 → 평가손실.', je: '(차) 단기매매증권 / (대) 평가이익' },
+    '현금과부족': { rule: '현금이 안 맞는데, 끝내 이유를 모른다', how: '모자라면 → 잡손실.\n남으면 → 잡이익.', je: '(차) 잡손실 / (대) 현금과부족' },
+    '가계정정리': { rule: '임시로 적어 둔 돈의 정체가 밝혀졌다', how: '가지급금·가수금은 지우고\n진짜 계정으로 바꿔 적어요.', je: '(차) 여비교통비 / (대) 가지급금' },
+    '유동성대체': { rule: '장기차입금 만기가 1년 안으로 왔다', how: '장기부채를 줄이고\n유동성장기부채로 옮겨요.', je: '(차) 장기차입금 / (대) 유동성장기부채' }
   };
   DATA.factoryTypeOf = function (L, R) {
     var s = L + '|' + R;
@@ -584,7 +589,15 @@
     '유가증권평가': '단기매매증권 평가', '현금과부족': '현금과부족 정리', '가계정정리': '가지급금·가수금 정리', '유동성대체': '유동성 대체'
   };
 
+  /* 해설을 줄 단위 HTML 로(글은 이스케이프, \n 은 줄바꿈) — readable.js 가 있으면 문단·"더 보기"로 */
+  function lines(arr, keep) {
+    if (global.Readable) return Readable.lines(arr, { keep: keep == null ? 0 : keep });
+    return arr.filter(Boolean).join('<br>');
+  }
+  function txt(s) { return esc(s).replace(/\n/g, '<br>'); }
+
   global.StepMode = {
+    lines: lines, txt: txt,
     start: start, mount: mount, DATA: DATA, esc: esc, shuffle: shuffle,
     isActive: function () { return active; },
     suggestReason: suggestReason, noteRound: noteRound, noteWrong: noteWrong,

@@ -7,7 +7,7 @@
 <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
      **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
      이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-<script src="safestore.js?v=35"></script>
+<script src="safestore.js?v=36"></script>
 <title>이론 객관식 | 전산회계 1급</title>
 <meta name="description" content="전산회계 1급 이론(필기) 기출 객관식을 풀고 오답을 복습">
 <style>
@@ -77,7 +77,7 @@
   .qtag{font-size:.72rem;color:var(--blue);margin-bottom:8px;}
   .qtag .fmt{color:var(--gold);margin-left:6px;}
   .qsrc{position:absolute;right:14px;bottom:10px;font-size:.62rem;color:var(--sub,#8a95a8);opacity:.55;letter-spacing:.2px;}
-  .qstem{font-size:1.04rem;line-height:1.65;margin-bottom:18px;white-space:pre-wrap;word-break:keep-all;overflow-wrap:break-word;}
+  .qstem{font-size:1.04rem;line-height:1.75;margin-bottom:18px;white-space:pre-wrap;word-break:keep-all;overflow-wrap:break-word;}
   .qstem .data{display:block;margin-top:4px;padding-left:2px;color:#cfe0f5;font-size:.98rem;}
 
   /* 스템에 들어가는 원장/T계정 표 */
@@ -120,7 +120,7 @@
   .tbal tr.total td{border-top:1.5px solid var(--line);border-bottom:none;font-weight:700;}
   .choice{display:flex;gap:10px;width:100%;text-align:left;border:1.5px solid var(--line);
           background:var(--card2);color:var(--txt);border-radius:13px;padding:13px 14px;
-          font-size:.97rem;line-height:1.45;margin-bottom:9px;cursor:pointer;transition:.12s;word-break:keep-all;overflow-wrap:break-word;}
+          font-size:.97rem;line-height:1.6;margin-bottom:10px;cursor:pointer;transition:.12s;word-break:keep-all;overflow-wrap:break-word;}
   .choice .no{flex:none;width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.1);
               display:flex;align-items:center;justify-content:center;font-size:.8rem;}
   .choice:active{transform:scale(.99);}
@@ -138,19 +138,20 @@
   .t-acc-side.debit{text-align:left;border-right:1px solid rgba(255,255,255,.22);}
   .t-acc-side.credit{text-align:right;}
   .expl{margin-top:12px;padding:13px;border-radius:13px;background:rgba(0,242,255,.07);
-        border:1px solid rgba(0,242,255,.22);font-size:.9rem;line-height:1.55;display:none;}
-  .expl .verdict{font-weight:700;margin-bottom:5px;}
+        border:1px solid rgba(0,242,255,.22);font-size:.94rem;line-height:1.8;display:none;}
+  .expl .verdict{font-weight:700;margin-bottom:8px;}
   .dd-btn{margin-top:12px;width:100%;padding:10px;border-radius:10px;
     background:rgba(180,79,255,.12);border:1px solid rgba(180,79,255,.35);
     color:var(--purple);font-size:.82rem;font-weight:700;cursor:pointer;transition:background .15s;}
   .dd-btn:hover{background:rgba(180,79,255,.2);}
   .dd-panel{margin-top:10px;padding:14px 15px;border-radius:12px;
     background:rgba(180,79,255,.06);border:1px solid rgba(180,79,255,.2);}
-  .dd-block{margin-bottom:12px;}
+  .dd-block{margin-bottom:18px;}
   .dd-block:last-child{margin-bottom:0;}
-  .dd-label{font-size:.72rem;font-weight:700;color:var(--purple);margin-bottom:4px;letter-spacing:.02em;}
-  .dd-text{font-size:.87rem;line-height:1.65;color:var(--txt);white-space:pre-wrap;word-break:keep-all;}
-  .dd-wrong{font-size:.84rem;line-height:1.6;color:var(--dim);margin-top:6px;word-break:keep-all;}
+  .dd-label{font-size:.74rem;font-weight:700;color:var(--purple);margin-bottom:6px;letter-spacing:.02em;}
+  .dd-text{font-size:.92rem;line-height:1.8;color:var(--txt);word-break:keep-all;}
+  .dd-wrong{font-size:.88rem;line-height:1.75;color:var(--dim);margin-top:12px;word-break:keep-all;}
+  .dd-wrong-opt{color:var(--txt);margin-bottom:2px;}
   .dd-wrong-no{display:inline-block;font-weight:700;color:var(--red);margin-right:2px;}
   .next-wrap{margin-top:14px;display:none;}
 
@@ -228,11 +229,12 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="wrongnote.js?v=35"></script>
-<script src="adsense.js?v=35"></script>
-<script src="growth.js?v=35"></script>
-<script src="streak.js?v=35"></script>
-<script src="stepmode.js?v=35"></script>
+<script src="wrongnote.js?v=36"></script>
+<script src="adsense.js?v=36"></script>
+<script src="growth.js?v=36"></script>
+<script src="streak.js?v=36"></script>
+<script src="readable.js?v=36"></script>
+<script src="stepmode.js?v=36"></script>
 <script>
 // 로그인 체크
 (function(){ if(!(localStorage.getItem('hub_nickname')||'').trim()){ location.replace('login.html'); } })();
@@ -426,9 +428,10 @@ function theoryStepPool() {
     const wrongIdx = q.options.map((o, i) => i).filter(i => i !== ans && wr[String(i + 1)]);
     const el = wrongIdx.length ? wrongIdx[Math.floor(Math.random() * wrongIdx.length)] : null;
     const hints = [];
-    if (el != null) hints.push({ text: `${el + 1}번은 아니에요 — ${esc(wr[String(el + 1)])}`, eliminate: el });
+    const R = (t, k) => window.Readable ? Readable.html(t, { keep: k }) : esc(t);
+    if (el != null) hints.push({ text: `<b>${el + 1}번은 아니에요.</b>` + R(wr[String(el + 1)], 2), eliminate: el });
     else hints.push({ text: '확실히 아닌 보기 하나를 지웠어요.', eliminate: true });
-    if (d.conceptExplain) hints.push(`<b>${esc(d.concept || '핵심 개념')}</b><br>${esc(d.conceptExplain)}`);
+    if (d.conceptExplain) hints.push(`<b>${esc(d.concept || '핵심 개념')}</b>` + R(d.conceptExplain, 2));
     const prompt = `<div style="white-space:normal"><div style="font-size:.76rem;opacity:.6;margin-bottom:6px">${esc(q.topicName)}</div><div class="qstem" style="margin:0">${fmtStem(q.stem)}</div>
       ${q.stemTAccount ? ledgerHtml(q.stemTAccount) : ''}
       ${q.stemTAccounts ? `<div class="ledger-group">${q.stemTAccounts.map(ledgerHtml).join('')}</div>` : ''}
@@ -443,9 +446,9 @@ function theoryStepPool() {
         options: q.options.map((o, i) => ({ label: o, html: `<b style="opacity:.6;margin-right:6px">${i + 1}</b>` + (q.optionsVisual && q.optionsVisual[i] ? tAccountHtml(q.optionsVisual[i]) : esc(o)) })),
         answer: ans, hints,
         explain: (c, ok) => ok
-          ? esc(d.whyCorrect || q.explanation || '')
-          : `<b>${c + 1}번이 틀린 이유</b><br>${esc(wr[String(c + 1)] || '이 보기는 문제에서 묻는 내용과 맞지 않아요.')}` +
-            (d.conceptExplain ? `<br><br><span style="opacity:.85"><b>개념 다시 보기</b> — ${esc(d.conceptExplain)}</span>` : '')
+          ? R(d.whyCorrect || q.explanation || '', 2)
+          : `<b>${c + 1}번이 틀린 이유</b>` + R(wr[String(c + 1)] || '이 보기는 문제에서 묻는 내용과 맞지 않아요.', 2) +
+            (d.conceptExplain ? `<div class="dim" style="margin-top:12px"><b>개념 다시 보기</b>${R(d.conceptExplain, 1)}</div>` : '')
       }]
     };
   });
@@ -522,8 +525,8 @@ function pick(choice,q){
   if(window.Growth) Growth.logTopicAttempt({game:GAME_ID, topic:q.topicName, correct:ok});
   const expl=document.getElementById('expl');
   const verdictHtml = ok
-    ? `<div class="verdict" style="color:var(--green)">✓ 정답!</div>${esc(q.explanation)||''}`
-    : `<div class="verdict" style="color:var(--red)">✗ 오답 — 정답은 ${q.answer}번</div>${esc(q.explanation)||''}`;
+    ? `<div class="verdict" style="color:var(--green)">✓ 정답!</div>${rd(q.explanation,2)}`
+    : `<div class="verdict" style="color:var(--red)">✗ 오답 — 정답은 ${q.answer}번</div>${rd(q.explanation,2)}`;
   expl.innerHTML = verdictHtml + deepDiveHtml(q);
   if(ok){
     combo++; correctCnt++;
@@ -546,6 +549,9 @@ function pick(choice,q){
   expl.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 
+// 긴 해설은 문장마다 줄을 나누고 앞 몇 문장만 먼저 보여 준다(readable.js, 2026-09-23 가독성 요청)
+function rd(t,keep){ return window.Readable ? Readable.html(t||'',{keep:keep}) : esc(t||''); }
+
 function deepDiveHtml(q){
   if(!q.deepDive) return '';
   return `<button class="dd-btn" id="dd-toggle">🔍 자세한 개념 알아보기</button>
@@ -564,12 +570,12 @@ function toggleDeepDive(q){
       if(idx===q.answer) return '';
       const reason = d.wrongReasons && d.wrongReasons[String(idx)];
       if(!reason) return '';
-      return `<div class="dd-wrong"><span class="dd-wrong-no">${idx}번</span> ${esc(o)} — ${esc(reason)}</div>`;
+      return `<div class="dd-wrong"><div class="dd-wrong-opt"><span class="dd-wrong-no">${idx}번</span> ${esc(o)}</div>${rd(reason,0)}</div>`;
     }).join('');
     panel.innerHTML = `
       <div class="dd-block"><div class="dd-label">📌 핵심 개념</div><div class="dd-text">${esc(d.concept||'')}</div></div>
-      <div class="dd-block"><div class="dd-label">💡 쉬운 설명</div><div class="dd-text">${esc(d.conceptExplain||'')}</div></div>
-      <div class="dd-block"><div class="dd-label">✅ 정답 해설</div><div class="dd-text">${esc(d.whyCorrect||'')}</div></div>
+      <div class="dd-block"><div class="dd-label">💡 쉬운 설명</div><div class="dd-text">${rd(d.conceptExplain,2)}</div></div>
+      <div class="dd-block"><div class="dd-label">✅ 정답 해설</div><div class="dd-text">${rd(d.whyCorrect,2)}</div></div>
       ${wrongList?`<div class="dd-block"><div class="dd-label">❌ 오답 해설</div>${wrongList}</div>`:''}
     `;
     panel.dataset.built='1';
@@ -645,6 +651,6 @@ function hideAdPlaceholder(){ if(window.AdBridge && typeof AdBridge.hide==='func
 
 load();
 </script>
-<script src="emoji-icons.js?v=35"></script>
+<script src="emoji-icons.js?v=36"></script>
 </body>
 </html>
