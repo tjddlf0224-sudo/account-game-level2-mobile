@@ -5,7 +5,7 @@
 <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
      **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
      이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-<script src="safestore.js?v=34"></script>
+<script src="safestore.js?v=35"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
@@ -576,18 +576,19 @@
 
 <button id="rewarded-btn" onclick="requestRewarded()">⏱ +30초 광고 보기</button>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="pausewatch.js?v=34"></script>
-    <script src="ask.js?v=34"></script>
-    <script src="wrongnote.js?v=34"></script>
-    <script src="growth.js?v=34"></script>
-<script src="streak.js?v=34"></script>
-    <script src="difficulty.js?v=34"></script>
-    <script src="review-prompt.js?v=34"></script>
+    <script src="pausewatch.js?v=35"></script>
+    <script src="ask.js?v=35"></script>
+    <script src="wrongnote.js?v=35"></script>
+    <script src="growth.js?v=35"></script>
+<script src="streak.js?v=35"></script>
+    <script src="difficulty.js?v=35"></script>
+    <script src="stepmode.js?v=35"></script>
+    <script src="review-prompt.js?v=35"></script>
 </head>
 <body>
 
 <!-- 🎵 BGM 오디오 엘리먼트 -->
-<script src="bgm.js?v=34"></script>
+<script src="bgm.js?v=35"></script>
 
 
 
@@ -607,6 +608,7 @@
             <button class="diff-btn locked" id="diff-btn-2" onclick="selectDifficulty(2)">난이도 2 🔒<br><span style="font-size:.72rem;opacity:.7">금액도 직접 계산</span></button>
         </div>
         <div class="diff-hint" id="diff-hint"></div>
+        <div id="step-host" style="width:100%"></div>
         <div class="action-btns" style="align-items:stretch; margin-top:20px; gap:10px;">
             <button class="pill pill-start" onclick="startGame()">▶ 공장 가동 시작</button>
             <button class="btn-hub" onclick="openGuide()">📖 사용방법</button>
@@ -747,7 +749,7 @@ const GAME_ID = "factory";
 // ══════════════════════════════════════
 // 🎵 BGM 관리
 // ══════════════════════════════════════
-const bgm = BGMAudio.create('bgm4_factory.mp3?v=34');
+const bgm = BGMAudio.create('bgm4_factory.mp3?v=35');
 bgm.volume = 0.5;
 
 // 게임별 키(factory_muted)가 있으면 우선, 없으면 허브 전역 토글(hub_muted) 참조
@@ -1275,6 +1277,55 @@ function initDiffUI() {
 initDiffUI();
 // 서버 기록으로 해금이 복원되면(다른 기기에서 해금한 학생) 잠금 표시를 다시 그린다
 window.addEventListener('difficulty-synced', function () { try { initDiffUI(); } catch (e) {} });
+
+/* ── 차근차근 모드(2026-09-23, docs/차근차근모드_기획.md) ──
+   한 번에 조립하지 않고 3단계로 쪼갠다: ① 어떤 결산 정리인가 → ② 차변 → ③ 대변.
+   보기는 가짜 1개만. 틀리면 유형 설명 카드. 점수·랭킹·서버 오답에는 안 들어간다. */
+function factoryStepPool() {
+    const SM = window.StepMode, D = SM.DATA, e = SM.esc;
+    const PAIR4 = ['선급비용', '선수수익', '미수수익', '미지급비용'];
+    const ALL = Object.keys(D.factoryTypes);
+    const card = t => { const c = D.factoryTypes[t]; return `<b>${e(D.factoryTypeLabel[t])}</b><br>상황: ${e(c.rule)}<br>처리: ${e(c.how)}<br><span style="opacity:.8">${e(c.je)}</span>`; };
+    return qBank.map(q => {
+        const t = D.factoryTypeOf(q.L, q.R);
+        if (!t) return null;
+        // 헷갈리는 짝(선급·선수·미수·미지급)끼리 보기로 붙여야 구분하는 연습이 된다
+        const near = PAIR4.includes(t) ? PAIR4.filter(x => x !== t) : SM.shuffle(ALL.filter(x => x !== t)).slice(0, 3);
+        const typeOpts = SM.shuffle([t].concat(near.slice(0, 3)));
+        const parts = String(q.hint || '').split('/').map(x => x.trim());
+        const qHtml = e(q.q);
+        const mk2 = (right, fake) => SM.shuffle([right, fake]).map(x => ({ label: x }));
+        const drOpts = mk2(q.L, q.fakes[0]);
+        const crOpts = mk2(q.R, q.fakes[1] || q.fakes[0]);
+        return {
+            key: q.q, type: D.factoryTypeLabel[t], learn: `${D.factoryTypeLabel[t]}: (차) ${q.L} / (대) ${q.R}`,
+            wrong: { q: q.q.replace(/\n/g, '<br>'), correct: '(차) ' + q.L + ' / (대) ' + q.R },
+            steps: [{
+                stepName: '어떤 정리?', prompt: `${qHtml}\n\n<b>어떤 결산 정리일까요?</b>`,
+                options: typeOpts.map(x => ({ label: D.factoryTypeLabel[x] })), answer: typeOpts.indexOf(t),
+                hints: [PAIR4.includes(t) ? '돈을 <b>이미</b> 주고받았나요, <b>아직</b>인가요? 그 돈은 올해 몫인가요, 내년 몫인가요?'
+                                          : '무엇이 바뀌었는지 찾아보세요 — 가치가 줄었나, 못 받을 돈인가, 시가가 변했나, 임시 계정인가?',
+                        '상황이 이렇대요: ' + e(D.factoryTypes[t].rule)],
+                explain: () => card(t)
+            }, {
+                stepName: '차변', prompt: `${qHtml}\n\n<b style="color:#6fb6ff">차변</b>(왼쪽)에 올 계정은?`,
+                options: drOpts, answer: drOpts.findIndex(o => o.label === q.L),
+                hints: [e(parts[0] || ''), e(D.factoryTypes[t].je)],
+                explain: (c, ok) => `(차) <b>${e(q.L)}</b> — ${e(parts[0] || '')}` + (ok ? '' : `<br><span style="opacity:.85">${e(D.factoryTypes[t].how)}</span>`)
+            }, {
+                stepName: '대변', prompt: `${qHtml}\n\n(차) ${e(q.L)} / <b style="color:#ff8fa8">대변</b>(오른쪽)에 올 계정은?`,
+                options: crOpts, answer: crOpts.findIndex(o => o.label === q.R),
+                hints: [e(parts[1] || ''), e(D.factoryTypes[t].je)],
+                explain: (c, ok) => `(대) <b>${e(q.R)}</b> — ${e(parts[1] || '')}` + (ok ? `<br>완성: (차) ${e(q.L)} / (대) ${e(q.R)}` : `<br><span style="opacity:.85">${e(D.factoryTypes[t].how)}</span>`)
+            }]
+        };
+    }).filter(Boolean);
+}
+function startFactoryStep() {
+    if (!window.StepMode) return;
+    StepMode.start({ game: 'factory', title: '결산분개 조립 공장', pool: factoryStepPool(), n: 8 });
+}
+if (window.StepMode) StepMode.mount({ game: 'factory', host: document.getElementById('step-host'), onStart: startFactoryStep });
 
     /* 스테이지 해금·개인 최고기록은 **플레이했는가**로 판단한다.
        예전엔 이 갱신이 saveScore() 안(그것도 서버 저장 성공 뒤)에 있어서,
@@ -1925,8 +1976,8 @@ const Tutorial = (function () {
 // 사용방법 버튼 → 인터랙티브 튜토리얼
 function openGuide() { Tutorial.start(); }
 </script>
-<script src="emoji-icons.js?v=34"></script>
+<script src="emoji-icons.js?v=35"></script>
 <!-- 웹 전용 광고(시작·결과 화면만, 앱에선 adsense.js 가 스스로 멈춘다) -->
-<script src="adsense.js?v=34"></script>
+<script src="adsense.js?v=35"></script>
 </body>
 </html>

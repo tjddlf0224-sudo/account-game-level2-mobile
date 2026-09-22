@@ -76,7 +76,9 @@
   }
 
   // ── 종료 시 저장: 로컬(항상) + Supabase(가능하면) ──
-  async function flush(game) {
+  // opts.localOnly: 이 기기에만 저장(서버 wrong_answers 에는 안 보냄) — 차근차근 모드용(2026-09-23).
+  //   차근차근 모드 사용 여부가 대시보드 오답 통계로 드러나지 않게 한다.
+  async function flush(game, opts) {
     var items = _session.slice();
     _session = [];
     if (!items.length) return { saved: 0 };
@@ -106,6 +108,7 @@
     _saveAll(obj);
 
     // 2) Supabase 업서트 (테이블/네트워크 없으면 조용히 무시)
+    if (opts && opts.localOnly) return { saved: items.length };
     var db = client();
     if (db) {
       var gid = groupId();

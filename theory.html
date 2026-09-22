@@ -7,7 +7,7 @@
 <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
      **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
      이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-<script src="safestore.js?v=34"></script>
+<script src="safestore.js?v=35"></script>
 <title>이론 객관식 | 전산회계 2급</title>
 <meta name="description" content="전산회계 2급 이론(필기) 기출 객관식을 풀고 오답을 복습">
 <style>
@@ -202,6 +202,7 @@
       </div>
       <button class="cta" id="start-btn">▶ 시작</button>
       <div class="mini" id="pool-info"></div>
+      <div id="step-host"></div>
     </div>
     <div class="ad-slot" data-adsense style="display:none">
       <div class="ad-slot-label">광고</div>
@@ -227,10 +228,11 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="wrongnote.js?v=34"></script>
-<script src="adsense.js?v=34"></script>
-<script src="growth.js?v=34"></script>
-<script src="streak.js?v=34"></script>
+<script src="wrongnote.js?v=35"></script>
+<script src="adsense.js?v=35"></script>
+<script src="growth.js?v=35"></script>
+<script src="streak.js?v=35"></script>
+<script src="stepmode.js?v=35"></script>
 <script>
 // 로그인 체크
 (function(){ if(!(localStorage.getItem('hub_nickname')||'').trim()){ location.replace('login.html'); } })();
@@ -407,7 +409,52 @@ function updatePool(){
   document.getElementById('start-btn').disabled=POOL.length===0;
 }
 
-function bindStart(){ document.getElementById('start-btn').onclick=startQuiz; }
+function bindStart(){
+  document.getElementById('start-btn').onclick=startQuiz;
+  if(window.StepMode) StepMode.mount({ game: STEP_GAME, host: document.getElementById('step-host'), sub: '선택한 주제로', onStart: startTheoryStep });
+}
+
+/* ── 차근차근 모드(2026-09-23, docs/차근차근모드_기획.md) ──
+   시간 제한 없이 한 문제씩. 힌트 ① 오답 보기 하나 지우기 + 그 보기가 왜 틀렸는지 ② 쉬운 개념 설명 ③ 정답 보기.
+   틀리면 "내가 고른 보기가 틀린 이유"를 보여 주고 다시 고른다. 점수·주제 통계·서버 오답에는 안 들어간다. */
+const STEP_GAME = (typeof GAME_ID !== 'undefined') ? GAME_ID : 'theory';
+function theoryStepPool() {
+  return poolFor().map(q => {
+    const d = q.deepDive || {}, wr = d.wrongReasons || {};
+    const ans = q.answer - 1;
+    const wrongIdx = q.options.map((o, i) => i).filter(i => i !== ans && wr[String(i + 1)]);
+    const el = wrongIdx.length ? wrongIdx[Math.floor(Math.random() * wrongIdx.length)] : null;
+    const hints = [];
+    if (el != null) hints.push({ text: `${el + 1}번은 아니에요 — ${esc(wr[String(el + 1)])}`, eliminate: el });
+    else hints.push({ text: '확실히 아닌 보기 하나를 지웠어요.', eliminate: true });
+    if (d.conceptExplain) hints.push(`<b>${esc(d.concept || '핵심 개념')}</b><br>${esc(d.conceptExplain)}`);
+    const prompt = `<div style="white-space:normal"><div style="font-size:.76rem;opacity:.6;margin-bottom:6px">${esc(q.topicName)}</div><div class="qstem" style="margin:0">${fmtStem(q.stem)}</div>
+      ${q.stemTAccount ? ledgerHtml(q.stemTAccount) : ''}
+      ${q.stemTAccounts ? `<div class="ledger-group">${q.stemTAccounts.map(ledgerHtml).join('')}</div>` : ''}
+      ${q.stemTrialBalance ? trialBalanceHtml(q.stemTrialBalance) : ''}
+      ${q.stemTable ? simpleTableHtml(q.stemTable) : ''}
+      ${q.stemReceipt ? receiptHtml(q.stemReceipt) : ''}</div>`;
+    return {
+      key: q.id, type: q.topicName, learn: d.concept || q.topicName,
+      wrong: { q: q.stem, correct: q.answerText },
+      steps: [{
+        prompt,
+        options: q.options.map((o, i) => ({ label: o, html: `<b style="opacity:.6;margin-right:6px">${i + 1}</b>` + (q.optionsVisual && q.optionsVisual[i] ? tAccountHtml(q.optionsVisual[i]) : esc(o)) })),
+        answer: ans, hints,
+        explain: (c, ok) => ok
+          ? esc(d.whyCorrect || q.explanation || '')
+          : `<b>${c + 1}번이 틀린 이유</b><br>${esc(wr[String(c + 1)] || '이 보기는 문제에서 묻는 내용과 맞지 않아요.')}` +
+            (d.conceptExplain ? `<br><br><span style="opacity:.85"><b>개념 다시 보기</b> — ${esc(d.conceptExplain)}</span>` : '')
+      }]
+    };
+  });
+}
+function startTheoryStep() {
+  if (!window.StepMode || !BANK.length) return;
+  const n = SEL_LEN === 0 ? 20 : SEL_LEN;
+  StepMode.start({ game: STEP_GAME, title: document.title.split('|')[0].trim(), pool: theoryStepPool(), n });
+}
+
 
 // ── 퀴즈 진행 ──
 let QUEUE=[], qi=0, score=0, combo=0, correctCnt=0;
@@ -597,6 +644,6 @@ function hideAdPlaceholder(){ if(window.AdBridge && typeof AdBridge.hide==='func
 
 load();
 </script>
-<script src="emoji-icons.js?v=34"></script>
+<script src="emoji-icons.js?v=35"></script>
 </body>
 </html>
