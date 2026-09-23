@@ -22,6 +22,14 @@
   'use strict';
 
   var CLIENT = 'ca-pub-7418287954060066';
+
+  /* ⚠ 심사 대기 중 스위치 (2026-09-24, 성일님 결정: "심사 동안 광고를 글 많은 화면에만")
+     AdSense 가 "게시자 콘텐츠가 없는 화면에 광고 / 가치가 별로 없는 콘텐츠"로 사이트를 보류했다.
+     게임 시작·결과 화면·허브는 글이 적어 심사에서 '콘텐츠 없는 화면'으로 잡힐 수 있으므로,
+     심사가 끝날 때까지 **게임 사이트에서는 광고를 아예 요청하지 않는다**(로더도 안 넣음).
+     광고 코드는 글이 충분한 루트 홈페이지(tjddlf0224-sudo.github.io)에만 남긴다.
+     → 승인이 나면 false 로 바꾸고 배포하면 원래대로(시작·결과 화면 + 허브) 돌아온다. */
+  var REVIEW_HOLD = true;
   var SLOT = '2076355142';   // 디스플레이 반응형 "전산회계오락실_콘텐츠화면_반응형"
 
   // 게임 시작·결과 화면 — 게임 진행 화면(보드·HUD)은 절대 넣지 않는다
@@ -130,6 +138,7 @@
 
   function init() {
     if (isNative()) return;
+    if (REVIEW_HOLD && !global.__AM_ADS_FORCE) return;   // 심사 대기 — 위 설명 참고(테스트는 __AM_ADS_FORCE 로 동작 검증)
     css();
     var list = document.querySelectorAll('.ad-slot[data-adsense]');
     for (var i = 0; i < list.length; i++) arm(list[i]);

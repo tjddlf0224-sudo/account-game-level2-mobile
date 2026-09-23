@@ -5,7 +5,7 @@
 <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
      **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
      이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-<script src="safestore.js?v=40"></script>
+<script src="safestore.js?v=41"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
@@ -92,20 +92,21 @@ body.step-mode .gchoice{pointer-events:auto;cursor:pointer}
 #step-coach .sc-hintbtn{border-style:dashed;border-color:rgba(255,209,102,.6);color:#ffd166}
 #step-coach .sc-go{border:2px solid var(--cy);color:#021018;background:var(--cy)}
 .gchoice.step-glow{animation:stepGlow 1s ease-in-out infinite}
+.gq mark.step-key{background:var(--gd);color:#020810;padding:0 5px;border-radius:5px;font-weight:900;box-shadow:0 0 12px rgba(255,214,0,.55)}
 @keyframes stepGlow{0%,100%{box-shadow:0 0 0 2px var(--gd),0 0 10px var(--gd)}50%{box-shadow:0 0 0 5px var(--gd),0 0 28px var(--gd)}}
 #glayer{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:12;overflow:hidden}
 .gatel{position:absolute;left:0;width:100%;display:flex;flex-direction:column;align-items:center}
 .gbar{width:100%;height:clamp(14px,2.5vw,20px);background:linear-gradient(90deg,transparent 0%,rgba(15,25,100,.9) 18%,rgba(20,35,130,.95) 50%,rgba(15,25,100,.9) 82%,transparent 100%);border-top:1.5px solid rgba(0,242,255,.22);border-bottom:1.5px solid rgba(0,242,255,.22);box-shadow:0 0 20px rgba(0,242,255,.12)}
 .ginfo{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 0 0}
-.gq{font-size:clamp(.85rem,3vw,1.4rem);font-weight:900;color:#eef0ff;text-align:center;text-shadow:0 2px 10px rgba(0,0,0,.95),0 0 6px rgba(0,0,0,.8);max-width:90vw;line-height:1.4;background:rgba(2,8,20,.82);padding:8px clamp(12px,4vw,30px);border-radius:12px;border:1px solid rgba(255,255,255,.1)}
-.gk{font-family:'Black Han Sans',sans-serif;font-size:clamp(.78rem,2.5vw,1.1rem);color:var(--gd);text-shadow:0 0 14px rgba(255,214,0,.75),0 2px 8px rgba(0,0,0,.9);animation:kP 1s infinite alternate}
+.gq{word-break:keep-all;font-size:clamp(1.1rem,4.6vw,1.5rem);font-weight:900;color:#eef0ff;text-align:center;text-shadow:0 2px 10px rgba(0,0,0,.95),0 0 6px rgba(0,0,0,.8);max-width:90vw;line-height:1.4;background:rgba(2,8,20,.82);padding:8px clamp(12px,4vw,30px);border-radius:12px;border:1px solid rgba(255,255,255,.1)}
+.gk{font-family:'Black Han Sans',sans-serif;font-size:clamp(1rem,3.9vw,1.2rem);color:var(--gd);text-shadow:0 0 14px rgba(255,214,0,.75),0 2px 8px rgba(0,0,0,.9);animation:kP 1s infinite alternate}
 @keyframes kP{from{transform:scale(1)}to{transform:scale(1.05)}}
 /* 장부 이름(좌·우 선택지) 위치. 2026-09-15 실기기 제보: "문제가 길면 장부이름과 겹치네.
    장부 이름을 살짝 아래로 내려야겠어." 문제가 2줄이 되면 모든 폭(360·390·430)에서
    정확히 13px 겹쳤다. -40px → -14~-17px 로 내려 10~13px 여유를 준다.
    판정은 g.y 와 기체 x좌표로만 하므로(update() 참고) 이 값은 순전히 보이는 위치다. */
-.gchoices{position:relative;display:flex;justify-content:space-between;width:100%;padding:0 clamp(14px,5vw,80px);top:clamp(-40px,-4vw,-14px)}
-.gchoice{font-family:'Black Han Sans',sans-serif;font-size:clamp(.9rem,3.5vw,1.4rem);padding:clamp(7px,2vw,11px) clamp(16px,4vw,34px);border-radius:50px;border:2.5px solid;backdrop-filter:blur(4px)}
+.gchoices{position:relative;display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;box-sizing:border-box;padding:0 clamp(8px,4vw,80px);top:clamp(-40px,-4vw,-14px)}
+.gchoice{font-family:'Black Han Sans',sans-serif;font-size:clamp(1.05rem,4.4vw,1.45rem);white-space:nowrap;max-width:48%;box-sizing:border-box;text-align:center;padding:clamp(8px,2.2vw,11px) clamp(12px,3.5vw,34px);border-radius:50px;border:2.5px solid;backdrop-filter:blur(4px)}
 .gchoice.left{color:var(--pk);border-color:var(--pk);background:rgba(255,45,120,.1);text-shadow:0 0 10px var(--pk);box-shadow:0 0 18px rgba(255,45,120,.2)}
 .gchoice.right{color:var(--gn);border-color:var(--gn);background:rgba(57,255,20,.07);text-shadow:0 0 10px var(--gn);box-shadow:0 0 18px rgba(57,255,20,.14)}
 
@@ -149,7 +150,7 @@ body.step-mode .gchoice{pointer-events:auto;cursor:pointer}
 .logo{font-family:'Black Han Sans','Noto Sans KR',sans-serif;font-size:clamp(1.8rem,7vw,3.5rem);font-weight:900;color:var(--cy);letter-spacing:clamp(2px,1vw,5px);text-align:center;text-shadow:0 0 32px var(--cy),0 0 64px rgba(0,242,255,.22)}
 .sub{font-family:'Black Han Sans';font-size:clamp(.85rem,3vw,1.15rem);color:rgba(255,255,255,.42);letter-spacing:3px;text-align:center}
 .ggrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%}
-.gc{background:rgba(255,255,255,.04);border:1px solid rgba(0,242,255,.18);border-radius:14px;padding:clamp(10px,3vw,16px) clamp(12px,3vw,20px);font-size:clamp(.75rem,2.5vw,.95rem);color:rgba(255,255,255,.65);line-height:1.75}
+.gc{background:rgba(255,255,255,.04);border:1px solid rgba(0,242,255,.18);border-radius:14px;padding:clamp(10px,3vw,16px) clamp(12px,3vw,20px);font-size:clamp(.88rem,3.6vw,1rem);color:rgba(255,255,255,.65);line-height:1.75}
 .gc strong{color:#fff;display:block;font-size:clamp(.78rem,2.5vw,1.02rem);margin-bottom:4px}
 .gc.a{border-left:3px solid var(--cy)}.gc.b{border-left:3px solid var(--pk)}.gc.c{border-left:3px solid var(--gd)}
 .sbtn{padding:clamp(12px,3vw,16px) clamp(36px,8vw,60px);background:transparent;border:3px solid var(--cy);border-radius:50px;cursor:pointer;font-family:'Black Han Sans';font-size:clamp(1.2rem,5vw,1.6rem);color:var(--cy);letter-spacing:2px;text-shadow:0 0 12px var(--cy);box-shadow:0 0 30px rgba(0,242,255,.25),inset 0 0 20px rgba(0,242,255,.05);transition:all .2s;animation:sbP 2s infinite;min-height:52px}
@@ -234,12 +235,14 @@ body.step-mode .gchoice{pointer-events:auto;cursor:pointer}
 #ldg-won{color:rgba(255,255,255,.5);align-self:center;flex-shrink:0}
 
 @media(max-width:480px){.ggrid{grid-template-columns:1fr}}
+/* 좁은 폰: 글씨를 키운 뒤(2026-09-24 안드로이드 제보 "글씨가 너무 작다") 열쇠 단어 줄과 장부 버튼이 겹친다 → 버튼을 한 줄 아래로 */
+@media(max-width:480px){.gchoices{top:8px}}
 /* 좁은 폰(iPhone SE 등 320px대)에서 HUD 버튼들이 넘치는 것 방지 — 기본 디자인은 그대로 */
 /* 360~400dp 안드로이드(갤럭시 기본)에서도 여유가 적어 한 단계 줄인다 */
 @media(max-width:400px){
   .hud-left{gap:8px}
   .irow{gap:4px}
-  .hud-left .hl{letter-spacing:0;font-size:.46rem}
+  .hud-left .hl{letter-spacing:0;font-size:.56rem}
   .hud-left .hb:nth-child(2) > div:last-child{display:none}   /* 'ITEMS' 작은 글씨 — 장식이라 좁을 땐 뺀다 */
   .hdb{padding:0 10px}
 }
@@ -518,18 +521,18 @@ body.step-mode .gchoice{pointer-events:auto;cursor:pointer}
 .gtitle, .logo, .ov-title, .overlay-title, h1, h2 { font-family: 'Black Han Sans', 'Noto Sans KR', sans-serif !important; }
 </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="ask.js?v=40"></script>
-    <script src="wrongnote.js?v=40"></script>
-    <script src="growth.js?v=40"></script>
-<script src="streak.js?v=40"></script>
-    <script src="difficulty.js?v=40"></script>
-    <script src="readable.js?v=40"></script>
-    <script src="stepmode.js?v=40"></script>
-    <script src="review-prompt.js?v=40"></script>
+    <script src="ask.js?v=41"></script>
+    <script src="wrongnote.js?v=41"></script>
+    <script src="growth.js?v=41"></script>
+<script src="streak.js?v=41"></script>
+    <script src="difficulty.js?v=41"></script>
+    <script src="readable.js?v=41"></script>
+    <script src="stepmode.js?v=41"></script>
+    <script src="review-prompt.js?v=41"></script>
 </head>
 <body>
 
-<script src="bgm.js?v=40"></script>
+<script src="bgm.js?v=41"></script>
 
 
 <div style="position:fixed;inset:0;background:var(--bg);z-index:-1;"></div>
@@ -675,7 +678,7 @@ const GAME_ID="flight";
 function escapeHTML(str) { if (!str) return ''; return str.replace(/[&<>'"]/g, function(tag) { const chars = { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }; return chars[tag] || tag; }); }
 
 const BGM={
-  el:BGMAudio.create('bgm5_flight.mp3?v=40'),
+  el:BGMAudio.create('bgm5_flight.mp3?v=41'),
   // 게임별 키(flight_muted)가 있으면 우선, 없으면 허브 전역 토글(hub_muted) 참조
   _muted:localStorage.getItem('flight_muted')!==null?localStorage.getItem('flight_muted')==='true':localStorage.getItem('hub_muted')==='true',
   _fadeTimer:null,
@@ -1402,13 +1405,33 @@ Object.assign(Game, {
     const p=st.list[st.i].p;
     document.getElementById('step-hud').textContent='🐢 차근차근 '+(st.i+1)+' / '+st.list.length;
     const el=document.createElement('div');el.className='gatel';el.style.top='-600px';
-    el.innerHTML=`<div class="gbar"></div><div class="ginfo"><div class="gq">${p.q}</div><div class="gk">💡 ${p.key}</div></div><div class="gchoices"><div class="gchoice left">${p.L}</div><div class="gchoice right">${p.R}</div></div>`;
+    el.innerHTML=`<div class="gbar"></div><div class="ginfo"><div class="gq">${this.stepKeyHtml(p)}</div><div class="gk">💡 ${p.key}</div></div><div class="gchoices"><div class="gchoice left">${p.L}</div><div class="gchoice right">${p.R}</div></div>`;
     el.querySelector('.gchoice.left').addEventListener('click',()=>this.stepChoose('L'));
     el.querySelector('.gchoice.right').addEventListener('click',()=>this.stepChoose('R'));
     document.getElementById('glayer').appendChild(el);
     st.g={p,y:-430,domEl:el,phase:'in'};st.hint=0;
     st.S.begin(p.q);
     this.stepCoach('문제 게이트가 내려와요…',[]);
+  },
+  /* 열쇠 말 색칠(2026-09-24 성일님: "3분기 중 임차료 지출이 가장 많았던 월은? — '가장 많았던 월'에 색 칠해 잘 보이게").
+     정답 장부를 고르게 만드는 말만 칠한다(기간·계정 이름까지 다 칠하면 오히려 헷갈린다). */
+  stepKeyHtml(p){
+    const ans=p.a==='L'?p.L:p.R;
+    const P={
+      '거래처원장':[/(\d{2}|[A-Z]{2}|[가-힣]{2})(상사|물산|기업|실업)/g,/가장\s*[가-힣]+\s*거래처|남아있는\s*거래처/g],
+      '총계정원장':[/가장[^?]*?(월|달)(?=[은는?])/g],
+      '재무상태표':[/\d+월\s*말\s*현재/g],
+      '월계표':[/\d+월\s*~\s*\d+월(\s*중)?|\d+월\s*중|\d분기\s*중|상반기\s*(동안|중)|하반기\s*(동안|중)/g,/현금으로|현금\s*(지출|회수)[가-힣]*|'현금'|'대체'|거래\s*건수/g],
+      '일계표':[/\d+월\s*\d+일/g],
+      '현금출납장':[/현금[가-힣]*/g],
+      '손익계산서':[/당기[가-힣]*/g]
+    }[ans]||[];
+    let q=String(p.q),marks=[];
+    P.forEach(re=>{q.replace(re,(m,...a)=>{const i=a[a.length-2];marks.push([i,i+m.length]);return m})});
+    marks.sort((x,y)=>x[0]-y[0]);
+    let out='',at=0;
+    marks.forEach(([a,b])=>{if(a<at)return;out+=StepMode.esc(q.slice(at,a))+'<mark class="step-key">'+StepMode.esc(q.slice(a,b))+'</mark>';at=b});
+    return out+StepMode.esc(q.slice(at));
   },
   stepHints(){
     const p=this.step.g.p,D=StepMode.DATA.flightLedgers,E=StepMode.esc;
@@ -1836,8 +1859,8 @@ const Tutorial = (function () {
 function openGuide() { Tutorial.start(); }
 </script>
 
-<script src="emoji-icons.js?v=40"></script>
+<script src="emoji-icons.js?v=41"></script>
 <!-- 웹 전용 광고(시작·결과 화면만, 앱에선 adsense.js 가 스스로 멈춘다) -->
-<script src="adsense.js?v=40"></script>
+<script src="adsense.js?v=41"></script>
 </body>
 </html>

@@ -4,7 +4,7 @@
     <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
          **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
          이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-    <script src="safestore.js?v=40"></script>
+    <script src="safestore.js?v=41"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
@@ -110,7 +110,7 @@ body {
 .path-step {
   display:flex; align-items:center; gap:10px;
   font-family:'Orbitron', monospace;
-  font-size:0.7rem; letter-spacing:2px;
+  font-size:0.78rem; letter-spacing:1px;
   color:rgba(255,255,255,0.25);
   white-space:nowrap;
 }
@@ -138,7 +138,7 @@ body {
 .review-entry .re-icon { font-size:1.7rem; flex:none; }
 .review-entry .re-body { flex:1; }
 .review-entry .re-title { font-weight:700; font-size:1.02rem; letter-spacing:-.2px; }
-.review-entry .re-desc { font-size:.78rem; color:rgba(234,242,255,.6); margin-top:3px; }
+.review-entry .re-desc { font-size:.84rem; color:rgba(234,242,255,.6); margin-top:3px; }
 .review-entry .re-go { font-size:1.1rem; color:#00f2ff; flex:none; }
 .theory-entry {
   background:linear-gradient(100deg, rgba(0,242,255,.16), rgba(46,204,113,.12));
@@ -290,9 +290,9 @@ body {
 .badge svg { width:13px; height:13px; }
 .stage-node .lock-badge { right:-3px; bottom:-3px; color:rgba(255,255,255,0.6); }
 .stage-node .clear-badge { right:-3px; top:-3px; color:#04240f; background:var(--gn); border-color:var(--gn); box-shadow:0 0 8px var(--gn); }
-.stage-node .n-title { font-family:'Black Han Sans', sans-serif; font-size:0.8rem; color:#fff; text-align:center; line-height:1.25; }
+.stage-node .n-title { font-family:'Black Han Sans', sans-serif; font-size:0.9rem; color:#fff; text-align:center; line-height:1.25; }
 .stage-node.lock .n-title { color:rgba(255,255,255,0.35); }
-.stage-node .n-sub { font-size:0.64rem; color:var(--card-color, var(--cy)); text-align:center; white-space:nowrap; min-height:1.1em; }
+.stage-node .n-sub { font-size:0.72rem; color:var(--card-color, var(--cy)); text-align:center; white-space:nowrap; min-height:1.1em; }
 .stage-node.lock .n-sub { color:rgba(255,255,255,0.3); }
 
 /* ── 난이도1/2 뱃지 겸 전환 스위치 (열린 스테이지에만 노출) ── */
@@ -303,7 +303,7 @@ body {
 .lv-pill.show { display:flex; }
 .lv-seg {
   font-family:'Orbitron', monospace;
-  font-size:0.56rem; letter-spacing:0.5px;
+  font-size:0.68rem; letter-spacing:0.5px;
   padding:3px 8px; border-radius:50px;
   color:rgba(255,255,255,0.35);
   cursor:pointer; transition:all 0.15s;
@@ -386,7 +386,7 @@ body {
 
   /* 경로 라인 — 모바일에서 압축 */
   .path-line { margin-bottom: 28px; gap: 0; }
-  .path-step { font-size: 0.6rem; letter-spacing: 1px; gap: 5px; }
+  .path-step { font-size: 0.68rem; letter-spacing: 0.5px; gap: 5px; }
   .path-dot { width: 6px; height: 6px; }
   .path-arrow { width: 18px; }
 
@@ -522,7 +522,7 @@ body {
   border: 1px solid rgba(180,79,255,0.28);
   border-radius: 50px;
   font-family: 'Orbitron', monospace;
-  font-size: 0.62rem; letter-spacing: 1.5px;
+  font-size: 0.76rem; letter-spacing: 0.5px;
   color: var(--pu);
   cursor: pointer; text-decoration: none;
   transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
@@ -580,7 +580,7 @@ body {
      버튼 글자는 하나도 안 건드린다 — 600px 이상에선 라벨도 그대로 보인다. */
   .user-bar .ub-nick .ub-label { display: none; }
   .user-bar { padding-left: 14px; padding-right: 14px; }
-  .group-mode-btn { font-size: 0.58rem; padding: 7px 12px; }
+  .group-mode-btn { font-size: 0.7rem; padding: 7px 12px; }
   .wrap { padding-top: calc(104px + env(safe-area-inset-top)) !important; }   /* 2줄 상단바(≤600px 에선 89px) */
   .user-bar .ub-group { max-width: 100px; font-size: 0.68rem; }
 }
@@ -609,7 +609,7 @@ body {
   display: flex; flex-direction: column; gap: 6px;
 }
 .examday-box .ed-date {
-  font-size: 0.78rem;
+  font-size: 0.84rem;
   color: rgba(255,255,255,0.45);
   line-height: 1.5;
 }
@@ -628,7 +628,7 @@ body {
   width: 0%;
 }
 .examday-box .ed-goal-txt {
-  font-size: 0.74rem; color: rgba(255,255,255,0.55);
+  font-size: 0.8rem; color: rgba(255,255,255,0.55);
   white-space: nowrap; flex-shrink: 0;
 }
 .examday-box .ed-set-btn {
@@ -639,7 +639,7 @@ body {
   border-radius: 50px;
   padding: 8px 16px;
   font-family: 'Orbitron', monospace;
-  font-size: 0.62rem; letter-spacing: 1.5px;
+  font-size: 0.76rem; letter-spacing: 0.5px;
   cursor: pointer;
   transition: background 0.2s, border-color 0.2s;
 }
@@ -651,7 +651,7 @@ body {
 @media (max-width: 600px) {
   .examday-box { padding: 12px 14px; margin-bottom: 20px; gap: 10px; }
   .examday-box .ed-dday { font-size: 1.15rem; }
-  .examday-box .ed-set-btn { padding: 7px 12px; font-size: 0.56rem; }
+  .examday-box .ed-set-btn { padding: 7px 12px; font-size: 0.7rem; }
 }
 
 
@@ -701,7 +701,7 @@ body {
   .user-bar { gap: 6px; padding-left: 10px; padding-right: 10px; }
   .user-bar .ub-nick { min-width: 34px; overflow: hidden; }
   .user-bar .ub-group { max-width: 72px; font-size: 0.64rem; padding: 4px 8px; }
-  .user-bar .group-mode-btn { padding: 7px 9px; font-size: 0.55rem; letter-spacing: 1px; }
+  .user-bar .group-mode-btn { padding: 7px 9px; font-size: 0.68rem; letter-spacing: 0.3px; }
   .user-bar .graph-btn { width: 36px; height: 36px; }
   .user-bar .stk-pill { height: 36px; padding: 0 7px; }
   .user-bar .stk-pill .stk-d { font-size: 0.7rem; }
@@ -908,9 +908,9 @@ body {
 
 </div>
 
-<script src="ask.js?v=40"></script>
-<script src="difficulty.js?v=40"></script>
-<script src="adsense.js?v=40"></script>
+<script src="ask.js?v=41"></script>
+<script src="difficulty.js?v=41"></script>
+<script src="adsense.js?v=41"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ── 로그인 체크 & 유저바 초기화 ──
@@ -1420,9 +1420,9 @@ function onRewardedFailed() {
 </script>
 
 <!-- ── 오답노트: 미니 요약(틀린 문제 수) 표시 (supabase-js는 상단에서 이미 로드됨) ── -->
-<script src="wrongnote.js?v=40"></script>
-<script src="growth.js?v=40"></script>
-<script src="streak.js?v=40"></script>
+<script src="wrongnote.js?v=41"></script>
+<script src="growth.js?v=41"></script>
+<script src="streak.js?v=41"></script>
 <script>
 (async function(){
   try {
@@ -1549,7 +1549,7 @@ async function setExamDate() {
 renderExamDay();
 </script>
 
-<script src="emoji-icons.js?v=40"></script>
+<script src="emoji-icons.js?v=41"></script>
 
 <script>
   // 스트릭 알약 — 붙일 자리가 있을 때만 뜬다. 0일이면 스스로 숨는다.

@@ -4,7 +4,7 @@
     <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
          **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
          이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-    <script src="safestore.js?v=40"></script>
+    <script src="safestore.js?v=41"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
@@ -100,21 +100,21 @@ body{
 }
 .examday-box .ed-dday { font-family:'Orbitron',monospace; font-weight:900; font-size:1.5rem; color:var(--gd); letter-spacing:1px; flex-shrink:0; }
 .examday-box .ed-body { flex:1; min-width:160px; display:flex; flex-direction:column; gap:6px; }
-.examday-box .ed-date { font-size:0.78rem; color:rgba(255,255,255,0.45); line-height:1.5; }
+.examday-box .ed-date { font-size:0.84rem; color:rgba(255,255,255,0.45); line-height:1.5; }
 .examday-box .ed-goal { display:flex; align-items:center; gap:8px; }
 .examday-box .ed-goal-bar { flex:1; height:8px; border-radius:50px; background:rgba(255,255,255,0.08); overflow:hidden; }
 .examday-box .ed-goal-fill { height:100%; border-radius:50px; background:linear-gradient(90deg,var(--cy),var(--gn)); transition:width .3s; width:0%; }
-.examday-box .ed-goal-txt { font-size:0.74rem; color:rgba(255,255,255,0.55); white-space:nowrap; flex-shrink:0; }
+.examday-box .ed-goal-txt { font-size:0.8rem; color:rgba(255,255,255,0.55); white-space:nowrap; flex-shrink:0; }
 .examday-box .ed-set-btn {
   flex-shrink:0; background:transparent; border:1px solid rgba(255,214,0,0.3); color:var(--gd);
-  border-radius:50px; padding:8px 16px; font-family:'Orbitron',monospace; font-size:0.62rem;
+  border-radius:50px; padding:8px 16px; font-family:'Orbitron',monospace; font-size:0.76rem;
   letter-spacing:1.5px; cursor:pointer; transition:background .2s, border-color .2s;
 }
 .examday-box .ed-set-btn:active, .examday-box .ed-set-btn:hover{ background:rgba(255,214,0,0.12); border-color:var(--gd); }
 @media (max-width:600px){
   .examday-box{ padding:12px 14px; margin-bottom:16px; gap:10px; }
   .examday-box .ed-dday{ font-size:1.15rem; }
-  .examday-box .ed-set-btn{ padding:7px 12px; font-size:0.56rem; }
+  .examday-box .ed-set-btn{ padding:7px 12px; font-size:0.7rem; }
 }
 
 /* ── 스테이지 노드맵(2급 허브 stagemap과 동일 패턴 — 징검다리 경로) ── */
@@ -163,7 +163,7 @@ body{
 .stage-node .clear-badge{ right:-3px; top:-3px; color:#04240f; background:var(--gn); border-color:var(--gn); box-shadow:0 0 8px var(--gn); }
 .stage-node .n-title{ font-family:'Black Han Sans',sans-serif; font-size:0.82rem; color:#fff; text-align:center; line-height:1.25; }
 .stage-node.lock .n-title{ color:rgba(255,255,255,0.35); }
-.stage-node .n-sub{ font-size:0.62rem; color:var(--node-color, var(--pu)); text-align:center; white-space:nowrap; min-height:1.1em; }
+.stage-node .n-sub{ font-size:0.72rem; color:var(--node-color, var(--pu)); text-align:center; white-space:nowrap; min-height:1.1em; }
 .stage-node.lock .n-sub{ color:rgba(255,255,255,0.3); }
 
 /* ── 하단 계정 관리(2급 허브와 동일) ── */
@@ -210,7 +210,7 @@ body{
 /* 좁은 폰에서 상단바가 넘치지 않도록 */
 @media (max-width:340px){
   .user-bar{ padding-left:10px; padding-right:10px; gap:5px; }
-  .group-mode-btn{ font-size:0.58rem; padding:7px 12px; }
+  .group-mode-btn{ font-size:0.7rem; padding:7px 12px; }
   .ub-group{ max-width:100px; font-size:0.68rem; }
 }
 /* ── 설정 패널(2026-09-14, 사용자 요청) ──
@@ -259,7 +259,7 @@ body{
   .user-bar { gap: 6px; padding-left: 10px; padding-right: 10px; }
   .user-bar .ub-nick { min-width: 34px; overflow: hidden; }
   .user-bar .ub-group { max-width: 72px; font-size: 0.64rem; padding: 4px 8px; }
-  .user-bar .group-mode-btn { padding: 7px 9px; font-size: 0.55rem; letter-spacing: 1px; }
+  .user-bar .group-mode-btn { padding: 7px 9px; font-size: 0.68rem; letter-spacing: 0.3px; }
   .user-bar .graph-btn { width: 36px; height: 36px; }
   .user-bar .stk-pill { height: 36px; padding: 0 7px; }
   .user-bar .stk-pill .stk-d { font-size: 0.7rem; }
@@ -461,8 +461,8 @@ body{
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="ask.js?v=40"></script>
-<script src="adsense.js?v=40"></script>
+<script src="ask.js?v=41"></script>
+<script src="adsense.js?v=41"></script>
 <script>
 /* 닉네임/그룹 표시 + 탈퇴 버튼 노출(2급 허브와 동일 로직 — 통일감) */
 (function(){
@@ -841,8 +841,8 @@ async function changeNickname(){
   await Ask.alert('✅ 닉네임이 "'+name+'"(으)로 변경되었어요.\n기존 점수와 오답노트도 함께 이동했습니다.');
 }
 </script>
-<script src="growth.js?v=40"></script>
-<script src="streak.js?v=40"></script>
+<script src="growth.js?v=41"></script>
+<script src="streak.js?v=41"></script>
 <script>
 /* 성장 그래프 버튼: 기록 있으면 초록 점(2급 허브와 동일 — growth.js 로드 후 실행) */
 (async function(){
@@ -909,7 +909,7 @@ async function setExamDate(){
 }
 renderExamDay();
 </script>
-<script src="wrongnote.js?v=40"></script>
+<script src="wrongnote.js?v=41"></script>
 <script>
 /* 오답노트 카드에 미니 요약(틀린 문제 수) 표시(2급 허브와 동일) */
 (async function(){
@@ -924,7 +924,7 @@ renderExamDay();
   }catch(e){}
 })();
 </script>
-<script src="emoji-icons.js?v=40"></script>
+<script src="emoji-icons.js?v=41"></script>
 
 <script>
   // 스트릭 알약 — 붙일 자리가 있을 때만 뜬다. 0일이면 스스로 숨는다.
