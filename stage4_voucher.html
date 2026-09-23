@@ -7,8 +7,8 @@
 <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
      **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
      이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-<script src="safestore.js?v=41"></script>
-<script src="readable.js?v=41"></script>
+<script src="safestore.js?v=42"></script>
+<script src="readable.js?v=42"></script>
 <title>전표의 눈 — 전산회계 1급 스테이지 3</title>
 <meta name="description" content="실제 기출 거래를 보고 매입매출전표 유형(과세·영세·면세·불공·카과 등)을 맞히는 연습">
 <style>
@@ -194,6 +194,32 @@
     background:rgba(242,177,52,.14);color:var(--gold);font-size:.8rem;font-weight:700;}
   .expl .continue-hint{margin-top:12px;font-size:.78rem;color:var(--dim);text-align:right;}
   #quiz-body.await-continue{cursor:pointer;}
+  /* ── 차근차근 모드(2026-09-24, 3차) — 같은 문제 화면에서 ① 팔았나/샀나 ② 서류 ③ 원래 유형 버튼 ── */
+  #step-badge{display:none;font-weight:800;font-size:.92rem;color:#9fe3c0;}
+  body.step-mode #step-badge{display:block;}
+  body.step-mode .status-bar .stat, body.step-mode .timer-track{display:none;}
+  body.step-mode .hint-btn, body.step-mode .hint-box{display:none !important;}
+  .vc-coach{margin:12px 0 14px;padding:14px 16px;border-radius:14px;background:rgba(255,209,102,.08);
+    border:1.5px dashed rgba(255,209,102,.5);font-size:.95rem;line-height:1.8;color:var(--txt);word-break:keep-all;}
+  .vc-coach .vc-step{display:block;font-size:.76rem;font-weight:700;color:#ffd166;letter-spacing:.04em;margin-bottom:4px;}
+  .vc-coach p{margin:0 0 .5em;}
+  .vc-coach p:last-child{margin-bottom:0;}
+  .vc-coach b{color:#ffd166;}
+  .vc-coach .vc-no{color:#ff8a78;font-weight:700;}
+  .vc-coach .vc-ok{color:var(--green);font-weight:800;}
+  .vc-opts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+  .vc-opt{flex:1 1 calc(50% - 8px);min-height:46px;padding:8px 10px;border-radius:12px;border:1.5px solid var(--line);
+    background:var(--card2);color:var(--txt);font-size:.92rem;font-weight:700;font-family:inherit;cursor:pointer;}
+  .vc-opt:disabled{opacity:.35;text-decoration:line-through;cursor:default;}
+  .vc-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+  .vc-hbtn,.vc-go{min-height:42px;padding:8px 16px;border-radius:12px;font-size:.9rem;font-weight:700;font-family:inherit;cursor:pointer;}
+  .vc-hbtn{border:1.5px dashed rgba(255,209,102,.7);background:none;color:#ffd166;}
+  .vc-go{border:none;background:linear-gradient(90deg,var(--blue),var(--green));color:#021;flex:1;}
+  .step-glow{animation:vcGlow 1s ease-in-out infinite;}
+  @keyframes vcGlow{0%,100%{box-shadow:0 0 0 2px #ffd166,0 0 10px #ffd166;}50%{box-shadow:0 0 0 4px #ffd166,0 0 26px #ffd166;}}
+  @media (prefers-reduced-motion:reduce){ .step-glow{animation:none;box-shadow:0 0 0 3px #ffd166;} }
+  body.step-mode .qcard .cat-badge.vc-hide{visibility:hidden;}
+  .qstem mark.vc-mark{background:rgba(255,209,102,.22);color:#ffd166;font-weight:800;padding:0 2px;border-radius:3px;}
   #result{display:none;text-align:center;}
   #result .result-title{font-size:1.3rem;font-weight:800;letter-spacing:.02em;color:var(--txt);}
   #result .grade{font-size:1.05rem;color:var(--dim);margin:6px 0 2px;}
@@ -262,6 +288,7 @@
 <header>
   <div class="logo">전표의 눈</div>
   <div class="status-bar">
+    <div id="step-badge"></div>
     <div class="stat"><div class="stat-label">TIME</div><div class="stat-value" id="hud-time">120</div></div>
     <div class="timer-track"><div class="timer-fill" id="timer-fill" style="width:100%"></div></div>
     <div class="stat"><div class="stat-label">점수</div><div class="stat-value" id="hud-score">0</div></div>
@@ -309,6 +336,7 @@
 
     <div class="home-actions">
       <button class="pill-btn pill-btn-gold" id="start-btn">▶ 게임 시작</button>
+      <div id="step-host" style="margin-top:-10px"></div>
       <button class="btn-hub" id="guide-btn">📖 사용방법</button>
       <button class="btn-hub" onclick="location.href='index_lv1.html'">🏠 메인으로 나가기</button>
     </div>
@@ -343,11 +371,12 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="pausewatch.js?v=41"></script>
-<script src="ask.js?v=41"></script>
-<script src="wrongnote.js?v=41"></script>
-<script src="growth.js?v=41"></script>
-<script src="streak.js?v=41"></script>
+<script src="pausewatch.js?v=42"></script>
+<script src="ask.js?v=42"></script>
+<script src="wrongnote.js?v=42"></script>
+<script src="growth.js?v=42"></script>
+<script src="streak.js?v=42"></script>
+<script src="stepmode.js?v=42"></script>
 <script>
 (function(){ if(!(localStorage.getItem('hub_nickname')||'').trim()){ location.replace('login.html'); } })();
 
@@ -384,14 +413,21 @@ async function load(){
 function bindStart(){
   document.getElementById('start-btn').onclick=startQuiz;
   document.getElementById('guide-btn').onclick=()=>Tutorial.start();
+  if(window.StepMode) StepMode.mount({ game: GAME_ID, host: document.getElementById('step-host'), sub: '시간 제한 없이', onStart: startVoucherStep });
 }
 
 /* ── 그만(중도 종료 → 지금까지 점수로 결과화면) / 홈(허브로 나가기) ── */
 async function quitGame(){
+  if(VSTEP) return stepQuit();
   if(!isPlaying) return;
   if(await Ask.confirm('지금까지 점수로 결과를 볼까요? 남은 시간은 더 진행할 수 없어요.')) endQuiz();
 }
 async function exitGame(){
+  if(VSTEP){
+    if(!await Ask.confirm('허브로 나갈까요? 지금까지 푼 것은 차근차근 기록에 남아요.')) return;
+    VSTEP.S.finish(false, true); VSTEP=null;
+    location.href='index_lv1.html'; return;
+  }
   if(isPlaying){
     if(!await Ask.confirm('허브로 나갈까요? 지금까지의 진행 상황은 저장되지 않습니다.')) return;
   }
@@ -655,6 +691,201 @@ function continueFromFeedback(){
   showQ();
 }
 
+/* =========================================================================
+ *  차근차근 모드(2026-09-24, 3차 — docs/차근차근모드_기획.md)
+ *  성일님: "기존 게임에서 차근차근 한 단계씩 스몰스텝으로. 갑자기 다른 창이 나오면 어떻게 해."
+ *  → **같은 문제 화면**(문제 카드 + 원래 유형 버튼)을 쓰고, 카드 아래 말풍선이 세 단계로 묻는다.
+ *    ① 팔았나요, 샀나요?(매출/매입)  ② 실제로 주고받은 서류는?  ③ 좁혀진 원래 유형 버튼에서 고르기
+ *  시간 제한·점수·콤보 없음. 기록은 StepMode.session(전용 테이블 + 이 기기 오답노트)만 —
+ *  scores·score_history·wrong_answers 에는 안 간다(pick()·endQuiz() 를 부르지 않는다).
+ * ========================================================================= */
+/* 유형 코드 → 실제로 주고받은 서류 */
+const VC_EVID = {
+  '11':'tax','51':'tax','54':'tax','12':'zero','52':'zero','13':'inv','53':'inv',
+  '14':'none','16':'none','17':'card','57':'card','22':'cash','61':'cash','62':'cash','55':'imp'
+};
+/* ② 보기. why = 이 서류가 뭔지 한 줄(틀렸을 때 보여 준다) — 초안, 성일님 검토 대상 */
+const VC_EVID_OPTS = [
+  ['tax', '세금계산서',       '부가세가 붙는 거래에서\n사업자끼리 주고받는 서류예요.'],
+  ['zero','영세율 세금계산서', '수출용 물건(구매확인서·내국신용장)에\n세율 0%로 끊는 세금계산서예요.'],
+  ['inv', '계산서',           '\'세금\' 두 글자가 없는 계산서.\n면세 물건(농산물·교육·토지 등)에 써요.'],
+  ['card','신용·체크카드',     '신용카드·체크카드로\n결제했을 때예요.'],
+  ['cash','현금영수증',       '현금을 내고 현금영수증을\n주고받았을 때예요.'],
+  ['imp', '수입세금계산서',    '물건을 들여올 때 세관이 끊어 줘요.'],
+  ['none','서류 없음',        '세금계산서도 카드도 현금영수증도\n없을 때예요(직수출·증빙 없는 판매 등).']
+];
+/* ③ 후보가 둘일 때 가르는 질문 */
+const VC_SPLIT = {
+  'sale_none':'해외로 <b>직접 수출</b>했나요?<p>그렇다면 <b>16.수출</b>, 아니면 <b>14.건별</b>이에요.</p>',
+  'buy_tax':'이 매입의 부가세를 <b>돌려받을 수 있나요?</b><p>접대·비영업용 승용차·토지·업무와 무관한 것이면 못 돌려받아요 → <b>54.불공</b>.<br>아니면 <b>51.과세</b>.</p>',
+  'buy_cash':'산 물건이 <b>면세</b>인가요?<p>쌀·과일 같은 농산물 등 면세면 <b>62.현면</b>, 아니면 <b>61.현과</b>.</p>'
+};
+/* 지문에 나오는 서류 말 — ② 힌트 색칠과 출제 거르기에 같이 쓴다 */
+const VC_EVID_RX=/(전자)?(영세율\s?)?(수입)?(전자)?(세금)?계산서|(법인)?[가-힣]{0,2}카드|현금영수증|구매확인서|내국신용장|세관|직수출|직접\s?수출/;
+let VSTEP=null;
+/* 받침에 따라 이/가 */
+function iga(w){ const c=String(w).charCodeAt(String(w).length-1); return (c>=0xAC00&&c<=0xD7A3&&(c-0xAC00)%28) ? w+'이' : w+'가'; }
+function startVoucherStep(){
+  if(!window.StepMode || !BANK.length) return;
+  hideAdPlaceholder();
+  const S=StepMode.session(GAME_ID);
+  /* 서류가 지문에 아예 안 나오는 문항(예: "제품을 판매하고 외상으로 했다")은 ②에서 고를 근거가 없어 뺀다.
+     서류 없음(14 건별·16 수출)은 '없다'가 답이라 그대로 둔다. */
+  const pool=BANK.filter(q=>VC_EVID[q.type_code]==='none' || VC_EVID_RX.test(q.stem));
+  VSTEP={ S, list:S.pick(pool, 10, q=>q.id), i:0, again:{}, phase:'cat', hint:0 };
+  isPlaying=false; clearInterval(timerInterval);
+  document.getElementById('home').style.display='none';
+  document.body.classList.remove('home-mode');
+  document.body.classList.add('step-mode');
+  document.getElementById('result').style.display='none';
+  document.getElementById('quiz').style.display='block';
+  stepShowQ();
+}
+function stepQ(){ return VSTEP.list[VSTEP.i]; }
+function stepShowQ(){
+  curQ=stepQ(); showQ();
+  const q=curQ;
+  VSTEP.phase='cat'; VSTEP.hint=0;
+  VSTEP.S.begin(q.id);
+  document.getElementById('step-badge').textContent=`🐢 차근차근 ${VSTEP.i+1} / ${VSTEP.list.length}`;
+  const badge=document.querySelector('.qcard .cat-badge'); if(badge) badge.classList.add('vc-hide');
+  const ask=document.querySelector('.q-ask'); if(ask) ask.outerHTML='<div class="vc-coach" id="vc-coach"></div>';
+  document.querySelectorAll('.tbtn').forEach(b=>{ b.disabled=true; b.classList.add('dim'); b.onclick=()=>stepType(b.dataset.code); });
+  stepCoach();
+}
+function stepCands(q){
+  const ev=VC_EVID[q.type_code];
+  return Object.keys(VC_EVID).filter(c=>VC_EVID[c]===ev && ((+c<50)===(q.category==='매출')));
+}
+function stepCoach(msg){
+  const q=stepQ(), box=document.getElementById('vc-coach'); if(!box) return;
+  let h='';
+  if(VSTEP.phase==='cat'){
+    h=`<span class="vc-step">1단계 · 매출일까, 매입일까?</span><p>이 거래에서 회사가 물건을 <b>팔았나요</b>, <b>샀나요</b>?</p>`+(msg||'')+
+      `<div class="vc-opts"><button class="vc-opt" data-v="매출">💰 팔았다 (매출)</button><button class="vc-opt" data-v="매입">🛒 샀다 (매입)</button></div>`;
+  }else if(VSTEP.phase==='evid'){
+    h=`<span class="vc-step">2단계 · 어떤 서류를 주고받았나요?</span><p><b>${q.category}</b> 맞아요!<br>이번엔 실제로 <b>주고받은 서류</b>를 찾아요.</p>`+(msg||'')+
+      `<div class="vc-opts">${VC_EVID_OPTS.map(o=>`<button class="vc-opt" data-v="${o[0]}">${o[1]}</button>`).join('')}</div>`;
+  }else if(VSTEP.phase==='type'){
+    const c=stepCands(q), ev=VC_EVID_OPTS.find(o=>o[0]===VC_EVID[q.type_code]);
+    const key=(q.category==='매출'?'sale_':'buy_')+VC_EVID[q.type_code];
+    h=`<span class="vc-step">3단계 · 유형 버튼 고르기</span><p><b>${q.category}</b> + <b>${ev[1]}</b>!<br>`+
+      (c.length>1 ? `남은 버튼은 ${c.length}개예요.</p><p>${VC_SPLIT[key]||''}</p>` : `아래에서 켜진 버튼을 눌러요.</p>`)+(msg||'');
+  }else if(VSTEP.phase==='done'){
+    h=msg||'';
+  }
+  if(VSTEP.phase!=='done'){
+    h+=`<div class="vc-row">${VSTEP.hint<2?`<button class="vc-hbtn" id="vc-hbtn" type="button">${VSTEP.hint===0?'💡 힌트':'👀 정답 짚어 주기'}</button>`:''}</div>`;
+  }
+  box.innerHTML=h;
+  box.querySelectorAll('.vc-opt').forEach(b=>b.onclick=()=>stepOpt(b.dataset.v, b));
+  const hb=document.getElementById('vc-hbtn'); if(hb) hb.onclick=stepHint;
+  const go=document.getElementById('vc-go'); if(go) go.onclick=stepNext;
+}
+/* 지문에서 단어를 찾아 칠한다(esc 된 HTML 기준) */
+function stepMark(words){
+  const el=document.querySelector('.qstem'); if(!el) return;
+  let html=el.innerHTML.replace(/<\/?mark[^>]*>/g,'');
+  const seen={};
+  words.filter(w=>w&&w.length>=2).forEach(w=>{ const e=esc(w); if(seen[e]||html.indexOf(e)<0) return; seen[e]=1; html=html.split(e).join('<mark class="vc-mark">'+e+'</mark>'); });
+  el.innerHTML=html;
+}
+function stepHint(){
+  const q=stepQ();
+  VSTEP.hint++;
+  VSTEP.S.hint(VSTEP.hint===1?1:3);
+  let msg='';
+  if(VSTEP.hint===1){
+    if(VSTEP.phase==='cat'){
+      const m=q.stem.match(/판매|공급|납품|매각|수출|제공|매입|구입|구매|수입|취득|리스|실시|수리/g)||[];
+      stepMark(m);
+      msg='<p>💡 칠한 말을 보세요. <b>내보냈으면 매출</b>, <b>들여왔으면 매입</b>이에요.</p>';
+    }else if(VSTEP.phase==='evid'){
+      stepMark(hintPieces(q.keyword).concat((q.stem.match(new RegExp(VC_EVID_RX.source,'g'))||[])));
+      msg='<p>💡 칠한 말에 서류 이름이 있어요.<br>\'<b>받았다·발급했다·결제했다</b>\'가 붙은 것이 진짜예요.</p>';
+    }else{
+      msg='<p>💡 '+(TYPE_RULES[q.type_code]||'')+'</p>';
+    }
+  }else{
+    const sel = VSTEP.phase==='cat' ? `.vc-opt[data-v="${q.category}"]` : VSTEP.phase==='evid' ? `.vc-opt[data-v="${VC_EVID[q.type_code]}"]` : `.tbtn[data-code="${q.type_code}"]`;
+    stepCoach(msg); const t=document.querySelector(sel); if(t) t.classList.add('step-glow'); return;
+  }
+  stepCoach(msg);
+}
+function stepOpt(v, btn){
+  const q=stepQ();
+  if(VSTEP.phase==='cat'){
+    if(v!==q.category){ VSTEP.S.wrong(); btn.disabled=true; return stepCoach(`<p class="vc-no">✗ ${iga(v)} 아니에요.</p><p>누가 돈을 받았는지 떠올려 봐요.<br>회사가 받았으면 매출, 냈으면 매입.</p>`); }
+    VSTEP.phase='evid'; VSTEP.hint=0;
+    const badge=document.querySelector('.qcard .cat-badge'); if(badge) badge.classList.remove('vc-hide');
+    return stepCoach();
+  }
+  if(VSTEP.phase==='evid'){
+    const right=VC_EVID[q.type_code];
+    if(v!==right){
+      VSTEP.S.wrong(); btn.disabled=true;
+      const o=VC_EVID_OPTS.find(x=>x[0]===v);
+      return stepCoach(`<p class="vc-no">✗ ${iga(o[1])} 아니에요.</p><p>${esc(o[2]).replace(/\n/g,'<br>')}</p><p>문제를 다시 읽고 서류를 찾아봐요.</p>`);
+    }
+    VSTEP.phase='type'; VSTEP.hint=0;
+    const c=stepCands(q);
+    document.querySelectorAll('.tbtn').forEach(b=>{ const on=c.includes(b.dataset.code); b.disabled=!on; b.classList.toggle('dim',!on); });
+    stepCoach();
+    const first=document.querySelector(`.tbtn[data-code="${c[0]}"]`); if(first) first.scrollIntoView({behavior:'smooth',block:'center'});
+  }
+}
+function stepType(code){
+  if(!VSTEP || VSTEP.phase!=='type') return;
+  const q=stepQ(), btn=document.querySelector(`.tbtn[data-code="${code}"]`);
+  if(code!==q.type_code){
+    VSTEP.S.wrong(); btn.disabled=true; btn.classList.add('wrong');
+    stepMark(hintPieces(q.keyword));
+    return stepCoach(`<p class="vc-no">✗ ${code}번은 아니에요.</p><p>${code}번은 이럴 때예요:<br>${TYPE_RULES[code]||''}</p><p>문제에서 칠한 말을 다시 봐요.</p>`);
+  }
+  document.querySelectorAll('.tbtn').forEach(b=>{ b.disabled=true; b.classList.remove('step-glow'); });
+  btn.classList.add('correct');
+  const clean=VSTEP.S.done(q.id,{ label:q.type_full+' — '+(q.keyword||''), q:q.stem, correct:q.type_full, type:q.category });
+  if(!clean && !VSTEP.again[q.id]){ VSTEP.again[q.id]=1; VSTEP.list.splice(Math.min(VSTEP.list.length, VSTEP.i+4),0,q); }
+  VSTEP.phase='done';
+  const last=VSTEP.i+1>=VSTEP.list.length;
+  stepCoach(`<p class="vc-ok">✓ 맞아요! ${esc(q.type_full)}</p><p>${esc(q.explain||'')}</p>${ruleHtml(q.type_code)}`+
+    (clean?'':'<p style="opacity:.8">조금 뒤에 한 번 더 나와요.</p>')+
+    `<div class="vc-row"><button class="vc-go" id="vc-go" type="button">${last?'결과 보기 🏁':'다음 문제 →'}</button></div>`);
+  document.getElementById('vc-coach').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function stepNext(){
+  VSTEP.i++;
+  if(VSTEP.i>=VSTEP.list.length) return stepEnd();
+  stepShowQ();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function stepEnd(){
+  const S=VSTEP.S; S.finish(true);
+  const L=S.learned(), A=S.again();
+  const list=arr=>arr.slice(0,5).map(x=>'· '+esc(x)).join('<br>');
+  document.getElementById('quiz').style.display='none';
+  const box=document.getElementById('result');
+  box.style.display='block';
+  box.innerHTML=`<div style="font-size:3rem;margin:8px 0">🐢</div>
+    <div class="result-title">차근차근 끝!</div>
+    <div class="res-note" style="text-align:left;line-height:1.8;margin-top:14px">🌱 오늘 익힌 것 <b>${L.length}</b>개${L.length?'<br>'+list(L):''}
+      ${A.length?`<br><br>🔁 다시 볼 것 <b>${A.length}</b>개<br>${list(A)}<br><span style="opacity:.7">내 오답노트에서 다시 볼 수 있어요.</span>`:''}</div>
+    <div class="btn-row">
+      <button class="primary" id="vc-again">한 번 더</button>
+      <a href="stage4_voucher.html">처음 화면으로</a>
+    </div>`;
+  document.getElementById('vc-again').onclick=()=>{ VSTEP=null; startVoucherStep(); };
+  VSTEP=null;
+  document.body.classList.remove('step-mode');
+  showAdPlaceholder();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+async function stepQuit(){
+  if(!await Ask.confirm('차근차근 모드를 그만할까요?\n지금까지 푼 것은 기록에 남아요.')) return;
+  VSTEP.S.finish(false); VSTEP=null;
+  location.href='stage4_voucher.html';
+}
+
 function grade(rate){
   if(rate>=0.9) return '전표 마스터';
   if(rate>=0.75) return '합격 안정권';
@@ -799,8 +1030,8 @@ function showAdPlaceholder(){ if(window.AdBridge && typeof AdBridge.show==='func
 
 load();
 </script>
-<script src="emoji-icons.js?v=41"></script>
+<script src="emoji-icons.js?v=42"></script>
 <!-- 웹 전용 광고(시작·결과 화면만, 앱에선 adsense.js 가 스스로 멈춘다) -->
-<script src="adsense.js?v=41"></script>
+<script src="adsense.js?v=42"></script>
 </body>
 </html>

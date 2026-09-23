@@ -4,8 +4,8 @@
     <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
          **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
          이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-    <script src="safestore.js?v=41"></script>
-<script src="readable.js?v=41"></script>
+    <script src="safestore.js?v=42"></script>
+<script src="readable.js?v=42"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>자본의 제왕 — 전산회계 1급 스테이지 2</title>
@@ -320,6 +320,30 @@
             .acc-card { padding: 11px 6px; font-size: 0.84rem; }
         }
 
+        /* ── 차근차근 모드(2026-09-24, 3차) — 같은 분류·분개 화면에 말풍선만 붙인다 ── */
+        body.step-mode .hud-stat:nth-child(2){ display:none; }
+        body.step-mode #screen-journal .btn-action{ display:none !important; }
+        /* 말풍선이 들어가면 좁은 화면의 왼쪽 칸 높이 제한(45%)에 카드 풀이 잘린다 → 제한을 풀고 화면째 스크롤 */
+        body.step-mode .journal-left{ max-height:none !important; overflow:visible; }
+        body.step-mode #screen-journal{ overflow-y:auto; }
+        body.step-mode .account-pool{ flex:none; overflow:visible; }
+        .cs-coach{ width:100%; max-width:640px; margin:14px auto 0; padding:14px 16px; border-radius:14px;
+            background:rgba(255,209,102,.08); border:1.5px dashed rgba(255,209,102,.5);
+            font-size:.95rem; line-height:1.8; color:#eee; word-break:keep-all; text-align:left; }
+        #screen-journal .cs-coach{ margin:0; max-width:none; }
+        .cs-coach .cs-step{ display:block; font-size:.76rem; font-weight:700; color:#ffd166; letter-spacing:.04em; margin-bottom:4px; }
+        .cs-coach p{ margin:0 0 .5em; }
+        .cs-coach p:last-child{ margin-bottom:0; }
+        .cs-coach b{ color:#ffd166; }
+        .cs-coach .cs-no{ color:#ff8a78; font-weight:700; }
+        .cs-coach .cs-ok{ color:#6be49a; font-weight:800; }
+        .cs-row{ display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+        .cs-hbtn,.cs-go{ min-height:42px; padding:8px 16px; border-radius:12px; font-size:.9rem; font-weight:700; font-family:inherit; cursor:pointer; }
+        .cs-hbtn{ border:1.5px dashed rgba(255,209,102,.7); background:none; color:#ffd166; }
+        .cs-go{ border:none; background:var(--neon-gold); color:#000; flex:1; }
+        .folder.cs-off{ opacity:.35; pointer-events:none; }
+        .folder.cs-glow .folder-body{ box-shadow:0 0 0 3px #ffd166, 0 0 18px #ffd166; animation:tutFolderGlow 1s ease-in-out infinite; }
+        .cs-badge{ font-family:'Black Han Sans','Noto Sans KR',sans-serif; color:#9fe3c0; font-size:.95rem; }
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         @keyframes flash-highlight {
             0%, 100% { transform: scale(1); color: var(--neon-gold); }
@@ -414,6 +438,7 @@
                 <!-- 2급 게임과 같은 버튼 구성·규격(2026-09-15 UI 통일): 세로·꽉 차게·52px·알약 -->
                 <div style="display:flex;flex-direction:column;gap:10px;width:min(360px,88%);margin-top:26px;">
                     <button class="btn-action start-btn" onclick="startGame()">▶ 게임 시작</button>
+                    <div id="step-host" style="margin-top:-10px"></div>
                     <button class="guide-btn" onclick="Tutorial.start()">📖 사용방법</button>
                     <button class="guide-btn" onclick="location.href='index_lv1.html'">🏠 메인으로 나가기</button>
                 </div>
@@ -837,6 +862,11 @@
 
         // --- 나가기(허브로) ---
         async function exitGame(){
+            if (CSTEP) {
+                if (!await Ask.confirm('허브로 나갈까요? 지금까지 푼 것은 차근차근 기록에 남아요.')) return;
+                CSTEP.S.finish(false, true); CSTEP = null;
+                location.href = 'index_lv1.html'; return;
+            }
             if(await Ask.confirm('허브로 나갈까요? 지금까지의 진행 상황은 저장되지 않습니다.')){
                 location.href = 'index_lv1.html';
             }
@@ -844,6 +874,7 @@
 
         // --- 그만(중도 종료 → 지금까지 점수로 바로 결과화면) ---
         async function quitGame(){
+            if (CSTEP) return stepQuit();
             const midGame = !document.getElementById('screen-start').classList.contains('active')
                           && !document.getElementById('screen-ending').classList.contains('active');
             if(!midGame) return;
@@ -893,7 +924,7 @@
 
         function startClassGame() {
             classIdx = 0;
-            currentClassPool = shuffle([...classData]).slice(0, 5);
+            currentClassPool = CSTEP ? CSTEP.S.pick(classData, 5, x => 'cls:' + x.w) : shuffle([...classData]).slice(0, 5);
             showScreen('screen-class');
             loadClassProblem();
         }
@@ -904,9 +935,11 @@
                 return;
             }
             document.getElementById('class-word').innerText = currentClassPool[classIdx].w;
+            if (CSTEP) stepClassShow();
         }
 
         function checkClass(type) {
+            if (CSTEP) return stepClass(type);
             if (currentClassPool[classIdx].t === type) {
                 state.score += 10;
                 state.classCorrect++;
@@ -932,7 +965,8 @@
         let dialogueIdx = 0;
 
         function startMainScenario() {
-            if (state.day >= 5) {
+            if (state.day >= (CSTEP ? state.gameList.length : 5)) {
+                if (CSTEP) return stepEnd();
                 showEnding();
                 return;
             }
@@ -1024,6 +1058,7 @@
 
             journalOpts = shuffle([...scene.options]);
             renderAccountPool();
+            if (CSTEP) stepJournalShow();
         }
 
         function renderAccountPool() {
@@ -1088,16 +1123,19 @@
         }
 
         function addAccount(accName, mode) {
+            if (CSTEP && !stepAccept(accName, mode)) return;
             Sound.playClick();
             const targetList = state.userJournal[mode];
             if (!targetList.includes(accName)) {
                 targetList.push(accName);
                 updateJournalUI();
                 renderAccountPool();
+                if (CSTEP) stepAfterAdd();
             }
         }
 
         function removeAccount(mode, idx) {
+            if (CSTEP) return;   // 차근차근: 놓인 카드는 늘 정답이라 빼지 않는다(빼면 단계가 꼬인다)
             Sound.playClick();
             state.userJournal[mode].splice(idx, 1);
             updateJournalUI();
@@ -1256,6 +1294,206 @@
             Sound.playClick();
             document.getElementById('popup').style.display = 'none';
             startMainScenario();
+        }
+
+        /* =========================================================================
+         *  차근차근 모드(2026-09-24, 3차 — docs/차근차근모드_기획.md)
+         *  대화·분류·분개 **화면은 그대로** 쓰고 말풍선만 붙인다.
+         *  ① 분류: 틀리면 그 폴더가 어떤 곳인지 → 다시. 힌트 ① 계정 설명 ② 폴더 짚기
+         *  ② 분개: 차변부터 한 장씩 — 놓을 때마다 바로 맞는지 알려 준다(결재 상신 없이).
+         *     힌트 ① 이 거래의 요점 ② 다음 카드 짚기. 다 채우면 "왜 그럴까요?" 해설.
+         *  점수·주가·랭킹 없음. 기록은 StepMode.session(전용 테이블 + 이 기기 오답노트)만.
+         * ========================================================================= */
+        /* 계정 한 줄 설명(초안, 성일님 검토 대상) — 폴더 이름은 넣지 않는다(힌트 ①에서 답을 말하지 않게) */
+        const CS_WORD = {
+            '보통주 자본금':'주주가 낸 돈 중 <b>주식 액면 금액</b>만큼이에요.',
+            '자기주식':'우리 회사 주식을 <b>도로 사 온 것</b>. 자본에서 <b>빼는</b> 임시 항목이에요.',
+            '주식발행초과금':'액면보다 <b>비싸게</b> 팔아 더 받은 돈. 주식 거래로 생긴 <b>이익</b>이에요.',
+            '감자차익':'자본금을 줄이면서 <b>남은</b> 돈. 주식 거래로 생긴 <b>이익</b>이에요.',
+            '주식할인발행차금':'액면보다 <b>싸게</b> 팔아 <b>모자란</b> 금액. 자본에서 <b>빼는</b> 항목이에요.',
+            '미처분이익잉여금':'<b>장사로 번</b> 이익 중 아직 쓰임을 안 정한 돈이에요.',
+            '감자차손':'자본금을 줄이면서 생긴 <b>손해</b>. 자본에서 <b>빼는</b> 항목이에요.',
+            '자기주식처분이익':'자기주식을 <b>비싸게</b> 팔아 남긴 돈. 주식 거래로 생긴 <b>이익</b>이에요.',
+            '자기주식처분손실':'자기주식을 <b>싸게</b> 팔아 본 <b>손해</b>. 자본에서 <b>빼는</b> 항목이에요.',
+            '이익준비금':'<b>장사로 번</b> 이익 중 법에 따라 쌓아 두는 돈이에요.',
+            '임의적립금':'<b>장사로 번</b> 이익 중 회사가 스스로 쌓아 두는 돈이에요.'
+        };
+        const CS_FOLDER = {
+            capital:['자본금','주식의 <b>액면 금액</b>만 들어가요.'],
+            surplus:['자본잉여금','<b>주식 거래</b>로 생긴 <b>이익</b>이 모여요.'],
+            adjust:['자본조정','자본에서 <b>빼는</b> 임시 항목(자기주식·할인·손실)이 모여요.'],
+            retained:['이익잉여금','<b>장사로 번</b> 이익을 쌓아 둔 곳이에요.']
+        };
+        let CSTEP = null;
+        function csJosa(w, a, b){ const c = String(w).charCodeAt(String(w).length - 1); return w + ((c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28) ? a : b); }
+        function startCapitalStep() {
+            if (!window.StepMode) return;
+            hideAdPlaceholder();
+            Sound.init();
+            const S = StepMode.session(GAME_ID);
+            CSTEP = { S, hint: 0, again: {}, phase: 'class', done: false };
+            document.body.classList.add('step-mode');
+            state.score = 0; state.classCorrect = 0; state.journalCorrect = 0; state.stockPrice = 10000; state.day = 0;
+            state.gameList = S.pick(scenarioPool, 5, sc => 'sc' + sc.id).map(sc =>
+                window.Readable ? Object.assign({}, sc, { dialogue: Readable.splitBeats(sc.dialogue, 'text', 48) }) : sc);
+            updateDash();
+            startIntro();
+        }
+        function csCoachEl(host) {
+            let box = document.getElementById('cs-coach');
+            if (!box) { box = document.createElement('div'); box.id = 'cs-coach'; box.className = 'cs-coach'; }
+            if (box.parentNode !== host) host.appendChild(box);
+            return box;
+        }
+        /* ── ① 분류 ── */
+        function stepClassShow() {
+            const it = currentClassPool[classIdx];
+            CSTEP.phase = 'class'; CSTEP.hint = 0;
+            CSTEP.S.begin('cls:' + it.w);
+            document.querySelectorAll('#screen-class .folder').forEach(f => f.classList.remove('cs-off', 'cs-glow'));
+            stepClassCoach();
+        }
+        function stepClassCoach(msg) {
+            const box = csCoachEl(document.getElementById('screen-class'));
+            let h = `<span class="cs-step">🐢 차근차근 · 분류 ${classIdx + 1} / ${currentClassPool.length}</span>` +
+                `<p>이 계정은 네 폴더 중 어디에 넣을까요?</p>` + (msg || '');
+            if (CSTEP.hint < 2) h += `<div class="cs-row"><button class="cs-hbtn" id="cs-hbtn" type="button">${CSTEP.hint === 0 ? '💡 힌트' : '👀 폴더 짚어 주기'}</button></div>`;
+            box.innerHTML = h;
+            const hb = document.getElementById('cs-hbtn'); if (hb) hb.onclick = stepClassHint;
+        }
+        function csFolderEl(type) { return document.querySelector(`#screen-class .folder[onclick="checkClass('${type}')"]`); }
+        function stepClassHint() {
+            const it = currentClassPool[classIdx];
+            CSTEP.hint++; CSTEP.S.hint(CSTEP.hint === 1 ? 1 : 3);
+            if (CSTEP.hint === 1) return stepClassCoach(`<p>💡 ${CS_WORD[it.w] || ''}</p><p style="opacity:.85">주식 거래 <b>이익</b> → 자본잉여금<br>빼는 항목·<b>손해</b> → 자본조정<br><b>장사로 번</b> 이익 → 이익잉여금</p>`);
+            stepClassCoach();
+            const f = csFolderEl(it.t); if (f) f.classList.add('cs-glow');
+        }
+        function stepClass(type) {
+            const it = currentClassPool[classIdx];
+            if (it.t !== type) {
+                Sound.playFail();
+                CSTEP.S.wrong();
+                const f = csFolderEl(type); if (f) f.classList.add('cs-off');
+                const F = CS_FOLDER[type];
+                return stepClassCoach(`<p class="cs-no">✗ ${F[0]} 폴더가 아니에요.</p><p>${F[0]}에는 ${F[1]}</p><p>${CS_WORD[it.w] || ''}</p>`);
+            }
+            Sound.playClick();
+            const clean = CSTEP.S.done('cls:' + it.w, { label: it.w + ' → ' + CS_FOLDER[it.t][0], q: it.w + ' 은(는) 어느 분류?', correct: CS_FOLDER[it.t][0], type: '자본 분류' });
+            if (!clean && !CSTEP.again['cls:' + it.w]) { CSTEP.again['cls:' + it.w] = 1; currentClassPool.push(it); }
+            classIdx++;
+            if (classIdx >= currentClassPool.length) {
+                const box = document.getElementById('cs-coach'); if (box) box.remove();
+                return startMainScenario();
+            }
+            loadClassProblem();
+        }
+        /* ── ② 분개 ── */
+        function stepJournalShow() {
+            const scene = state.gameList[state.day];
+            CSTEP.phase = 'dr'; CSTEP.hint = 0; CSTEP.done = false;
+            CSTEP.S.begin('sc' + scene.id);
+            stepJournalCoach();
+        }
+        function csNeed(side) {
+            const scene = state.gameList[state.day];
+            return scene.answer[side].filter(x => !state.userJournal[side].includes(x));
+        }
+        function stepJournalCoach(msg) {
+            const scene = state.gameList[state.day];
+            const box = csCoachEl(document.querySelector('#screen-journal .journal-left'));
+            const left = document.querySelector('#screen-journal .journal-left');
+            left.insertBefore(box, document.getElementById('account-pool'));
+            let h = `<span class="cs-step">🐢 차근차근 · 분개 ${state.day + 1} / ${state.gameList.length}</span>`;
+            if (CSTEP.phase === 'dr') h += `<p><b>① 차변</b>부터 채워요.<br>차변에 들어갈 카드가 <b>${scene.answer.dr.length}장</b>이에요.<br>카드를 <b>왼쪽 차변 칸</b>으로 끌어요.</p>`;
+            else if (CSTEP.phase === 'cr') h += `<p class="cs-ok">✓ 차변 완성!</p><p><b>② 대변</b>을 채워요.<br>대변에 들어갈 카드가 <b>${scene.answer.cr.length}장</b>이에요.</p>`;
+            h += (msg || '');
+            if (CSTEP.phase !== 'done' && CSTEP.hint < 2) h += `<div class="cs-row"><button class="cs-hbtn" id="cs-hbtn" type="button">${CSTEP.hint === 0 ? '💡 힌트' : '👀 다음 카드 짚어 주기'}</button></div>`;
+            box.innerHTML = h;
+            const hb = document.getElementById('cs-hbtn'); if (hb) hb.onclick = stepJournalHint;
+            const go = document.getElementById('cs-go'); if (go) go.onclick = stepJournalNext;
+        }
+        function stepJournalHint() {
+            const scene = state.gameList[state.day];
+            CSTEP.hint++; CSTEP.S.hint(CSTEP.hint === 1 ? 1 : 3);
+            if (CSTEP.hint === 1) return stepJournalCoach(`<p>💡 ${scene.whyKey || ''}</p>`);
+            stepJournalCoach();
+            const need = csNeed(CSTEP.phase)[0];
+            document.querySelectorAll('#account-pool .acc-card').forEach(c => c.classList.toggle('tut-target', c.textContent === need));
+        }
+        /* 카드를 놓을 때마다 바로 확인 — 맞으면 놓이고, 틀리면 안 놓인다 */
+        function stepAccept(acc, side) {
+            if (CSTEP.phase === 'done') return false;
+            const scene = state.gameList[state.day], a = scene.answer;
+            const where = a.dr.includes(acc) ? 'dr' : a.cr.includes(acc) ? 'cr' : null;
+            const K = s => s === 'dr' ? '차변' : '대변';
+            if (!where) {
+                Sound.playFail(); CSTEP.S.wrong();
+                stepJournalCoach(`<p class="cs-no">✗ ${csJosa(acc, '은', '는')} 이 거래에 안 써요.</p><p>문제를 다시 읽어 봐요.</p>`);
+                return false;
+            }
+            if (side !== CSTEP.phase) {
+                if (where === side) { stepJournalCoach(`<p>좋아요! 그런데 지금은 <b>${K(CSTEP.phase)}</b>부터 채워요.</p>`); return false; }
+                Sound.playFail(); CSTEP.S.wrong();
+                stepJournalCoach(`<p class="cs-no">✗ ${csJosa(acc, '은', '는')} ${K(side)}가 아니에요.</p><p>${K(where)}에 들어가요. 지금은 <b>${K(CSTEP.phase)}</b> 차례예요.</p>`);
+                return false;
+            }
+            if (where !== side) {
+                Sound.playFail(); CSTEP.S.wrong();
+                stepJournalCoach(`<p class="cs-no">✗ ${csJosa(acc, '은', '는')} ${K(side)}에 안 들어가요.</p><p>${K(where)} 쪽 카드예요. 나중에 채워요.</p>`);
+                return false;
+            }
+            return true;
+        }
+        function stepAfterAdd() {
+            document.querySelectorAll('#account-pool .acc-card.tut-target').forEach(c => c.classList.remove('tut-target'));
+            if (CSTEP.phase === 'dr' && !csNeed('dr').length) { CSTEP.phase = 'cr'; CSTEP.hint = 0; return stepJournalCoach(); }
+            if (CSTEP.phase === 'cr' && !csNeed('cr').length) return stepJournalDone();
+            stepJournalCoach(`<p class="cs-ok">✓ 맞아요! 남은 카드 ${csNeed(CSTEP.phase).length}장</p>`);
+        }
+        function stepJournalDone() {
+            const scene = state.gameList[state.day];
+            CSTEP.phase = 'done';
+            Sound.playSuccess();
+            const clean = CSTEP.S.done('sc' + scene.id, { label: scene.title, q: scene.desc, correct: '차변 ' + scene.answer.dr.join(', ') + ' / 대변 ' + scene.answer.cr.join(', '), type: '자본 분개' });
+            if (!clean && !CSTEP.again['sc' + scene.id]) { CSTEP.again['sc' + scene.id] = 1; state.gameList.push(scene); }
+            document.querySelectorAll('#account-pool .acc-card').forEach(c => { c.style.pointerEvents = 'none'; c.style.opacity = '.35'; });
+            const last = state.day + 1 >= state.gameList.length;
+            stepJournalCoach(`<p class="cs-ok">✓ 분개 완성!</p>${whyBox(scene)}` + (clean ? '' : '<p style="opacity:.8">이 거래는 조금 뒤에 한 번 더 나와요.</p>') +
+                `<div class="cs-row"><button class="cs-go" id="cs-go" type="button">${last ? '결과 보기 🏁' : '다음 일정 →'}</button></div>`);
+            document.getElementById('cs-coach').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        function stepJournalNext() {
+            const box = document.getElementById('cs-coach'); if (box) box.remove();
+            state.day++;
+            updateDash();
+            startMainScenario();
+        }
+        function stepEnd() {
+            const S = CSTEP.S; S.finish(true);
+            const L = S.learned(), A = S.again();
+            const list = arr => arr.slice(0, 5).map(x => '· ' + escHtml(x)).join('<br>');
+            showScreen('screen-ending');
+            document.querySelector('#screen-ending .ending-inner').innerHTML = `
+                <div style="font-size:3rem">🐢</div>
+                <h1 style="color:var(--neon-gold); font-size:2rem; margin:0;">차근차근 끝!</h1>
+                <div style="background:#2a2a35; padding:20px; border-radius:16px; width:100%; text-align:left; line-height:1.8; font-size:.95rem; color:#ddd;">
+                  🌱 오늘 익힌 것 <b>${L.length}</b>개${L.length ? '<br>' + list(L) : ''}
+                  ${A.length ? `<br><br>🔁 다시 볼 것 <b>${A.length}</b>개<br>${list(A)}<br><span style="opacity:.7">내 오답노트에서 다시 볼 수 있어요.</span>` : ''}
+                </div>
+                <div style="display:flex; flex-direction:column; gap:10px; width:100%;">
+                  <button class="btn-action" id="cs-again" style="background:var(--neon-gold); color:#000; height:52px; border-radius:50px;">한 번 더</button>
+                  <button class="btn-action" style="background:#555; height:52px; border-radius:50px;" onclick="location.href='stage3_capital.html'">처음 화면으로</button>
+                </div>`;
+            document.getElementById('cs-again').onclick = () => startCapitalStep();
+            CSTEP = null;
+            document.body.classList.remove('step-mode');
+            showAdPlaceholder();
+        }
+        async function stepQuit() {
+            if (!await Ask.confirm('차근차근 모드를 그만할까요?\n지금까지 푼 것은 기록에 남아요.')) return;
+            CSTEP.S.finish(false); CSTEP = null;
+            location.href = 'stage3_capital.html';
         }
 
         // --- 엔딩 --- (등급은 gradeForCapitalScore()로 통일 — 아래 저장에 쓰는 등급과 화면에 보이는
@@ -1590,11 +1828,17 @@
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="emoji-icons.js?v=41"></script>
-    <script src="ask.js?v=41"></script>
-    <script src="growth.js?v=41"></script>
-<script src="streak.js?v=41"></script>
+    <script src="emoji-icons.js?v=42"></script>
+    <script src="ask.js?v=42"></script>
+    <script src="growth.js?v=42"></script>
+<script src="streak.js?v=42"></script>
+    <script src="wrongnote.js?v=42"></script>
+    <script src="stepmode.js?v=42"></script>
+    <script>
+        // 차근차근 모드 버튼(시작 화면에 항상)
+        if (window.StepMode) StepMode.mount({ game: GAME_ID, host: document.getElementById('step-host'), sub: '힌트 보며 천천히', onStart: startCapitalStep });
+    </script>
 <!-- 웹 전용 광고(시작·결과 화면만, 앱에선 adsense.js 가 스스로 멈춘다) -->
-<script src="adsense.js?v=41"></script>
+<script src="adsense.js?v=42"></script>
 </body>
 </html>
