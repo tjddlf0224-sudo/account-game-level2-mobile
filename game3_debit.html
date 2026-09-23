@@ -5,7 +5,7 @@
 <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
      **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
      이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-<script src="safestore.js?v=39"></script>
+<script src="safestore.js?v=40"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
@@ -532,6 +532,28 @@
         .diff-btn.locked { opacity: 0.45; }
         .diff-hint { font-size: 0.72rem; color: rgba(255,255,255,0.35); text-align: center; }
 
+        /* ── 차근차근 모드(같은 화면 + 튜토리얼 말풍선) ── */
+        .step-hud { display: none; flex: 1; text-align: center; color: #9fe3c0; font-family: 'Black Han Sans', sans-serif; font-size: .95rem; align-self: center; white-space: nowrap; }
+        body.step-mode .stat, body.step-mode .timer-bar-wrap, body.step-mode #freeze-btn, body.step-mode #rewarded-btn, body.step-mode .hint-toggle-btn, body.step-mode .key-hint, body.step-mode .hint-panel { display: none !important; }
+        body.step-mode .step-hud { display: block; }
+        body.step-mode .game-area { padding-bottom: 250px; }
+        body.step-mode .answer-buttons-area.step-wait .ans-btn { opacity: .3; pointer-events: none; }
+        #step-coach { display: none; position: fixed; left: 0; right: 0; bottom: 0; z-index: 80; background: linear-gradient(180deg, #16213e, #0a0a14); max-height: 58vh; overflow-y: auto; }
+        #step-coach.show { display: block; }
+        #step-coach .tut-bubble-text { min-height: 0; }
+        #step-coach .tut-bubble-text b { color: var(--blue); }
+        #step-coach .sc-dim { opacity: .72; font-size: .9rem; }
+        #step-coach .sc-key { color: var(--gold); font-weight: 800; }
+        #step-coach .sc-hint { margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: rgba(255,209,102,.1); border: 1px dashed rgba(255,209,102,.45); color: #ffe6a6; font-size: .92rem; line-height: 1.75; text-align: center; }
+        #step-coach .rd p { margin: 0 0 .35em; }
+        #step-coach .sc-btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+        #step-coach .sc-btns button { flex: 1 1 28%; min-height: 48px; border-radius: 14px; font-family: 'Black Han Sans', sans-serif; font-size: 1rem; cursor: pointer; }
+        #step-coach .sc-btn { background: rgba(255,255,255,.08); border: 1.5px solid rgba(255,255,255,.25); color: #fff; }
+        #step-coach .sc-btn.off { opacity: .3; pointer-events: none; text-decoration: line-through; }
+        #step-coach .sc-hintbtn { flex-basis: 100%; border-style: dashed; border-color: rgba(255,209,102,.6); color: #ffd166; }
+        #step-coach .sc-go { flex-basis: 100%; border: 2px solid var(--blue); color: #021018; background: var(--blue); }
+        .step-glow { animation: stepGlow 1s ease-in-out infinite; }
+        @keyframes stepGlow { 0%,100% { box-shadow: 0 0 0 2px var(--gold), 0 0 10px var(--gold); } 50% { box-shadow: 0 0 0 4px var(--gold), 0 0 28px var(--gold); } }
         .answer-buttons-area { display: none; flex-direction: column; align-items: center; gap: clamp(10px, 2.5vh, 24px); width: 100%; }
         .answer-buttons-area.show { display: flex; }
 
@@ -832,18 +854,20 @@
 
 <button id="rewarded-btn" onclick="requestRewarded()">⏱ +30초 광고 보기</button>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="pausewatch.js?v=39"></script>
-    <script src="ask.js?v=39"></script>
-    <script src="wrongnote.js?v=39"></script>
-    <script src="growth.js?v=39"></script>
-<script src="streak.js?v=39"></script>
-    <script src="difficulty.js?v=39"></script>
-    <script src="review-prompt.js?v=39"></script>
+    <script src="pausewatch.js?v=40"></script>
+    <script src="ask.js?v=40"></script>
+    <script src="wrongnote.js?v=40"></script>
+    <script src="growth.js?v=40"></script>
+<script src="streak.js?v=40"></script>
+    <script src="difficulty.js?v=40"></script>
+    <script src="readable.js?v=40"></script>
+    <script src="stepmode.js?v=40"></script>
+    <script src="review-prompt.js?v=40"></script>
 </head>
 <body>
 
 <!-- 🎵 BGM 오디오 엘리먼트 -->
-<script src="bgm.js?v=39"></script>
+<script src="bgm.js?v=40"></script>
 
 
 
@@ -891,6 +915,7 @@
             <button class="diff-btn locked" id="diff-btn-2" onclick="selectDifficulty(2)">난이도 2 🔒<br><span style="font-size:.72rem;opacity:.7">전표를 통째로 완성</span></button>
         </div>
         <div class="diff-hint" id="diff-hint"></div>
+<div id="step-host" style="width:100%;max-width:420px;margin:0 auto"></div>
         <div class="action-btns" style="align-items:stretch; margin-top:20px; gap:10px;">
             <button class="pill-btn pill-btn-gold" onclick="startGame()">▶ 게임 시작</button>
             <button class="btn-hub" onclick="openGuide()">📖 사용방법</button>
@@ -993,6 +1018,7 @@
             <div class="stat-label">COMBO</div>
             <div class="stat-value" id="combo-val">0x</div>
         </div>
+        <div class="step-hud" id="step-hud">🐢 차근차근</div>
     </div>
     <div class="header-btns">
         <!-- 🎵 음소거 버튼 -->
@@ -1054,6 +1080,8 @@
 </div>
 
 <!-- 팝업 -->
+<!-- 차근차근 모드 말풍선 — 튜토리얼과 같은 모양 -->
+<div id="step-coach" class="tut-bubble"><div class="tut-bubble-text"></div><div class="sc-btns"></div></div>
 <div id="combo-popup"    class="combo-popup"></div>
 <div id="feedback-popup" class="feedback-popup"></div>
 
@@ -1074,7 +1102,7 @@ const GAME_ID   = "debit";
 // ══════════════════════════════════════
 // 🎵 BGM 관리
 // ══════════════════════════════════════
-const bgm = BGMAudio.create('bgm3_debit.mp3?v=39');
+const bgm = BGMAudio.create('bgm3_debit.mp3?v=40');
 bgm.volume = 0.5;
 
 // 음소거 상태: localStorage에 저장해서 다음 게임에도 유지
@@ -1505,6 +1533,7 @@ document.addEventListener('touchend', e => {
 }, { passive: true });
 
 function handleAnswer(side) {
+    if (STEP) return stepAnswer(side);   // 차근차근 모드는 ③ 단계에서만 버튼을 받는다
     const now = Date.now();
     if (now - lastInput < 120) return;
     lastInput = now;
@@ -1829,7 +1858,7 @@ function renderRankList(list) {
     }).join('');
 }
 
-function quitGame() { if (isPlaying) endGame(); }
+function quitGame() { if (STEP) return stepExit(); if (isPlaying) endGame(); }
 
 function toggleHint() {
     const panel = document.getElementById('hint-panel');
@@ -1883,6 +1912,156 @@ function initDiffUI() {
 initDiffUI();
 // 서버 기록으로 해금이 복원되면(다른 기기에서 해금한 학생) 잠금 표시를 다시 그린다
 window.addEventListener('difficulty-synced', function () { try { initDiffUI(); } catch (e) {} });
+
+/* ── 차근차근 모드(2026-09-24, docs/차근차근모드_기획.md) ──
+   같은 문제 카드·차변/대변 버튼을 그대로 쓰고, 아래 말풍선이 한 단계씩 짚어 준다.
+   ① 보라색 계정은 무슨 분류?  ② 늘었나, 줄었나?  ③ 그럼 차변? 대변?(원래 버튼)
+   시간 제한·점수·랭킹 없음. 기록은 StepMode.session(전용 테이블·이 기기 오답노트)만. */
+let STEP = null;
+const STEP_N = 10;
+const STEP_CATS = ['자산', '부채', '자본', '수익', '비용'];
+const STEP_RULE = '<b>차변</b> ← 자산↑ · 부채↓ · 자본↓ · 비용 발생<br><b>대변</b> ← 부채↑ · 자본↑ · 자산↓ · 수익 발생';
+function stepItems() {
+    return questions.map(q => {
+        const m = /^(.+?)\((자산차감|자산|부채|자본|수익|비용)\)\s*(증가|감소|발생)\s*→\s*(차변|대변)/.exec(q.hint || '');
+        if (!m) return null;
+        return { key: q.target + '｜' + q.sentence, q, contra: m[2] === '자산차감', cat: m[2] === '자산차감' ? '자산' : m[2], up: m[3] !== '감소', verb: m[3], side: m[4] };
+    }).filter(Boolean);
+}
+function startDebitStep() {
+    if (!window.StepMode) return;
+    hideAdPlaceholder(); getAudio(); bgmPlay();
+    LV = 1;
+    document.getElementById('answer-buttons-area').classList.add('show');
+    document.getElementById('lv2-area').classList.remove('show');
+    document.getElementById('start-screen').style.display = 'none';
+    document.getElementById('result-screen').style.display = 'none';
+    if (timerInterval) clearInterval(timerInterval);
+    if (nextQTimer) { clearTimeout(nextQTimer); nextQTimer = null; }
+    isPlaying = true; isLocked = false;
+    document.body.classList.add('step-mode');
+    const S = StepMode.session('debit');
+    STEP = { S, list: S.pick(stepItems(), STEP_N, x => x.key).map(x => ({ x, again: false })), i: 0, phase: '', hint: 0 };
+    stepNextQ();
+}
+function stepCoach(html, btns) {
+    const c = document.getElementById('step-coach');
+    c.querySelector('.tut-bubble-text').innerHTML = html;
+    const row = c.querySelector('.sc-btns'); row.innerHTML = '';
+    (btns || []).forEach(b => { const e = document.createElement('button'); e.type = 'button'; e.className = b.cls || 'sc-btn'; e.innerHTML = b.label; e.onclick = b.on; row.appendChild(e); });
+    c.classList.add('show');
+}
+function stepCur() { return STEP.list[STEP.i].x; }
+function stepWait(on) { document.getElementById('answer-buttons-area').classList.toggle('step-wait', on); }
+function stepNextQ() {
+    if (!STEP) return;
+    if (STEP.i >= STEP.list.length) return stepSummary();
+    const x = stepCur();
+    currentQ = x.q;
+    STEP.S.begin(x.key);
+    document.getElementById('step-hud').textContent = '🐢 차근차근 ' + (STEP.i + 1) + ' / ' + STEP.list.length;
+    document.getElementById('q-sentence').innerHTML = x.q.sentence;
+    document.getElementById('q-ask').innerHTML = `<b>${x.q.target}</b> 은(는) 차변? 대변?`;
+    document.getElementById('q-hint').textContent = '';
+    document.getElementById('question-card').className = 'question-card';
+    document.querySelectorAll('.ans-btn').forEach(b => b.classList.remove('step-glow'));
+    x.off = {};
+    stepWait(true);
+    stepPhase('cat');
+}
+function stepPhase(ph) { STEP.phase = ph; STEP.hint = 0; stepRender(); }
+function stepHints() {
+    const x = stepCur();
+    if (STEP.phase === 'cat') return ['가진 것 → 자산 · 갚을 것 → 부채<br>사장 몫 → 자본 · 번 것 → 수익 · 쓴 것 → 비용', `<b>${x.q.target}</b>은(는) 이런 계정이에요 →<br>` + (x.contra ? '자산을 깎아 주는 계정(자산의 차감)' : x.cat === '자산' ? '가진 것·받을 권리' : x.cat === '부채' ? '갚아야 할 것' : x.cat === '자본' ? '사장·주주의 몫' : x.cat === '수익' ? '벌어들인 것' : '쓴 것(나간 비용)'), `정답은 <b>${x.cat}</b>!`];
+    if (STEP.phase === 'dir') return ['거래 문장을 다시 읽어 봐요.<br>그 계정이 <b>생기거나 늘었나요</b>, <b>없어지거나 줄었나요</b>?', `${x.cat === '수익' || x.cat === '비용' ? '돈을 벌거나 쓴 일이 <b>생겼나요</b>?' : '받거나 사서 <b>생겼으면 늘어난 것</b>,<br>갚거나 내보냈으면 <b>줄어든 것</b>이에요.'}`, `정답은 <b>${x.up ? '늘었다(생겼다)' : '줄었다'}</b>!`];
+    return [STEP_RULE, `<b>${x.cat}</b>이(가) <b>${x.up ? (x.cat === '수익' || x.cat === '비용' ? '발생' : '증가') : '감소'}</b>하면 → ?` + (x.contra ? '<br><span class="sc-dim">단, 자산의 차감 계정은 자산과 반대쪽!</span>' : ''), `정답은 <b>${x.side}</b>!`];
+}
+function stepHintBtn() {
+    return STEP.hint < 3 ? [{ label: STEP.hint < 2 ? `💡 힌트 ${STEP.hint + 1}` : '👀 정답 짚어 주기', cls: 'sc-btn sc-hintbtn', on: () => {
+        STEP.hint++; STEP.S.hint(STEP.hint);
+        if (STEP.hint === 3 && STEP.phase === 'side') document.querySelector(stepCur().side === '차변' ? '#answer-buttons-area .ans-btn-left' : '#answer-buttons-area .ans-btn-right').classList.add('step-glow');
+        stepRender();
+    } }] : [];
+}
+function stepRender(extra) {
+    const x = stepCur(), ph = STEP.phase;
+    const hint = STEP.hint ? `<div class="sc-hint">💡 ${stepHints()[STEP.hint - 1]}</div>` : '';
+    const glow = v => STEP.hint >= 3 ? v : false;
+    if (ph === 'cat') {
+        return stepCoach((extra || `① 보라색 <b>${x.q.target}</b>은(는)<br>어떤 계정일까요?`) + hint,
+            STEP_CATS.map(c => ({ label: c, cls: 'sc-btn' + (x.off[c] ? ' off' : '') + (glow(c === x.cat) ? ' step-glow' : ''), on: () => stepPick('cat', c) })).concat(stepHintBtn()));
+    }
+    if (ph === 'dir') {
+        const opts = [['up', x.cat === '수익' || x.cat === '비용' ? '생겼다 (발생)' : '늘었다 ↑'], ['down', '줄었다 ↓']];
+        return stepCoach((extra || `② 이 거래에서 <b>${x.q.target}</b>은(는)<br>늘었나요, 줄었나요?`) + hint,
+            opts.map(([v, l]) => ({ label: l, cls: 'sc-btn' + (x.off[v] ? ' off' : '') + (glow((v === 'up') === x.up) ? ' step-glow' : ''), on: () => stepPick('dir', v) })).concat(stepHintBtn()));
+    }
+    stepCoach((extra || `③ 그럼 <b>${x.q.target}</b>은(는)<br>위 <b>차변·대변</b> 버튼 중 어디?`) + hint, stepHintBtn());
+}
+function stepPick(ph, v) {
+    const x = stepCur();
+    if (x.off[v]) return;
+    const ok = ph === 'cat' ? v === x.cat : (v === 'up') === x.up;
+    if (!ok) {
+        playSound('wrong'); hapticWrong();
+        STEP.S.wrong(); x.off[v] = true;
+        return stepRender(ph === 'cat' ? `<b>${v}</b>은(는) 아니에요.<br>힌트를 보고 다시 골라 봐요.` : '다시 읽어 봐요.<br>거래에서 그 계정이 어떻게 됐나요?');
+    }
+    playSound('correct');
+    x.off = {};
+    if (ph === 'cat') {
+        document.getElementById('q-hint').textContent = `✓ ${x.q.target} = ${x.cat}` + (x.contra ? '(차감)' : '');
+        return stepPhase('dir');
+    }
+    document.getElementById('q-hint').textContent = `✓ ${x.q.target} = ${x.cat}${x.contra ? '(차감)' : ''} · ${x.up ? (x.cat === '수익' || x.cat === '비용' ? '발생' : '증가') : '감소'}`;
+    stepWait(false);
+    stepPhase('side');
+}
+function stepAnswer(side) {
+    if (!STEP || STEP.phase !== 'side') return;
+    const x = stepCur(), want = x.side === '차변' ? 'left' : 'right';
+    const card = document.getElementById('question-card');
+    if (side !== want) {
+        playSound('wrong'); hapticWrong();
+        STEP.S.wrong();
+        card.classList.add('wrong'); setTimeout(() => card.classList.remove('wrong'), 500);
+        return stepRender(`<b>${side === 'left' ? '차변' : '대변'}</b>이 아니에요.<br>${STEP_RULE}`);
+    }
+    playSound('correct'); hapticCorrect();
+    card.classList.add('correct');
+    document.querySelectorAll('.ans-btn').forEach(b => b.classList.remove('step-glow'));
+    stepWait(true);
+    STEP.phase = 'done';
+    const cur = STEP.list[STEP.i];
+    const clean = STEP.S.done(x.key, { label: x.q.hint, q: x.q.sentence, correct: x.q.target + ' → ' + x.side, type: '차변/대변 판단' });
+    if (!clean && !cur.again) STEP.list.splice(Math.min(STEP.list.length, STEP.i + 4), 0, { x: Object.assign({}, x), again: true });
+    const last = STEP.i + 1 >= STEP.list.length;
+    stepCoach(StepMode.lines([`맞아요! <span class="sc-key">${StepMode.esc(x.q.hint)}</span>`]),
+        [{ label: last ? '결과 보기 ▶' : '다음 문제 ▶', cls: 'sc-go', on: () => { card.classList.remove('correct'); STEP.i++; stepNextQ(); } }]);
+}
+function stepSummary() {
+    STEP.phase = 'summary';
+    const S = STEP.S;
+    S.finish(true);
+    const L = S.learned(), A = S.again();
+    const list = arr => arr.slice(0, 3).map(v => '· ' + StepMode.esc(v)).join('<br>');
+    document.getElementById('step-hud').textContent = '🐢 차근차근 끝!';
+    stepCoach(`🌱 오늘 익힌 것 <b>${L.length}</b>개` + (L.length ? `<br><span class="sc-dim">${list(L)}</span>` : '') +
+        (A.length ? `<br>🔁 다시 볼 것 <b>${A.length}</b>개<br><span class="sc-dim">${list(A)}</span>` : ''),
+        [{ label: '한 번 더', on: () => { stepExit(true); startDebitStep(); } }, { label: '끝내기', cls: 'sc-go', on: () => stepExit() }]);
+}
+function stepExit(again) {
+    if (!STEP) return;
+    if (!STEP.S.sent) STEP.S.finish(false);
+    STEP = null;
+    isPlaying = false;
+    stepWait(false);
+    document.getElementById('step-coach').classList.remove('show');
+    document.body.classList.remove('step-mode');
+    if (!again) { document.getElementById('start-screen').style.display = ''; initDiffUI(); showAdPlaceholder(); }
+}
+if (window.StepMode) StepMode.mount({ game: 'debit', host: document.getElementById('step-host'), onStart: startDebitStep });
+
 
 
     // ══════════════════════════════════════
@@ -2296,8 +2475,8 @@ const Tutorial = (function () {
 function openGuide() { Tutorial.start(); }
 </script>
 
-<script src="emoji-icons.js?v=39"></script>
+<script src="emoji-icons.js?v=40"></script>
 <!-- 웹 전용 광고(시작·결과 화면만, 앱에선 adsense.js 가 스스로 멈춘다) -->
-<script src="adsense.js?v=39"></script>
+<script src="adsense.js?v=40"></script>
 </body>
 </html>

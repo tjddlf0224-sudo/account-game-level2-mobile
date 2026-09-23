@@ -5,7 +5,7 @@
 <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
      **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
      이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-<script src="safestore.js?v=39"></script>
+<script src="safestore.js?v=40"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
@@ -73,6 +73,26 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 .mute-btn{height:36px;padding:0 10px;border-radius:8px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2)!important;transition:opacity .2s,border-color .2s}
 .mute-btn.muted{opacity:.4;border-color:rgba(255,255,255,.1)!important}
 
+/* ── 차근차근 모드(같은 비행 화면 + 튜토리얼 말풍선) ── */
+#step-hud{display:none;position:absolute;top:max(14px,env(safe-area-inset-top));left:16px;z-index:21;color:#9fe3c0;font-family:'Black Han Sans',sans-serif;font-size:1rem;background:rgba(0,0,0,.45);border:1px solid rgba(80,200,140,.45);border-radius:999px;padding:6px 14px}
+body.step-mode #step-hud{display:block}
+body.step-mode .hud-left{visibility:hidden}
+body.step-mode .gchoice{pointer-events:auto;cursor:pointer}
+#step-coach{display:none;position:absolute;left:0;right:0;bottom:0;z-index:30;background:linear-gradient(180deg,#0d1830,#0a1120);max-height:34vh;overflow-y:auto}
+#step-coach.show{display:block}
+#step-coach .tut-bubble-text{min-height:0}
+#step-coach .sc-dim{opacity:.72;font-size:.9rem}
+#step-coach .sc-key{color:var(--gd);font-weight:800}
+#step-coach .sc-hint{margin-top:10px;padding:10px 12px;border-radius:12px;background:rgba(255,209,102,.1);border:1px dashed rgba(255,209,102,.45);color:#ffe6a6;font-size:.92rem;line-height:1.75;text-align:center}
+#step-coach .rd p{margin:0 0 .35em}
+#step-coach .sc-btns{display:flex;gap:10px;margin-top:14px}
+#step-coach .sc-btns:empty{display:none}
+#step-coach .sc-btns button{flex:1;min-height:48px;border-radius:14px;font-family:'Black Han Sans',sans-serif;font-size:1rem;cursor:pointer}
+#step-coach .sc-btn{background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.25);color:#fff}
+#step-coach .sc-hintbtn{border-style:dashed;border-color:rgba(255,209,102,.6);color:#ffd166}
+#step-coach .sc-go{border:2px solid var(--cy);color:#021018;background:var(--cy)}
+.gchoice.step-glow{animation:stepGlow 1s ease-in-out infinite}
+@keyframes stepGlow{0%,100%{box-shadow:0 0 0 2px var(--gd),0 0 10px var(--gd)}50%{box-shadow:0 0 0 5px var(--gd),0 0 28px var(--gd)}}
 #glayer{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:12;overflow:hidden}
 .gatel{position:absolute;left:0;width:100%;display:flex;flex-direction:column;align-items:center}
 .gbar{width:100%;height:clamp(14px,2.5vw,20px);background:linear-gradient(90deg,transparent 0%,rgba(15,25,100,.9) 18%,rgba(20,35,130,.95) 50%,rgba(15,25,100,.9) 82%,transparent 100%);border-top:1.5px solid rgba(0,242,255,.22);border-bottom:1.5px solid rgba(0,242,255,.22);box-shadow:0 0 20px rgba(0,242,255,.12)}
@@ -498,16 +518,18 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
 .gtitle, .logo, .ov-title, .overlay-title, h1, h2 { font-family: 'Black Han Sans', 'Noto Sans KR', sans-serif !important; }
 </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="ask.js?v=39"></script>
-    <script src="wrongnote.js?v=39"></script>
-    <script src="growth.js?v=39"></script>
-<script src="streak.js?v=39"></script>
-    <script src="difficulty.js?v=39"></script>
-    <script src="review-prompt.js?v=39"></script>
+    <script src="ask.js?v=40"></script>
+    <script src="wrongnote.js?v=40"></script>
+    <script src="growth.js?v=40"></script>
+<script src="streak.js?v=40"></script>
+    <script src="difficulty.js?v=40"></script>
+    <script src="readable.js?v=40"></script>
+    <script src="stepmode.js?v=40"></script>
+    <script src="review-prompt.js?v=40"></script>
 </head>
 <body>
 
-<script src="bgm.js?v=39"></script>
+<script src="bgm.js?v=40"></script>
 
 
 <div style="position:fixed;inset:0;background:var(--bg);z-index:-1;"></div>
@@ -530,6 +552,7 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
       </div>
       <!-- 난이도 2 보류(2026-09-14) — 해금 안내도 같이 끈다. 위 LV 고정 주석 참고 -->
       <div class="diff-hint" id="diff-hint" style="display:none"></div>
+<div id="step-host" style="width:100%;max-width:420px;margin:0 auto"></div>
       <div class="brow">
         <button class="sbtn" onclick="Game.start()">▶ 비행 시작</button>
         <button class="btn-hub" onclick="openGuide()">📖 사용방법</button>
@@ -578,12 +601,15 @@ canvas{display:block;position:absolute;top:0;left:0;z-index:1}
     </div>
     <div class="hud-btns">
       <button class="mute-btn" id="mute-btn" onclick="BGM.toggleMute()" title="BGM 음소거">🎵</button>
-      <button class="hdb hdb-quit" onclick="if(Game.state==='playing'||Game.state==='reading') Game.gameOver()">그만</button>
-      <button class="hdb hdb-home" onclick="(async()=>{if(Game.state==='playing'||Game.state==='reading'){if(!await Ask.confirm('게임을 종료하고 메인으로 나가시겠어요?'))return;}location.href='index.html'})()">홈</button>
+      <button class="hdb hdb-quit" onclick="if(Game.state==='step') Game.stepExit(); else if(Game.state==='playing'||Game.state==='reading') Game.gameOver()">그만</button>
+      <button class="hdb hdb-home" onclick="(async()=>{if(Game.state==='playing'||Game.state==='reading'||Game.state==='step'){if(!await Ask.confirm('게임을 종료하고 메인으로 나가시겠어요?'))return;}location.href='index.html'})()">홈</button>
     </div>
   </div>
 
   <div id="glayer"></div>
+  <!-- 차근차근 모드 말풍선 — 튜토리얼과 같은 모양 -->
+  <div id="step-coach" class="tut-bubble"><div class="tut-bubble-text"></div><div class="sc-btns"></div></div>
+  <div id="step-hud">🐢 차근차근</div>
   <div id="judge-pop"></div>
   <div id="flash"></div>
   <div id="cpop"></div>
@@ -649,7 +675,7 @@ const GAME_ID="flight";
 function escapeHTML(str) { if (!str) return ''; return str.replace(/[&<>'"]/g, function(tag) { const chars = { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }; return chars[tag] || tag; }); }
 
 const BGM={
-  el:BGMAudio.create('bgm5_flight.mp3?v=39'),
+  el:BGMAudio.create('bgm5_flight.mp3?v=40'),
   // 게임별 키(flight_muted)가 있으면 우선, 없으면 허브 전역 토글(hub_muted) 참조
   _muted:localStorage.getItem('flight_muted')!==null?localStorage.getItem('flight_muted')==='true':localStorage.getItem('hub_muted')==='true',
   _fadeTimer:null,
@@ -807,7 +833,7 @@ const Game={
     });
 
     window.addEventListener('touchstart',e=>{
-      if(this.state==='playing'){
+      if(this.state==='playing'||this.state==='step'){
         this.touchStartX=e.touches[0].clientX;
         this.playerStartX=this.player.x;
         this.targetX=this.player.x;
@@ -816,7 +842,7 @@ const Game={
 
     window.addEventListener('touchmove',e=>{
       // ★ playing 상태가 아니면 기본 스크롤 동작 허용
-      if(this.state!=='playing') return;
+      if(this.state!=='playing'&&!(this.state==='step'&&!(e.target&&e.target.closest&&e.target.closest('#step-coach')))) return;
       e.preventDefault();
       const dx=e.touches[0].clientX-this.touchStartX;
       const newX=Math.max(55,Math.min(this.w-55,this.playerStartX+dx));
@@ -824,7 +850,7 @@ const Game={
     },{passive:false});
 
     window.addEventListener('keydown',e=>{
-      if(this.state==='playing'){
+      if(this.state==='playing'||this.state==='step'){
         if(e.key==='ArrowLeft'){this.player.x=Math.max(55,this.player.x-65);this.targetX=this.player.x}
         if(e.key==='ArrowRight'){this.player.x=Math.min(this.w-55,this.player.x+65);this.targetX=this.player.x}
       }
@@ -843,7 +869,7 @@ const Game={
     this.w=this.canvas.width=wrap.clientWidth;
     this.h=this.canvas.height=window.innerHeight-adH;
     wrap.style.height=this.h+'px';
-    this.player.y=this.h-140;
+    this.player.y=this.state==='step'?Math.round(this.h*0.64):this.h-140;   // 차근차근 모드는 말풍선 위로
     if(this.state==='idle'){this.player.x=this.w/2;this.targetX=this.w/2}
   },
 
@@ -896,6 +922,7 @@ const Game={
   mkItem(x,y,type){this.items.push({x,y,type,r:type==='coin'?20:28})},
 
   update(){
+    if(this.state==='step'){this.stepUpdate();return}   // 차근차근 모드
     if(this.state!=='playing')return;
     this.frame++;
     this.speed=Math.min(8.5,3.0+this.frame*.0009);
@@ -1339,6 +1366,134 @@ function showAdPlaceholder(){
 
 window.addEventListener('load',()=>Game.init());
 
+/* ── 차근차근 모드(2026-09-24, docs/차근차근모드_기획.md) ──
+   같은 비행 화면을 쓰되, 게이트가 가운데서 **시간 제한 없이** 멈춰 기다린다.
+   ① 문제·단서 읽기 → ② 장부 이름을 탭(또는 비행기를 끌어서) → 그쪽으로 통과
+   틀려도 비행이 끝나지 않는다 — 말풍선이 그 장부가 무엇을 볼 때 쓰는지 알려 주고 게이트가 돌아와 다시.
+   코인·아이템·점수·랭킹 없음. 기록은 StepMode.session(전용 테이블·이 기기 오답노트)만. */
+Object.assign(Game, {
+  step: null,
+  stepStart(){
+    if(!window.StepMode)return;
+    SFX.init();BGM.play();hideAdPlaceholder();LV=1;
+    document.getElementById('ss').style.display='none';
+    document.getElementById('gs').style.display='none';
+    this.gates.forEach(g=>g.domEl&&g.domEl.remove());this.gates=[];this.items=[];this.parts=[];
+    document.getElementById('glayer').innerHTML='';
+    document.body.classList.add('step-mode');
+    this.player.y=Math.round(this.h*0.64);            // 말풍선에 가리지 않게 비행기를 조금 위로
+    this.player.x=this.w/2;this.targetX=this.w/2;
+    const S=StepMode.session('flight');
+    this.step={S,list:S.pick(Problems,8,p=>p.q).map(p=>({p,again:false})),i:0,g:null,hint:0,fly:null};
+    this.state='step';
+    this.stepGate();
+  },
+  stepCoach(html,btns){
+    const c=document.getElementById('step-coach');
+    c.querySelector('.tut-bubble-text').innerHTML=html;
+    const row=c.querySelector('.sc-btns');row.innerHTML='';
+    (btns||[]).forEach(b=>{const e=document.createElement('button');e.type='button';e.className=b.cls||'sc-btn';e.innerHTML=b.label;e.onclick=b.on;row.appendChild(e)});
+    c.classList.add('show');
+  },
+  stepGate(){
+    const st=this.step;
+    if(st.g&&st.g.domEl)st.g.domEl.remove();
+    if(st.i>=st.list.length)return this.stepSummary();
+    const p=st.list[st.i].p;
+    document.getElementById('step-hud').textContent='🐢 차근차근 '+(st.i+1)+' / '+st.list.length;
+    const el=document.createElement('div');el.className='gatel';el.style.top='-600px';
+    el.innerHTML=`<div class="gbar"></div><div class="ginfo"><div class="gq">${p.q}</div><div class="gk">💡 ${p.key}</div></div><div class="gchoices"><div class="gchoice left">${p.L}</div><div class="gchoice right">${p.R}</div></div>`;
+    el.querySelector('.gchoice.left').addEventListener('click',()=>this.stepChoose('L'));
+    el.querySelector('.gchoice.right').addEventListener('click',()=>this.stepChoose('R'));
+    document.getElementById('glayer').appendChild(el);
+    st.g={p,y:-430,domEl:el,phase:'in'};st.hint=0;
+    st.S.begin(p.q);
+    this.stepCoach('문제 게이트가 내려와요…',[]);
+  },
+  stepHints(){
+    const p=this.step.g.p,D=StepMode.DATA.flightLedgers,E=StepMode.esc;
+    const u=n=>D[n]?D[n].use:'';
+    return [`단서는 <b>${E(p.key)}</b>.<br>무엇을 찾는 문제인지 봐요.`,
+            `<b>${E(p.L)}</b> → ${E(u(p.L))}<br><b>${E(p.R)}</b> → ${E(u(p.R))}`,
+            `정답은 <b>${E(p.a==='L'?p.L:p.R)}</b> 쪽!`];
+  },
+  stepAsk(extra){
+    const st=this.step;
+    const hint=st.hint?`<div class="sc-hint">💡 ${this.stepHints()[st.hint-1]}</div>`:'';
+    const btns=[];
+    if(st.hint<3)btns.push({label:st.hint<2?`💡 힌트 ${st.hint+1}`:'👀 정답 짚어 주기',cls:'sc-btn sc-hintbtn',on:()=>{
+      st.hint++;st.S.hint(st.hint);
+      if(st.hint===3)st.g.domEl.querySelector(st.g.p.a==='L'?'.gchoice.left':'.gchoice.right').classList.add('step-glow');
+      this.stepAsk(extra);
+    }});
+    btns.push({label:'✈ 이쪽으로 통과',cls:'sc-btn',on:()=>this.stepChoose(this.player.x<this.w/2?'L':'R')});
+    this.stepCoach((extra||'답을 찾을 수 있는 <b>장부 이름</b>을 탭해요.<br><span class="sc-dim">(비행기를 끌어서 옮겨도 돼요)</span>')+hint,btns);
+  },
+  stepChoose(side){
+    const st=this.step;
+    if(!st||!st.g||st.g.phase!=='wait')return;
+    st.fly=side==='L'?this.w*0.25:this.w*0.75;
+    st.g.phase='go';
+    this.stepCoach('슝—',[]);
+  },
+  stepUpdate(){
+    const st=this.step;if(!st)return;
+    this.frame++;
+    this.stars.forEach(s=>{s.y+=s.v*0.25;if(s.y>this.h)Object.assign(s,this.mkStar())});
+    if(st.fly!=null){const dx=st.fly-this.player.x;this.player.x+=dx*0.18;this.targetX=this.player.x;if(Math.abs(dx)<1){this.player.x=st.fly;st.fly=null}}
+    for(let i=this.parts.length-1;i>=0;i--){this.parts[i].update();if(this.parts[i].life<=0)this.parts.splice(i,1)}
+    const g=st.g;if(!g)return;
+    const stopY=this.h*0.40;
+    if(g.phase==='in'){g.y+=4;if(g.y>=stopY){g.y=stopY;g.phase='wait';this.stepAsk()}}
+    else if(g.phase==='go'){if(st.fly==null){g.y+=7;if(g.y>=this.player.y-10)this.stepJudge()}}
+    else if(g.phase==='done'){g.y+=7;if(g.domEl)g.domEl.style.opacity=String(Math.max(0,1-(g.y-this.player.y)/200))}
+    if(g.domEl)g.domEl.style.top=(g.y-140)+'px';
+  },
+  stepJudge(){
+    const st=this.step,g=st.g,p=g.p,D=StepMode.DATA.flightLedgers,E=StepMode.esc;
+    const side=this.player.x<this.w/2?'L':'R';
+    const pick=side==='L'?p.L:p.R,ans=p.a==='L'?p.L:p.R;
+    if(side!==p.a){
+      SFX.bad();this.doFlash('bad');this.burst(this.player.x,this.player.y,'#ff2d78',16);this.showJudge(false,'✗ 다시!');hapticWrong();
+      st.S.wrong();
+      g.y=this.h*0.40;g.phase='wait';
+      return this.stepCoach(StepMode.lines([`<b>${E(pick)}</b> → <span class="sc-dim">${E(D[pick]?D[pick].use:'')}</span> 볼 때 써요.`,`이 문제의 단서 → <b>${E(p.key)}</b>`]),
+        [{label:'다시 해 볼게요',cls:'sc-go',on:()=>this.stepAsk()}]);
+    }
+    SFX.ok();this.doFlash('ok');this.burst(this.player.x,this.player.y,'#00f2ff',18);this.showJudge(true,'✓ 정답!');hapticCorrect();
+    g.phase='done';
+    const cur=st.list[st.i];
+    const clean=st.S.done(p.q,{label:`${p.q} → ${ans}`,q:p.q,correct:ans,type:'장부 선택'});
+    if(!clean&&!cur.again)st.list.splice(Math.min(st.list.length,st.i+4),0,{p,again:true});
+    const last=st.i+1>=st.list.length;
+    this.stepCoach(StepMode.lines([`맞아요! <span class="sc-key">${E(ans)}</span>`,D[ans]?`<span class="sc-dim">${StepMode.txt(D[ans].why)}</span>`:'']),
+      [{label:last?'결과 보기 ▶':'다음 게이트 ▶',cls:'sc-go',on:()=>{st.i++;this.stepGate()}}]);
+  },
+  stepSummary(){
+    const st=this.step,S=st.S;
+    st.g=null;
+    S.finish(true);
+    const L=S.learned(),A=S.again(),E=StepMode.esc;
+    const list=arr=>arr.slice(0,3).map(v=>'· '+E(v)).join('<br>');
+    document.getElementById('step-hud').textContent='🐢 차근차근 끝!';
+    this.stepCoach(`🌱 오늘 익힌 것 <b>${L.length}</b>개`+(L.length?`<br><span class="sc-dim">${list(L)}</span>`:'')+
+      (A.length?`<br>🔁 다시 볼 것 <b>${A.length}</b>개<br><span class="sc-dim">${list(A)}</span>`:''),
+      [{label:'한 번 더',on:()=>{this.stepExit(true);this.stepStart()}},{label:'끝내기',cls:'sc-go',on:()=>this.stepExit()}]);
+  },
+  stepExit(again){
+    const st=this.step;if(!st)return;
+    if(!st.S.sent)st.S.finish(false);
+    if(st.g&&st.g.domEl)st.g.domEl.remove();
+    this.step=null;this.state='idle';
+    document.getElementById('step-coach').classList.remove('show');
+    document.body.classList.remove('step-mode');
+    this.player.y=this.h-140;this.player.x=this.w/2;this.targetX=this.w/2;
+    if(!again){document.getElementById('ss').style.display='';initDiffUI();showAdPlaceholder()}
+  }
+});
+if(window.StepMode)StepMode.mount({game:'flight',host:document.getElementById('step-host'),onStart:()=>Game.stepStart()});
+
+
 // ── 등급 기준 단일 소스: _grade·팡파레 목표 공용 ──
 const GRADE_TIERS = [
   { min: 55000, label: '👑 전설의 에이스' },
@@ -1681,8 +1836,8 @@ const Tutorial = (function () {
 function openGuide() { Tutorial.start(); }
 </script>
 
-<script src="emoji-icons.js?v=39"></script>
+<script src="emoji-icons.js?v=40"></script>
 <!-- 웹 전용 광고(시작·결과 화면만, 앱에선 adsense.js 가 스스로 멈춘다) -->
-<script src="adsense.js?v=39"></script>
+<script src="adsense.js?v=40"></script>
 </body>
 </html>

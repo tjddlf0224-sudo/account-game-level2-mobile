@@ -5,7 +5,7 @@
 <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
      **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
      이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-<script src="safestore.js?v=39"></script>
+<script src="safestore.js?v=40"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
@@ -136,6 +136,26 @@
         }
 
         /* 카드 — 모바일 기준으로 크게 */
+        /* ── 차근차근 모드(같은 카드판, 카드는 처음부터 앞면 + 튜토리얼 말풍선) ── */
+        body.step-mode .status-bar { display: none !important; }
+        body.step-mode .score-formula { color: #9fe3c0; }
+        #step-coach { display: none; position: fixed; left: 0; right: 0; bottom: 0; z-index: 80; background: linear-gradient(180deg,#0d1830,#0a1120); max-height: 50vh; overflow-y: auto; }
+        #step-coach.show { display: block; }
+        #step-coach .tut-bubble-text { min-height: 0; text-align: center; }
+        #step-coach .sc-dim { opacity: .72; font-size: .9rem; }
+        #step-coach .sc-key { color: #f1c40f; font-weight: 800; }
+        #step-coach .sc-hint { margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: rgba(255,209,102,.1); border: 1px dashed rgba(255,209,102,.45); color: #ffe6a6; font-size: .92rem; line-height: 1.75; text-align: center; }
+        #step-coach .rd p { margin: 0 0 .35em; }
+        #step-coach .sc-btns { display: flex; gap: 10px; margin-top: 14px; }
+        #step-coach .sc-btns:empty { display: none; }
+        #step-coach .sc-btns button { flex: 1; min-height: 48px; border-radius: 14px; font-family: 'Black Han Sans', sans-serif; font-size: 1rem; cursor: pointer; }
+        #step-coach .sc-btn { background: rgba(255,255,255,.08); border: 1.5px solid rgba(255,255,255,.25); color: #fff; }
+        #step-coach .sc-hintbtn { border-style: dashed; border-color: rgba(255,209,102,.6); color: #ffd166; }
+        #step-coach .sc-go { border: 2px solid #00f2ff; color: #021018; background: #00f2ff; }
+        .card.step-sel .card-front { box-shadow: 0 0 0 4px #00f2ff, 0 0 18px #00f2ff; }
+        .card.step-bad .card-front { box-shadow: 0 0 0 4px #e74c3c; }
+        .card.step-glow .card-front { animation: stepGlow 1s ease-in-out infinite; }
+        @keyframes stepGlow { 0%,100% { box-shadow: 0 0 0 2px #f1c40f, 0 0 10px #f1c40f; } 50% { box-shadow: 0 0 0 5px #f1c40f, 0 0 26px #f1c40f; } }
         .card {
             background-color: transparent;
             perspective: 1200px;
@@ -619,19 +639,21 @@
 .gtitle, .logo, .ov-title, .overlay-title, h1, h2 { font-family: 'Black Han Sans', 'Noto Sans KR', sans-serif !important; }
 </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="ask.js?v=39"></script>
-    <script src="wrongnote.js?v=39"></script>
-    <script src="growth.js?v=39"></script>
-<script src="streak.js?v=39"></script>
-    <script src="difficulty.js?v=39"></script>
-    <script src="review-prompt.js?v=39"></script>
+    <script src="ask.js?v=40"></script>
+    <script src="wrongnote.js?v=40"></script>
+    <script src="growth.js?v=40"></script>
+<script src="streak.js?v=40"></script>
+    <script src="difficulty.js?v=40"></script>
+    <script src="readable.js?v=40"></script>
+    <script src="stepmode.js?v=40"></script>
+    <script src="review-prompt.js?v=40"></script>
 </head>
 <body>
 
 
 
     <!-- 🎵 BGM 오디오 엘리먼트 -->
-    <script src="bgm.js?v=39"></script>
+    <script src="bgm.js?v=40"></script>
 
     <header>
         <h1 style="flex:1;text-align:center;">🧩 기억의 전당 🧩</h1>
@@ -651,6 +673,8 @@
     <div class="score-formula" id="score-formula">Stage 1 (2×2)</div>
 
     <div class="grid-container" id="grid"></div>
+    <!-- 차근차근 모드 말풍선 — 튜토리얼과 같은 모양 -->
+    <div id="step-coach" class="tut-bubble"><div class="tut-bubble-text"></div><div class="sc-btns"></div></div>
 
     <!-- 시작 화면 -->
     <div id="start-screen" class="overlay">
@@ -668,6 +692,7 @@
                 <button class="diff-btn locked" id="diff-btn-2" onclick="selectDifficulty(2)">난이도 2 🔒<br><span style="font-size:.72rem;opacity:.7">계정과목 ↔ 분류</span></button>
             </div>
             <div class="diff-hint" id="diff-hint"></div>
+<div id="step-host" style="width:100%"></div>
 
             <!-- 계급 기준표 -->
             <div style="
@@ -779,7 +804,7 @@
         // ══════════════════════════════════════
         // 🎵 BGM 관리
         // ══════════════════════════════════════
-        const bgm = BGMAudio.create('bgm2_memory.mp3?v=39');
+        const bgm = BGMAudio.create('bgm2_memory.mp3?v=40');
         bgm.volume = 0.5;
 
         // 음소거 상태: localStorage에 저장해서 다음 게임에도 유지
@@ -985,7 +1010,7 @@
             const sidePad = Math.max(16, window.innerWidth * 0.04);
             const availW = Math.min(window.innerWidth, 600) - sidePad * 2;
             const cardW  = Math.floor((availW - GAP * (cfg.cols - 1)) / cfg.cols);
-            const availH = window.innerHeight - 150;
+            const availH = window.innerHeight - 150 - (window.__memStep ? 230 : 0);   // 차근차근 말풍선 자리
             const cardH  = Math.floor((availH - GAP * (cfg.rows - 1)) / cfg.rows);
             return {
                 w: Math.max(80, Math.min(cardW, 180)),
@@ -1162,6 +1187,134 @@
         // 서버 기록으로 해금이 복원되면(다른 기기에서 해금한 학생) 잠금 표시를 다시 그린다
         window.addEventListener('difficulty-synced', function () { try { initDiffUI(); } catch (e) {} });
 
+        /* ── 차근차근 모드(2026-09-24, docs/차근차근모드_기획.md) ──
+           같은 카드판을 쓰되, 카드를 **처음부터 모두 앞면으로** 깐다(위치 외우기 대신 뜻을 익히게).
+           ① 파란 계정 카드 하나 고르기  ② 그 짝(뜻·난이도2는 분류)을 빨간 카드에서 찾기
+           틀리면 말풍선이 "그건 ○○의 뜻이에요"로 알려 주고 다시. 한 판 3쌍 × 3판.
+           시간·점수·랭킹 없음. 기록은 StepMode.session(전용 테이블·이 기기 오답노트)만. */
+        let STEP = null;
+        const STEP_PER = 3, STEP_ROUNDS = 3;
+        const STEP_CAT_RULE = '가진 것 → 자산 · 갚을 것 → 부채<br>사장 몫 → 자본 · 번 것 → 수익 · 쓴 것 → 비용';
+        function startMemoryStep() {
+            if (!window.StepMode) return;
+            initAudio();
+            hideAdPlaceholder();
+            LV = window.Difficulty ? Difficulty.get(GAME_ID) : 1;
+            roundToken++;
+            clearInterval(timerInterval);
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('result-screen').style.display = 'none';
+            window.__memStep = true;
+            document.body.classList.add('step-mode');
+            const S = StepMode.session('memory');
+            const pool = (LV === 2) ? allPairs.filter(p => p.c) : allPairs;
+            STEP = { S, list: S.pick(pool, STEP_PER * STEP_ROUNDS, p => p.a), r: 0, sel: null, phase: '', hint: 0, left: 0 };
+            stepRound();
+        }
+        function stepCoach(html, btns) {
+            const c = document.getElementById('step-coach');
+            c.querySelector('.tut-bubble-text').innerHTML = html;
+            const row = c.querySelector('.sc-btns'); row.innerHTML = '';
+            (btns || []).forEach(b => { const e = document.createElement('button'); e.type = 'button'; e.className = b.cls || 'sc-btn'; e.innerHTML = b.label; e.onclick = b.on; row.appendChild(e); });
+            c.classList.add('show');
+        }
+        function stepPairOf(card) { return allPairs.find(x => String(x.id) === String(card.dataset.id)); }
+        function stepRound() {
+            const pairs = STEP.list.slice(STEP.r * STEP_PER, STEP.r * STEP_PER + STEP_PER);
+            if (!pairs.length) return stepSummary();
+            document.getElementById('score-formula').textContent = `🐢 차근차근 ${STEP.r + 1} / ${Math.ceil(STEP.list.length / STEP_PER)}판`;
+            grid.style.display = ''; grid.innerHTML = '';
+            const cards = [];
+            pairs.forEach(p => {
+                const mk = (LV === 2) ? p.c : String(p.id);
+                cards.push({ id: p.id, mk, text: p.a, type: 'account' });
+                cards.push({ id: p.id, mk, text: (LV === 2 ? p.c : p.b), type: 'pair' });
+            });
+            StepMode.shuffle(cards).forEach(d => appendCard(d));
+            const cfg = { pairs: pairs.length, cols: 2, rows: pairs.length };
+            applyGridStyle(cfg);
+            grid.querySelectorAll('.card').forEach(c => c.classList.add('flipped'));   // 처음부터 앞면
+            STEP.left = pairs.length;
+            stepAsk();
+        }
+        function stepAsk() {
+            STEP.phase = 'acc'; STEP.sel = null; STEP.hint = 0;
+            grid.querySelectorAll('.card').forEach(c => c.classList.remove('step-sel', 'step-bad', 'step-glow'));
+            stepCoach('① <b style="color:#3498db">파란 글씨</b> 계정 카드 하나를 골라요.', []);
+        }
+        function stepHints(p) {
+            if (LV === 2) return [STEP_CAT_RULE, `<b>${p.a}</b> — ${StepMode.esc(p.b)}`, `정답은 <b>${p.c}</b>!`];
+            return [p.c ? `<b>${p.a}</b>은(는) <b>${p.c}</b> 계정이에요.` : `<b>${p.a}</b>의 뜻을 떠올려 봐요.`, `뜻은 「<b>${StepMode.esc(String(p.b).slice(0, 2))}</b>…」로 시작해요.`, '정답 카드에 노란 테두리를 쳤어요.'];
+        }
+        function stepMatchCoach(extra) {
+            const p = stepPairOf(STEP.sel);
+            const hint = STEP.hint ? `<div class="sc-hint">💡 ${stepHints(p)[STEP.hint - 1]}</div>` : '';
+            const btns = STEP.hint < 3 ? [{ label: STEP.hint < 2 ? `💡 힌트 ${STEP.hint + 1}` : '👀 정답 짚어 주기', cls: 'sc-btn sc-hintbtn', on: () => {
+                STEP.hint++; STEP.S.hint(STEP.hint);
+                if (STEP.hint === 3) grid.querySelectorAll('.card[data-type="pair"]').forEach(c => { if (c.dataset.mk === STEP.sel.dataset.mk && !c.classList.contains('matched')) c.classList.add('step-glow'); });
+                stepMatchCoach(extra);
+            } }] : [];
+            stepCoach((extra || `② <b>${p.a}</b>의 ${LV === 2 ? '분류' : '뜻'}을(를)<br><b style="color:#e74c3c">빨간 글씨</b> 카드에서 찾아요.`) + hint, btns);
+        }
+        function stepCardTap(card) {
+            if (!STEP || card.classList.contains('matched')) return;
+            if (STEP.phase === 'acc') {
+                if (card.dataset.type !== 'account') { playSound('wrong'); return stepCoach('<b style="color:#3498db">파란 글씨</b> 계정 카드부터 골라요!', []); }
+                playSound('flip');
+                STEP.sel = card; card.classList.add('step-sel');
+                STEP.phase = 'match'; STEP.hint = 0;
+                STEP.S.begin(stepPairOf(card).a);
+                return stepMatchCoach();
+            }
+            if (STEP.phase !== 'match') return;
+            const p = stepPairOf(STEP.sel);
+            if (card.dataset.type === 'account') {
+                if (card === STEP.sel) return;
+                return stepMatchCoach(`지금은 <b>${p.a}</b>의 짝을 찾는 중이에요.<br><b style="color:#e74c3c">빨간 글씨</b> 카드를 골라요.`);
+            }
+            if (card.dataset.mk !== STEP.sel.dataset.mk) {
+                playSound('wrong'); hapticWrong();
+                STEP.S.wrong();
+                card.classList.add('step-bad'); setTimeout(() => card.classList.remove('step-bad'), 600);
+                const other = stepPairOf(card);
+                return stepMatchCoach(LV === 2 ? `<b>${p.a}</b>은(는) <b>${card.dataset.mk}</b>이(가) 아니에요.<br>다시 찾아 봐요.`
+                    : `그건 <b>${other ? other.a : '다른 계정'}</b>의 뜻이에요.<br><b>${p.a}</b>의 뜻을 다시 찾아 봐요.`);
+            }
+            playSound('match'); hapticCorrect();
+            STEP.sel.classList.remove('step-sel'); card.classList.remove('step-glow');
+            STEP.sel.classList.add('matched'); card.classList.add('matched');
+            STEP.S.done(p.a, { label: LV === 2 ? `${p.a} = ${p.c}` : `${p.a} = ${p.b}`, q: '"<b class="target-account">' + p.a + '</b>" 의 ' + (LV === 2 ? '분류는?' : '뜻은?'), correct: LV === 2 ? p.c : p.b, type: LV === 2 ? '계정과목 분류' : '계정과목 뜻' });
+            STEP.phase = 'right';
+            STEP.left--;
+            const roundDone = STEP.left <= 0;
+            const allDone = roundDone && (STEP.r + 1) * STEP_PER >= STEP.list.length;
+            stepCoach(StepMode.lines([`맞아요! <b>${p.a}</b> = <span class="sc-key">${StepMode.esc(LV === 2 ? p.c : p.b)}</span>`, p.c && LV !== 2 ? `<span class="sc-dim">${p.c} 계정</span>` : '']),
+                [{ label: allDone ? '결과 보기 ▶' : roundDone ? '다음 판 ▶' : '다음 짝 ▶', cls: 'sc-go', on: () => { if (roundDone) { STEP.r++; stepRound(); } else stepAsk(); } }]);
+        }
+        function stepSummary() {
+            STEP.phase = 'summary';
+            const S = STEP.S;
+            S.finish(true);
+            const L = S.learned(), A = S.again();
+            const list = arr => arr.slice(0, 3).map(v => '· ' + StepMode.esc(v)).join('<br>');
+            grid.innerHTML = '';
+            document.getElementById('score-formula').textContent = '🐢 차근차근 끝!';
+            stepCoach(`🌱 오늘 익힌 것 <b>${L.length}</b>개` + (L.length ? `<br><span class="sc-dim">${list(L)}</span>` : '') +
+                (A.length ? `<br>🔁 다시 볼 것 <b>${A.length}</b>개<br><span class="sc-dim">${list(A)}</span>` : ''),
+                [{ label: '한 번 더', on: () => { stepExit(true); startMemoryStep(); } }, { label: '끝내기', cls: 'sc-go', on: () => stepExit() }]);
+        }
+        function stepExit(again) {
+            if (!STEP) return;
+            if (!STEP.S.sent) STEP.S.finish(false);
+            STEP = null;
+            window.__memStep = false;
+            document.getElementById('step-coach').classList.remove('show');
+            document.body.classList.remove('step-mode');
+            if (!again) { grid.innerHTML = ''; document.getElementById('start-screen').style.display = ''; initDiffUI(); showAdPlaceholder(); }
+        }
+        if (window.StepMode) StepMode.mount({ game: 'memory', host: document.getElementById('step-host'), onStart: startMemoryStep });
+
+
         // ── 스테이지 클리어 직급 미리보기 ──
         function getRankPreviewInfo(score) {
             const tiers = RANK_TIERS;
@@ -1203,6 +1356,7 @@
         }
 
         function quitGame() {
+            if (STEP) return stepExit();
             stopTimer(); endGame(true);
         }
 
@@ -1346,6 +1500,7 @@
                 if (pressing) return;
                 pressing = true;
                 e.preventDefault();
+                if (window.__memStep) { stepCardTap(this); return; }   // 차근차근 모드: 말풍선이 한 단계씩
                 if (!timerInterval) startTimer();
                 flipCard.call(this);
             });
@@ -2295,8 +2450,8 @@ function openGuide() { Tutorial.start(); }
 
 </script>
 
-<script src="emoji-icons.js?v=39"></script>
+<script src="emoji-icons.js?v=40"></script>
 <!-- 웹 전용 광고(시작·결과 화면만, 앱에선 adsense.js 가 스스로 멈춘다) -->
-<script src="adsense.js?v=39"></script>
+<script src="adsense.js?v=40"></script>
 </body>
 </html>
