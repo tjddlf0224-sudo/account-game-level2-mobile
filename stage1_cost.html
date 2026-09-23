@@ -4,7 +4,7 @@
     <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
          **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
          이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-    <script src="safestore.js?v=38"></script>
+    <script src="safestore.js?v=39"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
@@ -16,10 +16,10 @@
 <title>원가의 길 — 전산회계 1급 스테이지 1</title>
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="growth.js?v=38"></script>
-<script src="streak.js?v=38"></script>
-<script src="ask.js?v=38"></script>
-<script src="readable.js?v=38"></script>
+<script src="growth.js?v=39"></script>
+<script src="streak.js?v=39"></script>
+<script src="ask.js?v=39"></script>
+<script src="readable.js?v=39"></script>
 <style>
 :root{
   --cy:#00f2ff; --pu:#b44fff; --or:#ff9800; --gd:#ffd600; --gn:#00e676; --pk:#ff2d78;
@@ -576,7 +576,7 @@ body{ font-family:'Noto Sans KR',sans-serif; color:#fff; position:relative; }
   </div>
 </div>
 
-<script src="bgm.js?v=38"></script>
+<script src="bgm.js?v=39"></script>
 
 
 <div id="minimap-box"><canvas id="minimap"></canvas></div>
@@ -3802,8 +3802,8 @@ const ResultScreen = {
 const BGM = {
   map:null, sheet:null, cur:null, muted:false, started:false,
   init(){
-    this.map=BGMAudio.create('bgm_stage1_map.mp3?v=38');
-    this.sheet=BGMAudio.create('bgm_stage1_sheet.mp3?v=38');
+    this.map=BGMAudio.create('bgm_stage1_map.mp3?v=39');
+    this.sheet=BGMAudio.create('bgm_stage1_sheet.mp3?v=39');
     this.map.volume=0.45; this.sheet.volume=0.45;
     this.muted = localStorage.getItem('cost_muted')!==null
       ? localStorage.getItem('cost_muted')==='true'
@@ -3902,8 +3902,8 @@ function showInterstitialAlways(afterFn){
 function hideAdPlaceholder(){ if(window.AdBridge) AdBridge.hide(); }
 function showAdPlaceholder(){ if(window.AdBridge) AdBridge.show(); }
 </script>
-<script src="emoji-icons.js?v=38"></script>
+<script src="emoji-icons.js?v=39"></script>
 <!-- 웹 전용 광고(시작·결과 화면만, 앱에선 adsense.js 가 스스로 멈춘다) -->
-<script src="adsense.js?v=38"></script>
+<script src="adsense.js?v=39"></script>
 </body>
 </html>

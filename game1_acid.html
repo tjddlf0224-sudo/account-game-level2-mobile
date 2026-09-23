@@ -5,7 +5,7 @@
 <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
      **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
      이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-<script src="safestore.js?v=38"></script>
+<script src="safestore.js?v=39"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
@@ -440,6 +440,26 @@
         #lv2-cat-btns button.picked-ok { background: var(--neon-green); color: #021018; }
         #lv2-cat-btns button.picked-no { background: var(--neon-red); color: #fff; }
 
+        /* ── 차근차근 모드(같은 게임판 + 튜토리얼 말풍선) ── */
+        .step-badge { display: none; color: #9fe3c0; }
+        body.step-mode .timer-box, body.step-mode .combo-box, body.step-mode .score-box, body.step-mode #fever-indicator { display: none !important; }
+        body.step-mode .step-badge { display: block; }
+        #step-coach { display: none; position: absolute; left: 0; right: 0; bottom: var(--catbar-h, 0px); z-index: 58; }
+        #step-coach.show { display: block; }
+        #step-coach .tut-bubble-text { min-height: 0; }
+        #step-coach .sc-dim { opacity: .72; font-size: .9rem; }
+        #step-coach .sc-key { color: var(--neon-gold); font-weight: 800; }
+        #step-coach .sc-hint { margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: rgba(255,209,102,.1); border: 1px dashed rgba(255,209,102,.45); color: #ffe6a6; font-size: .92rem; line-height: 1.75; }
+        #step-coach .rd p { margin: 0 0 .35em; }
+        #step-coach .sc-btns { display: flex; gap: 10px; margin-top: 14px; }
+        #step-coach .sc-btns button { flex: 1; min-height: 50px; border-radius: 14px; font-family: 'Black Han Sans', sans-serif; font-size: 1rem; cursor: pointer; }
+        #step-coach .sc-btn { background: rgba(255,255,255,.08); border: 1.5px solid rgba(255,255,255,.25); color: #fff; }
+        #step-coach .sc-send { border-color: rgba(255,45,120,.6); color: #ffb3c9; }
+        #step-coach .sc-go { border: 2px solid var(--neon-blue); color: #021018; background: linear-gradient(135deg, var(--neon-blue), #0084ff); }
+        .step-glow { animation: stepGlow 1s ease-in-out infinite; }
+        @keyframes stepGlow { 0%,100% { box-shadow: 0 0 0 2px var(--neon-gold), 0 0 10px var(--neon-gold); } 50% { box-shadow: 0 0 0 4px var(--neon-gold), 0 0 28px var(--neon-gold); } }
+        .step-word { z-index: 20; }
+
         /* ── 공통 애니메이션 ── */
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
         .shake { animation: shake 0.4s; }
@@ -736,22 +756,22 @@
 
 <button id="rewarded-btn" onclick="requestRewarded()">⏱ +15초 광고 보기</button>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="pausewatch.js?v=38"></script>
-    <script src="ask.js?v=38"></script>
-    <script src="wrongnote.js?v=38"></script>
-    <script src="growth.js?v=38"></script>
-<script src="streak.js?v=38"></script>
-    <script src="difficulty.js?v=38"></script>
-    <script src="readable.js?v=38"></script>
-    <script src="stepmode.js?v=38"></script>
-    <script src="review-prompt.js?v=38"></script>
+    <script src="pausewatch.js?v=39"></script>
+    <script src="ask.js?v=39"></script>
+    <script src="wrongnote.js?v=39"></script>
+    <script src="growth.js?v=39"></script>
+<script src="streak.js?v=39"></script>
+    <script src="difficulty.js?v=39"></script>
+    <script src="readable.js?v=39"></script>
+    <script src="stepmode.js?v=39"></script>
+    <script src="review-prompt.js?v=39"></script>
 </head>
 <body>
 
 
 
 <!-- 🎵 BGM 오디오 엘리먼트 -->
-<script src="bgm.js?v=38"></script>
+<script src="bgm.js?v=39"></script>
 
 <header>
     <h1>💎 전산회계 2급 산성비</h1>
@@ -770,7 +790,10 @@
         <div class="status-badge timer-box">⏰ <span id="timer">30</span></div>
         <div class="status-badge combo-box" id="combo-display">🔥 0 Combo</div>
         <div class="status-badge score-box">💎 <span id="score">0</span></div>
+        <div class="status-badge step-badge" id="step-badge">🐢 차근차근</div>
     </div>
+    <!-- 차근차근 모드 말풍선 — 튜토리얼과 같은 모양 -->
+    <div id="step-coach" class="tut-bubble"><div class="tut-bubble-text"></div><div class="sc-btns"></div></div>
     <!-- 난이도2 — 정답 단어를 탭하면 잠깐 멈추고 분류를 마저 고른다 -->
     <div id="lv2-catbar">
         <div id="lv2-cat-word"></div>
@@ -879,7 +902,7 @@
     // ══════════════════════════════════════
     // 🎵 BGM 관리
     // ══════════════════════════════════════
-    const bgm = BGMAudio.create('bgm1_acid.mp3?v=38');
+    const bgm = BGMAudio.create('bgm1_acid.mp3?v=39');
     bgm.volume = 0.5;
 
     // 음소거 상태: localStorage에 저장해서 다음 게임에도 유지
@@ -1039,7 +1062,7 @@
         document.documentElement.style.setProperty('--catbar-h', h + 'px');
     }
 
-    function quitGame() { if (isPlaying) endGame(); }
+    function quitGame() { if (STEP) return stepExit(); if (isPlaying) endGame(); }
 
     function startGame() {
         initAudio(); // ← AudioContext resume + BGM 시작
@@ -1274,6 +1297,7 @@
         setCatbarOffset(true);   // 광고 버튼이 이 바를 덮지 않도록
     }
     function pickCategory(cat) {
+        if (STEP) return pickCategoryStep(cat);   // 차근차근 모드는 점수 없이 한 단계씩
         if (!lv2Pending || !isPlaying) return;
         const p = lv2Pending; lv2Pending = null;
         freezeTime = 0; els.board.classList.remove('frozen'); els.freezeBar.style.width = '0%';
@@ -1372,54 +1396,204 @@
     // 서버 기록으로 해금이 복원되면(다른 기기에서 해금한 학생) 잠금 표시를 다시 그린다
     window.addEventListener('difficulty-synced', function () { try { initDiffUI(); } catch (e) {} });
 
-    /* ── 차근차근 모드(2026-09-23, docs/차근차근모드_기획.md) ──
-       떨어지는 단어 대신 한 장씩 카드로: ① 계정과목인가? ② (계정과목이면) 어느 분류인가?
-       함정 단어는 틀리면 "장부에는 무엇으로 적는지"를 보여 준다. 점수·랭킹·서버 오답에는 안 들어간다. */
-    function acidStepPool() {
-        const SM = window.StepMode, FK = SM.DATA.acidFake, e = SM.esc, L = SM.lines, T = SM.txt;
-        const OX = [{ label: '⭕ 계정과목이에요' }, { label: '❌ 계정과목이 아니에요' }];
-        const CATS = ['자산', '부채', '자본', '수익', '비용'];
-        const CAT_RULE = '가진 것 → 자산<br>갚을 것 → 부채<br>사장 몫 → 자본<br>번 것 → 수익<br>쓴 것 → 비용';
-        const Q = w => `장부에 쓰는 <b>계정과목</b>일까요?<span class="big">${e(w)}</span>`;
-        const pool = [];
-        fakeWords.forEach(w => {
-            const f = FK[w] || { name: '(계정과목 아님)', why: '평소에 쓰는 말이에요.' };
-            pool.push({ key: w, type: '함정 단어', learn: `${w} → ${f.name}`,
-                wrong: { q: `'${w}'은(는) 계정과목일까?`, correct: `아니에요 → 장부에는 ${f.name}` },
-                steps: [{
-                    prompt: Q(w), options: OX, answer: 1,
-                    hints: ['장부에 쓰는 <b>공식 이름</b>일까요?<br>아니면 평소에 쓰는 말일까요?',
-                            `장부에는 <b>${e(f.name)}</b>(으)로 적어요.`],
-                    explain: () => L([`<b>${e(w)}</b>은(는) 계정과목이 아니에요.`,
-                                      `장부에는 → <span class="key">${e(f.name)}</span>`,
-                                      `<span class="dim">${T(f.why)}</span>`])
-                }]
-            });
-        });
-        accountWords.forEach(a => {
-            const info = ACCT_INFO[a.word] || {};
-            const desc = info.desc ? e(info.desc) : '';
-            const ex = info.ex ? `<span class="dim">예) ${e(info.ex)}</span>` : '';
-            pool.push({ key: a.word, type: a.type, learn: `${a.word} = ${a.type}`,
-                wrong: { q: `'${a.word}'은(는) 어느 분류?`, correct: `${a.type} — ${info.desc || ''}` },
-                steps: [{
-                    prompt: Q(a.word), options: OX, answer: 0,
-                    hints: ['자산·부채·자본·수익·비용 중<br>하나에 들어가는 이름일까요?', `<b>${a.type}</b> 계정이에요.<br>${desc}`],
-                    explain: (c, ok) => ok ? L([`맞아요, 계정과목이에요.`, `이제 분류를 골라 봐요.`])
-                                           : L([`<b>${e(a.word)}</b>은(는) 장부에 그대로 쓰는 계정과목이에요.`, desc, ex])
-                }, {
-                    stepName: '분류', prompt: `<b>${e(a.word)}</b>은(는) 어느 분류일까요?`,
-                    options: CATS.map(c => ({ label: c })), answer: CATS.indexOf(a.type),
-                    hints: [CAT_RULE, desc || `${a.type} 계정이에요.`],
-                    explain: (c, ok) => L([ok ? '' : `<b>${e(a.word)}</b> → <span class="key">${a.type}</span>`, desc, ex])
-                }]
-            });
-        });
-        return pool;
+    /* ── 차근차근 모드(2026-09-24 개편, docs/차근차근모드_기획.md) ──
+       성일님: "기존 게임에서 차근차근 한 단계씩 스몰스텝으로. 갑자기 다른 창이 나오면 어떻게 해."
+       → **같은 게임판**에서 단어가 한 번에 하나씩 천천히 내려와 가운데서 멈추고,
+         아래 말풍선(튜토리얼과 같은 모양)이 한 단계씩 짚어 준다. 시간 제한·점수·랭킹 없음.
+         ① 계정과목이면 단어를 탭, 함정이면 "보내기"  ② (난이도 2면) 원래 분류 바로 분류 고르기
+         틀리면 말풍선이 이유를 알려 주고 같은 단어로 다시. 힌트는 한 단계씩(①·② 설명 → ③ 정답 짚기).
+       기록은 StepMode.session(전용 테이블·이 기기 오답노트)만 — 점수·판별·서버 오답에는 안 들어간다. */
+    let STEP = null;
+    const STEP_N = 10;
+    const CAT_RULE = '가진 것 → 자산<br>갚을 것 → 부채<br>사장 몫 → 자본<br>번 것 → 수익<br>쓴 것 → 비용';
+
+    function stepItems() {
+        const FK = StepMode.DATA.acidFake;
+        return fakeWords.map(w => ({ key: w, word: w, type: 'fake', fk: FK[w] || { name: '(계정과목 아님)', why: '평소에 쓰는 말이에요.' } }))
+            .concat(accountWords.map(a => ({ key: a.word, word: a.word, type: 'account', category: a.type, info: ACCT_INFO[a.word] || {} })));
     }
     function startAcidStep() {
         if (!window.StepMode) return;
-        StepMode.start({ game: 'acid', title: '계정과목 산성비', pool: acidStepPool(), n: 10 });
+        initAudio();
+        hideAdPlaceholder();
+        LV = window.Difficulty ? Difficulty.get(GAME_ID) : 1;
+        els.start.style.display = 'none'; els.result.style.display = 'none';
+        activeWords.forEach(w => w.el.remove()); activeWords = [];
+        isPlaying = true; isPaused = false;
+        document.body.classList.add('step-mode');
+        document.body.classList.remove('danger-mode', 'fever-mode');
+        const S = StepMode.session('acid');
+        STEP = { S, list: S.pick(stepItems(), STEP_N, q => q.key).map(q => ({ q, again: false })), i: 0, el: null, phase: '', hint: 0 };
+        stepNext();
+    }
+    function stepCoach(html, btns) {
+        const c = document.getElementById('step-coach');
+        c.querySelector('.tut-bubble-text').innerHTML = html;
+        const row = c.querySelector('.sc-btns');
+        row.innerHTML = '';
+        (btns || []).forEach(b => {
+            const e = document.createElement('button');
+            e.type = 'button'; e.className = b.cls || 'sc-btn'; e.innerHTML = b.label;
+            if (b.id) e.id = b.id;
+            e.onclick = b.on;
+            row.appendChild(e);
+        });
+        c.classList.add('show');
+    }
+    function stepBadge() {
+        const b = document.getElementById('step-badge');
+        if (b && STEP) b.textContent = '🐢 차근차근 ' + Math.min(STEP.i + 1, STEP.list.length) + ' / ' + STEP.list.length;
+    }
+    function stepMoveWord(toY, ms, done) {
+        const el = STEP && STEP.el; if (!el) return;
+        const from = parseFloat(el.style.top) || -60, t0 = performance.now();
+        (function f(t) {
+            if (!STEP || STEP.el !== el) return;
+            const k = Math.min(1, (t - t0) / ms), e = 1 - Math.pow(1 - k, 3);   // 끝에서 천천히 멈춘다
+            el.style.top = (from + (toY - from) * e) + 'px';
+            if (k < 1) requestAnimationFrame(f); else if (done) done();
+        })(t0);
+    }
+    function stepNext() {
+        if (!STEP) return;
+        if (STEP.el) { STEP.el.remove(); STEP.el = null; }
+        document.getElementById('lv2-catbar').classList.remove('show'); setCatbarOffset(false);
+        if (STEP.i >= STEP.list.length) return stepSummary();
+        const it = STEP.list[STEP.i].q;
+        STEP.phase = 'judge'; STEP.hint = 0;
+        STEP.S.begin(it.key);
+        stepBadge();
+        const el = document.createElement('div');
+        el.className = 'falling-word step-word';
+        el.textContent = it.word;
+        el.style.top = '-60px';
+        el.style.left = '50%'; el.style.transform = 'translateX(-50%)';
+        el.onpointerdown = (e) => { e.preventDefault(); stepTap(); };
+        els.board.appendChild(el);
+        STEP.el = el;
+        stepMoveWord(Math.round(getBoardHeight() * 0.3), 1600);
+        stepJudgeCoach();
+    }
+    function stepHintLines(it) {
+        if (STEP.phase === 'cat') return [CAT_RULE, it.info.desc ? StepMode.esc(it.info.desc) : `${it.category} 계정이에요.`, `정답은 <b>${it.category}</b>!`];
+        if (it.type === 'fake') return ['장부에 쓰는 <b>공식 이름</b>일까요?<br>아니면 평소에 쓰는 말일까요?', `장부에는 <b>${StepMode.esc(it.fk.name)}</b>(으)로 적어요.`, '함정이에요 → <b>보내기</b>를 눌러요!'];
+        return ['자산·부채·자본·수익·비용 중<br>하나에 들어가는 이름일까요?', `<b>${it.category}</b> 계정이에요.<br>${StepMode.esc(it.info.desc || '')}`, '진짜 계정과목 → <b>단어를 탭</b>!'];
+    }
+    function stepHintBtn() {
+        return STEP.hint < 3 ? [{ label: STEP.hint < 2 ? `💡 힌트 ${STEP.hint + 1}` : '👀 정답 짚어 주기', on: stepHint }] : [];
+    }
+    function stepHintHtml(it) {
+        if (!STEP.hint) return '';
+        return `<div class="sc-hint">💡 ${stepHintLines(it)[STEP.hint - 1]}</div>`;
+    }
+    function stepHint() {
+        if (!STEP || STEP.hint >= 3) return;
+        STEP.hint++;
+        STEP.S.hint(STEP.hint);
+        const it = STEP.list[STEP.i].q;
+        if (STEP.hint === 3) {   // 정답 짚기 — 누를 곳을 반짝이게
+            if (STEP.phase === 'cat') { const b = document.querySelector(`#lv2-cat-btns button[data-cat="${it.category}"]`); if (b) b.classList.add('step-glow'); }
+            else if (it.type === 'account') STEP.el.classList.add('step-glow');
+        }
+        STEP.phase === 'cat' ? stepCatCoach() : stepJudgeCoach();
+        if (STEP.hint === 3 && STEP.phase === 'judge' && it.type === 'fake') { const b = document.getElementById('sc-send'); if (b) b.classList.add('step-glow'); }
+    }
+    function stepJudgeCoach() {
+        const it = STEP.list[STEP.i].q;
+        stepCoach(`<b>${StepMode.esc(it.word)}</b> — 장부에 쓰는 계정과목일까?<br><span class="sc-dim">맞으면 단어를 탭 · 아니면 보내기</span>${stepHintHtml(it)}`,
+            stepHintBtn().concat([{ id: 'sc-send', label: '🙅 함정! 보내기', cls: 'sc-btn sc-send', on: stepSend }]));
+    }
+    function stepCatCoach() {
+        const it = STEP.list[STEP.i].q;
+        stepCoach(`좋아요, 계정과목이에요!<br>이제 아래에서 <b>분류</b>를 골라요.${stepHintHtml(it)}`, stepHintBtn());
+    }
+    function stepTap() {
+        if (!STEP || STEP.phase !== 'judge') return;
+        const it = STEP.list[STEP.i].q;
+        if (it.type === 'account') {
+            playSound('correct');
+            STEP.el.classList.remove('step-glow');
+            STEP.el.classList.add('word-correct');
+            if (LV === 2) {   // 원래 게임의 분류 바를 그대로 쓴다
+                STEP.phase = 'cat'; STEP.hint = 0;
+                document.getElementById('lv2-cat-word').innerHTML = '<b>' + StepMode.esc(it.word) + '</b>은(는) 무슨 분류?';
+                document.querySelectorAll('#lv2-cat-btns button').forEach(b => { b.className = ''; b.disabled = false; });
+                document.getElementById('lv2-catbar').classList.add('show');
+                setCatbarOffset(true);
+                return stepCatCoach();
+            }
+            return stepRight([`맞아요! <b>${StepMode.esc(it.word)}</b>은(는) 계정과목이에요.`, `분류는 → <span class="sc-key">${it.category}</span>`, it.info.desc ? `<span class="sc-dim">${StepMode.esc(it.info.desc)}</span>` : '']);
+        }
+        // 함정 단어를 눌렀다
+        playSound('wrong'); hapticWrong();
+        STEP.el.classList.add('word-wrong'); setTimeout(() => STEP && STEP.el && STEP.el.classList.remove('word-wrong'), 500);
+        stepWrong([`앗, <b>${StepMode.esc(it.word)}</b>은(는) 함정이에요.`, `장부에는 → <span class="sc-key">${StepMode.esc(it.fk.name)}</span>`, `<span class="sc-dim">${StepMode.txt(it.fk.why)}</span>`, '이번엔 <b>보내기</b>를 눌러 봐요.']);
+    }
+    function stepSend() {
+        if (!STEP || STEP.phase !== 'judge') return;
+        const it = STEP.list[STEP.i].q;
+        if (it.type === 'fake') {
+            playSound('correct');
+            stepMoveWord(getBoardHeight() + 40, 500);
+            return stepRight([`맞아요! <b>${StepMode.esc(it.word)}</b>은(는) 함정이에요.`, `장부에는 → <span class="sc-key">${StepMode.esc(it.fk.name)}</span>`, `<span class="sc-dim">${StepMode.txt(it.fk.why)}</span>`]);
+        }
+        playSound('wrong'); hapticWrong();
+        document.body.classList.add('shake'); setTimeout(() => document.body.classList.remove('shake'), 400);
+        stepWrong([`잠깐! <b>${StepMode.esc(it.word)}</b>은(는) 진짜 계정과목이에요.`, `분류는 → <span class="sc-key">${it.category}</span>`, it.info.desc ? `<span class="sc-dim">${StepMode.esc(it.info.desc)}</span>` : '', '이번엔 <b>단어를 탭</b>해 봐요.']);
+    }
+    function pickCategoryStep(cat) {
+        const it = STEP.list[STEP.i].q;
+        const btn = document.querySelector(`#lv2-cat-btns button[data-cat="${cat}"]`);
+        if (cat === it.category) {
+            playSound('correct');
+            if (btn) btn.className = 'picked-ok';
+            document.querySelectorAll('#lv2-cat-btns button').forEach(b => b.disabled = true);
+            setTimeout(() => { document.getElementById('lv2-catbar').classList.remove('show'); setCatbarOffset(false); }, 350);
+            return stepRight([`맞아요! <b>${StepMode.esc(it.word)}</b> → <span class="sc-key">${it.category}</span>`, it.info.desc ? `<span class="sc-dim">${StepMode.esc(it.info.desc)}</span>` : '', it.info.ex ? `<span class="sc-dim">예) ${StepMode.esc(it.info.ex)}</span>` : '']);
+        }
+        playSound('wrong'); hapticWrong();
+        if (btn) { btn.className = 'picked-no'; btn.disabled = true; }
+        STEP.S.wrong();
+        stepCoach(`<b>${cat}</b>이(가) 아니에요.<br>힌트를 보고 다시 골라 봐요.${stepHintHtml(it)}`, stepHintBtn());
+    }
+    function stepWrong(lines) {
+        STEP.S.wrong();
+        STEP.phase = 'wrong';
+        const it = STEP.list[STEP.i].q;
+        stepCoach(StepMode.lines(lines), [{ label: '다시 해 볼게요', cls: 'sc-go', on: () => { STEP.phase = 'judge'; stepJudgeCoach(); } }]);
+        void it;
+    }
+    function stepRight(lines) {
+        STEP.phase = 'right';
+        const cur = STEP.list[STEP.i], it = cur.q;
+        const clean = STEP.S.done(it.key, { label: it.type === 'fake' ? `${it.word} → ${it.fk.name}` : `${it.word} = ${it.category}`,
+            q: `'${it.word}'은(는) 계정과목일까?`, correct: it.type === 'fake' ? `아니에요 → 장부에는 ${it.fk.name}` : `맞아요 (${it.category})`, type: it.type === 'fake' ? '함정 단어' : it.category });
+        // 처음에 틀리거나 힌트를 본 단어는 3개 뒤에 한 번 더(두 번째엔 더 안 넣는다)
+        if (!clean && !cur.again) STEP.list.splice(Math.min(STEP.list.length, STEP.i + 4), 0, { q: it, again: true });
+        const last = STEP.i + 1 >= STEP.list.length;
+        stepCoach(StepMode.lines(lines), [{ label: last ? '결과 보기 ▶' : '다음 단어 ▶', cls: 'sc-go', on: () => { STEP.i++; stepNext(); } }]);
+    }
+    function stepSummary() {
+        STEP.phase = 'summary';
+        const S = STEP.S;
+        S.finish(true);
+        const L = S.learned(), A = S.again();
+        const list = arr => arr.slice(0, 3).map(x => '· ' + StepMode.esc(x)).join('<br>');
+        document.getElementById('step-badge').textContent = '🐢 차근차근 끝!';
+        stepCoach(`🌱 오늘 익힌 것 <b>${L.length}</b>개` + (L.length ? `<br><span class="sc-dim">${list(L)}</span>` : '') +
+            (A.length ? `<br>🔁 다시 볼 것 <b>${A.length}</b>개<br><span class="sc-dim">${list(A)}</span>` : ''),
+            [{ label: '한 번 더', cls: 'sc-btn', on: () => { stepExit(true); startAcidStep(); } }, { label: '끝내기', cls: 'sc-go', on: () => stepExit() }]);
+    }
+    function stepExit(again) {
+        if (!STEP) return;
+        if (!STEP.S.sent) STEP.S.finish(false);
+        if (STEP.el) STEP.el.remove();
+        STEP = null;
+        isPlaying = false;
+        document.getElementById('step-coach').classList.remove('show');
+        document.getElementById('lv2-catbar').classList.remove('show'); setCatbarOffset(false);
+        document.body.classList.remove('step-mode');
+        if (!again) { els.start.style.display = ''; initDiffUI(); showAdPlaceholder(); }
     }
     if (window.StepMode) StepMode.mount({ game: 'acid', host: document.getElementById('step-host'), onStart: startAcidStep });
 
@@ -2295,7 +2469,7 @@ const Tutorial = (function () {
 function openGuide() { Tutorial.start(); }
 </script>
 
-<script src="emoji-icons.js?v=38"></script>
+<script src="emoji-icons.js?v=39"></script>
 <!-- 웹 전용 광고(시작·결과 화면만, 앱에선 adsense.js 가 스스로 멈춘다) -->
-<script src="adsense.js?v=38"></script>
+<script src="adsense.js?v=39"></script>
 </html>

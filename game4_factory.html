@@ -5,7 +5,7 @@
 <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
      **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
      이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-<script src="safestore.js?v=38"></script>
+<script src="safestore.js?v=39"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
@@ -233,6 +233,28 @@
         }
         .part-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.15); }
         .part-btn.selected { opacity: 0; pointer-events: none; transform: scale(0.8); }
+        /* ── 차근차근 모드(같은 조립 화면 + 튜토리얼 말풍선) ── */
+        .step-hud { display: none; flex: 1; text-align: center; color: #9fe3c0; font-family: 'Black Han Sans', sans-serif; font-size: 1rem; }
+        body.step-mode .hud-stat, body.step-mode .timer-track, body.step-mode #freeze-btn, body.step-mode #rewarded-btn { display: none !important; }
+        body.step-mode .step-hud { display: block; }
+        body.step-mode .game-main { justify-content: flex-start; padding-bottom: 300px; }
+        #step-coach { display: none; position: fixed; left: 0; right: 0; bottom: 0; z-index: 80; background: linear-gradient(180deg, #16213e, #0a0a14); max-height: 58vh; overflow-y: auto; }
+        #step-coach.show { display: block; }
+        #step-coach .tut-bubble-text { min-height: 0; }
+        #step-coach .sc-dim { opacity: .72; font-size: .9rem; }
+        #step-coach .sc-key { color: var(--yellow); font-weight: 800; }
+        #step-coach .sc-hint { margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: rgba(255,209,102,.1); border: 1px dashed rgba(255,209,102,.45); color: #ffe6a6; font-size: .92rem; line-height: 1.75; text-align: center; }
+        #step-coach .rd p { margin: 0 0 .35em; }
+        #step-coach .sc-btns { display: flex; gap: 10px; margin-top: 14px; }
+        #step-coach .sc-btns.col { flex-direction: column; gap: 8px; }
+        #step-coach .sc-btns button { flex: 1; min-height: 48px; border-radius: 14px; font-family: 'Black Han Sans', sans-serif; font-size: 1rem; cursor: pointer; }
+        #step-coach .sc-btn { background: rgba(255,255,255,.08); border: 1.5px solid rgba(255,255,255,.25); color: #fff; }
+        #step-coach .sc-btn.off { opacity: .3; pointer-events: none; text-decoration: line-through; }
+        #step-coach .sc-hintbtn { border-style: dashed; border-color: rgba(255,209,102,.6); color: #ffd166; }
+        #step-coach .sc-go { border: 2px solid var(--blue); color: #021018; background: var(--blue); }
+        .part-btn.part-off { opacity: .25; pointer-events: none; text-decoration: line-through; }
+        .step-glow { animation: stepGlow 1s ease-in-out infinite; }
+        @keyframes stepGlow { 0%,100% { box-shadow: 0 0 0 2px var(--yellow), 0 0 10px var(--yellow); } 50% { box-shadow: 0 0 0 4px var(--yellow), 0 0 28px var(--yellow); } }
 
         /* ── 난이도 선택(시작화면) ── */
         .diff-toggle { display: flex; gap: 8px; width: 100%; }
@@ -576,20 +598,20 @@
 
 <button id="rewarded-btn" onclick="requestRewarded()">⏱ +30초 광고 보기</button>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="pausewatch.js?v=38"></script>
-    <script src="ask.js?v=38"></script>
-    <script src="wrongnote.js?v=38"></script>
-    <script src="growth.js?v=38"></script>
-<script src="streak.js?v=38"></script>
-    <script src="difficulty.js?v=38"></script>
-    <script src="readable.js?v=38"></script>
-    <script src="stepmode.js?v=38"></script>
-    <script src="review-prompt.js?v=38"></script>
+    <script src="pausewatch.js?v=39"></script>
+    <script src="ask.js?v=39"></script>
+    <script src="wrongnote.js?v=39"></script>
+    <script src="growth.js?v=39"></script>
+<script src="streak.js?v=39"></script>
+    <script src="difficulty.js?v=39"></script>
+    <script src="readable.js?v=39"></script>
+    <script src="stepmode.js?v=39"></script>
+    <script src="review-prompt.js?v=39"></script>
 </head>
 <body>
 
 <!-- 🎵 BGM 오디오 엘리먼트 -->
-<script src="bgm.js?v=38"></script>
+<script src="bgm.js?v=39"></script>
 
 
 
@@ -691,11 +713,12 @@
         <div class="timer-track"><div id="timer-bar" style="width:100%"></div></div>
         <div class="hud-stat"><div class="hud-label">SCORE</div><div class="hud-val" id="hud-score">0</div></div>
         <div class="hud-stat"><div class="hud-label">COMBO</div><div class="hud-val" id="hud-combo">0x</div></div>
+        <div class="step-hud" id="step-hud">🐢 차근차근</div>
     </div>
     <div class="hdr-btns">
         <!-- 🎵 음소거 버튼 -->
         <button class="mute-btn" id="mute-btn" onclick="toggleMute()" title="BGM 음소거">🎵</button>
-        <button class="hdr-btn hdr-btn-stop" onclick="if(isPlaying) endGame();">그만</button>
+        <button class="hdr-btn hdr-btn-stop" onclick="quitGame()">그만</button>
         <button class="hdr-btn hdr-btn-home" onclick="(async()=>{if(typeof isPlaying!=='undefined'&&isPlaying){if(!await Ask.confirm('게임을 종료하고 메인으로 나가시겠어요?'))return;}location.href='index.html'})()">홈</button>
     </div>
 </header>
@@ -731,6 +754,8 @@
         <button class="amt-submit" onclick="submitAmount()">✔ 확인</button>
     </div>
 </div>
+<!-- 차근차근 모드 말풍선 — 튜토리얼과 같은 모양 -->
+<div id="step-coach" class="tut-bubble"><div class="tut-bubble-text"></div><div class="sc-btns"></div></div>
 <div id="flash-overlay"></div>
 
 <script>
@@ -750,7 +775,7 @@ const GAME_ID = "factory";
 // ══════════════════════════════════════
 // 🎵 BGM 관리
 // ══════════════════════════════════════
-const bgm = BGMAudio.create('bgm4_factory.mp3?v=38');
+const bgm = BGMAudio.create('bgm4_factory.mp3?v=39');
 bgm.volume = 0.5;
 
 // 게임별 키(factory_muted)가 있으면 우선, 없으면 허브 전역 토글(hub_muted) 참조
@@ -1109,6 +1134,7 @@ function renderSlots() {
 }
 
 function handleSlotClick(side) {
+    if (typeof STEP !== "undefined" && STEP) return;   // 차근차근 모드는 말풍선이 켤 칸을 정한다
     if (!isPlaying || judging) return;
     playSound('select');
     if (selectedParts[side]) { selectedParts[side].el.classList.remove('selected'); selectedParts[side] = null; }
@@ -1279,53 +1305,184 @@ initDiffUI();
 // 서버 기록으로 해금이 복원되면(다른 기기에서 해금한 학생) 잠금 표시를 다시 그린다
 window.addEventListener('difficulty-synced', function () { try { initDiffUI(); } catch (e) {} });
 
-/* ── 차근차근 모드(2026-09-23, docs/차근차근모드_기획.md) ──
-   한 번에 조립하지 않고 3단계로 쪼갠다: ① 어떤 결산 정리인가 → ② 차변 → ③ 대변.
-   보기는 가짜 1개만. 틀리면 유형 설명 카드. 점수·랭킹·서버 오답에는 안 들어간다. */
-function factoryStepPool() {
-    const SM = window.StepMode, D = SM.DATA, e = SM.esc;
-    const PAIR4 = ['선급비용', '선수수익', '미수수익', '미지급비용'];
-    const ALL = Object.keys(D.factoryTypes);
-    const card = t => { const c = D.factoryTypes[t]; return SM.lines([`<span class="key">${e(D.factoryTypeLabel[t])}</span>`, `상황 — ${e(c.rule)}`, SM.txt(c.how), `<span class="dim">${e(c.je)}</span>`]); };
-    return qBank.map(q => {
-        const t = D.factoryTypeOf(q.L, q.R);
-        if (!t) return null;
-        // 헷갈리는 짝(선급·선수·미수·미지급)끼리 보기로 붙여야 구분하는 연습이 된다
-        const near = PAIR4.includes(t) ? PAIR4.filter(x => x !== t) : SM.shuffle(ALL.filter(x => x !== t)).slice(0, 3);
-        const typeOpts = SM.shuffle([t].concat(near.slice(0, 3)));
-        const parts = String(q.hint || '').split('/').map(x => x.trim());
-        const qHtml = e(q.q);
-        const mk2 = (right, fake) => SM.shuffle([right, fake]).map(x => ({ label: x }));
-        const drOpts = mk2(q.L, q.fakes[0]);
-        const crOpts = mk2(q.R, q.fakes[1] || q.fakes[0]);
-        return {
-            key: q.q, type: D.factoryTypeLabel[t], learn: `${D.factoryTypeLabel[t]}: (차) ${q.L} / (대) ${q.R}`,
-            wrong: { q: q.q.replace(/\n/g, '<br>'), correct: '(차) ' + q.L + ' / (대) ' + q.R },
-            steps: [{
-                stepName: '어떤 정리?', prompt: `${qHtml}\n\n<b>어떤 결산 정리일까요?</b>`,
-                options: typeOpts.map(x => ({ label: D.factoryTypeLabel[x] })), answer: typeOpts.indexOf(t),
-                hints: [PAIR4.includes(t) ? '돈을 <b>이미</b> 주고받았나요, <b>아직</b>인가요?<br>그 돈은 올해 몫? 내년 몫?'
-                                          : '무엇이 바뀌었나 찾아봐요.<br>가치가 줄었나? 못 받을 돈인가?<br>시가가 변했나? 임시 계정인가?',
-                        '상황을 한 줄로 줄이면<br><b>' + e(D.factoryTypes[t].rule) + '</b>'],
-                explain: () => card(t)
-            }, {
-                stepName: '차변', prompt: `${qHtml}\n\n<b style="color:#6fb6ff">차변</b>(왼쪽)에 올 계정은?`,
-                options: drOpts, answer: drOpts.findIndex(o => o.label === q.L),
-                hints: [e(parts[0] || ''), e(D.factoryTypes[t].je)],
-                explain: (c, ok) => SM.lines([`(차) <span class="key">${e(q.L)}</span>`, e(parts[0] || ''), ok ? '' : `<span class="dim">${SM.txt(D.factoryTypes[t].how)}</span>`])
-            }, {
-                stepName: '대변', prompt: `${qHtml}\n\n(차) ${e(q.L)} / <b style="color:#ff8fa8">대변</b>(오른쪽)에 올 계정은?`,
-                options: crOpts, answer: crOpts.findIndex(o => o.label === q.R),
-                hints: [e(parts[1] || ''), e(D.factoryTypes[t].je)],
-                explain: (c, ok) => SM.lines([`(대) <span class="key">${e(q.R)}</span>`, e(parts[1] || ''), ok ? `완성 → (차) ${e(q.L)} / (대) ${e(q.R)}` : `<span class="dim">${SM.txt(D.factoryTypes[t].how)}</span>`])
-            }]
-        };
-    }).filter(Boolean);
+/* ── 차근차근 모드(2026-09-24 개편, docs/차근차근모드_기획.md) ──
+   성일님: "기존 게임에서 차근차근 한 단계씩 스몰스텝으로. 갑자기 다른 창이 나오면 어떻게 해."
+   → **같은 조립 화면**(거래 카드·차변/대변 칸·부품)을 그대로 쓰고, 아래 말풍선이 한 단계씩 짚어 준다.
+     ① 어떤 결산 정리인지(말풍선 안 보기)  ② 차변 칸만 켜고 부품 2개  ③ 대변 칸만 켜고 부품 2개
+     틀리면 말풍선이 이유를 알려 주고 그 부품은 꺼 둔 채 다시. 시간 제한·점수·랭킹 없음(난이도 1 문제로).
+   기록은 StepMode.session(전용 테이블·이 기기 오답노트)만. */
+let STEP = null;
+const STEP_N = 8;
+const STEP_PAIR4 = ['선급비용', '선수수익', '미수수익', '미지급비용'];
+
+function stepQ(q) {
+    const D = StepMode.DATA, t = D.factoryTypeOf(q.L, q.R);
+    return t ? { key: q.q, q, t } : null;
 }
 function startFactoryStep() {
     if (!window.StepMode) return;
-    StepMode.start({ game: 'factory', title: '결산분개 조립 공장', pool: factoryStepPool(), n: 8 });
+    initAudio();
+    hideAdPlaceholder();
+    LV = 1;
+    els.screenStart.style.display = 'none';
+    els.screenResult.style.display = 'none';
+    clearInterval(timerInterval);
+    isPlaying = true; judging = false;
+    document.body.classList.add('step-mode');
+    const S = StepMode.session('factory');
+    STEP = { S, list: S.pick(qBank.map(stepQ).filter(Boolean), STEP_N, x => x.key).map(x => ({ x, again: false })), i: 0, phase: '', hint: 0 };
+    stepNextQ();
 }
+function stepCoach(html, btns) {
+    const c = document.getElementById('step-coach');
+    c.querySelector('.tut-bubble-text').innerHTML = html;
+    const row = c.querySelector('.sc-btns');
+    row.innerHTML = '';
+    (btns || []).forEach(b => {
+        const e = document.createElement('button');
+        e.type = 'button'; e.className = b.cls || 'sc-btn'; e.innerHTML = b.label;
+        if (b.data) e.setAttribute('data-v', b.data);
+        e.onclick = b.on;
+        row.appendChild(e);
+    });
+    row.classList.toggle('col', !!(btns && btns.col));
+    c.classList.add('show');
+}
+function stepCur() { return STEP.list[STEP.i].x; }
+function stepNextQ() {
+    if (!STEP) return;
+    if (STEP.i >= STEP.list.length) return stepSummary();
+    const x = stepCur(), q = x.q;
+    currentQ = q;
+    STEP.S.begin(x.key);
+    document.getElementById('step-hud').textContent = '🐢 차근차근 ' + (STEP.i + 1) + ' / ' + STEP.list.length;
+    els.qNum.textContent = 'Q.' + (STEP.i + 1);
+    els.qText.innerHTML = q.q.replace(/\n/g, '<br>');
+    const hintEl = document.getElementById('q-hint'); hintEl.style.display = 'none'; hintEl.textContent = '';
+    selectedParts = { L: null, R: null }; activeSlot = null;
+    renderSlots();
+    els.partsContainer.innerHTML = '';
+    stepTypeAsk();
+}
+/* ① 어떤 정리인가 — 헷갈리는 짝(선급·선수·미수·미지급)끼리 보기로 */
+function stepTypeAsk() {
+    const x = stepCur(), D = StepMode.DATA;
+    STEP.phase = 'type'; STEP.hint = 0;
+    if (!x.opts) {
+        const near = STEP_PAIR4.includes(x.t) ? STEP_PAIR4.filter(v => v !== x.t) : StepMode.shuffle(Object.keys(D.factoryTypes).filter(v => v !== x.t));
+        x.opts = StepMode.shuffle([x.t].concat(StepMode.shuffle(near.slice()).slice(0, 2)));
+    }
+    stepTypeCoach();
+}
+function stepHintHtml(lines) { return STEP.hint ? `<div class="sc-hint">💡 ${lines[STEP.hint - 1]}</div>` : ''; }
+function stepTypeHints() {
+    const x = stepCur(), D = StepMode.DATA;
+    return [STEP_PAIR4.includes(x.t) ? '돈을 <b>이미</b> 주고받았나요, <b>아직</b>인가요?<br>그 돈은 올해 몫? 내년 몫?' : '무엇이 바뀌었나 찾아봐요.<br>가치가 줄었나? 못 받을 돈인가?<br>시가가 변했나? 임시 계정인가?',
+            '상황을 한 줄로 줄이면<br><b>' + StepMode.esc(D.factoryTypes[x.t].rule) + '</b>',
+            '정답은 <b>' + StepMode.esc(D.factoryTypeLabel[x.t]) + '</b>!'];
+}
+function stepTypeCoach(extra) {
+    const x = stepCur(), D = StepMode.DATA;
+    const btns = x.opts.map(v => ({ label: StepMode.esc(D.factoryTypeLabel[v]), data: v, cls: 'sc-btn sc-opt' + (x.off && x.off[v] ? ' off' : '') + (STEP.hint >= 3 && v === x.t ? ' step-glow' : ''), on: () => stepPickType(v) }));
+    if (STEP.hint < 3) btns.push({ label: STEP.hint < 2 ? `💡 힌트 ${STEP.hint + 1}` : '👀 정답 짚어 주기', cls: 'sc-btn sc-hintbtn', on: () => { STEP.hint++; STEP.S.hint(STEP.hint); stepTypeCoach(); } });
+    btns.col = true;
+    stepCoach((extra || '① 위 거래를 읽어요.<br>이건 <b>어떤 결산 정리</b>일까요?') + stepHintHtml(stepTypeHints()), btns);
+}
+function stepPickType(v) {
+    const x = stepCur(), D = StepMode.DATA, c = D.factoryTypes[x.t];
+    if (x.off && x.off[v]) return;
+    if (v !== x.t) {
+        playSound('bad'); flashEffect(false); hapticWrong();
+        STEP.S.wrong();
+        (x.off = x.off || {})[v] = true;
+        return stepTypeCoach(`<b>${StepMode.esc(D.factoryTypeLabel[v])}</b>은(는) 아니에요.<br>${StepMode.esc(D.factoryTypes[v].rule)} — 이런 상황일 때예요.<br>다시 골라 봐요.`);
+    }
+    playSound('ok');
+    stepCoach(StepMode.lines([`맞아요! <span class="sc-key">${StepMode.esc(D.factoryTypeLabel[x.t])}</span>`, `상황 — ${StepMode.esc(c.rule)}`, StepMode.txt(c.how)]),
+        [{ label: '② 차변 고르러 가기 ▶', cls: 'sc-go', on: () => stepSide('L') }]);
+}
+/* ②③ 차변·대변 — 켜진 칸 하나, 부품 2개 */
+function stepSide(side) {
+    const x = stepCur(), q = x.q;
+    STEP.phase = side; STEP.hint = 0;
+    activeSlot = side; renderSlots();
+    const right = side === 'L' ? q.L : q.R;
+    const fake = side === 'L' ? q.fakes[0] : (q.fakes[1] || q.fakes[0]);
+    els.partsContainer.innerHTML = '';
+    StepMode.shuffle([right, fake]).forEach(opt => {
+        const btn = document.createElement('div');
+        btn.className = 'part-btn'; btn.textContent = opt;
+        btn.addEventListener('pointerdown', (e) => { e.preventDefault(); stepPickPart(opt, btn); });
+        els.partsContainer.appendChild(btn);
+    });
+    stepSideCoach();
+}
+function stepSideHints() {
+    const x = stepCur(), q = x.q, D = StepMode.DATA, parts = String(q.hint || '').split('/').map(v => v.trim());
+    const side = STEP.phase;
+    return [StepMode.esc(parts[side === 'L' ? 0 : 1] || ''), StepMode.esc(D.factoryTypes[x.t].je), `정답은 <b>${StepMode.esc(side === 'L' ? q.L : q.R)}</b>!`];
+}
+function stepSideCoach(extra) {
+    const side = STEP.phase;
+    const head = extra || (side === 'L' ? '② 이제 <b style="color:var(--blue)">👈 차변</b> 칸이에요.<br>차변에 올 부품을 골라요.' : '③ 마지막 <b style="color:var(--red)">대변 👉</b> 칸이에요.<br>대변에 올 부품을 골라요.');
+    const btns = STEP.hint < 3 ? [{ label: STEP.hint < 2 ? `💡 힌트 ${STEP.hint + 1}` : '👀 정답 짚어 주기', on: () => {
+        STEP.hint++; STEP.S.hint(STEP.hint);
+        if (STEP.hint === 3) { const r = side === 'L' ? stepCur().q.L : stepCur().q.R; els.partsContainer.querySelectorAll('.part-btn').forEach(b => { if (b.textContent === r) b.classList.add('step-glow'); }); }
+        stepSideCoach(extra);
+    } }] : [];
+    stepCoach(head + stepHintHtml(stepSideHints()), btns);
+}
+function stepPickPart(opt, btn) {
+    if (!STEP || (STEP.phase !== 'L' && STEP.phase !== 'R')) return;
+    const x = stepCur(), q = x.q, side = STEP.phase, D = StepMode.DATA;
+    const right = side === 'L' ? q.L : q.R;
+    const parts = String(q.hint || '').split('/').map(v => v.trim());
+    if (opt !== right) {
+        playSound('bad'); flashEffect(false); hapticWrong();
+        STEP.S.wrong();
+        btn.classList.add('part-off');
+        const slot = side === 'L' ? els.slotL : els.slotR;
+        slot.classList.add('error'); setTimeout(() => slot.classList.remove('error'), 500);
+        return stepSideCoach(`<b>${StepMode.esc(opt)}</b>은(는) 이 거래의 ${side === 'L' ? '차변' : '대변'}이 아니에요.<br><span class="sc-dim">${side === 'L' ? '차변' : '대변'}엔 → ${StepMode.esc(parts[side === 'L' ? 0 : 1] || '')}</span><br>남은 부품을 골라 봐요.`);
+    }
+    playSound('select');
+    selectedParts[side] = { text: opt, el: btn };
+    btn.classList.add('selected');
+    activeSlot = null; renderSlots();
+    if (side === 'L') {
+        return stepCoach(StepMode.lines([`맞아요! (차) <span class="sc-key">${StepMode.esc(q.L)}</span>`, `<span class="sc-dim">${StepMode.esc(parts[0] || '')}</span>`]),
+            [{ label: '③ 대변 고르러 가기 ▶', cls: 'sc-go', on: () => stepSide('R') }]);
+    }
+    playSound('ok'); flashEffect(true); hapticCorrect();
+    const cur = STEP.list[STEP.i];
+    const clean = STEP.S.done(x.key, { label: `${D.factoryTypeLabel[x.t]}: (차) ${q.L} / (대) ${q.R}`, q: q.q.replace(/\n/g, '<br>'), correct: '(차) ' + q.L + ' / (대) ' + q.R, type: D.factoryTypeLabel[x.t] });
+    if (!clean && !cur.again) STEP.list.splice(Math.min(STEP.list.length, STEP.i + 4), 0, { x: Object.assign({}, x, { off: null }), again: true });
+    const last = STEP.i + 1 >= STEP.list.length;
+    stepCoach(StepMode.lines([`완성! (차) <span class="sc-key">${StepMode.esc(q.L)}</span> / (대) <span class="sc-key">${StepMode.esc(q.R)}</span>`, `<span class="sc-dim">${StepMode.esc(D.factoryTypes[x.t].rule)}</span>`]),
+        [{ label: last ? '결과 보기 ▶' : '다음 거래 ▶', cls: 'sc-go', on: () => { STEP.i++; stepNextQ(); } }]);
+}
+function stepSummary() {
+    STEP.phase = 'summary';
+    const S = STEP.S;
+    S.finish(true);
+    const L = S.learned(), A = S.again();
+    const list = arr => arr.slice(0, 3).map(v => '· ' + StepMode.esc(v)).join('<br>');
+    document.getElementById('step-hud').textContent = '🐢 차근차근 끝!';
+    els.partsContainer.innerHTML = '';
+    stepCoach(`🌱 오늘 익힌 것 <b>${L.length}</b>개` + (L.length ? `<br><span class="sc-dim">${list(L)}</span>` : '') +
+        (A.length ? `<br>🔁 다시 볼 것 <b>${A.length}</b>개<br><span class="sc-dim">${list(A)}</span>` : ''),
+        [{ label: '한 번 더', on: () => { stepExit(true); startFactoryStep(); } }, { label: '끝내기', cls: 'sc-go', on: () => stepExit() }]);
+}
+function stepExit(again) {
+    if (!STEP) return;
+    if (!STEP.S.sent) STEP.S.finish(false);
+    STEP = null;
+    isPlaying = false;
+    document.getElementById('step-coach').classList.remove('show');
+    document.body.classList.remove('step-mode');
+    if (!again) { els.screenStart.style.display = ''; initDiffUI(); showAdPlaceholder(); }
+}
+function quitGame() { if (STEP) return stepExit(); if (isPlaying) endGame(); }
 if (window.StepMode) StepMode.mount({ game: 'factory', host: document.getElementById('step-host'), onStart: startFactoryStep });
 
     /* 스테이지 해금·개인 최고기록은 **플레이했는가**로 판단한다.
@@ -1977,8 +2134,8 @@ const Tutorial = (function () {
 // 사용방법 버튼 → 인터랙티브 튜토리얼
 function openGuide() { Tutorial.start(); }
 </script>
-<script src="emoji-icons.js?v=38"></script>
+<script src="emoji-icons.js?v=39"></script>
 <!-- 웹 전용 광고(시작·결과 화면만, 앱에선 adsense.js 가 스스로 멈춘다) -->
-<script src="adsense.js?v=38"></script>
+<script src="adsense.js?v=39"></script>
 </body>
 </html>

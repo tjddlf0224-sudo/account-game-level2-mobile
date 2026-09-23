@@ -2,8 +2,9 @@
  *  stepmode.js — 차근차근 모드 공통 엔진 (2026-09-23)
  *  기획: docs/차근차근모드_기획.md
  *
- *  게임 화면 위에 카드형 연습 화면을 띄운다. 시간 제한 없음 · 힌트 3단계 · 틀리면 해설 카드 ·
- *  틀린 문제는 3문제 뒤에 한 번 더 · 끝나면 점수 대신 "오늘 익힌 것 / 다시 볼 것".
+ *  ⚠ 2026-09-24 개편: 따로 뜨는 카드 창을 없앴다. 각 게임이 **자기 화면 그대로** 속도를 늦추고
+ *  말풍선으로 한 단계씩 짚어 준다(성일님: "아예 다른 창이 나오면 어떻게 해").
+ *  이 파일은 시작 화면 버튼·본인에게만 보이는 권유·문제 고르기·전용 테이블 기록·게임별 해설 데이터만 맡는다.
  *
  *  ⚠ 기록 원칙(성일님 결정)
  *   - 누가 썼는지 **다른 사람에게 보이지 않게**: 점수(scores·score_history)·판별(level_rounds)·
@@ -14,14 +15,8 @@
  *   - 틀린 문제는 **이 기기 오답노트에만** 남긴다(WrongNote.flush(game,{localOnly:true})).
  *
  *  게임 쪽 사용:
- *    StepMode.mount({ game:'acid', host: 요소, label:'🐢 차근차근 모드' })   // 시작 화면에 버튼+권유
- *    StepMode.start({ game, title, pool:[문항…], n:10 })
- *
- *  문항 형식:
- *    { key, type, learn:'요약 한 줄', wrong:{q, correct},
- *      steps:[ { prompt:html, options:[{label, html?}], answer:idx,
- *                hints:[ '문장' | {text, eliminate:true} ],   // 최대 2개 + 자동 ③정답 보기
- *                explain:function(chosen, ok){ return html } } ] }
+ *    StepMode.mount({ game:'acid', host: 요소, onStart })   // 시작 화면에 버튼+권유
+ *    var S = StepMode.session('acid')                      // 한 판 기록(아래 session() 설명)
  * ============================================================ */
 (function (global) {
   'use strict';
@@ -152,48 +147,12 @@
       .map(function (r) { return String(r.key).replace(/_cat$/, ''); });   // 산성비 분류오답('_cat')은 같은 단어로
   }
 
-  /* ── 화면 ───────────────────────────────────────────────── */
+  /* ── 버튼·권유 말풍선 모양(시작 화면에만 쓴다) ───────────────── */
   function css() {
     if (document.getElementById('am-step-css')) return;
     var s = document.createElement('style');
     s.id = 'am-step-css';
     s.textContent = [
-      '#am-step{position:fixed;inset:0;z-index:99990;background:#081322;color:#eaf2ff;display:none;flex-direction:column;',
-      ' font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;word-break:keep-all;overflow-wrap:anywhere;',
-      ' -webkit-user-select:none;user-select:none;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}',
-      '#am-step.open{display:flex}',
-      '#am-step .st-top{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.08)}',
-      '#am-step .st-badge{font-size:.72rem;font-weight:700;color:#9fe3c0;background:rgba(80,200,140,.12);border:1px solid rgba(80,200,140,.35);border-radius:999px;padding:3px 10px;white-space:nowrap}',
-      '#am-step .st-title{flex:1;font-size:.86rem;opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
-      '#am-step .st-prog{font-size:.8rem;opacity:.7;font-variant-numeric:tabular-nums}',
-      '#am-step .st-x{background:none;border:1px solid rgba(255,255,255,.18);color:#eaf2ff;border-radius:10px;padding:6px 12px;font-size:.8rem}',
-      '#am-step .st-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:18px 16px 28px}',
-      '#am-step .st-wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:14px}',
-      '#am-step .st-card{background:#0f1f36;border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:18px 16px}',
-      '#am-step .st-stepno{font-size:.72rem;opacity:.6;margin-bottom:6px;letter-spacing:.04em}',
-      '#am-step .st-prompt{font-size:1.02rem;line-height:1.75;white-space:pre-line}',
-      '#am-step .st-prompt .big{display:block;font-size:1.6rem;font-weight:800;text-align:center;margin:6px 0 2px;white-space:normal}',
-      '#am-step .st-opts{display:flex;flex-direction:column;gap:10px}',
-      '#am-step .st-opt{min-height:52px;text-align:left;background:#12284a;border:1.5px solid rgba(120,170,255,.25);color:#eaf2ff;border-radius:14px;padding:13px 15px;font-size:.98rem;line-height:1.6}',
-      '#am-step .st-opt:disabled{opacity:.35}',
-      '#am-step .st-opt.ok{border-color:#3ddc97;background:rgba(61,220,151,.14);opacity:1}',
-      '#am-step .st-opt.no{border-color:#ff6b8a;background:rgba(255,107,138,.12)}',
-      '#am-step .st-opt.show{border-color:#ffd166;box-shadow:0 0 0 2px rgba(255,209,102,.35)}',
-      '#am-step .st-hints{display:flex;flex-direction:column;gap:8px}',
-      '#am-step .st-hbtn{align-self:flex-start;background:none;border:1px dashed rgba(255,209,102,.6);color:#ffd166;border-radius:12px;padding:9px 14px;font-size:.88rem}',
-      '#am-step .st-hint{background:rgba(255,209,102,.08);border-left:3px solid #ffd166;border-radius:8px;padding:12px 14px;font-size:.92rem;line-height:1.8}',
-      '#am-step .st-hl{font-size:.74rem;font-weight:700;color:#ffd166;margin-bottom:4px;letter-spacing:.03em}',
-      '#am-step .st-exp{background:#0c2a24;border:1px solid rgba(61,220,151,.3);border-radius:14px;padding:16px;font-size:.95rem;line-height:1.8}',
-      '#am-step .st-exp.bad{background:#2a1020;border-color:rgba(255,107,138,.35)}',
-      '#am-step .st-exp b.v{display:block;font-size:1rem;margin-bottom:10px}',
-      '#am-step .st-exp .dim{opacity:.72;font-size:.88rem}',
-      '#am-step .st-exp .key{color:#ffd166;font-weight:800}',
-      '#am-step .st-intro{margin:6px 0 0;padding:0;list-style:none;line-height:1.8;font-size:.95rem}',
-      '#am-step .st-intro li{margin-bottom:6px}',
-      '#am-step .st-go{min-height:50px;border:none;border-radius:14px;background:#3ddc97;color:#062016;font-weight:800;font-size:1rem}',
-      '#am-step .st-note{font-size:.82rem;opacity:.65;line-height:1.75}',
-      '#am-step .st-list{margin:8px 0 0;padding-left:18px;line-height:1.9;font-size:.95rem}',
-      '#am-step h3{margin:0 0 6px;font-size:1rem}',
       '.am-step-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;min-height:44px;margin-top:10px;background:rgba(80,200,140,.1);border:1.5px solid rgba(80,200,140,.45);color:#9fe3c0;border-radius:12px;font-size:.9rem;font-weight:700;font-family:inherit}',
       '.am-step-sug{margin-top:8px;background:rgba(255,209,102,.08);border:1px solid rgba(255,209,102,.35);border-radius:12px;padding:12px 14px;font-size:.86rem;line-height:1.75;color:#ffe6a6;text-align:left}',
       '.am-step-sug .row{display:flex;gap:8px;margin-top:8px}',
@@ -203,276 +162,94 @@
     document.head.appendChild(s);
   }
 
-  var el = null;
-  function root() {
-    if (el) return el;
-    css();
-    el = document.createElement('div');
-    el.id = 'am-step';
-    el.setAttribute('role', 'dialog');
-    el.innerHTML = '<div class="st-top"><span class="st-badge">차근차근 모드</span><span class="st-title"></span>' +
-      '<span class="st-prog"></span><button class="st-x" type="button">그만하기</button></div>' +
-      '<div class="st-body"><div class="st-wrap"></div></div>';
-    document.body.appendChild(el);
-    el.querySelector('.st-x').onclick = function () { finish(false); };
-    return el;
-  }
-  function wrap() { return root().querySelector('.st-wrap'); }
-  function scrollBottom() { var b = root().querySelector('.st-body'); setTimeout(function () { b.scrollTop = b.scrollHeight; }, 30); }
+  /* ── 한 판 기록(세션) ─────────────────────────────────────────
+     2026-09-24 성일님: "아예 다른 창이 나오면 어떻게 해. 기존 게임에서 한 단계씩 알려줘야지."
+     → 화면은 **각 게임이 자기 화면 그대로** 그린다(속도를 늦추고 말풍선으로 짚어 줌).
+       여기서는 문제 고르기 · 판 기록(전용 테이블) · 이 기기 오답노트만 맡는다.
 
-  /* ── 한 판 진행 ─────────────────────────────────────────── */
-  var R = null;   // 현재 판
-
-  function pickQuestions(pool, n, game) {
-    var wk = localWrongKeys(game), byKey = {};
-    pool.forEach(function (q) { byKey[q.key] = q; });
-    var out = [], used = {};
-    // 이 기기 오답노트에서 자주 틀린 문제를 절반까지 먼저
-    for (var i = 0; i < wk.length && out.length < Math.ceil(n / 2); i++) {
-      var q = byKey[wk[i]];
-      if (q && !used[q.key]) { out.push(q); used[q.key] = 1; }
-    }
-    shuffle(pool.slice()).forEach(function (q) { if (out.length < n && !used[q.key]) { out.push(q); used[q.key] = 1; } });
-    return shuffle(out);
-  }
-
-  function start(opt) {
-    if (!opt || !opt.pool || !opt.pool.length) return;
-    hook();
+     var S = StepMode.session('acid');
+     S.pick(문항배열, 10, q => q.key)          // 이 기기 오답노트에서 자주 틀린 것 절반 먼저
+     S.begin(key) … S.hint(n) … S.wrong() … S.done(key, {q, correct, type})   // 한 문항
+     S.finish(끝까지 했는가)                    // 판 끝 — 서버 전송 */
+  var cur = null;
+  function session(game) {
     active = true;
-    var n = opt.n || 10;
-    R = {
-      game: opt.game, title: opt.title || '', onClose: opt.onClose,
-      key: opt.game + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    var S = {
+      game: game,
+      key: game + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
       startedAt: new Date().toISOString(),
-      list: pickQuestions(opt.pool, n, opt.game).map(function (q) { return { q: q, again: false }; }),
-      i: 0, answers: [], cards: 0, hints: 0, res: {}, wrongs: [], sent: false, pool0: opt.pool, n: n
-    };
-    try { if (global.AdBridge && AdBridge.hide) AdBridge.hide(); } catch (e) {}
-    root().classList.add('open');
-    root().querySelector('.st-title').textContent = R.title;
-    document.documentElement.style.overflow = 'hidden';
-    intro();
-  }
-
-  function intro() {
-    var w = wrap();
-    w.innerHTML = '<div class="st-card"><h3>천천히, 하나씩 풀어 봐요</h3>' +
-      '<ul class="st-intro"><li>⏳ 시간 제한이 없어요.</li><li>💡 막히면 힌트를 하나씩 열어요.</li>' +
-      '<li>📘 틀려도 괜찮아요.<br>이유를 보고 다시 골라요.</li><li>🔁 틀린 문제는 조금 뒤에 또 나와요.</li></ul></div>' +
-      '<div class="st-note">점수·랭킹·팀전에는 들어가지 않아요.<br>틀린 문제는 내 오답노트에만 남아요.</div>' +
-      '<button class="st-go" type="button">시작하기 (' + R.list.length + '문제)</button>';
-    w.querySelector('.st-go').onclick = function () { showItem(); };
-  }
-
-  function prog() {
-    root().querySelector('.st-prog').textContent = Math.min(R.i + 1, R.list.length) + ' / ' + R.list.length;
-  }
-
-  function showItem() {
-    if (R.i >= R.list.length) return finish(true);
-    var it = R.list[R.i];
-    it.si = 0; it.hintMax = 0; it.wrongTries = 0; it.t0 = Date.now(); it.cleanAll = true;
-    showStep();
-  }
-
-  function showStep() {
-    prog();
-    var it = R.list[R.i], q = it.q, st = q.steps[it.si];
-    var w = wrap();
-    var multi = q.steps.length > 1;
-    var h = '<div class="st-card">' + (multi ? '<div class="st-stepno">' + (it.si + 1) + '단계 / ' + q.steps.length + '단계' + (st.stepName ? ' · ' + esc(st.stepName) : '') + '</div>' : '') +
-      '<div class="st-prompt">' + st.prompt + '</div></div>' +
-      '<div class="st-opts">';
-    st.options.forEach(function (o, i) {
-      h += '<button class="st-opt" type="button" data-i="' + i + '">' + (o.html || esc(o.label)) + '</button>';
-    });
-    h += '</div><div class="st-hints"></div><div class="st-after"></div>';
-    w.innerHTML = h;
-    it.used = 0; it.stepWrong = false; it.elim = {};
-    renderHints();
-    w.querySelectorAll('.st-opt').forEach(function (b) { b.onclick = function () { choose(parseInt(b.getAttribute('data-i'), 10)); }; });
-    root().querySelector('.st-body').scrollTop = 0;
-  }
-
-  function hintList(st) {
-    var hs = (st.hints || []).slice(0, 2).map(function (h) { return typeof h === 'string' ? { text: h } : h; });
-    hs.push({ text: '정답에 노란 테두리를 쳤어요.<br>눌러서 확인해 봐요.', reveal: true });
-    return hs;
-  }
-
-  function renderHints() {
-    var it = R.list[R.i], st = it.q.steps[it.si], hs = hintList(st);
-    var box = wrap().querySelector('.st-hints');
-    var h = '';
-    for (var k = 0; k < it.used; k++) h += '<div class="st-hint"><div class="st-hl">💡 힌트 ' + (k + 1) + '</div>' + hs[k].text + '</div>';
-    if (it.used < hs.length) {
-      var lab = hs[it.used].reveal ? '👀 정답 보기' : '💡 힌트 ' + (it.used + 1) + ' 보기';
-      h += '<button class="st-hbtn" type="button">' + lab + '</button>';
-    }
-    box.innerHTML = h;
-    var hb = box.querySelector('.st-hbtn');
-    if (hb) hb.onclick = function () {
-      var x = hs[it.used];
-      it.used++; R.hints++;
-      it.hintMax = Math.max(it.hintMax, it.used);
-      if (x.eliminate != null && x.eliminate !== false) eliminateOne(x.eliminate);
-      if (x.reveal) { var ob = wrap().querySelector('.st-opt[data-i="' + st.answer + '"]'); if (ob) ob.classList.add('show'); }
-      renderHints();
-    };
-  }
-
-  function eliminateOne(which) {
-    var it = R.list[R.i], st = it.q.steps[it.si];
-    if (typeof which === 'number') {   // 문항이 지울 보기를 정해 준 경우(그 보기가 틀린 이유를 힌트로 같이 보여 줄 때)
-      var t = wrap().querySelector('.st-opt[data-i="' + which + '"]');
-      if (t && which !== st.answer) { t.disabled = true; return; }
-    }
-    var cand = [];
-    wrap().querySelectorAll('.st-opt').forEach(function (b) {
-      var i = parseInt(b.getAttribute('data-i'), 10);
-      if (i !== st.answer && !b.disabled) cand.push(b);
-    });
-    if (cand.length) cand[Math.floor(Math.random() * cand.length)].disabled = true;
-  }
-
-  function choose(i) {
-    var it = R.list[R.i], q = it.q, st = q.steps[it.si];
-    var ok = i === st.answer;
-    var btn = wrap().querySelector('.st-opt[data-i="' + i + '"]');
-    var after = wrap().querySelector('.st-after');
-    var body = '';
-    try { body = st.explain ? st.explain(i, ok) : ''; } catch (e) { body = ''; }
-    if (ok) {
-      btn.classList.add('ok');
-      wrap().querySelectorAll('.st-opt').forEach(function (b) { b.disabled = true; });
-      wrap().querySelector('.st-hints').querySelectorAll('.st-hbtn').forEach(function (b) { b.remove(); });
-      if (it.used > 0 || it.stepWrong) it.cleanAll = false;
-      var last = it.si >= q.steps.length - 1;
-      after.innerHTML = '<div class="st-exp"><b class="v">✓ 맞았어요!</b>' + body + '</div>' +
-        '<button class="st-go" type="button" style="margin-top:12px;width:100%">' + (last ? (R.i + 1 >= R.list.length ? '끝내기' : '다음 문제 →') : '다음 단계 →') + '</button>';
-      after.querySelector('.st-go').onclick = function () {
-        if (!last) { it.si++; showStep(); return; }
-        doneItem();
-      };
-      scrollBottom();
-    } else {
-      btn.classList.add('no'); btn.disabled = true;
-      it.wrongTries++; it.stepWrong = true; it.cleanAll = false; R.cards++;
-      after.innerHTML = '<div class="st-exp bad"><b class="v">✗ 아쉬워요! 이유를 보고 다시 골라요</b>' + body + '</div>' +
-        '<button class="st-go" type="button" style="margin-top:12px;width:100%;background:#ffd166;color:#2a1d00">알겠어요</button>';
-      wrap().querySelectorAll('.st-opt').forEach(function (b) { b.style.pointerEvents = 'none'; });
-      after.querySelector('.st-go').onclick = function () {
-        after.innerHTML = '';
-        wrap().querySelectorAll('.st-opt').forEach(function (b) { b.style.pointerEvents = ''; });
-        wrap().querySelector('.st-prompt').scrollIntoView({ block: 'nearest' });
-      };
-      scrollBottom();
-    }
-  }
-
-  function doneItem() {
-    var it = R.list[R.i], q = it.q;
-    R.answers.push({
-      round_key: R.key, user_name: user() || '게스트', group_id: groupId(), game_id: R.game,
-      q_key: String(q.key).slice(0, 200), first_try_correct: !!it.cleanAll,
-      hint_level: Math.min(3, it.hintMax), wrong_tries: Math.min(50, it.wrongTries),
-      ms: Math.min(3600000, Date.now() - it.t0)
-    });
-    var r = R.res[q.key] || (R.res[q.key] = { q: q, clean: false, first: false, tries: 0 });
-    r.tries++;
-    if (it.cleanAll) r.clean = true;                 // 요약 "오늘 익힌 것"(다시 풀어 맞힌 것 포함)
-    if (it.cleanAll && r.tries === 1) r.first = true; // 서버 correct_nohint — 처음 볼 때 힌트 없이 맞힌 것만
-    if (!it.cleanAll) {
-      if (it.wrongTries > 0 || it.hintMax >= 3) R.wrongs.push(q);
-      // 처음 틀린 문제는 3문제 뒤에 한 번 더(두 번째에도 틀리면 더 넣지 않는다 — 끝이 안 나는 판 방지)
-      if (!it.again) {
-        var pos = Math.min(R.list.length, R.i + 4);
-        R.list.splice(pos, 0, { q: q, again: true });
-      }
-    }
-    R.i++;
-    showItem();
-  }
-
-  function flushServer(finished, keepalive) {
-    if (!R || R.sent) return;
-    R.sent = true;
-    var seen = Object.keys(R.res);
-    var clean = seen.filter(function (k) { return R.res[k].first; }).length;
-    var u = user() || '게스트';
-    if (R.answers.length || finished) {
-      post('step_rounds', [{
-        round_key: R.key, user_name: u, group_id: groupId(), game_id: R.game,
-        started_at: R.startedAt, questions: Math.min(500, seen.length), correct_nohint: Math.min(500, clean),
-        hints_used: Math.min(2000, R.hints), cards_seen: Math.min(2000, R.cards),
-        finished: !!finished, source: platform()
-      }], keepalive);
-      post('step_answers', R.answers, keepalive);
-    }
-    // 이 기기 오답노트에만(서버 wrong_answers 에는 안 감)
-    var W = global.WrongNote;
-    if (W && R.wrongs.length) {
-      var seenW = {};
-      try {
-        W.reset();
-        R.wrongs.forEach(function (q) {
-          if (seenW[q.key]) return; seenW[q.key] = 1;
-          var wr = q.wrong || {};
-          W.add({ game: R.game, key: q.key, q: wr.q || '', correct: wr.correct || '', wrong: null, type: q.type || '' });
+      answers: [], res: {}, wrongs: [], hints: 0, cards: 0, sent: false,
+      _it: null,
+      pick: function (pool, n, keyOf) {
+        keyOf = keyOf || function (q) { return q.key; };
+        var wk = localWrongKeys(game), byKey = {}, out = [], used = {};
+        pool.forEach(function (q) { byKey[keyOf(q)] = q; });
+        for (var i = 0; i < wk.length && out.length < Math.ceil(n / 2); i++) {
+          var q = byKey[wk[i]];
+          if (q && !used[wk[i]]) { out.push(q); used[wk[i]] = 1; }
+        }
+        shuffle(pool.slice()).forEach(function (q) { var k = keyOf(q); if (out.length < n && !used[k]) { out.push(q); used[k] = 1; } });
+        return shuffle(out);
+      },
+      begin: function (key) { this._it = { key: String(key), t0: Date.now(), hint: 0, wrong: 0 }; },
+      hint: function (level) { if (!this._it) return; this.hints++; this._it.hint = Math.max(this._it.hint, level); },
+      wrong: function () { if (!this._it) return; this._it.wrong++; this.cards++; },
+      /* 한 문항 끝. 반환값: 힌트 없이 처음에 맞혔는가 */
+      done: function (key, note) {
+        var it = this._it || { key: String(key), t0: Date.now(), hint: 0, wrong: 0 };
+        this._it = null;
+        var clean = it.hint === 0 && it.wrong === 0;
+        this.answers.push({
+          round_key: this.key, user_name: user() || '게스트', group_id: groupId(), game_id: game,
+          q_key: String(key).slice(0, 200), first_try_correct: clean,
+          hint_level: Math.min(3, it.hint), wrong_tries: Math.min(50, it.wrong),
+          ms: Math.min(3600000, Date.now() - it.t0)
         });
-        W.flush(R.game, { localOnly: true });
-      } catch (e) {}
-    }
+        var r = this.res[key] || (this.res[key] = { clean: false, first: false, tries: 0, label: (note && note.label) || String(key) });
+        r.tries++;
+        if (clean) r.clean = true;
+        if (clean && r.tries === 1) r.first = true;
+        if (!clean && (it.wrong > 0 || it.hint >= 3) && note) this.wrongs.push({ key: String(key), note: note });
+        return clean;
+      },
+      learned: function () { var R = this.res; return Object.keys(R).filter(function (k) { return R[k].clean; }).map(function (k) { return R[k].label; }); },
+      again: function () { var R = this.res; return Object.keys(R).filter(function (k) { return !R[k].clean; }).map(function (k) { return R[k].label; }); },
+      finish: function (finished, keepalive) {
+        if (this.sent) return;
+        this.sent = true;
+        if (cur === this) cur = null;
+        active = false;
+        var R = this.res, seen = Object.keys(R);
+        if (this.answers.length) {
+          post('step_rounds', [{
+            round_key: this.key, user_name: user() || '게스트', group_id: groupId(), game_id: game,
+            started_at: this.startedAt, questions: Math.min(500, seen.length),
+            correct_nohint: Math.min(500, seen.filter(function (k) { return R[k].first; }).length),
+            hints_used: Math.min(2000, this.hints), cards_seen: Math.min(2000, this.cards),
+            finished: !!finished, source: platform()
+          }], keepalive);
+          post('step_answers', this.answers, keepalive);
+        }
+        // 틀린 문제는 이 기기 오답노트에만(서버 wrong_answers 에는 안 감)
+        var W = global.WrongNote;
+        if (W && this.wrongs.length) {
+          try {
+            var seenW = {};
+            W.reset();
+            this.wrongs.forEach(function (w) {
+              if (seenW[w.key]) return; seenW[w.key] = 1;
+              W.add({ game: game, key: w.key, q: w.note.q || '', correct: w.note.correct || '', wrong: null, type: w.note.type || '' });
+            });
+            W.flush(game, { localOnly: true });
+          } catch (e) {}
+        }
+      }
+    };
+    cur = S;
+    return S;
   }
-
-  function finish(completed) {
-    if (!R) return close();
-    if (!completed && R.answers.length) {
-      var ask = global.Ask && Ask.confirm ? Ask.confirm('여기까지 할까요?\n지금까지 푼 건 저장돼요.') : Promise.resolve(global.confirm('여기까지 할까요?'));
-      Promise.resolve(ask).then(function (y) { if (y) summary(false); });
-      return;
-    }
-    if (!completed) { flushServer(false); return close(); }
-    summary(true);
-  }
-
-  function summary(completed) {
-    flushServer(completed);
-    root().querySelector('.st-prog').textContent = '';
-    var learned = [], again = [];
-    Object.keys(R.res).forEach(function (k) {
-      var r = R.res[k];
-      (r.clean ? learned : again).push(r.q.learn || r.q.key);
-    });
-    var w = wrap();
-    var h = '<div class="st-card"><h3>🌱 오늘 익힌 것</h3>' +
-      (learned.length ? '<ul class="st-list">' + learned.slice(0, 5).map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' +
-        (learned.length > 5 ? '<div class="st-note">외 ' + (learned.length - 5) + '개</div>' : '')
-        : '<div class="st-note" style="font-size:.9rem">아직 없어요.<br>힌트 없이 맞히면 여기 쌓여요.</div>') + '</div>';
-    if (again.length) h += '<div class="st-card"><h3>🔁 다시 볼 것</h3><ul class="st-list">' +
-      again.slice(0, 3).map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' +
-      '<div class="st-note">오답노트에서 다시 볼 수 있어요.</div></div>';
-    h += '<button class="st-go" type="button">한 번 더 하기</button>' +
-      '<button class="st-x" type="button" style="min-height:46px">게임 화면으로 돌아가기</button>';
-    w.innerHTML = h;
-    var last = { game: R.game, title: R.title, pool: R.pool0, n: R.n, onClose: R.onClose };
-    w.querySelector('.st-go').onclick = function () { var o = last; R = null; start(o); };
-    w.querySelector('.st-x').onclick = function () { close(); };
-  }
-
-  function close() {
-    var cb = R && R.onClose;
-    R = null; active = false;
-    if (el) el.classList.remove('open');
-    document.documentElement.style.overflow = '';
-    try { if (global.AdBridge && AdBridge.show) AdBridge.show(); } catch (e) {}
-    if (typeof cb === 'function') try { cb(); } catch (e) {}
-  }
-
   // 판 도중에 앱을 닫거나 다른 화면으로 가도 푼 만큼은 남긴다
-  function onHide() { if (R && !R.sent && R.answers.length) flushServer(false, true); }
-  global.addEventListener('pagehide', onHide);
+  global.addEventListener('pagehide', function () { if (cur && !cur.sent && cur.answers.length) cur.finish(false, true); });
 
   /* ── 시작 화면 버튼 + 본인에게만 보이는 권유 ────────────────── */
   function mount(opt) {
@@ -598,12 +375,11 @@
 
   global.StepMode = {
     lines: lines, txt: txt,
-    start: start, mount: mount, DATA: DATA, esc: esc, shuffle: shuffle,
+    session: session, mount: mount, DATA: DATA, esc: esc, shuffle: shuffle,
     isActive: function () { return active; },
+    current: function () { return cur; },
     suggestReason: suggestReason, noteRound: noteRound, noteWrong: noteWrong,
-    _hook: hook,
-    _answer: function () { var it = R && R.list[R.i]; return it && it.q.steps[it.si || 0] ? it.q.steps[it.si || 0].answer : null; },   // 테스트용
-    _len: function () { return R ? R.list.length : 0; }
+    _hook: hook
   };
   hook();
 })(window);
