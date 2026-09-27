@@ -153,7 +153,16 @@
     var s = document.createElement('style');
     s.id = 'am-step-css';
     s.textContent = [
-      '.am-step-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;min-height:44px;margin-top:10px;background:rgba(80,200,140,.1);border:1.5px solid rgba(80,200,140,.45);color:#9fe3c0;border-radius:12px;font-size:.9rem;font-weight:700;font-family:inherit}',
+      /* 2026-09-27 성일님 "차근차근 버튼이 못생겼네" → 조종모 쓴 거북이 + 나사 박힌 패널(시안 C 차용, docs/디자인시안_2026-09-27_산성비) */
+      '.am-step-btn{position:relative;display:flex;align-items:center;width:100%;min-height:66px;margin-top:10px;padding:0 18px 0 86px;overflow:hidden;background:linear-gradient(180deg,#1a2420 0%,#131a18 100%);border:1.5px solid rgba(80,200,140,.5);border-radius:14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 2px 0 rgba(0,0,0,.35);color:#9fe3c0;font-family:inherit;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent}',
+      '.am-step-btn:active{transform:translateY(1px)}',
+      '.am-step-btn .sb-mascot{position:absolute;left:4px;bottom:-9px;width:80px;height:68px;pointer-events:none;z-index:2}',
+      '.am-step-btn .sb-txt{position:relative;z-index:2;display:flex;flex-direction:column;gap:3px;flex:1;align-items:center}',
+      ".am-step-btn .sb-t{font-family:'Black Han Sans',sans-serif;font-size:1.12rem;letter-spacing:.02em;color:#a8f0cb}",
+      '.am-step-btn .sb-s{font-size:.78rem;font-weight:500;color:rgba(168,240,203,.62)}',
+      '.am-step-btn .sb-go{position:relative;z-index:2;font-size:1.1rem;color:rgba(168,240,203,.55);margin-left:6px}',
+      '.am-step-btn i.sc{position:absolute;z-index:1;width:5px;height:5px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#6f8c80,#2c3a35);box-shadow:0 0 0 1px rgba(0,0,0,.4)}',
+      '.am-step-btn i.sc:nth-of-type(1){top:6px;left:6px}.am-step-btn i.sc:nth-of-type(2){top:6px;right:6px}.am-step-btn i.sc:nth-of-type(3){bottom:6px;left:6px}.am-step-btn i.sc:nth-of-type(4){bottom:6px;right:6px}',
       '.am-step-sug{margin-top:8px;background:rgba(255,209,102,.08);border:1px solid rgba(255,209,102,.35);border-radius:12px;padding:12px 14px;font-size:.86rem;line-height:1.75;color:#ffe6a6;text-align:left}',
       '.am-step-sug .row{display:flex;gap:8px;margin-top:8px}',
       '.am-step-sug button{flex:1;min-height:38px;border-radius:10px;font-size:.84rem;font-family:inherit;border:1px solid rgba(255,255,255,.2);background:none;color:#eaf2ff}',
@@ -252,6 +261,8 @@
   global.addEventListener('pagehide', function () { if (cur && !cur.sent && cur.answers.length) cur.finish(false, true); });
 
   /* ── 시작 화면 버튼 + 본인에게만 보이는 권유 ────────────────── */
+  // 조종모·고글 쓴 거북이(그림 파일 없이 SVG — 화면 배율과 상관없이 선명)
+  var TURTLE = '<svg class="sb-mascot" viewBox="0 0 84 72" aria-hidden="true"> <ellipse cx="28" cy="58" rx="27" ry="19" fill="#2f7a4a" stroke="#18402a" stroke-width="2"/> <path d="M6 56 Q28 26 52 56 Z" fill="#46a066" opacity=".9"/> <path d="M18 50 l6-6 h8 l6 6 l-6 6 h-8 z" fill="#5fbf7e" stroke="#2a6b40" stroke-width="1.4"/> <path d="M4 58 Q28 66 53 58" fill="none" stroke="#d8c48a" stroke-width="3" stroke-linecap="round"/> <ellipse cx="49" cy="66" rx="8" ry="5" fill="#8fd49a" stroke="#2d6b3f" stroke-width="1.6"/> <path d="M46 52 Q50 44 56 42" stroke="#2d6b3f" stroke-width="12" stroke-linecap="round" fill="none"/> <path d="M46 52 Q50 44 56 42" stroke="#8fd49a" stroke-width="9" stroke-linecap="round" fill="none"/> <circle cx="59" cy="33" r="17" fill="#8fd49a" stroke="#2d6b3f" stroke-width="2"/> <path d="M41.5 33 Q42 14 59 13 Q76 14 76.5 33 Q70 25 59 25 Q48 25 41.5 33 Z" fill="#8a5a32" stroke="#4a2e16" stroke-width="1.8" stroke-linejoin="round"/> <path d="M42 31 q-2 8 2 12 q4 -1 4 -8" fill="#8a5a32" stroke="#4a2e16" stroke-width="1.6" stroke-linejoin="round"/> <path d="M76 31 q2 8 -2 12 q-4 -1 -4 -8" fill="#8a5a32" stroke="#4a2e16" stroke-width="1.6" stroke-linejoin="round"/> <path d="M47 17 Q59 12 71 17" fill="none" stroke="#b07a48" stroke-width="1.2" opacity=".8"/> <rect x="44" y="18.5" width="30" height="4" rx="2" fill="#3a2716"/> <circle cx="52" cy="20" r="6" fill="#d9ad5c" stroke="#5a3d12" stroke-width="1.6"/> <circle cx="66" cy="20" r="6" fill="#d9ad5c" stroke="#5a3d12" stroke-width="1.6"/> <circle cx="52" cy="20" r="4" fill="#7fd6ff"/><circle cx="66" cy="20" r="4" fill="#7fd6ff"/> <path d="M50 18.3 l2.2 -1.2" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/> <path d="M64 18.3 l2.2 -1.2" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/> <ellipse cx="53" cy="34" rx="2.6" ry="3.2" fill="#10261a"/><ellipse cx="65" cy="34" rx="2.6" ry="3.2" fill="#10261a"/> <circle cx="53.9" cy="32.8" r="1" fill="#fff"/><circle cx="65.9" cy="32.8" r="1" fill="#fff"/> <ellipse cx="48.5" cy="39.5" rx="3" ry="1.8" fill="#ff9fb0" opacity=".7"/><ellipse cx="69.5" cy="39.5" rx="3" ry="1.8" fill="#ff9fb0" opacity=".7"/> <path d="M56 40 Q59 43 62 40" fill="none" stroke="#10261a" stroke-width="1.6" stroke-linecap="round"/> </svg>';
   function mount(opt) {
     hook();
     retryPending();
@@ -261,7 +272,9 @@
     var b = document.createElement('button');
     b.type = 'button';
     b.className = 'am-step-btn';
-    b.innerHTML = '🐢 차근차근 모드' + (opt.sub ? ' <span style="font-weight:400;opacity:.75;font-size:.78rem">' + esc(opt.sub) + '</span>' : '');
+    b.setAttribute('aria-label', '차근차근 모드' + (opt.sub ? ', ' + opt.sub : ''));
+    b.innerHTML = TURTLE + '<i class="sc"></i><i class="sc"></i><i class="sc"></i><i class="sc"></i>' +
+      '<span class="sb-txt"><span class="sb-t">차근차근 모드</span><span class="sb-s">' + esc(opt.sub || '천천히 한 단계씩 연습') + '</span></span><span class="sb-go" aria-hidden="true">›</span>';
     b.onclick = function () { opt.onStart(); };
     host.appendChild(b);
 
