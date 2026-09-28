@@ -4,7 +4,7 @@
     <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
          **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
          이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-    <script src="safestore.js?v=45"></script>
+    <script src="safestore.js?v=46"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1538,11 +1538,26 @@ let theoryScoreByStudent = {}; // name → { bestRate, plays, passed }
 // 이론 합격 기준: 정답률 60%(🥈 합격 가시권) 이상을 한 번이라도 달성 — theory.html의 grade() 등급과 동일
 const THEORY_PASS_GRADES = ['👑 회계 마스터', '🥇 합격 안정권', '🥈 합격 가시권'];
 
+/* ── 전부 받아 오기(2026-09-28) ─────────────────────────────
+   Supabase(PostgREST)는 .limit() 을 크게 줘도 서버 최대 행 수(1000)에서 **말없이 자른다**.
+   학급 단위 기록(단계 판별·이론)이 1000줄을 넘으면 통과였던 학생이 "도전중"으로 보이게 된다
+   (LZD8TN level_rounds 804줄 시점에 선제 조치). id 순으로 1000줄씩 끝까지 받는다.
+   build: () => db.from(...).select(...).eq(...) — 페이지마다 새 쿼리를 만들어야 해서 함수로 받는다. */
+const PAGE_ROWS = 1000;
+async function fetchAllRows(build) {
+  const out = [];
+  for (let from = 0; ; from += PAGE_ROWS) {
+    const { data, error } = await build().order('id', { ascending: true }).range(from, from + PAGE_ROWS - 1);
+    if (error) return { data: out, error };
+    out.push(...(data || []));
+    if (!data || data.length < PAGE_ROWS) return { data: out, error: null };
+  }
+}
 async function loadTheoryScores(gid) {
   theoryScoreByStudent = {};
   try {
-    const { data, error } = await db.from('score_history')
-      .select('user_name,score,grade,correct,total').eq('group_id', gid).eq('game_id', THEORY_GAME_ID).limit(5000);
+    const { data, error } = await fetchAllRows(() => db.from('score_history')
+      .select('user_name,score,grade,correct,total').eq('group_id', gid).eq('game_id', THEORY_GAME_ID));
     if (error) throw error;
     (data || []).forEach(r => {
       const cur = theoryScoreByStudent[r.user_name] || { bestRate: 0, plays: 0, passed: false };
@@ -1562,8 +1577,8 @@ let theoryTopicByStudent = {};
 async function loadTopicAttempts(gid) {
   theoryTopicByStudent = {};
   try {
-    const { data, error } = await db.from('topic_attempts')
-      .select('user_name,topic,correct').eq('group_id', gid).eq('game_id', THEORY_GAME_ID).limit(20000);
+    const { data, error } = await fetchAllRows(() => db.from('topic_attempts')
+      .select('user_name,topic,correct').eq('group_id', gid).eq('game_id', THEORY_GAME_ID));
     if (error) throw error;
     (data || []).forEach(r => {
       const cur = theoryTopicByStudent[r.user_name] || {};
@@ -1579,8 +1594,8 @@ async function loadTopicAttempts(gid) {
 async function loadTheoryWeak(gid) {
   theoryWeakByTopic = {}; theoryWeakByStudent = {};
   try {
-    const { data, error } = await db.from('wrong_answers')
-      .select('user_name,q_type').eq('group_id', gid).eq('game_id', THEORY_GAME_ID).limit(5000);
+    const { data, error } = await fetchAllRows(() => db.from('wrong_answers')
+      .select('user_name,q_type').eq('group_id', gid).eq('game_id', THEORY_GAME_ID));
     if (error) throw error;
     (data || []).forEach(r => {
       const topic = r.q_type || '기타';
@@ -1633,9 +1648,9 @@ let levelByStudent = {};   // name → gameId → { unlocked, l1:{rounds,best,pa
 async function loadLevelRounds(gid) {
   levelByStudent = {};
   try {
-    const { data, error } = await db.from('level_rounds')
+    const { data, error } = await fetchAllRows(() => db.from('level_rounds')
       .select('user_name,game_id,level,correct,total,unlocked,score')
-      .eq('group_id', gid).in('game_id', LV2_GAMES).limit(20000);
+      .eq('group_id', gid).in('game_id', LV2_GAMES));
     if (error) throw error;
     (data || []).forEach(r => {
       if (r.level !== 1 && r.level !== 2) return;
@@ -2383,8 +2398,8 @@ function hideAdPlaceholder(){}
     </div>
   </div>
 </div>
-<script src="ask.js?v=45"></script>
-<script src="teambattle.js?v=45"></script>
-<script src="emoji-icons.js?v=45"></script>
+<script src="ask.js?v=46"></script>
+<script src="teambattle.js?v=46"></script>
+<script src="emoji-icons.js?v=46"></script>
 </body>
 </html>
