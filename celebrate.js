@@ -143,7 +143,8 @@
       'font-size:3.4vmin;font-weight:800;color:#ffd24a;background:rgba(0,0,0,.25)}' +
     '#cel .grow{margin-top:3vmin;font-size:2.8vmin;color:rgba(255,255,255,.75)}' +
     '#cel .grow b{color:#7cf28a}' +
-    '#cel .ctl{position:absolute;top:2vmin;right:2vmin;z-index:4;display:flex;gap:1.2vmin}' +
+    '#cel .ctl{position:absolute;top:calc(2vmin + env(safe-area-inset-top));right:calc(2vmin + env(safe-area-inset-right));z-index:4;display:flex;gap:1.2vmin}' +   /* 아이폰 상태 표시줄 밑에 숨던 ✕(2026-09-30) */
+    '#cel .tap{position:absolute;left:0;right:0;bottom:calc(3vmin + env(safe-area-inset-bottom));text-align:center;font-size:2.4vmin;color:rgba(255,255,255,.55);z-index:4;pointer-events:none}' +
     '#cel .ctl button{width:6.5vmin;height:6.5vmin;min-width:40px;min-height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.3);' +
       'background:rgba(0,0,0,.35);color:#fff;font-size:3vmin;cursor:pointer}' +
     '#cel .ctl button:focus-visible{outline:3px solid #ffd24a;outline-offset:2px}' +
@@ -174,7 +175,8 @@
       '<div class="mem">' + esc(win.members.map(function (m) { return m.name; }).join('  ·  ')) + '</div>' +
       '<div class="sc">팀 점수 ' + Number(win.score).toLocaleString() + '</div>' +
       (gw && gw.score > 0 ? '<div class="grow">📈 성장상 <b>' + esc(gw.name) + '</b> (+' + gw.score + ')</div>' : '') +
-      '</div></div>';
+      '</div></div>' +
+      '<div class="tap">화면을 누르면 닫혀요</div>';
     document.body.appendChild(el);
     var fx = null, t1;
     drumroll(2.2);
@@ -190,8 +192,9 @@
     addEventListener('keydown', onKey);
     el.addEventListener('click', function (e) {
       var a = e.target.closest && e.target.closest('button') && e.target.closest('button').dataset.a;
-      if (a === 'close') close();
-      else if (a === 'again') { fanfare(); if (fx) fx.burst(); }
+      // 🔊 만 빼고 화면 어디를 눌러도 닫힌다(2026-09-30 성일님: 우승 화면에서 나가기가 없다)
+      if (a === 'again') { fanfare(); if (fx) fx.burst(); }
+      else close();
     });
     open = { close: close };
     setTimeout(function () { var b = el.querySelector('[data-a="close"]'); if (b) b.focus(); }, 50);

@@ -4,7 +4,7 @@
     <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
          **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
          이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-    <script src="safestore.js?v=52"></script>
+    <script src="safestore.js?v=53"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
@@ -629,7 +629,9 @@ body{
   .sidebar-overlay.open{display:block}
   .main{margin-left:0}
   .menu-toggle{display:flex}
-  .content-wrap{padding:calc(24px + env(safe-area-inset-top)) 16px 48px}
+  /* 떠 있는 ☰ 버튼(위 14px + 높이 약 41px) 아래에서 시작 — 그룹 이름·ADMIN PANEL 첫 글자를 가리던 문제(2026-09-30 성일님 아이폰) */
+  .content-wrap{padding:calc(68px + env(safe-area-inset-top)) 16px 48px}
+  .sb-header{padding-top:calc(68px + env(safe-area-inset-top))}
   .summary-grid{grid-template-columns:repeat(2,1fr)}
   .two-col{grid-template-columns:1fr}
   .modal-score-grid{grid-template-columns:repeat(3,1fr)}
@@ -2386,8 +2388,8 @@ function hideAdPlaceholder(){}
     </div>
   </div>
 </div>
-<script src="ask.js?v=52"></script>
-<script src="teambattle.js?v=52"></script>
-<script src="emoji-icons.js?v=52"></script>
+<script src="ask.js?v=53"></script>
+<script src="teambattle.js?v=53"></script>
+<script src="emoji-icons.js?v=53"></script>
 </body>
 </html>
