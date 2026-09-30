@@ -4,7 +4,7 @@
     <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
          **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
          이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-    <script src="safestore.js?v=53"></script>
+    <script src="safestore.js?v=54"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
@@ -118,7 +118,7 @@ body{
 }
 
 /* ── 스테이지 노드맵(2급 허브 stagemap과 동일 패턴 — 징검다리 경로) ── */
-.stagemap{ position:relative; max-width:300px; margin:0 auto 34px; aspect-ratio:340/1000; }
+.stagemap{ position:relative; max-width:300px; margin:0 auto 34px; aspect-ratio:340/1200; }   /* 노드 6개(2026-09-30 분개의 탑 추가) */
 .stagemap svg.trail{ position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
 .trail-dim{ fill:none; stroke:rgba(255,255,255,0.12); stroke-width:5; stroke-linecap:round; }
 .trail-lit{ fill:none; stroke:var(--pu); stroke-width:5; stroke-linecap:round;
@@ -381,12 +381,12 @@ body{
 
   <!-- ── 스테이지 노드맵(2급 허브 stagemap과 동일 패턴, 게임 스테이지만) ── -->
   <div class="stagemap">
-    <svg class="trail" viewBox="0 0 340 1000" preserveAspectRatio="none" aria-hidden="true">
-      <path class="trail-dim" d="M240,70 C240,180 100,160 100,270 C100,380 240,360 240,470 C240,580 100,580 100,690 C100,800 240,790 240,910"/>
-      <path class="trail-lit" id="trail-lit" d="M240,70 C240,180 100,160 100,270 C100,380 240,360 240,470 C240,580 100,580 100,690 C100,800 240,790 240,910"/>
+    <svg class="trail" viewBox="0 0 340 1200" preserveAspectRatio="none" aria-hidden="true">
+      <path class="trail-dim" d="M240,70 C240,180 100,170 100,280 C100,390 240,380 240,490 C240,600 100,590 100,700 C100,810 240,800 240,910 C240,1020 100,1010 100,1120"/>
+      <path class="trail-lit" id="trail-lit" d="M240,70 C240,180 100,170 100,280 C100,390 240,380 240,490 C240,600 100,590 100,700 C100,810 240,800 240,910 C240,1020 100,1010 100,1120"/>
     </svg>
     <div class="nodes">
-      <a class="stage-node cur" id="node-s1" href="stage1_cost.html" style="left:70%;top:7%; --node-color:var(--pu); --node-glow:rgba(180,79,255,0.4);">
+      <a class="stage-node cur" id="node-s1" href="stage1_cost.html" style="left:70%;top:5.83%; --node-color:var(--pu); --node-glow:rgba(180,79,255,0.4);">
         <div class="disc">🏭
           <span class="nm-badge clear-badge" title="클리어" style="display:none">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"/></svg>
@@ -395,7 +395,7 @@ body{
         <div class="n-title">STAGE 1<br>원가의 길</div>
         <div class="n-sub" id="sub-s1">자료 0/14</div>
       </a>
-      <a class="stage-node lock" id="node-s3" href="stage3_capital.html" style="left:30%;top:27%; --node-color:var(--cy); --node-glow:rgba(0,242,255,0.4);"
+      <a class="stage-node lock" id="node-s3" href="stage3_capital.html" style="left:30%;top:23.33%; --node-color:var(--cy); --node-glow:rgba(0,242,255,0.4);"
          onclick="return onNodeClick(event,'s3')">
         <div class="disc">👑
           <span class="nm-badge lock-badge" title="스테이지1 클리어 필요">
@@ -408,9 +408,9 @@ body{
         <div class="n-title">STAGE 2<br>자본의 제왕</div>
         <div class="n-sub" id="sub-s3">스테이지1 클리어 필요</div>
       </a>
-      <a class="stage-node lock" id="node-s4" href="stage4_voucher.html" style="left:70%;top:47%; --node-color:var(--gd); --node-glow:rgba(255,210,74,0.4);"
-         onclick="return onNodeClick(event,'s4')">
-        <div class="disc">🧾
+      <a class="stage-node lock" id="node-s2" href="stage2_journal.html" style="left:70%;top:40.83%; --node-color:var(--or); --node-glow:rgba(255,152,0,0.4);"
+         onclick="return onNodeClick(event,'s2')">
+        <div class="disc">⚡
           <span class="nm-badge lock-badge" title="스테이지2 클리어 필요">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
           </span>
@@ -418,12 +418,12 @@ body{
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"/></svg>
           </span>
         </div>
-        <div class="n-title">STAGE 3<br>전표의 눈</div>
-        <div class="n-sub" id="sub-s4">스테이지2 클리어 필요</div>
+        <div class="n-title">STAGE 3<br>분개의 탑</div>
+        <div class="n-sub" id="sub-s2">스테이지2 클리어 필요</div>
       </a>
-      <a class="stage-node lock" id="node-s5" href="stage5_vat.html" style="left:30%;top:69%; --node-color:var(--gn); --node-glow:rgba(0,230,118,0.4);"
-         onclick="return onNodeClick(event,'s5')">
-        <div class="disc">🏛️
+      <a class="stage-node lock" id="node-s4" href="stage4_voucher.html" style="left:30%;top:58.33%; --node-color:var(--gd); --node-glow:rgba(255,210,74,0.4);"
+         onclick="return onNodeClick(event,'s4')">
+        <div class="disc">🧾
           <span class="nm-badge lock-badge" title="스테이지3 클리어 필요">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
           </span>
@@ -431,12 +431,12 @@ body{
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"/></svg>
           </span>
         </div>
-        <div class="n-title">STAGE 4<br>신고의 문</div>
-        <div class="n-sub" id="sub-s5">스테이지3 클리어 필요</div>
+        <div class="n-title">STAGE 4<br>전표의 눈</div>
+        <div class="n-sub" id="sub-s4">스테이지3 클리어 필요</div>
       </a>
-      <a class="stage-node lock" id="node-s6" href="stage6_alloc.html" style="left:70%;top:91%; --node-color:var(--pk); --node-glow:rgba(255,45,120,0.4);"
-         onclick="return onNodeClick(event,'s6')">
-        <div class="disc">🔧
+      <a class="stage-node lock" id="node-s5" href="stage5_vat.html" style="left:70%;top:75.83%; --node-color:var(--gn); --node-glow:rgba(0,230,118,0.4);"
+         onclick="return onNodeClick(event,'s5')">
+        <div class="disc">🏛️
           <span class="nm-badge lock-badge" title="스테이지4 클리어 필요">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
           </span>
@@ -444,8 +444,21 @@ body{
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"/></svg>
           </span>
         </div>
-        <div class="n-title">STAGE 5<br>배관의 방</div>
-        <div class="n-sub" id="sub-s6">스테이지4 클리어 필요</div>
+        <div class="n-title">STAGE 5<br>신고의 문</div>
+        <div class="n-sub" id="sub-s5">스테이지4 클리어 필요</div>
+      </a>
+      <a class="stage-node lock" id="node-s6" href="stage6_alloc.html" style="left:30%;top:93.33%; --node-color:var(--pk); --node-glow:rgba(255,45,120,0.4);"
+         onclick="return onNodeClick(event,'s6')">
+        <div class="disc">🔧
+          <span class="nm-badge lock-badge" title="스테이지5 클리어 필요">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          </span>
+          <span class="nm-badge clear-badge" title="클리어" style="display:none">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"/></svg>
+          </span>
+        </div>
+        <div class="n-title">STAGE 6<br>배관의 방</div>
+        <div class="n-sub" id="sub-s6">스테이지5 클리어 필요</div>
       </a>
     </div>
   </div>
@@ -461,8 +474,8 @@ body{
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="ask.js?v=53"></script>
-<script src="adsense.js?v=53"></script>
+<script src="ask.js?v=54"></script>
+<script src="adsense.js?v=54"></script>
 <script>
 /* 닉네임/그룹 표시 + 탈퇴 버튼 노출(2급 허브와 동일 로직 — 통일감) */
 (function(){
@@ -576,7 +589,43 @@ function renderStageMap(){
     }
   }
 
-  // 스테이지3(전표의 눈) — 스테이지2(자본의 제왕) 클리어로 순차 언락(진짜 3단계 시퀀스가 됨)
+  // 스테이지3(분개의 탑, 2026-09-30 추가) — 스테이지2(자본의 제왕) 클리어로 언락.
+  // 실제 시험 순서(문제2 일반전표 → 문제3 매입매출전표)에 맞춰 전표의 눈 앞에 끼워 넣었다.
+  let s2Cleared=false, s2Score=0;
+  try{
+    const raw2=localStorage.getItem('lv1_s2_progress');
+    if(raw2){ const s2=JSON.parse(raw2)||{}; s2Cleared=!!s2.cleared; s2Score=s2.score||0; }
+  }catch(e){}
+  /* 끼워 넣기 전에 이미 전표의 눈까지 와 있던 학생은 그대로 열어 둔다(한 번만 옮긴다).
+     그때의 조건은 "자본의 제왕 클리어"였다 — 분개의 탑을 안 했다고 다시 잠기면 안 된다. */
+  try{
+    if(localStorage.getItem('lv1_map_v2')!=='1'){
+      if(s3Cleared || localStorage.getItem('lv1_s4_progress')) localStorage.setItem('hub_adunlock_s4','1');
+      localStorage.setItem('lv1_map_v2','1');
+    }
+  }catch(e){}
+  const adUnlockS2 = localStorage.getItem('hub_adunlock_s2')==='1';
+  const node2=document.getElementById('node-s2'), sub2=document.getElementById('sub-s2');
+  if(node2){
+    const lockBadge2=node2.querySelector('.lock-badge'), clearBadge2=node2.querySelector('.clear-badge');
+    if(s3Cleared || adUnlockS2){
+      node2.classList.remove('lock');
+      lockBadge2.style.display='none';
+      if(s2Cleared){
+        node2.classList.add('done');
+        clearBadge2.style.display='flex';
+        sub2.textContent=`클리어 · ${s2Score}점`;
+      } else {
+        node2.classList.remove('done'); node2.classList.add('cur');
+        clearBadge2.style.display='none';
+        sub2.textContent='도전!';
+      }
+    } else {
+      sub2.textContent='스테이지2 클리어 필요';
+    }
+  }
+
+  // 스테이지4(전표의 눈) — 스테이지3(분개의 탑) 클리어로 순차 언락
   let s4Cleared=false, s4Score=0;
   try{
     const raw4=localStorage.getItem('lv1_s4_progress');
@@ -586,7 +635,7 @@ function renderStageMap(){
   const node4=document.getElementById('node-s4'), sub4=document.getElementById('sub-s4');
   if(node4){
     const lockBadge4=node4.querySelector('.lock-badge'), clearBadge4=node4.querySelector('.clear-badge');
-    if(s3Cleared || adUnlockS4){
+    if(s2Cleared || adUnlockS4){
       node4.classList.remove('lock');
       lockBadge4.style.display='none';
       if(s4Cleared){
@@ -599,11 +648,11 @@ function renderStageMap(){
         sub4.textContent='도전!';
       }
     } else {
-      sub4.textContent='스테이지2 클리어 필요';
+      sub4.textContent='스테이지3 클리어 필요';
     }
   }
 
-  // 스테이지4(신고의 문) — 스테이지3(전표의 눈) 클리어로 순차 언락
+  // 스테이지5(신고의 문) — 스테이지4(전표의 눈) 클리어로 순차 언락
   let s5Cleared=false, s5Score=0;
   try{
     const raw5=localStorage.getItem('lv1_s5_progress');
@@ -626,11 +675,11 @@ function renderStageMap(){
         sub5.textContent='도전!';
       }
     } else {
-      sub5.textContent='스테이지3 클리어 필요';
+      sub5.textContent='스테이지4 클리어 필요';
     }
   }
 
-  // 스테이지5(배관의 방) — 스테이지4(신고의 문) 클리어로 순차 언락
+  // 스테이지6(배관의 방) — 스테이지5(신고의 문) 클리어로 순차 언락
   let s6Cleared=false, s6Score=0;
   try{
     const raw6=localStorage.getItem('lv1_s6_progress');
@@ -653,7 +702,7 @@ function renderStageMap(){
         sub6.textContent='도전!';
       }
     } else {
-      sub6.textContent='스테이지4 클리어 필요';
+      sub6.textContent='스테이지5 클리어 필요';
     }
   }
 
@@ -661,8 +710,8 @@ function renderStageMap(){
   if(lit){
     const total=lit.getTotalLength();
     lit.style.strokeDasharray=total;
-    // 5노드(4구간) 경로 — 스테이지1 클리어로 1/4, 스테이지2로 2/4, 스테이지3으로 3/4, 스테이지4로 끝까지
-    const frac = !cleared ? 0 : !s3Cleared ? 1/4 : !s4Cleared ? 2/4 : !s5Cleared ? 3/4 : 1;
+    // 6노드(5구간) 경로 — 스테이지를 하나 클리어할 때마다 1/5 씩
+    const frac = !cleared ? 0 : !s3Cleared ? 1/5 : !s2Cleared ? 2/5 : !s4Cleared ? 3/5 : !s5Cleared ? 4/5 : 1;
     lit.style.strokeDashoffset = total*(1-frac);
   }
 }
@@ -841,8 +890,8 @@ async function changeNickname(){
   await Ask.alert('✅ 닉네임이 "'+name+'"(으)로 변경되었어요.\n기존 점수와 오답노트도 함께 이동했습니다.');
 }
 </script>
-<script src="growth.js?v=53"></script>
-<script src="streak.js?v=53"></script>
+<script src="growth.js?v=54"></script>
+<script src="streak.js?v=54"></script>
 <script>
 /* 성장 그래프 버튼: 기록 있으면 초록 점(2급 허브와 동일 — growth.js 로드 후 실행) */
 (async function(){
@@ -909,7 +958,7 @@ async function setExamDate(){
 }
 renderExamDay();
 </script>
-<script src="wrongnote.js?v=53"></script>
+<script src="wrongnote.js?v=54"></script>
 <script>
 /* 오답노트 카드에 미니 요약(틀린 문제 수) 표시(2급 허브와 동일) */
 (async function(){
@@ -924,7 +973,7 @@ renderExamDay();
   }catch(e){}
 })();
 </script>
-<script src="emoji-icons.js?v=53"></script>
+<script src="emoji-icons.js?v=54"></script>
 
 <script>
   // 스트릭 알약 — 붙일 자리가 있을 때만 뜬다. 0일이면 스스로 숨는다.

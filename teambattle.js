@@ -444,7 +444,7 @@
   var GAMES = [
     ['acid', '계정과목 산성비'], ['memory', '기억의 전당'], ['debit', '차변대변'],
     ['factory', '분개 공장'], ['flight', '결산 비행'], ['theory', '이론 객관식'],
-    ['cost_lv1', '원가의 길(1급)'], ['capital_lv1', '자본(1급)'],
+    ['cost_lv1', '원가의 길(1급)'], ['capital_lv1', '자본(1급)'], ['journal_lv1', '분개(1급)'],
     ['voucher_lv1', '전표(1급)'], ['vat_lv1', '부가세(1급)'], ['alloc_lv1', '배분(1급)'],
     ['theory_lv1', '이론(1급)']
   ];

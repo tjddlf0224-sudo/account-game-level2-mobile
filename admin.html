@@ -4,7 +4,7 @@
     <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
          **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
          이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-    <script src="safestore.js?v=53"></script>
+    <script src="safestore.js?v=54"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1013,13 +1013,14 @@ const GAMES_2GUP = [
   { id:'factory', name:'조립공장',  icon:'🏭', color:'var(--game4)', max:12000 },  // 👑 결산 마스터
   { id:'flight',  name:'플라이트',  icon:'🛩', color:'var(--game5)', max:55000 },  // 👑 전설의 에이스
 ];
-// 1급 스테이지 5종 — max는 각 스테이지 파일의 실제 채점식 기준 만점(정답 시 만점 도달 가능한 값)
+// 1급 스테이지 6종(2026-09-30 분개의 탑 추가) — max는 각 스테이지 파일의 실제 채점식 기준 만점(정답 시 만점 도달 가능한 값)
 //  cost_lv1: 100-감점 방식(최대 100) / capital_lv1: 분류5×10+분개5×20=150(파일 주석 확인)
 //  voucher_lv1: 기본 10문항×콤보보너스 완주 시 이론상 최대 1,900(100+120+...+280) / vat_lv1: 문항 14개×100
 //  alloc_lv1: 확인퀴즈 7문항×150
 const GAMES_LV1 = [
   { id:'cost_lv1',    name:'원가의 길',   icon:'🏭',  color:'var(--game1)', max:100  },
   { id:'capital_lv1', name:'자본의 제왕', icon:'👑',  color:'var(--game2)', max:150  },
+  { id:'journal_lv1', name:'분개의 탑',   icon:'⚡',  color:'#ff9800',      max:4000 },  // 👑 분개의 달인
   { id:'voucher_lv1', name:'전표의 눈',   icon:'🧾',  color:'var(--game3)', max:1900 },
   { id:'vat_lv1',     name:'신고의 문',   icon:'🏛️', color:'var(--game4)', max:1400 },
   { id:'alloc_lv1',   name:'배관의 방',   icon:'🔧',  color:'var(--game5)', max:1050 },
@@ -1649,7 +1650,7 @@ function renderTheoryWeakPanel() {
    게임이 판마다 "그 판에 실제로 쓴 단계"를 level_rounds 에 남긴다(difficulty.js logRound).
    통과 기준은 해금 기준과 같다: 한 판에서 10문항 이상 풀고 정답률 70% 이상.
 ══════════════════════════════════════════ */
-const LV2_GAMES = ['acid', 'memory', 'debit', 'factory'];
+const LV2_GAMES = ['acid', 'memory', 'debit', 'factory', 'journal_lv1'];   // journal_lv1 = 1급 분개의 탑(2026-09-30)
 const LV_PASS_ACC = 0.70, LV_PASS_MIN = 10;
 let levelByStudent = {};   // name → gameId → { unlocked, l1:{rounds,best,passed}, l2:{...} }
 async function loadLevelRounds(gid) {
@@ -1709,7 +1710,7 @@ function lvEff(name, gameId) {
            tried2: base.l2.rounds > 0 || saved > 0 };
 }
 function lvCellHTML(name, gameId) {
-  if (currentLevel !== '2급' || !LV2_GAMES.includes(gameId)) return '';
+  if (!LV2_GAMES.includes(gameId)) return '';   // 2단계가 있는 게임만(1급은 분개의 탑)
   const g = lvEff(name, gameId);
   const pct = x => Math.round(x * 100) + '%';
   if (!g) return `<div class="lv-lines"><span class="lv-line">단계 기록 없음</span></div>`;
@@ -1730,7 +1731,7 @@ function lvCellHTML(name, gameId) {
    대시보드 렌더링
 ══════════════════════════════════════════ */
 function lvBarHTML(gameId, names) {
-  if (currentLevel !== '2급' || !LV2_GAMES.includes(gameId)) return '';
+  if (!LV2_GAMES.includes(gameId)) return '';   // 2단계가 있는 게임만(1급은 분개의 탑)
   const n = names.length;
   let p1 = 0, p2 = 0, tried2 = 0;
   names.forEach(name => {
@@ -2186,6 +2187,7 @@ function generateDiagnosis(name, student) {
     const adviceLv1 = {
       cost_lv1:    '제조원가 흐름(재료비·노무비·경비→재공품→제품) 정리가 약합니다. 원가의 길을 다시 플레이하며 T계정으로 자료를 재확인하게 하세요.',
       capital_lv1: '계정과목 분류·분개 정확도가 부족합니다. 자본의 제왕으로 분류·분개 반복 훈련을 권장합니다.',
+      journal_lv1: '일반전표 분개(복합 분개·제조/판관 구분·금액 계산)가 약합니다. 분개의 탑 차근차근 모드로 기출 거래를 한 줄씩 다시 풀게 하세요.',
       voucher_lv1: '매입매출전표 유형 구분이 아직 불안정합니다. 전표의 눈을 더 플레이하며 유형별 특징을 정리해 주세요.',
       vat_lv1:     '부가가치세 신고서 작성 실전 감각이 부족합니다. 신고의 문 재도전과 함께 신고서 서식을 복습시키세요.',
       alloc_lv1:   '보조부문원가 배분(직접·단계·상호배분법) 이해가 약합니다. 배관의 방으로 배분방법별 차이를 다시 확인하게 하세요.',
@@ -2388,8 +2390,8 @@ function hideAdPlaceholder(){}
     </div>
   </div>
 </div>
-<script src="ask.js?v=53"></script>
-<script src="teambattle.js?v=53"></script>
-<script src="emoji-icons.js?v=53"></script>
+<script src="ask.js?v=54"></script>
+<script src="teambattle.js?v=54"></script>
+<script src="emoji-icons.js?v=54"></script>
 </body>
 </html>

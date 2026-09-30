@@ -10,11 +10,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>⚡ 전산회계 마스터 ⚡</title>
-<meta name="description" content="거래를 읽고 차변/대변 판별! 전산회계 2급 게임으로 공부하기">
+    <title>분개의 탑 — 전산회계 1급 스테이지 3</title>
+<meta name="description" content="기출 일반전표입력 162문항으로 분개 연습! 전산회계 1급 게임으로 공부하기">
 <meta name="theme-color" content="#020810">
-<meta property="og:title" content="회계 차변대변 | 전산회계 2급 마스터">
-<meta property="og:description" content="거래를 읽고 차변/대변 판별! 전산회계 2급 게임으로 공부하기">
+<meta property="og:title" content="분개의 탑 | 전산회계 1급">
+<meta property="og:description" content="기출 일반전표입력 162문항으로 분개 연습! 전산회계 1급 게임으로 공부하기">
 <meta property="og:type" content="website">
     <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
     <style>
@@ -856,6 +856,58 @@
 /* 좁은 화면(360dp급 안드로이드)에서 머리줄 버튼이 제각각 줄어들어 '홈'이 28px까지 찌그러졌다 —
    최소 폭을 맞추고 줄어들지 않게 한다. 대신 왼쪽 시간·점수 칸이 줄어든다(2026-09-27 에뮬레이터 QA) */
 @media (max-width:400px){ .mute-btn, .hdr-btn { min-width:44px; flex-shrink:0; justify-content:center; text-align:center; } }
+        /* ══ 1급 분개의 탑 ══
+           기출 문장은 길다(2~4줄 + 증빙). 카드 글씨를 줄이고, 화면이 넘치면 게임 영역이 스크롤된다. */
+        .game-area { align-items: flex-start; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        .center-area { justify-content: flex-start; margin: auto; }   /* 짧으면 가운데, 길면 위에서부터 */
+        .question-card { padding: clamp(14px, 3.4vw, 30px) clamp(14px, 3.6vw, 36px); min-height: 0; align-items: stretch; }
+        .q-label { text-align: center; margin-bottom: 6px; font-size: clamp(0.72rem, 2.4vw, 0.85rem); letter-spacing: 1px; }
+        .q-sentence { font-size: clamp(0.95rem, 3.7vw, 1.2rem); line-height: 1.6; text-align: left; }
+        .q-doc { display: none; margin-top: 10px; padding: 9px 12px; border: 1.5px dashed #b9c0d4; border-radius: 10px;
+                 background: #f5f7fc; color: #33384d; font-size: clamp(0.82rem, 3.2vw, 1rem); line-height: 1.6; text-align: left; font-weight: 500; }
+        .q-doc.show { display: block; }
+        .q-doc div:first-child { font-weight: 700; }
+        .q-target { display: none; text-align: center; margin-top: 12px; padding-bottom: 14px; font-size: clamp(0.95rem, 3.6vw, 1.2rem); font-weight: 700; color: #2a2a3e; }
+        .q-target.show { display: block; }
+        .q-ask { align-self: center; margin-top: 6px; }
+        .q-ask:empty { display: none; }
+        .q-hint { text-align: center; }
+        .q-hint:empty { display: none; }
+        .tut-play .q-sentence { text-align: center; }
+
+        /* 전표(난이도2) — 차변·대변 두 칸에 줄이 하나씩 채워진다 */
+        .slip { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .slip-col { background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 12px; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+        .slip-h { font-family: 'Black Han Sans', sans-serif; font-size: .82rem; text-align: center; letter-spacing: 2px; }
+        .slip-col.dr .slip-h { color: var(--blue); }
+        .slip-col.cr .slip-h { color: var(--red); }
+        .slip-row { display: flex; flex-direction: column; justify-content: center; gap: 1px; min-height: 48px; border-radius: 9px; padding: 6px 8px; background: rgba(0,0,0,0.28); border: 1.5px solid transparent; }
+        .slip-row.cur { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(255,214,0,.18); }
+        .slip-acc { font-weight: 700; font-size: clamp(0.82rem, 3.1vw, 1rem); color: #fff; word-break: keep-all; line-height: 1.3; }
+        .slip-acc.blank { color: rgba(255,255,255,.35); }
+        .slip-row.ok .slip-acc { color: var(--green); }
+        .slip-row.no .slip-acc { color: #ff8a9b; }
+        .slip-amt { font-size: clamp(0.78rem, 2.9vw, 0.95rem); color: rgba(255,255,255,.72); text-align: right; font-variant-numeric: tabular-nums; }
+        .slip-amt.blank { color: var(--gold); }
+        #lv2-ask b { color: var(--gold); }
+        .lv2-opt { word-break: keep-all; line-height: 1.25; font-size: clamp(0.88rem, 3.1vw, 1.08rem); padding: 12px 8px; }
+        #lv2-why { display: none; width: 100%; padding: 12px 14px; border-radius: 12px; background: rgba(255,214,0,0.08); border: 1px solid rgba(255,214,0,0.28);
+                   color: rgba(255,255,255,.9); font-size: clamp(0.86rem, 3.1vw, 1rem); line-height: 1.6; text-align: left; }
+        #lv2-why.show { display: block; }
+        #lv2-why b { color: var(--gold); }
+        /* 금액 입력 — 결산분개 조립 공장(난이도2)과 같은 모양 */
+        .amt-area { display: none; width: 100%; flex-direction: column; align-items: center; gap: 8px; }
+        .amt-area.show { display: flex; }
+        .amt-row { display: flex; gap: 8px; align-items: center; width: 100%; max-width: 320px; }
+        .amt-input { flex: 1; min-width: 0; background: rgba(0,0,0,0.4); border: 2px solid rgba(255,255,255,0.2); border-radius: 12px; color: #fff;
+                     padding: 12px 14px; font-size: 1.15rem; text-align: right; font-family: 'Black Han Sans', sans-serif; outline: none; -moz-appearance: textfield;
+                     -webkit-user-select: text; user-select: text; }
+        .amt-input::-webkit-outer-spin-button, .amt-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .amt-input:focus { border-color: var(--blue); }
+        .amt-won { color: rgba(255,255,255,0.5); font-size: 1rem; flex-shrink: 0; }
+        .amt-submit { padding: 12px 20px; border-radius: 12px; border: none; background: var(--green); color: #000; font-family: 'Black Han Sans', sans-serif;
+                      font-size: 0.95rem; cursor: pointer; min-height: 48px; min-width: 160px; }
+        .amt-submit:active { transform: scale(0.96); }
 </style>
 
 <button id="rewarded-btn" onclick="requestRewarded()">⏱ +30초 광고 보기</button>
@@ -880,13 +932,13 @@
 <!-- ── 시작 화면 ── -->
 <div id="start-screen" class="overlay">
     <div class="overlay-inner">
-        <div class="overlay-title">⚡ 차변대변</div>
-        <div class="overlay-sub">전산회계 2급 · 계정과목 차변/대변 위치 판단 게임</div>
+        <div class="overlay-title">⚡ 분개의 탑</div>
+        <div class="overlay-sub">전산회계 1급 · 기출 일반전표입력 162문항 분개 연습</div>
 
         <div class="example-card">
             <div class="ex-label">📌 문제 예시</div>
-            <span>상품을 현금으로 구입하다 → </span>
-            <span class="target-account" style="font-size:1rem; padding:1px 10px 2px;">상품</span>
+            <span>외상매입금 중 일부를 면제받았다 → </span>
+            <span class="target-account" style="font-size:1rem; padding:1px 10px 2px;">채무면제이익</span>
             <span>은(는) 어느 쪽?</span>
             <div class="ex-ask">↑ 강조된 계정과목이 차변인지 대변인지 클릭!</div>
         </div>
@@ -894,13 +946,13 @@
         <div class="start-grid">
             <div class="info-card">
                 <strong>🎮 게임 방법</strong>
-                <b style="color:#b388ff">보라색 강조</b>된<br>
-                계정과목이 차변/대변<br>
-                버튼을 클릭하세요!
+                실제 <b style="color:#b388ff">기출 거래</b>를 읽고<br>
+                계정마다 차변/대변을<br>
+                골라 분개를 완성!
             </div>
             <div class="info-card">
                 <strong>⏱️ 규칙</strong>
-                제한 시간 <strong style="color:var(--gold)">60초</strong><br>
+                제한 시간 <strong style="color:var(--gold)">120초</strong><br>
                 오답 시 <strong style="color:var(--red)">-5초</strong><br>
                 콤보 보너스!
             </div>
@@ -917,7 +969,7 @@
         </div>
 
         <div class="diff-toggle" id="diff-toggle" style="max-width:340px;margin:4px auto 0;">
-            <button class="diff-btn" id="diff-btn-1" onclick="selectDifficulty(1)">난이도 1<br><span style="font-size:.72rem;opacity:.7">한쪽 계정만 선택</span></button>
+            <button class="diff-btn" id="diff-btn-1" onclick="selectDifficulty(1)">난이도 1<br><span style="font-size:.72rem;opacity:.7">차변·대변 고르기</span></button>
             <button class="diff-btn locked" id="diff-btn-2" onclick="selectDifficulty(2)">난이도 2 🔒<br><span style="font-size:.72rem;opacity:.7">전표를 통째로 완성</span></button>
         </div>
         <div class="diff-hint" id="diff-hint"></div>
@@ -925,7 +977,7 @@
         <div class="action-btns" style="align-items:stretch; margin-top:20px; gap:10px;">
             <button class="pill-btn pill-btn-gold" onclick="startGame()">▶ 게임 시작</button>
             <button class="btn-hub" onclick="openGuide()">📖 사용방법</button>
-            <button class="btn-hub" onclick="location.href='index.html'">🏠 메인으로 나가기</button>
+            <button class="btn-hub" onclick="location.href='index_lv1.html'">🏠 메인으로 나가기</button>
         </div>
     </div>
 </div>
@@ -958,7 +1010,7 @@
         </div>
         <div class="action-btns" style="align-items:center;">
             <button class="btn-restart" onclick="startGame()">↺ 다시 하기</button>
-            <button class="btn-hub" onclick="location.href='index.html'">🏠 메인으로 나가기</button>
+            <button class="btn-hub" onclick="location.href='index_lv1.html'">🏠 메인으로 나가기</button>
         </div>
     </div>
 </div>
@@ -971,7 +1023,7 @@
     <button class="tt-skip" onclick="Tutorial.close()">건너뛰기</button>
   </div>
   <div class="tut-stage">
-    <div class="tut-status" id="tut-status">⏱ <b id="tut-time">60</b>초 · 콤보 <b id="tut-combo">0</b>x</div>
+    <div class="tut-status" id="tut-status">⏱ <b id="tut-time">120</b>초 · 콤보 <b id="tut-combo">0</b>x</div>
     <div class="tut-play">
       <div class="question-card" id="tut-card">
         <div class="q-label">강조된 계정과목은 어느 쪽?</div>
@@ -994,9 +1046,9 @@
         </div>
       </div>
       <div class="tut-balance" id="tut-balance">
-        <div class="hint-box hint-box-left"><strong>👈 차변</strong>상품 100,000</div>
-        <div class="hint-box hint-box-right"><strong>대변 👉</strong>외상매입금 100,000</div>
-        <div class="tut-bal-eq">차변 합계 100,000 = 대변 합계 100,000</div>
+        <div class="hint-box hint-box-left"><strong>👈 차변</strong>외상매입금 2,500,000</div>
+        <div class="hint-box hint-box-right"><strong>대변 👉</strong>지급어음 1,300,000<br>채무면제이익 1,200,000</div>
+        <div class="tut-bal-eq">차변 합계 2,500,000 = 대변 합계 2,500,000</div>
       </div>
     </div>
   </div>
@@ -1009,7 +1061,7 @@
 
 <!-- ── 헤더 ── -->
 <header>
-    <div class="logo" style="display:none">⚡ 차변대변</div>
+    <div class="logo" style="display:none">⚡ 분개의 탑</div>
     <div class="status-bar">
         <div class="stat">
             <div class="stat-label">TIME</div>
@@ -1030,7 +1082,7 @@
         <!-- 🎵 음소거 버튼 -->
         <button class="mute-btn" id="mute-btn" onclick="toggleMute()" title="BGM 음소거">🎵</button>
         <button class="hdr-btn" onclick="quitGame()">그만</button>
-        <button class="hdr-btn" onclick="(async()=>{if(typeof isPlaying!=='undefined'&&isPlaying){if(!await Ask.confirm('게임을 종료하고 메인으로 나가시겠어요?'))return;}location.href='index.html'})()">홈</button>
+        <button class="hdr-btn" onclick="(async()=>{if(typeof isPlaying!=='undefined'&&isPlaying){if(!await Ask.confirm('게임을 종료하고 메인으로 나가시겠어요?'))return;}location.href='index_lv1.html'})()">홈</button>
     </div>
 </header>
 <button id="freeze-btn" onclick="requestFreeze()">⏸ 시간 정지(5문제 시간제한 없음)</button>
@@ -1039,8 +1091,10 @@
 <div class="game-area">
     <div class="center-area">
         <div id="question-card" class="question-card">
-            <div class="q-label">강조된 계정과목은 어느 쪽?</div>
+            <div class="q-label" id="q-label">기출 일반전표입력</div>
             <div class="q-sentence" id="q-sentence">게임을 시작해보세요!</div>
+            <div class="q-doc" id="q-doc"></div>
+            <div class="q-target" id="q-target"></div>
             <div class="q-ask" id="q-ask"></div>
             <div class="q-hint" id="q-hint"></div>
         </div>
@@ -1076,11 +1130,21 @@
         </div>
         </div>
 
-        <!-- 난이도2 — 차변/대변 계정·전표유형을 한 단계씩 완성 -->
+        <!-- 난이도2 — 전표 한 장을 줄마다 채운다(계정 → 계산이 필요한 금액) -->
         <div class="lv2-area" id="lv2-area">
+            <div class="slip" id="slip"></div>
             <div id="lv2-progress">1/3</div>
             <div id="lv2-ask">차변 계정과목은?</div>
             <div id="lv2-opts"></div>
+            <div class="amt-area" id="amt-area">
+                <div class="amt-row">
+                    <input type="number" id="amt-input" class="amt-input" inputmode="numeric" placeholder="0" onkeydown="if(event.key==='Enter'){event.preventDefault();submitAmount();}">
+                    <span class="amt-won">원</span>
+                </div>
+                <button class="amt-submit" onclick="submitAmount()">✔ 확인</button>
+            </div>
+            <div id="lv2-why"></div>
+            <button class="amt-submit" id="lv2-next" style="display:none" onclick="lv2Continue()">다음 문제 ▶</button>
         </div>
     </div>
 </div>
@@ -1096,25 +1160,25 @@ const SUPABASE_URL = "https://pjagaulfivafamhhiveg.supabase.co";
     const SUPABASE_KEY = "sb_publishable_yck2tAKApEjVSJOJMVSXuQ_AGaNatuI";
     const { createClient } = supabase;
     const db = createClient(SUPABASE_URL, SUPABASE_KEY);
-const GAME_ID   = "debit";
+const GAME_ID   = "journal_lv1";
 
     // ── 난이도2 점수는 따로 저장하고 따로 랭킹을 낸다(2026-09-18, 사용자 요청).
     //    game_id 는 '<게임>_d2'. 랭킹·내 순위는 결과 화면에만 있고, LV 는 다음 판을 시작할 때까지
     //    방금 끝낸 판의 값을 유지하므로 LV 하나로 저장·조회 대상을 정한다.
-    //    (허브 스테이지 해금용 hub_<게임>_best 는 단계와 무관하게 그대로 둔다 — 2단계로 잘해도 다음 게임은 열려야 한다.)
+    //    (허브 노드맵용 lv1_s2_progress 는 단계와 무관하게 남긴다 — 2단계로 잘해도 다음 스테이지는 열려야 한다.)
     function scoreIdFor(lv) { return lv === 2 ? GAME_ID + '_d2' : GAME_ID; }
     function rankId() { return scoreIdFor(typeof LV !== 'undefined' ? LV : 1); }
 
 // ══════════════════════════════════════
 // 🎵 BGM 관리
 // ══════════════════════════════════════
-const bgm = BGMAudio.create('bgm3_debit.mp3?v=54');
+const bgm = BGMAudio.create('bgm3_debit.mp3?v=54');   // 전용 BGM 은 아직 없다 — 2급 차변대변 곡을 같이 쓴다
 bgm.volume = 0.5;
 
 // 음소거 상태: localStorage에 저장해서 다음 게임에도 유지
-// 게임별 키(debit_muted)가 있으면 우선, 없으면 허브 전역 토글(hub_muted) 참조
-let isMuted = localStorage.getItem('debit_muted') !== null
-    ? localStorage.getItem('debit_muted') === 'true'
+// 게임별 키(journal_muted)가 있으면 우선, 없으면 허브 전역 토글(hub_muted) 참조
+let isMuted = localStorage.getItem('journal_muted') !== null
+    ? localStorage.getItem('journal_muted') === 'true'
     : localStorage.getItem('hub_muted') === 'true';
 applyMuteState();
 
@@ -1129,7 +1193,7 @@ function applyMuteState() {
 
 function toggleMute() {
     isMuted = !isMuted;
-    localStorage.setItem('debit_muted', isMuted);
+    localStorage.setItem('journal_muted', isMuted);
     applyMuteState();
 }
 
@@ -1166,131 +1230,70 @@ function bgmStop() {
 }
 
 // ══════════════════════════════════════
-// 문제 데이터
+// 문제 데이터 — journal_bank_lv1.json
+//   한국세무사회 기출 100~126회 문제2 [일반전표입력] 162문항(tools/journal/build.py 가 만든다).
+//   한 문항 = 거래 문장(stem)·증빙(doc) + 차변 줄(debit)·대변 줄(credit).
+//   줄: a 보기에 찍히는 이름 · m 금액 · x 계산해야 하는 금액 · c 문장 속 단서 ·
+//       k 분류 · r 증가/감소/발생 · h 힌트 · f 오답 후보(앞 n 개는 꼭 넣는다)
 // ══════════════════════════════════════
-const questions = [
-    // ── 자산 증가 → 차변 ──
-    { sentence: '상품을 현금으로 구입하다 → <b class="target-account">상품</b>', target: '상품', type: 'left', hint: '상품(자산) 증가 → 차변' },
-    { sentence: '건물을 현금으로 취득하다 → <b class="target-account">건물</b>', target: '건물', type: 'left', hint: '건물(자산) 증가 → 차변' },
-    { sentence: '상품을 외상으로 판매하다 → <b class="target-account">외상매출금</b>', target: '외상매출금', type: 'left', hint: '외상매출금(자산) 증가 → 차변' },
-    { sentence: '거래처에 단기대여금을 지급하다 → <b class="target-account">단기대여금</b>', target: '단기대여금', type: 'left', hint: '단기대여금(자산) 증가 → 차변' },
-    { sentence: '컴퓨터(비품)를 구입하다 → <b class="target-account">비품</b>', target: '비품', type: 'left', hint: '비품(자산) 증가 → 차변' },
-    { sentence: '업무용 차량을 구입하다 → <b class="target-account">차량운반구</b>', target: '차량운반구', type: 'left', hint: '차량운반구(자산) 증가 → 차변' },
-    { sentence: '매출 대금을 현금으로 받다 → <b class="target-account">현금</b>', target: '현금', type: 'left', hint: '현금(자산) 증가 → 차변' },
-    { sentence: '비품을 매각하고 대금이 미수 처리되다 → <b class="target-account">미수금</b>', target: '미수금', type: 'left', hint: '미수금(자산) 증가 → 차변' },
-    { sentence: '거래처에 계약금을 선지급하다 → <b class="target-account">선급금</b>', target: '선급금', type: 'left', hint: '선급금(자산) 증가 → 차변' },
-    { sentence: '상품 판매 후 받을어음을 받다 → <b class="target-account">받을어음</b>', target: '받을어음', type: 'left', hint: '받을어음(자산) 증가 → 차변' },
-    { sentence: '급여를 보통예금 계좌로 받다 → <b class="target-account">보통예금</b>', target: '보통예금', type: 'left', hint: '보통예금(자산) 증가 → 차변' },
-    { sentence: '단기매매 목적 주식을 취득하다 → <b class="target-account">단기매매증권</b>', target: '단기매매증권', type: 'left', hint: '단기매매증권(자산) 증가 → 차변' },
-    // ── 부채 감소 → 차변 ──
-    { sentence: '외상매입금을 현금으로 갚다 → <b class="target-account">외상매입금</b>', target: '외상매입금', type: 'left', hint: '외상매입금(부채) 감소 → 차변' },
-    { sentence: '단기차입금을 은행에 상환하다 → <b class="target-account">단기차입금</b>', target: '단기차입금', type: 'left', hint: '단기차입금(부채) 감소 → 차변' },
-    { sentence: '비품 미지급 대금을 현금 지급하다 → <b class="target-account">미지급금</b>', target: '미지급금', type: 'left', hint: '미지급금(부채) 감소 → 차변' },
-    { sentence: '받은 계약금(선수금)으로 상품을 납품하다 → <b class="target-account">선수금</b>', target: '선수금', type: 'left', hint: '선수금(부채) 감소 → 차변 (의무 이행)' },
-    { sentence: '만기 도래한 지급어음을 결제하다 → <b class="target-account">지급어음</b>', target: '지급어음', type: 'left', hint: '지급어음(부채) 감소 → 차변' },
-    { sentence: '원천징수한 예수금을 세무서에 납부하다 → <b class="target-account">예수금</b>', target: '예수금', type: 'left', hint: '예수금(부채) 감소 → 차변' },
-    { sentence: '장기차입금을 조기 상환하다 → <b class="target-account">장기차입금</b>', target: '장기차입금', type: 'left', hint: '장기차입금(부채) 감소 → 차변' },
-    // ── 비용 발생 → 차변 ──
-    { sentence: '직원 급여를 현금으로 지급하다 → <b class="target-account">급여</b>', target: '급여', type: 'left', hint: '급여(비용) 발생 → 차변' },
-    { sentence: '사무실 임차료를 지급하다 → <b class="target-account">임차료</b>', target: '임차료', type: 'left', hint: '임차료(비용) 발생 → 차변' },
-    { sentence: '거래처 접대 목적으로 식사비를 현금 지출하다 → <b class="target-account">기업업무추진비</b>', target: '기업업무추진비', type: 'left', hint: '기업업무추진비(비용) 발생 → 차변' },
-    { sentence: 'TV 광고 비용을 지급하다 → <b class="target-account">광고선전비</b>', target: '광고선전비', type: 'left', hint: '광고선전비(비용) 발생 → 차변' },
-    { sentence: '차입금에 대한 이자를 지급하다 → <b class="target-account">이자비용</b>', target: '이자비용', type: 'left', hint: '이자비용(비용) 발생 → 차변' },
-    { sentence: '직원 복리후생비를 지출하다 → <b class="target-account">복리후생비</b>', target: '복리후생비', type: 'left', hint: '복리후생비(비용) 발생 → 차변' },
-    { sentence: '회사 통신비를 납부하다 → <b class="target-account">통신비</b>', target: '통신비', type: 'left', hint: '통신비(비용) 발생 → 차변' },
-    { sentence: '건물 감가상각비를 계상하다 → <b class="target-account">감가상각비</b>', target: '감가상각비', type: 'left', hint: '감가상각비(비용) 발생 → 차변' },
-    { sentence: '화재보험료를 납부하다 → <b class="target-account">보험료</b>', target: '보험료', type: 'left', hint: '보험료(비용) 발생 → 차변' },
-    { sentence: '재산세를 납부하다 → <b class="target-account">세금과공과</b>', target: '세금과공과', type: 'left', hint: '세금과공과(비용) 발생 → 차변' },
-    { sentence: '출장 교통비를 지급하다 → <b class="target-account">여비교통비</b>', target: '여비교통비', type: 'left', hint: '여비교통비(비용) 발생 → 차변' },
-    { sentence: '외상매출금 중 회수 불능액을 처리하다 → <b class="target-account">대손상각비</b>', target: '대손상각비', type: 'left', hint: '대손상각비(비용) 발생 → 차변' },
-    // ── 부채 증가 → 대변 ──
-    { sentence: '상품을 외상으로 구입하다 → <b class="target-account">외상매입금</b>', target: '외상매입금', type: 'right', hint: '외상매입금(부채) 증가 → 대변' },
-    { sentence: '은행에서 단기로 자금을 빌리다 → <b class="target-account">단기차입금</b>', target: '단기차입금', type: 'right', hint: '단기차입금(부채) 증가 → 대변' },
-    { sentence: '비품을 구입하고 대금을 다음 달 지급하기로 하다 → <b class="target-account">미지급금</b>', target: '미지급금', type: 'right', hint: '미지급금(부채) 증가 → 대변' },
-    { sentence: '고객으로부터 상품 계약금을 미리 받다 → <b class="target-account">선수금</b>', target: '선수금', type: 'right', hint: '선수금(부채) 증가 → 대변' },
-    { sentence: '장기 시설자금을 은행에서 대출받다 → <b class="target-account">장기차입금</b>', target: '장기차입금', type: 'right', hint: '장기차입금(부채) 증가 → 대변' },
-    { sentence: '상품 대금으로 어음을 발행하다 → <b class="target-account">지급어음</b>', target: '지급어음', type: 'right', hint: '지급어음(부채) 증가 → 대변' },
-    { sentence: '직원 급여에서 소득세를 원천징수하다 → <b class="target-account">예수금</b>', target: '예수금', type: 'right', hint: '예수금(부채) 증가 → 대변' },
-    { sentence: '기말 외상매출금 잔액에 대해 대손충당금 설정 → <b class="target-account">대손충당금</b>', target: '대손충당금', type: 'right', hint: '대손충당금(자산차감) 증가 → 대변' },
-    // ── 자본 증가 → 대변 ──
-    { sentence: '창업자가 현금을 출자하다 → <b class="target-account">자본금</b>', target: '자본금', type: 'right', hint: '자본금(자본) 증가 → 대변' },
-    { sentence: '유상증자로 주식을 발행하다 → <b class="target-account">자본금</b>', target: '자본금', type: 'right', hint: '자본금(자본) 증가 → 대변' },
-    // ── 수익 발생 → 대변 ──
-    { sentence: '상품을 현금으로 판매하다 → <b class="target-account">상품매출</b>', target: '상품매출', type: 'right', hint: '매출(수익) 발생 → 대변' },
-    { sentence: '상품을 외상으로 판매하다 → <b class="target-account">상품매출</b>', target: '상품매출', type: 'right', hint: '매출(수익) 발생 → 대변' },
-    { sentence: '은행 예금에 이자가 입금되다 → <b class="target-account">이자수익</b>', target: '이자수익', type: 'right', hint: '이자수익(수익) 발생 → 대변' },
-    { sentence: '건물을 타사에 임대하고 임대료를 받다 → <b class="target-account">임대료</b>', target: '임대료', type: 'right', hint: '임대료(수익) 발생 → 대변' },
-    { sentence: '업무용 차량을 처분하고 처분이익 발생 → <b class="target-account">유형자산처분이익</b>', target: '유형자산처분이익', type: 'right', hint: '유형자산처분이익(수익) 발생 → 대변' },
-    { sentence: '보유 주식에서 배당금을 받다 → <b class="target-account">배당금수익</b>', target: '배당금수익', type: 'right', hint: '배당금수익(수익) 발생 → 대변' },
-    { sentence: '원인 불명 현금 초과액을 잡이익 처리하다 → <b class="target-account">잡이익</b>', target: '잡이익', type: 'right', hint: '잡이익(수익) 발생 → 대변' },
-    { sentence: '단기대여금에 대한 이자 입금 → <b class="target-account">이자수익</b>', target: '이자수익', type: 'right', hint: '이자수익(수익) 발생 → 대변' },
-    // ── 자산 감소 → 대변 ──
-    { sentence: '보통예금 계좌에서 급여를 이체하다 → <b class="target-account">보통예금</b>', target: '보통예금', type: 'right', hint: '보통예금(자산) 감소 → 대변' },
-    { sentence: '현금으로 상품을 구입하다 → <b class="target-account">현금</b>', target: '현금', type: 'right', hint: '현금(자산) 감소 → 대변' },
-    { sentence: '외상매출금을 현금으로 회수하다 → <b class="target-account">외상매출금</b>', target: '외상매출금', type: 'right', hint: '외상매출금(자산) 감소 → 대변' },
-    { sentence: '대여금이 만기 회수되다 → <b class="target-account">단기대여금</b>', target: '단기대여금', type: 'right', hint: '단기대여금(자산) 감소 → 대변' },
-    { sentence: '사무용 소모품을 사용하다(자산 처리된 것) → <b class="target-account">소모품</b>', target: '소모품', type: 'right', hint: '소모품(자산) 감소 → 대변' },
-    { sentence: '받을어음이 만기가 되어 당좌예금으로 입금 → <b class="target-account">받을어음</b>', target: '받을어음', type: 'right', hint: '받을어음(자산) 감소 → 대변' },
-    { sentence: '건물에 감가상각을 반영하다 → <b class="target-account">감가상각누계액</b>', target: '감가상각누계액', type: 'right', hint: '감가상각누계액(자산차감) 증가 → 대변' },
-];
-
-/* ═══════════════════════════════════════════════════════
- *  난이도2 — 한쪽 계정만 맞히면 끝나던 방식에서 "전표 한 장 통째로
- *  완성"으로 확장. 거래 하나당 ①차변 계정 ②대변 계정 ③전표유형(출금/입금/
- *  대체)을 순서대로 물어, 전부 맞혀야 정답 판정한다. 118회 기출 대조 분석
- *  결과 일반전표(24점) 정답률이 37%였던 이유가 "계정과목 한쪽만 고르면 끝"
- *  이었기 때문 — 실제 시험은 차·대변 둘 다 + 전표유형까지 직접 입력해야 함.
- *  ⚠ 거래처코드도 물었었지만 뺐다(2026-09-13) — buildLv2Steps 주석 참고.
- *  전표유형 판정 규칙(단순화): 현금이 대변(현금 감소)=출금전표,
- *  현금이 차변(현금 증가)=입금전표, 현금이 아예 없으면=대체전표.
- * ═══════════════════════════════════════════════════════ */
-const ACCOUNT_POOL = [
-  '현금','보통예금','외상매출금','받을어음','단기대여금','상품','비품','차량운반구',
-  '외상매입금','미지급금','단기차입금','지급어음','예수금','선수금',
-  '급여','임차료','이자비용','통신비','복리후생비',
-  '상품매출','이자수익','임대료',
-];
-function shuffleArr(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
-function pickFakes(exclude, n){
-  const pool = ACCOUNT_POOL.filter(a=>!exclude.includes(a));
-  return shuffleArr(pool).slice(0, n);
+let BANK = [];
+const bankReady = (async function () {
+    try {
+        const r = await fetch('journal_bank_lv1.json?b=1');
+        const j = await r.json();
+        BANK = (j && j.questions) || [];
+    } catch (e) { BANK = []; }
+})();
+async function ensureBank() {
+    if (!BANK.length) await bankReady;
+    if (BANK.length) return true;
+    Ask.alert('문제를 불러오지 못했어요.\n인터넷 연결을 확인하고 다시 시도해 주세요.');
+    return false;
 }
-const entriesLv2 = [
-  { sentence:'상품 500,000원을 가나상사에 외상으로 매입하다', debitAcc:'상품', creditAcc:'외상매입금', vendor:'가나상사', voucherType:'대체전표' },
-  { sentence:'상품 300,000원을 현금으로 매입하다', debitAcc:'상품', creditAcc:'현금', vendor:null, voucherType:'출금전표' },
-  { sentence:'다라상사에 상품 700,000원을 외상으로 판매하다', debitAcc:'외상매출금', creditAcc:'상품매출', vendor:'다라상사', voucherType:'대체전표' },
-  { sentence:'상품 400,000원을 현금으로 판매하다', debitAcc:'현금', creditAcc:'상품매출', vendor:null, voucherType:'입금전표' },
-  { sentence:'가나상사에 대한 외상매입금 200,000원을 현금으로 지급하다', debitAcc:'외상매입금', creditAcc:'현금', vendor:'가나상사', voucherType:'출금전표' },
-  { sentence:'다라상사의 외상매출금 350,000원을 현금으로 회수하다', debitAcc:'현금', creditAcc:'외상매출금', vendor:'다라상사', voucherType:'입금전표' },
-  { sentence:'직원 급여 2,000,000원을 현금으로 지급하다', debitAcc:'급여', creditAcc:'현금', vendor:null, voucherType:'출금전표' },
-  { sentence:'은행에서 현금 5,000,000원을 단기로 차입하다', debitAcc:'현금', creditAcc:'단기차입금', vendor:null, voucherType:'입금전표' },
-  { sentence:'마바상사로부터 비품 1,200,000원을 외상으로 구입하다', debitAcc:'비품', creditAcc:'미지급금', vendor:'마바상사', voucherType:'대체전표' },
-  { sentence:'다라상사로부터 받을어음 800,000원을 현금으로 회수하다', debitAcc:'현금', creditAcc:'받을어음', vendor:'다라상사', voucherType:'입금전표' },
-  { sentence:'사무실 임차료 600,000원을 보통예금 계좌에서 이체 지급하다', debitAcc:'임차료', creditAcc:'보통예금', vendor:null, voucherType:'대체전표' },
-  { sentence:'보통예금 계좌에 이자수익 50,000원이 입금되다', debitAcc:'보통예금', creditAcc:'이자수익', vendor:null, voucherType:'대체전표' },
-  { sentence:'마바상사에 상품 900,000원 매입 대금으로 어음을 발행하다', debitAcc:'상품', creditAcc:'지급어음', vendor:'마바상사', voucherType:'대체전표' },
-  { sentence:'상품 250,000원을 판매하고 대금을 현금으로 받다', debitAcc:'현금', creditAcc:'상품매출', vendor:null, voucherType:'입금전표' },
-];
-function buildLv2Steps(entry){
-  const steps = [];
-  steps.push({ ask:'차변 계정과목은?', correct:entry.debitAcc,
-    options: shuffleArr([entry.debitAcc, ...pickFakes([entry.debitAcc, entry.creditAcc], 3)]) });
-  steps.push({ ask:'대변 계정과목은?', correct:entry.creditAcc,
-    options: shuffleArr([entry.creditAcc, ...pickFakes([entry.debitAcc, entry.creditAcc], 3)]) });
-  /* ⚠ 거래처코드는 묻지 않는다(2026-09-13, 사용자 지시).
-     KcLep 에서 F2 로 조회해 넣는 값이지 외우는 값이 아니고, 게임이 코드표를
-     보여주지도 않아서 순수 찍기 문제였다. 되살리지 말 것. */
-  steps.push({ ask:'이 거래의 전표유형은?', correct:entry.voucherType,
-    options: shuffleArr(['출금전표','입금전표','대체전표']) });
-  return steps;
+function won(n) { return Number(n).toLocaleString('ko-KR'); }
+function escH(str) { return String(str == null ? '' : str).replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c])); }
+function shuffleArr(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+/* 보기 4개 = 정답 + 오답 3개. 같은 계정의 제/판 반대쪽(f 의 앞 n 개)은 꼭 넣는다 — 1급에서 가장 자주 틀리는 자리. */
+function optionsFor(l) {
+    const must = l.f.slice(0, l.n || 0), rest = shuffleArr(l.f.slice(l.n || 0));
+    return shuffleArr([l.a].concat(must.concat(rest).slice(0, 3)));
+}
+function slipText(e) {
+    const side = arr => arr.map(l => l.a + ' ' + won(l.m)).join(' · ');
+    return '(차) ' + side(e.debit) + ' / (대) ' + side(e.credit);
+}
+/* 문장 속 단서를 금색으로 칠한다(차근차근 모드 ② 단계) */
+function markClue(text, clue) {
+    const t = escH(text);
+    if (!clue) return t;
+    const c = escH(clue), i = t.indexOf(c);
+    return i < 0 ? t : t.slice(0, i) + '<mark class="step-key">' + c + '</mark>' + t.slice(i + c.length);
+}
+function renderStem(e, clue) {
+    document.getElementById('q-label').textContent = '제' + e.round + '회 기출 · 일반전표입력';
+    document.getElementById('q-sentence').innerHTML = markClue(e.stem, clue);
+    const d = document.getElementById('q-doc');
+    if (e.doc && e.doc.length) {
+        d.innerHTML = e.doc.map(t => '<div>' + markClue(t, clue) + '</div>').join('');
+        d.classList.add('show');
+    } else { d.innerHTML = ''; d.classList.remove('show'); }
+}
+function renderTarget(name) {
+    const t = document.getElementById('q-target');
+    if (!name) { t.innerHTML = ''; t.classList.remove('show'); return; }
+    t.innerHTML = '→ <b class="target-account">' + escH(name) + '</b>';
+    t.classList.add('show');
 }
 
 // ══════════════════════════════════════
 // 게임 상태
 // ══════════════════════════════════════
-const GAME_TIME = 60;
-let LV = 1; // 1=한쪽 계정만 선택 / 2=전표 통째로 완성(difficulty.js로 해금)
-let lv2Round = null; // {entry, steps, idx, allOk}
+const GAME_TIME = 120;   // 기출 문장이 길어 2급(60초)의 두 배
+let LV = 1; // 1=계정마다 차변/대변 고르기 / 2=전표 통째로 완성(difficulty.js로 해금)
+let lv2Round = null;      // {entry, steps, idx, allOk, state, frozen}
+let curEntry = null;      // 지금 풀고 있는 거래(난이도1은 이 거래의 줄을 하나씩 묻는다)
+let lv1Queue = [], lv1Idx = 0;
+let explainPause = false; // 난이도2 오답 풀이를 읽는 동안 시간을 멈춘다
 let score = 0, combo = 0, maxCombo = 0;
 let timeLeft = GAME_TIME;
 let timerInterval = null;
@@ -1337,10 +1340,11 @@ function playSound(type) {
     } catch(e) {}
 }
 
-function startGame() {
+async function startGame() {
     hideAdPlaceholder();
     getAudio();
     bgmPlay(); // 🎵 게임 시작 시 BGM 재생
+    if (!(await ensureBank())) { bgmStop(); showAdPlaceholder(); return; }
     LV = window.Difficulty ? Difficulty.get(GAME_ID) : 1;
     document.getElementById('answer-buttons-area').classList.toggle('show', LV !== 2);
     document.getElementById('lv2-area').classList.toggle('show', LV === 2);
@@ -1349,6 +1353,7 @@ function startGame() {
     score = 0; combo = 0; maxCombo = 0;
     timeLeft = GAME_TIME; correctCount = 0; wrongCount = 0;
     freezeLeft = 0; pendingReward = null;
+    curEntry = null; lv1Queue = []; lv1Idx = 0; explainPause = false;
     isPlaying = true;
     isLocked = false;
     if (nextQTimer) { clearTimeout(nextQTimer); nextQTimer = null; }
@@ -1363,7 +1368,7 @@ let adPaused = false; // 광고 시청 중 타이머 일시정지 플래그
 let freezeLeft = 0;   // 설명타임: 이 값이 0보다 크면 남은 문제 수만큼 타이머 완전 정지
 let pendingReward = null; // 'time' | 'freeze' — 광고 시청 후 지급할 보상 종류
 function tick() {
-    if (adPaused || freezeLeft > 0) return; // 광고 시청/설명타임 중엔 시간 멈춤
+    if (adPaused || freezeLeft > 0 || explainPause) return; // 광고 시청/설명타임/오답 풀이 중엔 시간 멈춤
     /* 화면이 가려져 있으면(전면광고·전화·홈버튼) 시간을 깎지 않는다.
        실기기 제보 2026-09-15: 신고의 문에서 전면광고가 덮은 채로 제한 시간이 흘러 죽었다.
        판단은 pausewatch.js 한 곳에서 한다 — WKWebView 는 visibilitychange 가 안 올 때가 있어
@@ -1406,119 +1411,202 @@ function grantFreeze() {
     updateHUD();
 }
 
-// 셔플 백: 전체 문제를 섞어 하나씩 소진, 다 나오면 재셔플(직전 문제 연속 방지)
-let _qBag = [];
-function _drawQ(arr, last) {
-    if (_qBag.length === 0) {
-        _qBag = arr.map((_, i) => i);
-        for (let i = _qBag.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [_qBag[i], _qBag[j]] = [_qBag[j], _qBag[i]]; }
-        if (_qBag.length > 1 && arr[_qBag[0]] === last) { [_qBag[0], _qBag[1]] = [_qBag[1], _qBag[0]]; }
-    }
-    return arr[_qBag.shift()];
-}
-let _eBag = []; // entriesLv2 전용 셔플백(questions와 배열 길이가 달라 _qBag과 공유하면 범위를 벗어난 인덱스를 뽑을 수 있음)
-function _drawEntry(arr, last) {
+// 셔플 백: 162문항을 섞어 하나씩 소진, 다 나오면 재셔플(직전 문제 연속 방지)
+let _eBag = [];
+function _drawEntry(last) {
     if (_eBag.length === 0) {
-        _eBag = arr.map((_, i) => i);
-        for (let i = _eBag.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [_eBag[i], _eBag[j]] = [_eBag[j], _eBag[i]]; }
-        if (_eBag.length > 1 && arr[_eBag[0]] === last) { [_eBag[0], _eBag[1]] = [_eBag[1], _eBag[0]]; }
+        _eBag = shuffleArr(BANK.map((_, i) => i));
+        if (_eBag.length > 1 && BANK[_eBag[0]] === last) { [_eBag[0], _eBag[1]] = [_eBag[1], _eBag[0]]; }
     }
-    return arr[_eBag.shift()];
+    return BANK[_eBag.shift()];
 }
 function nextQuestion() {
     if (!isPlaying) return;
     nextQTimer = null;
     isLocked = false;
+    document.getElementById('q-hint').textContent = '';
+    document.getElementById('question-card').className = 'question-card';
     if (LV === 2) {
-        const entry = _drawEntry(entriesLv2, currentQ);
+        const entry = _drawEntry(curEntry);
+        curEntry = entry;
         currentQ = entry;
-        lv2Round = { entry, steps: buildLv2Steps(entry), idx: 0, allOk: true };
-        document.getElementById('q-sentence').textContent = entry.sentence;
+        lv2Round = { entry, steps: buildLv2Steps(entry), idx: 0, allOk: true, state: {}, frozen: freezeLeft > 0 };
+        entry.debit.forEach((_, i) => { lv2Round.state['D' + i] = {}; });
+        entry.credit.forEach((_, i) => { lv2Round.state['C' + i] = {}; });
+        if (lv2Round.frozen) { freezeLeft--; updateHUD(); }   // 시간 정지는 전표 한 장 = 1문제로 센다
+        renderStem(entry);
+        renderTarget('');
         document.getElementById('q-ask').textContent = '';
-        document.getElementById('q-hint').textContent = '';
-        document.getElementById('question-card').className = 'question-card';
+        document.getElementById('lv2-why').classList.remove('show');
+        document.getElementById('lv2-next').style.display = 'none';
         renderLv2Step();
         return;
     }
-    currentQ = _drawQ(questions, currentQ);
-    let q = currentQ;
-    document.getElementById('q-sentence').innerHTML = q.sentence;
-    document.getElementById('q-ask').innerHTML = `<b>${q.target}</b> 은(는) 차변? 대변?`;
-    document.getElementById('q-hint').textContent = '';
-    document.getElementById('question-card').className = 'question-card';
+    // 난이도1 — 한 거래의 계정을 하나씩(섞어서) 묻는다. 문장은 한 번만 읽으면 된다.
+    if (!curEntry || lv1Idx >= lv1Queue.length) {
+        curEntry = _drawEntry(curEntry);
+        lv1Queue = shuffleArr(curEntry.debit.map(l => ({ l, side: 'left' })).concat(curEntry.credit.map(l => ({ l, side: 'right' }))));
+        lv1Idx = 0;
+        renderStem(curEntry);
+    }
+    const it = lv1Queue[lv1Idx];
+    currentQ = { entry: curEntry, line: it.l, target: it.l.a, type: it.side, hint: it.l.h };
+    renderTarget(it.l.a);
+    document.getElementById('q-ask').innerHTML = `<b>${escH(it.l.a)}</b> 은(는) 차변? 대변?` +
+        (lv1Queue.length > 1 ? ` <span style="opacity:.6">(${lv1Idx + 1}/${lv1Queue.length})</span>` : '');
 }
 
-function renderLv2Step(){
-    const step = lv2Round.steps[lv2Round.idx];
-    document.getElementById('lv2-progress').textContent = (lv2Round.idx+1)+'/'+lv2Round.steps.length;
-    document.getElementById('lv2-ask').textContent = step.ask;
-    const box = document.getElementById('lv2-opts');
+/* ═══════════════════════════════════════════════════════
+ *  난이도2 — 전표 한 장 통째로.
+ *  ① 차변 줄 → 대변 줄 순서로 계정과목을 고르고(4지선다),
+ *  ② 문제에 그대로 적혀 있지 않은 금액은 직접 계산해 입력한다.
+ *  전부 맞혀야 정답. 하나라도 틀리면 풀이를 보여 주고(그동안 시간 정지) 다음 문제로.
+ *  ⚠ 거래처코드·전표유형은 묻지 않는다 — KcLep 에서 조회해 넣는 값이지 외우는 값이 아니다(2급과 같은 원칙).
+ * ═══════════════════════════════════════════════════════ */
+function buildLv2Steps(e) {
+    const steps = [];
+    e.debit.forEach((l, i) => steps.push({ kind: 'acc', side: 'D', i, l }));
+    e.credit.forEach((l, i) => steps.push({ kind: 'acc', side: 'C', i, l }));
+    const seen = {};   // 같은 금액은 한 번만 묻는다(차·대 한 줄씩인 전표에서 두 번 입력하지 않게)
+    [['D', e.debit], ['C', e.credit]].forEach(([side, arr]) => arr.forEach((l, i) => {
+        if (!l.x || seen[l.m]) return;
+        seen[l.m] = true;
+        steps.push({ kind: 'amt', side, i, l });
+    }));
+    return steps;
+}
+function renderSlip(done) {
+    const R = lv2Round, e = R.entry, cur = done ? null : R.steps[R.idx];
+    const col = (arr, side, title) => '<div class="slip-col ' + (side === 'D' ? 'dr' : 'cr') + '"><div class="slip-h">' + title + '</div>' +
+        arr.map((l, i) => {
+            const st = R.state[side + i];
+            const isCur = !!cur && cur.side === side && cur.i === i;
+            const amtShown = !l.x || st.amt;
+            return '<div class="slip-row' + (isCur ? ' cur' : '') + (st.acc ? ' ' + st.acc : '') + '">' +
+                '<span class="slip-acc' + (st.acc ? '' : ' blank') + '">' + (st.acc ? escH(l.a) : '계정과목') + '</span>' +
+                '<span class="slip-amt' + (amtShown ? '' : ' blank') + '">' + (amtShown ? won(l.m) : '금액 ?') + '</span></div>';
+        }).join('') + '</div>';
+    document.getElementById('slip').innerHTML = col(e.debit, 'D', '차변') + col(e.credit, 'C', '대변');
+}
+function renderLv2Step() {
+    const R = lv2Round, step = R.steps[R.idx];
+    renderSlip(false);
+    document.getElementById('lv2-progress').textContent = (R.idx + 1) + '/' + R.steps.length;
+    const box = document.getElementById('lv2-opts'), amt = document.getElementById('amt-area');
+    const sideKr = step.side === 'D' ? '차변' : '대변';
     box.innerHTML = '';
-    step.options.forEach(opt=>{
-        const b=document.createElement('button');
-        b.className='ans-btn lv2-opt'; b.textContent=opt;
-        b.addEventListener('click', ()=>handleLv2Pick(opt, b));
+    if (step.kind === 'amt') {
+        amt.classList.add('show');
+        document.getElementById('lv2-ask').innerHTML = sideKr + ' <b>' + escH(step.l.a) + '</b> 금액은? (계산해서 입력)';
+        const inp = document.getElementById('amt-input');
+        inp.value = '';
+        try { inp.focus({ preventScroll: true }); } catch (e) {}
+        return;
+    }
+    amt.classList.remove('show');
+    document.getElementById('lv2-ask').innerHTML = step.l.x
+        ? sideKr + ' <b>노란 테두리 칸</b>의 계정과목은?'
+        : sideKr + ' <b>' + won(step.l.m) + '원</b>의 계정과목은?';
+    optionsFor(step.l).forEach(opt => {
+        const b = document.createElement('button');
+        b.className = 'ans-btn lv2-opt'; b.textContent = opt;
+        b.addEventListener('click', () => handleLv2Pick(opt, b));
         box.appendChild(b);
     });
 }
-
-function handleLv2Pick(opt, btnEl){
-    if (!isPlaying || isLocked) return;
-    isLocked = true;
-    const step = lv2Round.steps[lv2Round.idx];
-    const wasFrozen = freezeLeft > 0; if (wasFrozen) { freezeLeft--; updateHUD(); }
-    const ok = (opt === step.correct);
-    document.querySelectorAll('#lv2-opts .lv2-opt').forEach(b=>b.style.pointerEvents='none');
-    if (ok) {
-        playSound('correct'); btnEl.classList.add('picked-ok'); hapticCorrect();
-    } else {
-        playSound('wrong'); lv2Round.allOk = false; btnEl.classList.add('picked-no');
-        document.getElementById('q-hint').textContent = '💡 정답: ' + step.correct;
-        hapticWrong();
-    }
-    nextQTimer = setTimeout(()=>{
-        // 이 지연 시간 안에 라운드가 끝나버리면(그만/시간종료) 이미 결과화면에 반영된
-        // score/combo/correctCount를 뒤늦게 또 건드려서 화면 점수와 실제 저장 점수가
-        // 어긋나는 사고로 이어진다 — nextQuestion()의 기존 가드와 동일하게 여기도 막는다.
+function lv2Advance(ok) {
+    nextQTimer = setTimeout(() => {
+        // 이 지연 안에 라운드가 끝나면(그만/시간종료) 점수를 뒤늦게 건드리지 않는다
         if (!isPlaying) return;
         document.getElementById('q-hint').textContent = '';
         lv2Round.idx++;
-        if (lv2Round.idx < lv2Round.steps.length) {
-            isLocked = false;
-            renderLv2Step();
-        } else {
-            finishLv2Round(wasFrozen);
-        }
-    }, ok ? 350 : 900);
+        if (lv2Round.idx < lv2Round.steps.length) { isLocked = false; renderLv2Step(); }
+        else finishLv2Round();
+    }, ok ? 350 : 1100);
 }
-
-function finishLv2Round(wasFrozen){
+function handleLv2Pick(opt, btnEl) {
+    if (!isPlaying || isLocked) return;
+    isLocked = true;
+    const R = lv2Round, step = R.steps[R.idx];
+    const ok = (opt === step.l.a) || (step.l.o || []).indexOf(opt) >= 0;
+    document.querySelectorAll('#lv2-opts .lv2-opt').forEach(b => b.style.pointerEvents = 'none');
+    R.state[step.side + step.i].acc = ok ? 'ok' : 'no';
+    if (ok) {
+        playSound('correct'); btnEl.classList.add('picked-ok'); hapticCorrect();
+    } else {
+        playSound('wrong'); R.allOk = false; btnEl.classList.add('picked-no');
+        document.getElementById('q-hint').textContent = '💡 정답: ' + step.l.a;
+        hapticWrong();
+    }
+    renderSlip(false);
+    lv2Advance(ok);
+}
+function submitAmount() {
+    if (!isPlaying || isLocked || !lv2Round) return;
+    const R = lv2Round, step = R.steps[R.idx];
+    if (!step || step.kind !== 'amt') return;
+    const raw = (document.getElementById('amt-input').value || '').replace(/[^\d]/g, '');
+    if (!raw) return;   // 빈 칸으로는 넘어가지 않는다
+    isLocked = true;
+    const ok = Number(raw) === step.l.m;
+    // 같은 금액인 줄은 함께 채운다
+    const e = R.entry;
+    e.debit.forEach((l, i) => { if (l.m === step.l.m) R.state['D' + i].amt = true; });
+    e.credit.forEach((l, i) => { if (l.m === step.l.m) R.state['C' + i].amt = true; });
+    try { document.getElementById('amt-input').blur(); } catch (err) {}
+    if (ok) { playSound('correct'); hapticCorrect(); }
+    else {
+        playSound('wrong'); R.allOk = false; hapticWrong();
+        document.getElementById('q-hint').textContent = '💡 정답: ' + won(step.l.m) + '원';
+    }
+    renderSlip(false);
+    lv2Advance(ok);
+}
+function finishLv2Round() {
     const card = document.getElementById('question-card');
-    if (lv2Round.allOk) {
+    const R = lv2Round, e = R.entry;
+    renderSlip(true);
+    document.getElementById('lv2-opts').innerHTML = '';
+    document.getElementById('amt-area').classList.remove('show');
+    document.getElementById('lv2-progress').textContent = R.steps.length + '/' + R.steps.length;
+    if (R.allOk) {
         playSound('correct');
         combo++; if (combo > maxCombo) maxCombo = combo;
-        score += 100 + Math.floor(combo * 10) + 100; // 난이도2는 전표 완성 보너스 +100
+        score += 300 + combo * 20;   // 전표 한 장 = 300점 + 콤보
         correctCount++;
         card.classList.add('correct');
+        document.getElementById('lv2-ask').textContent = '✓ 전표 완성!';
+        if (e.note) document.getElementById('q-hint').textContent = '📌 ' + e.note;
         showFeedback('ok', combo >= 2 ? `✓ ${combo} COMBO!` : '✓ 전표 완성!');
         if (combo >= 2) showCombo(combo);
-    } else {
-        combo = 0; wrongCount++;
-        if (!wasFrozen) timeLeft = Math.max(0, timeLeft - 5);
-        const e = lv2Round.entry;
-        if (window.WrongNote) WrongNote.add({ game:'debit', key:e.sentence, q:e.sentence,
-            correct:'(차)'+e.debitAcc+' / (대)'+e.creditAcc+(e.vendor?' / 거래처 '+e.vendor:'')+' / '+e.voucherType,
-            wrong:'(항목 중 오답 포함)', type:'전표 입력(난이도2)' });
-        card.classList.add('wrong');
-        document.body.classList.add('shake');
-        showFeedback('no', '✗ 오답 (-5초)');
+        updateHUD();
+        nextQTimer = setTimeout(() => { card.classList.remove('correct'); nextQuestion(); }, e.note ? 1700 : 550);
+        return;
     }
+    combo = 0; wrongCount++;
+    if (!R.frozen) timeLeft = Math.max(0, timeLeft - 5);
+    if (window.WrongNote) WrongNote.add({ game: GAME_ID, key: e.id, q: e.stem, correct: slipText(e),
+        wrong: '(항목 중 오답 포함)', type: '전표 완성(난이도2)' });
+    card.classList.add('wrong');
+    document.body.classList.add('shake');
+    setTimeout(() => document.body.classList.remove('shake'), 500);
+    showFeedback('no', '✗ 오답 (-5초)');
+    // 풀이를 읽는 동안은 시간을 멈춘다 — 1급 분개는 왜 그런지 알아야 다음에 맞힌다
+    explainPause = true;
+    document.getElementById('lv2-ask').textContent = '정답 전표와 풀이를 확인하세요';
+    const why = document.getElementById('lv2-why');
+    why.innerHTML = '<b>풀이</b> ' + escH(e.why) + (e.note ? '<br>📌 ' + escH(e.note) : '');
+    why.classList.add('show');
+    document.getElementById('lv2-next').style.display = '';
     updateHUD();
-    nextQTimer = setTimeout(()=>{
-        card.classList.remove('correct','wrong');
-        document.body.classList.remove('shake');
-        nextQuestion();
-    }, lv2Round.allOk ? 400 : 800);
+    if (timeLeft <= 0) { explainPause = false; endGame(); }
+}
+function lv2Continue() {
+    if (!isPlaying) return;
+    explainPause = false;
+    document.getElementById('lv2-why').classList.remove('show');
+    document.getElementById('lv2-next').style.display = 'none';
+    nextQuestion();
 }
 
 // 키보드 (데스크탑)
@@ -1564,28 +1652,30 @@ function checkAnswer(side) {
         if (combo >= 2) showCombo(combo);
         updateHUD();
         hapticCorrect();
+        lv1Idx++;
         nextQTimer = setTimeout(() => { card.classList.remove('correct'); nextQuestion(); }, 130);
     } else {
         playSound('wrong');
         combo = 0;
         if (!wasFrozen) timeLeft = Math.max(0, timeLeft - 5);
         wrongCount++;
-        if (window.WrongNote) WrongNote.add({ game:'debit', key:currentQ.target+'｜'+currentQ.sentence,
-            q:currentQ.sentence,
-            correct:currentQ.target+' → '+(currentQ.type==='left'?'차변':'대변'),
-            wrong:currentQ.target+' → '+(side==='left'?'차변':'대변'), type:'차변/대변 판단' });
+        if (window.WrongNote) WrongNote.add({ game: GAME_ID, key: currentQ.entry.id + '｜' + currentQ.target,
+            q: currentQ.entry.stem,
+            correct: currentQ.target + ' → ' + (currentQ.type === 'left' ? '차변' : '대변'),
+            wrong: currentQ.target + ' → ' + (side === 'left' ? '차변' : '대변'), type: '차변/대변 판단(1급)' });
         card.classList.add('wrong');
         document.getElementById('q-hint').textContent = '💡 ' + currentQ.hint;
         document.body.classList.add('shake');
         showFeedback('no', '✗ 오답 (-5초)');
         updateHUD();
         hapticWrong();
+        lv1Idx++;
         nextQTimer = setTimeout(() => {
             card.classList.remove('wrong');
             document.getElementById('q-hint').textContent = '';
             document.body.classList.remove('shake');
             nextQuestion();
-        }, 700);
+        }, 1000);
     }
 }
 
@@ -1615,15 +1705,24 @@ function showCombo(n) {
     function recordBest(sc){
         try{
             const v = Math.max(0, parseInt(sc,10) || 0);
-            if (v > (parseInt(localStorage.getItem('hub_debit_best')||'0',10)||0))
-                localStorage.setItem('hub_debit_best', String(v));
+            if (v > (parseInt(localStorage.getItem('lv1_journal_best')||'0',10)||0))
+                localStorage.setItem('lv1_journal_best', String(v));
+            // 1급 허브 노드맵용 — 한 문제라도 맞히고 한 판을 끝내면 클리어(다른 1급 스테이지와 같은 기준)
+            if (correctCount > 0) {
+                let prev = {};
+                try { prev = JSON.parse(localStorage.getItem('lv1_s2_progress') || '{}') || {}; } catch (e) {}
+                localStorage.setItem('lv1_s2_progress', JSON.stringify({
+                    cleared: true, score: Math.max(v, prev.score || 0), grade: getGrade(Math.max(v, prev.score || 0)),
+                    correct: correctCount, total: correctCount + wrongCount, playedAt: new Date().toISOString() }));
+            }
         }catch(e){}
     }
 
 function endGame() {
     isPlaying = false;
+    explainPause = false;
     if (window.Growth) Growth.logPlay(GAME_ID);
-    if (window.WrongNote) WrongNote.flush('debit');
+    if (window.WrongNote) WrongNote.flush(GAME_ID);
     clearInterval(timerInterval);
     hideRewardedBtn();
     bgmStop(); // 🎵 게임 종료 시 BGM 페이드 아웃
@@ -1722,8 +1821,8 @@ async function saveScore() {
     }
     try {
         // 개인 최고기록 갱신
-        const _g3best = parseInt(localStorage.getItem('hub_debit_best')||'0');
-        if((data.score||0) > _g3best) { localStorage.setItem('hub_debit_best', String(data.score||0));
+        const _g3best = parseInt(localStorage.getItem('lv1_journal_best')||'0');
+        if((data.score||0) > _g3best) { localStorage.setItem('lv1_journal_best', String(data.score||0));
           if (window.Review) Review.maybeAsk(); }   // 최고기록 갱신 = 만족스러운 순간
         await supabaseSaveScore(data.name, data.score, data.combo||0, data.correct||0, scoreIdFor(LV));
         saveLocal(data);
@@ -1745,7 +1844,7 @@ function showSaveStatus(msg, type) {
     el.style.color = type === 'err' ? 'var(--red)' : type === 'ok' ? 'var(--green)' : 'rgba(255,255,255,0.4)';
 }
 
-const RANK_PREV_KEY = 'hub_debit_prevRank';
+const RANK_PREV_KEY = 'lv1_journal_prevRank';
 
 function nextTierHtml(score) {
     const idx = GRADE_TIERS.findIndex(t => score >= t.min);
@@ -1816,9 +1915,9 @@ async function showMyRank(name, score, opts) {
 function saveLocal(data) {
     const list = getLocal(); list.push(data);
     list.sort((a, b) => b.score - a.score);
-    localStorage.setItem('accGame_v3', JSON.stringify(list.slice(0, 20)));
+    localStorage.setItem('accGame_journal_lv1', JSON.stringify(list.slice(0, 20)));
 }
-function getLocal() { return JSON.parse(localStorage.getItem('accGame_v3') || '[]'); }
+function getLocal() { return JSON.parse(localStorage.getItem('accGame_journal_lv1') || '[]'); }
 
 function saveMyName(name) { localStorage.setItem('accGame_myName', name); }
 function getMyName() { return localStorage.getItem('accGame_myName') || ''; }
@@ -1875,11 +1974,11 @@ function toggleHint() {
 
 // ── 등급 기준 단일 소스: getGrade·결과화면 계급·팡파레 목표 공용 ──
 const GRADE_TIERS = [
-    { min: 3300, label: '👑 전설의 CFO' },
-    { min: 2800, label: '🥇 회계 부장' },
-    { min: 1800, label: '🥈 회계 대리' },
-    { min:  800, label: '🥉 신입 사원' },
-    { min:    0, label: '📋 수습 직원' }
+    { min: 4000, label: '👑 분개의 달인' },
+    { min: 3000, label: '🥇 회계 팀장' },
+    { min: 1800, label: '🥈 회계 주임' },
+    { min:  800, label: '🥉 회계 사원' },
+    { min:    0, label: '📋 수습 사원' }
 ];
 
 function getGrade(score) {
@@ -1919,94 +2018,29 @@ initDiffUI();
 // 서버 기록으로 해금이 복원되면(다른 기기에서 해금한 학생) 잠금 표시를 다시 그린다
 window.addEventListener('difficulty-synced', function () { try { initDiffUI(); } catch (e) {} });
 
-/* ── 차근차근 모드(2026-09-24, docs/차근차근모드_기획.md) ──
+/* ── 차근차근 모드(2급 차변대변과 같은 3단계, docs/차근차근모드_기획.md) ──
    같은 문제 카드·차변/대변 버튼을 그대로 쓰고, 아래 말풍선이 한 단계씩 짚어 준다.
-   ① 보라색 계정은 무슨 분류?  ② 늘었나, 줄었나?  ③ 그럼 차변? 대변?(원래 버튼)
-   시간 제한·점수·랭킹 없음. 기록은 StepMode.session(전용 테이블·이 기기 오답노트)만. */
+   ① 보라색 계정은 무슨 분류?  ② 늘었나, 줄었나?(문장 속 단서를 금색으로)  ③ 그럼 차변? 대변?(원래 버튼)
+   시간 제한·점수·랭킹 없음. 기록은 StepMode.session(전용 테이블·이 기기 오답노트)만.
+   단서(c)·분류(k)·증감(r)은 문제은행에 줄마다 들어 있다 — 새 문제를 넣으면 tools/journal 에서 같이 적는다. */
 let STEP = null;
 const STEP_N = 10;
 const STEP_CATS = ['자산', '부채', '자본', '수익', '비용'];
 const STEP_RULE = '<b>차변</b> ← 자산↑ · 부채↓ · 자본↓ · 비용 발생<br><b>대변</b> ← 부채↑ · 자본↑ · 자산↓ · 수익 발생';
 function stepItems() {
-    return questions.map(q => {
-        const m = /^(.+?)\((자산차감|자산|부채|자본|수익|비용)\)\s*(증가|감소|발생)\s*→\s*(차변|대변)/.exec(q.hint || '');
-        if (!m) return null;
-        return { key: q.target + '｜' + q.sentence, q, contra: m[2] === '자산차감', cat: m[2] === '자산차감' ? '자산' : m[2], up: m[3] !== '감소', verb: m[3], side: m[4] };
-    }).filter(Boolean);
+    const out = [];
+    const mk = (e, l, side) => {
+        const kp = String(l.k).split(' ');
+        out.push({ key: e.id + '｜' + l.a, e, l, target: l.a, hint: l.h, contra: kp[1] === '차감', cat: kp[0],
+                   up: l.r === '증가' || l.r === '발생', verb: l.r, side });
+    };
+    BANK.forEach(e => { e.debit.forEach(l => mk(e, l, '차변')); e.credit.forEach(l => mk(e, l, '대변')); });
+    return out;
 }
-/* ② "늘었나요, 줄었나요?" 단서 — 문제마다 손으로 정한 칸(2026-09-29 성일님 "관련 키워드 강조").
-   동사만 보고 자동으로 칠하면 틀린다: "현금으로 상품을 구입하다"는 현금↓, "상품을 현금으로 구입하다"는 상품↑.
-   그래서 '묻는 계정｜문장(→ 앞)'마다 그 계정이 늘었는지 줄었는지 드러나는 말을 고른다. 새 문제를 넣으면 여기도 한 줄. */
-const STEP_CLUE = {
-    '상품|상품을 현금으로 구입하다': ["구입하다"],
-    '건물|건물을 현금으로 취득하다': ["취득하다"],
-    '외상매출금|상품을 외상으로 판매하다': ["외상으로 판매하다"],
-    '단기대여금|거래처에 단기대여금을 지급하다': ["단기대여금을 지급하다"],
-    '비품|컴퓨터(비품)를 구입하다': ["구입하다"],
-    '차량운반구|업무용 차량을 구입하다': ["구입하다"],
-    '현금|매출 대금을 현금으로 받다': ["현금으로 받다"],
-    '미수금|비품을 매각하고 대금이 미수 처리되다': ["미수 처리되다"],
-    '선급금|거래처에 계약금을 선지급하다': ["선지급하다"],
-    '받을어음|상품 판매 후 받을어음을 받다': ["받을어음을 받다"],
-    '보통예금|급여를 보통예금 계좌로 받다': ["계좌로 받다"],
-    '단기매매증권|단기매매 목적 주식을 취득하다': ["취득하다"],
-    '외상매입금|외상매입금을 현금으로 갚다': ["갚다"],
-    '단기차입금|단기차입금을 은행에 상환하다': ["상환하다"],
-    '미지급금|비품 미지급 대금을 현금 지급하다': ["현금 지급하다"],
-    '선수금|받은 계약금(선수금)으로 상품을 납품하다': ["상품을 납품하다"],
-    '지급어음|만기 도래한 지급어음을 결제하다': ["결제하다"],
-    '예수금|원천징수한 예수금을 세무서에 납부하다': ["세무서에 납부하다"],
-    '장기차입금|장기차입금을 조기 상환하다': ["상환하다"],
-    '급여|직원 급여를 현금으로 지급하다': ["지급하다"],
-    '임차료|사무실 임차료를 지급하다': ["지급하다"],
-    '기업업무추진비|거래처 접대 목적으로 식사비를 현금 지출하다': ["지출하다"],
-    '광고선전비|TV 광고 비용을 지급하다': ["지급하다"],
-    '이자비용|차입금에 대한 이자를 지급하다': ["지급하다"],
-    '복리후생비|직원 복리후생비를 지출하다': ["지출하다"],
-    '통신비|회사 통신비를 납부하다': ["납부하다"],
-    '감가상각비|건물 감가상각비를 계상하다': ["계상하다"],
-    '보험료|화재보험료를 납부하다': ["납부하다"],
-    '세금과공과|재산세를 납부하다': ["납부하다"],
-    '여비교통비|출장 교통비를 지급하다': ["지급하다"],
-    '대손상각비|외상매출금 중 회수 불능액을 처리하다': ["회수 불능액"],
-    '외상매입금|상품을 외상으로 구입하다': ["외상으로 구입하다"],
-    '단기차입금|은행에서 단기로 자금을 빌리다': ["빌리다"],
-    '미지급금|비품을 구입하고 대금을 다음 달 지급하기로 하다': ["다음 달 지급하기로"],
-    '선수금|고객으로부터 상품 계약금을 미리 받다': ["미리 받다"],
-    '장기차입금|장기 시설자금을 은행에서 대출받다': ["대출받다"],
-    '지급어음|상품 대금으로 어음을 발행하다': ["어음을 발행하다"],
-    '예수금|직원 급여에서 소득세를 원천징수하다': ["원천징수하다"],
-    '대손충당금|기말 외상매출금 잔액에 대해 대손충당금 설정': ["대손충당금 설정"],
-    '자본금|창업자가 현금을 출자하다': ["출자하다"],
-    '자본금|유상증자로 주식을 발행하다': ["주식을 발행하다"],
-    '상품매출|상품을 현금으로 판매하다': ["판매하다"],
-    '상품매출|상품을 외상으로 판매하다': ["판매하다"],
-    '이자수익|은행 예금에 이자가 입금되다': ["이자가 입금되다"],
-    '임대료|건물을 타사에 임대하고 임대료를 받다': ["임대료를 받다"],
-    '유형자산처분이익|업무용 차량을 처분하고 처분이익 발생': ["처분이익 발생"],
-    '배당금수익|보유 주식에서 배당금을 받다': ["배당금을 받다"],
-    '잡이익|원인 불명 현금 초과액을 잡이익 처리하다': ["현금 초과액"],
-    '이자수익|단기대여금에 대한 이자 입금': ["이자 입금"],
-    '보통예금|보통예금 계좌에서 급여를 이체하다': ["계좌에서", "이체하다"],
-    '현금|현금으로 상품을 구입하다': ["현금으로", "구입하다"],
-    '외상매출금|외상매출금을 현금으로 회수하다': ["회수하다"],
-    '단기대여금|대여금이 만기 회수되다': ["회수되다"],
-    '소모품|사무용 소모품을 사용하다(자산 처리된 것)': ["사용하다"],
-    '받을어음|받을어음이 만기가 되어 당좌예금으로 입금': ["만기가 되어"],
-    '감가상각누계액|건물에 감가상각을 반영하다': ["감가상각을 반영하다"]
-};
-function stepPlain(q) { return String(q.sentence).split(' →')[0].trim(); }
-function stepClueHtml(q) {
-    const plain = stepPlain(q), keys = STEP_CLUE[q.target + '|' + plain] || [];
-    let out = plain;
-    keys.forEach(k => { out = out.replace(k, '\u0000' + k + '\u0001'); });
-    out = out.replace(/\u0000/g, '<mark class="step-key">').replace(/\u0001/g, '</mark>');
-    const i = String(q.sentence).indexOf(' →');
-    return out + (i >= 0 ? String(q.sentence).slice(i) : '');
-}
-function startDebitStep() {
+async function startJournalStep() {
     if (!window.StepMode) return;
     hideAdPlaceholder(); getAudio(); bgmPlay();
+    if (!(await ensureBank())) { bgmStop(); showAdPlaceholder(); return; }
     LV = 1;
     document.getElementById('answer-buttons-area').classList.add('show');
     document.getElementById('lv2-area').classList.remove('show');
@@ -2014,9 +2048,9 @@ function startDebitStep() {
     document.getElementById('result-screen').style.display = 'none';
     if (timerInterval) clearInterval(timerInterval);
     if (nextQTimer) { clearTimeout(nextQTimer); nextQTimer = null; }
-    isPlaying = true; isLocked = false;
+    isPlaying = true; isLocked = false; explainPause = false;
     document.body.classList.add('step-mode');
-    const S = StepMode.session('debit');
+    const S = StepMode.session(GAME_ID);
     STEP = { S, list: S.pick(stepItems(), STEP_N, x => x.key).map(x => ({ x, again: false })), i: 0, phase: '', hint: 0 };
     stepNextQ();
 }
@@ -2033,14 +2067,16 @@ function stepNextQ() {
     if (!STEP) return;
     if (STEP.i >= STEP.list.length) return stepSummary();
     const x = stepCur();
-    currentQ = x.q;
+    currentQ = { entry: x.e, line: x.l, target: x.target, type: x.side === '차변' ? 'left' : 'right', hint: x.hint };
     STEP.S.begin(x.key);
     document.getElementById('step-hud').textContent = '🐢 차근차근 ' + (STEP.i + 1) + ' / ' + STEP.list.length;
-    document.getElementById('q-sentence').innerHTML = x.q.sentence;
-    document.getElementById('q-ask').innerHTML = `<b>${x.q.target}</b> 은(는) 차변? 대변?`;
+    renderStem(x.e);
+    renderTarget(x.target);
+    document.getElementById('q-ask').innerHTML = `<b>${escH(x.target)}</b> 은(는) 차변? 대변?`;
     document.getElementById('q-hint').textContent = '';
     document.getElementById('question-card').className = 'question-card';
     document.querySelectorAll('.ans-btn').forEach(b => b.classList.remove('step-glow'));
+    const ga = document.querySelector('.game-area'); if (ga) ga.scrollTop = 0;
     x.off = {};
     stepWait(true);
     stepPhase('cat');
@@ -2048,14 +2084,15 @@ function stepNextQ() {
 function stepPhase(ph) {
     STEP.phase = ph; STEP.hint = 0;
     // ② 부터 문장 속 단서를 금색으로 — ① 분류 단계엔 칠하지 않는다(분류는 계정 이름으로 판단)
-    if (ph === 'dir') document.getElementById('q-sentence').innerHTML = stepClueHtml(stepCur().q);
+    if (ph === 'dir') renderStem(stepCur().e, stepCur().l.c);
     stepRender();
 }
+function stepVerb(x) { return x.up ? (x.cat === '수익' || x.cat === '비용' ? '발생' : '증가') : (x.cat === '수익' || x.cat === '비용' ? '취소' : '감소'); }
 function stepHints() {
-    const x = stepCur();
-    if (STEP.phase === 'cat') return ['가진 것 → 자산 · 갚을 것 → 부채<br>사장 몫 → 자본 · 번 것 → 수익 · 쓴 것 → 비용', `<b>${x.q.target}</b>은(는) 이런 계정이에요 →<br>` + (x.contra ? '자산을 깎아 주는 계정(자산의 차감)' : x.cat === '자산' ? '가진 것·받을 권리' : x.cat === '부채' ? '갚아야 할 것' : x.cat === '자본' ? '사장·주주의 몫' : x.cat === '수익' ? '벌어들인 것' : '쓴 것(나간 비용)'), `정답은 <b>${x.cat}</b>!`];
-    if (STEP.phase === 'dir') return ['거래 문장을 다시 읽어 봐요.<br>그 계정이 <b>생기거나 늘었나요</b>, <b>없어지거나 줄었나요</b>?', `${x.cat === '수익' || x.cat === '비용' ? '돈을 벌거나 쓴 일이 <b>생겼나요</b>?' : '받거나 사서 <b>생겼으면 늘어난 것</b>,<br>갚거나 내보냈으면 <b>줄어든 것</b>이에요.'}`, `정답은 <b>${x.up ? '늘었다(생겼다)' : '줄었다'}</b>!`];
-    return [STEP_RULE, `<b>${x.cat}</b>이(가) <b>${x.up ? (x.cat === '수익' || x.cat === '비용' ? '발생' : '증가') : '감소'}</b>하면 → ?` + (x.contra ? '<br><span class="sc-dim">단, 자산의 차감 계정은 자산과 반대쪽!</span>' : ''), `정답은 <b>${x.side}</b>!`];
+    const x = stepCur(), T = escH(x.target);
+    if (STEP.phase === 'cat') return ['가진 것 → 자산 · 갚을 것 → 부채<br>주주 몫 → 자본 · 번 것 → 수익 · 쓴 것 → 비용', `<b>${T}</b>은(는) 이런 계정이에요 →<br>` + (x.contra ? `${x.cat}을(를) 깎아 주는 계정(${x.cat}의 차감)` : x.cat === '자산' ? '가진 것·받을 권리' : x.cat === '부채' ? '갚아야 할 것' : x.cat === '자본' ? '주주의 몫' : x.cat === '수익' ? '벌어들인 것' : '쓴 것(나간 비용)'), `정답은 <b>${x.cat}</b>!`];
+    if (STEP.phase === 'dir') return ['거래 문장의 <b>금색 말</b>을 다시 읽어 봐요.<br>그 계정이 <b>생기거나 늘었나요</b>, <b>없어지거나 줄었나요</b>?', `${x.cat === '수익' || x.cat === '비용' ? '돈을 벌거나 쓴 일이 <b>생겼나요</b>?' : '받거나 사서 <b>생겼으면 늘어난 것</b>,<br>갚거나 내보냈으면 <b>줄어든 것</b>이에요.'}`, `정답은 <b>${x.up ? '늘었다(생겼다)' : '줄었다'}</b>!`];
+    return [STEP_RULE, `<b>${x.cat}</b>이(가) <b>${stepVerb(x)}</b>하면 → ?` + (x.contra ? `<br><span class="sc-dim">단, ${x.cat}의 차감 계정은 ${x.cat}과(와) 반대쪽!</span>` : ''), `정답은 <b>${x.side}</b>!`];
 }
 function stepHintBtn() {
     return STEP.hint < 3 ? [{ label: STEP.hint < 2 ? `💡 힌트 ${STEP.hint + 1}` : '👀 정답 짚어 주기', cls: 'sc-btn sc-hintbtn', on: () => {
@@ -2065,19 +2102,19 @@ function stepHintBtn() {
     } }] : [];
 }
 function stepRender(extra) {
-    const x = stepCur(), ph = STEP.phase;
+    const x = stepCur(), ph = STEP.phase, T = escH(x.target);
     const hint = STEP.hint ? `<div class="sc-hint">💡 ${stepHints()[STEP.hint - 1]}</div>` : '';
     const glow = v => STEP.hint >= 3 ? v : false;
     if (ph === 'cat') {
-        return stepCoach((extra || `① 보라색 <b>${x.q.target}</b>은(는)<br>어떤 계정일까요?`) + hint,
+        return stepCoach((extra || `① 보라색 <b>${T}</b>은(는)<br>어떤 계정일까요?`) + hint,
             STEP_CATS.map(c => ({ label: c, cls: 'sc-btn' + (x.off[c] ? ' off' : '') + (glow(c === x.cat) ? ' step-glow' : ''), on: () => stepPick('cat', c) })).concat(stepHintBtn()));
     }
     if (ph === 'dir') {
         const opts = [['up', x.cat === '수익' || x.cat === '비용' ? '생겼다 (발생)' : '늘었다 ↑'], ['down', '줄었다 ↓']];
-        return stepCoach((extra || `② 이 거래에서 <b>${x.q.target}</b>은(는)<br>늘었나요, 줄었나요?<br><span class="sc-dim">문장의 <mark class="step-key">금색 말</mark>을 보세요</span>`) + hint,
+        return stepCoach((extra || `② 이 거래에서 <b>${T}</b>은(는)<br>늘었나요, 줄었나요?<br><span class="sc-dim">문장의 <mark class="step-key">금색 말</mark>을 보세요</span>`) + hint,
             opts.map(([v, l]) => ({ label: l, cls: 'sc-btn' + (x.off[v] ? ' off' : '') + (glow((v === 'up') === x.up) ? ' step-glow' : ''), on: () => stepPick('dir', v) })).concat(stepHintBtn()));
     }
-    stepCoach((extra || `③ 그럼 <b>${x.q.target}</b>은(는)<br>위 <b>차변·대변</b> 버튼 중 어디?`) + hint, stepHintBtn());
+    stepCoach((extra || `③ 그럼 <b>${T}</b>은(는)<br>위 <b>차변·대변</b> 버튼 중 어디?`) + hint, stepHintBtn());
 }
 function stepPick(ph, v) {
     const x = stepCur();
@@ -2091,10 +2128,10 @@ function stepPick(ph, v) {
     playSound('correct');
     x.off = {};
     if (ph === 'cat') {
-        document.getElementById('q-hint').textContent = `✓ ${x.q.target} = ${x.cat}` + (x.contra ? '(차감)' : '');
+        document.getElementById('q-hint').textContent = `✓ ${x.target} = ${x.cat}` + (x.contra ? '(차감)' : '');
         return stepPhase('dir');
     }
-    document.getElementById('q-hint').textContent = `✓ ${x.q.target} = ${x.cat}${x.contra ? '(차감)' : ''} · ${x.up ? (x.cat === '수익' || x.cat === '비용' ? '발생' : '증가') : '감소'}`;
+    document.getElementById('q-hint').textContent = `✓ ${x.target} = ${x.cat}${x.contra ? '(차감)' : ''} · ${stepVerb(x)}`;
     stepWait(false);
     stepPhase('side');
 }
@@ -2114,10 +2151,10 @@ function stepAnswer(side) {
     stepWait(true);
     STEP.phase = 'done';
     const cur = STEP.list[STEP.i];
-    const clean = STEP.S.done(x.key, { label: x.q.hint, q: x.q.sentence, correct: x.q.target + ' → ' + x.side, type: '차변/대변 판단' });
+    const clean = STEP.S.done(x.key, { label: x.hint, q: x.e.stem, correct: x.target + ' → ' + x.side, type: '차변/대변 판단(1급)' });
     if (!clean && !cur.again) STEP.list.splice(Math.min(STEP.list.length, STEP.i + 4), 0, { x: Object.assign({}, x), again: true });
     const last = STEP.i + 1 >= STEP.list.length;
-    stepCoach(StepMode.lines([`맞아요! <span class="sc-key">${StepMode.esc(x.q.hint)}</span>`]),
+    stepCoach(`맞아요! <span class="sc-key">${StepMode.esc(x.hint)}</span><br><span class="sc-dim">${StepMode.esc(x.e.why)}</span>`,
         [{ label: last ? '결과 보기 ▶' : '다음 문제 ▶', cls: 'sc-go', on: () => { card.classList.remove('correct'); STEP.i++; stepNextQ(); } }]);
 }
 function stepSummary() {
@@ -2129,7 +2166,7 @@ function stepSummary() {
     document.getElementById('step-hud').textContent = '🐢 차근차근 끝!';
     stepCoach(`🌱 오늘 익힌 것 <b>${L.length}</b>개` + (L.length ? `<br><span class="sc-dim">${list(L)}</span>` : '') +
         (A.length ? `<br>🔁 다시 볼 것 <b>${A.length}</b>개<br><span class="sc-dim">${list(A)}</span>` : ''),
-        [{ label: '한 번 더', on: () => { stepExit(true); startDebitStep(); } }, { label: '끝내기', cls: 'sc-go', on: () => stepExit() }]);
+        [{ label: '한 번 더', on: () => { stepExit(true); startJournalStep(); } }, { label: '끝내기', cls: 'sc-go', on: () => stepExit() }]);
 }
 function stepExit(again) {
     if (!STEP) return;
@@ -2141,8 +2178,7 @@ function stepExit(again) {
     document.body.classList.remove('step-mode');
     if (!again) { document.getElementById('start-screen').style.display = ''; initDiffUI(); showAdPlaceholder(); }
 }
-if (window.StepMode) StepMode.mount({ game: 'debit', host: document.getElementById('step-host'), onStart: startDebitStep });
-
+if (window.StepMode) StepMode.mount({ game: GAME_ID, host: document.getElementById('step-host'), sub: '힌트 보며 천천히', onStart: startJournalStep });
 
 
     // ══════════════════════════════════════
@@ -2293,15 +2329,16 @@ if (window.StepMode) StepMode.mount({ game: 'debit', host: document.getElementBy
             acid:    [[15000,"👑 전설의 에이스"],[11000,"🥇 베테랑"],[7000,"🥈 숙련자"],[3000,"🥉 정규 파일럿"],[0,"🛩 견습생"]],
             memory:  [[5000,"👑 CEO"],[4000,"⭐ CEO급"],[3000,"🎖 전무/상무"],[2200,"🏅 이사"],[1500,"📋 부장"],[900,"🗂 차장"],[500,"📁 과장"],[250,"📝 대리"],[0,"💼 사원"]],
             debit:   [[3300,"👑 전설의 CFO"],[2800,"🥇 회계 부장"],[1800,"🥈 회계 대리"],[800,"🥉 신입 사원"],[0,"📋 수습 직원"]],
+            journal_lv1: [[4000,"👑 분개의 달인"],[3000,"🥇 회계 팀장"],[1800,"🥈 회계 주임"],[800,"🥉 회계 사원"],[0,"📋 수습 사원"]],
             factory: [[12000,"👑 결산 마스터"],[7000,"🥇 숙련 경리"],[4000,"🥈 견습 경리"],[1500,"🥉 수습생"],[0,"📋 인턴"]],
             flight:  [[55000,"👑 전설의 에이스"],[40000,"🥇 베테랑 파일럿"],[30000,"🥈 숙련 파일럿"],[18000,"🥉 정규 파일럿"],[0,"🛩 견습 파일럿"]]
         };
-        const tiers = scales[String(gameId).replace(/_d2$/, '')] || scales.flight;
+        const tiers = scales[String(gameId).replace(/_d2$/, '')] || scales.journal_lv1;
         return (tiers.find(([min]) => score >= min) || tiers[tiers.length-1])[1];
     }
 
     async function supabaseSaveScore(name, score, combo, correct, gameId, retry = 0) {
-        const maxScore = {acid:99999999,memory:99999999,debit:99999999,factory:99999999,flight:99999999};
+        const maxScore = {journal_lv1:99999999};
         const safeScore = Math.min(Math.max(score,0), maxScore[String(gameId).replace(/_d2$/, '')]||999999);
         const safeName = String(name).replace(/<[^>]*>/g,'').substring(0,30).trim();
         if (!safeName) return;
@@ -2349,15 +2386,15 @@ if (window.StepMode) StepMode.mount({ game: 'debit', host: document.getElementBy
 
 <script>
     // ── 팡파레 시스템 ──
-    const FANFARE_TARGET_LABEL = '회계 부장';
-    // 목표 점수는 GRADE_TIERS(단일 소스)에서 해당 계급의 최소 점수로 산출 (= 2800)
+    const FANFARE_TARGET_LABEL = '회계 팀장';
+    // 목표 점수는 GRADE_TIERS(단일 소스)에서 해당 계급의 최소 점수로 산출 (= 3000)
     const FANFARE_TARGET_SCORE = (GRADE_TIERS.find(t => t.label.includes(FANFARE_TARGET_LABEL)) || GRADE_TIERS[0]).min;
 
     function checkAndShowFanfare(currentScore, gradeFn) {
         const grade = typeof gradeFn === 'function' ? gradeFn(currentScore) : gradeFn;
-        const alreadyShown = sessionStorage.getItem('fanfare_shown_game3_debit');
+        const alreadyShown = sessionStorage.getItem('fanfare_shown_stage2_journal');
         if (currentScore >= FANFARE_TARGET_SCORE && !alreadyShown) {
-            sessionStorage.setItem('fanfare_shown_game3_debit', '1');
+            sessionStorage.setItem('fanfare_shown_stage2_journal', '1');
             setTimeout(() => showFanfare(grade), 600);
         }
     }
@@ -2365,7 +2402,7 @@ if (window.StepMode) StepMode.mount({ game: 'debit', host: document.getElementBy
     function showFanfare(grade) {
         document.getElementById('fanfare-grade-text').textContent = grade || ('🥇 ' + FANFARE_TARGET_LABEL);
         document.getElementById('fanfare-sub-text').textContent =
-            '목표 랭크 [' + FANFARE_TARGET_LABEL + ']를 달성했어요!\n전산회계 2급 합격에 한 걸음 더 가까워졌습니다 🎯';
+            '목표 랭크 [' + FANFARE_TARGET_LABEL + ']를 달성했어요!\n전산회계 1급 합격에 한 걸음 더 가까워졌습니다 🎯';
         spawnFanfareStars();
         playFanfareSound();
         document.getElementById('fanfare-overlay').classList.add('show');
@@ -2446,32 +2483,32 @@ if (window.StepMode) StepMode.mount({ game: 'debit', host: document.getElementBy
 <script>
 /* ── 인터랙티브 튜토리얼 ── */
 const Tutorial = (function () {
-  // 한 거래를 양쪽에서 두 번 묻는다 → 마지막에 대차평형으로 자연스럽게 이어진다.
-  const Q1 = { sentence:'상품 100,000원을 외상으로 매입하다 → <b class="target-account">상품</b>',
-               target:'상품', type:'left',  hint:'상품(자산) 증가 → 차변' };
-  const Q2 = { sentence:'상품 100,000원을 외상으로 매입하다 → <b class="target-account">외상매입금</b>',
-               target:'외상매입금', type:'right', hint:'외상매입금(부채) 증가 → 대변' };
+  const STEM = '외상매입금 2,500,000원 중 1,300,000원은<br>어음을 발행하고, 나머지는 면제받았다 → ';
+  const Q1 = { sentence: STEM + '<b class="target-account">외상매입금</b>',
+               target:'외상매입금', type:'left',  hint:'외상매입금(부채) 감소 → 차변' };
+  const Q2 = { sentence: STEM + '<b class="target-account">채무면제이익</b>',
+               target:'채무면제이익', type:'right', hint:'채무면제이익(수익) 발생 → 대변' };
   const STEPS = [
     { q:Q1,
-      text:'거래 문장 속 <b>보라색 계정과목</b>.<br>이게 <b>차변</b>일까, <b>대변</b>일까?<br>한 문제 같이 풀어 봐요.',
+      text:'실제 <b>1급 기출 거래</b>가 나와요.<br><b>보라색 계정과목</b>이 <b>차변</b>일까, <b>대변</b>일까?<br>한 문제 같이 풀어 봐요.',
       btn:'시작 ▶' },
     { q:Q1, ask:true,
-      text:'상품을 외상으로 샀어요.<br><b>상품(자산)이 늘었죠?</b><br>자산이 늘면 어느 쪽에 적을까요?',
+      text:'줄 돈(외상매입금)을 어음과 면제로 없앴어요.<br><b>외상매입금(부채)이 줄었죠?</b><br>부채가 줄면 어느 쪽에 적을까요?',
       hint:'차변·대변 중 하나를 골라 탭!' },
     { q:Q2, ask:true,
-      text:'맞아요, <b>자산 증가 → 차변</b>!<br>이번엔 반대쪽. 돈은 아직 안 냈으니<br><b>갚을 빚(부채)이 늘었어요</b>.',
+      text:'맞아요, <b>부채 감소 → 차변</b>!<br>같은 거래의 다른 계정도 물어요.<br>안 갚아도 되는 돈은 <b>수익이 생긴 것</b>이에요.',
       hint:'이번엔 어느 쪽일까요?' },
     { q:Q2, balance:true,
-      text:'좋아요, <b>부채 증가 → 대변</b>!<br>차변 합계와 대변 합계는 언제나 같아요.<br>이걸 <b>대차평형</b>이라고 해요.',
+      text:'좋아요, <b>수익 발생 → 대변</b>!<br>1급 분개는 줄이 여러 개지만<br>차변 합계와 대변 합계는 언제나 같아요.',
       btn:'다음 ▶' },
     { q:Q2, glow:true,
-      text:'연속으로 맞히면 <b>콤보</b> 점수 UP!<br>틀리면 콤보 0, <b>시간 −5초</b>.<br>한 판은 <b>60초</b>예요.',
+      text:'연속으로 맞히면 <b>콤보</b> 점수 UP!<br>틀리면 콤보 0, <b>시간 −5초</b>.<br>한 판은 <b>120초</b>예요.',
       btn:'다음 ▶' },
     { q:Q2,
-      text:'헷갈리면 아래 <b>💡 차변·대변 참고표</b>!<br>준비 끝. 이제 <b>직접</b> 도전해 봐요!',
+      text:'난이도 2에서는 <b>전표를 통째로</b> 완성해요.<br>계정을 고르고 <b>금액도 직접 계산</b>!<br>준비 끝. 이제 <b>직접</b> 도전해 봐요!',
       btn:'게임 시작 ▶', finish:true },
   ];
-  let step = 0, tTime = 60, tCombo = 0, locked = false;
+  let step = 0, tTime = 120, tCombo = 0, locked = false;
   let timer = null, unlockTimer = null;   // 예약 연출 타이머 — close() 에서 취소(안 하면 재진입 시 1단계 건너뜀)
 
   function el(id){ return document.getElementById(id); }
@@ -2539,7 +2576,7 @@ const Tutorial = (function () {
        닫을 때는 곧바로 되돌리지 않는다: finish() 는 close() 뒤에 게임을 시작하는데,
        거기서 show 를 해 버리면 게임 중에 배너가 다시 올라온다. 대신 시작화면으로
        돌아가는 경우만 되살리도록 startGame/startQuiz 쪽 hide 와 짝을 맞춰 뒀다. */
-    if (typeof hideAdPlaceholder === 'function') hideAdPlaceholder(); clearTimers(); step = 0; tTime = 60; tCombo = 0; locked = false; setStatus(); render(); el('tutorial').classList.add('show'); }
+    if (typeof hideAdPlaceholder === 'function') hideAdPlaceholder(); clearTimers(); step = 0; tTime = 120; tCombo = 0; locked = false; setStatus(); render(); el('tutorial').classList.add('show'); }
   function close() {
     if (typeof showAdPlaceholder === 'function') showAdPlaceholder(); clearTimers(); locked = false; el('tutorial').classList.remove('show'); }
   function finish() { close(); if (window.startGame) startGame(); }

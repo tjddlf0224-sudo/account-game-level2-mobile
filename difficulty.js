@@ -29,7 +29,7 @@
 
   var UNLOCK_ACC = 0.70;   // 정답률 70% 이상
   var UNLOCK_MIN = 10;     // 최소 10문항은 풀어야 인정(1~2문항 요행 방지)
-  var SYNC_GAMES = ['acid', 'memory', 'debit', 'factory', 'flight'];   // 난이도2 해금이 있는 게임(서버 복원 대상)
+  var SYNC_GAMES = ['acid', 'memory', 'debit', 'factory', 'flight', 'journal_lv1'];   // 난이도2 해금이 있는 게임(서버 복원 대상)
 
   function k(pre, g) { return 'hub_' + pre + '_' + g; }
   function safeGet(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }

@@ -321,7 +321,7 @@
       acid: '계정과목 산성비', memory: '계정·뜻 메모리', debit: '분개 차·대변',
       factory: '결산분개 조립', flight: '플라이트 장부조회', theory: '이론 객관식',
       acid_d2: '계정과목 산성비 · 난이도2', memory_d2: '계정·뜻 메모리 · 난이도2', debit_d2: '분개 차·대변 · 난이도2', factory_d2: '결산분개 조립 · 난이도2',
-      cost_lv1: '원가의 길', capital_lv1: '자본의 제왕', theory_lv1: '이론 객관식(1급)', voucher_lv1: '매입매출전표 유형', vat_lv1: '신고의 문', alloc_lv1: '배관의 방'
+      cost_lv1: '원가의 길', capital_lv1: '자본의 제왕', journal_lv1: '분개의 탑', journal_lv1_d2: '분개의 탑 · 난이도2', theory_lv1: '이론 객관식(1급)', voucher_lv1: '매입매출전표 유형', vat_lv1: '신고의 문', alloc_lv1: '배관의 방'
     }
   };
 
