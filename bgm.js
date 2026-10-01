@@ -168,7 +168,9 @@
         if (c.state !== 'running') throw new Error('AudioContext suspended');
         return self._ensure();
       })
-      .then(function (buf) { if (self._paused) self._start(buf); })
+      /* 받는 사이에 pause() 가 불렸으면(그만·결과 화면) 시작하지 않는다 — 안 그러면 게임이 끝난 뒤에
+         음악이 뒤늦게 켜진다(2026-10-01 1급 스테이지 배경음악 테스트에서 발견) */
+      .then(function (buf) { if (self._paused && self._wantPlay) self._start(buf); })
       .catch(function (e) { armGesture(); throw e; });
   };
 
