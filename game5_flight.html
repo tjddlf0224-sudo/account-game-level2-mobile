@@ -5,7 +5,7 @@
 <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
      **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
      이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-<script src="safestore.js?v=55"></script>
+<script src="safestore.js?v=56"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
@@ -526,18 +526,18 @@ body.step-mode .gchoice{pointer-events:auto;cursor:pointer}
 @media (max-width:400px){ .mute-btn, .hdb { min-width:44px; flex-shrink:0; justify-content:center; text-align:center; } }
 </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="ask.js?v=55"></script>
-    <script src="wrongnote.js?v=55"></script>
-    <script src="growth.js?v=55"></script>
-<script src="streak.js?v=55"></script>
-    <script src="difficulty.js?v=55"></script>
-    <script src="readable.js?v=55"></script>
-    <script src="stepmode.js?v=55"></script>
-    <script src="review-prompt.js?v=55"></script>
+    <script src="ask.js?v=56"></script>
+    <script src="wrongnote.js?v=56"></script>
+    <script src="growth.js?v=56"></script>
+<script src="streak.js?v=56"></script>
+    <script src="difficulty.js?v=56"></script>
+    <script src="readable.js?v=56"></script>
+    <script src="stepmode.js?v=56"></script>
+    <script src="review-prompt.js?v=56"></script>
 </head>
 <body>
 
-<script src="bgm.js?v=55"></script>
+<script src="bgm.js?v=56"></script>
 
 
 <div style="position:fixed;inset:0;background:var(--bg);z-index:-1;"></div>
@@ -553,13 +553,12 @@ body.step-mode .gchoice{pointer-events:auto;cursor:pointer}
         <div class="gc b"><strong>⚡ 특수 아이템</strong>🛡️ 방어막 — 오답 1회 보호<br>🧲 자석 — 코인 자동 흡입<br>💰 코인 — +100점</div>
         <div class="gc c"><strong>🏆 점수 체계</strong>정답 통과: <b style="color:var(--gd)">+500점</b><br>콤보 보너스: +50점/연속<br>오답 → 방어막 없으면 종료!</div>
       </div>
-      <!-- 난이도 2 보류(2026-09-14) — 위 LV 고정 주석 참고 -->
-      <div class="diff-toggle" id="diff-toggle" style="display:none;max-width:340px;margin:4px auto 0;">
+      <!-- 난이도 2 — 2026-09-14 보류(받아쓰기형) → 2026-10-03 비교형으로 다시 켬(아래 LedgerLv2Cmp) -->
+      <div class="diff-toggle" id="diff-toggle" style="max-width:340px;margin:4px auto 0;">
         <button class="diff-btn" id="diff-btn-1" onclick="selectDifficulty(1)">난이도 1<br><span style="font-size:.72rem;opacity:.7">장부만 선택</span></button>
-        <button class="diff-btn locked" id="diff-btn-2" onclick="selectDifficulty(2)">난이도 2 🔒<br><span style="font-size:.72rem;opacity:.7">숫자도 직접 조회</span></button>
+        <button class="diff-btn locked" id="diff-btn-2" onclick="selectDifficulty(2)">난이도 2 🔒<br><span style="font-size:.72rem;opacity:.7">장부 보고 비교·계산</span></button>
       </div>
-      <!-- 난이도 2 보류(2026-09-14) — 해금 안내도 같이 끈다. 위 LV 고정 주석 참고 -->
-      <div class="diff-hint" id="diff-hint" style="display:none"></div>
+      <div class="diff-hint" id="diff-hint"></div>
 <div id="step-host" style="width:100%;max-width:420px;margin:0 auto"></div>
       <div class="brow">
         <button class="sbtn" onclick="Game.start()">▶ 비행 시작</button>
@@ -677,13 +676,16 @@ const SUPABASE_KEY="sb_publishable_yck2tAKApEjVSJOJMVSXuQ_AGaNatuI";
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 const GAME_ID="flight";
+/* 난이도2 점수는 따로 저장·랭킹(다른 게임과 같은 규칙, game_id <게임>_d2) */
+function scoreIdFor(lv){return lv===2?GAME_ID+'_d2':GAME_ID}
+function rankId(){return scoreIdFor(typeof LV!=='undefined'?LV:1)}
 
 
 // XSS 방어
 function escapeHTML(str) { if (!str) return ''; return str.replace(/[&<>'"]/g, function(tag) { const chars = { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }; return chars[tag] || tag; }); }
 
 const BGM={
-  el:BGMAudio.create('bgm5_flight.mp3?v=55'),
+  el:BGMAudio.create('bgm5_flight.mp3?v=56'),
   // 게임별 키(flight_muted)가 있으면 우선, 없으면 허브 전역 토글(hub_muted) 참조
   _muted:localStorage.getItem('flight_muted')!==null?localStorage.getItem('flight_muted')==='true':localStorage.getItem('hub_muted')==='true',
   _fadeTimer:null,
@@ -793,6 +795,590 @@ const LedgerLv2 = {
   "9월 말 현재 자본금 잔액은?": { rows:[{label:"자본금",amount:30000000},{label:"이익잉여금",amount:8500000},{label:"자본총계",amount:38500000}], amount:30000000 },
 };
 
+/* ── 난이도2 '비교형'(2026-10-03) — 기출 문제7은 한 값 읽기뿐 아니라 가장 많은 달의 금액·
+   많은 달과 적은 달의 차이·기간 합계·거래 건수를 묻는다. 위 LedgerLv2(특정 대상 한 값)에 없던
+   달·거래처 비교형 문제에 표를 붙인다. 데이터와 정답은 tools/flight/make_cmp.py 가 계산해 넣는다. */
+/*CMP_START*/
+const LedgerLv2Cmp = {
+ "외상매입금 잔액이 가장 많은 거래처는?": {
+  "rows": [
+   {
+    "label": "가람상사",
+    "amount": 1080000
+   },
+   {
+    "label": "나래상사",
+    "amount": 850000
+   },
+   {
+    "label": "다온상사",
+    "amount": 4260000
+   },
+   {
+    "label": "라온상사",
+    "amount": 7040000
+   }
+  ],
+  "amount": 7040000,
+  "ask": "가장 많은(큰) 쪽의 금액을 입력하세요",
+  "unit": "원",
+  "kind": "max"
+ },
+ "상반기 중 기업업무추진비가 가장 많은 월은?": {
+  "rows": [
+   {
+    "label": "1월",
+    "amount": 500000
+   },
+   {
+    "label": "2월",
+    "amount": 180000
+   },
+   {
+    "label": "3월",
+    "amount": 610000
+   },
+   {
+    "label": "4월",
+    "amount": 250000
+   },
+   {
+    "label": "5월",
+    "amount": 790000
+   },
+   {
+    "label": "6월",
+    "amount": 780000
+   }
+  ],
+  "amount": 790000,
+  "ask": "가장 많은(큰) 쪽의 금액을 입력하세요",
+  "unit": "원",
+  "kind": "max"
+ },
+ "상반기 중 받을어음 금액이 가장 큰 월은?": {
+  "rows": [
+   {
+    "label": "1월",
+    "amount": 5610000
+   },
+   {
+    "label": "2월",
+    "amount": 3940000
+   },
+   {
+    "label": "3월",
+    "amount": 2160000
+   },
+   {
+    "label": "4월",
+    "amount": 11050000
+   },
+   {
+    "label": "5월",
+    "amount": 5730000
+   },
+   {
+    "label": "6월",
+    "amount": 11470000
+   }
+  ],
+  "amount": 11470000,
+  "ask": "가장 많은(큰) 쪽의 금액을 입력하세요",
+  "unit": "원",
+  "kind": "max"
+ },
+ "하반기 중 복리후생비가 가장 많은 월은?": {
+  "rows": [
+   {
+    "label": "7월",
+    "amount": 1350000
+   },
+   {
+    "label": "8월",
+    "amount": 1010000
+   },
+   {
+    "label": "9월",
+    "amount": 670000
+   },
+   {
+    "label": "10월",
+    "amount": 290000
+   },
+   {
+    "label": "11월",
+    "amount": 1120000
+   },
+   {
+    "label": "12월",
+    "amount": 1500000
+   }
+  ],
+  "amount": 1210000,
+  "ask": "가장 많은 쪽과 가장 적은 쪽의 차이를 입력하세요(양수)",
+  "unit": "원",
+  "kind": "diff"
+ },
+ "하반기 중 외상매입금 월말 잔액이 가장 큰 달은?": {
+  "rows": [
+   {
+    "label": "7월",
+    "amount": 15080000
+   },
+   {
+    "label": "8월",
+    "amount": 18530000
+   },
+   {
+    "label": "9월",
+    "amount": 9160000
+   },
+   {
+    "label": "10월",
+    "amount": 19770000
+   },
+   {
+    "label": "11월",
+    "amount": 17340000
+   },
+   {
+    "label": "12월",
+    "amount": 8930000
+   }
+  ],
+  "amount": 19770000,
+  "ask": "가장 많은(큰) 쪽의 금액을 입력하세요",
+  "unit": "원",
+  "kind": "max"
+ },
+ "미지급금 잔액이 가장 적은 거래처는?": {
+  "rows": [
+   {
+    "label": "나라카드",
+    "amount": 1800000
+   },
+   {
+    "label": "한빛상사",
+    "amount": 4450000
+   },
+   {
+    "label": "도원상사",
+    "amount": 3450000
+   },
+   {
+    "label": "새봄상사",
+    "amount": 5590000
+   }
+  ],
+  "amount": 1800000,
+  "ask": "가장 적은 쪽의 금액을 입력하세요",
+  "unit": "원",
+  "kind": "min"
+ },
+ "미수금 잔액이 가장 많은 거래처는?": {
+  "rows": [
+   {
+    "label": "XX물산",
+    "amount": 3050000
+   },
+   {
+    "label": "YY기업",
+    "amount": 4700000
+   },
+   {
+    "label": "ZZ상사",
+    "amount": 1010000
+   },
+   {
+    "label": "우주상사",
+    "amount": 1330000
+   }
+  ],
+  "amount": 3690000,
+  "ask": "가장 많은 쪽과 가장 적은 쪽의 차이를 입력하세요(양수)",
+  "unit": "원",
+  "kind": "diff"
+ },
+ "1분기 중 여비교통비가 가장 많이 발생한 월은?": {
+  "rows": [
+   {
+    "label": "1월",
+    "amount": 550000
+   },
+   {
+    "label": "2월",
+    "amount": 400000
+   },
+   {
+    "label": "3월",
+    "amount": 190000
+   }
+  ],
+  "amount": 550000,
+  "ask": "가장 많은(큰) 쪽의 금액을 입력하세요",
+  "unit": "원",
+  "kind": "max"
+ },
+ "상반기 중 지급어음 발생액이 가장 큰 월은?": {
+  "rows": [
+   {
+    "label": "1월",
+    "amount": 12270000
+   },
+   {
+    "label": "2월",
+    "amount": 5620000
+   },
+   {
+    "label": "3월",
+    "amount": 5900000
+   },
+   {
+    "label": "4월",
+    "amount": 7300000
+   },
+   {
+    "label": "5월",
+    "amount": 1630000
+   },
+   {
+    "label": "6월",
+    "amount": 2870000
+   }
+  ],
+  "amount": 12270000,
+  "ask": "가장 많은(큰) 쪽의 금액을 입력하세요",
+  "unit": "원",
+  "kind": "max"
+ },
+ "하반기 중 통신비가 가장 적게 발생한 월은?": {
+  "rows": [
+   {
+    "label": "7월",
+    "amount": 120000
+   },
+   {
+    "label": "8월",
+    "amount": 300000
+   },
+   {
+    "label": "9월",
+    "amount": 150000
+   },
+   {
+    "label": "10월",
+    "amount": 200000
+   },
+   {
+    "label": "11월",
+    "amount": 280000
+   },
+   {
+    "label": "12월",
+    "amount": 210000
+   }
+  ],
+  "amount": 120000,
+  "ask": "가장 적은 쪽의 금액을 입력하세요",
+  "unit": "원",
+  "kind": "min"
+ },
+ "1월~6월 중 제품매출액이 가장 큰 달은?": {
+  "rows": [
+   {
+    "label": "1월",
+    "amount": 14050000
+   },
+   {
+    "label": "2월",
+    "amount": 24070000
+   },
+   {
+    "label": "3월",
+    "amount": 36660000
+   },
+   {
+    "label": "4월",
+    "amount": 28430000
+   },
+   {
+    "label": "5월",
+    "amount": 61240000
+   },
+   {
+    "label": "6월",
+    "amount": 11370000
+   }
+  ],
+  "amount": 49870000,
+  "ask": "가장 많은 쪽과 가장 적은 쪽의 차이를 입력하세요(양수)",
+  "unit": "원",
+  "kind": "diff"
+ },
+ "3분기 중 임차료 지출이 가장 많았던 월은?": {
+  "rows": [
+   {
+    "label": "7월",
+    "amount": 1060000
+   },
+   {
+    "label": "8월",
+    "amount": 1120000
+   },
+   {
+    "label": "9월",
+    "amount": 1440000
+   }
+  ],
+  "amount": 1440000,
+  "ask": "가장 많은(큰) 쪽의 금액을 입력하세요",
+  "unit": "원",
+  "kind": "max"
+ },
+ "하반기 중 이자수익이 가장 크게 발생한 월은?": {
+  "rows": [
+   {
+    "label": "7월",
+    "amount": 50000
+   },
+   {
+    "label": "8월",
+    "amount": 270000
+   },
+   {
+    "label": "9월",
+    "amount": 350000
+   },
+   {
+    "label": "10월",
+    "amount": 20000
+   },
+   {
+    "label": "11월",
+    "amount": 330000
+   },
+   {
+    "label": "12월",
+    "amount": 90000
+   }
+  ],
+  "amount": 350000,
+  "ask": "가장 많은(큰) 쪽의 금액을 입력하세요",
+  "unit": "원",
+  "kind": "max"
+ },
+ "2분기 중 수도광열비가 가장 많이 발생한 달은?": {
+  "rows": [
+   {
+    "label": "4월",
+    "amount": 660000
+   },
+   {
+    "label": "5월",
+    "amount": 220000
+   },
+   {
+    "label": "6월",
+    "amount": 410000
+   }
+  ],
+  "amount": 440000,
+  "ask": "가장 많은 쪽과 가장 적은 쪽의 차이를 입력하세요(양수)",
+  "unit": "원",
+  "kind": "diff"
+ },
+ "하반기 중 수수료비용이 가장 적은 월은?": {
+  "rows": [
+   {
+    "label": "7월",
+    "amount": 430000
+   },
+   {
+    "label": "8월",
+    "amount": 230000
+   },
+   {
+    "label": "9월",
+    "amount": 240000
+   },
+   {
+    "label": "10월",
+    "amount": 170000
+   },
+   {
+    "label": "11월",
+    "amount": 140000
+   },
+   {
+    "label": "12월",
+    "amount": 440000
+   }
+  ],
+  "amount": 140000,
+  "ask": "가장 적은 쪽의 금액을 입력하세요",
+  "unit": "원",
+  "kind": "min"
+ },
+ "1월~3월 외상매출금 회수총액?": {
+  "rows": [
+   {
+    "label": "1월",
+    "amount": 12120000
+   },
+   {
+    "label": "2월",
+    "amount": 3910000
+   },
+   {
+    "label": "3월",
+    "amount": 4960000
+   }
+  ],
+  "amount": 20990000,
+  "ask": "기간 합계를 입력하세요",
+  "unit": "원",
+  "kind": "sum"
+ },
+ "2월~4월 미수금 회수 총액은?": {
+  "rows": [
+   {
+    "label": "2월",
+    "amount": 3270000
+   },
+   {
+    "label": "3월",
+    "amount": 1360000
+   },
+   {
+    "label": "4월",
+    "amount": 350000
+   }
+  ],
+  "amount": 4980000,
+  "ask": "기간 합계를 입력하세요",
+  "unit": "원",
+  "kind": "sum"
+ },
+ "상반기 동안 현금으로 지출된 보험료 총액은?": {
+  "rows": [
+   {
+    "label": "1월",
+    "amount": 510000
+   },
+   {
+    "label": "2월",
+    "amount": 550000
+   },
+   {
+    "label": "3월",
+    "amount": 190000
+   },
+   {
+    "label": "4월",
+    "amount": 340000
+   },
+   {
+    "label": "5월",
+    "amount": 80000
+   },
+   {
+    "label": "6월",
+    "amount": 180000
+   }
+  ],
+  "amount": 1850000,
+  "ask": "기간 합계를 입력하세요",
+  "unit": "원",
+  "kind": "sum"
+ },
+ "4월 중 발생한 상품매입 거래 건수는?": {
+  "rows": [
+   {
+    "label": "3/23 상품 매입",
+    "amount": 1640000
+   },
+   {
+    "label": "3/27 상품 매입",
+    "amount": 2740000
+   },
+   {
+    "label": "4/01 상품 매입",
+    "amount": 590000
+   },
+   {
+    "label": "4/18 상품 매입",
+    "amount": 4330000
+   },
+   {
+    "label": "4/23 상품 매입",
+    "amount": 4550000
+   },
+   {
+    "label": "5/08 상품 매입",
+    "amount": 5470000
+   },
+   {
+    "label": "5/09 상품 매입",
+    "amount": 4230000
+   }
+  ],
+  "amount": 3,
+  "ask": "그 달의 거래만 골라 건수를 입력하세요",
+  "unit": "건",
+  "kind": "count"
+ },
+ "5월 중 발생한 제품매출 거래 건수는?": {
+  "rows": [
+   {
+    "label": "4/24 제품 매출",
+    "amount": 3860000
+   },
+   {
+    "label": "4/26 제품 매출",
+    "amount": 1630000
+   },
+   {
+    "label": "5/02 제품 매출",
+    "amount": 8010000
+   },
+   {
+    "label": "5/09 제품 매출",
+    "amount": 7290000
+   },
+   {
+    "label": "5/12 제품 매출",
+    "amount": 7180000
+   },
+   {
+    "label": "5/17 제품 매출",
+    "amount": 5470000
+   },
+   {
+    "label": "5/22 제품 매출",
+    "amount": 5060000
+   },
+   {
+    "label": "5/24 제품 매출",
+    "amount": 5510000
+   },
+   {
+    "label": "6/03 제품 매출",
+    "amount": 2270000
+   },
+   {
+    "label": "6/07 제품 매출",
+    "amount": 1530000
+   }
+  ],
+  "amount": 6,
+  "ask": "그 달의 거래만 골라 건수를 입력하세요",
+  "unit": "건",
+  "kind": "count"
+ }
+};
+/*CMP_END*/
+
 const SFX={
   ctx:null,
   /* AudioContext 가 없으면 this.ctx 를 null 로 둔다 — tone() 이 이미 null 을 걸러
@@ -883,8 +1469,12 @@ const Game={
 
   mkStar(init=false){return{x:Math.random()*this.w,y:init?Math.random()*this.h:-2,s:Math.random()*2+.3,v:Math.random()*14+4,c:Math.random()>.85?'#00f2ff':Math.random()>.7?'#b44fff':'#fff'}},
 
-  start(){SFX.init();BGM.play();hideAdPlaceholder();/* 난이도2 보류(2026-09-14, 사용자 지시). 장부 화면에 '유동자산 14,500,000원'이 그대로 보이는데 그 숫자를 받아쓰라는 문제라, 회계가 아니라 받아쓰기였다. 더 나은 안이 정해질 때까지 LV 을 1로 고정한다 — 이미 해금된 학생이 저장값(hub_lv_flight=2) 때문에 계속 LV2 를 만나는 일도 막는다. LV2 코드는 남겨 둔다. */LV=1;document.getElementById('ss').style.display='none';this._reset()},
-  restart(){BGM.play();hideAdPlaceholder();LV=1;   /* 위 start() 주석 참고 — 난이도2 보류 */document.getElementById('gs').style.display='none';this._reset()},
+  start(){SFX.init();BGM.play();hideAdPlaceholder();
+    /* 난이도2 — 2026-09-14 보류: 장부 화면의 '유동자산 14,500,000원'을 그대로 옮겨 적는 받아쓰기였다(사용자 지적).
+       2026-10-03 다시 켬: 기출 문제7처럼 '가장 많은 달의 금액·차이·기간 합계·그 달 거래 건수'를 찾아 계산하는
+       비교형(LedgerLv2Cmp)만 붙인다. 받아쓰기형 LedgerLv2 는 붙이지 않는다(아래 spawnGate). */
+    LV=window.Difficulty?Difficulty.get(GAME_ID):1;document.getElementById('ss').style.display='none';this._reset()},
+  restart(){BGM.play();hideAdPlaceholder();LV=window.Difficulty?Difficulty.get(GAME_ID):1;   /* 위 start() 주석 참고 */document.getElementById('gs').style.display='none';this._reset()},
 
   _reset(){
     if(window.WrongNote)WrongNote.reset();
@@ -912,7 +1502,7 @@ const Game={
   spawnGate(){
     const p=_drawP(Problems);
     const id='g'+Date.now()+'_'+Math.random().toString(36).slice(2);
-    const g={id,y:-430,q:p.q,k:p.key,lText:p.L,rText:p.R,ans:p.a,passed:false,domEl:null,pauseT:0,pauseDone:false,ledgerData:LedgerLv2[p.q]||null};
+    const g={id,y:-430,q:p.q,k:p.key,lText:p.L,rText:p.R,ans:p.a,passed:false,domEl:null,pauseT:0,pauseDone:false,ledgerData:LedgerLv2Cmp[p.q]||null};   // 받아쓰기형 LedgerLv2 는 쓰지 않는다(start() 주석)
     const layer=document.getElementById('glayer');
     const el=document.createElement('div');
     el.id=id;el.className='gatel';el.style.top='-600px';
@@ -1037,6 +1627,9 @@ const Game={
     document.getElementById('ldg-rows').innerHTML=ld.rows.map(r=>
       `<div class="ldg-row"><span>${escapeHTML(r.label)}</span><span>${r.amount.toLocaleString()}원</span></div>`
     ).join('');
+    // 비교형은 무엇을 입력하는지(가장 많은 금액·차이·합계·건수)를 따로 알려 준다
+    document.getElementById('ldg-hint2').textContent='💰 '+(ld.ask||'위 장부에서 숫자를 찾아 입력하세요');
+    document.getElementById('ldg-won').textContent=ld.unit||'원';
     document.getElementById('ldg-input').value='';
     document.getElementById('ldg-overlay').classList.add('show');
     this._pendingLedger={g,ld};
@@ -1060,11 +1653,11 @@ const Game={
       hapticCorrect();
     } else {
       this.combo=0;this.wrongCount++;SFX.bad();this.doFlash('bad');
-      this.showJudge(false,'숫자 오답 (정답 '+p.ld.amount.toLocaleString()+'원)');
+      this.showJudge(false,'숫자 오답 (정답 '+p.ld.amount.toLocaleString()+(p.ld.unit||'원')+')');
       hapticWrong();
       if(window.WrongNote)WrongNote.add({game:'flight',key:p.g.q+'_amt',q:p.g.q+' (장부 금액)',
-        correct:p.ld.amount.toLocaleString()+'원',
-        wrong:(isNaN(typed)?'?':typed.toLocaleString())+'원',type:'장부 금액 조회'});
+        correct:p.ld.amount.toLocaleString()+(p.ld.unit||'원'),
+        wrong:(isNaN(typed)?'?':typed.toLocaleString())+(p.ld.unit||'원'),type:p.ld.kind?'장부 비교·계산':'장부 금액 조회'});
     }
     this.updHUD();
     this.state='playing';
@@ -1093,7 +1686,9 @@ const Game={
       justUnlocked=Difficulty.reportRound(GAME_ID,this.okCount,this.okCount+this.wrongCount);
     }
     const unlockEl=document.getElementById('lv-unlock-msg');
-    if(unlockEl) unlockEl.style.display='none';   // 난이도2 보류 — 해금 안내 끔
+    if(unlockEl) unlockEl.style.display=justUnlocked?'block':'none';
+    // 판별 기록(level_rounds) — 다른 게임과 같다. 1·2단계 모두
+    if(window.Difficulty&&Difficulty.logRound) Difficulty.logRound(GAME_ID,LV,this.okCount,this.okCount+this.wrongCount,this.score);
 
     document.getElementById('go-score').textContent=this.score.toLocaleString()+'점';
     document.getElementById('go-ok').textContent=this.okCount;
@@ -1183,10 +1778,10 @@ const Game={
     const btn=document.getElementById('savebtn'),msg=document.getElementById('savemsg');
     btn.disabled=true;btn.style.opacity='.5';msg.textContent='저장 중...';msg.style.color='rgba(255,255,255,.4)';
     const today=new Date().toLocaleDateString('ko-KR',{month:'2-digit',day:'2-digit'});
-    const data={name,score:this.score,combo:this.maxCombo,correct:this.okCount,date:today,game:GAME_ID,grade:this._grade(this.score)};
+    const data={name,score:this.score,combo:this.maxCombo,correct:this.okCount,date:today,game:rankId(),grade:this._grade(this.score)};
     if(false){this._lsave(data);msg.textContent='✓ 로컬 저장 완료';msg.style.color='var(--gd)';this.loadRanking();return}
     try{
-      await supabaseSaveScore(data.name, data.score, data.combo||0, data.correct||0, GAME_ID);
+      await supabaseSaveScore(data.name, data.score, data.combo||0, data.correct||0, rankId());
       this._lsave(data);
       if(myEpoch===this._saveEpoch)this._saved=true;
       msg.textContent='✓ 저장 완료! 랭킹에 반영됩니다';msg.style.color='#39ff14';
@@ -1202,7 +1797,7 @@ const Game={
     const box=document.getElementById('rkbox');box.style.display='block';
     if(false){this._render(this._lget());return}
     box.innerHTML='<div class="spinrow"><div class="spinner"></div>&nbsp;불러오는 중...</div>';
-    try{const res=await supabaseFetchRanking(GAME_ID);this._render(res)}
+    try{const res=await supabaseFetchRanking(rankId());this._render(res)}
     catch(e){this._render(this._lget())}
   },
   _merge(remote,local){const map=new Map();[...(Array.isArray(remote)?remote:[]),...local].forEach(r=>{const p=map.get(r.name);if(!p||(r.score||0)>(p.score||0))map.set(r.name,r)});return[...map.values()].sort((a,b)=>b.score-a.score).slice(0,15)},
@@ -1227,12 +1822,12 @@ const Game={
     try{
       const groupId=localStorage.getItem('hub_group_id')||null;
       const withGroup = (q) => q;   // 전체 범위(그룹 필터는 아래 반 순위에서만)
-      const countQ=withGroup(db.from('scores').select('*',{count:'exact',head:true}).eq('game_id',GAME_ID).gt('score',score));
-      const aboveQ=withGroup(db.from('scores').select('name,score').eq('game_id',GAME_ID).gt('score',score).order('score',{ascending:true}).limit(1));
-      const belowQ=withGroup(db.from('scores').select('name,score').eq('game_id',GAME_ID).lt('score',score).order('score',{ascending:false}).limit(1));
+      const countQ=withGroup(db.from('scores').select('*',{count:'exact',head:true}).eq('game_id',rankId()).gt('score',score));
+      const aboveQ=withGroup(db.from('scores').select('name,score').eq('game_id',rankId()).gt('score',score).order('score',{ascending:true}).limit(1));
+      const belowQ=withGroup(db.from('scores').select('name,score').eq('game_id',rankId()).lt('score',score).order('score',{ascending:false}).limit(1));
       const grpQ = groupId
         ? db.from('scores').select('*',{count:'exact',head:true})
-            .eq('game_id',GAME_ID).eq('group_id',groupId).gt('score',score)
+            .eq('game_id',rankId()).eq('group_id',groupId).gt('score',score)
         : Promise.resolve({count:null});
       const [{count,error:cErr},{data:aboveRows},{data:belowRows},grpRes]=await Promise.all([countQ,aboveQ,belowQ,grpQ]);
       if(cErr) throw cErr;
@@ -1573,13 +2168,13 @@ window.addEventListener('difficulty-synced', function () { try { initDiffUI(); }
             factory: [[12000,"👑 결산 마스터"],[7000,"🥇 숙련 경리"],[4000,"🥈 견습 경리"],[1500,"🥉 수습생"],[0,"📋 인턴"]],
             flight:  [[55000,"👑 전설의 에이스"],[40000,"🥇 베테랑 파일럿"],[30000,"🥈 숙련 파일럿"],[18000,"🥉 정규 파일럿"],[0,"🛩 견습 파일럿"]]
         };
-        const tiers = scales[gameId] || scales.flight;
+        const tiers = scales[String(gameId).replace(/_d2$/, '')] || scales.flight;
         return (tiers.find(([min]) => score >= min) || tiers[tiers.length-1])[1];
     }
 
     async function supabaseSaveScore(name, score, combo, correct, gameId, retry = 0) {
         const maxScore = {acid:99999999,memory:99999999,debit:99999999,factory:99999999,flight:99999999};
-        const safeScore = Math.min(Math.max(score,0), maxScore[gameId]||999999);
+        const safeScore = Math.min(Math.max(score,0), maxScore[String(gameId).replace(/_d2$/, '')]||999999);
         const safeName = String(name).replace(/<[^>]*>/g,'').substring(0,30).trim();
         if (!safeName) return;
         const today = new Date().toISOString().split('T')[0];
@@ -1864,8 +2459,8 @@ const Tutorial = (function () {
 function openGuide() { Tutorial.start(); }
 </script>
 
-<script src="emoji-icons.js?v=55"></script>
+<script src="emoji-icons.js?v=56"></script>
 <!-- 웹 전용 광고(시작·결과 화면만, 앱에선 adsense.js 가 스스로 멈춘다) -->
-<script src="adsense.js?v=55"></script>
+<script src="adsense.js?v=56"></script>
 </body>
 </html>

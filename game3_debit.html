@@ -5,7 +5,7 @@
 <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
      **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
      이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-<script src="safestore.js?v=55"></script>
+<script src="safestore.js?v=56"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
@@ -856,24 +856,69 @@
 /* 좁은 화면(360dp급 안드로이드)에서 머리줄 버튼이 제각각 줄어들어 '홈'이 28px까지 찌그러졌다 —
    최소 폭을 맞추고 줄어들지 않게 한다. 대신 왼쪽 시간·점수 칸이 줄어든다(2026-09-27 에뮬레이터 QA) */
 @media (max-width:400px){ .mute-btn, .hdr-btn { min-width:44px; flex-shrink:0; justify-content:center; text-align:center; } }
+        /* ══ 난이도2 — 2급 기출 일반전표 전표 완성(2026-10-03, 1급 분개의 탑과 같은 방식) ══
+           기출 문장은 길다 → 난이도2에서만 카드 글씨를 줄이고, 화면이 넘치면 게임 영역이 스크롤된다. */
+        body.lv2-mode .game-area { align-items: flex-start; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        body.lv2-mode .center-area { justify-content: flex-start; margin: auto; }
+        body.lv2-mode .question-card { padding: clamp(14px, 3.4vw, 30px) clamp(14px, 3.6vw, 36px); min-height: 0; align-items: stretch; }
+        body.lv2-mode .q-label { text-align: center; margin-bottom: 6px; font-size: clamp(0.72rem, 2.4vw, 0.85rem); letter-spacing: 1px; }
+        body.lv2-mode .q-sentence { font-size: clamp(0.95rem, 3.7vw, 1.2rem); line-height: 1.6; text-align: left; }
+        body.lv2-mode .q-hint { text-align: center; }
+        .q-doc { display: none; margin-top: 10px; padding: 9px 12px; border: 1.5px dashed #b9c0d4; border-radius: 10px;
+                 background: #f5f7fc; color: #33384d; font-size: clamp(0.82rem, 3.2vw, 1rem); line-height: 1.6; text-align: left; font-weight: 500; }
+        .q-doc.show { display: block; }
+        .q-doc div:first-child { font-weight: 700; }
+        .slip { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .slip-col { background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 12px; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+        .slip-h { font-family: 'Black Han Sans', sans-serif; font-size: .82rem; text-align: center; letter-spacing: 2px; }
+        .slip-col.dr .slip-h { color: var(--blue); }
+        .slip-col.cr .slip-h { color: var(--red); }
+        .slip-row { display: flex; flex-direction: column; justify-content: center; gap: 1px; min-height: 48px; border-radius: 9px; padding: 6px 8px; background: rgba(0,0,0,0.28); border: 1.5px solid transparent; }
+        .slip-row.cur { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(255,214,0,.18); }
+        .slip-acc { font-weight: 700; font-size: clamp(0.82rem, 3.1vw, 1rem); color: #fff; word-break: keep-all; line-height: 1.3; }
+        .slip-acc.blank { color: rgba(255,255,255,.35); }
+        .slip-row.ok .slip-acc { color: var(--green); }
+        .slip-row.no .slip-acc { color: #ff8a9b; }
+        .slip-amt { font-size: clamp(0.78rem, 2.9vw, 0.95rem); color: rgba(255,255,255,.72); text-align: right; font-variant-numeric: tabular-nums; }
+        .slip-amt.blank { color: var(--gold); }
+        .slip-type { grid-column: 1 / -1; text-align: center; font-size: .82rem; color: rgba(255,255,255,.6); }
+        .slip-type b { color: #fff; }
+        #lv2-ask b { color: var(--gold); }
+        .lv2-opt { word-break: keep-all; line-height: 1.25; }
+        #lv2-why { display: none; width: 100%; padding: 12px 14px; border-radius: 12px; background: rgba(255,214,0,0.08); border: 1px solid rgba(255,214,0,0.28);
+                   color: rgba(255,255,255,.9); font-size: clamp(0.86rem, 3.1vw, 1rem); line-height: 1.6; text-align: left; }
+        #lv2-why.show { display: block; }
+        #lv2-why b { color: var(--gold); }
+        .amt-area { display: none; width: 100%; flex-direction: column; align-items: center; gap: 8px; }
+        .amt-area.show { display: flex; }
+        .amt-row { display: flex; gap: 8px; align-items: center; width: 100%; max-width: 320px; }
+        .amt-input { flex: 1; min-width: 0; background: rgba(0,0,0,0.4); border: 2px solid rgba(255,255,255,0.2); border-radius: 12px; color: #fff;
+                     padding: 12px 14px; font-size: 1.15rem; text-align: right; font-family: 'Black Han Sans', sans-serif; outline: none; -moz-appearance: textfield;
+                     -webkit-user-select: text; user-select: text; }
+        .amt-input::-webkit-outer-spin-button, .amt-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .amt-input:focus { border-color: var(--blue); }
+        .amt-won { color: rgba(255,255,255,0.5); font-size: 1rem; flex-shrink: 0; }
+        .amt-submit { padding: 12px 20px; border-radius: 12px; border: none; background: var(--green); color: #000; font-family: 'Black Han Sans', sans-serif;
+                      font-size: 0.95rem; cursor: pointer; min-height: 48px; min-width: 160px; }
+        .amt-submit:active { transform: scale(0.96); }
 </style>
 
 <button id="rewarded-btn" onclick="requestRewarded()">⏱ +30초 광고 보기</button>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="pausewatch.js?v=55"></script>
-    <script src="ask.js?v=55"></script>
-    <script src="wrongnote.js?v=55"></script>
-    <script src="growth.js?v=55"></script>
-<script src="streak.js?v=55"></script>
-    <script src="difficulty.js?v=55"></script>
-    <script src="readable.js?v=55"></script>
-    <script src="stepmode.js?v=55"></script>
-    <script src="review-prompt.js?v=55"></script>
+    <script src="pausewatch.js?v=56"></script>
+    <script src="ask.js?v=56"></script>
+    <script src="wrongnote.js?v=56"></script>
+    <script src="growth.js?v=56"></script>
+<script src="streak.js?v=56"></script>
+    <script src="difficulty.js?v=56"></script>
+    <script src="readable.js?v=56"></script>
+    <script src="stepmode.js?v=56"></script>
+    <script src="review-prompt.js?v=56"></script>
 </head>
 <body>
 
 <!-- 🎵 BGM 오디오 엘리먼트 -->
-<script src="bgm.js?v=55"></script>
+<script src="bgm.js?v=56"></script>
 
 
 
@@ -901,6 +946,7 @@
             <div class="info-card">
                 <strong>⏱️ 규칙</strong>
                 제한 시간 <strong style="color:var(--gold)">60초</strong><br>
+                <span style="font-size:.78em;opacity:.75">(난이도2는 120초)</span><br>
                 오답 시 <strong style="color:var(--red)">-5초</strong><br>
                 콤보 보너스!
             </div>
@@ -1039,8 +1085,9 @@
 <div class="game-area">
     <div class="center-area">
         <div id="question-card" class="question-card">
-            <div class="q-label">강조된 계정과목은 어느 쪽?</div>
+            <div class="q-label" id="q-label">강조된 계정과목은 어느 쪽?</div>
             <div class="q-sentence" id="q-sentence">게임을 시작해보세요!</div>
+            <div class="q-doc" id="q-doc"></div>
             <div class="q-ask" id="q-ask"></div>
             <div class="q-hint" id="q-hint"></div>
         </div>
@@ -1076,11 +1123,21 @@
         </div>
         </div>
 
-        <!-- 난이도2 — 차변/대변 계정·전표유형을 한 단계씩 완성 -->
+        <!-- 난이도2 — 기출 거래로 전표 한 장을 줄마다 채운다(계정 → 계산이 필요한 금액 → 전표유형) -->
         <div class="lv2-area" id="lv2-area">
+            <div class="slip" id="slip"></div>
             <div id="lv2-progress">1/3</div>
             <div id="lv2-ask">차변 계정과목은?</div>
             <div id="lv2-opts"></div>
+            <div class="amt-area" id="amt-area">
+                <div class="amt-row">
+                    <input type="number" id="amt-input" class="amt-input" inputmode="numeric" placeholder="0" onkeydown="if(event.key==='Enter'){event.preventDefault();submitAmount();}">
+                    <span class="amt-won">원</span>
+                </div>
+                <button class="amt-submit" onclick="submitAmount()">✔ 확인</button>
+            </div>
+            <div id="lv2-why"></div>
+            <button class="amt-submit" id="lv2-next" style="display:none" onclick="lv2Continue()">다음 문제 ▶</button>
         </div>
     </div>
 </div>
@@ -1108,7 +1165,7 @@ const GAME_ID   = "debit";
 // ══════════════════════════════════════
 // 🎵 BGM 관리
 // ══════════════════════════════════════
-const bgm = BGMAudio.create('bgm3_debit.mp3?v=55');
+const bgm = BGMAudio.create('bgm3_debit.mp3?v=56');
 bgm.volume = 0.5;
 
 // 음소거 상태: localStorage에 저장해서 다음 게임에도 유지
@@ -1235,62 +1292,80 @@ const questions = [
 ];
 
 /* ═══════════════════════════════════════════════════════
- *  난이도2 — 한쪽 계정만 맞히면 끝나던 방식에서 "전표 한 장 통째로
- *  완성"으로 확장. 거래 하나당 ①차변 계정 ②대변 계정 ③전표유형(출금/입금/
- *  대체)을 순서대로 물어, 전부 맞혀야 정답 판정한다. 118회 기출 대조 분석
- *  결과 일반전표(24점) 정답률이 37%였던 이유가 "계정과목 한쪽만 고르면 끝"
- *  이었기 때문 — 실제 시험은 차·대변 둘 다 + 전표유형까지 직접 입력해야 함.
- *  ⚠ 거래처코드도 물었었지만 뺐다(2026-09-13) — buildLv2Steps 주석 참고.
- *  전표유형 판정 규칙(단순화): 현금이 대변(현금 감소)=출금전표,
- *  현금이 차변(현금 증가)=입금전표, 현금이 아예 없으면=대체전표.
+ *  난이도2 — 2급 기출 일반전표입력 128문항으로 전표 한 장 통째로(2026-10-03 교체).
+ *  예전 난이도2는 단순 거래 14개로 차·대 계정 하나씩만 골랐다. 그러면 3줄 이상 복합 분개
+ *  (대손·처분·원천징수·일부 현금 일부 외상)와 금액 계산을 한 번도 연습하지 못한다 —
+ *  기출 모의 채점(docs/분석/기출모의채점_2026-10-03.md)에서 점수가 가장 막힌 자리.
+ *  그래서 1급 「분개의 탑」과 같은 방식으로 바꿨다:
+ *   ① 차변 줄 → 대변 줄 순서로 계정과목 4지선다, ② 문제에 그대로 없는 금액은 직접 입력,
+ *   ③ 전표유형(출금/입금/대체) — 원래 난이도2에 있던 단계라 그대로 남겼다.
+ *  문제은행: journal_bank_lv2.json(tools/journal/build.py --lv2). 거래처코드는 묻지 않는다(2026-09-13 지시).
  * ═══════════════════════════════════════════════════════ */
-const ACCOUNT_POOL = [
-  '현금','보통예금','외상매출금','받을어음','단기대여금','상품','비품','차량운반구',
-  '외상매입금','미지급금','단기차입금','지급어음','예수금','선수금',
-  '급여','임차료','이자비용','통신비','복리후생비',
-  '상품매출','이자수익','임대료',
-];
-function shuffleArr(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
-function pickFakes(exclude, n){
-  const pool = ACCOUNT_POOL.filter(a=>!exclude.includes(a));
-  return shuffleArr(pool).slice(0, n);
+let BANK2 = [];
+const bank2Ready = (async function () {
+    try {
+        const r = await fetch('journal_bank_lv2.json?b=1');
+        const j = await r.json();
+        BANK2 = (j && j.questions) || [];
+    } catch (e) { BANK2 = []; }
+})();
+async function ensureBank2() {
+    if (!BANK2.length) await bank2Ready;
+    if (BANK2.length) return true;
+    Ask.alert('문제를 불러오지 못했어요.\n인터넷 연결을 확인하고 다시 시도해 주세요.');
+    return false;
 }
-const entriesLv2 = [
-  { sentence:'상품 500,000원을 가나상사에 외상으로 매입하다', debitAcc:'상품', creditAcc:'외상매입금', vendor:'가나상사', voucherType:'대체전표' },
-  { sentence:'상품 300,000원을 현금으로 매입하다', debitAcc:'상품', creditAcc:'현금', vendor:null, voucherType:'출금전표' },
-  { sentence:'다라상사에 상품 700,000원을 외상으로 판매하다', debitAcc:'외상매출금', creditAcc:'상품매출', vendor:'다라상사', voucherType:'대체전표' },
-  { sentence:'상품 400,000원을 현금으로 판매하다', debitAcc:'현금', creditAcc:'상품매출', vendor:null, voucherType:'입금전표' },
-  { sentence:'가나상사에 대한 외상매입금 200,000원을 현금으로 지급하다', debitAcc:'외상매입금', creditAcc:'현금', vendor:'가나상사', voucherType:'출금전표' },
-  { sentence:'다라상사의 외상매출금 350,000원을 현금으로 회수하다', debitAcc:'현금', creditAcc:'외상매출금', vendor:'다라상사', voucherType:'입금전표' },
-  { sentence:'직원 급여 2,000,000원을 현금으로 지급하다', debitAcc:'급여', creditAcc:'현금', vendor:null, voucherType:'출금전표' },
-  { sentence:'은행에서 현금 5,000,000원을 단기로 차입하다', debitAcc:'현금', creditAcc:'단기차입금', vendor:null, voucherType:'입금전표' },
-  { sentence:'마바상사로부터 비품 1,200,000원을 외상으로 구입하다', debitAcc:'비품', creditAcc:'미지급금', vendor:'마바상사', voucherType:'대체전표' },
-  { sentence:'다라상사로부터 받을어음 800,000원을 현금으로 회수하다', debitAcc:'현금', creditAcc:'받을어음', vendor:'다라상사', voucherType:'입금전표' },
-  { sentence:'사무실 임차료 600,000원을 보통예금 계좌에서 이체 지급하다', debitAcc:'임차료', creditAcc:'보통예금', vendor:null, voucherType:'대체전표' },
-  { sentence:'보통예금 계좌에 이자수익 50,000원이 입금되다', debitAcc:'보통예금', creditAcc:'이자수익', vendor:null, voucherType:'대체전표' },
-  { sentence:'마바상사에 상품 900,000원 매입 대금으로 어음을 발행하다', debitAcc:'상품', creditAcc:'지급어음', vendor:'마바상사', voucherType:'대체전표' },
-  { sentence:'상품 250,000원을 판매하고 대금을 현금으로 받다', debitAcc:'현금', creditAcc:'상품매출', vendor:null, voucherType:'입금전표' },
-];
-function buildLv2Steps(entry){
-  const steps = [];
-  steps.push({ ask:'차변 계정과목은?', correct:entry.debitAcc,
-    options: shuffleArr([entry.debitAcc, ...pickFakes([entry.debitAcc, entry.creditAcc], 3)]) });
-  steps.push({ ask:'대변 계정과목은?', correct:entry.creditAcc,
-    options: shuffleArr([entry.creditAcc, ...pickFakes([entry.debitAcc, entry.creditAcc], 3)]) });
-  /* ⚠ 거래처코드는 묻지 않는다(2026-09-13, 사용자 지시).
-     KcLep 에서 F2 로 조회해 넣는 값이지 외우는 값이 아니고, 게임이 코드표를
-     보여주지도 않아서 순수 찍기 문제였다. 되살리지 말 것. */
-  steps.push({ ask:'이 거래의 전표유형은?', correct:entry.voucherType,
-    options: shuffleArr(['출금전표','입금전표','대체전표']) });
-  return steps;
+function won(n) { return Number(n).toLocaleString('ko-KR'); }
+function escH(str) { return String(str == null ? '' : str).replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c])); }
+function shuffleArr(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+/* 보기 4개 = 정답 + 오답 3개. f 의 앞 n 개는 꼭 넣는다(수수료비용 ↔ 수수료비용(영업외) 같은 짝). */
+function optionsFor(l) {
+    const must = l.f.slice(0, l.n || 0), rest = shuffleArr(l.f.slice(l.n || 0));
+    return shuffleArr([l.a].concat(must.concat(rest).slice(0, 3)));
+}
+/* 전표유형 — 현금만 나간 거래는 출금전표, 현금만 들어온 거래는 입금전표, 나머지는 대체전표.
+   (시험은 대체전표로 적어도 정답이지만, KcLep 에서 어떤 전표를 쓰는지 익히려고 원래대로 묻는다.) */
+function voucherTypeOf(e) {
+    const cashD = e.debit.some(l => l.b === '현금'), cashC = e.credit.some(l => l.b === '현금');
+    if (e.credit.length === 1 && e.credit[0].b === '현금' && !cashD) return '출금전표';
+    if (e.debit.length === 1 && e.debit[0].b === '현금' && !cashC) return '입금전표';
+    return '대체전표';
+}
+function slipText(e) {
+    const side = arr => arr.map(l => l.a + ' ' + won(l.m)).join(' · ');
+    return '(차) ' + side(e.debit) + ' / (대) ' + side(e.credit) + ' / ' + voucherTypeOf(e);
+}
+function renderStem2(e) {
+    document.getElementById('q-label').textContent = '제' + e.round + '회 기출 · 일반전표입력';
+    document.getElementById('q-sentence').textContent = e.stem;
+    const d = document.getElementById('q-doc');
+    if (e.doc && e.doc.length) { d.innerHTML = e.doc.map(t => '<div>' + escH(t) + '</div>').join(''); d.classList.add('show'); }
+    else { d.innerHTML = ''; d.classList.remove('show'); }
+}
+function buildLv2Steps(e) {
+    const steps = [];
+    e.debit.forEach((l, i) => steps.push({ kind: 'acc', side: 'D', i, l }));
+    e.credit.forEach((l, i) => steps.push({ kind: 'acc', side: 'C', i, l }));
+    const seen = {};   // 같은 금액은 한 번만 묻는다
+    [['D', e.debit], ['C', e.credit]].forEach(([side, arr]) => arr.forEach((l, i) => {
+        if (!l.x || seen[l.m]) return;
+        seen[l.m] = true;
+        steps.push({ kind: 'amt', side, i, l });
+    }));
+    steps.push({ kind: 'type', correct: voucherTypeOf(e) });
+    return steps;
 }
 
 // ══════════════════════════════════════
 // 게임 상태
 // ══════════════════════════════════════
 const GAME_TIME = 60;
+const GAME_TIME_LV2 = 120;   // 난이도2는 기출 문장을 읽고 전표를 통째로 채우므로 두 배
+let roundTime = GAME_TIME;
 let LV = 1; // 1=한쪽 계정만 선택 / 2=전표 통째로 완성(difficulty.js로 해금)
-let lv2Round = null; // {entry, steps, idx, allOk}
+let lv2Round = null; // {entry, steps, idx, allOk, state, frozen}
+let explainPause = false;   // 난이도2 오답 풀이를 읽는 동안 시간을 멈춘다
+let lv2StepOk = 0, lv2StepTotal = 0;   // 판별 기록용 — 난이도2는 단계(계정·금액·유형) 단위로 센다
 let score = 0, combo = 0, maxCombo = 0;
 let timeLeft = GAME_TIME;
 let timerInterval = null;
@@ -1337,18 +1412,22 @@ function playSound(type) {
     } catch(e) {}
 }
 
-function startGame() {
+async function startGame() {
     hideAdPlaceholder();
     getAudio();
     bgmPlay(); // 🎵 게임 시작 시 BGM 재생
     LV = window.Difficulty ? Difficulty.get(GAME_ID) : 1;
+    if (LV === 2 && !(await ensureBank2())) { bgmStop(); showAdPlaceholder(); return; }
+    document.body.classList.toggle('lv2-mode', LV === 2);
     document.getElementById('answer-buttons-area').classList.toggle('show', LV !== 2);
     document.getElementById('lv2-area').classList.toggle('show', LV === 2);
     document.getElementById('start-screen').style.display = 'none';
     document.getElementById('result-screen').style.display = 'none';
     score = 0; combo = 0; maxCombo = 0;
-    timeLeft = GAME_TIME; correctCount = 0; wrongCount = 0;
+    roundTime = LV === 2 ? GAME_TIME_LV2 : GAME_TIME;
+    timeLeft = roundTime; correctCount = 0; wrongCount = 0;
     freezeLeft = 0; pendingReward = null;
+    explainPause = false; lv2StepOk = 0; lv2StepTotal = 0;
     isPlaying = true;
     isLocked = false;
     if (nextQTimer) { clearTimeout(nextQTimer); nextQTimer = null; }
@@ -1363,7 +1442,7 @@ let adPaused = false; // 광고 시청 중 타이머 일시정지 플래그
 let freezeLeft = 0;   // 설명타임: 이 값이 0보다 크면 남은 문제 수만큼 타이머 완전 정지
 let pendingReward = null; // 'time' | 'freeze' — 광고 시청 후 지급할 보상 종류
 function tick() {
-    if (adPaused || freezeLeft > 0) return; // 광고 시청/설명타임 중엔 시간 멈춤
+    if (adPaused || freezeLeft > 0 || explainPause) return; // 광고 시청/설명타임/오답 풀이 중엔 시간 멈춤
     /* 화면이 가려져 있으면(전면광고·전화·홈버튼) 시간을 깎지 않는다.
        실기기 제보 2026-09-15: 신고의 문에서 전면광고가 덮은 채로 제한 시간이 흘러 죽었다.
        판단은 pausewatch.js 한 곳에서 한다 — WKWebView 는 visibilitychange 가 안 올 때가 있어
@@ -1379,7 +1458,7 @@ function updateHUD() {
     document.getElementById('timer-val').textContent = freezeLeft > 0 ? '⏸' : timeLeft;
     document.getElementById('score-val').textContent = score.toLocaleString();
     document.getElementById('combo-val').textContent = combo + 'x';
-    document.getElementById('timer-bar').style.width = Math.min(100, timeLeft / GAME_TIME * 100) + '%';
+    document.getElementById('timer-bar').style.width = Math.min(100, timeLeft / roundTime * 100) + '%';
     document.getElementById('timer-val').style.color =
         freezeLeft > 0 ? 'var(--green)' : timeLeft <= 10 ? '#ff2d55' : timeLeft <= 20 ? '#ffd600' : 'var(--red)';
     const fb = document.getElementById('freeze-btn');
@@ -1416,7 +1495,7 @@ function _drawQ(arr, last) {
     }
     return arr[_qBag.shift()];
 }
-let _eBag = []; // entriesLv2 전용 셔플백(questions와 배열 길이가 달라 _qBag과 공유하면 범위를 벗어난 인덱스를 뽑을 수 있음)
+let _eBag = []; // 난이도2 문제은행 전용 셔플백(난이도1 questions 와 길이가 달라 _qBag 과 공유하면 범위를 벗어난다)
 function _drawEntry(arr, last) {
     if (_eBag.length === 0) {
         _eBag = arr.map((_, i) => i);
@@ -1430,95 +1509,171 @@ function nextQuestion() {
     nextQTimer = null;
     isLocked = false;
     if (LV === 2) {
-        const entry = _drawEntry(entriesLv2, currentQ);
+        const entry = _drawEntry(BANK2, currentQ);
         currentQ = entry;
-        lv2Round = { entry, steps: buildLv2Steps(entry), idx: 0, allOk: true };
-        document.getElementById('q-sentence').textContent = entry.sentence;
+        lv2Round = { entry, steps: buildLv2Steps(entry), idx: 0, allOk: true, state: {}, frozen: freezeLeft > 0 };
+        entry.debit.forEach((_, i) => { lv2Round.state['D' + i] = {}; });
+        entry.credit.forEach((_, i) => { lv2Round.state['C' + i] = {}; });
+        if (lv2Round.frozen) { freezeLeft--; updateHUD(); }   // 시간 정지는 전표 한 장 = 1문제로 센다
+        renderStem2(entry);
         document.getElementById('q-ask').textContent = '';
         document.getElementById('q-hint').textContent = '';
         document.getElementById('question-card').className = 'question-card';
+        document.getElementById('lv2-why').classList.remove('show');
+        document.getElementById('lv2-next').style.display = 'none';
+        const ga = document.querySelector('.game-area'); if (ga) ga.scrollTop = 0;
         renderLv2Step();
         return;
     }
     currentQ = _drawQ(questions, currentQ);
     let q = currentQ;
+    document.getElementById('q-label').textContent = '강조된 계정과목은 어느 쪽?';
+    document.getElementById('q-doc').classList.remove('show');
     document.getElementById('q-sentence').innerHTML = q.sentence;
     document.getElementById('q-ask').innerHTML = `<b>${q.target}</b> 은(는) 차변? 대변?`;
     document.getElementById('q-hint').textContent = '';
     document.getElementById('question-card').className = 'question-card';
 }
 
-function renderLv2Step(){
-    const step = lv2Round.steps[lv2Round.idx];
-    document.getElementById('lv2-progress').textContent = (lv2Round.idx+1)+'/'+lv2Round.steps.length;
-    document.getElementById('lv2-ask').textContent = step.ask;
-    const box = document.getElementById('lv2-opts');
+function renderSlip(done) {
+    const R = lv2Round, e = R.entry, cur = done ? null : R.steps[R.idx];
+    const col = (arr, side, title) => '<div class="slip-col ' + (side === 'D' ? 'dr' : 'cr') + '"><div class="slip-h">' + title + '</div>' +
+        arr.map((l, i) => {
+            const st = R.state[side + i];
+            const isCur = !!cur && cur.side === side && cur.i === i;
+            const amtShown = !l.x || st.amt;
+            return '<div class="slip-row' + (isCur ? ' cur' : '') + (st.acc ? ' ' + st.acc : '') + '">' +
+                '<span class="slip-acc' + (st.acc ? '' : ' blank') + '">' + (st.acc ? escH(l.a) : '계정과목') + '</span>' +
+                '<span class="slip-amt' + (amtShown ? '' : ' blank') + '">' + (amtShown ? won(l.m) : '금액 ?') + '</span></div>';
+        }).join('') + '</div>';
+    const type = R.typeDone ? '<div class="slip-type">전표유형 <b>' + escH(R.typeDone) + '</b></div>' : '';
+    document.getElementById('slip').innerHTML = col(e.debit, 'D', '차변') + col(e.credit, 'C', '대변') + type;
+}
+function renderLv2Step() {
+    const R = lv2Round, step = R.steps[R.idx];
+    renderSlip(false);
+    document.getElementById('lv2-progress').textContent = (R.idx + 1) + '/' + R.steps.length;
+    const box = document.getElementById('lv2-opts'), amt = document.getElementById('amt-area');
     box.innerHTML = '';
-    step.options.forEach(opt=>{
-        const b=document.createElement('button');
-        b.className='ans-btn lv2-opt'; b.textContent=opt;
-        b.addEventListener('click', ()=>handleLv2Pick(opt, b));
+    amt.classList.toggle('show', step.kind === 'amt');
+    if (step.kind === 'amt') {
+        document.getElementById('lv2-ask').innerHTML = (step.side === 'D' ? '차변' : '대변') + ' <b>' + escH(step.l.a) + '</b> 금액은? (계산해서 입력)';
+        const inp = document.getElementById('amt-input');
+        inp.value = '';
+        try { inp.focus({ preventScroll: true }); } catch (e) {}
+        return;
+    }
+    let opts;
+    if (step.kind === 'type') {
+        document.getElementById('lv2-ask').textContent = '이 거래의 전표유형은?';
+        opts = ['출금전표', '입금전표', '대체전표'];
+    } else {
+        const sideKr = step.side === 'D' ? '차변' : '대변';
+        document.getElementById('lv2-ask').innerHTML = step.l.x
+            ? sideKr + ' <b>노란 테두리 칸</b>의 계정과목은?'
+            : sideKr + ' <b>' + won(step.l.m) + '원</b>의 계정과목은?';
+        opts = optionsFor(step.l);
+    }
+    opts.forEach(opt => {
+        const b = document.createElement('button');
+        b.className = 'ans-btn lv2-opt'; b.textContent = opt;
+        b.addEventListener('click', () => handleLv2Pick(opt, b));
         box.appendChild(b);
     });
 }
-
-function handleLv2Pick(opt, btnEl){
-    if (!isPlaying || isLocked) return;
-    isLocked = true;
-    const step = lv2Round.steps[lv2Round.idx];
-    const wasFrozen = freezeLeft > 0; if (wasFrozen) { freezeLeft--; updateHUD(); }
-    const ok = (opt === step.correct);
-    document.querySelectorAll('#lv2-opts .lv2-opt').forEach(b=>b.style.pointerEvents='none');
-    if (ok) {
-        playSound('correct'); btnEl.classList.add('picked-ok'); hapticCorrect();
-    } else {
-        playSound('wrong'); lv2Round.allOk = false; btnEl.classList.add('picked-no');
-        document.getElementById('q-hint').textContent = '💡 정답: ' + step.correct;
-        hapticWrong();
-    }
-    nextQTimer = setTimeout(()=>{
-        // 이 지연 시간 안에 라운드가 끝나버리면(그만/시간종료) 이미 결과화면에 반영된
-        // score/combo/correctCount를 뒤늦게 또 건드려서 화면 점수와 실제 저장 점수가
-        // 어긋나는 사고로 이어진다 — nextQuestion()의 기존 가드와 동일하게 여기도 막는다.
+function lv2Advance(ok) {
+    lv2StepTotal++; if (ok) lv2StepOk++;
+    nextQTimer = setTimeout(() => {
+        // 이 지연 안에 라운드가 끝나면(그만/시간종료) 점수를 뒤늦게 건드리지 않는다
         if (!isPlaying) return;
         document.getElementById('q-hint').textContent = '';
         lv2Round.idx++;
-        if (lv2Round.idx < lv2Round.steps.length) {
-            isLocked = false;
-            renderLv2Step();
-        } else {
-            finishLv2Round(wasFrozen);
-        }
-    }, ok ? 350 : 900);
+        if (lv2Round.idx < lv2Round.steps.length) { isLocked = false; renderLv2Step(); }
+        else finishLv2Round();
+    }, ok ? 350 : 1100);
 }
-
-function finishLv2Round(wasFrozen){
+function handleLv2Pick(opt, btnEl) {
+    if (!isPlaying || isLocked) return;
+    isLocked = true;
+    const R = lv2Round, step = R.steps[R.idx];
+    const right = step.kind === 'type' ? step.correct : step.l.a;
+    const ok = opt === right || (step.kind === 'acc' && (step.l.o || []).indexOf(opt) >= 0);
+    document.querySelectorAll('#lv2-opts .lv2-opt').forEach(b => b.style.pointerEvents = 'none');
+    if (step.kind === 'acc') R.state[step.side + step.i].acc = ok ? 'ok' : 'no';
+    else R.typeDone = right;
+    if (ok) { playSound('correct'); btnEl.classList.add('picked-ok'); hapticCorrect(); }
+    else {
+        playSound('wrong'); R.allOk = false; btnEl.classList.add('picked-no');
+        document.getElementById('q-hint').textContent = '💡 정답: ' + right;
+        hapticWrong();
+    }
+    renderSlip(false);
+    lv2Advance(ok);
+}
+function submitAmount() {
+    if (!isPlaying || isLocked || !lv2Round) return;
+    const R = lv2Round, step = R.steps[R.idx];
+    if (!step || step.kind !== 'amt') return;
+    const raw = (document.getElementById('amt-input').value || '').replace(/[^\d]/g, '');
+    if (!raw) return;   // 빈 칸으로는 넘어가지 않는다
+    isLocked = true;
+    const ok = Number(raw) === step.l.m;
+    const e = R.entry;   // 같은 금액인 줄은 함께 채운다
+    e.debit.forEach((l, i) => { if (l.m === step.l.m) R.state['D' + i].amt = true; });
+    e.credit.forEach((l, i) => { if (l.m === step.l.m) R.state['C' + i].amt = true; });
+    try { document.getElementById('amt-input').blur(); } catch (err) {}
+    if (ok) { playSound('correct'); hapticCorrect(); }
+    else {
+        playSound('wrong'); R.allOk = false; hapticWrong();
+        document.getElementById('q-hint').textContent = '💡 정답: ' + won(step.l.m) + '원';
+    }
+    renderSlip(false);
+    lv2Advance(ok);
+}
+function finishLv2Round() {
     const card = document.getElementById('question-card');
-    if (lv2Round.allOk) {
+    const R = lv2Round, e = R.entry;
+    renderSlip(true);
+    document.getElementById('lv2-opts').innerHTML = '';
+    document.getElementById('amt-area').classList.remove('show');
+    document.getElementById('lv2-progress').textContent = R.steps.length + '/' + R.steps.length;
+    if (R.allOk) {
         playSound('correct');
         combo++; if (combo > maxCombo) maxCombo = combo;
-        score += 100 + Math.floor(combo * 10) + 100; // 난이도2는 전표 완성 보너스 +100
+        score += 300 + combo * 20;   // 전표 한 장 = 300점 + 콤보
         correctCount++;
         card.classList.add('correct');
+        document.getElementById('lv2-ask').textContent = '✓ 전표 완성!';
         showFeedback('ok', combo >= 2 ? `✓ ${combo} COMBO!` : '✓ 전표 완성!');
         if (combo >= 2) showCombo(combo);
-    } else {
-        combo = 0; wrongCount++;
-        if (!wasFrozen) timeLeft = Math.max(0, timeLeft - 5);
-        const e = lv2Round.entry;
-        if (window.WrongNote) WrongNote.add({ game:'debit', key:e.sentence, q:e.sentence,
-            correct:'(차)'+e.debitAcc+' / (대)'+e.creditAcc+(e.vendor?' / 거래처 '+e.vendor:'')+' / '+e.voucherType,
-            wrong:'(항목 중 오답 포함)', type:'전표 입력(난이도2)' });
-        card.classList.add('wrong');
-        document.body.classList.add('shake');
-        showFeedback('no', '✗ 오답 (-5초)');
+        updateHUD();
+        nextQTimer = setTimeout(() => { card.classList.remove('correct'); nextQuestion(); }, 600);
+        return;
     }
+    combo = 0; wrongCount++;
+    if (!R.frozen) timeLeft = Math.max(0, timeLeft - 5);
+    if (window.WrongNote) WrongNote.add({ game: 'debit', key: e.id, q: e.stem, correct: slipText(e),
+        wrong: '(항목 중 오답 포함)', type: '전표 완성(난이도2)' });
+    card.classList.add('wrong');
+    document.body.classList.add('shake');
+    setTimeout(() => document.body.classList.remove('shake'), 500);
+    showFeedback('no', '✗ 오답 (-5초)');
+    // 풀이를 읽는 동안은 시간을 멈춘다 — 복합 분개는 왜 그런지 알아야 다음에 맞힌다
+    explainPause = true;
+    document.getElementById('lv2-ask').textContent = '정답 전표와 풀이를 확인하세요';
+    const why = document.getElementById('lv2-why');
+    why.innerHTML = '<b>풀이</b> ' + escH(e.why) + '<br><span style="opacity:.75">전표유형: ' + voucherTypeOf(e) + '</span>';
+    why.classList.add('show');
+    document.getElementById('lv2-next').style.display = '';
     updateHUD();
-    nextQTimer = setTimeout(()=>{
-        card.classList.remove('correct','wrong');
-        document.body.classList.remove('shake');
-        nextQuestion();
-    }, lv2Round.allOk ? 400 : 800);
+    if (timeLeft <= 0) { explainPause = false; endGame(); }
+}
+function lv2Continue() {
+    if (!isPlaying) return;
+    explainPause = false;
+    document.getElementById('lv2-why').classList.remove('show');
+    document.getElementById('lv2-next').style.display = 'none';
+    nextQuestion();
 }
 
 // 키보드 (데스크탑)
@@ -1622,6 +1777,7 @@ function showCombo(n) {
 
 function endGame() {
     isPlaying = false;
+    explainPause = false;
     if (window.Growth) Growth.logPlay(GAME_ID);
     if (window.WrongNote) WrongNote.flush('debit');
     clearInterval(timerInterval);
@@ -1634,7 +1790,8 @@ function endGame() {
         justUnlocked = Difficulty.reportRound(GAME_ID, correctCount, correctCount + wrongCount);
     }
     // 판별 단계 기록 — 해금 판정 블록 밖에서, 1·2단계 모두. LV 는 이 판의 화면을 그린 값 그대로.
-    if (window.Difficulty && Difficulty.logRound) Difficulty.logRound(GAME_ID, LV, correctCount, correctCount + wrongCount, score);
+    // 난이도2는 단계(계정·금액·전표유형) 단위로 센다 — 전표 한 장이 3~6단계라 장 수로 세면 한 판에 10장을 못 채워 2단계 '통과'가 안 나온다
+    if (window.Difficulty && Difficulty.logRound) Difficulty.logRound(GAME_ID, LV, LV === 2 ? lv2StepOk : correctCount, LV === 2 ? lv2StepTotal : correctCount + wrongCount, score);
     const unlockEl = document.getElementById('lv-unlock-msg');
     if (unlockEl) unlockEl.style.display = justUnlocked ? 'block' : 'none';
 
@@ -2008,6 +2165,7 @@ function startDebitStep() {
     if (!window.StepMode) return;
     hideAdPlaceholder(); getAudio(); bgmPlay();
     LV = 1;
+    document.body.classList.remove('lv2-mode');
     document.getElementById('answer-buttons-area').classList.add('show');
     document.getElementById('lv2-area').classList.remove('show');
     document.getElementById('start-screen').style.display = 'none';
@@ -2556,8 +2714,8 @@ const Tutorial = (function () {
 function openGuide() { Tutorial.start(); }
 </script>
 
-<script src="emoji-icons.js?v=55"></script>
+<script src="emoji-icons.js?v=56"></script>
 <!-- 웹 전용 광고(시작·결과 화면만, 앱에선 adsense.js 가 스스로 멈춘다) -->
-<script src="adsense.js?v=55"></script>
+<script src="adsense.js?v=56"></script>
 </body>
 </html>
