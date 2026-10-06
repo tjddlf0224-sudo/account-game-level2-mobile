@@ -5,7 +5,7 @@
 <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
      **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
      이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-<script src="safestore.js?v=57"></script>
+<script src="safestore.js?v=58"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
@@ -571,7 +571,7 @@
         .lv2-opt {
             padding: 16px 10px; min-height: 58px; border: none; border-radius: 14px;
             background: rgba(255,255,255,0.08); color: #fff; font-family: 'Black Han Sans', sans-serif;
-            font-size: clamp(0.95rem,3vw,1.15rem); cursor: pointer; transition: all 0.15s;
+            font-size: clamp(0.95rem,3vw,1.15rem); cursor: pointer; transition: transform 0.15s, background 0.15s, box-shadow 0.15s;   /* all 이면 압축 전환 때 높이가 서서히 바뀌어 맞춤 계산이 어긋난다 */
         }
         .lv2-opt:active { transform: scale(0.96); background: rgba(255,255,255,0.16); }
         .lv2-opt.picked-ok { background: rgba(0,230,118,0.35); box-shadow: 0 0 0 2px var(--green); }
@@ -859,12 +859,37 @@
         /* ══ 1급 분개의 탑 ══
            기출 문장은 길다(2~4줄 + 증빙). 카드 글씨를 줄이고, 화면이 넘치면 게임 영역이 스크롤된다. */
         .game-area { align-items: flex-start; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-        .center-area { justify-content: flex-start; margin: auto; }   /* 짧으면 가운데, 길면 위에서부터 */
-        .question-card { padding: clamp(14px, 3.4vw, 30px) clamp(14px, 3.6vw, 36px); min-height: 0; align-items: stretch; }
+        /* 문제지가 위 빈 곳까지 차오르게(2026-10-06): 가운데 영역을 게임 영역 높이로 늘리고 남는 높이는 카드가 가져간다.
+           문장이 길어 넘치면 카드는 내용 크기 그대로, 게임 영역이 스크롤된다. */
+        .center-area { justify-content: flex-start; align-self: stretch; margin: 0 auto; }
+        .question-card { flex: 1 0 auto; padding: clamp(18px, 4.4vw, 34px) clamp(16px, 4.2vw, 40px); min-height: 0; align-items: stretch; }
         .q-label { text-align: center; margin-bottom: 6px; font-size: clamp(0.72rem, 2.4vw, 0.85rem); letter-spacing: 1px; }
-        .q-sentence { font-size: clamp(0.95rem, 3.7vw, 1.2rem); line-height: 1.6; text-align: left; }
+        .q-sentence { font-size: var(--qfs, clamp(1.1rem, 5.3vw, 1.6rem)); line-height: var(--qlh, 1.9); text-align: left; letter-spacing: -0.2px; }
+        .q-sentence .nw, .q-doc .nw { white-space: nowrap; }
+        .ans-sub { white-space: nowrap; letter-spacing: -0.3px; font-size: clamp(0.62rem, 3.3vw, 1rem); }   /* 단추 설명은 한 줄(화살표로 줄임) */
+        @media (max-width: 360px) { .answer-buttons-area .ans-btn { padding-left: 4px; padding-right: 4px; } }
+        /* 압축 — fitQuestion 이 '넘칠 때만' 켠다(작은 폰에서 긴 문제). 큰 화면은 여유 있게 그대로 */
+        .game-area.q-compact { padding-top: 6px; padding-bottom: 6px; }
+        .game-area.q-compact .center-area { gap: 6px; }
+        .game-area.q-compact .question-card { padding: 8px 12px 6px; }
+        .game-area.q-compact .q-label { margin-bottom: 0; font-size: .68rem; line-height: 1.3; }
+        .game-area.q-compact .q-doc { margin-top: 6px; padding: 5px 10px; line-height: 1.5; }
+        .game-area.q-compact .q-sentence .q-note { margin-top: 2px; }
+        .game-area.q-compact .q-target { margin-top: 6px; padding-bottom: 12px; }
+        .game-area.q-compact .q-ask { margin-top: 2px; padding: 2px 12px; }
+        .game-area.q-compact .ans-btn { min-height: 58px; padding-top: 8px; padding-bottom: 8px; }
+        .game-area.q-compact .hint-toggle-btn { min-height: 36px; padding: 4px 16px; }
+        /* 난이도2 압축: 전표 줄은 '계정 · 금액' 한 줄로, 보기 단추는 낮게 */
+        .game-area.q-compact #lv2-area { gap: 5px; }
+        .game-area.q-compact #lv2-ask { font-size: 1rem; }
+        .game-area.q-compact .slip-col { padding: 5px; gap: 4px; }
+        .game-area.q-compact .slip-h { font-size: .74rem; }
+        .game-area.q-compact .slip-row { flex-direction: row; flex-wrap: wrap; align-items: baseline; justify-content: space-between; column-gap: 6px; min-height: 0; padding: 4px 8px; }
+        .game-area.q-compact #lv2-progress { padding: 1px 14px; font-size: .78rem; }
+        .game-area.q-compact .lv2-opt { min-height: 44px; padding: 6px; }   /* 금액(3,500,000원에서)은 한 덩어리 */
+        .q-sentence .q-note { display: block; margin-top: 6px; color: #4a4f66; font-size: 0.92em; }   /* (단, …) 은 새 줄에서 */
         .q-doc { display: none; margin-top: 10px; padding: 9px 12px; border: 1.5px dashed #b9c0d4; border-radius: 10px;
-                 background: #f5f7fc; color: #33384d; font-size: clamp(0.82rem, 3.2vw, 1rem); line-height: 1.6; text-align: left; font-weight: 500; }
+                 background: #f5f7fc; color: #33384d; font-size: calc(var(--qfs, clamp(1.1rem, 5.3vw, 1.6rem)) * 0.84); line-height: 1.7; text-align: left; font-weight: 500; word-break: keep-all; }
         .q-doc.show { display: block; }
         .q-doc div:first-child { font-weight: 700; }
         .q-target { display: none; text-align: center; margin-top: 12px; padding-bottom: 14px; font-size: clamp(0.95rem, 3.6vw, 1.2rem); font-weight: 700; color: #2a2a3e; }
@@ -912,20 +937,20 @@
 
 <button id="rewarded-btn" onclick="requestRewarded()">⏱ +30초 광고 보기</button>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="pausewatch.js?v=57"></script>
-    <script src="ask.js?v=57"></script>
-    <script src="wrongnote.js?v=57"></script>
-    <script src="growth.js?v=57"></script>
-<script src="streak.js?v=57"></script>
-    <script src="difficulty.js?v=57"></script>
-    <script src="readable.js?v=57"></script>
-    <script src="stepmode.js?v=57"></script>
-    <script src="review-prompt.js?v=57"></script>
+    <script src="pausewatch.js?v=58"></script>
+    <script src="ask.js?v=58"></script>
+    <script src="wrongnote.js?v=58"></script>
+    <script src="growth.js?v=58"></script>
+<script src="streak.js?v=58"></script>
+    <script src="difficulty.js?v=58"></script>
+    <script src="readable.js?v=58"></script>
+    <script src="stepmode.js?v=58"></script>
+    <script src="review-prompt.js?v=58"></script>
 </head>
 <body>
 
 <!-- 🎵 BGM 오디오 엘리먼트 -->
-<script src="bgm.js?v=57"></script>
+<script src="bgm.js?v=58"></script>
 
 
 
@@ -1035,13 +1060,13 @@
         <div class="tut-slot" data-side="left">
           <button class="ans-btn ans-btn-left" type="button">
             👈 차변
-            <span class="ans-sub">자산증가 · 비용발생 · 부채·자본감소</span>
+            <span class="ans-sub">자산↑ 비용↑ 부채·자본↓</span>
           </button>
         </div>
         <div class="tut-slot" data-side="right">
           <button class="ans-btn ans-btn-right" type="button">
             대변 👉
-            <span class="ans-sub">부채·자본증가 · 수익발생 · 자산감소</span>
+            <span class="ans-sub">부채·자본↑ 수익↑ 자산↓</span>
           </button>
         </div>
       </div>
@@ -1103,11 +1128,11 @@
         <div class="answer-buttons">
             <button class="ans-btn ans-btn-left" onclick="handleAnswer('left')">
                 👈 차변
-                <span class="ans-sub">자산증가 · 비용발생 · 부채·자본감소</span>
+                <span class="ans-sub">자산↑ 비용↑ 부채·자본↓</span>
             </button>
             <button class="ans-btn ans-btn-right" onclick="handleAnswer('right')">
                 대변 👉
-                <span class="ans-sub">부채·자본증가 · 수익발생 · 자산감소</span>
+                <span class="ans-sub">부채·자본↑ 수익↑ 자산↓</span>
             </button>
         </div>
 
@@ -1172,7 +1197,7 @@ const GAME_ID   = "journal_lv1";
 // ══════════════════════════════════════
 // 🎵 BGM 관리
 // ══════════════════════════════════════
-const bgm = BGMAudio.create('bgm_lv1_journal.mp3?v=57');   // 분개의 탑 전용 곡(2026-10-01)
+const bgm = BGMAudio.create('bgm_lv1_journal.mp3?v=58');   // 분개의 탑 전용 곡(2026-10-01)
 bgm.volume = 0.5;
 
 // 음소거 상태: localStorage에 저장해서 다음 게임에도 유지
@@ -1269,15 +1294,66 @@ function markClue(text, clue) {
     const c = escH(clue), i = t.indexOf(c);
     return i < 0 ? t : t.slice(0, i) + '<mark class="step-key">' + c + '</mark>' + t.slice(i + c.length);
 }
+/* 읽기 좋게(2026-10-06 성일님 아이폰 제보 — "3,500,\n000원"처럼 금액이 쉼표에서 잘렸다)
+   ① 쉼표 들어간 금액은 붙은 조사까지 한 덩어리로 묶어 줄이 안 바뀌게 ② 문장 끝 "(단, …)" 은 늘 새 줄에서 시작 */
+function readable(html, splitNote) {
+    html = html.replace(/[^\s<>]*\d{1,3}(?:,\d{3})+[^\s<>]*/g, '<span class="nw">$&</span>');
+    if (splitNote) {
+        const i = html.indexOf('(단');
+        if (i > 0) html = html.slice(0, i).replace(/\s+$/, '') + '<span class="q-note">' + html.slice(i) + '</span>';
+    }
+    return html;
+}
 function renderStem(e, clue) {
     document.getElementById('q-label').textContent = '제' + e.round + '회 기출 · 일반전표입력';
-    document.getElementById('q-sentence').innerHTML = markClue(e.stem, clue);
+    document.getElementById('q-sentence').innerHTML = readable(markClue(e.stem, clue), true);
     const d = document.getElementById('q-doc');
     if (e.doc && e.doc.length) {
-        d.innerHTML = e.doc.map(t => '<div>' + markClue(t, clue) + '</div>').join('');
+        d.innerHTML = e.doc.map(t => '<div>' + readable(markClue(t, clue)) + '</div>').join('');
         d.classList.add('show');
     } else { d.innerHTML = ''; d.classList.remove('show'); }
 }
+/* 어떤 폰에서도 한 화면에(2026-10-06 성일님 "어떤 스마트폰에서도 한 화면에 보이게끔"):
+   문제 글씨를 화면 폭 기준 최대 크기에서 시작해, 게임 영역이 넘치면(스크롤이 생기면) 0.5px 씩 줄인다.
+   13px 까지 줄여도 넘치면 그때만 스크롤. 차근차근 모드는 아래 코치 칸 때문에 원래대로 둔다. */
+let _fitBusy = false, _fitRaf = 0;
+function fitQuestion(retry) {
+    const ga = document.querySelector('.game-area'), card = document.getElementById('question-card');
+    if (!ga || !card || _fitBusy) return;
+    _fitBusy = true;
+    card.style.removeProperty('--qfs'); card.style.removeProperty('--qlh'); ga.classList.remove('q-compact');
+    if (!document.body.classList.contains('step-mode') && ga.offsetParent !== null) {
+        const max = parseFloat(getComputedStyle(document.getElementById('q-sentence')).fontSize) || 18;
+        const set = v => { card.style.setProperty('--qfs', v + 'px'); card.style.setProperty('--qlh', v >= 17 ? '1.9' : v >= 15 ? '1.75' : '1.6'); };
+        const hp = document.getElementById('hint-panel');   // 참고표를 펼쳤으면 그 아래로는 스크롤해서 본다 — 계산에서 뺀다
+        const why = document.getElementById('lv2-why'), nx = document.getElementById('lv2-next');   // 난이도2 오답 풀이·[다음 문제]도 스크롤해서 읽는다
+        const below = () => (hp && hp.classList.contains('open') ? hp.getBoundingClientRect().height + 24 : 0)
+            + (why && why.classList.contains('show') ? why.getBoundingClientRect().height + 12 : 0)
+            + (nx && nx.style.display !== 'none' && nx.offsetParent ? nx.getBoundingClientRect().height + 12 : 0);
+        const over = () => ga.scrollHeight - below() > ga.clientHeight + 1;
+        let px = max;
+        while (over() && px - 0.5 >= 15) { px -= 0.5; set(px); }
+        if (over()) {   // 15px 로도 넘치면(작은 폰 · 긴 문제) 여백을 좁히고 다시 큰 글씨부터
+            ga.classList.add('q-compact'); px = max; set(px);
+            while (over() && px - 0.5 >= 13) { px -= 0.5; set(px); }
+        }
+        // 맞춘 직후 한 프레임 뒤 다시 본다 — 같은 프레임에 늦게 바뀐 칸 때문에 2~4px 넘치는 경우가 있었다(전수 점검)
+        if (!retry) requestAnimationFrame(() => { if (over() && !_fitBusy) fitQuestion(1); });
+    }
+    _fitBusy = false;
+}
+function scheduleFit() { cancelAnimationFrame(_fitRaf); _fitRaf = requestAnimationFrame(fitQuestion); }
+// 금액 입력 중에 안드로이드 키보드가 올라오며 화면이 줄어드는 건 무시(글씨가 출렁이지 않게)
+window.addEventListener('resize', () => { const a = document.activeElement; if (!(a && a.tagName === 'INPUT')) scheduleFit(); });
+document.addEventListener('DOMContentLoaded', () => {
+    const ca = document.querySelector('.center-area');
+    // 단추를 style.display 로 보이고 숨기는 곳도 있어 style 도 본다 — 단, 맞춤이 카드에 직접 넣는 글씨 크기(style)는 빼야 무한 반복이 안 된다
+    const onMut = ms => { if (ms.some(m => !(m.attributeName === 'style' && m.target.id === 'question-card'))) scheduleFit(); };
+    if (ca && window.MutationObserver) new MutationObserver(onMut).observe(ca, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['class', 'style'] });
+    new MutationObserver(scheduleFit).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    // 웹 글꼴(Black Han Sans 등)이 늦게 받아지면 글자 폭·높이가 바뀐다 — 그때도 다시 맞춘다
+    if (document.fonts) { document.fonts.ready.then(scheduleFit); document.fonts.addEventListener && document.fonts.addEventListener('loadingdone', scheduleFit); }
+});
 function renderTarget(name) {
     const t = document.getElementById('q-target');
     if (!name) { t.innerHTML = ''; t.classList.remove('show'); return; }
@@ -2593,8 +2669,8 @@ const Tutorial = (function () {
 function openGuide() { Tutorial.start(); }
 </script>
 
-<script src="emoji-icons.js?v=57"></script>
+<script src="emoji-icons.js?v=58"></script>
 <!-- 웹 전용 광고(시작·결과 화면만, 앱에선 adsense.js 가 스스로 멈춘다) -->
-<script src="adsense.js?v=57"></script>
+<script src="adsense.js?v=58"></script>
 </body>
 </html>
