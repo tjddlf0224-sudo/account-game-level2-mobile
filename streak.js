@@ -133,6 +133,7 @@
 
     var Ad = global.AdBridge;
     if (typeof Ad.isRewardedReady === 'function' && !Ad.isRewardedReady()) {
+      if (global.DayLog) DayLog.hit('ad', 'streak', 'rw_notready');
       if (global.Ask) Ask.alert('광고를 불러오는 중이에요. 잠시 후 다시 눌러주세요.');
       if (done) done(false);
       return;
@@ -140,7 +141,7 @@
     // 보상형 콜백이 전역 함수 이름이라, 이미 걸려 있던 것을 지우지 않게 체이닝한다.
     // 이벤트와 Promise 가 둘 다 올 수 있어 한 번만 처리되도록 settled 로 잠근다.
     var prevOk = global.onRewardGranted, prevNo = global.onRewardedFailed, settled = false;
-    function restore() { global.onRewardGranted = prevOk; global.onRewardedFailed = prevNo; }
+    function restore() { global.onRewardGranted = prevOk; global.onRewardedFailed = prevNo; global.__adPlace = null; }
     global.onRewardGranted = function () {
       if (typeof prevOk === 'function') { try { prevOk.apply(this, arguments); } catch (e) {} }
       if (settled) return; settled = true;
@@ -151,9 +152,17 @@
       if (typeof prevNo === 'function') { try { prevNo.apply(this, arguments); } catch (e) {} }
       if (settled) return; settled = true;
       restore();
-      if (global.Ask) Ask.alert('광고를 불러올 수 없어요. 잠시 후 다시 시도해주세요.');
-      if (done) done(false);
+      /* 보상형을 못 불러오면 막지 않고 그냥 되살린다 — 오프라인일 때만 막는다(전 앱 공통 규칙,
+         한국사 1.0 심사 거절 2.1(a) 원인, 2026-10-09 이 자리에도 맞춤) */
+      if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+        if (global.Ask) Ask.alert('인터넷에 연결된 뒤 다시 시도해 주세요.');
+        if (done) done(false);
+        return;
+      }
+      if (global.DayLog) DayLog.hit('ad', 'streak', 'rw_free');
+      if (done) done(grantRevive());
     };
+    global.__adPlace = 'streak';   // 광고 기록(daylog): 이 보상형의 자리
     Ad.showRewarded();
   }
 
@@ -255,6 +264,7 @@
     document.body.appendChild(ov);
     ov.querySelector('#stk-close').addEventListener('click', close);
     var rv = ov.querySelector('#stk-revive');
+    if (rv && global.DayLog) DayLog.hit('ad', 'streak', 'rw_offer');
     if (rv) rv.addEventListener('click', function () {
       revive(function (ok) { if (ok) { close(); openModal(); } });
     });

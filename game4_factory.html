@@ -5,7 +5,7 @@
 <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
      **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
      이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-<script src="safestore.js?v=59"></script>
+<script src="safestore.js?v=60"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
@@ -602,20 +602,23 @@
 
 <button id="rewarded-btn" onclick="requestRewarded()">⏱ +30초 광고 보기</button>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="pausewatch.js?v=59"></script>
-    <script src="ask.js?v=59"></script>
-    <script src="wrongnote.js?v=59"></script>
-    <script src="growth.js?v=59"></script>
-<script src="streak.js?v=59"></script>
-    <script src="difficulty.js?v=59"></script>
-    <script src="readable.js?v=59"></script>
-    <script src="stepmode.js?v=59"></script>
-    <script src="review-prompt.js?v=59"></script>
+    <script src="pausewatch.js?v=60"></script>
+    <script src="ask.js?v=60"></script>
+    <script src="wrongnote.js?v=60"></script>
+    <script src="growth.js?v=60"></script>
+<script src="streak.js?v=60"></script>
+<script src="examday.js?v=60"></script>
+<script src="remind.js?v=60"></script>
+    <script src="difficulty.js?v=60"></script>
+    <script src="readable.js?v=60"></script>
+    <script src="stepmode.js?v=60"></script>
+    <script src="daylog.js?v=60"></script>
+    <script src="review-prompt.js?v=60"></script>
 </head>
 <body>
 
 <!-- 🎵 BGM 오디오 엘리먼트 -->
-<script src="bgm.js?v=59"></script>
+<script src="bgm.js?v=60"></script>
 
 
 
@@ -779,7 +782,7 @@ const GAME_ID = "factory";
 // ══════════════════════════════════════
 // 🎵 BGM 관리
 // ══════════════════════════════════════
-const bgm = BGMAudio.create('bgm4_factory.mp3?v=59');
+const bgm = BGMAudio.create('bgm4_factory.mp3?v=60');
 bgm.volume = 0.5;
 
 // 게임별 키(factory_muted)가 있으면 우선, 없으면 허브 전역 토글(hub_muted) 참조
@@ -984,6 +987,7 @@ function playSound(type) {
 }
 
 function startGame() {
+    if (window.DayLog) DayLog.hit('act', 'factory', 'start');   // 시작 횟수(끝까지 한 판은 Growth.logPlay → 'finish')
     initAudio(); // ← AudioContext resume + BGM 시작
     hideAdPlaceholder();
     LV = window.Difficulty ? Difficulty.get(GAME_ID) : 1;
@@ -1029,7 +1033,8 @@ function requestFreeze() {
         pendingReward = 'freeze';
         adPaused = true;
         armResumeOnReturn();
-        AdBridge.showRewarded();
+        window.__adPlace = 'factory_freeze';   // 광고 기록(daylog): +시간 보상형과 가른다
+        try { AdBridge.showRewarded(); } finally { window.__adPlace = null; }
     } else {
         grantFreeze();
     }
@@ -1734,7 +1739,11 @@ function renderRankList(list) {
             armResumeOnReturn(); // 광고 닫고 게임으로 '돌아왔을 때' 재개 예약
             AdBridge.showRewarded();
         } else {
-            Ask.alert('광고를 불러오는 중이에요. 잠시 후 다시 눌러주세요!');
+            // 앱에서 광고를 못 불러오면 막지 않고 그냥 준다 — 오프라인만 막는다(전 앱 공통 규칙, 2026-10-09). 웹은 광고가 없어 예전대로 안내만.
+            if (!window.AdBridge) { Ask.alert('광고를 불러오는 중이에요. 잠시 후 다시 눌러주세요!'); return; }
+            if (navigator.onLine === false) { Ask.alert('인터넷에 연결된 뒤 다시 눌러주세요.'); return; }
+            if (window.DayLog) DayLog.hit('ad', 'factory', 'rw_free');
+            onRewardGranted();
         }
     }
     // Kotlin → JS 콜백: 보상 지급 (※ 광고가 아직 떠 있는 도중에 호출됨 → 여기서 재개 X)
@@ -1787,6 +1796,7 @@ function renderRankList(list) {
         if (_rewardBtnShown) return; _rewardBtnShown = true;
         const btn = document.getElementById('rewarded-btn');
         if (btn) btn.style.display = 'flex';
+        if (btn && window.DayLog) DayLog.hit('ad', 'factory', 'rw_offer');
     }
     function hideRewardedBtn() {
         _rewardBtnShown = false;
@@ -1801,8 +1811,12 @@ function renderRankList(list) {
         if (pendingReward === 'freeze') {
             grantFreeze();
             pendingReward = null;
+        } else if (navigator.onLine === false) {
+            Ask.alert('인터넷에 연결된 뒤 다시 시도해주세요.');
         } else {
-            Ask.alert('광고를 불러올 수 없어요. 잠시 후 다시 시도해주세요.');
+            // 광고를 못 띄워도 막지 않고 준다(전 앱 공통 규칙, 2026-10-09)
+            if (window.DayLog) DayLog.hit('ad', 'factory', 'rw_free');
+            onRewardGranted();
         }
     }
 
@@ -2138,8 +2152,8 @@ const Tutorial = (function () {
 // 사용방법 버튼 → 인터랙티브 튜토리얼
 function openGuide() { Tutorial.start(); }
 </script>
-<script src="emoji-icons.js?v=59"></script>
+<script src="emoji-icons.js?v=60"></script>
 <!-- 웹 전용 광고(시작·결과 화면만, 앱에선 adsense.js 가 스스로 멈춘다) -->
-<script src="adsense.js?v=59"></script>
+<script src="adsense.js?v=60"></script>
 </body>
 </html>
