@@ -72,13 +72,13 @@
         var md = (c.d.getMonth() + 1) + '/' + c.d.getDate();
         return md + ' 시험까지 D-' + left + (due ? ' · ' + agoText(due.ago) + ' 틀린 문제 ' + due.n + '개부터' : ' · 오늘 한 판이면 충분해요');
       }
-      if (left === 0) return '오늘 시험이에요. 그동안 쌓은 만큼 충분해요! 💪';
+      if (left === 0) return '오늘 시험이에요. 그동안 쌓은 만큼 충분해요!';
     }
-    if (due) return '🔁 ' + agoText(due.ago) + ' 틀린 문제 ' + due.n + '개 — 지금 다시 풀면 오래 기억돼요';
+    if (due) return agoText(due.ago) + ' 틀린 문제 ' + due.n + '개 — 지금 다시 풀면 오래 기억돼요';
     var s = streakInfo();
     // 연속 기록은 '그날 한 판이면 이어지는' 경우에만: 오늘 아직(오늘 저녁 몫) 또는 오늘 했음(내일 저녁 몫)
     if (s && s.days > 0 && ((offset === 0 && !playedToday) || (offset === 1 && playedToday))) {
-      return '🔥 연속 ' + s.days + '일째! 오늘 한 판이면 ' + (s.days + 1) + '일';
+      return '연속 ' + s.days + '일째! 오늘 한 판이면 ' + (s.days + 1) + '일';
     }
     return offset >= 7 ? '분개 10문제, 5분이면 감 다시 잡아요' : '오늘 한 판, 10분이면 충분해요';
   }
@@ -131,7 +131,7 @@
     if (!can() || isOn() || get(K_ASKED) === '1' || get(K_PLAYED) !== '1') return false;
     if (!(global.Ask && Ask.confirm)) return false;
     set(K_ASKED, '1'); hit('asked');
-    var yes = await Ask.confirm('하루 한 번, 저녁 7시에 알려 드릴까요?\n시험 D-day와 다시 볼 오답을 짧게 알려 드려요.\n허브 ⚙️ 설정에서 언제든 끌 수 있어요.', { ok: '알림 받기', cancel: '괜찮아요' });
+    var yes = await Ask.confirm('하루 한 번, 저녁 7시에 알려 드릴까요?\n시험 D-day와 다시 볼 오답을 짧게 알려 드려요.\n허브 오른쪽 위 톱니바퀴(설정)에서 언제든 끌 수 있어요.', { ok: '알림 받기', cancel: '괜찮아요' });
     if (yes) await turnOn();
     return true;
   }

@@ -101,16 +101,16 @@
     var k = 'am_postexam_' + p.date;
     try { if (localStorage.getItem(k)) return false; localStorage.setItem(k, '1'); } catch (e) { return false; }
     var lv2 = level !== 'lv1';
-    var good = await Ask.confirm('🎓 ' + fmt(parse(p.date)) + ' 시험 잘 보셨나요?\n결과가 나오기 전이라도 다음 목표를 정해 두면 좋아요.',
+    var good = await Ask.confirm(fmt(parse(p.date)) + ' 시험 잘 보셨나요?\n결과가 나오기 전이라도 다음 목표를 정해 두면 좋아요.',
       { ok: lv2 ? '잘 봤어요 · 1급 도전' : '잘 봤어요', cancel: '다음 회차 준비' });
     try { localStorage.setItem(k, good ? 'good' : 'retry'); } catch (e) {}
     try { if (global.DayLog) DayLog.hit('act', 'postexam_' + (lv2 ? 'lv2' : 'lv1'), good ? 'good' : 'retry'); } catch (e) {}
     if (good) {
       if (lv2) {
-        var go = await Ask.confirm('수고 많으셨어요! 🎉\n1급은 원가회계·부가가치세가 더해져요. 1급 허브에서 이어 가 볼까요?', { ok: '1급 허브로', cancel: '나중에' });
+        var go = await Ask.confirm('수고 많으셨어요!\n1급은 원가회계·부가가치세가 더해져요. 1급 허브에서 이어 가 볼까요?', { ok: '1급 허브로', cancel: '나중에' });
         if (go) { try { localStorage.setItem('hub_level', 'lv1'); } catch (e) {} location.href = 'index_lv1.html'; }
       } else {
-        await Ask.alert('수고 많으셨어요! 🎉\n합격 소식 기다릴게요.');
+        await Ask.alert('수고 많으셨어요!\n합격 소식 기다릴게요.');
       }
       return true;
     }
