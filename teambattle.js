@@ -38,7 +38,10 @@
     rosterOpen: false,
     past: [],        // 끝난 세션(결과 다시 열기)
     pastOpen: false, // 지난 세션 모달
-    edit: {}         // 명단 편집 버퍼 {name:{class_label,alias_of,excluded}}
+    edit: {},        // 명단 편집 버퍼 {name:{class_label,alias_of,excluded}}
+    gid: null,       // 지금 상태가 어느 그룹 것인지 — 같은 그룹이면 자동 갱신 때 편성을 지킨다
+    k: null,         // 교사가 고친 팀 수
+    games: []        // 세션에 고른 게임
   };
 
   /* ⚠ admin.html 의 db·currentGid·dashData·verifiedPass 는 전부 let/const 로 선언돼 있다.
@@ -152,6 +155,19 @@
     return hi - lo;
   }
 
+  /* 2026-10-13 랜덤 편성 — 예전엔 실력 점수 순 고정 배치라 누를 때마다 **똑같은 팀**이 나왔다(성일님 "항상 똑같은 멤버").
+     이제 한 번 누를 때 300번 시도한다: 실력 점수에 흔들림(±8)을 줘서 계층 경계를 섞고, 계층마다 팀 자리를
+     무작위로 돌린 뒤 같은 계층 안 교환으로 평균을 맞춘다. 평균 편차가 최선 +3점(또는 5점) 안인 후보 중 **지금 팀과 다른 것**을
+     무작위로 고른다 — 이질 모둠(팀마다 상·중·하)과 평균 맞추기는 그대로, 조합만 매번 달라진다. */
+  function shuffled(a) {
+    a = a.slice();
+    for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; }
+    return a;
+  }
+  function teamKey(teams) {
+    return teams.map(function (t) { return t.slice().sort().join('|'); }).sort().join('/');
+  }
+
   function autoAssign(k) {
     var names = studentsOf(S.cls).filter(function (n) { return !S.absent[n]; });
     if (!names.length) { S.teams = []; return; }
@@ -162,20 +178,56 @@
     S.teams.forEach(function (team, ti) {
       team.forEach(function (n) { if (S.locked[n]) fixed[n] = ti; });
     });
+    var prevKey = S.teams.length ? teamKey(S.teams) : null;
+    var free = names.filter(function (n) { return !(n in fixed); });
 
-    var pool = names.filter(function (n) { return !(n in fixed); })
-                    .sort(function (a, b) { return (S.skill[b] || 0) - (S.skill[a] || 0); });
+    // 평균 맞추기(교환)를 한 배치 몇 개로 '최선'을 알고, 교환 없이 무작위로 놓은 배치 수백 개 중 그 근처를 고른다
+    // — 교환까지 다 돌리면 늘 같은 몇 조합으로 모여서(10번 눌러 3~4가지) 랜덤 느낌이 안 났다.
+    var cands = [];
+    for (var trial = 0; trial < 300; trial++) {
+      var teams = teamsFromSlots(arrange(free, k, trial < 8), k);
+      // 잠근 학생을 원래 팀에 되돌려 놓는다
+      Object.keys(fixed).forEach(function (n) {
+        var ti = Math.min(fixed[n], k - 1);
+        if (!teams[ti]) teams[ti] = [];
+        teams[ti].push(n);
+      });
+      cands.push({ teams: teams, d: spreadOf(teams), key: teamKey(teams) });
+    }
+    var best = Math.min.apply(null, cands.map(function (c) { return c.d; }));
+    var ok = cands.filter(function (c) { return c.d <= Math.max(best + 3, 5); });
+    var fresh = ok.filter(function (c) { return c.key !== prevKey; });
+    var from = fresh.length ? fresh : ok;
+    S.teams = from[Math.floor(Math.random() * from.length)].teams;
+  }
 
-    // 계층(= draft 라운드)별로 지그재그 배치
+  function spreadOf(teams) {
+    var lo = Infinity, hi = -Infinity;
+    teams.forEach(function (t) {
+      if (!t.length) return;
+      var a = t.reduce(function (x, n) { return x + (S.skill[n] || 0); }, 0) / t.length;
+      if (a < lo) lo = a;
+      if (a > hi) hi = a;
+    });
+    return hi === -Infinity ? 0 : hi - lo;
+  }
+
+  /* 한 번의 배치: 흔들린 실력 순 → 계층(= draft 라운드) → 계층마다 무작위 자리 → 계층 안 교환으로 평균 맞추기 */
+  function arrange(free, k, balance) {
+    var noisy = {};
+    free.forEach(function (n) { noisy[n] = (S.skill[n] || 0) + (Math.random() * 16 - 8); });
+    var pool = shuffled(free).sort(function (a, b) { return noisy[b] - noisy[a]; });
+
     var slots = [];
     for (var i = 0; i < pool.length; i += k) {
-      var tier = pool.slice(i, i + k), row = new Array(k).fill(null), t = slots.length;
-      for (var p = 0; p < tier.length; p++) row[t % 2 === 0 ? p : k - 1 - p] = tier[p];
+      var tier = pool.slice(i, i + k), row = new Array(k).fill(null);
+      var cols = shuffled(Array.from({ length: k }, function (_, c) { return c; }));
+      for (var p = 0; p < tier.length; p++) row[cols[p]] = tier[p];
       slots.push(row);
     }
 
+    if (!balance) return slots;
     // 같은 계층 안에서만 교환해 팀 평균 편차를 줄인다
-    S.teams = teamsFromSlots(slots, k);
     for (var pass = 0; pass < 60; pass++) {
       var bestD = meanSpread(slots, k), moved = false;
       for (var r = 0; r < slots.length; r++) {
@@ -189,15 +241,7 @@
       }
       if (!moved) break;
     }
-
-    var teams = teamsFromSlots(slots, k);
-    // 잠근 학생을 원래 팀에 되돌려 놓는다
-    Object.keys(fixed).forEach(function (n) {
-      var ti = Math.min(fixed[n], k - 1);
-      if (!teams[ti]) teams[ti] = [];
-      teams[ti].push(n);
-    });
-    S.teams = teams;
+    return slots;
   }
 
   /* ── 렌더 ──────────────────────────────────────────────── */
@@ -312,8 +356,8 @@
          classes.map(function (c) {
            return '<option' + (c === S.cls ? ' selected' : '') + '>' + esc(c) + '</option>';
          }).join('') + '</select>';
-    h += '<label>팀 수</label><input id="tb-k" type="number" min="1" max="10" value="' +
-         (S.teams.length || Math.max(1, Math.round(present.length / 4))) + '">';
+    h += '<label>팀 수</label><input id="tb-k" type="number" min="1" max="10" onchange="TeamBattle.setK(this.value)" value="' +
+         (S.k || S.teams.length || Math.max(1, Math.round(present.length / 4))) + '">';
     h += '<button class="tb-btn primary" onclick="TeamBattle.auto()">↻ 자동 편성</button>';
     h += '<span class="tb-count">출석 <b>' + present.length + '</b>/' + all.length + '</span>';
     h += '<button class="tb-btn" onclick="TeamBattle.toggleRoster()">명단 관리</button>';
@@ -353,9 +397,9 @@
       h += '</div>';
 
       h += '<div class="tb-go">';
-      h += '<label>게임</label><select id="tb-games" multiple size="4">' +
+      h += '<label>게임</label><select id="tb-games" multiple size="4" onchange="TeamBattle.setGames(this)">' +
            GAMES.map(function (g) {
-             return '<option value="' + g[0] + '">' + g[1] + '</option>';
+             return '<option value="' + g[0] + '"' + (S.games.indexOf(g[0]) >= 0 ? ' selected' : '') + '>' + g[1] + '</option>';
            }).join('') + '</select>';
       h += '<div class="tb-go-r">' +
            '<div class="tb-hint">여러 개 고르면 게임마다 “그 시간 1등 대비 %”로 환산해 합산합니다.<br>' +
@@ -453,7 +497,9 @@
 
   var dragging = null;
   var api = {
-    setClass: function (c) { S.cls = c; S.skill = computeSkill(c); S.teams = []; S.locked = {}; render(); },
+    setClass: function (c) { S.cls = c; S.skill = computeSkill(c); S.teams = []; S.locked = {}; S.k = null; render(); },
+    setK: function (v) { var k = parseInt(v, 10); S.k = isFinite(k) && k > 0 ? k : null; },
+    setGames: function (sel) { S.games = Array.prototype.slice.call(sel.selectedOptions).map(function (o) { return o.value; }); },
     setAbsent: function (n, off) { if (off) S.absent[n] = true; else delete S.absent[n]; render(); },
     toggleLock: function (n) { if (S.locked[n]) delete S.locked[n]; else S.locked[n] = true; render(); },
     auto: function () {
@@ -599,7 +645,19 @@
       S.session = list.filter(function (x) { return !x.ended_at; })[0] || null;
       S.past = list.filter(function (x) { return !!x.ended_at; }).slice(0, 40);
 
-      S.cls = null; S.teams = []; S.absent = {}; S.locked = {}; S.edit = {};
+      /* 2026-10-13 대시보드 자동 갱신(학생 기록이 바뀌면 3초 안에 다시 받음)이 이 load() 를 부르는데, 예전엔 여기서
+         반·편성·출석·잠금을 전부 지워 **팀을 짜 놓으면 잠시 뒤 초기화**됐다(성일님). 같은 그룹이면 지키고 실력 점수만 새로 계산한다. */
+      if (S.gid !== gid()) {
+        S.cls = null; S.teams = []; S.absent = {}; S.locked = {}; S.edit = {}; S.k = null; S.games = [];
+        S.gid = gid();
+      } else if (S.cls) {
+        S.skill = computeSkill(S.cls);
+      }
+      // 교사가 입력칸·목록·명단 창을 만지는 중이면 다시 그리지 않는다(다음 갱신 때 반영)
+      var ae = document.activeElement, mr = document.getElementById('tb-modal-root'), hb = document.getElementById('tb-body');
+      var busy = ae && ae !== document.body &&
+        ((hb && hb.contains(ae) && /INPUT|SELECT|TEXTAREA/.test(ae.tagName)) || (mr && mr.contains(ae)));
+      if (dragging || busy) return;
       render();
     } catch (e) { console.warn('팀전 로드 실패', e); }
   };
