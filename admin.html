@@ -4,32 +4,33 @@
     <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
          **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
          이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-    <script src="safestore.js?v=66"></script>
+    <script src="safestore.js?v=67"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#020810">
+<meta name="theme-color" content="#17233F">
 <title>교수자 대시보드 — 전산회계 2급</title>
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root {
-  --cy:#00f2ff; --pk:#ff2d78; --gd:#ffd600; --gn:#00e676; --pu:#b44fff;
-  --bg:#020810; --surface:rgba(255,255,255,0.04); --border:rgba(255,255,255,0.09);
-  --game1:#00e676; --game2:#00f2ff; --game3:#b44fff; --game4:#ffd600; --game5:#ff2d78;
+  /* 2026-10-13 밝은 화면(성일님 "대시보드 가독성 · PC 는 시안대로"). 예전 네온 이름(--cy 등)은 그대로 두고 값만 흰 바탕에서 읽히는 색으로. */
+  --cy:#0A8F9C; --pk:#D7263D; --gd:#B57A00; --gn:#1E9E5A; --pu:#6A4FD0;
+  --bg:#F3F5F9; --surface:#fff; --border:#E2E7EF; --card:#fff;
+  --ink:#17233F; --ink2:#4A5672; --mute2:#6B7488; --mute:#8A94A8; --line:#E2E7EF; --soft:#F1F4F8; --soft2:#F8FAFC;
+  --navy:#17233F; --good:#1E9E5A; --goodb:#E5F5EC; --warn:#B57A00; --warnb:#FFF4DC; --bad:#D7263D; --badb:#FDE8EB; --blue:#2F6FE0;
+  --game1:#1E9E5A; --game2:#0A8F9C; --game3:#6A4FD0; --game4:#B57A00; --game5:#D7263D;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{width:100%;min-height:100%}
 body{
   font-family:'Noto Sans KR',sans-serif;
-  background:var(--bg);color:#fff;
+  background:var(--bg);color:var(--ink);
   min-height:100vh;overflow-x:hidden;
-  background-image:
-    radial-gradient(ellipse 55% 35% at 10% 15%,rgba(0,242,255,0.06) 0%,transparent 60%),
-    radial-gradient(ellipse 45% 30% at 90% 85%,rgba(180,79,255,0.06) 0%,transparent 55%);
+  font-variant-numeric:tabular-nums;
 }
-#starfield{position:fixed;inset:0;z-index:0;pointer-events:none}
+#starfield{display:none}
 
 /* ══ 사이드바 레이아웃 ══ */
 .layout{display:flex;min-height:100vh}
@@ -48,19 +49,19 @@ body{
 /* ── 사이드바 내부 ── */
 .sb-header{padding:calc(28px + env(safe-area-inset-top)) 22px 20px}
 .sb-badge{
-  font-family:'Orbitron',monospace;font-size:0.58rem;letter-spacing:3px;
+  font-family:'Noto Sans KR',sans-serif;font-size:0.58rem;letter-spacing:3px;
   color:rgba(0,242,255,0.5);margin-bottom:12px;display:block;
 }
 .sb-title{
   font-family:'Black Han Sans',sans-serif;font-size:1.2rem;
-  line-height:1.3;color:#fff;margin-bottom:4px;
+  line-height:1.3;color:var(--ink);margin-bottom:4px;
 }
 .sb-title span{
   background:linear-gradient(90deg,var(--cy),var(--pu));
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
 }
 .sb-nick{
-  font-size:0.78rem;color:rgba(255,255,255,0.35);margin-top:6px;
+  font-size:0.78rem;color:var(--mute2);margin-top:6px;
 }
 
 .sb-divider{height:1px;background:var(--border);margin:0 22px 16px}
@@ -68,23 +69,23 @@ body{
 
 /* 그룹 선택 영역 */
 .sb-section-label{
-  font-family:'Orbitron',monospace;font-size:0.58rem;letter-spacing:2.5px;
-  color:rgba(255,255,255,0.25);padding:0 22px;margin-bottom:8px;
+  font-family:'Noto Sans KR',sans-serif;font-size:0.58rem;letter-spacing:2.5px;
+  color:var(--mute);padding:0 22px;margin-bottom:8px;
 }
 .group-search-wrap{padding:0 14px;margin-bottom:10px}
 .group-search{
-  width:100%;background:rgba(255,255,255,0.05);
-  border:1px solid rgba(255,255,255,0.1);border-radius:10px;
-  padding:9px 14px;font-size:0.82rem;color:#fff;outline:none;
+  width:100%;background:var(--soft);
+  border:1px solid var(--line);border-radius:10px;
+  padding:9px 14px;font-size:0.82rem;color:var(--ink);outline:none;
   font-family:'Noto Sans KR',sans-serif;
   transition:border-color 0.2s;-webkit-appearance:none;
 }
-.group-search::placeholder{color:rgba(255,255,255,0.2)}
+.group-search::placeholder{color:var(--mute)}
 .group-search:focus{border-color:var(--cy)}
 
 .group-nav{flex:1;overflow-y:auto;padding-bottom:16px}
 .group-nav::-webkit-scrollbar{width:3px}
-.group-nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:2px}
+.group-nav::-webkit-scrollbar-thumb{background:var(--soft);border-radius:2px}
 
 .group-nav-item{
   display:flex;align-items:center;gap:10px;
@@ -92,7 +93,7 @@ body{
   transition:background 0.15s;
   border-left:3px solid transparent;
 }
-.group-nav-item:hover{background:rgba(255,255,255,0.04)}
+.group-nav-item:hover{background:var(--soft)}
 .group-nav-item.active{
   background:rgba(0,242,255,0.07);
   border-left-color:var(--cy);
@@ -101,26 +102,26 @@ body{
   width:32px;height:32px;border-radius:8px;
   display:flex;align-items:center;justify-content:center;
   font-size:1rem;flex-shrink:0;
-  background:rgba(255,255,255,0.05);
+  background:var(--soft);
 }
 .group-nav-item.active .gni-icon{background:rgba(0,242,255,0.1)}
 .gni-info{flex:1;min-width:0}
 .gni-name{font-size:0.88rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.gni-meta{font-size:0.7rem;color:rgba(255,255,255,0.3);margin-top:1px}
+.gni-meta{font-size:0.7rem;color:var(--mute2);margin-top:1px}
 
-.sb-nav-loading{padding:20px 22px;text-align:center;color:rgba(255,255,255,0.25);font-size:0.82rem}
-.sb-nav-empty{padding:20px 22px;color:rgba(255,255,255,0.25);font-size:0.8rem;line-height:1.6}
+.sb-nav-loading{padding:20px 22px;text-align:center;color:var(--mute);font-size:0.82rem}
+.sb-nav-empty{padding:20px 22px;color:var(--mute);font-size:0.8rem;line-height:1.6}
 
 /* 사이드바 하단 */
 .sb-footer{padding:16px 22px;border-top:1px solid var(--border)}
 .sb-back-btn{
   display:flex;align-items:center;gap:7px;
-  background:none;border:1px solid rgba(255,255,255,0.1);
+  background:none;border:1px solid var(--line);
   border-radius:10px;padding:10px 14px;width:100%;
-  color:rgba(255,255,255,0.4);font-size:0.78rem;cursor:pointer;
+  color:var(--mute2);font-size:0.78rem;cursor:pointer;
   transition:all 0.2s;text-decoration:none;
 }
-.sb-back-btn:hover{border-color:rgba(255,255,255,0.25);color:rgba(255,255,255,0.7)}
+.sb-back-btn:hover{border-color:var(--line);color:var(--ink2)}
 
 /* ══ 메인 콘텐츠 ══ */
 .content-wrap{padding:calc(36px + env(safe-area-inset-top)) 36px 60px}
@@ -133,16 +134,16 @@ body{
 .content-header .ch-left{}
 .content-header .ch-group-name{
   font-family:'Black Han Sans',sans-serif;
-  font-size:2rem;color:#fff;margin-bottom:4px;
+  font-size:2rem;color:var(--ink);margin-bottom:4px;
 }
 .content-header .ch-meta{
-  font-size:0.82rem;color:rgba(255,255,255,0.35);
+  font-size:0.82rem;color:var(--mute2);
 }
 .refresh-btn{
   display:flex;align-items:center;gap:6px;
   padding:10px 18px;background:rgba(0,242,255,0.07);
   border:1px solid rgba(0,242,255,0.2);border-radius:50px;
-  font-family:'Orbitron',monospace;font-size:0.62rem;letter-spacing:1.5px;
+  font-family:'Noto Sans KR',sans-serif;font-size:0.62rem;letter-spacing:1.5px;
   color:var(--cy);cursor:pointer;transition:all 0.2s;white-space:nowrap;
 }
 .refresh-btn:hover{background:rgba(0,242,255,0.15)}
@@ -152,10 +153,10 @@ body{
 /* 빈 상태 */
 .empty-state{
   text-align:center;padding:80px 20px;
-  color:rgba(255,255,255,0.2);
+  color:var(--mute);
 }
 .empty-state .es-icon{font-size:3rem;margin-bottom:16px}
-.empty-state .es-title{font-size:1.1rem;margin-bottom:8px;color:rgba(255,255,255,0.35)}
+.empty-state .es-title{font-size:1.1rem;margin-bottom:8px;color:var(--mute2)}
 .empty-state .es-desc{font-size:0.82rem;line-height:1.7}
 
 /* ── 요약 카드 ── */
@@ -168,16 +169,16 @@ body{
   border-radius:16px;padding:20px 18px;
   transition:border-color 0.2s;
 }
-.sum-card:hover{border-color:rgba(255,255,255,0.18)}
+.sum-card:hover{border-color:var(--line)}
 .sum-card .sc-label{
-  font-family:'Orbitron',monospace;font-size:0.58rem;
-  letter-spacing:2.5px;color:rgba(255,255,255,0.3);margin-bottom:10px;
+  font-family:'Noto Sans KR',sans-serif;font-size:0.58rem;
+  letter-spacing:2.5px;color:var(--mute2);margin-bottom:10px;
 }
 .sum-card .sc-val{
   font-family:'Black Han Sans',sans-serif;font-size:2rem;
   line-height:1;margin-bottom:4px;
 }
-.sum-card .sc-sub{font-size:0.75rem;color:rgba(255,255,255,0.3)}
+.sum-card .sc-sub{font-size:0.75rem;color:var(--mute2)}
 .sum-card.c-cy .sc-val{color:var(--cy)}
 .sum-card.c-gn .sc-val{color:var(--gn)}
 .sum-card.c-gd .sc-val{color:var(--gd)}
@@ -197,8 +198,8 @@ body{
   padding:18px 22px 14px;border-bottom:1px solid var(--border);
 }
 .panel-title{
-  font-family:'Orbitron',monospace;font-size:0.72rem;
-  letter-spacing:2px;color:rgba(255,255,255,0.6);
+  font-family:'Noto Sans KR',sans-serif;font-size:0.72rem;
+  letter-spacing:2px;color:var(--ink2);
   display:flex;align-items:center;gap:8px;
 }
 .panel-title .pt-dot{
@@ -209,46 +210,46 @@ body{
 
 /* ── 팀전(모둠 대항전) ── */
 .tb-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
-.tb-bar label{font-size:.72rem;color:rgba(255,255,255,.45);letter-spacing:1px}
-.tb-bar select,.tb-bar input{background:rgba(255,255,255,.06);border:1px solid var(--border);
-  color:#eaf0ff;border-radius:9px;padding:7px 10px;font-size:.85rem;font-family:inherit}
+.tb-bar label{font-size:.72rem;color:var(--mute2);letter-spacing:1px}
+.tb-bar select,.tb-bar input{background:var(--soft);border:1px solid var(--border);
+  color:var(--ink);border-radius:9px;padding:7px 10px;font-size:.85rem;font-family:inherit}
 .tb-bar input{width:64px}
-.tb-count{font-size:.78rem;color:rgba(255,255,255,.5);margin-left:auto}
+.tb-count{font-size:.78rem;color:var(--mute2);margin-left:auto}
 .tb-count b{color:var(--cy)}
-.tb-btn{background:rgba(255,255,255,.07);border:1px solid var(--border);color:#eaf0ff;
+.tb-btn{background:var(--soft);border:1px solid var(--border);color:var(--ink);
   border-radius:10px;padding:8px 14px;font-size:.82rem;font-weight:700;cursor:pointer;font-family:inherit}
-.tb-btn.primary{background:linear-gradient(135deg,#00c2d6,#0090c8);border-color:transparent;color:#04121a}
+.tb-btn.primary{background:linear-gradient(135deg,#00c2d6,#0090c8);border-color:transparent;color:#fff}
 .tb-btn:active{transform:translateY(1px)}
 .tb-attend{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
-.tb-chip{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.05);
+.tb-chip{display:inline-flex;align-items:center;gap:6px;background:var(--soft);
   border:1px solid var(--border);border-radius:999px;padding:5px 11px;font-size:.8rem;cursor:pointer}
 .tb-chip.off{opacity:.35;text-decoration:line-through}
-.tb-chip i{font-style:normal;font-size:.68rem;color:rgba(255,255,255,.4)}
+.tb-chip i{font-style:normal;font-size:.68rem;color:var(--mute2)}
 .tb-chip input{margin:0}
 .tb-teams{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}
-.tb-team{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:14px;
+.tb-team{background:var(--soft);border:1px solid var(--border);border-radius:14px;
   padding:10px;min-height:120px}
 .tb-th{display:flex;justify-content:space-between;align-items:baseline;
-  padding:2px 4px 9px;border-bottom:1px solid rgba(255,255,255,.07);margin-bottom:8px}
+  padding:2px 4px 9px;border-bottom:1px solid var(--line);margin-bottom:8px}
 .tb-th b{font-size:.92rem}
-.tb-th span{font-size:.68rem;color:rgba(255,255,255,.4)}
-.tb-card{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.08);border-radius:9px;padding:7px 9px;margin-bottom:6px;cursor:grab}
+.tb-th span{font-size:.68rem;color:var(--mute2)}
+.tb-card{display:flex;align-items:center;gap:8px;background:var(--soft);
+  border:1px solid var(--line);border-radius:9px;padding:7px 9px;margin-bottom:6px;cursor:grab}
 .tb-card.lock{border-color:rgba(255,214,0,.45)}
 .tb-card .tb-n{flex:1;min-width:0;font-size:.84rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.tb-card .tb-s{font-size:.72rem;color:var(--cy);font-family:'Orbitron',monospace}
+.tb-card .tb-s{font-size:.72rem;color:var(--cy);font-family:'Noto Sans KR',sans-serif}
 .tb-lk{background:none;border:0;cursor:pointer;font-size:.78rem;padding:0;line-height:1}
 .tb-go{display:flex;gap:14px;align-items:flex-start;margin-top:16px;padding-top:14px;
   border-top:1px solid var(--border);flex-wrap:wrap}
-.tb-go select option,.tb-bar select option{background:#0a0e16;color:#fff;font-size:.85rem}
-.tb-go select{background:rgba(255,255,255,.06);border:1px solid var(--border);color:#eaf0ff;
+.tb-go select option,.tb-bar select option{background:#fff;color:var(--ink);font-size:.85rem}
+.tb-go select{background:var(--soft);border:1px solid var(--border);color:var(--ink);
   border-radius:9px;padding:6px;font-size:.8rem;min-width:170px;font-family:inherit}
 .tb-go-r{display:flex;flex-direction:column;gap:9px;flex:1;min-width:220px}
-.tb-hint{font-size:.72rem;color:rgba(255,255,255,.4);line-height:1.6}
+.tb-hint{font-size:.72rem;color:var(--mute2);line-height:1.6}
 .tb-live{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;
   padding:10px 14px;border-radius:12px;background:rgba(0,230,118,.10);
   border:1px solid rgba(0,230,118,.35);font-size:.84rem}
-.tb-live code{font-family:'Orbitron',monospace;color:var(--gn);letter-spacing:1px}
+.tb-live code{font-family:'Noto Sans KR',sans-serif;color:var(--gn);letter-spacing:1px}
 .tb-live a{text-decoration:none}
 .tb-live-dot{width:8px;height:8px;border-radius:50%;background:var(--gn);
   box-shadow:0 0 8px var(--gn);animation:tbPulse 1.4s ease-in-out infinite}
@@ -259,20 +260,20 @@ body{
   padding:max(16px,env(safe-area-inset-top)) 16px max(16px,env(safe-area-inset-bottom));
   background:rgba(4,7,12,.72);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
 .tb-mo{display:flex;flex-direction:column;width:min(860px,100%);max-height:100%;
-  background:var(--card,#0e1420);border:1px solid var(--border);border-radius:16px;
+  background:var(--card,#fff);border:1px solid var(--border);border-radius:16px;
   box-shadow:0 24px 70px rgba(0,0,0,.6);overflow:hidden}
 .tb-mh{flex:none;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;
   padding:15px 18px;border-bottom:1px solid var(--border)}
 .tb-mh b{font-size:1rem}
-.tb-mh span{flex:1 1 200px;min-width:0;font-size:.75rem;color:rgba(255,255,255,.4);line-height:1.5}
+.tb-mh span{flex:1 1 200px;min-width:0;font-size:.75rem;color:var(--mute2);line-height:1.5}
 .tb-x{flex:none;margin-left:auto;width:32px;height:32px;border-radius:9px;cursor:pointer;
-  border:1px solid var(--border);background:rgba(255,255,255,.05);color:#fff;font-size:.95rem}
-.tb-x:hover{background:rgba(255,255,255,.12)}
+  border:1px solid var(--border);background:var(--soft);color:var(--ink);font-size:.95rem}
+.tb-x:hover{background:var(--soft)}
 /* 내용만 스크롤한다 — 머리줄과 버튼줄은 늘 보인다. 스마트폰 손 스크롤도 함께 켠다. */
 .tb-mb{flex:1 1 auto;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;
   overscroll-behavior:contain;padding:14px 18px}
 .tb-mf{flex:none;display:flex;gap:8px;justify-content:flex-end;
-  padding:12px 18px;border-top:1px solid var(--border);background:rgba(255,255,255,.02)}
+  padding:12px 18px;border-top:1px solid var(--border);background:var(--soft2)}
 .tb-more{margin-top:8px;width:100%;justify-content:center}
 .tb-plist{display:flex;flex-direction:column;gap:2px}
 @media(max-width:600px){
@@ -282,38 +283,38 @@ body{
 .tb-roster{margin:0}
 .tb-rhead{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
 .tb-rhead b{font-size:.9rem}
-.tb-rhead span{font-size:.72rem;color:rgba(255,255,255,.35);flex:1;min-width:200px;line-height:1.6}
+.tb-rhead span{font-size:.72rem;color:var(--mute2);flex:1;min-width:200px;line-height:1.6}
 .tb-rt{width:100%;border-collapse:collapse;font-size:.82rem}
-.tb-rt th{text-align:left;padding:7px 8px;font-family:'Orbitron',monospace;font-size:.58rem;
-  letter-spacing:2px;color:rgba(255,255,255,.25);border-bottom:1px solid var(--border)}
-.tb-rt td{padding:5px 8px;border-bottom:1px solid rgba(255,255,255,.05)}
+.tb-rt th{text-align:left;padding:7px 8px;font-family:'Noto Sans KR',sans-serif;font-size:.58rem;
+  letter-spacing:2px;color:var(--mute);border-bottom:1px solid var(--border)}
+.tb-rt td{padding:5px 8px;border-bottom:1px solid var(--line)}
 /* 이름이 '학생\n01' 처럼 접히면 누구 줄인지 읽기 어렵다 — 이름과 머리줄은 한 줄로 */
 .tb-rt th,.tb-rt td:first-child{white-space:nowrap}
 .tb-rt td:first-child{max-width:9em;overflow:hidden;text-overflow:ellipsis}
 .tb-rt tr.new td{background:rgba(255,214,0,.07)}
 .tb-rt input[type=text],.tb-rt input:not([type]),.tb-rt select{
-  background:rgba(255,255,255,.06);border:1px solid var(--border);color:#eaf0ff;
+  background:var(--soft);border:1px solid var(--border);color:var(--ink);
   border-radius:7px;padding:5px 8px;font-size:.8rem;font-family:inherit;width:100%;max-width:190px}
 /* ⚠ 펼친 목록(option)은 **따로 색을 주지 않으면** 운영체제 기본(흰 배경)으로 그려진다.
    그러면 위에서 준 밝은 글자색(#eaf0ff)이 흰 배경에 얹혀 거의 안 보인다
    (2026-09-16 수업 중 제보: "배경은 하얀색인데 글씨가 연한 회색이라서 잘 안보여").
    .cert-select 는 이미 같은 이유로 option 색을 주고 있었다 — 그것과 맞춘다. */
-.tb-rt select option{background:#0a0e16;color:#fff;font-size:.85rem}
-.tb-rt select option:disabled{color:rgba(255,255,255,.45)}
+.tb-rt select option{background:#fff;color:var(--ink);font-size:.85rem}
+.tb-rt select option:disabled{color:var(--mute2)}
 .tb-rt input:disabled{opacity:.3}
 .tb-new{font-style:normal;font-size:.62rem;color:var(--gd);border:1px solid rgba(255,214,0,.4);
   border-radius:5px;padding:1px 5px;margin-left:5px;vertical-align:middle}
 .tb-past{margin-top:16px;padding-top:12px;border-top:1px solid var(--border)}
-.tb-pt{font-family:'Orbitron',monospace;font-size:.58rem;letter-spacing:2px;
-  color:rgba(255,255,255,.25);margin-bottom:8px}
+.tb-pt{font-family:'Noto Sans KR',sans-serif;font-size:.58rem;letter-spacing:2px;
+  color:var(--mute);margin-bottom:8px}
 .tb-prow{display:flex;align-items:center;gap:12px;padding:7px 10px;border-radius:9px;
-  text-decoration:none;color:#eaf0ff;font-size:.8rem}
-.tb-prow:hover{background:rgba(255,255,255,.05)}
-.tb-pw{font-family:'Orbitron',monospace;color:rgba(255,255,255,.4);flex:none;width:78px}
+  text-decoration:none;color:var(--ink);font-size:.8rem}
+.tb-prow:hover{background:var(--soft)}
+.tb-pw{font-family:'Noto Sans KR',sans-serif;color:var(--mute2);flex:none;width:78px}
 .tb-pn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.tb-pc{font-family:'Orbitron',monospace;font-size:.7rem;color:rgba(255,255,255,.25);flex:none}
+.tb-pc{font-family:'Noto Sans KR',sans-serif;font-size:.7rem;color:var(--mute);flex:none}
 .tb-pg{color:var(--cy);font-size:.75rem;flex:none}
-.tb-empty{padding:26px;text-align:center;color:rgba(255,255,255,.35);font-size:.85rem;line-height:1.7}
+.tb-empty{padding:26px;text-align:center;color:var(--mute2);font-size:.85rem;line-height:1.7}
 
 /* ── 그룹 랭킹 테이블 ── */
 /* 표가 길면 카드가 화면을 통째로 삼킨다 — 10명쯤 보이는 높이로 자르고 안에서 스크롤한다.
@@ -321,7 +322,7 @@ body{
 .tbl-scroll{overflow-y:auto;overflow-x:auto;-webkit-overflow-scrolling:touch;
   touch-action:pan-x pan-y;overscroll-behavior:contain;}
 .tbl-scroll::-webkit-scrollbar{width:9px;height:9px}
-.tbl-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.16);border-radius:9px}
+.tbl-scroll::-webkit-scrollbar-thumb{background:var(--soft);border-radius:9px}
 .tbl-scroll::-webkit-scrollbar-track{background:transparent}
 /* 10행 남짓 — 행 높이가 표마다 달라 각자 잡는다 */
 #group-rank-scroll{max-height:452px}
@@ -334,53 +335,53 @@ body{
    개인 진단 모달(.modal-overlay 400)이 이 위에 떠야 하므로 350 — 사이드바 토글(300)보다는 위. */
 .ph-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:flex-end}
 .ph-fs-btn,.sfull-x{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:9px;
-  cursor:pointer;font-family:inherit;font-size:.75rem;font-weight:700;color:rgba(255,255,255,.85);
-  background:rgba(255,255,255,.05);border:1px solid var(--border)}
-.ph-fs-btn:hover,.sfull-x:hover{background:rgba(255,255,255,.12)}
+  cursor:pointer;font-family:inherit;font-size:.75rem;font-weight:700;color:var(--ink2);
+  background:var(--soft);border:1px solid var(--border)}
+.ph-fs-btn:hover,.sfull-x:hover{background:var(--soft)}
 .ph-fs-btn:focus-visible,.sfull-x:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
-.sfull-ov{position:fixed;inset:0;z-index:350;display:flex;flex-direction:column;background:#050b16;
+.sfull-ov{position:fixed;inset:0;z-index:350;display:flex;flex-direction:column;background:var(--bg);
   padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   animation:fadeIn .18s ease}
 .sfull-head{flex:none;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
   padding:12px 22px;border-bottom:1px solid var(--border)}
-.sfull-title{display:flex;align-items:center;gap:8px;font-family:'Orbitron',monospace;
-  font-size:.74rem;letter-spacing:2px;color:rgba(255,255,255,.7)}
-.sfull-hint{font-size:.72rem;color:rgba(255,255,255,.3)}
+.sfull-title{display:flex;align-items:center;gap:8px;font-family:'Noto Sans KR',sans-serif;
+  font-size:.74rem;letter-spacing:2px;color:var(--ink2)}
+.sfull-hint{font-size:.72rem;color:var(--mute2)}
 .sfull-x{margin-left:auto;height:36px;padding:0 14px}
 .sfull-body{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
 .sfull-body #student-table-scroll{flex:1 1 auto;min-height:0;max-height:none}
 @media (max-width:600px){ .sfull-head{padding:10px 14px} .sfull-hint{display:none} }
 
 .rank-table{width:100%;border-collapse:collapse}
-.rank-table thead th{position:sticky;top:0;z-index:2;background:var(--card,#0e1420)}
+.rank-table thead th{position:sticky;top:0;z-index:2;background:var(--card,#fff)}
 .rank-table th{
-  font-family:'Orbitron',monospace;font-size:0.58rem;
-  letter-spacing:2px;color:rgba(255,255,255,0.25);
+  font-family:'Noto Sans KR',sans-serif;font-size:0.58rem;
+  letter-spacing:2px;color:var(--mute);
   text-align:left;padding:8px 12px 12px;border-bottom:1px solid var(--border);
 }
 .rank-table td{
-  padding:13px 12px;border-bottom:1px solid rgba(255,255,255,0.05);
+  padding:13px 12px;border-bottom:1px solid var(--line);
   font-size:0.88rem;vertical-align:middle;
 }
 .rank-table tr:last-child td{border-bottom:none}
-.rank-table tr:hover td{background:rgba(255,255,255,0.02)}
+.rank-table tr:hover td{background:var(--soft2)}
 
 .rank-no{
-  font-family:'Orbitron',monospace;font-size:0.72rem;
+  font-family:'Noto Sans KR',sans-serif;font-size:0.72rem;
   font-weight:900;width:36px;
 }
 .rank-no.gold{color:var(--gd)}
 .rank-no.silver{color:#c0c0c0}
 .rank-no.bronze{color:#cd7f32}
-.rank-no.other{color:rgba(255,255,255,0.3)}
+.rank-no.other{color:var(--mute2)}
 
-.rank-name{font-weight:700;color:#fff}
+.rank-name{font-weight:700;color:var(--ink)}
 .rank-score{
-  font-family:'Orbitron',monospace;font-size:0.82rem;
+  font-family:'Noto Sans KR',sans-serif;font-size:0.82rem;
   color:var(--cy);text-align:right;
 }
 .rank-grade{
-  font-size:0.72rem;color:rgba(255,255,255,0.4);text-align:center;
+  font-size:0.72rem;color:var(--mute2);text-align:center;
   white-space:nowrap;
 }
 
@@ -396,9 +397,9 @@ body{
   font-size:0.85rem;font-weight:700;
 }
 .gbi-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.gbi-count{font-size:0.75rem;color:rgba(255,255,255,0.35)}
+.gbi-count{font-size:0.75rem;color:var(--mute2)}
 .gbi-track{
-  height:8px;background:rgba(255,255,255,0.06);
+  height:8px;background:var(--soft);
   border-radius:50px;overflow:hidden;
 }
 .gbi-fill{
@@ -411,46 +412,46 @@ body{
 /* 가로로 밀어도 누구 줄인지 알아야 하므로 학생 이름 칸을 왼쪽에 고정한다.
    머리줄(위)과 이름칸(왼쪽)이 겹치는 첫 칸은 z-index 를 더 높여 준다. */
 .student-table{width:100%;border-collapse:separate;border-spacing:0}
-.student-table thead th{position:sticky;top:0;z-index:2;background:var(--card,#0e1420)}
+.student-table thead th{position:sticky;top:0;z-index:2;background:var(--card,#fff)}
 .student-table th:first-child,
-.student-table td:first-child{position:sticky;left:0;z-index:1;background:var(--card,#0e1420);
-  box-shadow:1px 0 0 rgba(255,255,255,.07);
+.student-table td:first-child{position:sticky;left:0;z-index:1;background:var(--card,#fff);
+  box-shadow:1px 0 0 var(--line);
   /* 폭을 안 잡아 주면 좁은 화면에서 '학생' 이 '학/생' 으로 세로로 접힌다 */
   min-width:124px}
 .student-table thead th:first-child{z-index:3}
-.student-table tbody tr:hover td:first-child{background:#141b28}
+.student-table tbody tr:hover td:first-child{background:var(--soft2)}
 .student-table th{
-  font-family:'Orbitron',monospace;font-size:0.55rem;
-  letter-spacing:1.5px;color:rgba(255,255,255,0.25);
+  font-family:'Noto Sans KR',sans-serif;font-size:0.55rem;
+  letter-spacing:1.5px;color:var(--mute);
   text-align:center;padding:8px 8px 12px;border-bottom:1px solid var(--border);
 }
 .student-table th:first-child{text-align:left}
 .student-table th .th-sub{display:block;margin-top:3px;font-size:0.58rem;letter-spacing:0.5px;color:var(--gn);opacity:0.75;}
 .student-table td{
-  padding:11px 8px;border-bottom:1px solid rgba(255,255,255,0.04);
+  padding:11px 8px;border-bottom:1px solid var(--line);
   font-size:0.82rem;text-align:center;vertical-align:middle;
 }
 .student-table td:first-child{text-align:left;font-weight:700}
 .student-table tr:last-child td{border-bottom:none}
 /* 합격여부 뱃지 (클릭 토글) */
 .exam-badge{
-  font-family:'Orbitron',monospace;font-size:0.68rem;font-weight:700;cursor:pointer;
+  font-family:'Noto Sans KR',sans-serif;font-size:0.68rem;font-weight:700;cursor:pointer;
   padding:5px 11px;border-radius:50px;white-space:nowrap;transition:transform .1s;
-  border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.55);
+  border:1px solid var(--line);background:var(--soft);color:var(--mute2);
 }
 .exam-badge:active{transform:scale(0.94)}
-.exam-badge.ex-pass{background:linear-gradient(180deg,#2ecc71,#27ae60);color:#fff;border-color:#2ecc71;box-shadow:0 0 10px rgba(46,204,113,0.5)}
+.exam-badge.ex-pass{background:linear-gradient(180deg,#2ecc71,#27ae60);color:var(--ink);border-color:#2ecc71;box-shadow:0 0 10px rgba(46,204,113,0.5)}
 .exam-badge.ex-no{}
 .cert-select{
   font-family:'Noto Sans KR',sans-serif;font-size:0.72rem;font-weight:600;cursor:pointer;
   padding:5px 8px;border-radius:8px;white-space:nowrap;max-width:130px;
-  border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.75);
+  border:1px solid var(--line);background:var(--soft);color:var(--ink2);
 }
-.cert-select option{background:#0a0e16;color:#fff}
-.student-table tr:hover td{background:rgba(255,255,255,0.02)}
+.cert-select option{background:#fff;color:var(--ink)}
+.student-table tr:hover td{background:var(--soft2)}
 .stu-del-btn{
   font-size:0.85rem;cursor:pointer;padding:5px 9px;border-radius:8px;line-height:1;
-  border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.4);
+  border:1px solid var(--line);background:var(--soft);color:var(--mute2);
   transition:transform .1s,background .15s,color .15s,border-color .15s;
 }
 .stu-del-btn:hover{background:rgba(231,76,60,0.15);color:#e74c3c;border-color:rgba(231,76,60,0.4)}
@@ -460,23 +461,23 @@ body{
 .score-cell{
   display:inline-flex;align-items:center;justify-content:center;
   min-width:64px;padding:4px 10px;border-radius:8px;
-  font-family:'Orbitron',monospace;font-size:0.7rem;
+  font-family:'Noto Sans KR',sans-serif;font-size:0.7rem;
   font-weight:700;
 }
-.sc-none{color:rgba(255,255,255,0.15);background:none;font-family:'Noto Sans KR',sans-serif;font-size:0.75rem}
+.sc-none{color:var(--mute);background:none;font-family:'Noto Sans KR',sans-serif;font-size:0.75rem}
 .sc-high{background:rgba(0,230,118,0.1);color:var(--gn);border:1px solid rgba(0,230,118,0.2)}
 .sc-mid {background:rgba(255,214,0,0.08);color:var(--gd);border:1px solid rgba(255,214,0,0.18)}
 .sc-low {background:rgba(255,45,120,0.1);color:var(--pk);border:1px solid rgba(255,45,120,0.2)}
 /* 단계별 통과(2026-09-17) — 점수 칸 아래 한 줄. level_rounds(판마다 1·2단계 구분) 기준 */
 .lv-lines{display:flex;flex-direction:column;gap:2px;margin-top:4px;font-size:0.64rem;line-height:1.35;white-space:nowrap}
-.lv-line{color:rgba(255,255,255,0.32)}
+.lv-line{color:var(--mute2)}
 .lv-line b{font-weight:700}
 .lv-pass{color:var(--gn)}
 .lv-try{color:var(--gd)}
 .lv-open{color:var(--cy)}
 .lv-d2{color:#ff9f43}
-.gbi-lv{margin-top:5px;font-size:0.68rem;color:rgba(255,255,255,0.4);display:flex;gap:10px;flex-wrap:wrap}
-.gbi-lv b{color:rgba(255,255,255,0.75);font-weight:700}
+.gbi-lv{margin-top:5px;font-size:0.68rem;color:var(--mute2);display:flex;gap:10px;flex-wrap:wrap}
+.gbi-lv b{color:var(--ink2);font-weight:700}
 
 /* 약점 태그 */
 .weak-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
@@ -488,9 +489,9 @@ body{
 .student-table .student-name-wrap{display:flex;flex-direction:column;gap:2px}
 
 /* 총점 / 레벨 */
-.total-score{font-family:'Orbitron',monospace;font-size:0.8rem;color:var(--cy)}
+.total-score{font-family:'Noto Sans KR',sans-serif;font-size:0.8rem;color:var(--cy)}
 .student-level{
-  font-size:0.68rem;color:rgba(255,255,255,0.35);
+  font-size:0.68rem;color:var(--mute2);
   white-space:nowrap;
 }
 
@@ -502,7 +503,7 @@ body{
 }
 .modal-overlay.open{display:flex;animation:fadeIn 0.2s ease}
 .modal{
-  background:#0a1020;border:1px solid rgba(255,255,255,0.12);
+  background:#fff;border:1px solid var(--line);
   border-radius:22px;width:100%;max-width:560px;
   max-height:90vh;overflow-y:auto;
   animation:slideUp 0.25s ease;
@@ -512,22 +513,22 @@ body{
 .modal-header{
   display:flex;align-items:center;justify-content:space-between;
   padding:24px 26px 18px;border-bottom:1px solid var(--border);
-  position:sticky;top:0;background:#0a1020;z-index:1;
+  position:sticky;top:0;background:#fff;z-index:1;
 }
 .modal-title{font-family:'Black Han Sans',sans-serif;font-size:1.4rem}
 .modal-close{
-  background:none;border:none;color:rgba(255,255,255,0.3);
+  background:none;border:none;color:var(--mute2);
   font-size:1.4rem;cursor:pointer;line-height:1;padding:4px;
   transition:color 0.2s;
 }
-.modal-close:hover{color:#fff}
+.modal-close:hover{color:var(--ink)}
 .modal-body{padding:22px 26px 28px}
 
 /* 모달 내 레이더 차트 대체: 5각형 바 */
 .radar-wrap{margin-bottom:24px}
 .radar-title{
-  font-family:'Orbitron',monospace;font-size:0.62rem;letter-spacing:2px;
-  color:rgba(255,255,255,0.3);margin-bottom:14px;
+  font-family:'Noto Sans KR',sans-serif;font-size:0.62rem;letter-spacing:2px;
+  color:var(--mute2);margin-bottom:14px;
 }
 .radar-bars{display:flex;flex-direction:column;gap:10px}
 .rb-item{}
@@ -537,11 +538,11 @@ body{
 }
 .rb-name{font-size:0.82rem;font-weight:700;display:flex;align-items:center;gap:7px}
 .rb-pct{
-  font-family:'Orbitron',monospace;font-size:0.7rem;
-  color:rgba(255,255,255,0.5);
+  font-family:'Noto Sans KR',sans-serif;font-size:0.7rem;
+  color:var(--mute2);
 }
 .rb-track{
-  height:10px;background:rgba(255,255,255,0.06);
+  height:10px;background:var(--soft);
   border-radius:50px;overflow:hidden;
 }
 .rb-fill{height:100%;border-radius:50px;transition:width 0.7s cubic-bezier(0.4,0,0.2,1)}
@@ -549,7 +550,7 @@ body{
 /* 모달 성장 그래프 */
 .growth-wrap{margin-bottom:24px}
 .growth-game{
-  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);
+  background:var(--soft2);border:1px solid var(--line);
   border-radius:12px;padding:12px 14px;margin-bottom:10px;
 }
 .growth-game-head{
@@ -559,15 +560,15 @@ body{
 .growth-game-head .gg-chips{display:flex;gap:6px;font-weight:400}
 .gg-chip{
   font-size:0.68rem;border-radius:20px;padding:2px 8px;
-  background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.55);
+  background:var(--soft);color:var(--mute2);
   font-variant-numeric:tabular-nums;
 }
-.gg-chip b{color:#fff;font-weight:700}
+.gg-chip b{color:var(--ink);font-weight:700}
 .gg-chip.up{color:var(--gn);background:rgba(0,230,118,0.1)}
 .gg-chip.up b{color:var(--gn)}
 .growth-svg{width:100%;display:block;margin-top:4px}
 .growth-empty{
-  text-align:center;color:rgba(255,255,255,0.35);font-size:0.8rem;
+  text-align:center;color:var(--mute2);font-size:0.8rem;
   padding:18px 10px;line-height:1.6;
 }
 
@@ -577,31 +578,31 @@ body{
   border-radius:14px;padding:18px 20px;margin-bottom:20px;
 }
 .diag-label{
-  font-family:'Orbitron',monospace;font-size:0.58rem;letter-spacing:2.5px;
+  font-family:'Noto Sans KR',sans-serif;font-size:0.58rem;letter-spacing:2.5px;
   color:rgba(0,242,255,0.5);margin-bottom:10px;
 }
-.diag-text{font-size:0.88rem;line-height:1.75;color:rgba(255,255,255,0.75)}
-.diag-text strong{color:#fff}
+.diag-text{font-size:0.88rem;line-height:1.75;color:var(--ink2)}
+.diag-text strong{color:var(--ink)}
 
 /* 모달 게임별 점수 카드 */
 .modal-score-grid{
   display:grid;grid-template-columns:repeat(5,1fr);gap:8px;
 }
 .msg-card{
-  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);
+  background:var(--soft2);border:1px solid var(--line);
   border-radius:12px;padding:12px 8px;text-align:center;
 }
-.msg-game{font-size:0.7rem;color:rgba(255,255,255,0.3);margin-bottom:6px}
+.msg-game{font-size:0.7rem;color:var(--mute2);margin-bottom:6px}
 .msg-score{
-  font-family:'Orbitron',monospace;font-size:0.9rem;font-weight:900;
+  font-family:'Noto Sans KR',sans-serif;font-size:0.9rem;font-weight:900;
   margin-bottom:4px;
 }
-.msg-grade{font-size:0.65rem;color:rgba(255,255,255,0.3)}
+.msg-grade{font-size:0.65rem;color:var(--mute2)}
 
 /* ── 로딩 ── */
 .loading-cover{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:60px 20px;gap:16px;color:rgba(255,255,255,0.3);
+  padding:60px 20px;gap:16px;color:var(--mute2);
 }
 .spinner{
   width:32px;height:32px;
@@ -613,8 +614,8 @@ body{
 /* ── 모바일 햄버거 ── */
 .menu-toggle{
   display:none;position:fixed;top:calc(14px + env(safe-area-inset-top));left:14px;z-index:300;
-  background:rgba(2,8,16,0.9);border:1px solid rgba(255,255,255,0.12);
-  border-radius:10px;padding:10px;cursor:pointer;color:#fff;
+  background:rgba(2,8,16,0.9);border:1px solid var(--line);
+  border-radius:10px;padding:10px;cursor:pointer;color:var(--ink);
   font-size:1.2rem;line-height:1;
 }
 .sidebar-overlay{
@@ -651,22 +652,22 @@ body{
 }
 #pass-overlay.open { display: flex; }
 #pass-box {
-  background: #0d1520; border: 1px solid rgba(255,255,255,0.12);
+  background: #fff; border: 1px solid var(--line);
   border-radius: 20px; padding: 36px 32px; width: 100%; max-width: 360px;
   box-shadow: 0 24px 60px rgba(0,0,0,0.6);
   animation: fadeInUp 0.25s ease both;
 }
 #pass-box .pb-title {
-  font-family: 'Orbitron', monospace; font-size: 0.7rem;
+  font-family: 'Noto Sans KR', sans-serif; font-size: 0.7rem;
   letter-spacing: 3px; color: rgba(0,242,255,0.7); margin-bottom: 6px;
 }
 #pass-box .pb-name {
-  font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 20px;
+  font-size: 1.15rem; font-weight: 700; color: var(--ink); margin-bottom: 20px;
 }
 #pass-input {
-  width: 100%; background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.12); border-radius: 12px;
-  padding: 14px 18px; font-size: 1rem; color: #fff; outline: none;
+  width: 100%; background: var(--soft);
+  border: 1px solid var(--line); border-radius: 12px;
+  padding: 14px 18px; font-size: 1rem; color: var(--ink); outline: none;
   transition: border-color 0.2s, box-shadow 0.2s; margin-bottom: 8px;
   -webkit-appearance: none;
 }
@@ -678,12 +679,12 @@ body{
 #pass-err.show { display: block; }
 .pb-btns { display: flex; gap: 10px; }
 .pb-btn-cancel {
-  flex: 1; padding: 13px; background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.12); border-radius: 12px;
-  color: rgba(255,255,255,0.5); font-size: 0.95rem; cursor: pointer;
+  flex: 1; padding: 13px; background: var(--soft);
+  border: 1px solid var(--line); border-radius: 12px;
+  color: var(--mute2); font-size: 0.95rem; cursor: pointer;
   transition: background 0.2s;
 }
-.pb-btn-cancel:hover { background: rgba(255,255,255,0.1); }
+.pb-btn-cancel:hover { background: var(--soft); }
 /* 참여코드 설정 팝업 — 비밀번호 팝업과 동일한 톤, id만 분리 */
 #joincode-overlay {
   display: none; position: fixed; inset: 0; z-index: 9999;
@@ -692,18 +693,18 @@ body{
 }
 #joincode-overlay.open { display: flex; }
 #joincode-box {
-  background: #0d1520; border: 1px solid rgba(255,255,255,0.12);
+  background: #fff; border: 1px solid var(--line);
   border-radius: 20px; padding: 36px 32px; width: 100%; max-width: 360px;
   box-shadow: 0 24px 60px rgba(0,0,0,0.6);
   animation: fadeInUp 0.25s ease both;
 }
 #joincode-box .pb-desc {
-  font-size: 0.85rem; color: rgba(255,255,255,0.5); margin-bottom: 20px; line-height: 1.5;
+  font-size: 0.85rem; color: var(--mute2); margin-bottom: 20px; line-height: 1.5;
 }
 #joincode-input {
-  width: 100%; background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.12); border-radius: 12px;
-  padding: 14px 18px; font-size: 1rem; color: #fff; outline: none;
+  width: 100%; background: var(--soft);
+  border: 1px solid var(--line); border-radius: 12px;
+  padding: 14px 18px; font-size: 1rem; color: var(--ink); outline: none;
   transition: border-color 0.2s, box-shadow 0.2s; margin-bottom: 8px;
   -webkit-appearance: none; text-transform: uppercase;
 }
@@ -716,11 +717,200 @@ body{
 .pb-btn-ok {
   flex: 2; padding: 13px;
   background: linear-gradient(135deg, var(--cy), var(--pu));
-  border: none; border-radius: 12px; color: #fff;
+  border: none; border-radius: 12px; color: var(--ink);
   font-family: 'Black Han Sans', sans-serif; font-size: 1rem;
   cursor: pointer; transition: opacity 0.2s;
 }
 .pb-btn-ok:hover { opacity: 0.85; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   2026-10-13 새 화면(밝은 화면 · 탭 · 폰 전용 배치) — 성일님 시안 승인. 위 규칙을 덮어쓴다.
+   ══════════════════════════════════════════════════════════════════════ */
+body{font-size:14px;line-height:1.5;word-break:keep-all}
+[hidden]{display:none!important}
+/* 사이드바는 남색 그대로 — 학급 목록은 전부 보인다(성일님 10/13 "원래 목록은 보여야지") */
+.sidebar{background:var(--navy);border-right:0;backdrop-filter:none}
+.sidebar, .sidebar .sb-title{color:#fff}
+.sb-badge{color:#7FD6DE;font-family:'Noto Sans KR',sans-serif;letter-spacing:1px;font-size:.7rem;font-weight:700}
+.sb-title span{background:none;-webkit-text-fill-color:#5FE0EA;color:#5FE0EA}
+.sb-nick,.sb-section-label,.gni-meta,.sb-nav-loading,.sb-nav-empty{color:#9AA6C0}
+.sb-section-label{font-family:'Noto Sans KR',sans-serif;font-size:.74rem;letter-spacing:.5px;font-weight:700}
+.sb-divider{background:rgba(255,255,255,.12)}
+.group-search{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.14);color:#fff}
+.group-search::placeholder{color:#9AA6C0}
+.group-nav-item:hover{background:rgba(255,255,255,.06)}
+.group-nav-item.active{background:#2A3A60;border-left-color:#5FE0EA}
+.gni-icon{background:rgba(255,255,255,.08);color:#fff}
+.gni-name{color:#fff}
+.sb-footer{border-top-color:rgba(255,255,255,.12)}
+.sb-back-btn{color:#C9D2E6;border-color:rgba(255,255,255,.18)}
+.sb-back-btn:hover{color:#fff;border-color:rgba(255,255,255,.4)}
+.group-nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2)}
+
+/* 머리줄 · 탭 */
+.content-wrap{padding:calc(24px + env(safe-area-inset-top)) 32px 60px;max-width:1440px}
+.content-header{margin-bottom:14px;align-items:flex-end}
+.content-header .ch-group-name,#ch-group-name{font-family:'Black Han Sans',sans-serif;font-size:1.9rem;color:var(--ink);line-height:1.15}
+.content-header .ch-meta{color:var(--ink2);font-size:.86rem;margin-top:2px}
+.ch-right{display:flex;gap:8px;align-items:center;margin-left:auto}
+.live-chip,.refresh-btn{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:18px;cursor:pointer;
+  background:#fff;border:1px solid var(--line);color:var(--ink2);font:600 .82rem 'Noto Sans KR',sans-serif;letter-spacing:0}
+.refresh-btn:hover,.live-chip:hover{background:var(--soft2)}
+#auto-dot{font-size:.62rem}
+.dtabs{display:flex;gap:2px;border-bottom:2px solid var(--line);margin-bottom:18px;overflow-x:auto;scrollbar-width:none}
+.dtabs::-webkit-scrollbar{display:none}
+.dtabs button{flex:none;background:none;border:0;border-bottom:3px solid transparent;margin-bottom:-2px;padding:10px 18px;cursor:pointer;
+  font:700 .95rem 'Noto Sans KR',sans-serif;color:var(--mute2)}
+.dtabs button.on{color:var(--ink);border-bottom-color:var(--cy)}
+.dtabs button:focus-visible{outline:2px solid var(--cy);outline-offset:-2px}
+.dtab{display:flex;flex-direction:column;gap:16px}
+.dtab[hidden]{display:none}
+.dtab > .one-col,.dtab > .two-col{margin-bottom:0}
+
+/* 패널 */
+.panel{background:#fff;border:1px solid var(--line);border-radius:12px}
+.panel-header{padding:13px 16px;border-bottom:1px solid var(--line);gap:10px}
+.panel-title{font-family:'Noto Sans KR',sans-serif;font-size:1rem;font-weight:900;letter-spacing:0;color:var(--ink)}
+.panel-title .pt-dot{display:none}
+.ph-note{font-size:.8rem;color:var(--mute)}
+.panel-body{padding:12px 16px}
+.two-col{grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:16px}
+
+/* 요약 4칸 */
+.sum2{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.sc2{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.sc2 .l{font-size:.84rem;color:var(--ink2);font-weight:700}
+.sc2 .v{font-size:1.75rem;font-weight:900;margin-top:2px;line-height:1.25;word-break:keep-all}
+.sc2 .v small{font-size:.95rem;color:var(--mute);font-weight:500}
+.sc2 .s{font-size:.8rem;color:var(--mute)}
+.sc2.bad .v{color:var(--bad)} .sc2.warn .v{color:var(--warn)}
+.row2{display:grid;grid-template-columns:1.15fr 1fr;gap:16px}
+
+/* 챙겨 볼 학생 */
+#v2-watch{display:grid;gap:12px}
+.watch{display:grid;grid-template-columns:118px 1fr;gap:10px;align-items:start}
+.watch .k{font-weight:700;display:flex;align-items:center;gap:7px;font-size:.92rem;padding-top:3px}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none}
+.dot.bad{background:var(--bad)} .dot.warn{background:var(--warn)} .dot.good{background:var(--good)} .dot.blue{background:var(--blue)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:0;background:var(--soft);border-radius:14px;padding:4px 11px;font:500 .86rem 'Noto Sans KR',sans-serif;color:var(--ink);cursor:pointer}
+.chip:hover{background:#E6ECF4}
+.chip small{color:var(--mute2);margin-left:5px;font-size:.76rem}
+.chip.more{cursor:default;color:var(--mute2)}
+.v2-none{color:var(--mute);font-size:.86rem;padding-top:3px}
+
+/* 게임별 현황 표 */
+.v2-t{width:100%;border-collapse:collapse;font-size:.9rem}
+.v2-t th{font-size:.8rem;color:var(--ink2);font-weight:700;text-align:left;padding:9px 14px;background:var(--soft2);border-bottom:1px solid var(--line)}
+.v2-t td{padding:9px 14px;border-bottom:1px solid var(--line)}
+.v2-t tr:last-child td{border-bottom:0}
+.v2-t .n{text-align:right;white-space:nowrap}
+.bar{height:8px;border-radius:4px;background:var(--soft);overflow:hidden;width:96px;display:inline-block;vertical-align:middle;margin-right:8px}
+.bar i{display:block;height:100%}
+.bar i.good{background:var(--good)} .bar i.warn{background:var(--warn)} .bar i.bad{background:var(--bad)}
+.pill{display:inline-block;border-radius:10px;padding:1px 9px;font-size:.8rem;font-weight:700;white-space:nowrap}
+.pill.good{background:var(--goodb);color:var(--good)} .pill.warn{background:var(--warnb);color:var(--warn)} .pill.bad{background:var(--badb);color:var(--bad)}
+.v2-note{color:var(--mute);font-size:.82rem}
+
+/* 표(랭킹·학생별) 글씨 키우기 */
+.rank-table th,.student-table th{font-family:'Noto Sans KR',sans-serif;font-size:.8rem;letter-spacing:0;color:var(--ink2);background:var(--soft2)}
+.rank-table td{font-size:.92rem;padding:10px 12px}
+.rank-score,.total-score{color:var(--ink);font-weight:700}
+.rank-no{font-family:'Noto Sans KR',sans-serif;font-size:.86rem}
+.student-table td{font-size:.86rem}
+.student-table th:first-child,.student-table td:first-child{background:#fff;box-shadow:1px 0 0 var(--line)}
+.student-table tbody tr:hover td:first-child{background:var(--soft2)}
+.score-cell{font-size:.84rem;min-width:70px}
+.sc-high{background:var(--goodb);color:var(--good);border-color:transparent}
+.sc-mid{background:var(--warnb);color:var(--warn);border-color:transparent}
+.sc-low{background:var(--badb);color:var(--bad);border-color:transparent}
+.sc-none{color:var(--mute)}
+.lv-lines{font-size:.72rem}
+.lv-line{color:var(--mute)}
+.weak-tag{background:var(--badb);border-color:transparent}
+.th-sub{color:var(--good)!important;opacity:1!important}
+.gbi-name{font-size:.9rem}
+.gbi-count{font-size:.82rem;color:var(--ink2)}
+.exam-badge{font-family:'Noto Sans KR',sans-serif}
+.modal{border-color:var(--line)}
+.radar-title,.diag-label{font-family:'Noto Sans KR',sans-serif;font-size:.84rem;letter-spacing:0;color:var(--ink2);font-weight:900}
+.diagnosis-box{background:#F0FAFB;border-color:#C9ECEF}
+.diag-text{font-size:.92rem}
+.msg-score{font-family:'Noto Sans KR',sans-serif}
+.tb-card .tb-s{font-family:'Noto Sans KR',sans-serif;font-weight:700}
+
+/* 설정 */
+.set-list{display:grid;gap:0;padding:0}
+.set-row{display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.set-row:last-child{border-bottom:0}
+.set-row > div{flex:1;display:grid;gap:2px}
+.set-row b{font-size:.95rem}
+.set-row span{font-size:.84rem;color:var(--mute2)}
+.tb-btn.danger{background:var(--badb);color:var(--bad);border-color:transparent}
+
+/* 수업 자료 */
+.mat-head{display:grid;gap:4px;margin-bottom:12px}
+.mat-head b{font-size:1.1rem}
+.mat-head span{color:var(--ink2);font-size:.9rem}
+.mats{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px}
+.mat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;grid-template-columns:52px 1fr;gap:12px;align-items:start}
+.mat img{width:52px;height:52px}
+.mat .mt{display:grid;gap:1px}
+.mat .mt em{font-style:normal;font-size:.78rem;color:var(--mute2);font-weight:700}
+.mat .mt b{font-size:1.02rem}
+.mat .mt span{font-size:.82rem;color:var(--mute2)}
+.mat .mrec{color:var(--blue)!important;font-weight:700}
+.mat .mb{grid-column:1 / -1;display:flex;gap:8px;flex-wrap:wrap}
+.mat .mb a{text-decoration:none;display:inline-flex;align-items:center}
+
+/* 학생별 탭에서는 표가 주인공 — 화면 높이만큼 보이게(예전엔 470px 로 4명만 보였다) */
+#student-table-scroll{max-height:calc(100vh - 230px);min-height:470px}
+/* 폰용 학생 카드 — PC 에선 숨김(표를 씀) */
+.v2-cards{display:none}
+
+/* ── 폰(앱) 배치 ─────────────────────────────────────────── */
+@media (max-width:760px){
+  body{font-size:15px}
+  .content-wrap{padding:calc(64px + env(safe-area-inset-top)) 14px calc(84px + var(--ad-banner-h,0px) + env(safe-area-inset-bottom))}
+  .menu-toggle{background:var(--navy);color:#fff;border:0}
+  .content-header{flex-wrap:wrap;gap:8px}
+  #ch-group-name{font-size:1.5rem}
+  .ch-right{margin-left:0;width:100%}
+  .ch-right .refresh-btn{margin-left:auto}
+  /* 탭은 화면 아래 막대로 — 엄지로 누르기 쉽게 */
+  .dtabs{position:fixed;left:0;right:0;bottom:calc(var(--ad-banner-h,0px));z-index:60;margin:0;border:0;background:#fff;
+    box-shadow:0 -1px 0 var(--line),0 -6px 18px rgba(23,35,63,.06);padding:4px 4px calc(4px + env(safe-area-inset-bottom));justify-content:space-around}
+  .dtabs button{flex:1;padding:12px 2px;margin:0;border:0;border-radius:10px;font-size:.84rem}
+  .dtabs button.on{background:#E6F6F7;color:var(--cy)}
+  .sum2{grid-template-columns:1fr 1fr;gap:10px}
+  .sc2{padding:12px}
+  .sc2 .v{font-size:1.35rem}
+  .row2,.two-col{grid-template-columns:1fr}
+  .watch{grid-template-columns:1fr;gap:6px}
+  .v2-t th,.v2-t td{padding:9px 10px}
+  .bar{width:56px}
+  /* 학생별: 넓은 표 대신 카드 */
+  .v2-cards{display:grid;gap:10px}
+  .dtab[data-tab="students"] > .one-col{display:none}
+  .v2-card{display:grid;gap:8px;text-align:left;width:100%;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;cursor:pointer;font:inherit;color:inherit}
+  .v2-card .hd{display:flex;align-items:baseline;gap:8px}
+  .v2-card .hd b{font-size:1.02rem}
+  .v2-card .hd span{font-size:.8rem;color:var(--mute2)}
+  .v2-card .hd span.idle{color:var(--bad);font-weight:700}
+  .v2-card .hd .rc{margin-left:auto;color:var(--blue);font-weight:700}
+  .pcs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+  .pc{border-radius:8px;padding:6px 8px;display:grid;gap:0;background:var(--soft)}
+  .pc em{font-style:normal;font-size:.72rem;color:var(--mute2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pc b{font-size:.9rem}
+  .pc.good{background:var(--goodb)} .pc.good b{color:var(--good)}
+  .pc.warn{background:var(--warnb)} .pc.warn b{color:var(--warn)}
+  .pc.bad{background:var(--badb)} .pc.bad b{color:var(--bad)}
+  .pc.none b{color:var(--mute);font-weight:500}
+  .mats{grid-template-columns:1fr}
+  .set-row{flex-wrap:wrap}
+  .set-row .tb-btn{width:100%}
+  .tb-teams{grid-template-columns:1fr 1fr}
+}
 </style>
 </head>
 <body>
@@ -770,44 +960,92 @@ body{
 
     <!-- 대시보드 콘텐츠 (그룹 선택 후 표시) -->
     <div id="dashboard" style="display:none">
-
-      <!-- 헤더 -->
+      <!-- 머리줄 (2026-10-13 밝은 화면·탭 구성 — 성일님 시안 승인) -->
       <div class="content-header">
         <div class="ch-left">
-          <div class="content-header .ch-group-name" id="ch-group-name" style="font-family:'Black Han Sans',sans-serif;font-size:2rem;margin-bottom:4px">—</div>
+          <div class="ch-group-name" id="ch-group-name">—</div>
           <div class="ch-meta" id="ch-meta">교수자: — · 학생 —명 · 참여코드: —</div>
         </div>
-        <button class="refresh-btn" id="refresh-btn" onclick="loadDashboard()">
-          <span class="ri">↻</span> 새로고침
-        </button>
-        <button class="refresh-btn" id="auto-btn" onclick="toggleAuto()"
-          title="3초마다 바뀐 게 있는지 확인해서, 바뀌었을 때만 다시 불러옵니다">
-          <span id="auto-dot">🟢</span> <span id="auto-label">자동 갱신 켜짐</span>
-        </button>
-        <button class="refresh-btn" id="delete-group-btn" onclick="deleteGroup()"
-          style="background:rgba(255,70,70,0.12);color:#ff7b7b;margin-left:8px">
-          <span>🗑</span> 그룹 삭제
-        </button>
+        <div class="ch-right">
+          <button class="live-chip" id="auto-btn" onclick="toggleAuto()"
+            title="3초마다 바뀐 게 있는지 확인해서, 바뀌었을 때만 다시 불러옵니다">
+            <span id="auto-dot">🟢</span> <span id="auto-label">자동 갱신 켜짐</span>
+          </button>
+          <button class="refresh-btn" id="refresh-btn" onclick="loadDashboard()">
+            <span class="ri">↻</span> 새로고침
+          </button>
+        </div>
       </div>
 
-      <!-- 팀전(모둠 대항전) -->
-      <div class="one-col" id="tb-section">
+      <nav class="dtabs" id="dtabs" role="tablist">
+        <button role="tab" data-tab="overview" onclick="DashV2.tab('overview')">반 현황</button>
+        <button role="tab" data-tab="students" onclick="DashV2.tab('students')">학생별</button>
+        <button role="tab" data-tab="team" onclick="DashV2.tab('team')">팀전</button>
+        <button role="tab" data-tab="materials" onclick="DashV2.tab('materials')">수업 자료</button>
+        <button role="tab" data-tab="settings" onclick="DashV2.tab('settings')">설정</button>
+      </nav>
+
+      <section class="dtab" data-tab="overview">
+        <div class="sum2" id="v2-sum"></div>
+        <div class="row2">
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title">챙겨 볼 학생</div><span class="ph-note">이름을 누르면 개인 진단</span></div>
+            <div class="panel-body" id="v2-watch"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title">게임별 현황</div><span class="ph-note">정답률은 최근 30일 판 기준</span></div>
+            <div class="panel-body" style="padding:0" id="v2-games"></div>
+          </div>
+        </div>
+      <!-- 2컬럼: 그룹 랭킹 + 게임별 참여율 -->
+      <div class="two-col">
+
+        <!-- 그룹 종합 랭킹 -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><div class="pt-dot"></div>그룹 종합 랭킹</div>
+          </div>
+          <div class="panel-body" style="padding:0">
+            <div class="tbl-scroll" id="group-rank-scroll">
+            <table class="rank-table" id="group-rank-table">
+              <thead><tr>
+                <th>#</th><th>학생</th><th style="text-align:right">총점</th><th style="text-align:center">클리어</th>
+              </tr></thead>
+              <tbody id="group-rank-body"></tbody>
+            </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 게임별 참여율(새 게임별 현황 표로 대신, 렌더 호환용으로 숨김) -->
+        <div class="panel" hidden>
+          <div class="panel-header">
+            <div class="panel-title"><div class="pt-dot" style="background:var(--gn);box-shadow:0 0 8px var(--gn)"></div>게임별 참여율</div>
+          </div>
+          <div class="panel-body">
+            <div class="game-bar-list" id="game-bar-list"></div>
+          </div>
+        </div>
+
+      <!-- 이론 약점 분석 (주제별) -->
+      <div id="theory-weak-section" style="display:none">
         <div class="panel">
           <div class="panel-header">
             <div class="panel-title">
-              <div class="pt-dot" style="background:var(--gd,#ffd600);box-shadow:0 0 8px var(--gd,#ffd600)"></div>
-              🏆 팀전 — 모둠 편성
+              <div class="pt-dot" style="background:var(--cy);box-shadow:0 0 8px var(--cy)"></div>
+              📝 이론 약점 분석 (주제별 오답)
             </div>
-            <span style="font-size:0.72rem;color:rgba(255,255,255,0.25)">최고점 기준 · 이질 편성</span>
+            <span style="font-size:0.72rem;color:var(--mute)" id="theory-weak-meta"></span>
           </div>
-          <div class="panel-body" id="tb-body">
-            <div class="tb-empty">불러오는 중…</div>
+          <div class="panel-body">
+            <div class="game-bar-list" id="theory-weak-list"></div>
           </div>
         </div>
       </div>
+      </div>
 
       <!-- 요약 카드 -->
-      <div class="summary-grid">
+      <div class="summary-grid legacy-sum" hidden>
         <div class="sum-card c-cy">
           <div class="sc-label">STUDENTS</div>
           <div class="sc-val" id="sum-students">0</div>
@@ -830,54 +1068,10 @@ body{
         </div>
       </div>
 
-      <!-- 2컬럼: 그룹 랭킹 + 게임별 참여율 -->
-      <div class="two-col">
+      </section>
 
-        <!-- 그룹 종합 랭킹 -->
-        <div class="panel">
-          <div class="panel-header">
-            <div class="panel-title"><div class="pt-dot"></div>그룹 종합 랭킹</div>
-          </div>
-          <div class="panel-body" style="padding:0">
-            <div class="tbl-scroll" id="group-rank-scroll">
-            <table class="rank-table" id="group-rank-table">
-              <thead><tr>
-                <th>#</th><th>학생</th><th style="text-align:right">총점</th><th style="text-align:center">클리어</th>
-              </tr></thead>
-              <tbody id="group-rank-body"></tbody>
-            </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- 게임별 참여율 -->
-        <div class="panel">
-          <div class="panel-header">
-            <div class="panel-title"><div class="pt-dot" style="background:var(--gn);box-shadow:0 0 8px var(--gn)"></div>게임별 참여율</div>
-          </div>
-          <div class="panel-body">
-            <div class="game-bar-list" id="game-bar-list"></div>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- 이론 약점 분석 (주제별) -->
-      <div class="one-col" id="theory-weak-section" style="display:none">
-        <div class="panel">
-          <div class="panel-header">
-            <div class="panel-title">
-              <div class="pt-dot" style="background:var(--cy);box-shadow:0 0 8px var(--cy)"></div>
-              📝 이론 약점 분석 (주제별 오답)
-            </div>
-            <span style="font-size:0.72rem;color:rgba(255,255,255,0.25)" id="theory-weak-meta"></span>
-          </div>
-          <div class="panel-body">
-            <div class="game-bar-list" id="theory-weak-list"></div>
-          </div>
-        </div>
-      </div>
-
+      <section class="dtab" data-tab="students">
+        <div class="v2-cards" id="v2-cards"></div>
       <!-- 학생 상세 분석 테이블 -->
       <div class="one-col">
         <div class="panel">
@@ -887,7 +1081,7 @@ body{
               학생별 상세 분석
             </div>
             <div class="ph-right">
-              <span style="font-size:0.72rem;color:rgba(255,255,255,0.25)">클릭 → 개인 진단</span>
+              <span style="font-size:0.72rem;color:var(--mute)">클릭 → 개인 진단</span>
               <button type="button" class="ph-fs-btn" id="student-fs-btn" onclick="openStudentFull()" aria-haspopup="dialog">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
                 전체화면
@@ -925,6 +1119,41 @@ body{
         </div>
       </div>
 
+      </section>
+
+      <section class="dtab" data-tab="team">
+      <!-- 팀전(모둠 대항전) -->
+      <div class="one-col" id="tb-section">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <div class="pt-dot" style="background:var(--gd,#ffd600);box-shadow:0 0 8px var(--gd,#ffd600)"></div>
+              🏆 팀전 — 모둠 편성
+            </div>
+            <span style="font-size:0.72rem;color:var(--mute)">최고점 기준 · 이질 편성</span>
+          </div>
+          <div class="panel-body" id="tb-body">
+            <div class="tb-empty">불러오는 중…</div>
+          </div>
+        </div>
+      </div>
+
+      </section>
+
+      <section class="dtab" data-tab="materials">
+        <div id="v2-materials"></div>
+      </section>
+
+      <section class="dtab" data-tab="settings">
+        <div class="panel"><div class="panel-header"><div class="panel-title">학급 설정</div></div>
+          <div class="panel-body set-list">
+            <div class="set-row"><div><b>참여 코드</b><span id="v2-code">—</span></div><button class="tb-btn" onclick="openJoinCodeModal()">참여 코드 바꾸기</button></div>
+            <div class="set-row"><div><b>자동 갱신</b><span>학생이 게임을 하면 3초 안에 화면이 저절로 바뀌어요</span></div><button class="tb-btn" onclick="toggleAuto()">켜기 / 끄기</button></div>
+            <div class="set-row danger"><div><b>학급 삭제</b><span>학급과 학생 기록이 모두 지워져요. 되돌릴 수 없어요</span></div>
+              <button class="tb-btn danger" id="delete-group-btn" onclick="deleteGroup()">학급 삭제</button></div>
+          </div>
+        </div>
+      </section>
     </div><!-- /dashboard -->
   </div>
 </div>
@@ -950,7 +1179,7 @@ body{
       <!-- 이론 주제별 분석(정답률·미풀이 주제, 개인) -->
       <div class="radar-wrap" id="modal-theory-wrap" style="display:none">
         <div class="radar-title">📝 이론 주제별 분석</div>
-        <div style="font-size:0.74rem;color:rgba(255,255,255,0.35);margin:-6px 0 10px">주제별 정답률 · 아직 안 풀어본 주제 확인 — 약한 주제를 짚어 안내해주세요</div>
+        <div style="font-size:0.74rem;color:var(--mute2);margin:-6px 0 10px">주제별 정답률 · 아직 안 풀어본 주제 확인 — 약한 주제를 짚어 안내해주세요</div>
         <div class="radar-bars" id="modal-theory-bars"></div>
       </div>
 
@@ -998,8 +1227,8 @@ function animStars(){
     ctx.fillStyle=s.c;ctx.globalAlpha=s.o;ctx.fill();ctx.globalAlpha=1});
   requestAnimationFrame(animStars);
 }
-resize();initStars();animStars();
-window.addEventListener('resize',()=>{resize();initStars()});
+/* 별 하늘은 밝은 화면에서 끔(2026-10-13) */
+
 
 /* ══════════════════════════════════════════
    상수
@@ -1428,10 +1657,10 @@ async function loadDashboard(quiet) {
     // 로딩 표시 (tbody에는 tr, div에는 div — 잘못된 마크업 주입 방지)
     ['group-rank-body','student-table-body'].forEach(id =>
       document.getElementById(id).innerHTML =
-        '<tr><td colspan="10" style="text-align:center;padding:30px;color:rgba(255,255,255,0.2)"><div class="spinner" style="margin:0 auto"></div></td></tr>'
+        '<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--mute)"><div class="spinner" style="margin:0 auto"></div></td></tr>'
     );
     document.getElementById('game-bar-list').innerHTML =
-      '<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.2)"><div class="spinner" style="margin:0 auto"></div></div>';
+      '<div style="text-align:center;padding:30px;color:var(--mute)"><div class="spinner" style="margin:0 auto"></div></div>';
   }
 
   try {
@@ -1442,7 +1671,8 @@ async function loadDashboard(quiet) {
       loadTheoryWeak(currentGid),    // 이론 주제별 오답 병렬 로드
       loadTheoryScores(currentGid),  // 이론 참여/점수 병렬 로드
       loadTopicAttempts(currentGid), // 이론 주제별 정답률(문항 단위 정오답 전체) 병렬 로드
-      loadLevelRounds(currentGid)    // 2급 게임 판별 1·2단계 통과 현황
+      loadLevelRounds(currentGid),   // 2급 게임 판별 1·2단계 통과 현황
+      (window.DashV2 ? DashV2.loadActivity(currentGid) : null)   // 새 화면: 최근 60일 활동(2026-10-13)
     ]);
     if (scoresRes.error) throw scoresRes.error;
     dashData = mergeScoreRows(scoresRes.data);
@@ -1819,7 +2049,7 @@ function renderDashboard(scores) {
 
   const rankBody = document.getElementById('group-rank-body');
   if (!ranked.length) {
-    rankBody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:30px;color:rgba(255,255,255,0.2)">아직 데이터가 없습니다</td></tr>';
+    rankBody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--mute)">아직 데이터가 없습니다</td></tr>';
   } else {
     rankBody.innerHTML = ranked.map((r,i) => {
       const cls = i===0?'gold':i===1?'silver':i===2?'bronze':'other';
@@ -1827,7 +2057,7 @@ function renderDashboard(scores) {
       return `<tr>
         <td class="rank-no ${cls}">${medal||('#'+(i+1))}</td>
         <td class="rank-name" style="cursor:pointer" onclick="openModal('${escAttr(r.name)}')">
-          ${escHTML(r.name)} <span style="font-size:0.7rem;color:rgba(255,255,255,0.3)">↗</span>
+          ${escHTML(r.name)} <span style="font-size:0.7rem;color:var(--mute2)">↗</span>
         </td>
         <td class="rank-score">${r.total.toLocaleString()}</td>
         <td class="rank-grade">${r.cleared}/5 ✓</td>
@@ -1868,7 +2098,7 @@ function renderDashboard(scores) {
   // ── 학생 상세 분석 테이블 ──
   const tbody = document.getElementById('student-table-body');
   if (!ranked.length) {
-    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:30px;color:rgba(255,255,255,0.2)">아직 데이터가 없습니다</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--mute)">아직 데이터가 없습니다</td></tr>';
   } else {
     tbody.innerHTML = ranked.map((r,i) => {
       const gameCells = GAMES.map(g => {
@@ -1894,7 +2124,7 @@ function renderDashboard(scores) {
 
       const theoryInfo = theoryScoreByStudent[r.name];
       const theoryCell = theoryInfo
-        ? `<td><span class="score-cell ${theoryInfo.passed?'sc-high':'sc-low'}">${Math.round(theoryInfo.bestRate*100)}%</span><div style="font-size:0.62rem;color:rgba(255,255,255,0.3);margin-top:2px">${theoryInfo.plays}회</div></td>`
+        ? `<td><span class="score-cell ${theoryInfo.passed?'sc-high':'sc-low'}">${Math.round(theoryInfo.bestRate*100)}%</span><div style="font-size:0.62rem;color:var(--mute2);margin-top:2px">${theoryInfo.plays}회</div></td>`
         : `<td><span class="score-cell sc-none">미참여</span></td>`;
 
       return `<tr style="cursor:pointer" onclick="openModal('${escAttr(r.name)}')">
@@ -1927,6 +2157,7 @@ function renderDashboard(scores) {
   window._ranked = ranked;
 
   renderTheoryWeakPanel();
+  if (window.DashV2) DashV2.render(ranked, studentNames, students);   // 새 화면(요약·챙겨 볼 학생·게임별 현황·폰 카드)
 }
 
 /* ══════════════════════════════════════════
@@ -1945,7 +2176,7 @@ function openModal(name) {
   scoreGrid.innerHTML = GAMES.map(g => {
     const s = student.scores[g.id];
     const pct = s ? s.score/g.max*100 : 0;
-    const col = !s?'rgba(255,255,255,0.2)':pct>=CLEAR_PCT?'var(--gn)':pct>=40?'var(--gd)':'var(--pk)';
+    const col = !s?'var(--mute)':pct>=CLEAR_PCT?'var(--gn)':pct>=40?'var(--gd)':'var(--pk)';
     return `<div class="msg-card">
       <div class="msg-game">${g.icon} ${g.name}</div>
       <div class="msg-score" style="color:${col}">${s?s.score.toLocaleString():'—'}</div>
@@ -1953,7 +2184,7 @@ function openModal(name) {
     </div>`;
   }).join('') + (() => {
     const t = theoryScoreByStudent[name];
-    const tcol = !t?'rgba(255,255,255,0.2)':t.passed?'var(--gn)':'var(--pk)';
+    const tcol = !t?'var(--mute)':t.passed?'var(--gn)':'var(--pk)';
     return `<div class="msg-card">
       <div class="msg-game">📝 이론</div>
       <div class="msg-score" style="color:${tcol}">${t?Math.round(t.bestRate*100)+'%':'—'}</div>
@@ -1966,7 +2197,7 @@ function openModal(name) {
   radars.innerHTML = GAMES.map(g => {
     const s = student.scores[g.id];
     const pct = s ? Math.min(100, Math.round(s.score/g.max*100)) : 0;
-    const col = !s?'rgba(255,255,255,0.1)':pct>=70?'var(--gn)':pct>=40?'var(--gd)':'var(--pk)';
+    const col = !s?'var(--line)':pct>=70?'var(--gn)':pct>=40?'var(--gd)':'var(--pk)';
     return `<div class="rb-item">
       <div class="rb-header">
         <div class="rb-name" style="color:${col}">
@@ -1991,13 +2222,13 @@ function openModal(name) {
       if (!s) {
         return `<div class="rb-item">
           <div class="rb-header">
-            <div class="rb-name" style="color:rgba(255,255,255,0.35)">
-              <span style="background:rgba(255,255,255,0.25);width:8px;height:8px;border-radius:50%;display:inline-block"></span>
+            <div class="rb-name" style="color:var(--mute2)">
+              <span style="background:var(--soft);width:8px;height:8px;border-radius:50%;display:inline-block"></span>
               ${escHTML(topic)}
             </div>
-            <div class="rb-pct" style="color:rgba(255,255,255,0.35)">미풀이</div>
+            <div class="rb-pct" style="color:var(--mute2)">미풀이</div>
           </div>
-          <div class="rb-track"><div class="rb-fill" style="background:rgba(255,255,255,0.15);width:0" data-w="6"></div></div>
+          <div class="rb-track"><div class="rb-fill" style="background:var(--soft);width:0" data-w="6"></div></div>
         </div>`;
       }
       const pct = Math.round(s.correct/s.total*100);
@@ -2133,7 +2364,7 @@ function growthChartSVG(gid, arr) {
         <stop offset="100%" stop-color="rgba(0,242,255,0)"/>
       </linearGradient>
     </defs>
-    <line x1="${padL}" y1="${baseY}" x2="${W-padR}" y2="${baseY}" stroke="rgba(255,255,255,0.08)"/>
+    <line x1="${padL}" y1="${baseY}" x2="${W-padR}" y2="${baseY}" stroke="#D5DCE8"/>
     <path d="${area}" fill="url(#ggf_${gid})"/>
     <polyline points="${pts.join(' ')}" fill="none" stroke="url(#ggl_${gid})"
       stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
@@ -2390,8 +2621,9 @@ function hideAdPlaceholder(){}
     </div>
   </div>
 </div>
-<script src="ask.js?v=66"></script>
-<script src="teambattle.js?v=66"></script>
-<script src="emoji-icons.js?v=66"></script>
+<script src="ask.js?v=67"></script>
+<script src="admin-v2.js?v=67"></script>
+<script src="teambattle.js?v=67"></script>
+<script src="emoji-icons.js?v=67"></script>
 </body>
 </html>
