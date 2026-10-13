@@ -155,10 +155,10 @@
     return hi - lo;
   }
 
-  /* 2026-10-13 랜덤 편성 — 예전엔 실력 점수 순 고정 배치라 누를 때마다 **똑같은 팀**이 나왔다(성일님 "항상 똑같은 멤버").
-     이제 한 번 누를 때 300번 시도한다: 실력 점수에 흔들림(±8)을 줘서 계층 경계를 섞고, 계층마다 팀 자리를
-     무작위로 돌린 뒤 같은 계층 안 교환으로 평균을 맞춘다. 평균 편차가 최선 +3점(또는 5점) 안인 후보 중 **지금 팀과 다른 것**을
-     무작위로 고른다 — 이질 모둠(팀마다 상·중·하)과 평균 맞추기는 그대로, 조합만 매번 달라진다. */
+  /* 2026-10-13 편성에 약간의 변화 — 예전엔 실력 순 고정 배치라 누를 때마다 **똑같은 팀**이 나왔다(성일님 "항상 똑같은 멤버").
+     성일님 기준: "완전 랜덤이면 안 되고, 이질 모둠으로 짜되 멤버가 조금 달라지면 된다. 조합 몇 가지면 된다."
+     그래서 **계층(실력 순으로 팀 수만큼씩 끊은 묶음)은 그대로** 두고 — 모둠마다 상·중·하가 한 명씩 들어가는 구조는 절대 안 깨진다 —
+     계층마다 어느 팀으로 갈지만 무작위로 돌린다. 300개 중 평균 편차가 최선 근처(+2점, 최소 3점)인 것에서 **지금 팀과 다른 것**을 고른다. */
   function shuffled(a) {
     a = a.slice();
     for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; }
@@ -195,7 +195,7 @@
       cands.push({ teams: teams, d: spreadOf(teams), key: teamKey(teams) });
     }
     var best = Math.min.apply(null, cands.map(function (c) { return c.d; }));
-    var ok = cands.filter(function (c) { return c.d <= Math.max(best + 3, 5); });
+    var ok = cands.filter(function (c) { return c.d <= Math.max(best + 2, 3); });
     var fresh = ok.filter(function (c) { return c.key !== prevKey; });
     var from = fresh.length ? fresh : ok;
     S.teams = from[Math.floor(Math.random() * from.length)].teams;
@@ -212,11 +212,12 @@
     return hi === -Infinity ? 0 : hi - lo;
   }
 
-  /* 한 번의 배치: 흔들린 실력 순 → 계층(= draft 라운드) → 계층마다 무작위 자리 → 계층 안 교환으로 평균 맞추기 */
+  /* 한 번의 배치: 실력 순 → 계층(= draft 라운드) → 계층마다 무작위 자리 → (balance 면) 계층 안 교환으로 평균 맞추기 */
   function arrange(free, k, balance) {
     var noisy = {};
-    free.forEach(function (n) { noisy[n] = (S.skill[n] || 0) + (Math.random() * 16 - 8); });
-    var pool = shuffled(free).sort(function (a, b) { return noisy[b] - noisy[a]; });
+    // 같은 점수끼리 순서만 섞는다(계층 경계는 실력 그대로)
+    free.forEach(function (n) { noisy[n] = (S.skill[n] || 0) + Math.random() * 0.01; });
+    var pool = free.slice().sort(function (a, b) { return noisy[b] - noisy[a]; });
 
     var slots = [];
     for (var i = 0; i < pool.length; i += k) {
