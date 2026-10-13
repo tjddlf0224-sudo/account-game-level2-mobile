@@ -4,7 +4,7 @@
     <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
          **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
          이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-    <script src="safestore.js?v=67"></script>
+    <script src="safestore.js?v=68"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
@@ -865,6 +865,7 @@ body{font-size:14px;line-height:1.5;word-break:keep-all}
 
 /* 학생별 탭에서는 표가 주인공 — 화면 높이만큼 보이게(예전엔 470px 로 4명만 보였다) */
 #student-table-scroll{max-height:calc(100vh - 230px);min-height:470px}
+.v2-toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + var(--ad-banner-h,0px) + env(safe-area-inset-bottom));z-index:9500;background:var(--navy);color:#fff;padding:10px 18px;border-radius:20px;font-size:.9rem;box-shadow:0 6px 20px rgba(0,0,0,.2);max-width:90vw;text-align:center}
 /* 폰용 학생 카드 — PC 에선 숨김(표를 씀) */
 .v2-cards{display:none}
 
@@ -873,6 +874,9 @@ body{font-size:14px;line-height:1.5;word-break:keep-all}
   body{font-size:15px}
   .content-wrap{padding:calc(64px + env(safe-area-inset-top)) 14px calc(84px + var(--ad-banner-h,0px) + env(safe-area-inset-bottom))}
   .menu-toggle{background:var(--navy);color:#fff;border:0}
+  /* 위로 밀린 내용이 ☰ 단추 밑으로 비치지 않게 윗줄에 바탕을 깐다(사이드바 z50 아래, 본문 위) */
+  body::before{content:'';position:fixed;left:0;right:0;top:0;height:calc(64px + env(safe-area-inset-top));z-index:45;
+    background:rgba(243,245,249,.97);box-shadow:0 1px 0 var(--line);pointer-events:none}
   .content-header{flex-wrap:wrap;gap:8px}
   #ch-group-name{font-size:1.5rem}
   .ch-right{margin-left:0;width:100%}
@@ -2621,9 +2625,9 @@ function hideAdPlaceholder(){}
     </div>
   </div>
 </div>
-<script src="ask.js?v=67"></script>
-<script src="admin-v2.js?v=67"></script>
-<script src="teambattle.js?v=67"></script>
-<script src="emoji-icons.js?v=67"></script>
+<script src="ask.js?v=68"></script>
+<script src="admin-v2.js?v=68"></script>
+<script src="teambattle.js?v=68"></script>
+<script src="emoji-icons.js?v=68"></script>
 </body>
 </html>

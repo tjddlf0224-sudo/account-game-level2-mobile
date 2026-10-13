@@ -248,9 +248,60 @@
       '<div class="mats">' + MATS.map(function (m) {
         var k = rec[m[0]] ? '<span class="mrec">이 반 추천 ' + rec[m[0]].length + '명</span>' : '';
         return '<div class="mat"><img src="assets/icons/' + m[3] + '.webp" alt=""><div class="mt"><em>학습지 ' + '①②③④⑤⑥'[m[0] - 1] + '</em><b>' + m[1] + '</b><span>함께하는 게임 · ' + m[2] + '</span>' + k + '</div>' +
-          '<div class="mb"><a class="tb-btn primary" href="' + MAT_BASE + 'ws' + m[0] + '_student.pdf" target="_blank" rel="noopener">학생용 PDF</a>' +
-          '<a class="tb-btn" href="' + MAT_BASE + 'ws' + m[0] + '_teacher_' + T_KEY + '.pdf" target="_blank" rel="noopener">교사용 (정답·해설)</a></div></div>';
+          '<div class="mb"><a class="tb-btn primary" href="' + MAT_BASE + 'ws' + m[0] + '_student.pdf" target="_blank" rel="noopener"' +
+          ' onclick="return DashV2.pdf(event, this, \'학습지' + m[0] + '_' + m[1].replace(/ /g, '') + '_학생용.pdf\')">학생용 PDF</a>' +
+          '<a class="tb-btn" href="' + MAT_BASE + 'ws' + m[0] + '_teacher_' + T_KEY + '.pdf" target="_blank" rel="noopener"' +
+          ' onclick="return DashV2.pdf(event, this, \'학습지' + m[0] + '_' + m[1].replace(/ /g, '') + '_교사용_정답해설.pdf\')">교사용 (정답·해설)</a></div></div>';
       }).join('') + '</div>');
+  }
+
+  /* ── 앱에서 PDF 받기 (2026-10-13) ───────────────────────
+     웹은 링크를 새 탭으로 연다. 앱(아이폰·안드로이드)에서 링크를 누르면 바깥 브라우저로 튕겨 나가
+     저장·인쇄가 번거롭다 → 상담일지 앱과 같은 방식(성일님 "상담일지 앱 PDF 코드 참고"):
+     PDF 를 받아 앱 임시 폴더에 2MB씩 나눠 쓰고(큰 base64 한 번에 넘기면 안드로이드 메모리 부족) → 휴대폰 '공유' 창.
+     공유 창에서 바로 인쇄 · 파일에 저장 · 카톡/에어드롭으로 PC 에 보내기가 된다. */
+  var pdfBusy = false;
+  function nativeP() {
+    try {
+      var C = global.Capacitor;
+      if (!(C && C.isNativePlatform && C.isNativePlatform())) return null;
+      return C.Plugins && C.Plugins.Filesystem && C.Plugins.Share ? C.Plugins : null;
+    } catch (e) { return null; }
+  }
+  function toastPdf(msg, keep) {
+    var t = document.getElementById('v2-pdf-toast');
+    if (!t) { t = document.createElement('div'); t.id = 'v2-pdf-toast'; t.className = 'v2-toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); }
+    t.textContent = msg; t.hidden = !msg;
+    clearTimeout(t._h); if (msg && !keep) t._h = setTimeout(function () { t.hidden = true; }, 3500);
+  }
+  function b64of(buf) {
+    var u = new Uint8Array(buf), out = '', CH = 0x8000;
+    for (var i = 0; i < u.length; i += CH) out += String.fromCharCode.apply(null, u.subarray(i, i + CH));
+    return btoa(out);
+  }
+  function pdf(ev, a, fname) {
+    var P = nativeP();
+    if (!P) return true;                         // 웹: 링크 그대로(새 탭)
+    if (ev) ev.preventDefault();
+    if (pdfBusy) return false;
+    pdfBusy = true;
+    toastPdf('PDF 받는 중…', true);
+    (async function () {
+      try {
+        var r = await fetch(a.href, { cache: 'no-cache' });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        var b64 = b64of(await r.arrayBuffer()), CH = 2 * 1024 * 1024;
+        var res = await P.Filesystem.writeFile({ path: fname, data: b64.slice(0, CH), directory: 'CACHE' });
+        for (var i = CH; i < b64.length; i += CH) await P.Filesystem.appendFile({ path: fname, data: b64.slice(i, i + CH), directory: 'CACHE' });
+        toastPdf('');
+        try { await P.Share.share({ title: fname.replace(/\.pdf$/, ''), url: res.uri, dialogTitle: '학습지 저장 · 인쇄 · 보내기' }); }
+        catch (e) { /* 공유 창을 그냥 닫음 — 오류 아님 */ }
+      } catch (e) {
+        toastPdf('PDF를 받지 못했어요. 인터넷 연결을 확인하고 다시 눌러 주세요.');
+        try { if (global.DayLog) DayLog.hit('act', 'material_pdf', 'fail'); } catch (x) {}
+      } finally { pdfBusy = false; }
+    })();
+    return false;
   }
 
   /* ── 탭 ─────────────────────────────────────────────── */
@@ -268,5 +319,5 @@
   function initTab() { var t = 'overview'; try { t = localStorage.getItem(TAB_KEY) || t; } catch (e) {} tab(t); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initTab); else initTab();
 
-  global.DashV2 = { loadActivity: loadActivity, render: render, tab: tab, _A: function () { return A; } };
+  global.DashV2 = { loadActivity: loadActivity, render: render, tab: tab, pdf: pdf, _A: function () { return A; } };
 })(window);
