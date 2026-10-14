@@ -50,37 +50,79 @@
   function css() {
     if (document.getElementById('ev129-style')) return;
     var s = document.createElement('style'); s.id = 'ev129-style';
-    s.textContent =
-      '#ev129{max-width:640px;margin:0 auto 14px;display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:16px;cursor:pointer;' +
-      'background:linear-gradient(100deg,rgba(255,196,60,.16),rgba(255,140,40,.10));border:1.5px solid rgba(255,200,80,.55);color:#fff3d6;' +
-      'font-family:"Noto Sans KR",sans-serif;-webkit-user-select:none;user-select:none;box-sizing:border-box}' +
-      '#ev129 img{width:38px;height:38px;flex:none}' +
-      '#ev129 .t{flex:1;min-width:0;display:grid;gap:5px}' +
-      '#ev129 .h{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}' +
-      '#ev129 b{font-family:"Black Han Sans",sans-serif;font-weight:400;font-size:1.02rem;color:#ffd166;white-space:nowrap}' +
-      '#ev129 .d{font-size:.78rem;color:#ffcf8a;font-weight:700;white-space:nowrap}' +
-      '#ev129 .row{display:flex;align-items:center;gap:8px}' +
-      '#ev129 .bar{flex:1;height:7px;border-radius:4px;background:rgba(255,255,255,.14);overflow:hidden}' +
-      '#ev129 .bar i{display:block;height:100%;background:linear-gradient(90deg,#ffd166,#ff9f43);border-radius:4px}' +
-      '#ev129 .n{font-size:.8rem;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}' +
-      '#ev129 .go{flex:none;font-size:.78rem;color:#ffd166;font-weight:700}' +
-      '#ev129.won{background:linear-gradient(100deg,rgba(255,209,102,.28),rgba(255,159,67,.18))}' +
-      '#ev129.small{padding:8px 14px}#ev129.small img{width:28px;height:28px}' +
-      '@media(max-width:480px){#ev129{margin-bottom:12px;padding:10px 12px}#ev129 b{font-size:.95rem}}' +
+    /* 2026-10-14 성일님 "좀 더 예쁘게 — 제미나이로 뽑아 보고 예쁜 걸 차용해서" → 제미나이 시안 3안에서
+       금테 카드(③)·스테이지 11개를 보석으로(①)·오른쪽 위 EVENT 띠·보상 배지 미리보기·반짝이는 확인 단추를 가져왔다.
+       배지·보석 그림은 제미나이로 기존 아이콘과 같은 화풍(assets/icons/ev129_*.webp). */
+    s.textContent = [
+      '#ev129{position:relative;max-width:640px;margin:0 auto 14px;box-sizing:border-box;cursor:pointer;-webkit-user-select:none;user-select:none;',
+      ' border-radius:18px;padding:13px 34px 12px 12px;overflow:hidden;font-family:"Noto Sans KR",sans-serif;color:#fff3d6;',
+      ' background:radial-gradient(120% 140% at 0% 0%,rgba(255,196,80,.22),transparent 55%),linear-gradient(135deg,#1d1a33,#14223d 60%,#101a30) padding-box,',
+      '  linear-gradient(135deg,#ffe29a,#c8862a 35%,#7a4b14 55%,#f5c35a 80%,#8a5a1c) border-box;border:2px solid transparent;',
+      ' box-shadow:0 6px 22px rgba(0,0,0,.35),0 0 18px rgba(255,190,80,.18),inset 0 1px 0 rgba(255,255,255,.08);',
+      ' display:grid;grid-template-columns:auto 1fr auto;grid-template-rows:auto auto;column-gap:10px;row-gap:7px;align-items:center}',
+      '#ev129::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.10) 45%,transparent 55%);',
+      ' transform:translateX(-120%);animation:ev129shine 5.5s ease-in-out infinite}',
+      '@keyframes ev129shine{0%,65%{transform:translateX(-120%)}85%,100%{transform:translateX(120%)}}',
+      '#ev129 .em{grid-row:1/3;width:54px;height:54px;filter:drop-shadow(0 3px 8px rgba(120,90,255,.45))}',
+      '#ev129 .ti{display:flex;align-items:center;gap:7px;min-width:0}',
+      '#ev129 .ti b{font-family:"Black Han Sans",sans-serif;font-weight:400;font-size:1.08rem;white-space:nowrap;letter-spacing:.01em;',
+      ' background:linear-gradient(180deg,#fff3c4,#ffc24a 60%,#e08a1e);-webkit-background-clip:text;background-clip:text;color:transparent}',
+      '#ev129 .dd{flex:none;font-size:.7rem;font-weight:900;color:#1b1200;background:linear-gradient(180deg,#ffe08a,#f2a93b);border-radius:20px;padding:1px 8px;box-shadow:0 0 8px rgba(255,190,80,.4)}',
+      '#ev129 .go{grid-row:1;grid-column:3;align-self:center;font-size:.74rem;font-weight:700;color:#ffd98a;border:1px solid rgba(255,210,120,.45);border-radius:20px;padding:5px 10px;white-space:nowrap;background:rgba(255,200,90,.08)}',
+      '#ev129 .gems{grid-column:2/4;display:flex;align-items:center;gap:3px;min-width:0}',
+      '#ev129 .gems img{width:17px;height:17px;flex:none}',
+      '#ev129 .gems img.off{opacity:.75}',
+      '#ev129 .gems .sep{width:1px;height:13px;background:rgba(255,220,150,.35);margin:0 4px;flex:none}',
+      '#ev129 .gems .n{margin-left:6px;font-size:.76rem;font-weight:900;color:#ffe2a0;white-space:nowrap;font-variant-numeric:tabular-nums}',
+      '#ev129 .rb{position:absolute;top:7px;right:-30px;width:96px;transform:rotate(38deg);text-align:center;font-size:.56rem;font-weight:900;letter-spacing:.14em;',
+      ' color:#0c2230;background:linear-gradient(90deg,#5ef0ff,#25c6e6);box-shadow:0 2px 6px rgba(0,0,0,.3);padding:1px 0}',
+      '#ev129.won{box-shadow:0 6px 22px rgba(0,0,0,.35),0 0 26px rgba(255,200,90,.35),inset 0 1px 0 rgba(255,255,255,.1)}',
+      '#ev129.small{grid-template-columns:auto 1fr;padding:8px 14px 8px 10px}#ev129.small .em{grid-row:auto;width:34px;height:34px}#ev129.small::after{display:none}',
+      '#ev129.small .ti b{font-size:.95rem}#ev129.small .sub{font-size:.74rem;color:#e9cf98}',
+      '@media(max-width:400px){#ev129{padding:11px 30px 10px 9px;column-gap:8px}#ev129 .em{width:46px;height:46px}#ev129 .ti b{font-size:.98rem}',
+      ' #ev129 .gems img{width:15px;height:15px}#ev129 .gems{gap:2px}#ev129 .go{padding:4px 8px;font-size:.7rem}}',
+      '@media(max-width:350px){#ev129 .gems .sep{margin:0 2px}#ev129 .gems img{width:13px;height:13px}}',
       /* 설명 창 */
-      '#ev129-ov{position:fixed;inset:0;z-index:9000;background:rgba(2,8,16,.72);display:flex;align-items:center;justify-content:center;padding:18px}' +
-      '#ev129-ov .box{word-break:keep-all;width:min(420px,100%);max-height:88vh;overflow:auto;background:#0f1a2c;border:1.5px solid rgba(255,200,80,.5);border-radius:18px;padding:18px;color:#eaf2ff;font-family:"Noto Sans KR",sans-serif}' +
-      '#ev129-ov h3{margin:0 0 4px;font-family:"Black Han Sans",sans-serif;font-weight:400;color:#ffd166;font-size:1.25rem}' +
-      '#ev129-ov p{margin:6px 0;font-size:.9rem;line-height:1.55;color:#cfdaf0}' +
-      '#ev129-ov ul{list-style:none;margin:10px 0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:6px}' +
-      '#ev129-ov li{font-size:.84rem;padding:6px 9px;border-radius:9px;background:rgba(255,255,255,.06);color:#9fb0cc}' +
-      '#ev129-ov li.ok{background:rgba(46,204,113,.16);color:#7ee2a8;font-weight:700}' +
-      '#ev129-ov li em{font-style:normal;font-size:.72rem;opacity:.8;margin-right:4px}' +
-      '#ev129-ov button{width:100%;margin-top:8px;padding:12px;border:0;border-radius:12px;background:#ffd166;color:#1b1200;font-weight:900;font-size:.95rem;font-family:inherit;cursor:pointer}' +
+      '#ev129-ov{position:fixed;inset:0;z-index:9000;background:rgba(2,6,14,.78);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:16px;animation:ev129in .18s ease}',
+      '@keyframes ev129in{from{opacity:0}to{opacity:1}}',
+      '#ev129-ov .box{position:relative;width:min(400px,100%);max-height:90vh;overflow:auto;word-break:keep-all;border-radius:22px;color:#eaf2ff;font-family:"Noto Sans KR",sans-serif;',
+      ' background:linear-gradient(180deg,#18213d,#0f1729) padding-box,linear-gradient(160deg,#ffe29a,#b9772a 40%,#3a5bd0 75%,#7fe7ff) border-box;border:2px solid transparent;',
+      ' box-shadow:0 20px 60px rgba(0,0,0,.55),0 0 30px rgba(255,190,80,.15);animation:ev129pop .22s cubic-bezier(.2,.9,.3,1.2)}',
+      '@keyframes ev129pop{from{transform:scale(.94);opacity:.4}to{transform:none;opacity:1}}',
+      '#ev129-ov .hd{position:relative;padding:18px 18px 14px;display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;',
+      ' background:radial-gradient(90% 120% at 15% 10%,rgba(140,110,255,.35),transparent 60%),radial-gradient(80% 100% at 100% 0%,rgba(255,190,80,.22),transparent 60%);border-bottom:1px solid rgba(255,220,150,.18)}',
+      '#ev129-ov .hd img{width:84px;height:84px;filter:drop-shadow(0 4px 12px rgba(120,90,255,.5))}',
+      '#ev129-ov h3{margin:0;font-family:"Black Han Sans",sans-serif;font-weight:400;font-size:1.45rem;line-height:1.1;',
+      ' background:linear-gradient(180deg,#fff3c4,#ffc24a 60%,#e08a1e);-webkit-background-clip:text;background-clip:text;color:transparent}',
+      '#ev129-ov .per{margin-top:6px;font-size:.8rem;color:#cdd7ee;display:flex;flex-wrap:wrap;gap:6px;align-items:center}',
+      '#ev129-ov .per .dd{font-size:.72rem;font-weight:900;color:#1b1200;background:linear-gradient(180deg,#ffe08a,#f2a93b);border-radius:20px;padding:1px 9px}',
+      '#ev129-ov .bd{padding:14px 16px 16px;display:grid;gap:12px}',
+      '#ev129-ov .lead{margin:0;font-size:.88rem;line-height:1.55;color:#cfdaf0}',
+      '#ev129-ov .grp{display:grid;gap:7px}',
+      '#ev129-ov .gt{display:flex;align-items:center;gap:8px;font-size:.78rem;font-weight:900;color:#9fb3d8;letter-spacing:.04em}',
+      '#ev129-ov .gt::after{content:"";flex:1;height:1px;background:rgba(159,179,216,.25)}',
+      '#ev129-ov .tiles{display:grid;grid-template-columns:1fr 1fr;gap:6px}',
+      '#ev129-ov .tile{display:flex;align-items:center;gap:6px;padding:7px 8px;border-radius:11px;font-size:.8rem;white-space:nowrap;min-width:0;color:#9fb0cc;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06)}',
+      '#ev129-ov .tile img{width:18px;height:18px;flex:none}#ev129-ov .tile span:not(.ck){overflow:hidden;text-overflow:ellipsis}',
+      '#ev129-ov .tile.ok{color:#fff1cf;font-weight:700;background:linear-gradient(135deg,rgba(255,196,80,.22),rgba(255,150,40,.10));border-color:rgba(255,205,110,.55)}',
+      '#ev129-ov .tile.ok .ck{margin-left:auto;flex:none;font-size:.66rem;font-weight:900;color:#1b1200;background:#ffc24a;border-radius:20px;padding:0 5px}',
+      '#ev129-ov .pg{display:flex;align-items:center;gap:10px;font-size:.82rem;font-weight:900;color:#ffe2a0;font-variant-numeric:tabular-nums}',
+      '#ev129-ov .pg .bar{flex:1;height:9px;border-radius:5px;background:rgba(255,255,255,.1);overflow:hidden}',
+      '#ev129-ov .pg .bar i{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,#ffe08a,#ff9f43);box-shadow:0 0 10px rgba(255,180,70,.6)}',
+      '#ev129-ov .rw{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;padding:10px 12px;border-radius:14px;',
+      ' background:linear-gradient(135deg,rgba(110,90,255,.18),rgba(60,120,255,.08));border:1px solid rgba(150,140,255,.35)}',
+      '#ev129-ov .rw img{width:52px;height:52px}',
+      '#ev129-ov .rw.locked img{filter:grayscale(.85) brightness(.75)}',
+      '#ev129-ov .rw b{display:block;font-size:.95rem;color:#fff}#ev129-ov .rw span{font-size:.78rem;color:#b9c6e6}',
+      '#ev129-ov button{width:100%;padding:13px;border:0;border-radius:14px;cursor:pointer;font-family:"Black Han Sans",sans-serif;font-size:1.05rem;letter-spacing:.04em;color:#2a1600;',
+      ' background:linear-gradient(180deg,#ffe9a6,#ffc24a 55%,#e8921f);box-shadow:0 4px 0 #a8620f,0 8px 18px rgba(255,170,60,.35),inset 0 1px 0 rgba(255,255,255,.6)}',
+      '#ev129-ov button:active{transform:translateY(2px);box-shadow:0 2px 0 #a8620f,0 4px 10px rgba(255,170,60,.3)}',
+      '#ev129-ov button:focus-visible,#ev129:focus-visible{outline:2px solid #7fe7ff;outline-offset:2px}',
       /* 꽃가루 */
-      '.ev129-conf{position:fixed;top:-12px;width:9px;height:14px;z-index:9500;pointer-events:none;border-radius:2px;animation:ev129fall linear forwards}' +
-      '@keyframes ev129fall{to{transform:translateY(105vh) rotate(720deg);opacity:.9}}' +
-      '@media (prefers-reduced-motion: reduce){.ev129-conf{display:none}}';
+      '.ev129-conf{position:fixed;top:-12px;width:9px;height:14px;z-index:9500;pointer-events:none;border-radius:2px;animation:ev129fall linear forwards}',
+      '@keyframes ev129fall{to{transform:translateY(105vh) rotate(720deg);opacity:.9}}',
+      '@media (prefers-reduced-motion: reduce){.ev129-conf{display:none}#ev129::after{animation:none;display:none}#ev129-ov,#ev129-ov .box{animation:none}}'
+    ].join('\n');
     (document.head || document.documentElement).appendChild(s);
   }
 
@@ -98,20 +140,36 @@
     }
   }
 
+  var IC = 'assets/icons/';
+  function gem(on) { return '<img class="' + (on ? 'on' : 'off') + '" src="' + IC + (on ? 'ev129_gem_on' : 'ev129_gem_off') + '.webp" alt="">'; }
   function openInfo() {
     hit('open');
     var st = status(), won = hasBadge();
+    var g2 = st.list.filter(function (x) { return x.lv === '2급'; }), g1 = st.list.filter(function (x) { return x.lv === '1급'; });
+    function tiles(arr) {
+      return '<div class="tiles">' + arr.map(function (x) {
+        return '<div class="tile' + (x.done ? ' ok' : '') + '">' + gem(x.done) + '<span>' + x.name + '</span>' + (x.done ? '<span class="ck">깸</span>' : '') + '</div>';
+      }).join('') + '</div>';
+    }
+    var pct = Math.round(st.done / st.total * 100);
     var ov = document.createElement('div'); ov.id = 'ev129-ov';
     ov.innerHTML = '<div class="box" role="dialog" aria-label="129회 정복 챌린지">' +
-      '<h3>' + (won ? '129회 정복 완료!' : '129회 정복 챌린지') + '</h3>' +
-      '<p>12월 5일 전산회계 129회 시험 전까지 2급·1급 <b>모든 스테이지</b>를 깨 보세요. 틀린 문제는 오답노트에 모여요.</p>' +
-      '<p>기간: 11월 5일 ~ 12월 5일 낮 12시 · 시험까지 <b>' + dday() + '</b></p>' +
-      '<p>깬 스테이지 <b>' + st.done + ' / ' + st.total + '</b>' + (won ? ' · <b>129회 정복 배지</b>를 받았어요' : ' · 다 깨면 <b>129회 정복 배지</b>') + '</p>' +
-      '<ul>' + st.list.map(function (x) { return '<li class="' + (x.done ? 'ok' : '') + '"><em>' + x.lv + '</em>' + x.name + (x.done ? ' · 깸' : '') + '</li>'; }).join('') + '</ul>' +
-      '<button type="button">확인</button></div>';
+      '<div class="hd"><img src="' + IC + 'ev129_badge.webp" alt=""><div>' +
+        '<h3>' + (won ? '129회 정복 완료!' : '129회 정복 챌린지') + '</h3>' +
+        '<div class="per">11월 5일 ~ 12월 5일 낮 12시<span class="dd">시험 ' + dday() + '</span></div></div></div>' +
+      '<div class="bd">' +
+        '<p class="lead">12월 5일 전산회계 129회 전까지 2급·1급 <b>모든 스테이지</b>를 깨 보세요. 틀린 문제는 오답노트에 모여요.</p>' +
+        '<div class="grp"><div class="gt">2급 · ' + g2.length + '개</div>' + tiles(g2) + '</div>' +
+        '<div class="grp"><div class="gt">1급 · ' + g1.length + '개</div>' + tiles(g1) + '</div>' +
+        '<div class="pg"><div class="bar"><i style="width:' + pct + '%"></i></div>깬 스테이지 ' + st.done + ' / ' + st.total + '</div>' +
+        '<div class="rw' + (won ? '' : ' locked') + '"><img src="' + IC + 'ev129_badge.webp" alt=""><div><b>' + (won ? '129회 정복 배지를 받았어요' : '보상 · 129회 정복 배지') + '</b>' +
+          '<span>' + (won ? '시험까지 오답노트로 마무리해요' : '기간 안에 ' + st.total + '개를 모두 깨면 받아요') + '</span></div></div>' +
+        '<button type="button">확인</button>' +
+      '</div></div>';
     function close() { ov.remove(); }
     ov.addEventListener('click', function (e) { if (e.target === ov || e.target.tagName === 'BUTTON') close(); });
     document.body.appendChild(ov);
+    try { ov.querySelector('button').focus({ preventScroll: true }); } catch (e) {}
   }
 
   function render() {
@@ -136,14 +194,15 @@
     el.setAttribute('tabindex', '0');
     if (!on) {   // 기간이 끝난 뒤 — 받은 배지만 작게
       el.className = 'won small';
-      el.innerHTML = '<img src="assets/icons/trophy.webp" alt=""><div class="t"><div class="h"><b>129회 정복 배지</b><span class="d">2급·1급 모든 스테이지</span></div></div>';
+      el.innerHTML = '<img class="em" src="' + IC + 'ev129_badge.webp" alt=""><div><div class="ti"><b>129회 정복 배지</b></div><div class="sub">2급·1급 모든 스테이지를 깼어요</div></div>';
     } else {
       el.className = won ? 'won' : '';
-      var pct = Math.round(st.done / st.total * 100);
-      el.innerHTML = '<img src="assets/icons/' + (won ? 'trophy' : 'target') + '.webp" alt="">' +
-        '<div class="t"><div class="h"><b>' + (won ? '129회 정복 완료' : '129회 정복 챌린지') + '</b><span class="d">시험 ' + dday() + '</span></div>' +
-        '<div class="row"><div class="bar"><i style="width:' + pct + '%"></i></div><span class="n">깬 스테이지 ' + st.done + '/' + st.total + '</span></div></div>' +
-        '<span class="go">자세히</span>';
+      var gems = st.list.map(function (x, i) { return (i === 5 ? '<span class="sep"></span>' : '') + gem(x.done); }).join('');
+      el.innerHTML = '<span class="rb">EVENT</span>' +
+        '<img class="em" src="' + IC + 'ev129_badge.webp" alt="">' +
+        '<div class="ti"><b>' + (won ? '129회 정복 완료' : '129회 정복 챌린지') + '</b><span class="dd">' + dday() + '</span></div>' +
+        '<span class="go">자세히 ›</span>' +
+        '<div class="gems" aria-label="깬 스테이지 ' + st.done + '/' + st.total + '">' + gems + '<span class="n">' + st.done + '/' + st.total + '</span></div>';
     }
     el.onclick = openInfo;
     el.onkeydown = function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openInfo(); } };
