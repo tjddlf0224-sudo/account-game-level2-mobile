@@ -4,7 +4,7 @@
     <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
          **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
          이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-    <script src="safestore.js?v=68"></script>
+    <script src="safestore.js?v=69"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>오답노트 · 약점복습 | 전산회계 2급</title>
@@ -161,9 +161,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="wrongnote.js?v=68"></script>
-<script src="daylog.js?v=68"></script>
-<script src="adsense.js?v=68"></script>
+<script src="wrongnote.js?v=69"></script>
+<script src="daylog.js?v=69"></script>
+<script src="adsense.js?v=69"></script>
 <script>
 // 로그인 체크
 (function(){
@@ -299,12 +299,13 @@ async function wipe(){
 /* ───────── 다시풀기 모드 ───────── */
 var QUEUE=[], qi=0, solved=0;
 
+var _doneLogged = false;
 function startQuiz(){
     if (window.DayLog) DayLog.hit('act', 'review', 'start');   // 시작 횟수(끝까지 한 판은 Growth.logPlay → 'finish')
   QUEUE = ITEMS.slice();
   // 섞기
   for(var i=QUEUE.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=QUEUE[i];QUEUE[i]=QUEUE[j];QUEUE[j]=t; }
-  qi=0; solved=0;
+  qi=0; solved=0; _doneLogged=false;
   document.getElementById('home').style.display='none';
   document.getElementById('quiz').style.display='block';
   showQ();
@@ -320,6 +321,8 @@ function showQ(){
   var prog = document.getElementById('quiz-progress');
   var body = document.getElementById('quiz-body');
   if(qi >= QUEUE.length){
+    // 끝까지 푼 판 — 분석에 '다시 풀기 시작 28·끝 0'으로 보이던 것(2026-10-13 분석팀). 판수(play_events)엔 안 넣고 하루 합계만.
+    if (window.DayLog && !_doneLogged) { _doneLogged = true; DayLog.hit('act', 'review', 'finish'); }
     prog.textContent='';
     body.innerHTML = '<div class="quiz-card quiz-done"><span class="em">🏁</span>'+
       '<div style="font-size:1.1rem;margin-bottom:6px;">복습 완료!</div>'+
@@ -383,6 +386,6 @@ function nextQ(){ qi++; showQ(); }
 
 load();
 </script>
-<script src="emoji-icons.js?v=68"></script>
+<script src="emoji-icons.js?v=69"></script>
 </body>
 </html>

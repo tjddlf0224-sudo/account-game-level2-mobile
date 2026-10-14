@@ -5,7 +5,7 @@
 <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
      **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
      이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-<script src="safestore.js?v=68"></script>
+<script src="safestore.js?v=69"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
@@ -526,21 +526,22 @@ body.step-mode .gchoice{pointer-events:auto;cursor:pointer}
 @media (max-width:400px){ .mute-btn, .hdb { min-width:44px; flex-shrink:0; justify-content:center; text-align:center; } }
 </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="ask.js?v=68"></script>
-    <script src="wrongnote.js?v=68"></script>
-    <script src="growth.js?v=68"></script>
-<script src="streak.js?v=68"></script>
-<script src="examday.js?v=68"></script>
-<script src="remind.js?v=68"></script>
-    <script src="difficulty.js?v=68"></script>
-    <script src="readable.js?v=68"></script>
-    <script src="stepmode.js?v=68"></script>
-    <script src="daylog.js?v=68"></script>
-    <script src="review-prompt.js?v=68"></script>
+    <script src="ask.js?v=69"></script>
+    <script src="wrongnote.js?v=69"></script>
+    <script src="growth.js?v=69"></script>
+<script src="streak.js?v=69"></script>
+<script src="examday.js?v=69"></script>
+<script src="remind.js?v=69"></script>
+    <script src="difficulty.js?v=69"></script>
+    <script src="readable.js?v=69"></script>
+    <script src="stepmode.js?v=69"></script>
+    <script src="daylog.js?v=69"></script>
+    <script src="adlabel.js?v=69"></script>
+    <script src="review-prompt.js?v=69"></script>
 </head>
 <body>
 
-<script src="bgm.js?v=68"></script>
+<script src="bgm.js?v=69"></script>
 
 
 <div style="position:fixed;inset:0;background:var(--bg);z-index:-1;"></div>
@@ -592,7 +593,7 @@ body.step-mode .gchoice{pointer-events:auto;cursor:pointer}
       <div class="rank-colhdr"><span>순위</span><span>이름</span><span>직급</span><span>점수</span></div>
       <div id="rkbox"></div>
       <div class="brow">
-        <button class="revive-btn" id="revive-btn" onclick="Game.requestReviveAd()" style="display:none;">📺 광고 보고 부활하기</button>
+        <button class="revive-btn" id="revive-btn" onclick="Game.requestReviveAd()" style="display:none;" data-ad-label="부활하기">광고 보고 부활하기</button>
         <div class="action-btns" style="align-items:center;">
             <button class="btn-restart" onclick="Game.restart()">↺ 다시 하기</button>
             <button class="btn-hub" onclick="location.href='index.html'">🏠 메인으로 나가기</button>
@@ -686,7 +687,7 @@ const GAME_ID="flight";
 function escapeHTML(str) { if (!str) return ''; return str.replace(/[&<>'"]/g, function(tag) { const chars = { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }; return chars[tag] || tag; }); }
 
 const BGM={
-  el:BGMAudio.create('bgm5_flight.mp3?v=68'),
+  el:BGMAudio.create('bgm5_flight.mp3?v=69'),
   // 게임별 키(flight_muted)가 있으면 우선, 없으면 허브 전역 토글(hub_muted) 참조
   _muted:localStorage.getItem('flight_muted')!==null?localStorage.getItem('flight_muted')==='true':localStorage.getItem('hub_muted')==='true',
   _fadeTimer:null,
@@ -1112,7 +1113,8 @@ const Game={
         showAdPlaceholder();
         // 부활 버튼: 아직 부활을 안 썼고, 광고 제거 안 한 경우에만 노출
         const rb=document.getElementById('revive-btn');
-        if(rb) rb.style.display = (!self.reviveUsed && !(window.AdBridge && typeof AdBridge.isAdsRemoved==='function' && AdBridge.isAdsRemoved())) ? 'flex' : 'none';
+        // 앱에서만(웹은 광고가 없어 '광고 불러오는 중' 안내만 떠서 지키지 못할 약속이 된다 — 다른 게임의 보상형 단추와 같은 규칙, 2026-10-14)
+        if(rb) rb.style.display = (window.AdBridge && !self.reviveUsed && !(typeof AdBridge.isAdsRemoved==='function' && AdBridge.isAdsRemoved())) ? 'flex' : 'none';
         if(rb && rb.style.display==='flex' && window.AdBridge && window.DayLog) DayLog.hit('ad','flight','rw_offer');
         self.loadRanking();
         const pname = document.getElementById('pname').value || '나';
@@ -1875,8 +1877,8 @@ const Tutorial = (function () {
 function openGuide() { Tutorial.start(); }
 </script>
 
-<script src="emoji-icons.js?v=68"></script>
+<script src="emoji-icons.js?v=69"></script>
 <!-- 웹 전용 광고(시작·결과 화면만, 앱에선 adsense.js 가 스스로 멈춘다) -->
-<script src="adsense.js?v=68"></script>
+<script src="adsense.js?v=69"></script>
 </body>
 </html>
