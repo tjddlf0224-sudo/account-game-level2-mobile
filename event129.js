@@ -5,7 +5,9 @@
  *  이벤트 카드를 보고 들어온 사람이 앱 안에서도 이벤트를 볼 수 있게 — 한국사 event81.js 와 같은 틀.
  *   ① 이벤트 기간에만 허브(2급·1급) 맨 위에 띠: '129회 정복 챌린지 · 깬 스테이지 n/11 · D-n'(누르면 설명)
  *   ② 기간 안에 2급 5개 + 1급 6개를 모두 깨면 '129회 정복' 배지 + 축하 한 번
- *   기간이 끝나면 띠는 저절로 사라지고 받은 배지(기기 저장)는 남는다(배지를 받은 사람에겐 기간 뒤에도 작게 보임).
+ *   기간이 끝나면 띠는 저절로 사라지고 받은 배지는 남는다(배지를 받은 사람에겐 기간 뒤에도 작게 보임).
+ *   배지는 계정(닉네임)에도 저장한다(Supabase user_badges, 2026-10-15 성일님 "그렇게 바꿔") — 앱을 지우거나 폰을 바꿔도
+ *   같은 닉네임으로 들어오면 되살아난다. 기기 값에는 주인 닉네임을 같이 적어, 한 기기에서 다른 사람으로 바꾸면 안 넘어간다.
  *
  *  '깼다'는 허브의 클리어 기준과 같다.
  *   · 2급: index.html renderStageMap 과 같은 식 — 최고점 ≥ MIN_CLEAR 또는 hub_cleared_<게임>='1'
@@ -19,7 +21,7 @@
   var START = Date.UTC(2026, 10, 4, 15, 0, 0);   // 2026-11-05 00:00 KST
   var END   = Date.UTC(2026, 11, 5, 3, 0, 0);    // 2026-12-05 12:00 KST
   var EXAM  = Date.UTC(2026, 11, 4, 15, 0, 0);   // 시험일 12/5 0시 KST — D-day 셈
-  var K_BADGE = 'am_ev129_badge', K_SEEN = 'am_ev129_seen';
+  var K_BADGE = 'am_ev129_badge', K_SEEN = 'am_ev129_seen', K_WHO = 'am_ev129_badge_who', K_PUSHED = 'am_ev129_badge_pushed';
   var MIN_CLEAR = { acid: 1000, memory: 500, debit: 600, factory: 600, flight: 8000 };
   var LV2 = [['acid', 'hub_acid_best', '계정과목 산성비'], ['memory', 'hub_memory_best', '기억의 전당'], ['debit', 'hub_debit_best', '회계 차변대변'],
              ['factory', 'hub_factory_best', '결산분개 조립공장'], ['flight', 'hub_flight_hi', '플라이트 장부조회']];
@@ -45,7 +47,39 @@
     return { list: all, done: all.filter(function (x) { return x.done; }).length, total: all.length };
   }
   function dday() { var d = Math.ceil((EXAM - now()) / 86400000); return d > 0 ? 'D-' + d : 'D-DAY'; }
-  function hasBadge() { return !!get(K_BADGE); }
+  function me() { return (get('hub_nickname') || '').trim(); }
+  // 기기에 남은 배지가 지금 사람 것인지(주인 기록이 없는 옛 값은 지금 사람 것으로 본다)
+  function hasBadge() { var w = get(K_WHO); return !!get(K_BADGE) && (!w || w === me()); }
+
+  /* ── 계정 저장(Supabase user_badges) ──────────────────────────
+     · 받을 때 올린다(실패하면 다음에 허브를 열 때 다시).  · 허브를 열 때 받아 온다(기기에 없으면 채움, 축하는 안 띄움).
+     닉네임 바꾸기(rename_player)·회원탈퇴(delete_account) RPC 가 서버 쪽 배지도 같이 옮기고 지운다. */
+  function db() { try { return typeof global._sbClient === 'function' ? global._sbClient() : null; } catch (e) { return null; } }
+  var pushing = false;
+  function push() {
+    var n = me(), c = db();
+    if (pushing || !n || !c || !hasBadge() || get(K_PUSHED) === n) return;
+    pushing = true;
+    try {
+      c.from('user_badges').upsert({ user_name: n, badge: 'ev129', group_id: get('hub_group_id') || null,
+        earned_at: new Date(+get(K_BADGE) || Date.now()).toISOString() }, { onConflict: 'user_name,badge', ignoreDuplicates: true })
+        .then(function (r) { pushing = false; if (r && !r.error) set(K_PUSHED, n); }, function () { pushing = false; });
+    } catch (e) { pushing = false; }
+  }
+  function pull() {
+    var n = me(), c = db();
+    if (!n || !c) return;
+    if (hasBadge()) { push(); return; }
+    try {
+      c.from('user_badges').select('earned_at').eq('user_name', n).eq('badge', 'ev129').limit(1)
+        .then(function (r) {
+          var row = r && !r.error && r.data && r.data[0];
+          if (!row || me() !== n) return;
+          set(K_BADGE, String(Date.parse(row.earned_at) || now())); set(K_WHO, n); set(K_PUSHED, n);
+          try { render(); } catch (e) {}
+        }, function () {});
+    } catch (e) {}
+  }
 
   function css() {
     if (document.getElementById('ev129-style')) return;
@@ -182,7 +216,8 @@
     var st = status();
     // 기간 안에 다 깨면 배지 + 축하(한 번)
     if (on && !won && st.done >= st.total) {
-      set(K_BADGE, String(now())); won = true; hit('complete');
+      set(K_BADGE, String(now())); set(K_WHO, me()); try { localStorage.removeItem(K_PUSHED); } catch (e) {}
+      won = true; hit('complete'); push();
       setTimeout(function () {
         confetti();
         if (global.Ask && Ask.alert) Ask.alert('129회 정복!\n2급·1급 스테이지 ' + st.total + '개를 모두 깼어요.\n시험까지 ' + dday() + ' — 오답노트로 마무리해요.');
@@ -214,6 +249,7 @@
 
   function boot() {
     render();
+    pull();
     /* 허브는 계정의 최고점을 서버에서 받아 온 뒤 renderStageMap() 으로 지도를 다시 그린다 — 그때 띠 숫자도 다시 센다.
        (함수 선언은 window 속성이라 감싸면 허브 안의 renderStageMap() 호출도 이쪽을 지난다) */
     if (typeof global.renderStageMap === 'function' && !global.renderStageMap.__ev129) {
