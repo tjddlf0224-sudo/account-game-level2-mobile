@@ -70,9 +70,10 @@
       return;
     }
     dd.textContent = ddayText(c.days);
-    de.textContent = '시험일 ' + fmt(c.d) + ' · ' + (c.auto ? '공식 일정 기준' : '직접 설정');
+    // 2026-10-18 성일님 "깔끔하게" — 자동(공식 일정)일 때 붙던 '· 공식 일정 기준' 뺌
+    de.textContent = '시험일 ' + fmt(c.d) + (c.auto ? '' : ' · 직접 설정');
     if (note) {
-      if (c.auto) { note.style.display = ''; note.textContent = '시험일은 바뀔 수 있어요 · 한국세무사회(license.kacpta.or.kr)에서 꼭 확인하세요'; }
+      if (c.auto) { note.style.display = ''; note.textContent = '시험일은 바뀔 수 있어요'; }   // 같은 날 '한국세무사회(…)에서 꼭 확인하세요' 뺌
       else note.style.display = 'none';
     }
     if (btn) btn.textContent = '✏️ 변경';
