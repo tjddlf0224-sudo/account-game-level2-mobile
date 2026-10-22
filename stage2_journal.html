@@ -5,7 +5,7 @@
 <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
      **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
      이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-<script src="safestore.js?v=78"></script>
+<script src="safestore.js?v=79"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
@@ -937,24 +937,25 @@
 
 <button id="rewarded-btn" onclick="requestRewarded()" data-ad-label="+30초 더 받기" data-ad-web="⏱ ">⏱ +30초 광고 보기</button>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="pausewatch.js?v=78"></script>
-    <script src="ask.js?v=78"></script>
-    <script src="wrongnote.js?v=78"></script>
-    <script src="growth.js?v=78"></script>
-<script src="streak.js?v=78"></script>
-<script src="examday.js?v=78"></script>
-<script src="remind.js?v=78"></script>
-    <script src="difficulty.js?v=78"></script>
-    <script src="readable.js?v=78"></script>
-    <script src="stepmode.js?v=78"></script>
-    <script src="daylog.js?v=78"></script>
-    <script src="adlabel.js?v=78"></script>
-    <script src="review-prompt.js?v=78"></script>
+    <script src="pausewatch.js?v=79"></script>
+    <script src="ask.js?v=79"></script>
+    <script src="wrongnote.js?v=79"></script>
+    <script src="growth.js?v=79"></script>
+<script src="streak.js?v=79"></script>
+<script src="examday.js?v=79"></script>
+<script src="remind.js?v=79"></script>
+    <script src="difficulty.js?v=79"></script>
+    <script src="readable.js?v=79"></script>
+    <script src="stepmode.js?v=79"></script>
+    <script src="daylog.js?v=79"></script>
+    <script src="adlabel.js?v=79"></script>
+    <script src="combo-revive.js?v=79"></script>
+    <script src="review-prompt.js?v=79"></script>
 </head>
 <body>
 
 <!-- 🎵 BGM 오디오 엘리먼트 -->
-<script src="bgm.js?v=78"></script>
+<script src="bgm.js?v=79"></script>
 
 
 
@@ -1201,7 +1202,7 @@ const GAME_ID   = "journal_lv1";
 // ══════════════════════════════════════
 // 🎵 BGM 관리
 // ══════════════════════════════════════
-const bgm = BGMAudio.create('bgm_lv1_journal.mp3?v=78');   // 분개의 탑 전용 곡(2026-10-01)
+const bgm = BGMAudio.create('bgm_lv1_journal.mp3?v=79');   // 분개의 탑 전용 곡(2026-10-01)
 bgm.volume = 0.5;
 
 // 음소거 상태: localStorage에 저장해서 다음 게임에도 유지
@@ -1667,8 +1668,12 @@ function finishLv2Round() {
         nextQTimer = setTimeout(() => { card.classList.remove('correct'); nextQuestion(); }, e.note ? 1700 : 550);
         return;
     }
-    combo = 0; wrongCount++;
+    const _had = combo; combo = 0; wrongCount++;
     if (!R.frozen) timeLeft = Math.max(0, timeLeft - 5);
+    if (!STEP && _had >= 5 && window.ComboRevive) ComboRevive.offer(_had, { place: 'journal', pos: 'low', isPlaying: () => isPlaying,   // 연속 정답 되살리기(2026-10-22, combo-revive.js)
+        pause() { adPaused = true; armResumeOnReturn(); },
+        resume() { _wantResume = false; if (window._resumeSafety) clearTimeout(window._resumeSafety); adPaused = false; },
+        restore(n) { combo = n; if (n > maxCombo) maxCombo = n; updateHUD(); showFeedback('ok', n + '연속 되살림!'); } });
     if (window.WrongNote) WrongNote.add({ game: GAME_ID, key: e.id, q: e.stem, correct: slipText(e),
         wrong: '(항목 중 오답 포함)', type: '전표 완성(난이도2)' });
     card.classList.add('wrong');
@@ -1740,8 +1745,12 @@ function checkAnswer(side) {
         nextQTimer = setTimeout(() => { card.classList.remove('correct'); nextQuestion(); }, 130);
     } else {
         playSound('wrong');
-        combo = 0;
+        const _had = combo; combo = 0;
         if (!wasFrozen) timeLeft = Math.max(0, timeLeft - 5);
+        if (!STEP && _had >= 5 && window.ComboRevive) ComboRevive.offer(_had, { place: 'journal', pos: 'low', isPlaying: () => isPlaying,   // 연속 정답 되살리기(2026-10-22, combo-revive.js)
+        pause() { adPaused = true; armResumeOnReturn(); },
+        resume() { _wantResume = false; if (window._resumeSafety) clearTimeout(window._resumeSafety); adPaused = false; },
+        restore(n) { combo = n; if (n > maxCombo) maxCombo = n; updateHUD(); showFeedback('ok', n + '연속 되살림!'); } });
         wrongCount++;
         if (window.WrongNote) WrongNote.add({ game: GAME_ID, key: currentQ.entry.id + '｜' + currentQ.target,
             q: currentQ.entry.stem,
@@ -1804,6 +1813,7 @@ function showCombo(n) {
 
 function endGame() {
     isPlaying = false;
+    if (window.ComboRevive) ComboRevive.close();
     explainPause = false;
     if (window.Growth) Growth.logPlay(GAME_ID);
     if (window.WrongNote) WrongNote.flush(GAME_ID);
@@ -2686,8 +2696,8 @@ const Tutorial = (function () {
 function openGuide() { Tutorial.start(); }
 </script>
 
-<script src="emoji-icons.js?v=78"></script>
+<script src="emoji-icons.js?v=79"></script>
 <!-- 웹 전용 광고(시작·결과 화면만, 앱에선 adsense.js 가 스스로 멈춘다) -->
-<script src="adsense.js?v=78"></script>
+<script src="adsense.js?v=79"></script>
 </body>
 </html>

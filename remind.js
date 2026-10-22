@@ -263,5 +263,5 @@
   function boot() { mountSetting(); setTimeout(schedule, 1200); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 
-  global.Remind = { can: can, isOn: isOn, turnOn: turnOn, turnOff: turnOff, schedule: schedule, offerOnce: offerOnce, dueWrongs: dueWrongs, mountSetting: mountSetting, _bodyFor: bodyFor, _noteFor: noteFor, _tierOf: tierOf };
+  global.Remind = { can: can, isOn: isOn, turnOn: turnOn, turnOff: turnOff, schedule: schedule, offerOnce: offerOnce, dueWrongs: dueWrongs, mountSetting: mountSetting, _bodyFor: bodyFor, _noteFor: noteFor, _tierOf: tierOf, _attachIos: attachIos };
 })(window);
