@@ -152,7 +152,7 @@
    "hint": "Advances to Employees (asset) increase → debit"
   },
   {
-   "sentence": "Sent withheld FICA taxes to the government → <b class=\"target-account\">FICA Taxes Payable</b>",
+   "sentence": "Sent withheld U.S. FICA taxes to the government → <b class=\"target-account\">FICA Taxes Payable</b>",
    "target": "FICA Taxes Payable",
    "type": "left",
    "hint": "FICA Taxes Payable (liability) decrease → debit"
@@ -182,7 +182,7 @@
    "hint": "Payroll Tax Expense (expense) increase → debit"
   },
   {
-   "sentence": "Sent the sales tax collected to the state → <b class=\"target-account\">Sales Tax Payable</b>",
+   "sentence": "Sent the U.S. sales tax collected to the state → <b class=\"target-account\">Sales Tax Payable</b>",
    "target": "Sales Tax Payable",
    "type": "left",
    "hint": "Sales Tax Payable (liability) decrease → debit"
@@ -272,13 +272,13 @@
    "hint": "Interest Revenue (revenue) increase → credit"
   },
   {
-   "sentence": "Collected sales tax from customers → <b class=\"target-account\">Sales Tax Payable</b>",
+   "sentence": "Collected U.S. sales tax from customers → <b class=\"target-account\">Sales Tax Payable</b>",
    "target": "Sales Tax Payable",
    "type": "right",
    "hint": "Sales Tax Payable (liability) increase → credit"
   },
   {
-   "sentence": "Withheld FICA taxes from employees' pay → <b class=\"target-account\">FICA Taxes Payable</b>",
+   "sentence": "Withheld U.S. FICA taxes from employees' pay → <b class=\"target-account\">FICA Taxes Payable</b>",
    "target": "FICA Taxes Payable",
    "type": "right",
    "hint": "FICA Taxes Payable (liability) increase → credit"
@@ -559,7 +559,7 @@
    "voucherType": "Cash Payments Journal"
   },
   {
-   "sentence": "Paid $450 cash to the state for sales tax collected.",
+   "sentence": "Paid $450 cash to the state for U.S. sales tax collected.",
    "debitAcc": "Sales Tax Payable",
    "creditAcc": "Cash",
    "vendor": "",

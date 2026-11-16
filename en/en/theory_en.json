@@ -2149,7 +2149,7 @@
    "format": [
     "calculation"
    ],
-   "stem": "Merchandise inventory: 100 units at $10 were on hand, then 200 units at $12 were bought. 150 units were sold. Using FIFO, what is the cost of goods sold?",
+   "stem": "Merchandise inventory: 100 units at $10 were on hand, then 200 units at $12 were bought. 150 units were sold. Under U.S. GAAP, using FIFO, what is the cost of goods sold?",
    "options": [
     "$1,800",
     "$1,600",
@@ -2158,7 +2158,7 @@
    ],
    "answer": 2,
    "answerText": "$1,600",
-   "explanation": "FIFO sells the oldest units first: 100 units at $10 is $1,000, plus 50 units at $12 is $600. The total is $1,600.",
+   "explanation": "FIFO sells the oldest units first: 100 units at $10 is $1,000, plus 50 units at $12 is $600. The total is $1,600. LIFO is not allowed under IFRS (Canada, Australia, New Zealand).",
    "deepDive": {
     "concept": "FIFO cost of goods sold",
     "conceptExplain": "First-in, first-out assumes the oldest costs leave inventory first. So cost of goods sold uses the earliest prices and ending inventory holds the latest prices.",
@@ -2177,7 +2177,7 @@
    "format": [
     "calculation"
    ],
-   "stem": "Merchandise inventory: 100 units at $10 were on hand, then 200 units at $12 were bought. 150 units were sold. Using LIFO, what is the cost of goods sold?",
+   "stem": "Merchandise inventory: 100 units at $10 were on hand, then 200 units at $12 were bought. 150 units were sold. Under U.S. GAAP, using LIFO, what is the cost of goods sold?",
    "options": [
     "$1,600",
     "$1,700",
@@ -2186,7 +2186,7 @@
    ],
    "answer": 3,
    "answerText": "$1,800",
-   "explanation": "LIFO sells the newest units first, so all 150 units come from the $12 purchase. The cost is 150 x $12 = $1,800.",
+   "explanation": "LIFO sells the newest units first, so all 150 units come from the $12 purchase. The cost is 150 x $12 = $1,800. LIFO is not allowed under IFRS (Canada, Australia, New Zealand).",
    "deepDive": {
     "concept": "LIFO cost of goods sold",
     "conceptExplain": "Last-in, first-out assumes the most recent costs leave inventory first. When prices rise, LIFO gives a higher cost of goods sold than FIFO.",
@@ -2233,7 +2233,7 @@
    "format": [
     "true statement"
    ],
-   "stem": "When purchase prices are rising, which statement comparing FIFO and LIFO is correct?",
+   "stem": "Under U.S. GAAP, when purchase prices are rising, which statement comparing FIFO and LIFO is correct?",
    "options": [
     "FIFO reports a higher gross profit than LIFO",
     "FIFO reports a lower ending inventory than LIFO",
@@ -2242,7 +2242,7 @@
    ],
    "answer": 1,
    "answerText": "FIFO reports a higher gross profit than LIFO",
-   "explanation": "With rising prices, FIFO charges the older, lower costs to cost of goods sold. That leaves a higher gross profit than LIFO.",
+   "explanation": "With rising prices, FIFO charges the older, lower costs to cost of goods sold. That leaves a higher gross profit than LIFO. LIFO is not allowed under IFRS (Canada, Australia, New Zealand).",
    "deepDive": {
     "concept": "FIFO vs LIFO when prices rise",
     "conceptExplain": "The method changes which costs go to expense and which stay in inventory. Rising prices make FIFO's cost of goods sold lower and its ending inventory higher than LIFO's.",
@@ -2261,7 +2261,7 @@
    "format": [
     "application"
    ],
-   "stem": "Which cost flow method values ending merchandise inventory closest to current replacement cost when prices are rising?",
+   "stem": "Under U.S. GAAP, which cost flow method values ending merchandise inventory closest to current replacement cost when prices are rising?",
    "options": [
     "LIFO",
     "FIFO",
@@ -2270,7 +2270,7 @@
    ],
    "answer": 2,
    "answerText": "FIFO",
-   "explanation": "FIFO leaves the most recent purchases in ending inventory. Those costs are closest to today's prices.",
+   "explanation": "FIFO leaves the most recent purchases in ending inventory. Those costs are closest to today's prices. LIFO is not allowed under IFRS (Canada, Australia, New Zealand).",
    "deepDive": {
     "concept": "Inventory valuation on the balance sheet",
     "conceptExplain": "Ending inventory under FIFO is made up of the latest purchases. LIFO leaves the oldest costs on the balance sheet, which can look out of date after years of rising prices.",
@@ -3866,7 +3866,7 @@
    ],
    "answer": 4,
    "answerText": "$210",
-   "explanation": "The customer paid $200 plus tax of $10, so the refund is $210. The company no longer owes that $10 to the state.",
+   "explanation": "The customer paid $200 plus tax of $10, so the refund is $210. The company no longer owes that $10 to the state. This follows U.S. sales tax rules.",
    "deepDive": {
     "concept": "Sales tax on returns",
     "conceptExplain": "Sales tax is collected for the state. When goods come back, the tax is returned with the price, and Sales Tax Payable goes down.",
@@ -3894,7 +3894,7 @@
    ],
    "answer": 1,
    "answerText": "$153.00",
-   "explanation": "FICA withheld is 7.65% of $2,000, which is $153.00.",
+   "explanation": "FICA withheld is 7.65% of $2,000, which is $153.00. This follows U.S. payroll rules.",
    "deepDive": {
     "concept": "FICA withholding",
     "conceptExplain": "FICA pays for Social Security and Medicare. The employer withholds the employee's part from pay and records it in FICA Taxes Payable.",
@@ -3922,7 +3922,7 @@
    ],
    "answer": 2,
    "answerText": "$4,017.50",
-   "explanation": "FICA withheld is $5,000 x 7.65% = $382.50. Net pay is $5,000 - $382.50 - $600 = $4,017.50.",
+   "explanation": "FICA withheld is $5,000 x 7.65% = $382.50. Net pay is $5,000 - $382.50 - $600 = $4,017.50. This follows U.S. payroll rules.",
    "deepDive": {
     "concept": "Net pay",
     "conceptExplain": "Net pay is gross pay less the amounts withheld from the employee. The employer's own payroll taxes are not taken out of the employee's pay.",
@@ -3950,7 +3950,7 @@
    ],
    "answer": 3,
    "answerText": "Dr Wages Expense 5,000 / Cr FICA Taxes Payable 382.50, Cr Federal Income Taxes Payable 600, Cr Cash 4,017.50",
-   "explanation": "The expense is the full gross wages. The withholdings are liabilities, and the employee receives the remainder in cash.",
+   "explanation": "The expense is the full gross wages. The withholdings are liabilities, and the employee receives the remainder in cash. This follows U.S. payroll rules.",
    "deepDive": {
     "concept": "Recording payroll",
     "conceptExplain": "Wages Expense is always the gross amount earned. Amounts withheld are owed to the government until they are sent in, so they are credited to payable accounts.",
@@ -3978,7 +3978,7 @@
    ],
    "answer": 2,
    "answerText": "$382.50",
-   "explanation": "The employer's share equals the employee's share, 7.65% x $5,000 = $382.50. It is an expense of the employer.",
+   "explanation": "The employer's share equals the employee's share, 7.65% x $5,000 = $382.50. It is an expense of the employer. This follows U.S. payroll rules.",
    "deepDive": {
     "concept": "Employer payroll taxes",
     "conceptExplain": "Employer payroll taxes are a cost of having employees. The entry is Dr Payroll Tax Expense 382.50 / Cr FICA Taxes Payable 382.50.",
@@ -4006,7 +4006,7 @@
    ],
    "answer": 4,
    "answerText": "$765.00",
-   "explanation": "The liability includes both the employee's withholding and the employer's match. $382.50 + $382.50 = $765.00.",
+   "explanation": "The liability includes both the employee's withholding and the employer's match. $382.50 + $382.50 = $765.00. This follows U.S. payroll rules.",
    "deepDive": {
     "concept": "FICA Taxes Payable",
     "conceptExplain": "The company owes the government both shares, so FICA Taxes Payable holds the total until it is sent in.",
@@ -4034,7 +4034,7 @@
    ],
    "answer": 3,
    "answerText": "Amounts withheld from employees are liabilities of the employer until they are sent to the government",
-   "explanation": "The employer holds the money for the employee and the government. So the amounts are credited to payable accounts.",
+   "explanation": "The employer holds the money for the employee and the government. So the amounts are credited to payable accounts. This follows U.S. payroll rules.",
    "deepDive": {
     "concept": "Withholdings are liabilities",
     "conceptExplain": "Employee withholdings were earned by the employee but are paid to the government. The employer acts as a collector and records a liability until it sends the money.",
@@ -4062,7 +4062,7 @@
    ],
    "answer": 1,
    "answerText": "Cr Sales Tax Payable 60",
-   "explanation": "The $60 collected is owed to the state. So the entry credits Sales Tax Payable, along with Dr Cash 1,060 and Cr Sales Revenue 1,000.",
+   "explanation": "The $60 collected is owed to the state. So the entry credits Sales Tax Payable, along with Dr Cash 1,060 and Cr Sales Revenue 1,000. This follows U.S. sales tax rules.",
    "deepDive": {
     "concept": "Sales tax collected",
     "conceptExplain": "A seller collects sales tax for the state. It is a liability, not revenue, until the company sends it in.",
@@ -4090,7 +4090,7 @@
    ],
    "answer": 4,
    "answerText": "$1,750",
-   "explanation": "Sales tax equals the sales amount times the tax rate. $25,000 x 7% = $1,750.",
+   "explanation": "Sales tax equals the sales amount times the tax rate. $25,000 x 7% = $1,750. This follows U.S. sales tax rules.",
    "deepDive": {
     "concept": "Computing sales tax",
     "conceptExplain": "The tax is added to the sale at the register and does not count as the company's revenue. The total owed to the state at month-end is the total tax collected.",
@@ -4118,7 +4118,7 @@
    ],
    "answer": 3,
    "answerText": "It is a current liability, because the company collects the tax for the state",
-   "explanation": "The company collects sales tax on behalf of the state. So it owes the money and records a liability.",
+   "explanation": "The company collects sales tax on behalf of the state. So it owes the money and records a liability. This follows U.S. sales tax rules.",
    "deepDive": {
     "concept": "Sales tax is a liability",
     "conceptExplain": "The company is only an agent for the state. The tax is not part of the company's income or expenses.",
@@ -4146,7 +4146,7 @@
    ],
    "answer": 1,
    "answerText": "Dr Sales Tax Payable 1,750 / Cr Cash 1,750",
-   "explanation": "Paying the state settles the liability. So Sales Tax Payable is debited and Cash is credited.",
+   "explanation": "Paying the state settles the liability. So Sales Tax Payable is debited and Cash is credited. This follows U.S. sales tax rules.",
    "deepDive": {
     "concept": "Remitting sales tax",
     "conceptExplain": "Remitting means sending the money in. The liability that was credited when the tax was collected is debited when it is paid.",

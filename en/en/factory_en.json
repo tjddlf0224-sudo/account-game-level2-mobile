@@ -228,7 +228,7 @@
    ]
   },
   {
-   "q": "The employer's share of FICA tax on accrued wages has not been paid.",
+   "q": "The employer's share of U.S. FICA tax on accrued wages has not been paid.",
    "hint": "Expense increase (debit) / Liability increase (credit)",
    "L": "Payroll Tax Expense",
    "R": "FICA Taxes Payable",

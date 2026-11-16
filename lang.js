@@ -14,7 +14,9 @@
  *        en-*  (en-KR 은 빼고)          → 미국판   ┐ 단, 기기 시간대가 Asia/Seoul 이면 한국판
  *        zh-TW·zh-HK·zh-MO·zh-Hant → 대만판           ┘ (영어·중국어로 쓰는 한국 사용자 보호 — 11/15 부모 추가, 팀장 ② 보고)
  *      zh-HK·zh-MO 도 대만판(11/16 성일님 "대만판으로 열기" — 번체 스토어 정보가 홍콩·마카오에도 보여서, 받으면 번체 화면이 맞음). 일본판 규칙은 3.0.18 그대로(시간대 안 봄).
- *   4. 그 밖 → 한국판.
+ *        그 밖 언어(fr-CA·zh-CN·zh-Hans·vi …, ko 아닌 것) → 미국판 — 서울 시간대면 한국판, 기기 언어 ko 는 해외 시간대여도 한국판,
+ *          언어 값이 비면 한국판(11/16 팀장 결재 C-3 — 캐나다 퀘벡 등 판에 없는 언어 기기가 한국어 화면을 받던 것. 중국 스토어 미판매라 간체도 영어판).
+ *   4. 그 밖(웹·ko·빈 값) → 한국판.
  * 2~4 로 정해지면 am_lang 에 **넘어가기 전에** 적어 둬서 다음부터는 1 로 간다.
  *
  * window.AmLang = { get(), set(v), ask(), go(v) } — 설정 단추용(ask = 판 고르는 창 뒤 go). go 는 한국판 알림 예약(한국어)을 지우고 넘어간다
@@ -43,7 +45,8 @@
       if (/^ja\b/i.test(l)) return 'ja';
       if (seoulTz()) return null;
       if (/^en\b/i.test(l)) return /-KR\b/i.test(l) ? null : 'en';
-      if (/^zh-(TW|HK|MO|Hant)\b/i.test(l)) return 'tw';   // 번체(대만·홍콩·마카오), 간체 zh-CN·zh-Hans 는 한국판
+      if (/^zh-(TW|HK|MO|Hant)\b/i.test(l)) return 'tw';   // 번체(대만·홍콩·마카오)
+      if (l && !/^ko\b/i.test(l)) return 'en';            // 판에 없는 언어(fr-CA·zh-CN·vi…) → 미국판(11/16 팀장 C-3), ko·빈 값은 한국판
     } catch (e) {}
     return null;
   }

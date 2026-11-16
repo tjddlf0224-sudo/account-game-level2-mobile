@@ -221,7 +221,7 @@
    "name": "Sales Tax Payable",
    "type": "Liability",
    "clue": "Tax collected for the state",
-   "desc": "Sales tax collected from customers that the company must pass on to the state.",
+   "desc": "U.S. sales tax collected from customers that the company must pass on to the state.",
    "ex": "Sold merchandise for cash plus 6% tax → Dr Cash / Cr Sales Revenue, Cr Sales Tax Payable"
   },
   {
@@ -235,7 +235,7 @@
    "name": "FICA Taxes Payable",
    "type": "Liability",
    "clue": "Social Security and Medicare owed",
-   "desc": "Social Security and Medicare taxes withheld from pay, plus the company's share, not yet paid.",
+   "desc": "U.S. Social Security and Medicare taxes withheld from pay, plus the company's share, not yet paid.",
    "ex": "Recorded employer payroll taxes → Dr Payroll Tax Expense / Cr FICA Taxes Payable"
   },
   {
@@ -389,7 +389,7 @@
    "name": "Payroll Tax Expense",
    "type": "Expense",
    "clue": "Employer's share of staff taxes",
-   "desc": "The employer's share of payroll taxes, such as FICA, on employee pay.",
+   "desc": "The employer's share of U.S. payroll taxes, such as FICA, on employee pay.",
    "ex": "Recorded the employer's FICA → Dr Payroll Tax Expense / Cr FICA Taxes Payable"
   },
   {
