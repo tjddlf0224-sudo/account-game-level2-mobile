@@ -1,0 +1,585 @@
+{
+ "meta": {
+  "title": "US Accounting Account Master (Principles of Accounting I)",
+  "basis": "Standard US GAAP intro textbook chart of accounts for a small corporation with perpetual inventory",
+  "note": "Contra accounts keep their parent type and say contra in desc. Freight-In is theory-only; entries debit Merchandise Inventory.",
+  "count": 82,
+  "generated": "2026-11-15"
+ },
+ "accounts": [
+  {
+   "name": "Cash",
+   "type": "Asset",
+   "clue": "Bills, coins, checks on hand",
+   "desc": "Money the company can spend right away. It includes coins, paper money, and checks received.",
+   "ex": "Sold merchandise for cash → Dr Cash / Cr Sales Revenue"
+  },
+  {
+   "name": "Petty Cash",
+   "type": "Asset",
+   "clue": "Small fund for minor costs",
+   "desc": "A small fund kept on hand for minor payments like postage or snacks.",
+   "ex": "Set up a petty cash fund of $200 → Dr Petty Cash / Cr Cash"
+  },
+  {
+   "name": "Accounts Receivable",
+   "type": "Asset",
+   "clue": "Customers owe the company, no note",
+   "desc": "Money customers owe the company for goods or services sold on credit.",
+   "ex": "Sold merchandise on account → Dr Accounts Receivable / Cr Sales Revenue"
+  },
+  {
+   "name": "Allowance for Doubtful Accounts",
+   "type": "Asset",
+   "clue": "Estimated unpaid customer balances",
+   "desc": "A contra asset that reduces receivables by the amount you expect not to collect.",
+   "ex": "Estimated bad debts → Dr Bad Debt Expense / Cr Allowance for Doubtful Accounts"
+  },
+  {
+   "name": "Notes Receivable",
+   "type": "Asset",
+   "clue": "Customer's written promise to pay",
+   "desc": "A written promise from someone to pay the company a set amount later, usually with interest.",
+   "ex": "Accepted a 90-day note from a customer → Dr Notes Receivable / Cr Accounts Receivable"
+  },
+  {
+   "name": "Interest Receivable",
+   "type": "Asset",
+   "clue": "Earned but not yet collected",
+   "desc": "Interest the company has earned but not yet been paid.",
+   "ex": "Accrued interest earned on a note → Dr Interest Receivable / Cr Interest Revenue"
+  },
+  {
+   "name": "Rent Receivable",
+   "type": "Asset",
+   "clue": "Tenant owes for time used",
+   "desc": "Rent the company has earned from a tenant but not yet collected.",
+   "ex": "Accrued rent earned → Dr Rent Receivable / Cr Rent Revenue"
+  },
+  {
+   "name": "Merchandise Inventory",
+   "type": "Asset",
+   "clue": "Goods held for resale",
+   "desc": "Goods the company bought to resell to customers. It is an asset until the goods are sold.",
+   "ex": "Purchased merchandise on account → Dr Merchandise Inventory / Cr Accounts Payable"
+  },
+  {
+   "name": "Supplies",
+   "type": "Asset",
+   "clue": "Unused office items on hand",
+   "desc": "Items like paper and pens that the company has bought but not yet used up.",
+   "ex": "Purchased supplies for cash → Dr Supplies / Cr Cash"
+  },
+  {
+   "name": "Prepaid Insurance",
+   "type": "Asset",
+   "clue": "Coverage paid in advance",
+   "desc": "Insurance paid for in advance. It becomes an expense as the coverage period passes.",
+   "ex": "Paid a one-year premium → Dr Prepaid Insurance / Cr Cash"
+  },
+  {
+   "name": "Prepaid Rent",
+   "type": "Asset",
+   "clue": "Space paid for in advance",
+   "desc": "Rent paid before the period it covers. It becomes an expense as time passes.",
+   "ex": "Paid three months' rent in advance → Dr Prepaid Rent / Cr Cash"
+  },
+  {
+   "name": "Prepaid Advertising",
+   "type": "Asset",
+   "clue": "Ads paid, not yet run",
+   "desc": "Advertising paid for before the ads run. It becomes an expense once the ads appear.",
+   "ex": "Paid for a future ad campaign → Dr Prepaid Advertising / Cr Cash"
+  },
+  {
+   "name": "Land",
+   "type": "Asset",
+   "clue": "Ground the company owns",
+   "desc": "The land the company owns for its operations. It is not depreciated.",
+   "ex": "Purchased land for cash → Dr Land / Cr Cash"
+  },
+  {
+   "name": "Buildings",
+   "type": "Asset",
+   "clue": "Structures the company owns",
+   "desc": "Structures the company owns and uses, like an office or a warehouse. They are depreciated over time.",
+   "ex": "Purchased a building with a bank loan → Dr Buildings / Cr Bank Loan Payable"
+  },
+  {
+   "name": "Equipment",
+   "type": "Asset",
+   "clue": "Machines and tools for operations",
+   "desc": "Long-lived machines and tools used in the business. They are depreciated over their useful lives.",
+   "ex": "Purchased equipment for cash → Dr Equipment / Cr Cash"
+  },
+  {
+   "name": "Vehicles",
+   "type": "Asset",
+   "clue": "Cars and trucks owned",
+   "desc": "Cars and trucks the company owns and uses. They are depreciated over time.",
+   "ex": "Purchased a delivery truck for cash → Dr Vehicles / Cr Cash"
+  },
+  {
+   "name": "Furniture",
+   "type": "Asset",
+   "clue": "Desks, chairs, and shelves",
+   "desc": "Desks, chairs, and shelving used in the business. They are depreciated over time.",
+   "ex": "Purchased office furniture on account → Dr Furniture / Cr Accounts Payable"
+  },
+  {
+   "name": "Accumulated Depreciation—Buildings",
+   "type": "Asset",
+   "clue": "Total wear charged on structures",
+   "desc": "A contra asset that holds all depreciation recorded so far on buildings.",
+   "ex": "Recorded building depreciation → Dr Depreciation Expense / Cr Accumulated Depreciation—Buildings"
+  },
+  {
+   "name": "Accumulated Depreciation—Equipment",
+   "type": "Asset",
+   "clue": "Total wear charged on machines",
+   "desc": "A contra asset that holds all depreciation recorded so far on equipment.",
+   "ex": "Recorded equipment depreciation → Dr Depreciation Expense / Cr Accumulated Depreciation—Equipment"
+  },
+  {
+   "name": "Accumulated Depreciation—Vehicles",
+   "type": "Asset",
+   "clue": "Total wear charged on trucks",
+   "desc": "A contra asset that holds all depreciation recorded so far on vehicles.",
+   "ex": "Recorded vehicle depreciation → Dr Depreciation Expense / Cr Accumulated Depreciation—Vehicles"
+  },
+  {
+   "name": "Accumulated Depreciation—Furniture",
+   "type": "Asset",
+   "clue": "Total wear charged on desks",
+   "desc": "A contra asset that holds all depreciation recorded so far on furniture.",
+   "ex": "Recorded furniture depreciation → Dr Depreciation Expense / Cr Accumulated Depreciation—Furniture"
+  },
+  {
+   "name": "Advances to Employees",
+   "type": "Asset",
+   "clue": "Pay given early to staff",
+   "desc": "Money the company lends or pays ahead to employees. The employee owes it back.",
+   "ex": "Advanced $300 to an employee → Dr Advances to Employees / Cr Cash"
+  },
+  {
+   "name": "Deposits Paid",
+   "type": "Asset",
+   "clue": "Refundable money held by others",
+   "desc": "Money the company paid as a deposit and expects to get back, like a security deposit.",
+   "ex": "Paid a refundable security deposit → Dr Deposits Paid / Cr Cash"
+  },
+  {
+   "name": "Accounts Payable",
+   "type": "Liability",
+   "clue": "Owed to suppliers, no note",
+   "desc": "Money the company owes suppliers for goods or services bought on credit.",
+   "ex": "Purchased merchandise on account → Dr Merchandise Inventory / Cr Accounts Payable"
+  },
+  {
+   "name": "Notes Payable",
+   "type": "Liability",
+   "clue": "Written promise to repay",
+   "desc": "A written promise by the company to pay a set amount later, usually with interest.",
+   "ex": "Signed a 60-day note to a supplier → Dr Accounts Payable / Cr Notes Payable"
+  },
+  {
+   "name": "Interest Payable",
+   "type": "Liability",
+   "clue": "Borrowing cost owed, unpaid",
+   "desc": "Interest the company has incurred but not yet paid.",
+   "ex": "Accrued interest on a note → Dr Interest Expense / Cr Interest Payable"
+  },
+  {
+   "name": "Salaries Payable",
+   "type": "Liability",
+   "clue": "Earned pay, not yet paid",
+   "desc": "Salaries employees have earned that the company has not yet paid.",
+   "ex": "Accrued salaries at year-end → Dr Salaries Expense / Cr Salaries Payable"
+  },
+  {
+   "name": "Wages Payable",
+   "type": "Liability",
+   "clue": "Hourly pay earned, unpaid",
+   "desc": "Hourly wages employees have earned that the company has not yet paid.",
+   "ex": "Accrued wages at period end → Dr Wages Expense / Cr Wages Payable"
+  },
+  {
+   "name": "Unearned Revenue",
+   "type": "Liability",
+   "clue": "Paid by customer before work",
+   "desc": "Cash received before the company delivers the service or goods. The company owes the work.",
+   "ex": "Received cash for services not yet done → Dr Cash / Cr Unearned Revenue"
+  },
+  {
+   "name": "Unearned Rent",
+   "type": "Liability",
+   "clue": "Tenant paid ahead of time",
+   "desc": "Rent received in advance from a tenant for a future period.",
+   "ex": "Received six months' rent in advance → Dr Cash / Cr Unearned Rent"
+  },
+  {
+   "name": "Sales Tax Payable",
+   "type": "Liability",
+   "clue": "Tax collected for the state",
+   "desc": "Sales tax collected from customers that the company must pass on to the state.",
+   "ex": "Sold merchandise for cash plus 6% tax → Dr Cash / Cr Sales Revenue, Cr Sales Tax Payable"
+  },
+  {
+   "name": "Income Taxes Payable",
+   "type": "Liability",
+   "clue": "Profit tax owed to government",
+   "desc": "Income taxes the company has recorded but not yet paid to the government.",
+   "ex": "Recorded income tax owed → Dr Income Tax Expense / Cr Income Taxes Payable"
+  },
+  {
+   "name": "FICA Taxes Payable",
+   "type": "Liability",
+   "clue": "Social Security and Medicare owed",
+   "desc": "Social Security and Medicare taxes withheld from pay, plus the company's share, not yet paid.",
+   "ex": "Recorded employer payroll taxes → Dr Payroll Tax Expense / Cr FICA Taxes Payable"
+  },
+  {
+   "name": "Federal Income Taxes Payable",
+   "type": "Liability",
+   "clue": "Pay held for the IRS",
+   "desc": "Federal income tax taken out of employees' pay that the company must send to the IRS.",
+   "ex": "Recorded payroll with income tax withheld → Dr Salaries Expense / Cr Federal Income Taxes Payable and Cash"
+  },
+  {
+   "name": "Utilities Payable",
+   "type": "Liability",
+   "clue": "Power and water bill unpaid",
+   "desc": "Utility bills for services already used but not yet paid.",
+   "ex": "Accrued the electric bill → Dr Utilities Expense / Cr Utilities Payable"
+  },
+  {
+   "name": "Dividends Payable",
+   "type": "Liability",
+   "clue": "Declared payout not yet paid",
+   "desc": "Dividends the board has declared but the company has not yet paid to shareholders.",
+   "ex": "Declared a $2,000 dividend → Dr Dividends / Cr Dividends Payable"
+  },
+  {
+   "name": "Customer Deposits",
+   "type": "Liability",
+   "clue": "Cash held for future orders",
+   "desc": "Money customers paid ahead as a deposit. The company owes goods, service, or a refund.",
+   "ex": "Received a deposit on a special order → Dr Cash / Cr Customer Deposits"
+  },
+  {
+   "name": "Bank Loan Payable",
+   "type": "Liability",
+   "clue": "Money borrowed from a lender",
+   "desc": "The amount the company has borrowed from a bank and must repay.",
+   "ex": "Borrowed $20,000 from First Valley Bank → Dr Cash / Cr Bank Loan Payable"
+  },
+  {
+   "name": "Common Stock",
+   "type": "Equity",
+   "clue": "Owners' paid-in shares",
+   "desc": "The amount shareholders paid in when they bought the company's shares.",
+   "ex": "Issued shares for cash → Dr Cash / Cr Common Stock"
+  },
+  {
+   "name": "Retained Earnings",
+   "type": "Equity",
+   "clue": "Earnings kept in the business",
+   "desc": "Net income earned over time, minus dividends, that the company has kept in the business.",
+   "ex": "Closed net income → Dr Income Summary / Cr Retained Earnings"
+  },
+  {
+   "name": "Dividends",
+   "type": "Equity",
+   "clue": "Payouts to shareholders",
+   "desc": "A contra equity account for distributions to shareholders. It reduces equity and is not an expense.",
+   "ex": "Declared a cash dividend → Dr Dividends / Cr Dividends Payable"
+  },
+  {
+   "name": "Sales Revenue",
+   "type": "Revenue",
+   "clue": "Income from selling goods",
+   "desc": "Income earned from selling merchandise to customers.",
+   "ex": "Sold merchandise for cash → Dr Cash / Cr Sales Revenue"
+  },
+  {
+   "name": "Sales Returns and Allowances",
+   "type": "Revenue",
+   "clue": "Refunds for returned goods",
+   "desc": "A contra revenue account for goods customers send back or price cuts for flawed goods.",
+   "ex": "Customer returned goods → Dr Sales Returns and Allowances / Cr Accounts Receivable"
+  },
+  {
+   "name": "Sales Discounts",
+   "type": "Revenue",
+   "clue": "Price cut for paying early",
+   "desc": "A contra revenue account for discounts given to customers who pay early.",
+   "ex": "Collected within the discount period → Dr Cash, Dr Sales Discounts / Cr Accounts Receivable"
+  },
+  {
+   "name": "Service Revenue",
+   "type": "Revenue",
+   "clue": "Income from doing work",
+   "desc": "Income earned by performing services for customers.",
+   "ex": "Performed services for cash → Dr Cash / Cr Service Revenue"
+  },
+  {
+   "name": "Fees Earned",
+   "type": "Revenue",
+   "clue": "Income from professional fees",
+   "desc": "Income earned by charging fees for professional or advisory work.",
+   "ex": "Earned consulting fees on account → Dr Accounts Receivable / Cr Fees Earned"
+  },
+  {
+   "name": "Interest Revenue",
+   "type": "Revenue",
+   "clue": "Income from lending or deposits",
+   "desc": "Interest the company earns on notes or bank balances.",
+   "ex": "Received interest on a note → Dr Cash / Cr Interest Revenue"
+  },
+  {
+   "name": "Rent Revenue",
+   "type": "Revenue",
+   "clue": "Income from renting space",
+   "desc": "Income earned by renting property to others.",
+   "ex": "Received rent from a tenant → Dr Cash / Cr Rent Revenue"
+  },
+  {
+   "name": "Commission Revenue",
+   "type": "Revenue",
+   "clue": "Income for arranging sales",
+   "desc": "Income earned for selling or arranging sales on behalf of others.",
+   "ex": "Earned a sales commission in cash → Dr Cash / Cr Commission Revenue"
+  },
+  {
+   "name": "Gain on Sale of Equipment",
+   "type": "Revenue",
+   "clue": "Sold machines above book value",
+   "desc": "The amount received above the book value when equipment is sold.",
+   "ex": "Sold equipment above book value → Dr Cash, Dr Accumulated Depreciation—Equipment / Cr Equipment, Cr Gain on Sale of Equipment"
+  },
+  {
+   "name": "Miscellaneous Revenue",
+   "type": "Revenue",
+   "clue": "Small odd income items",
+   "desc": "Small bits of income that do not fit any other revenue account.",
+   "ex": "Sold scrap paper for cash → Dr Cash / Cr Miscellaneous Revenue"
+  },
+  {
+   "name": "Cost of Goods Sold",
+   "type": "Expense",
+   "clue": "What sold items originally cost",
+   "desc": "The cost of the merchandise the company sold during the period.",
+   "ex": "Recorded the cost of goods sold → Dr Cost of Goods Sold / Cr Merchandise Inventory"
+  },
+  {
+   "name": "Salaries Expense",
+   "type": "Expense",
+   "clue": "Office staff pay cost",
+   "desc": "The cost of salaries earned by employees during the period.",
+   "ex": "Paid salaries → Dr Salaries Expense / Cr Cash"
+  },
+  {
+   "name": "Wages Expense",
+   "type": "Expense",
+   "clue": "Hourly staff pay cost",
+   "desc": "The cost of hourly wages earned by employees during the period.",
+   "ex": "Paid wages → Dr Wages Expense / Cr Cash"
+  },
+  {
+   "name": "Payroll Tax Expense",
+   "type": "Expense",
+   "clue": "Employer's share of staff taxes",
+   "desc": "The employer's share of payroll taxes, such as FICA, on employee pay.",
+   "ex": "Recorded the employer's FICA → Dr Payroll Tax Expense / Cr FICA Taxes Payable"
+  },
+  {
+   "name": "Rent Expense",
+   "type": "Expense",
+   "clue": "Cost of using rented space",
+   "desc": "The cost of renting space used in the business.",
+   "ex": "Paid monthly rent → Dr Rent Expense / Cr Cash"
+  },
+  {
+   "name": "Utilities Expense",
+   "type": "Expense",
+   "clue": "Electric, gas, and water cost",
+   "desc": "The cost of electricity, gas, and water used in the business.",
+   "ex": "Paid the electric bill → Dr Utilities Expense / Cr Cash"
+  },
+  {
+   "name": "Insurance Expense",
+   "type": "Expense",
+   "clue": "Coverage cost used up",
+   "desc": "The part of insurance cost that applies to the current period.",
+   "ex": "Recorded insurance used up → Dr Insurance Expense / Cr Prepaid Insurance"
+  },
+  {
+   "name": "Supplies Expense",
+   "type": "Expense",
+   "clue": "Cost of items used up",
+   "desc": "The cost of supplies the company used during the period.",
+   "ex": "Recorded supplies used → Dr Supplies Expense / Cr Supplies"
+  },
+  {
+   "name": "Advertising Expense",
+   "type": "Expense",
+   "clue": "Cost of promoting the business",
+   "desc": "The cost of ads and other promotion during the period.",
+   "ex": "Paid for a radio ad → Dr Advertising Expense / Cr Cash"
+  },
+  {
+   "name": "Depreciation Expense",
+   "type": "Expense",
+   "clue": "Yearly share of asset cost",
+   "desc": "The part of a long-lived asset's cost assigned to the current period.",
+   "ex": "Recorded depreciation → Dr Depreciation Expense / Cr Accumulated Depreciation—Equipment"
+  },
+  {
+   "name": "Bad Debt Expense",
+   "type": "Expense",
+   "clue": "Uncollectible customer accounts",
+   "desc": "The estimated cost of customer balances the company will not collect.",
+   "ex": "Estimated uncollectible accounts → Dr Bad Debt Expense / Cr Allowance for Doubtful Accounts"
+  },
+  {
+   "name": "Interest Expense",
+   "type": "Expense",
+   "clue": "Cost of borrowed money",
+   "desc": "The cost of borrowing money during the period.",
+   "ex": "Paid interest on a loan → Dr Interest Expense / Cr Cash"
+  },
+  {
+   "name": "Telephone Expense",
+   "type": "Expense",
+   "clue": "Phone service cost",
+   "desc": "The cost of phone service used in the business.",
+   "ex": "Paid the phone bill → Dr Telephone Expense / Cr Cash"
+  },
+  {
+   "name": "Internet Expense",
+   "type": "Expense",
+   "clue": "Online service cost",
+   "desc": "The cost of internet service used in the business.",
+   "ex": "Paid the internet bill → Dr Internet Expense / Cr Cash"
+  },
+  {
+   "name": "Travel Expense",
+   "type": "Expense",
+   "clue": "Business trip costs",
+   "desc": "The cost of airfare, lodging, and other travel for business.",
+   "ex": "Paid for a business trip → Dr Travel Expense / Cr Cash"
+  },
+  {
+   "name": "Delivery Expense",
+   "type": "Expense",
+   "clue": "Cost of shipping to customers",
+   "desc": "The cost of delivering goods to customers.",
+   "ex": "Paid for delivery of goods sold → Dr Delivery Expense / Cr Cash"
+  },
+  {
+   "name": "Repairs and Maintenance Expense",
+   "type": "Expense",
+   "clue": "Cost of fixing and upkeep",
+   "desc": "The cost of routine repairs and upkeep that keep assets working.",
+   "ex": "Paid to repair a machine → Dr Repairs and Maintenance Expense / Cr Cash"
+  },
+  {
+   "name": "Office Expense",
+   "type": "Expense",
+   "clue": "Everyday desk-job costs",
+   "desc": "The cost of everyday office needs that do not fit another expense account.",
+   "ex": "Paid for office cleaning → Dr Office Expense / Cr Cash"
+  },
+  {
+   "name": "Bank Service Charges",
+   "type": "Expense",
+   "clue": "Monthly fees from the bank",
+   "desc": "Fees charged by the bank for account services.",
+   "ex": "Bank charged a monthly fee → Dr Bank Service Charges / Cr Cash"
+  },
+  {
+   "name": "Postage Expense",
+   "type": "Expense",
+   "clue": "Cost of mailing items",
+   "desc": "The cost of stamps and shipping mail.",
+   "ex": "Bought stamps for cash → Dr Postage Expense / Cr Cash"
+  },
+  {
+   "name": "Training Expense",
+   "type": "Expense",
+   "clue": "Cost of teaching staff",
+   "desc": "The cost of training courses for employees.",
+   "ex": "Paid for a staff workshop → Dr Training Expense / Cr Cash"
+  },
+  {
+   "name": "Entertainment Expense",
+   "type": "Expense",
+   "clue": "Meals and events for clients",
+   "desc": "The cost of entertaining clients or customers.",
+   "ex": "Paid for a client dinner → Dr Entertainment Expense / Cr Cash"
+  },
+  {
+   "name": "Donations Expense",
+   "type": "Expense",
+   "clue": "Gifts to charity",
+   "desc": "The cost of gifts the company gives to charities.",
+   "ex": "Donated $500 to a local charity → Dr Donations Expense / Cr Cash"
+  },
+  {
+   "name": "Property Tax Expense",
+   "type": "Expense",
+   "clue": "Yearly levy on land owned",
+   "desc": "The cost of property taxes on land and buildings the company owns.",
+   "ex": "Paid property tax → Dr Property Tax Expense / Cr Cash"
+  },
+  {
+   "name": "Income Tax Expense",
+   "type": "Expense",
+   "clue": "Tax charged on profit",
+   "desc": "The income tax cost recorded for the period.",
+   "ex": "Recorded income tax → Dr Income Tax Expense / Cr Income Taxes Payable"
+  },
+  {
+   "name": "Loss on Sale of Equipment",
+   "type": "Expense",
+   "clue": "Sold machines below book value",
+   "desc": "The shortfall when equipment is sold for less than its book value.",
+   "ex": "Sold equipment below book value → Dr Cash, Dr Accumulated Depreciation—Equipment, Dr Loss on Sale of Equipment / Cr Equipment"
+  },
+  {
+   "name": "Loss from Theft",
+   "type": "Expense",
+   "clue": "Stolen goods written off",
+   "desc": "The cost of assets or goods lost to theft.",
+   "ex": "Inventory was stolen → Dr Loss from Theft / Cr Merchandise Inventory"
+  },
+  {
+   "name": "Miscellaneous Expense",
+   "type": "Expense",
+   "clue": "Small odd costs",
+   "desc": "Small costs that do not fit any other expense account.",
+   "ex": "Paid a small odd cost → Dr Miscellaneous Expense / Cr Cash"
+  },
+  {
+   "name": "Freight-In",
+   "type": "Expense",
+   "clue": "Inbound shipping cost",
+   "desc": "The cost of shipping purchased goods to the company. Under perpetual inventory it goes to Merchandise Inventory.",
+   "ex": "Paid freight on goods bought (perpetual) → Dr Merchandise Inventory / Cr Cash"
+  },
+  {
+   "name": "Cash Over and Short",
+   "type": "Other",
+   "clue": "Drawer count mismatch",
+   "desc": "Holds small differences between the cash counted and the cash records. A shortage is a debit; an overage is a credit.",
+   "ex": "Drawer was $5 short → Dr Cash Over and Short / Cr Cash"
+  },
+  {
+   "name": "Income Summary",
+   "type": "Other",
+   "clue": "Temporary closing collector",
+   "desc": "A temporary account used at year-end to gather revenues and expenses before closing to Retained Earnings.",
+   "ex": "Closed revenue to the summary → Dr Sales Revenue / Cr Income Summary"
+  }
+ ]
+}

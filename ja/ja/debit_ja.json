@@ -1,0 +1,653 @@
+{
+ "meta": {
+  "title": "ゲーム3 借方・貸方(日商簿記3級 2027年度準拠)",
+  "lv1": 60,
+  "lv2": 40,
+  "note": "lv2は3伝票制(現金の入金=入金伝票、現金の出金=出金伝票、それ以外=振替伝票)",
+  "generated": "2026-11-14"
+ },
+ "lv1": [
+  {
+   "sentence": "商品を現金で仕入れた → <b class=\"target-account\">仕入</b>",
+   "target": "仕入",
+   "type": "left",
+   "hint": "仕入(費用)の発生 → 借方"
+  },
+  {
+   "sentence": "商品を掛けで売り上げた → <b class=\"target-account\">売上</b>",
+   "target": "売上",
+   "type": "right",
+   "hint": "売上(収益)の発生 → 貸方"
+  },
+  {
+   "sentence": "商品代金を現金で受け取った → <b class=\"target-account\">現金</b>",
+   "target": "現金",
+   "type": "left",
+   "hint": "現金(資産)の増加 → 借方"
+  },
+  {
+   "sentence": "事務用の文房具を現金で買った → <b class=\"target-account\">現金</b>",
+   "target": "現金",
+   "type": "right",
+   "hint": "現金(資産)の減少 → 貸方"
+  },
+  {
+   "sentence": "売掛金が普通預金に振り込まれた → <b class=\"target-account\">普通預金</b>",
+   "target": "普通預金",
+   "type": "left",
+   "hint": "普通預金(資産)の増加 → 借方"
+  },
+  {
+   "sentence": "家賃を普通預金から支払った → <b class=\"target-account\">普通預金</b>",
+   "target": "普通預金",
+   "type": "right",
+   "hint": "普通預金(資産)の減少 → 貸方"
+  },
+  {
+   "sentence": "現金を当座預金に預け入れた → <b class=\"target-account\">当座預金</b>",
+   "target": "当座預金",
+   "type": "left",
+   "hint": "当座預金(資産)の増加 → 借方"
+  },
+  {
+   "sentence": "買掛金を当座預金から支払った → <b class=\"target-account\">当座預金</b>",
+   "target": "当座預金",
+   "type": "right",
+   "hint": "当座預金(資産)の減少 → 貸方"
+  },
+  {
+   "sentence": "商品を掛けで売った → <b class=\"target-account\">売掛金</b>",
+   "target": "売掛金",
+   "type": "left",
+   "hint": "売掛金(資産)の増加 → 借方"
+  },
+  {
+   "sentence": "売掛金を現金で回収した → <b class=\"target-account\">売掛金</b>",
+   "target": "売掛金",
+   "type": "right",
+   "hint": "売掛金(資産)の減少 → 貸方"
+  },
+  {
+   "sentence": "商品を掛けで仕入れた → <b class=\"target-account\">買掛金</b>",
+   "target": "買掛金",
+   "type": "right",
+   "hint": "買掛金(負債)の増加 → 貸方"
+  },
+  {
+   "sentence": "買掛金を現金で支払った → <b class=\"target-account\">買掛金</b>",
+   "target": "買掛金",
+   "type": "left",
+   "hint": "買掛金(負債)の減少 → 借方"
+  },
+  {
+   "sentence": "売掛金について電子記録債権の発生記録を行った → <b class=\"target-account\">電子記録債権</b>",
+   "target": "電子記録債権",
+   "type": "left",
+   "hint": "電子記録債権(資産)の増加 → 借方"
+  },
+  {
+   "sentence": "買掛金について電子記録債務の発生記録を受けた → <b class=\"target-account\">電子記録債務</b>",
+   "target": "電子記録債務",
+   "type": "right",
+   "hint": "電子記録債務(負債)の増加 → 貸方"
+  },
+  {
+   "sentence": "商品の注文をして手付金を支払った → <b class=\"target-account\">前払金</b>",
+   "target": "前払金",
+   "type": "left",
+   "hint": "前払金(資産)の増加 → 借方"
+  },
+  {
+   "sentence": "商品の注文を受けて手付金を受け取った → <b class=\"target-account\">前受金</b>",
+   "target": "前受金",
+   "type": "right",
+   "hint": "前受金(負債)の増加 → 貸方"
+  },
+  {
+   "sentence": "商品を引き渡し、受け取っていた手付金を代金に充てた → <b class=\"target-account\">前受金</b>",
+   "target": "前受金",
+   "type": "left",
+   "hint": "前受金(負債)の減少 → 借方"
+  },
+  {
+   "sentence": "不用になった備品を売却し、代金は後日受け取ることにした → <b class=\"target-account\">未収入金</b>",
+   "target": "未収入金",
+   "type": "left",
+   "hint": "未収入金(資産)の増加 → 借方"
+  },
+  {
+   "sentence": "備品を購入し、代金は後日支払うことにした → <b class=\"target-account\">未払金</b>",
+   "target": "未払金",
+   "type": "right",
+   "hint": "未払金(負債)の増加 → 貸方"
+  },
+  {
+   "sentence": "未払いの備品代金を普通預金から支払った → <b class=\"target-account\">未払金</b>",
+   "target": "未払金",
+   "type": "left",
+   "hint": "未払金(負債)の減少 → 借方"
+  },
+  {
+   "sentence": "取引先に現金を貸し付けた → <b class=\"target-account\">貸付金</b>",
+   "target": "貸付金",
+   "type": "left",
+   "hint": "貸付金(資産)の増加 → 借方"
+  },
+  {
+   "sentence": "銀行から現金を借り入れた → <b class=\"target-account\">借入金</b>",
+   "target": "借入金",
+   "type": "right",
+   "hint": "借入金(負債)の増加 → 貸方"
+  },
+  {
+   "sentence": "借入金を普通預金から返済した → <b class=\"target-account\">借入金</b>",
+   "target": "借入金",
+   "type": "left",
+   "hint": "借入金(負債)の減少 → 借方"
+  },
+  {
+   "sentence": "出張する従業員に旅費を概算で渡した → <b class=\"target-account\">仮払金</b>",
+   "target": "仮払金",
+   "type": "left",
+   "hint": "仮払金(資産)の増加 → 借方"
+  },
+  {
+   "sentence": "内容のわからない入金が普通預金にあった → <b class=\"target-account\">仮受金</b>",
+   "target": "仮受金",
+   "type": "right",
+   "hint": "仮受金(負債)の増加 → 貸方"
+  },
+  {
+   "sentence": "取引先から保証金を現金で預かった → <b class=\"target-account\">預り金</b>",
+   "target": "預り金",
+   "type": "right",
+   "hint": "預り金(負債)の増加 → 貸方"
+  },
+  {
+   "sentence": "給料から源泉所得税を差し引いた → <b class=\"target-account\">所得税預り金</b>",
+   "target": "所得税預り金",
+   "type": "right",
+   "hint": "所得税預り金(負債)の増加 → 貸方"
+  },
+  {
+   "sentence": "預かっていた社会保険料を納付した → <b class=\"target-account\">社会保険料預り金</b>",
+   "target": "社会保険料預り金",
+   "type": "left",
+   "hint": "社会保険料預り金(負債)の減少 → 借方"
+  },
+  {
+   "sentence": "店舗用の建物を購入した → <b class=\"target-account\">建物</b>",
+   "target": "建物",
+   "type": "left",
+   "hint": "建物(資産)の増加 → 借方"
+  },
+  {
+   "sentence": "パソコンを購入した → <b class=\"target-account\">備品</b>",
+   "target": "備品",
+   "type": "left",
+   "hint": "備品(資産)の増加 → 借方"
+  },
+  {
+   "sentence": "不用になった備品を売却した → <b class=\"target-account\">備品</b>",
+   "target": "備品",
+   "type": "right",
+   "hint": "備品(資産)の減少 → 貸方"
+  },
+  {
+   "sentence": "営業用のトラックを購入した → <b class=\"target-account\">車両運搬具</b>",
+   "target": "車両運搬具",
+   "type": "left",
+   "hint": "車両運搬具(資産)の増加 → 借方"
+  },
+  {
+   "sentence": "駐車場用の土地を購入した → <b class=\"target-account\">土地</b>",
+   "target": "土地",
+   "type": "left",
+   "hint": "土地(資産)の増加 → 借方"
+  },
+  {
+   "sentence": "株式を発行し、払込みを受けた → <b class=\"target-account\">資本金</b>",
+   "target": "資本金",
+   "type": "right",
+   "hint": "資本金(純資産)の増加 → 貸方"
+  },
+  {
+   "sentence": "配当金を支払うことが決まった → <b class=\"target-account\">繰越利益剰余金</b>",
+   "target": "繰越利益剰余金",
+   "type": "left",
+   "hint": "繰越利益剰余金(純資産)の減少 → 借方"
+  },
+  {
+   "sentence": "家賃を現金で受け取った → <b class=\"target-account\">受取家賃</b>",
+   "target": "受取家賃",
+   "type": "right",
+   "hint": "受取家賃(収益)の発生 → 貸方"
+  },
+  {
+   "sentence": "仲介手数料を現金で受け取った → <b class=\"target-account\">受取手数料</b>",
+   "target": "受取手数料",
+   "type": "right",
+   "hint": "受取手数料(収益)の発生 → 貸方"
+  },
+  {
+   "sentence": "貸付金の利息を受け取った → <b class=\"target-account\">受取利息</b>",
+   "target": "受取利息",
+   "type": "right",
+   "hint": "受取利息(収益)の発生 → 貸方"
+  },
+  {
+   "sentence": "従業員に給料を支払った → <b class=\"target-account\">給料</b>",
+   "target": "給料",
+   "type": "left",
+   "hint": "給料(費用)の発生 → 借方"
+  },
+  {
+   "sentence": "電車代を現金で支払った → <b class=\"target-account\">旅費交通費</b>",
+   "target": "旅費交通費",
+   "type": "left",
+   "hint": "旅費交通費(費用)の発生 → 借方"
+  },
+  {
+   "sentence": "郵便切手を購入した → <b class=\"target-account\">通信費</b>",
+   "target": "通信費",
+   "type": "left",
+   "hint": "通信費(費用)の発生 → 借方"
+  },
+  {
+   "sentence": "コピー用紙を購入した → <b class=\"target-account\">消耗品費</b>",
+   "target": "消耗品費",
+   "type": "left",
+   "hint": "消耗品費(費用)の発生 → 借方"
+  },
+  {
+   "sentence": "電気代が普通預金から引き落とされた → <b class=\"target-account\">水道光熱費</b>",
+   "target": "水道光熱費",
+   "type": "left",
+   "hint": "水道光熱費(費用)の発生 → 借方"
+  },
+  {
+   "sentence": "店舗の家賃を支払った → <b class=\"target-account\">支払家賃</b>",
+   "target": "支払家賃",
+   "type": "left",
+   "hint": "支払家賃(費用)の発生 → 借方"
+  },
+  {
+   "sentence": "火災保険料を支払った → <b class=\"target-account\">保険料</b>",
+   "target": "保険料",
+   "type": "left",
+   "hint": "保険料(費用)の発生 → 借方"
+  },
+  {
+   "sentence": "収入印紙を購入した → <b class=\"target-account\">租税公課</b>",
+   "target": "租税公課",
+   "type": "left",
+   "hint": "租税公課(費用)の発生 → 借方"
+  },
+  {
+   "sentence": "チラシの印刷代を支払った → <b class=\"target-account\">広告宣伝費</b>",
+   "target": "広告宣伝費",
+   "type": "left",
+   "hint": "広告宣伝費(費用)の発生 → 借方"
+  },
+  {
+   "sentence": "振込手数料を支払った → <b class=\"target-account\">支払手数料</b>",
+   "target": "支払手数料",
+   "type": "left",
+   "hint": "支払手数料(費用)の発生 → 借方"
+  },
+  {
+   "sentence": "借入金の利息を支払った → <b class=\"target-account\">支払利息</b>",
+   "target": "支払利息",
+   "type": "left",
+   "hint": "支払利息(費用)の発生 → 借方"
+  },
+  {
+   "sentence": "商品を発送するときの運賃を現金で支払った → <b class=\"target-account\">発送費</b>",
+   "target": "発送費",
+   "type": "left",
+   "hint": "発送費(費用)の発生 → 借方"
+  },
+  {
+   "sentence": "決算で備品の減価償却を行った → <b class=\"target-account\">減価償却費</b>",
+   "target": "減価償却費",
+   "type": "left",
+   "hint": "減価償却費(費用)の発生 → 借方"
+  },
+  {
+   "sentence": "当期に売り上げた売掛金が回収できなくなった → <b class=\"target-account\">貸倒損失</b>",
+   "target": "貸倒損失",
+   "type": "left",
+   "hint": "貸倒損失(費用)の発生 → 借方"
+  },
+  {
+   "sentence": "決算で貸倒引当金を設定した → <b class=\"target-account\">貸倒引当金</b>",
+   "target": "貸倒引当金",
+   "type": "right",
+   "hint": "貸倒引当金(資産の評価勘定)の増加 → 貸方"
+  },
+  {
+   "sentence": "決算で備品の減価償却累計額を計上した → <b class=\"target-account\">備品減価償却累計額</b>",
+   "target": "備品減価償却累計額",
+   "type": "right",
+   "hint": "備品減価償却累計額(資産の評価勘定)の増加 → 貸方"
+  },
+  {
+   "sentence": "決算で期末の売れ残り商品を繰り越した → <b class=\"target-account\">繰越商品</b>",
+   "target": "繰越商品",
+   "type": "left",
+   "hint": "繰越商品(資産)の増加 → 借方"
+  },
+  {
+   "sentence": "商品を仕入れ、消費税も支払った → <b class=\"target-account\">仮払消費税</b>",
+   "target": "仮払消費税",
+   "type": "left",
+   "hint": "仮払消費税(資産)の増加 → 借方"
+  },
+  {
+   "sentence": "商品を売り上げ、消費税も受け取った → <b class=\"target-account\">仮受消費税</b>",
+   "target": "仮受消費税",
+   "type": "right",
+   "hint": "仮受消費税(負債)の増加 → 貸方"
+  },
+  {
+   "sentence": "実際の現金が帳簿残高より少なかった → <b class=\"target-account\">現金過不足</b>",
+   "target": "現金過不足",
+   "type": "left",
+   "hint": "現金過不足(帳簿より実際が少ない)→ 借方"
+  },
+  {
+   "sentence": "前期に貸倒れとして処理した売掛金を回収した → <b class=\"target-account\">償却債権取立益</b>",
+   "target": "償却債権取立益",
+   "type": "right",
+   "hint": "償却債権取立益(収益)の発生 → 貸方"
+  },
+  {
+   "sentence": "決算で貸倒引当金が多すぎたため、差額を戻し入れた → <b class=\"target-account\">貸倒引当金戻入</b>",
+   "target": "貸倒引当金戻入",
+   "type": "right",
+   "hint": "貸倒引当金戻入(収益)の発生 → 貸方"
+  }
+ ],
+ "lv2": [
+  {
+   "sentence": "青葉商店に商品￥80,000を売り上げ、代金は現金で受け取った。",
+   "debitAcc": "現金",
+   "creditAcc": "売上",
+   "vendor": "青葉商店",
+   "voucherType": "入金伝票"
+  },
+  {
+   "sentence": "桜井商事から売掛金￥120,000を現金で回収した。",
+   "debitAcc": "現金",
+   "creditAcc": "売掛金",
+   "vendor": "桜井商事",
+   "voucherType": "入金伝票"
+  },
+  {
+   "sentence": "仲介手数料￥15,000を現金で受け取った。",
+   "debitAcc": "現金",
+   "creditAcc": "受取手数料",
+   "vendor": "",
+   "voucherType": "入金伝票"
+  },
+  {
+   "sentence": "みなと物産から手付金￥50,000を現金で受け取った。",
+   "debitAcc": "現金",
+   "creditAcc": "前受金",
+   "vendor": "みなと物産",
+   "voucherType": "入金伝票"
+  },
+  {
+   "sentence": "取引先に貸し付けていた￥200,000を現金で返してもらった。",
+   "debitAcc": "現金",
+   "creditAcc": "貸付金",
+   "vendor": "",
+   "voucherType": "入金伝票"
+  },
+  {
+   "sentence": "みどり銀行から現金￥300,000を借り入れた。",
+   "debitAcc": "現金",
+   "creditAcc": "借入金",
+   "vendor": "みどり銀行",
+   "voucherType": "入金伝票"
+  },
+  {
+   "sentence": "建物の賃借人から家賃￥90,000を現金で受け取った。",
+   "debitAcc": "現金",
+   "creditAcc": "受取家賃",
+   "vendor": "",
+   "voucherType": "入金伝票"
+  },
+  {
+   "sentence": "ひばり商店に商品￥60,000を売り上げ、代金は現金で受け取った。",
+   "debitAcc": "現金",
+   "creditAcc": "売上",
+   "vendor": "ひばり商店",
+   "voucherType": "入金伝票"
+  },
+  {
+   "sentence": "内容のわからない入金￥25,000が現金であった。",
+   "debitAcc": "現金",
+   "creditAcc": "仮受金",
+   "vendor": "",
+   "voucherType": "入金伝票"
+  },
+  {
+   "sentence": "取引先から保証金￥40,000を現金で預かった。",
+   "debitAcc": "現金",
+   "creditAcc": "預り金",
+   "vendor": "",
+   "voucherType": "入金伝票"
+  },
+  {
+   "sentence": "貸している土地の地代￥30,000を現金で受け取った。",
+   "debitAcc": "現金",
+   "creditAcc": "受取地代",
+   "vendor": "",
+   "voucherType": "入金伝票"
+  },
+  {
+   "sentence": "若葉堂から売掛金￥95,000を現金で回収した。",
+   "debitAcc": "現金",
+   "creditAcc": "売掛金",
+   "vendor": "若葉堂",
+   "voucherType": "入金伝票"
+  },
+  {
+   "sentence": "前期に貸倒れとして処理した売掛金￥18,000を現金で回収した。",
+   "debitAcc": "現金",
+   "creditAcc": "償却債権取立益",
+   "vendor": "",
+   "voucherType": "入金伝票"
+  },
+  {
+   "sentence": "北斗商店から商品￥50,000を仕入れ、代金は現金で支払った。",
+   "debitAcc": "仕入",
+   "creditAcc": "現金",
+   "vendor": "北斗商店",
+   "voucherType": "出金伝票"
+  },
+  {
+   "sentence": "あおい商事への買掛金￥70,000を現金で支払った。",
+   "debitAcc": "買掛金",
+   "creditAcc": "現金",
+   "vendor": "あおい商事",
+   "voucherType": "出金伝票"
+  },
+  {
+   "sentence": "従業員に給料￥200,000を現金で支払った。",
+   "debitAcc": "給料",
+   "creditAcc": "現金",
+   "vendor": "",
+   "voucherType": "出金伝票"
+  },
+  {
+   "sentence": "事務用の文房具￥3,000を現金で買った。",
+   "debitAcc": "消耗品費",
+   "creditAcc": "現金",
+   "vendor": "",
+   "voucherType": "出金伝票"
+  },
+  {
+   "sentence": "電車代￥1,200を現金で支払った。",
+   "debitAcc": "旅費交通費",
+   "creditAcc": "現金",
+   "vendor": "",
+   "voucherType": "出金伝票"
+  },
+  {
+   "sentence": "郵便切手￥2,500を現金で購入した。",
+   "debitAcc": "通信費",
+   "creditAcc": "現金",
+   "vendor": "",
+   "voucherType": "出金伝票"
+  },
+  {
+   "sentence": "商品の発送運賃￥1,800を現金で支払った。",
+   "debitAcc": "発送費",
+   "creditAcc": "現金",
+   "vendor": "",
+   "voucherType": "出金伝票"
+  },
+  {
+   "sentence": "つばめ商会に手付金￥40,000を現金で支払った。",
+   "debitAcc": "前払金",
+   "creditAcc": "現金",
+   "vendor": "つばめ商会",
+   "voucherType": "出金伝票"
+  },
+  {
+   "sentence": "出張する従業員に旅費￥30,000を現金で概算払いした。",
+   "debitAcc": "仮払金",
+   "creditAcc": "現金",
+   "vendor": "",
+   "voucherType": "出金伝票"
+  },
+  {
+   "sentence": "チラシの印刷代￥12,000を現金で支払った。",
+   "debitAcc": "広告宣伝費",
+   "creditAcc": "現金",
+   "vendor": "",
+   "voucherType": "出金伝票"
+  },
+  {
+   "sentence": "収入印紙￥4,000を現金で購入した。",
+   "debitAcc": "租税公課",
+   "creditAcc": "現金",
+   "vendor": "",
+   "voucherType": "出金伝票"
+  },
+  {
+   "sentence": "取引先に現金￥100,000を貸し付けた。",
+   "debitAcc": "貸付金",
+   "creditAcc": "現金",
+   "vendor": "",
+   "voucherType": "出金伝票"
+  },
+  {
+   "sentence": "電気代￥8,500を現金で支払った。",
+   "debitAcc": "水道光熱費",
+   "creditAcc": "現金",
+   "vendor": "",
+   "voucherType": "出金伝票"
+  },
+  {
+   "sentence": "しらかば物産から商品￥90,000を掛けで仕入れた。",
+   "debitAcc": "仕入",
+   "creditAcc": "買掛金",
+   "vendor": "しらかば物産",
+   "voucherType": "振替伝票"
+  },
+  {
+   "sentence": "桜井商事に商品￥150,000を掛けで売り上げた。",
+   "debitAcc": "売掛金",
+   "creditAcc": "売上",
+   "vendor": "桜井商事",
+   "voucherType": "振替伝票"
+  },
+  {
+   "sentence": "備品￥240,000を購入し、代金は月末に支払うことにした。",
+   "debitAcc": "備品",
+   "creditAcc": "未払金",
+   "vendor": "",
+   "voucherType": "振替伝票"
+  },
+  {
+   "sentence": "こだま屋への買掛金￥80,000を普通預金から支払った。",
+   "debitAcc": "買掛金",
+   "creditAcc": "普通預金",
+   "vendor": "こだま屋",
+   "voucherType": "振替伝票"
+  },
+  {
+   "sentence": "みなと物産から売掛金￥110,000が普通預金に振り込まれた。",
+   "debitAcc": "普通預金",
+   "creditAcc": "売掛金",
+   "vendor": "みなと物産",
+   "voucherType": "振替伝票"
+  },
+  {
+   "sentence": "店舗の家賃￥100,000を普通預金から支払った。",
+   "debitAcc": "支払家賃",
+   "creditAcc": "普通預金",
+   "vendor": "",
+   "voucherType": "振替伝票"
+  },
+  {
+   "sentence": "普通預金から当座預金へ￥300,000を預け替えた。",
+   "debitAcc": "当座預金",
+   "creditAcc": "普通預金",
+   "vendor": "",
+   "voucherType": "振替伝票"
+  },
+  {
+   "sentence": "中央クレジットを通じて、カード払いで商品￥70,000を売り上げた。",
+   "debitAcc": "クレジット売掛金",
+   "creditAcc": "売上",
+   "vendor": "中央クレジット",
+   "voucherType": "振替伝票"
+  },
+  {
+   "sentence": "青葉商店に対する売掛金￥130,000について、電子記録債権の発生記録を行った。",
+   "debitAcc": "電子記録債権",
+   "creditAcc": "売掛金",
+   "vendor": "青葉商店",
+   "voucherType": "振替伝票"
+  },
+  {
+   "sentence": "帳簿価額￥50,000の不用な備品を同額で売却し、代金は後日受け取ることにした。",
+   "debitAcc": "未収入金",
+   "creditAcc": "備品",
+   "vendor": "",
+   "voucherType": "振替伝票"
+  },
+  {
+   "sentence": "ほたる銀行から普通預金に￥1,000,000を借り入れた。",
+   "debitAcc": "普通預金",
+   "creditAcc": "借入金",
+   "vendor": "ほたる銀行",
+   "voucherType": "振替伝票"
+  },
+  {
+   "sentence": "ひばり商店に対する当期の売掛金￥45,000が貸し倒れた。",
+   "debitAcc": "貸倒損失",
+   "creditAcc": "売掛金",
+   "vendor": "ひばり商店",
+   "voucherType": "振替伝票"
+  },
+  {
+   "sentence": "振込手数料￥440を普通預金から支払った。",
+   "debitAcc": "支払手数料",
+   "creditAcc": "普通預金",
+   "vendor": "",
+   "voucherType": "振替伝票"
+  },
+  {
+   "sentence": "株式を発行し、払込金￥2,000,000が普通預金に入金された。",
+   "debitAcc": "普通預金",
+   "creditAcc": "資本金",
+   "vendor": "",
+   "voucherType": "振替伝票"
+  }
+ ]
+}

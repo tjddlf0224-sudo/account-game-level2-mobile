@@ -4,9 +4,12 @@
     <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
          **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
          이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-    <script src="safestore.js?v=79"></script>
+    <script src="safestore.js?v=81"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<!-- 교사용 대시보드 콘텐츠 보안 정책(2026-10-27, 점검후속 ①): 앱 자신·구글 글꼴·jsdelivr(supabase-js)·우리 Supabase 만. 페이지 안 스크립트·onclick 이 많아 inline 은 허용 — 대신 낯선 외부 스크립트·다른 서버로 보내기는 막힌다. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://pjagaulfivafamhhiveg.supabase.co wss://pjagaulfivafamhhiveg.supabase.co https://cdn.jsdelivr.net; media-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
+<style>html{-webkit-text-size-adjust:100%;text-size-adjust:100%}</style>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#17233F">
@@ -725,6 +728,13 @@ body{
   cursor: pointer; transition: opacity 0.2s;
 }
 .pb-btn-ok:hover { opacity: 0.85; }
+/* Face ID·지문으로 열기(앱에서, 이 그룹을 저장해 둔 경우만 보인다 — dashbio.js) */
+.pb-btn-bio {
+  width: 100%; padding: 13px; margin-bottom: 10px;
+  background: var(--soft); border: 1.5px solid var(--cy); border-radius: 12px;
+  color: var(--ink); font-family: 'Black Han Sans', sans-serif; font-size: 1rem; cursor: pointer;
+}
+.pb-btn-bio[hidden] { display: none; }
 
 /* ══════════════════════════════════════════════════════════════════════
    2026-10-13 새 화면(밝은 화면 · 탭 · 폰 전용 배치) — 성일님 시안 승인. 위 규칙을 덮어쓴다.
@@ -926,6 +936,23 @@ html.wide-web .fs-btn{display:inline-flex}
   .set-row{flex-wrap:wrap}
   .set-row .tb-btn{width:100%}
   .tb-teams{grid-template-columns:1fr 1fr}
+}
+
+/* ── 접는 폰 맞춤(2026-10-27, foldable.js) — 접힘 정보가 없으면 하나도 안 걸린다 ──
+   활짝 편 넓은 화면(fold-wide)·책처럼 반쯤 접음(fold-book): 왼쪽 = 그룹 목록(사이드바 고정) | 오른쪽 = 대시보드.
+   책 모양이면 접힌 선을 경계로, 넓은 화면이면 왼쪽 칸을 알맞은 폭으로. 접힌 선(--hinge) 위엔 아무것도 두지 않는다. */
+html.fold-wide{--fold-sb:clamp(240px,38vw,320px);--fold-main:var(--fold-sb)}
+html.fold-book{--fold-sb:var(--fold-a);--fold-main:calc(var(--fold-a) + var(--hinge))}
+html.fold-wide .sidebar, html.fold-book .sidebar{transform:none!important;width:var(--fold-sb);transition:width .2s ease}
+html.fold-wide .sidebar-overlay, html.fold-book .sidebar-overlay, html.fold-wide .menu-toggle, html.fold-book .menu-toggle{display:none!important}
+html.fold-wide .main, html.fold-book .main{margin-left:var(--fold-main)}
+html.fold-wide .sb-header, html.fold-book .sb-header{padding-top:calc(16px + env(safe-area-inset-top))}
+@media (max-width:900px){
+  html.fold-wide .content-wrap, html.fold-book .content-wrap{padding-top:calc(16px + env(safe-area-inset-top))}
+}
+@media (max-width:760px){
+  html.fold-wide body::before, html.fold-book body::before{display:none}
+  html.fold-wide .dtabs, html.fold-book .dtabs{left:var(--fold-main)}
 }
 </style>
 </head>
@@ -1418,10 +1445,33 @@ async function selectGroup(gid) {
   document.getElementById('pass-input').value = '';
   document.getElementById('pass-err').classList.remove('show');
   document.getElementById('pass-overlay').classList.add('open');
-  setTimeout(() => document.getElementById('pass-input').focus(), 100);
+  // 이 그룹을 Face ID·지문으로 저장해 뒀으면 버튼을 보이고 바로 한 번 물어본다(취소하면 비밀번호 칸 그대로)
+  const bioBtn = document.getElementById('pass-bio');
+  bioBtn.hidden = true;
+  if (window.DashBio && await DashBio.saved(gid) && pendingGid === gid) {
+    bioBtn.textContent = DashBio.word() + ' 열기';
+    bioBtn.hidden = false;
+    bioOpenPass();
+  } else {
+    setTimeout(() => document.getElementById('pass-input').focus(), 100);
+  }
 }
 
-async function confirmPass() {
+/* 얼굴·지문으로 비밀번호를 꺼내 같은 서버 확인(confirmPass)을 거친다 */
+async function bioOpenPass() {
+  const gid = pendingGid; if (!gid || !window.DashBio) return;
+  const group = allGroups.find(g=>g.id===gid);
+  const pass = await DashBio.get(gid, group && group.name);
+  if (!pass || pendingGid !== gid) {
+    if (!(await DashBio.saved(gid))) document.getElementById('pass-bio').hidden = true;   // 보관함이 비었다
+    return;
+  }
+  document.getElementById('pass-input').value = pass;
+  confirmPass(true);
+}
+
+async function confirmPass(fromBio) {
+  fromBio = fromBio === true;
   const input = document.getElementById('pass-input').value.trim();
   const errEl = document.getElementById('pass-err');
   if (!input) { errEl.textContent = '비밀번호를 입력해주세요'; errEl.classList.add('show'); return; }
@@ -1441,6 +1491,12 @@ async function confirmPass() {
     }
     if (!ok) {
       errEl.textContent = '비밀번호가 틀렸습니다';
+      if (fromBio && window.DashBio) {
+        // 저장해 둔 비밀번호가 더는 안 맞는다(바뀌었다) — 지우고 비밀번호로 다시 받는다
+        await DashBio.forget(pendingGid);
+        document.getElementById('pass-bio').hidden = true;
+        errEl.textContent = '비밀번호가 바뀐 것 같아요. 새 비밀번호로 한 번 열면 다시 ' + DashBio.word() + ' 쓸 수 있어요';
+      }
       errEl.classList.add('show');
       document.getElementById('pass-input').value = '';
       document.getElementById('pass-input').focus();
@@ -1454,6 +1510,15 @@ async function confirmPass() {
     closePassPopup();
     const group = allGroups.find(g=>g.id===gid) || { id:gid, name:gid, teacher_name:'—' };
     enterGroup(gid, group);
+    // 앱에서 비밀번호로 처음 열었으면 "다음부터 Face ID로 열까요?"(이미 저장했거나 웹이면 아무 일 없음)
+    // 참여 코드가 없는 그룹은 들어가자마자 '참여 코드 설정' 창이 뜬다 — 그 창이 닫힌 뒤에 묻는다(창 두 개가 겹치지 않게)
+    if (!fromBio && window.DashBio) {
+      const ask = (n) => {
+        if (document.getElementById('joincode-overlay').classList.contains('open') && n < 240) return setTimeout(() => ask(n + 1), 500);
+        DashBio.offer(gid, input);
+      };
+      setTimeout(() => ask(0), 700);
+    }
   } catch(e) {
     errEl.textContent = '오류가 발생했습니다. 다시 시도해주세요';
     errEl.classList.add('show');
@@ -1565,6 +1630,7 @@ async function deleteGroup() {
     // 세션/화면 정리 (버튼도 원상복구 — 다음 그룹 진입 시 재사용)
     btn.disabled = false; btn.innerHTML = '<span>🗑</span> 그룹 삭제';
     sessionStorage.removeItem('verified_group');
+    if (window.DashBio) await DashBio.forget(currentGid);   // 지운 그룹의 Face ID 보관 값도 지운다
     await Ask.alert(`"${name}" 그룹이 삭제되었습니다.`);
     currentGid = null; currentGroup = null; location.hash = '';
     document.getElementById('dashboard').style.display = 'none';
@@ -1585,7 +1651,24 @@ async function deleteStudent(name) {
   if (!currentGid) return;
   if (!await Ask.confirm(`정말 "${name}" 학생의 모든 데이터를 삭제할까요?\n\n⚠️ 이 그룹에서의 점수·이론 기록이 전부 영구 삭제되며, 되돌릴 수 없습니다.`)) return;
 
+  // 그룹 비밀번호를 서버가 확인한 뒤 지우는 함수(delete_student, 2026-10-27) — 학생이 anon 키로 남의 기록을 지우던 길을 막기 위한 준비.
+  // 이미 확인한 비번(verifiedPass)을 다시 쓰고, 없으면 한 번만 묻는다. 함수가 없는 옛 서버면 예전처럼 직접 지운다.
+  let pass = verifiedPass;
+  if (!pass) {
+    const input = await Ask.prompt('대시보드 비밀번호를 입력해주세요:', '', { password: true });
+    if (input === null) return;
+    pass = input.trim();
+  }
   try {
+    const { data: status, error: rpcErr } = await db.rpc('delete_student', { p_group_id: currentGid, p_pass: pass, p_name: name });
+    if (!rpcErr) {
+      if (status === 'wrong_pass') { await Ask.alert('비밀번호가 틀려 삭제를 취소했습니다.'); return; }
+      if (status !== 'ok') throw new Error(String(status));
+      await Ask.alert(`"${name}" 학생 데이터가 삭제되었습니다.`);
+      loadDashboard();
+      return;
+    }
+    if (rpcErr.code !== 'PGRST202') throw rpcErr;
     const [r1, r2, r3, r4, r5] = await Promise.all([
       db.from('scores').delete().eq('group_id', currentGid).eq('name', name),
       db.from('score_history').delete().eq('group_id', currentGid).eq('user_name', name),
@@ -2616,6 +2699,7 @@ function hideAdPlaceholder(){}
       onkeydown="if(event.key==='Enter') confirmPass()"
     >
     <div id="pass-err"></div>
+    <button class="pb-btn-bio" id="pass-bio" hidden onclick="bioOpenPass()">Face ID로 열기</button>
     <div class="pb-btns">
       <button class="pb-btn-cancel" onclick="closePassPopup()">취소</button>
       <button class="pb-btn-ok" onclick="confirmPass()">🔓 확인</button>
@@ -2638,10 +2722,12 @@ function hideAdPlaceholder(){}
     </div>
   </div>
 </div>
-<script src="ask.js?v=79"></script>
-<script src="admin-v2.js?v=79"></script>
-<script src="teambattle.js?v=79"></script>
-<script src="emoji-icons.js?v=79"></script>
+<script src="ask.js?v=81"></script>
+<script src="dashbio.js?v=81"></script>
+<script src="foldable.js?v=81"></script>
+<script src="admin-v2.js?v=81"></script>
+<script src="teambattle.js?v=81"></script>
+<script src="emoji-icons.js?v=81"></script>
 <script>
 /* ── 큰 모니터·TV 에 맞춰 키우기 (2026-10-22) ──
    기준 폭 1440(왼쪽 학급 목록 260 + 본문)으로 짜인 화면을, 그보다 넓으면 그만큼 키운다.

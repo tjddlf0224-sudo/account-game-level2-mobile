@@ -1,0 +1,409 @@
+{
+ "meta": {
+  "title": "Game 5 Ledger Flight (US Intro Accounting)",
+  "count": 50,
+  "generated": "2026-11-15"
+ },
+ "problems": [
+  {
+   "q": "Sold merchandise on account to Maple Supply for $4,000. Which special journal records this sale?",
+   "key": "credit sale",
+   "L": "Purchases Journal",
+   "R": "Sales Journal",
+   "a": "R",
+   "why": "The Sales Journal records sales of merchandise on account."
+  },
+  {
+   "q": "Purchased merchandise on account from Summit Wholesale for $2,800. Which special journal records it?",
+   "key": "credit purchase",
+   "L": "Sales Journal",
+   "R": "Purchases Journal",
+   "a": "R",
+   "why": "The Purchases Journal records merchandise bought on account."
+  },
+  {
+   "q": "Received $3,000 cash from Bright Path Co. on its account. Where is it recorded?",
+   "key": "cash received",
+   "L": "Cash Receipts Journal",
+   "R": "Cash Payments Journal",
+   "a": "L",
+   "why": "Any cash coming in goes in the Cash Receipts Journal."
+  },
+  {
+   "q": "Paid Oakridge Supply $2,500 cash on account. Where is it recorded?",
+   "key": "cash paid",
+   "L": "Cash Payments Journal",
+   "R": "Cash Receipts Journal",
+   "a": "L",
+   "why": "Any cash going out goes in the Cash Payments Journal."
+  },
+  {
+   "q": "Recorded the adjusting entry for supplies used during the year. Where does it go first?",
+   "key": "adjusting entry",
+   "L": "General Journal",
+   "R": "Cash Payments Journal",
+   "a": "L",
+   "why": "Adjusting entries are not routine, so they go in the General Journal."
+  },
+  {
+   "q": "You need to see how much each customer owes. Which book do you check?",
+   "key": "by customer",
+   "L": "Accounts Receivable Subsidiary Ledger",
+   "R": "Accounts Payable Subsidiary Ledger",
+   "a": "L",
+   "why": "The Accounts Receivable Subsidiary Ledger has one account per customer."
+  },
+  {
+   "q": "You need to see how much the company owes each supplier. Which book do you check?",
+   "key": "by supplier",
+   "L": "Accounts Payable Subsidiary Ledger",
+   "R": "Accounts Receivable Subsidiary Ledger",
+   "a": "L",
+   "why": "The Accounts Payable Subsidiary Ledger has one account per supplier."
+  },
+  {
+   "q": "Which book holds every account, with a running balance for each?",
+   "key": "all accounts",
+   "L": "General Journal",
+   "R": "General Ledger",
+   "a": "R",
+   "why": "The General Ledger is the book of all accounts and their balances."
+  },
+  {
+   "q": "Which book of original entry records general entries in date order, as debits and credits?",
+   "key": "book of original entry",
+   "L": "General Journal",
+   "R": "General Ledger",
+   "a": "L",
+   "why": "The General Journal is a book of original entry; the ledger comes after posting."
+  },
+  {
+   "q": "Which record lists small payments made from the petty cash fund, one voucher at a time?",
+   "key": "small cash payments",
+   "L": "Petty Cash Record",
+   "R": "Cash Payments Journal",
+   "a": "L",
+   "why": "The Petty Cash Record tracks each payment made from the fund."
+  },
+  {
+   "q": "Which record shows units on hand and unit cost for each product, updated after every purchase and sale?",
+   "key": "units and cost",
+   "L": "Plant Asset Subsidiary Ledger",
+   "R": "Inventory Subsidiary Ledger",
+   "a": "R",
+   "why": "Under the perpetual system, the Inventory Subsidiary Ledger tracks each product."
+  },
+  {
+   "q": "Which record shows cost, useful life, and accumulated depreciation for each delivery truck?",
+   "key": "by asset",
+   "L": "Inventory Subsidiary Ledger",
+   "R": "Plant Asset Subsidiary Ledger",
+   "a": "R",
+   "why": "The Plant Asset Subsidiary Ledger keeps one card or account per long-term asset."
+  },
+  {
+   "q": "Which listing shows every ledger balance to check that debits equal credits?",
+   "key": "debits = credits",
+   "L": "Trial Balance",
+   "R": "Worksheet",
+   "a": "L",
+   "why": "A trial balance lists all account balances and compares total debits to credits."
+  },
+  {
+   "q": "Which tool has columns for unadjusted balances, adjustments, and adjusted balances side by side?",
+   "key": "adjustment columns",
+   "L": "Trial Balance",
+   "R": "Worksheet",
+   "a": "R",
+   "why": "A worksheet lays out the adjusting process in columns before statements are prepared."
+  },
+  {
+   "q": "Which document compares the bank statement with the company's Cash account?",
+   "key": "bank vs books",
+   "L": "Bank Reconciliation",
+   "R": "Trial Balance",
+   "a": "L",
+   "why": "A bank reconciliation explains the difference between bank and book balances."
+  },
+  {
+   "q": "Which record shows each employee's gross pay, withholdings, and net pay for a pay period?",
+   "key": "employee pay",
+   "L": "Payroll Register",
+   "R": "Cash Payments Journal",
+   "a": "L",
+   "why": "The Payroll Register summarizes pay and deductions for every employee."
+  },
+  {
+   "q": "Sold merchandise to a customer for cash. Where is it recorded?",
+   "key": "cash sale",
+   "L": "Cash Receipts Journal",
+   "R": "Sales Journal",
+   "a": "L",
+   "why": "The Sales Journal is only for credit sales, so a cash sale goes in the Cash Receipts Journal."
+  },
+  {
+   "q": "Purchased office equipment on account from Clearwater Inc. Where is it recorded?",
+   "key": "non-merchandise purchase",
+   "L": "General Journal",
+   "R": "Purchases Journal",
+   "a": "L",
+   "why": "The Purchases Journal is only for merchandise, so equipment goes in the General Journal."
+  },
+  {
+   "q": "Maple Supply returned damaged merchandise for credit. Which journal records the return?",
+   "key": "sales return",
+   "L": "General Journal",
+   "R": "Sales Journal",
+   "a": "L",
+   "why": "A sales return is not a new sale, so it is recorded in the General Journal."
+  },
+  {
+   "q": "Paid the monthly rent by check. Where is it recorded?",
+   "key": "rent paid",
+   "L": "Cash Payments Journal",
+   "R": "General Journal",
+   "a": "L",
+   "why": "All cash payments are recorded in the Cash Payments Journal."
+  },
+  {
+   "q": "Sold an old computer for cash. Where is the cash received recorded?",
+   "key": "equipment sold for cash",
+   "L": "Cash Receipts Journal",
+   "R": "General Journal",
+   "a": "L",
+   "why": "Any cash received goes in the Cash Receipts Journal, whatever its source."
+  },
+  {
+   "q": "Recorded the closing entries at year-end. Where do they go first?",
+   "key": "closing entries",
+   "L": "General Ledger",
+   "R": "General Journal",
+   "a": "R",
+   "why": "Closing entries are journalized in the General Journal and then posted to the ledger."
+  },
+  {
+   "q": "Individual credit sales are posted daily to which book?",
+   "key": "daily posting",
+   "L": "Accounts Payable Subsidiary Ledger",
+   "R": "Accounts Receivable Subsidiary Ledger",
+   "a": "R",
+   "why": "Each credit sale is posted to the customer's account in the Accounts Receivable Subsidiary Ledger."
+  },
+  {
+   "q": "Individual credit purchases are posted daily to which book?",
+   "key": "daily posting",
+   "L": "Accounts Receivable Subsidiary Ledger",
+   "R": "Accounts Payable Subsidiary Ledger",
+   "a": "R",
+   "why": "Each credit purchase is posted to the supplier's account in the Accounts Payable Subsidiary Ledger."
+  },
+  {
+   "q": "Which record supports the amount of the check written to replenish the petty cash fund?",
+   "key": "replenishment support",
+   "L": "Cash Receipts Journal",
+   "R": "Petty Cash Record",
+   "a": "R",
+   "why": "The Petty Cash Record totals what the fund paid out, which sets the check amount."
+  },
+  {
+   "q": "The Accounts Receivable account in the General Ledger should equal the total of which book?",
+   "key": "control account",
+   "L": "Accounts Payable Subsidiary Ledger",
+   "R": "Accounts Receivable Subsidiary Ledger",
+   "a": "R",
+   "why": "The subsidiary ledger's account balances must add up to the control account."
+  },
+  {
+   "q": "Found a service charge on the bank statement that the books do not show. Where do you list it?",
+   "key": "service charge",
+   "L": "Bank Reconciliation",
+   "R": "Payroll Register",
+   "a": "L",
+   "why": "A bank reconciliation lists unrecorded bank charges so the books can be corrected."
+  },
+  {
+   "q": "Which document ends with an adjusted bank balance and an adjusted book balance that should agree?",
+   "key": "adjusted balances",
+   "L": "Trial Balance",
+   "R": "Bank Reconciliation",
+   "a": "R",
+   "why": "A bank reconciliation brings the bank and book balances to the same correct amount."
+  },
+  {
+   "q": "Paid a $45 postage bill from the petty cash fund. Where is the payment first recorded?",
+   "key": "petty cash payment",
+   "L": "Cash Receipts Journal",
+   "R": "Petty Cash Record",
+   "a": "R",
+   "why": "Payments from the fund are first recorded in the Petty Cash Record."
+  },
+  {
+   "q": "Wrote a check to reimburse the petty cash fund. Which book records the check?",
+   "key": "reimbursement check",
+   "L": "Cash Payments Journal",
+   "R": "Petty Cash Record",
+   "a": "L",
+   "why": "Writing a check is a cash payment, so it goes in the Cash Payments Journal."
+  },
+  {
+   "q": "At month-end, which journal's column total is posted as Dr Accounts Receivable and Cr Sales Revenue?",
+   "key": "credit sales total",
+   "L": "Purchases Journal",
+   "R": "Sales Journal",
+   "a": "R",
+   "why": "The Sales Journal total of credit sales is posted to the General Ledger at month-end."
+  },
+  {
+   "q": "Which tool helps you organize amounts for the financial statements before adjusting and closing entries are posted?",
+   "key": "statement preparation",
+   "L": "General Journal",
+   "R": "Worksheet",
+   "a": "R",
+   "why": "A worksheet collects balances and adjustments to build the statements."
+  },
+  {
+   "q": "After closing entries are posted, which listing confirms debits still equal credits?",
+   "key": "post-closing",
+   "L": "Worksheet",
+   "R": "Trial Balance",
+   "a": "R",
+   "why": "A post-closing trial balance checks the ledger after closing."
+  },
+  {
+   "q": "Issued new Common Stock for $5,000 cash. Where is it recorded?",
+   "key": "stock issued for cash",
+   "L": "Cash Receipts Journal",
+   "R": "Purchases Journal",
+   "a": "L",
+   "why": "Cash received from selling stock goes in the Cash Receipts Journal."
+  },
+  {
+   "q": "Paid a cash dividend to shareholders. Where is the payment recorded?",
+   "key": "dividend paid",
+   "L": "Cash Payments Journal",
+   "R": "General Journal",
+   "a": "L",
+   "why": "Cash dividends paid go in the Cash Payments Journal."
+  },
+  {
+   "q": "The board declared a dividend: Dr Dividends / Cr Dividends Payable. Where is it recorded?",
+   "key": "dividend declared",
+   "L": "Cash Payments Journal",
+   "R": "General Journal",
+   "a": "R",
+   "why": "No cash moved yet, so the declaration goes in the General Journal."
+  },
+  {
+   "q": "Recorded accrued salaries at year-end. Where is the entry first recorded?",
+   "key": "accrued salaries",
+   "L": "General Journal",
+   "R": "Payroll Register",
+   "a": "L",
+   "why": "Accrual adjustments are entered in the General Journal."
+  },
+  {
+   "q": "Where do you look for the running balance of the Cash account?",
+   "key": "Cash balance",
+   "L": "General Journal",
+   "R": "General Ledger",
+   "a": "R",
+   "why": "A ledger account shows running balances; a journal does not."
+  },
+  {
+   "q": "Returned damaged merchandise to Summit Wholesale for credit. Where is the purchase return recorded?",
+   "key": "purchase return",
+   "L": "General Journal",
+   "R": "Purchases Journal",
+   "a": "L",
+   "why": "A return is not a new purchase, so it goes in the General Journal."
+  },
+  {
+   "q": "Received a $200 credit memo from Bluebird Traders for returned goods. Which subsidiary ledger is updated?",
+   "key": "supplier credit memo",
+   "L": "Accounts Receivable Subsidiary Ledger",
+   "R": "Accounts Payable Subsidiary Ledger",
+   "a": "R",
+   "why": "The credit memo lowers what the company owes that supplier."
+  },
+  {
+   "q": "Purchased merchandise from Oakridge Supply and paid cash on delivery. Where is it recorded?",
+   "key": "cash purchase",
+   "L": "Cash Payments Journal",
+   "R": "Purchases Journal",
+   "a": "L",
+   "why": "The Purchases Journal is only for credit purchases, so a cash purchase goes in the Cash Payments Journal."
+  },
+  {
+   "q": "Wrote off an uncollectible customer account against the allowance. Where is the entry first recorded?",
+   "key": "write-off",
+   "L": "Cash Receipts Journal",
+   "R": "General Journal",
+   "a": "R",
+   "why": "No cash moved, and no special journal covers a write-off, so it goes in the General Journal."
+  },
+  {
+   "q": "A customer wants 50 units of one product. Which record shows how many units are on hand?",
+   "key": "units on hand",
+   "L": "Purchases Journal",
+   "R": "Inventory Subsidiary Ledger",
+   "a": "R",
+   "why": "The Inventory Subsidiary Ledger tracks units in, out, and on hand for each product."
+  },
+  {
+   "q": "At month-end, which journal's total is posted as Dr Merchandise Inventory and Cr Accounts Payable?",
+   "key": "credit purchases total",
+   "L": "Sales Journal",
+   "R": "Purchases Journal",
+   "a": "R",
+   "why": "The Purchases Journal total of credit purchases is posted to the General Ledger at month-end."
+  },
+  {
+   "q": "The bank returned a customer's check marked NSF. Which document lists it as a correction to the book balance?",
+   "key": "NSF check",
+   "L": "Sales Journal",
+   "R": "Bank Reconciliation",
+   "a": "R",
+   "why": "An NSF check is a reconciling item that reduces the Cash balance in the books."
+  },
+  {
+   "q": "Purchased supplies on account for office use. Where is it recorded?",
+   "key": "supplies on account",
+   "L": "General Journal",
+   "R": "Purchases Journal",
+   "a": "L",
+   "why": "The Purchases Journal is only for merchandise, so supplies go in the General Journal."
+  },
+  {
+   "q": "Which record's totals support the journal entry that records a payroll?",
+   "key": "payroll entry support",
+   "L": "Payroll Register",
+   "R": "Trial Balance",
+   "a": "L",
+   "why": "The Payroll Register totals give the gross pay, withholdings, and net pay for the entry."
+  },
+  {
+   "q": "Which book is the final destination of all posting from the journals?",
+   "key": "final posting",
+   "L": "General Journal",
+   "R": "General Ledger",
+   "a": "R",
+   "why": "Journal amounts are posted to the General Ledger accounts."
+  },
+  {
+   "q": "A delivery van is being sold. Which record shows its cost and depreciation so you can find the gain or loss?",
+   "key": "asset sale detail",
+   "L": "Inventory Subsidiary Ledger",
+   "R": "Plant Asset Subsidiary Ledger",
+   "a": "R",
+   "why": "The Plant Asset Subsidiary Ledger holds cost and accumulated depreciation for each asset."
+  },
+  {
+   "q": "Recorded a bank loan received in the checking account. Where is it recorded?",
+   "key": "loan proceeds",
+   "L": "Cash Receipts Journal",
+   "R": "General Journal",
+   "a": "L",
+   "why": "Cash received from a loan goes in the Cash Receipts Journal."
+  }
+ ]
+}

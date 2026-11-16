@@ -43,10 +43,22 @@
       'align-items:center;justify-content:center;background:rgba(5,3,16,.72);',
       '-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);',
       'font-family:"Noto Sans KR",-apple-system,sans-serif;}',
-      '.ask-box{width:min(420px,84%);background:#1b1f2e;color:#eef1f7;',
+      '.ask-box{position:relative;box-sizing:border-box;width:min(420px,84%);background:#1b1f2e;color:#eef1f7;',
       'border:1px solid rgba(255,255,255,.14);border-radius:16px;',
       'box-shadow:0 18px 48px rgba(0,0,0,.55);padding:22px 22px 16px;}',
-      '.ask-msg{font-size:.98rem;line-height:1.8;white-space:pre-wrap;margin-bottom:18px;}',
+      /* 계사니(2026-11-06 성일님 "글씨만 나오는 부분 있으면 고치자. 계사니가 알려드릴까요? 라는데 계사니는 안 보여").
+         세로: 창 위로 고개를 내민다 — 그림 아래쪽(잘린 끝)은 창 뒤로 숨긴다(z-index:-1, .ask-box 는 z-index 없음).
+         가로(높이 430 이하): 창 안 왼쪽. */
+      '.ask-box.has-face{margin-top:52px;padding-top:40px;}',
+      '.ask-face{position:absolute;left:50%;top:-70px;width:92px;height:92px;margin-left:-46px;z-index:-1;',
+      'pointer-events:none;-webkit-user-select:none;user-select:none;}',
+      '.ask-box.has-face .ask-msg,.ask-box.has-face .ask-note{text-align:center;}',
+      '.ask-box.side{margin-top:0;padding:18px 20px 14px 108px;}',
+      '.ask-box.side .ask-face{left:14px;top:50%;margin:-42px 0 0;width:84px;height:84px;z-index:1;}',
+      '.ask-box.side .ask-msg,.ask-box.side .ask-note{text-align:left;}',
+      '.ask-msg{font-size:.98rem;line-height:1.8;white-space:pre-wrap;margin-bottom:18px;word-break:keep-all;overflow-wrap:anywhere;}',
+      /* opts.note — 본문 아래 작은 글씨(부연은 버튼·본문에 넣지 않는다) */
+      '.ask-note{font-size:.8rem;line-height:1.5;color:#9aa3b8;margin:-12px 0 16px;word-break:keep-all;}',
       '.ask-row{display:flex;gap:10px;}',
       /* 버튼은 같은 크기로 나란히 — 제각각 크기를 쓰지 않는다. */
       '.ask-row button{flex:1 1 0;min-width:0;padding:12px 0;border-radius:11px;',
@@ -55,6 +67,9 @@
       '.ask-row button.primary{background:linear-gradient(135deg,#00c2d6,#0090c8);',
       'border-color:transparent;color:#04121a;}',
       '.ask-row button:active{transform:translateY(1px);}',
+      /* Ask.choose — 고를 것이 여럿이면 세로로 쌓는다(같은 폭·같은 높이, 취소는 맨 아래) */
+      '.ask-row.col{flex-direction:column;gap:8px;}',
+      '.ask-row.col button{flex:0 0 auto;padding:11px 0;}',
       /* prompt 용 입력창 — 메시지와 버튼 사이에 들어간다 */
       '.ask-input{width:100%;box-sizing:border-box;margin:-8px 0 16px;padding:12px 14px;',
       'border-radius:11px;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.28);',
@@ -64,12 +79,30 @@
     document.head.appendChild(s);
   }
 
+  /* 내용에 맞는 계사니 표정 — 그림은 알림용 www/noti/calc_*.png 그대로(새로 그리지 않음).
+     opts.face 로 직접 고를 수 있고(clock·fire·plead·cry·sulk·ghost), false 면 안 넣는다. */
+  var FACES = ['clock', 'fire', 'plead', 'cry', 'sulk', 'ghost'];
+  function pickFace(msg, kind) {
+    var m = String(msg || '');
+    if (/✅|정복|축하|수고|고마워|변경되었|변경됐|초기화됐|저장했|열어드렸|합격/.test(m)) return 'fire';
+    if (/실패|못했|못 했|불러올 수 없|인터넷|네트워크|거부|⚠|탈퇴|삭제|일치하지 않/.test(m)) return 'cry';
+    if (kind !== 'alert' && /나갈|나가시|그만|종료|로그아웃|초기화|정말/.test(m)) return 'plead';
+    if (/입력해|입력하세요|글자 이상|글자 이하|형식이|먼저 /.test(m)) return 'plead';
+    return 'clock';
+  }
+  /* 회전 트릭(#rotator) 안이면 그 엘리먼트의 (돌기 전) 높이가 곧 보이는 가로 화면 높이다 */
+  function shortScreen(h) {
+    var px = (h === document.body) ? global.innerHeight : (h.clientHeight || global.innerHeight);
+    return px <= 430;
+  }
+
   /* opts.input 이 있으면 입력창을 넣는다. 그때 '확인'의 value 는 입력값이 되고,
      비우거나 취소하면 null 을 돌려준다(원래 prompt() 와 같은 약속). */
   function open(msg, labels, opts) {
     opts = opts || {};
     ensureStyle();
     return new Promise(function (resolve) {
+      var t0 = Date.now();   // 헛눌림 막기(11/15 플레이북 7-5): 창을 띄운 손가락을 뗄 때 생기는 click 이 새 단추를 누르지 않게 0.35초 무시
       var ov = document.createElement('div');
       ov.className = 'ask-ov';
       var box = document.createElement('div');
@@ -78,8 +111,27 @@
       p.className = 'ask-msg';
       p.textContent = msg;                       // 텍스트로 넣는다(HTML 주입 방지)
       var row = document.createElement('div');
-      row.className = 'ask-row';
+      row.className = opts.col ? 'ask-row col' : 'ask-row';
+      var where = host();
+      var face = opts.face === false ? null : (FACES.indexOf(opts.face) >= 0 ? opts.face : pickFace(msg, opts.kind));
+      if (face) {
+        var img = document.createElement('img');
+        img.className = 'ask-face';
+        img.alt = '';
+        img.draggable = false;
+        img.src = 'noti/calc_' + face + '.png';
+        img.setAttribute('data-face', face);
+        img.onerror = function () { if (img.parentNode) img.parentNode.removeChild(img); box.classList.remove('has-face', 'side'); };
+        box.appendChild(img);
+        box.classList.add(shortScreen(where) ? 'side' : 'has-face');
+      }
       box.appendChild(p);
+      if (opts.note) {
+        var nt = document.createElement('div');
+        nt.className = 'ask-note';
+        nt.textContent = opts.note;
+        box.appendChild(nt);
+      }
 
       var inp = null;
       if (opts.input) {
@@ -109,18 +161,18 @@
         var b = document.createElement('button');
         b.textContent = l.text;
         if (l.primary) b.className = 'primary';
-        b.addEventListener('click', function (e) { e.stopPropagation(); done(valueOf(l)); });
+        b.addEventListener('click', function (e) { e.stopPropagation(); if (e.detail !== 0 && Date.now() - t0 < 350) return; done(valueOf(l)); });   // detail 0 = 키보드·스크립트 click 은 그대로
         row.appendChild(b);
       });
       function onKey(e) {
-        if (e.key === 'Escape') { e.stopPropagation(); done(inp ? null : false); }
-        else if (e.key === 'Enter') { e.stopPropagation(); done(valueOf(labels[labels.length - 1])); }
+        if (e.key === 'Escape') { e.stopPropagation(); done(opts.col ? null : (inp ? null : false)); }
+        else if (e.key === 'Enter' && !opts.col) { e.stopPropagation(); done(valueOf(labels[labels.length - 1])); }
       }
       document.addEventListener('keydown', onKey, true);
       // 뒷배경 클릭이 게임(대화창 넘기기 등)에 새지 않게 막는다.
       ov.addEventListener('click', function (e) { e.stopPropagation(); });
 
-      host().appendChild(ov);
+      where.appendChild(ov);
       // 키보드가 바로 올라오도록. iOS 는 사용자 제스처 흐름 안이라 먹는다.
       if (inp) setTimeout(function () { try { inp.focus(); inp.select(); } catch (e) {} }, 30);
     });
@@ -132,11 +184,19 @@
       return open(msg, [
         { text: opts.cancel || '취소', value: false },
         { text: opts.ok || '확인', value: true, primary: true }
-      ]);
+      ], { kind: 'confirm', face: opts.face, note: opts.note });
     },
     alert: function (msg, opts) {
       opts = opts || {};
-      return open(msg, [{ text: opts.ok || '확인', value: true, primary: true }]);
+      return open(msg, [{ text: opts.ok || '확인', value: true, primary: true }], { kind: 'alert', face: opts.face, note: opts.note });
+    },
+    /* 여럿 중 하나 고르기(2026-11-15 언어 단추) — items: [{ text, value }]. 고르면 그 value, 취소면 null.
+       버튼은 세로로 쌓이고 취소가 맨 아래. */
+    choose: function (msg, items, opts) {
+      opts = opts || {};
+      var labels = (items || []).map(function (it) { return { text: it.text, value: it.value }; });
+      labels.push({ text: opts.cancel || '취소', value: null });
+      return open(msg, labels, { kind: 'confirm', face: opts.face, note: opts.note, col: true });
     },
     /* 원래 prompt() 와 같은 약속: 확인하면 입력 문자열, 취소하거나 비우면 null.
        두 번째 인자로 기본값을 준다(prompt(msg, defaultValue) 와 같은 자리). */
@@ -145,7 +205,7 @@
       return open(msg, [
         { text: opts.cancel || '취소', value: false },
         { text: opts.ok || '확인', value: true, primary: true }
-      ], { input: true, value: def == null ? '' : String(def),
+      ], { input: true, value: def == null ? '' : String(def), kind: 'prompt', face: opts.face, note: opts.note,
            placeholder: opts.placeholder, password: !!opts.password });
     }
   };

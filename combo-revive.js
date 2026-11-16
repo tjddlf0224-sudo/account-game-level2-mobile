@@ -125,8 +125,11 @@
     ['pointerdown', 'touchstart', 'mousedown', 'click'].forEach(function (t) {
       el.addEventListener(t, function (e) { e.stopPropagation(); }, false);
     });
-    el.querySelector('.no').addEventListener('click', function () { hit(o.place, 'rw_skip'); close(); });
-    el.querySelector('.go').addEventListener('click', function () { close(); watch(had, o); });
+    /* 헛눌림 막기(11/15 플레이북 7-5): 산성비는 오답 단어를 pointerdown 으로 받아 곧바로 이 창을 연다 — 손가락을 뗄 때 생기는 click 이
+       같은 자리(화면 아래)의 '광고 보고 되살리기'를 눌러 광고가 저절로 뜰 수 있다 → 창을 띄우고 0.35초 안의 진짜 터치 click 은 무시 */
+    var t0 = Date.now(), ghost = function (e) { return e && e.detail !== 0 && Date.now() - t0 < 350; };
+    el.querySelector('.no').addEventListener('click', function (e) { if (ghost(e)) return; hit(o.place, 'rw_skip'); close(); });
+    el.querySelector('.go').addEventListener('click', function (e) { if (ghost(e)) return; close(); watch(had, o); });
     return true;
   }
 

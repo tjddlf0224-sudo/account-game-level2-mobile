@@ -4,9 +4,10 @@
     <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
          **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
          이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-    <script src="safestore.js?v=79"></script>
+    <script src="safestore.js?v=81"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<style>html{-webkit-text-size-adjust:100%;text-size-adjust:100%}</style>
 <title>내 성장 그래프 | 전산회계 2급</title>
 <meta name="description" content="게임을 할수록 쌓이는 내 점수의 성장곡선">
 <style>
@@ -82,6 +83,25 @@
         padding:0 2px 6px;margin-top:-2px;}
   .one-hint{font-size:.76rem;color:var(--dim);text-align:center;padding:6px 0 10px;}
 
+  /* 내 기술 도감(skill.js, 2026-11-03) */
+  .dex-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:10px;}
+  .dex-h b{font-size:1rem;}
+  .dex-h span{font-size:.74rem;color:var(--dim);}
+  .dex-title{display:inline-block;margin:-2px 0 10px;font-size:.78rem;color:var(--gold);background:rgba(255,210,74,.1);
+    border:1px solid rgba(255,210,74,.35);border-radius:20px;padding:3px 10px;}
+  .dex{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+  @media (min-width:600px){ .dex{grid-template-columns:repeat(3,minmax(0,1fr));} }
+  .dx{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:9px 11px;min-width:0;}
+  .dx .nm{display:flex;align-items:center;justify-content:space-between;gap:6px;font-weight:700;font-size:.9rem;}
+  .dx .lv{font-size:.7rem;font-weight:700;border-radius:20px;padding:2px 8px;white-space:nowrap;
+    color:var(--blue);background:rgba(0,242,255,.1);}
+  .dx.l2 .lv{color:var(--purple);background:rgba(180,79,255,.14);}
+  .dx.l3{border-color:rgba(255,210,74,.55);}
+  .dx.l3 .lv{color:var(--gold);background:rgba(255,210,74,.14);}
+  .dx .bar{height:5px;border-radius:3px;background:rgba(255,255,255,.07);margin:7px 0 4px;overflow:hidden;}
+  .dx .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--green));}
+  .dx .ft{font-size:.68rem;color:var(--dim);font-variant-numeric:tabular-nums;}
+  .dx.none{opacity:.55;}
   .empty{text-align:center;color:var(--dim);padding:46px 14px;line-height:1.65;}
   .empty .em{font-size:2.6rem;display:block;margin-bottom:12px;}
   .empty .go{display:inline-block;margin-top:16px;background:linear-gradient(90deg,var(--blue),var(--green));
@@ -113,11 +133,11 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="growth.js?v=79"></script>
-<script src="streak.js?v=79"></script>
-<script src="examday.js?v=79"></script>
-<script src="remind.js?v=79"></script>
-<script src="daylog.js?v=79"></script>
+<script src="growth.js?v=81"></script>
+<script src="streak.js?v=81"></script>
+<script src="examday.js?v=81"></script>
+<script src="remind.js?v=81"></script>
+<script src="daylog.js?v=81"></script><script src="amev.js?v=81"></script><script src="skill.js?v=81"></script><script src="boss.js?v=81"></script>
 <script>
 // 로그인 체크
 (function(){
@@ -149,7 +169,7 @@ function render(data){
     box.innerHTML =
       '<div class="empty"><span class="em">🌱</span>'+
       '아직 기록이 없어요.<br>게임을 플레이하면 점수가 차곡차곡 쌓여<br>나만의 <b style="color:#00f2ff">성장곡선</b>이 그려집니다.'+
-      '<br><a class="go" href="index.html">게임 하러 가기 →</a></div>';
+      '<br><a class="go" href="index.html">게임 하러 가기 →</a></div>' + skillDex();   // 이론만 푼 사람도 도감은 보이게
     return;
   }
 
@@ -179,10 +199,31 @@ function render(data){
         : '<div class="topgrow">한 게임을 두 판 이상 하면 여기서 성장폭을 볼 수 있어요 💪</div>')+
     '</div>';
 
+  html += skillDex();
+
   // ── 게임별 차트 ──
   games.forEach(function(g){ html += gameCard(g, data[g]); });
 
   box.innerHTML = html;
+}
+
+/* 내 기술 도감 — 분개 기술 숙련 4단계(skill.js). 하나도 안 만났으면 빈 문자열 */
+function skillDex(){
+  if(!window.Skill) return '';
+  var L = Skill.list(), met = L.filter(function(x){ return x.met; });
+  if(!met.length) return '';
+  var g = L.filter(function(x){ return x.lv === 2; }).length, d = L.filter(function(x){ return x.lv === 3; }).length;
+  var title = ''; try { var b = window.Boss && Boss.state(); if(b && b.won) title = '<div class="dex-title">칭호 · 감사관도 인정한 회계사</div>'; } catch(e){}
+  var h = '<div class="panel"><div class="dex-h"><b>내 기술 도감</b><span>'+(g||d ? '고수 '+g+' · 달인 '+d : '문제를 맞히다 보면 칸이 채워져요')+'</span></div>'+title+'<div class="dex">';
+  L.forEach(function(x){
+    // 화면엔 고수·달인 둘만(11/3 성일님) — 아직 고수가 아니면 기술 이름만 흐리게
+    if(!x.stage){ h += '<div class="dx none"><div class="nm">'+esc(x.name)+'</div></div>'; return; }
+    var pct = x.lv >= 3 ? 100 : Math.round(100 * x.n / x.max);
+    h += '<div class="dx l'+x.lv+'"><div class="nm"><span>'+esc(x.name)+'</span><span class="lv">'+esc(x.stage)+'</span></div>'+
+         '<div class="bar"><i style="width:'+pct+'%"></i></div>'+
+         '<div class="ft">'+(x.lv >= 3 ? '정답 '+comma(x.total)+'개 · 최고 단계' : '정답 '+comma(x.total)+'개 · 달인까지 최대 '+x.left+'개')+'</div></div>';
+  });
+  return h + '</div></div>';
 }
 
 function gameCard(g, arr){
@@ -278,6 +319,6 @@ function chartSVG(arr){
 
 load();
 </script>
-<script src="emoji-icons.js?v=79"></script>
+<script src="emoji-icons.js?v=81"></script>
 </body>
 </html>

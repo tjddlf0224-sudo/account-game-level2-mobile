@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
+         **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
+         이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
+    <script src="tw/tw_data.js?v=1"></script>
+<script src="tw/server_tw.js?v=1"></script>
+<link rel="stylesheet" href="tw/tw.css?v=1">
+<script src="safestore.js?v=79"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<style>html{-webkit-text-size-adjust:100%;text-size-adjust:100%}</style>
+<title>成長曲線 | 會計電玩館</title>
+<meta name="description" content="越玩越進步，看見自己的成長曲線">
+<style>
+  :root{
+    --bg:#020810; --card:#0c1626; --card2:#11203a; --line:rgba(255,255,255,.08);
+    --blue:#00f2ff; --purple:#b44fff; --green:#2ecc71; --red:#ff2d78; --gold:#ffd24a;
+    --txt:#eaf2ff; --dim:rgba(234,242,255,.55);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  
+  /* 본문 글꼴은 전 게임 공통으로 Noto Sans KR 이 먼저다(2026-09-15).
+     전엔 -apple-system 이 앞이라 **웹폰트를 불러놓고도 iOS 에선 애플 기본 글꼴**이
+     나왔다 — 게임 5종·원가의 길과 글자 모양이 달라 보이던 이유다.
+     시스템 글꼴은 뒤에 남겨 웹폰트가 늦거나 막혀도 한글이 깨지지 않게 한다. */
+  body{margin:0;background:var(--bg);color:var(--txt);
+       font-family:'Noto Sans TC', 'Noto Sans KR',-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
+       padding:0 0 calc(60px + var(--ad-banner-h, 0px));
+       min-height:100vh;}
+  .wrap{max-width:640px;margin:0 auto;padding:calc(18px + env(safe-area-inset-top)) 16px 18px;}
+  @media (min-width:701px){
+    body{background:
+      radial-gradient(ellipse 50% 40% at 12% 10%, rgba(0,242,255,0.07), transparent 60%),
+      radial-gradient(ellipse 45% 35% at 90% 90%, rgba(180,79,255,0.07), transparent 55%),
+      var(--bg);
+      display:flex; flex-direction:column; justify-content:center;}
+    .wrap{padding-top:16px;max-width:900px;width:100%;}
+    h1{font-size:1.55rem;}
+    h1 .sub{font-size:.85rem;}
+    .panel{padding:22px 26px;}
+    .sum .box b{font-size:1.9rem;}
+    .sum .box span{font-size:.85rem;}
+    .topgrow{font-size:1rem;}
+    .gcard{padding:20px 22px 14px;}
+    .ghead .nm{font-size:1.15rem;}
+    .chip{font-size:.88rem;}
+  }
+  .top{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+  .back{background:var(--card);border:1px solid var(--line);color:var(--txt);
+        border-radius:12px;padding:9px 13px;font-size:.92rem;text-decoration:none;}
+  h1{font-size:1.25rem;margin:0;letter-spacing:-.3px;}
+  h1 .sub{display:block;font-size:.72rem;color:var(--dim);font-weight:500;margin-top:3px;}
+
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;
+         padding:16px;margin-bottom:14px;}
+  .sum{display:flex;gap:10px;}
+  .sum .box{flex:1;background:var(--card2);border:1px solid var(--line);border-radius:13px;
+            padding:12px 10px;text-align:center;}
+  .sum .box b{display:block;font-size:1.5rem;color:var(--gold);line-height:1.15;}
+  .sum .box span{font-size:.72rem;color:var(--dim);}
+  .topgrow{margin-top:12px;font-size:.86rem;color:var(--green);
+           background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.25);
+           border-radius:11px;padding:10px 12px;line-height:1.5;}
+  .topgrow b{color:var(--gold);}
+
+  .gcard{background:var(--card);border:1px solid var(--line);border-radius:16px;
+         padding:14px 14px 8px;margin-bottom:14px;}
+  .ghead{display:flex;align-items:center;gap:9px;margin-bottom:4px;}
+  .ghead .ic{font-size:1.3rem;}
+  .ghead .nm{font-weight:700;font-size:1rem;flex:1;}
+  .ghead .gr{font-size:.74rem;color:var(--blue);background:rgba(0,242,255,.1);
+             border-radius:20px;padding:3px 9px;white-space:nowrap;}
+  .gstats{display:flex;gap:7px;margin:6px 0 2px;flex-wrap:wrap;}
+  .chip{font-size:.76rem;border-radius:20px;padding:3px 10px;background:rgba(255,255,255,.06);
+        color:var(--dim);font-variant-numeric:tabular-nums;}
+  .chip b{color:var(--txt);font-weight:700;}
+  .chip.best b{color:var(--gold);}
+  .chip.up{color:var(--green);background:rgba(46,204,113,.12);}
+  .chip.up b{color:var(--green);}
+  .chip.down{color:var(--red);background:rgba(255,45,120,.12);}
+  .chip.down b{color:var(--red);}
+  .chart{width:100%;display:block;margin-top:6px;}
+  .axis{display:flex;justify-content:space-between;font-size:.68rem;color:var(--dim);
+        padding:0 2px 6px;margin-top:-2px;}
+  .one-hint{font-size:.76rem;color:var(--dim);text-align:center;padding:6px 0 10px;}
+
+  /* 내 기술 도감(skill.js, 2026-11-03) */
+  .dex-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:10px;}
+  .dex-h b{font-size:1rem;}
+  .dex-h span{font-size:.74rem;color:var(--dim);}
+  .dex-title{display:inline-block;margin:-2px 0 10px;font-size:.78rem;color:var(--gold);background:rgba(255,210,74,.1);
+    border:1px solid rgba(255,210,74,.35);border-radius:20px;padding:3px 10px;}
+  .dex{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+  @media (min-width:600px){ .dex{grid-template-columns:repeat(3,minmax(0,1fr));} }
+  .dx{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:9px 11px;min-width:0;}
+  .dx .nm{display:flex;align-items:center;justify-content:space-between;gap:6px;font-weight:700;font-size:.9rem;}
+  .dx .lv{font-size:.7rem;font-weight:700;border-radius:20px;padding:2px 8px;white-space:nowrap;
+    color:var(--blue);background:rgba(0,242,255,.1);}
+  .dx.l2 .lv{color:var(--purple);background:rgba(180,79,255,.14);}
+  .dx.l3{border-color:rgba(255,210,74,.55);}
+  .dx.l3 .lv{color:var(--gold);background:rgba(255,210,74,.14);}
+  .dx .bar{height:5px;border-radius:3px;background:rgba(255,255,255,.07);margin:7px 0 4px;overflow:hidden;}
+  .dx .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--green));}
+  .dx .ft{font-size:.68rem;color:var(--dim);font-variant-numeric:tabular-nums;}
+  .dx.none{opacity:.55;}
+  .empty{text-align:center;color:var(--dim);padding:46px 14px;line-height:1.65;}
+  .empty .em{font-size:2.6rem;display:block;margin-bottom:12px;}
+  .empty .go{display:inline-block;margin-top:16px;background:linear-gradient(90deg,var(--blue),var(--green));
+             color:#021;font-weight:700;text-decoration:none;border-radius:13px;padding:12px 22px;}
+
+/*FONTUNI*/
+/* ── 폰트 통일 (2026-09-14) ──
+   제목·버튼 = Black Han Sans / 본문 = Noto Sans KR. 둘 다 OFL 이라 상업 배포에 제약이 없다.
+   ⚠ Orbitron 은 **라틴 전용**이라 한글에 쓰면 시스템 폰트로 대체되고 자간만 벌어져
+     "회계 플라이트"처럼 멋없게 나온다(사용자 지적). 숫자·영문 전용으로만 쓴다.
+   Jua 는 게임마다 섞여 있어 걷어냈다. */
+.gtitle, .logo, .ov-title, .overlay-title, h1, h2 { font-family: 'Noto Sans TC', 'Black Han Sans', 'Noto Sans TC', 'Noto Sans KR', sans-serif !important; }
+</style>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800;900&family=Black+Han+Sans&family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <a class="back" href="index.html">←</a>
+    <script>/* 1급 허브에서 들어왔으면 1급 허브로 돌아간다(2026-09-27 QA) */try{if(localStorage.getItem('hub_level')==='lv1')document.currentScript.previousElementSibling.href='index_lv1.html';}catch(e){}</script>
+    <h1>📈 成長曲線
+      <span class="sub" id="who">載入中...</span>
+    </h1>
+  </div>
+
+  <div id="content"><div class="empty">載入中...</div></div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="growth.js?v=79"></script>
+<script src="streak.js?v=79"></script>
+<script src="examday.js?v=79"></script>
+<script src="remind.js?v=79"></script>
+<script src="daylog.js?v=79"></script><script src="amev.js?v=1"></script><script src="skill.js?v=1"></script><script src="boss.js?v=1"></script>
+<script>
+// 로그인 체크
+(function(){
+  var nick = (localStorage.getItem('hub_nickname')||'').trim();
+  if(!nick){ location.replace('login.html'); return; }
+  document.getElementById('who').textContent = nick + ' 的成長紀錄';
+})();
+
+var GAME_ORDER = ['acid','acid_d2','memory','memory_d2','debit','debit_d2','factory','factory_d2','flight','theory'];
+var GAME_ICON  = {acid:'☁️',memory:'🧩',debit:'⚡',factory:'🏭',flight:'🛩',theory:'📝',
+                  acid_d2:'🔥',memory_d2:'🔥',debit_d2:'🔥',factory_d2:'🔥'};   // 난이도2는 따로 그린다(2026-09-18)
+
+function esc(s){ return (s==null?'':String(s)).replace(/[&<>"']/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function gameName(g){ return (Growth.GAME_NAMES[g]||g); }
+function fmtDate(ts){ if(!ts) return ''; var d=new Date(ts); return (d.getMonth()+1)+'/'+d.getDate(); }
+function comma(n){ return (n||0).toLocaleString(); }
+
+async function load(){
+  var data = await Growth.series();
+  render(data);
+}
+
+function render(data){
+  var box = document.getElementById('content');
+  var games = GAME_ORDER.filter(function(g){ return data[g] && data[g].length; });
+
+  if(!games.length){
+    box.innerHTML =
+      '<div class="empty"><span class="em">🌱</span>'+
+      '還沒有紀錄。<br>玩遊戲後分數會慢慢累積，<br>就會畫出你專屬的<b style="color:#00f2ff">成長曲線</b>。'+
+      '<br><a class="go" href="index.html">去玩遊戲 →</a></div>' + skillDex();   // 이론만 푼 사람도 도감은 보이게
+    return;
+  }
+
+  // ── 요약 ──
+  var totalPlays = 0, bestGrow = null;
+  games.forEach(function(g){
+    var arr = data[g];
+    totalPlays += arr.length;
+    if(arr.length >= 2){
+      var first = arr[0].score;
+      var best = Math.max.apply(null, arr.map(function(p){return p.score;}));
+      var grow = best - first;
+      if(grow > 0 && (!bestGrow || grow > bestGrow.grow)) bestGrow = {g:g, grow:grow, first:first, best:best};
+    }
+  });
+
+  var html =
+    '<div class="panel">'+
+      '<div class="sum">'+
+        '<div class="box"><b>'+totalPlays+'</b><span>總遊玩次數</span></div>'+
+        '<div class="box"><b>'+games.length+'</b><span>玩過的遊戲</span></div>'+
+      '</div>'+
+      (bestGrow
+        ? '<div class="topgrow">🚀 進步最多的遊戲是<b>'+esc(gameName(bestGrow.g))+'</b>！<br>'+
+          '第一次 '+comma(bestGrow.first)+'分 → 最高分 '+comma(bestGrow.best)+'分 ('+
+          '<b>+'+comma(bestGrow.grow)+'</b>)</div>'
+        : '<div class="topgrow">同一個遊戲玩2次以上，就看得到進步幅度 💪</div>')+
+    '</div>';
+
+  html += skillDex();
+
+  // ── 게임별 차트 ──
+  games.forEach(function(g){ html += gameCard(g, data[g]); });
+
+  box.innerHTML = html;
+}
+
+/* 내 기술 도감 — 분개 기술 숙련 4단계(skill.js). 하나도 안 만났으면 빈 문자열 */
+function skillDex(){
+  if(!window.Skill) return '';
+  var L = Skill.list(), met = L.filter(function(x){ return x.met; });
+  if(!met.length) return '';
+  var g = L.filter(function(x){ return x.lv === 2; }).length, d = L.filter(function(x){ return x.lv === 3; }).length;
+  var title = ''; try { var b = window.Boss && Boss.state(); if(b && b.won) title = '<div class="dex-title">稱號 · 連稽核員都點頭的記帳高手</div>'; } catch(e){}
+  var h = '<div class="panel"><div class="dex-h"><b>技能圖鑑</b><span>'+(g||d ? '高手 '+g+' · 達人 '+d : '答對題目，格子就會被填滿')+'</span></div>'+title+'<div class="dex">';
+  L.forEach(function(x){
+    // 화면엔 고수·달인 둘만(11/3 성일님) — 아직 고수가 아니면 기술 이름만 흐리게
+    if(!x.stage){ h += '<div class="dx none"><div class="nm">'+esc(x.name)+'</div></div>'; return; }
+    var pct = x.lv >= 3 ? 100 : Math.round(100 * x.n / x.max);
+    h += '<div class="dx l'+x.lv+'"><div class="nm"><span>'+esc(x.name)+'</span><span class="lv">'+esc(x.stage)+'</span></div>'+
+         '<div class="bar"><i style="width:'+pct+'%"></i></div>'+
+         '<div class="ft">'+(x.lv >= 3 ? '答對 '+comma(x.total)+'題 · 最高階段' : '答對 '+comma(x.total)+'題 · 離達人還差 '+x.left+' 題')+'</div></div>';
+  });
+  return h + '</div></div>';
+}
+
+function gameCard(g, arr){
+  var scores = arr.map(function(p){return p.score;});
+  var n = scores.length;
+  var first = scores[0], latest = scores[n-1];
+  var best = Math.max.apply(null, scores);
+  var delta = latest - first;
+  var latestGrade = arr[n-1].grade || '';
+
+  var deltaChip = '';
+  if(n >= 2){
+    if(delta > 0)      deltaChip = '<span class="chip up">比第一次 <b>▲ '+comma(delta)+'</b></span>';
+    else if(delta < 0) deltaChip = '<span class="chip down">比第一次 <b>▼ '+comma(-delta)+'</b></span>';
+    else               deltaChip = '<span class="chip">比第一次 <b>0</b></span>';
+  }
+
+  var h =
+    '<div class="gcard">'+
+      '<div class="ghead">'+
+        '<span class="ic">'+GAME_ICON[g]+'</span>'+
+        '<span class="nm">'+esc(gameName(g))+'</span>'+
+        (latestGrade ? '<span class="gr">'+esc(latestGrade)+'</span>' : '')+
+      '</div>'+
+      '<div class="gstats">'+
+        '<span class="chip">遊玩 <b>'+n+'次</b></span>'+
+        '<span class="chip best">最高分 <b>'+comma(best)+'</b></span>'+
+        '<span class="chip">最近 <b>'+comma(latest)+'</b></span>'+
+        deltaChip+
+      '</div>'+
+      chartSVG(arr);
+
+  if(n < 2){
+    h += '<div class="one-hint">目前只有1次，再玩1次就能畫出曲線 ✏️</div>';
+  } else {
+    h += '<div class="axis"><span>'+fmtDate(arr[0].ts)+'</span><span>'+fmtDate(arr[n-1].ts)+'</span></div>';
+  }
+  h += '</div>';
+  return h;
+}
+
+function chartSVG(arr){
+  var W=320, H=140, padL=12, padR=14, padT=20, padB=14;
+  var n = arr.length;
+  var scores = arr.map(function(p){return p.score;});
+  var maxS = Math.max.apply(null,scores), minS = Math.min.apply(null,scores);
+  var span = maxS - minS;
+
+  function xFor(i){ return n<=1 ? W/2 : padL + i/(n-1)*(W-padL-padR); }
+  function yFor(s){
+    if(span<=0) return padT + (H-padT-padB)*0.45;
+    return padT + (1-(s-minS)/span)*(H-padT-padB);
+  }
+
+  var bestI=0; for(var i=1;i<n;i++) if(scores[i]>scores[bestI]) bestI=i;
+  var baseY = H - padB + 2;
+
+  var ptArr = arr.map(function(p,i){ return xFor(i)+','+yFor(p.score); });
+  var line = ptArr.join(' ');
+  var area = 'M'+xFor(0)+','+baseY+' L'+ptArr.join(' L')+' L'+xFor(n-1)+','+baseY+' Z';
+
+  var dots = arr.map(function(p,i){
+    var cx=xFor(i), cy=yFor(p.score);
+    if(i===bestI) return '<circle cx="'+cx+'" cy="'+cy+'" r="4.8" fill="var(--gold)" stroke="#020810" stroke-width="1.6"/>';
+    if(i===n-1)   return '<circle cx="'+cx+'" cy="'+cy+'" r="3.8" fill="var(--blue)" stroke="#020810" stroke-width="1.4"/>';
+    return '<circle cx="'+cx+'" cy="'+cy+'" r="2.5" fill="#9fe8ff"/>';
+  }).join('');
+
+  // 최고점 값 라벨 (가장자리 클램프)
+  var lx = xFor(bestI);
+  var anchor = lx < 30 ? 'start' : (lx > W-30 ? 'end' : 'middle');
+  var bestLabel = '<text x="'+lx+'" y="'+(yFor(scores[bestI])-9)+'" text-anchor="'+anchor+'" '+
+                  'fill="var(--gold)" font-size="11.5" font-weight="800">'+comma(scores[bestI])+'</text>';
+
+  var svgLine = (n>=2)
+    ? '<path d="'+area+'" fill="url(#gfill)"/><polyline points="'+line+'" fill="none" '+
+      'stroke="url(#gline)" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>'
+    : '';
+
+  return '<svg class="chart" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet" '+
+         'style="overflow:visible">'+
+    '<defs>'+
+      '<linearGradient id="gline" x1="0" y1="0" x2="1" y2="0">'+
+        '<stop offset="0%" stop-color="#00f2ff"/><stop offset="100%" stop-color="#2ecc71"/></linearGradient>'+
+      '<linearGradient id="gfill" x1="0" y1="0" x2="0" y2="1">'+
+        '<stop offset="0%" stop-color="rgba(0,242,255,.28)"/>'+
+        '<stop offset="100%" stop-color="rgba(0,242,255,0)"/></linearGradient>'+
+    '</defs>'+
+    '<line x1="'+padL+'" y1="'+baseY+'" x2="'+(W-padR)+'" y2="'+baseY+'" stroke="rgba(255,255,255,.08)" stroke-width="1"/>'+
+    svgLine + dots + bestLabel +
+  '</svg>';
+}
+
+load();
+</script>
+<script src="emoji-icons.js?v=79"></script>
+</body>
+</html>

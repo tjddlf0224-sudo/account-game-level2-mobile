@@ -136,3 +136,35 @@
     ['acid', 'memory', 'debit', 'factory'].forEach(function (g) { ls.setItem('hub_' + g + '_myName', name); });
   } catch (e) {}
 })(window);
+
+/* ── 구글 출시 전 자동 점검 기기(Firebase Test Lab)에서는 학습 기록도 서버에 쓰지 않는다 (2026-11-14 성일님 "진행해", 팀장 제안) ──
+   왜: 위에서 이름 없는 사람에게도 자동 닉네임을 주므로, Play 사전 출시 보고서 로봇이 게임을 치면 점수·성장·오답 기록이
+   실서버에 저장돼 순위표에 무작위 이름이 남는다(11/14 일본판 별도 앱 vc1 에서 실제로 9명분 발견 → 팀장이 지움).
+   통계(daylog·amev·growth 접속 기록)는 이미 owner_device·__amTestEnv 로 꺼져 있고, 이것은 그 연장 — **Test Lab 만**:
+     window.__amTestEnv === 'testlab'(안드 네이티브가 문서 시작에 넣음) 또는 안드 am_env_chk === '1'(daylog AmEnv 가 물어서 기억).
+   iOS 'sandbox'(TestFlight·심사)·성일님 폰(owner_device)·시험 광고판은 지금처럼 그대로 저장한다.
+   어떻게: 이 파일은 모든 페이지에서 가장 먼저 읽히므로 여기서 fetch 를 감싸, Supabase /rest/v1/ 로 가는 GET·HEAD 아닌 요청을
+   보내지 않고 빈 성공 응답을 돌려준다(supabase-js 는 만들 때 fetch 를 잡아 두므로 그보다 먼저 감싸야 한다). 읽기(GET)는 그대로. */
+(function (global) {
+  'use strict';
+  if (global.__amLabGuard || typeof global.fetch !== 'function') return;
+  global.__amLabGuard = true;
+  function lab() {
+    try {
+      if (global.__amTestEnv === 'testlab') return true;
+      var C = global.Capacitor;
+      return !!(C && C.getPlatform && C.getPlatform() === 'android' && global.localStorage.getItem('am_env_chk') === '1');
+    } catch (e) { return false; }
+  }
+  var orig = global.fetch;
+  global.fetch = function (input, init) {
+    try {
+      var url = typeof input === 'string' ? input : (input && input.url) || '';
+      var method = String((init && init.method) || (input && input.method) || 'GET').toUpperCase();
+      if (method !== 'GET' && method !== 'HEAD' && /\.supabase\.co\/rest\/v1\//.test(url) && lab()) {
+        return Promise.resolve(new Response(null, { status: 204, statusText: 'No Content (Test Lab)' }));
+      }
+    } catch (e) {}
+    return orig.apply(this, arguments);
+  };
+})(window);

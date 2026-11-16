@@ -17,9 +17,51 @@
  *    · 페이지를 열 때, 지난 날짜 몫이 남아 있거나 5분 넘게 묵은 게 있으면 보낸다.
  *  보내는 곳: Supabase RPC usage_bump(rows) — 표 usage_daily 에 더하기만 한다(docs/sql/2026-10-09_usage_daily.sql).
  *  보내다 실패하면 다음 기회에 다시(보낸 몫만 지운다). 테스트 하네스는 /rest/v1/** 를 가로챈다.
+ *  안 모으는 경우(11/4 분석팀 '내 폰 통계 제외'): owner_device='1'(성일님 폰) · 시험 광고판(__amTestAds) · 디버그 빌드(Capacitor.DEBUG) ·
+ *    웹이 localhost·127.0.0.1·file(앱 웹뷰도 localhost 라 웹일 때만 본다). 시험 하네스는 window.__amStatForce 로 켠다.
  *
  *  window.DayLog.hit(kind, key, event)
  * ============================================================ */
+/* ── AmEnv: 안드로이드 점검 기기(Firebase Test Lab)인지 웹이 직접 물어본다 (2026-11-12, 팀장 — 보카 735422a 와 같은 보강) ──
+   네이티브 TestEnvPlugin 은 문서 시작 스크립트로 window.__amTestEnv 를 넣는데, 그게 안 붙는 웹뷰에서는 조용히 빠져
+   점검 기기가 통계에 섞일 수 있다(보카 11/12 분석팀 실측). 그래서 처음 한 번 AmTestEnv.isTest() 로 묻고 답을 기억한다
+   (am_env_chk: '0' 일반 기기 · '1' 점검 기기 → 다음 페이지부터는 묻지 않고 바로 판정). 답이 오기 전에는 **서버로 보내지 않고 기다린다**
+   (기기 안 모으기는 그대로 — 점검 기기로 판정되면 보내는 쪽이 statOff/off 로 비운다). 4초 안에 답이 없으면 이번만 그냥 진행(저장 안 함, 다음에 다시 묻는다).
+   iOS 는 WKUserScript(문서 시작)가 늘 붙어 해당 없음. 웹은 아무것도 안 한다.
+   보내는 쪽: daylog.flush · amev.flush/faLog · growth.checkDAU/logPlay 가 AmEnv.pending() 이면 AmEnv.whenReady 로 미룬다. */
+(function (global) {
+  'use strict';
+  if (global.AmEnv) return;
+  var K = 'am_env_chk', pending = false, waiters = [];
+  function ls(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+  function android() { try { var C = global.Capacitor; return !!(C && C.isNativePlatform && C.isNativePlatform() && C.getPlatform && C.getPlatform() === 'android'); } catch (e) { return false; } }
+  function mark() { if (!global.__amTestEnv) global.__amTestEnv = 'testlab'; ls('owner_device', '1'); }
+  function done() { pending = false; var w = waiters; waiters = []; w.forEach(function (f) { try { f(); } catch (e) {} }); }
+  try {
+    if (android()) {
+      var c = ls(K);
+      if (global.__amTestEnv) { if (c !== '1') ls(K, '1'); }      // 문서 시작 스크립트가 붙은 경우
+      else if (c === '1') mark();
+      else if (c !== '0') {
+        var P = (global.Capacitor.Plugins || {}).AmTestEnv;
+        if (P && typeof P.isTest === 'function') {
+          pending = true;
+          var t = setTimeout(done, 4000);
+          Promise.resolve().then(function () { return P.isTest(); }).then(function (r) {
+            clearTimeout(t);
+            if (r && r.test) { ls(K, '1'); mark(); } else ls(K, '0');
+            done();
+          }, function () { clearTimeout(t); done(); });
+        }
+      }
+    }
+  } catch (e) { pending = false; }
+  global.AmEnv = {
+    pending: function () { return pending; },
+    whenReady: function (cb) { if (pending) waiters.push(cb); else { try { cb(); } catch (e) {} } }
+  };
+})(window);
+
 (function (global) {
   'use strict';
   if (global.DayLog) return;
@@ -44,13 +86,36 @@
       else { localStorage.removeItem(LS); localStorage.removeItem(LS_FIRST); }
     } catch (e) {}
   }
+  function native() {
+    try { var C = global.Capacitor; return !!(C && C.isNativePlatform && C.isNativePlatform()); } catch (e) { return false; }
+  }
+  function statOff() {
+    try {
+      if (localStorage.getItem('owner_device') === '1') return true;
+      if (global.__amStatForce) return false;
+      if (global.__amTestAds) return true;
+      if (global.__amTestEnv) return true;   // 스토어 점검·심사 기기(안드 Test Lab·iOS sandboxReceipt, 네이티브가 넣음 — 2026-11-05)
+      if (native() && global.Capacitor.DEBUG === true) return true;   // 디버그 빌드(iOS Debug 구성 CAPACITOR_DEBUG·안드 디버그 가능) — Release·아카이브는 false
+      if (!native()) {
+        var h = location.hostname;
+        if (!h || h === 'localhost' || h === '127.0.0.1' || location.protocol === 'file:') return true;
+      }
+    } catch (e) { return true; }
+    return false;
+  }
   function clean(s) { return String(s == null ? '' : s).replace(/[|]/g, '_').slice(0, 40); }
 
   function hit(kind, key, event) {
     try {
-      if (!kind || !key || !event) return;
+      if (!kind || !key || !event || statOff()) return;
       var o = load(), k = [day(), clean(kind), clean(key), clean(event), platform()].join('|');
       o[k] = (o[k] || 0) + 1;
+      /* 그냥 준 까닭(11/15 분석팀 규격 free(+까닭)): rw_free 합계는 그대로 두고 rw_free_<까닭> 줄을 따로 하나 더(합계가 갈리지 않게).
+         까닭은 브리지가 실패 때 남긴 window.__amRwWhy(notready·showfail·error·offline) 또는 부르는 쪽이 정한 것, 없으면 na */
+      if (event === 'rw_free') {
+        var why = 'na'; try { why = String(window.__amRwWhy || 'na').replace(/[^a-z0-9]/gi, '').slice(0, 12) || 'na'; } catch (e) {}
+        var k2 = [day(), clean(kind), clean(key), clean('rw_free_' + why), platform()].join('|'); o[k2] = (o[k2] || 0) + 1;
+      }
       save(o);
       if (!localStorage.getItem(LS_FIRST)) localStorage.setItem(LS_FIRST, String(Date.now()));
     } catch (e) {}
@@ -77,6 +142,8 @@
   function flush(leaving) {
     try {
       if (busy && !leaving) return;
+      if (global.AmEnv && global.AmEnv.pending()) { global.AmEnv.whenReady(function () { flush(leaving); }); return; }   // 점검 기기 판정 기다림
+      if (statOff()) { save({}); return; }
       var o = load(), keys = Object.keys(o);
       if (!keys.length || typeof fetch !== 'function') return;
       if (keys.length > 200) { var cut = {}; keys.slice(0, 200).forEach(function (k) { cut[k] = o[k]; }); o = cut; }
@@ -111,6 +178,8 @@
   global.DayLog = {
     hit: hit,
     flush: flush,
+    statOff: statOff,
+    _clear: function () { save({}); },
     _pending: function () { return load(); }   // 시험용
   };
 
@@ -129,7 +198,8 @@
       if (G.__daylogHooked) return true;
       var orig = G.logPlay;
       G.logPlay = function (gameId) {
-        try { if (gameId) hit('act', gameId, 'finish'); } catch (e) {}
+        // global.DayLog.hit 로 불러야 amev.js 가 감싼 것(g_end)도 탄다 — 안쪽 hit 를 바로 부르면 끝낸 판이 g_quit 으로 남았음(11/3 S9 실측)
+        try { if (gameId) { var H = (global.DayLog && global.DayLog.hit) || hit; H('act', gameId, 'finish'); } } catch (e) {}
         return orig.apply(G, arguments);
       };
       G.__daylogHooked = true;

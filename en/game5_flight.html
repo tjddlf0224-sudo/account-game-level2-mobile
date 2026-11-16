@@ -1,0 +1,1818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; img-src 'self' data:; connect-src 'self' https://pjagaulfivafamhhiveg.supabase.co https://cdn.jsdelivr.net; media-src 'self';">
+<!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
+     **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
+     이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
+<script src="en/en_data.js?v=1"></script>
+<script src="en/server_en.js?v=1"></script>
+<link rel="stylesheet" href="en/en.css?v=1">
+<script src="safestore.js?v=79"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<style>html{-webkit-text-size-adjust:100%;text-size-adjust:100%}</style>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>🛩 Ledger Flight — Ledger Arcade</title>
+<meta name="description" content="Fly your plane and pick the right book to pass each gate. Learn accounting with games.">
+<meta name="theme-color" content="#020810">
+<meta property="og:title" content="Ledger Flight | Ledger Arcade">
+<meta property="og:description" content="Fly your plane and pick the right book to pass each gate. Learn accounting with games.">
+<meta property="og:type" content="website">
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;800&family=Noto+Sans+JP:wght@400;500;700;900&family=Black+Han+Sans&family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* 앱에서 하단 광고 배너가 가릴 수 있는 최대 높이. JS(--ad-safe-h)가 안 걸려도
+     이 값 덕분에 오버레이는 항상 스크롤 여지를 갖는다(2026-09-14). 웹에서는
+     스크롤 끝에 빈 공간이 조금 더 생길 뿐이라 손해가 없다. */
+  --ad-reserve: 96px;
+}
+
+/*ADSPACER*/
+/* ── 하단 배너 안전영역을 padding 이 아니라 **실제 요소**로 잡는다 (2026-09-14) ──
+   iOS WKWebView 는 flex 스크롤 컨테이너의 padding-bottom 을 스크롤 영역
+   (scrollable overflow)에 넣어 주지 않는 경우가 있다. 그러면 배너가 버튼을 덮고
+   있는데도 브라우저는 "더 내릴 것이 없다"고 보고 **스크롤 자체가 안 생긴다**.
+   Chromium 은 제대로 처리해서 자동 테스트만으로는 안 잡혔다.
+   실기기 제보(b69, 기억의 전당 시작화면): '메인으로 나가기'가 배너에 잘린 채
+   손가락으로 내려지지 않았다. 사용자 진단 그대로 — "아래에 공란을 만들어 달라".
+   ::after 는 진짜 박스라 scrollable overflow 에 반드시 포함된다.
+   flex:0 0 auto 가 없으면 내용이 넘칠 때 이 여백부터 찌그러져서 의미가 없다. */
+.overlay::after, .ovl::after{
+  content:''; display:block; flex:0 0 auto; width:100%;
+  height: calc(env(safe-area-inset-bottom, 0px) + max(var(--ad-banner-h, 0px), var(--ad-safe-h, 0px), var(--ad-reserve)));
+}
+
+:root{--cy:#00f2ff;--pk:#ff2d78;--gd:#ffd600;--gn:#39ff14;--pu:#b44fff;--bg:#020810;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{height:100%}
+body{background:var(--bg);font-family:'Noto Sans JP', 'Noto Sans KR',sans-serif;overflow:hidden;user-select:none;height:100vh;height:100dvh;} /* 100vh 먼저: dvh 를 모르는 옛 웹뷰(크롬 108 미만, 안드 9 기본 등)는 dvh 줄을 버린다 — 보카 Play 거절 원인(10/28) */
+/* ⚠ body 에 touch-action:none 을 걸지 말 것 — 조상 값과 교집합이라 오버레이의 pan-y 가
+   무력화되어 iOS 에서 시작/결과 화면이 아예 안 스크롤된다(2026-09-14 실기기 제보).
+   비행 조작은 캔버스에만 건다. */
+#canvas-wrap,canvas{touch-action:none;}
+canvas{display:block;position:absolute;top:0;left:0;z-index:1}
+
+
+
+#hud{position:absolute;top:0;left:0;width:100%;box-sizing:border-box;z-index:20;display:flex;justify-content:space-between;align-items:center;gap:6px;padding:max(10px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 10px max(14px,env(safe-area-inset-left));pointer-events:none;background:linear-gradient(to bottom,rgba(2,8,16,.7) 0%,transparent 100%)}
+.hud-left{display:flex;gap:clamp(12px,4vw,30px);align-items:center;
+  /* 2026-09-22 Android 제보("그만 옆에 홈 단추가 잘리네"): 폰 글자 크기를 키우면(글꼴 130%) 점수·아이템·콤보가
+     넓어져 오른쪽 버튼을 화면 밖으로 밀었다(360dp 실측: 홈 389~428). 왼쪽이 먼저 줄어들게 한다 — 버튼은 flex-shrink:0 */
+  flex:1 1 auto;min-width:0;overflow:hidden}
+.hb{display:flex;flex-direction:column;align-items:center;gap:2px}
+.hl{font-family:'Orbitron',monospace;font-size:clamp(.55rem,.18vw+.5rem,.72rem);color:rgba(0,242,255,.5);letter-spacing:2px;text-transform:uppercase}
+.hv{font-family:'Orbitron',monospace;font-size:clamp(1.1rem,3.8vw,1.8rem);font-weight:900;color:#fff;text-shadow:0 0 14px var(--cy);line-height:1}
+#hv-score{color:var(--gd);text-shadow:0 0 14px var(--gd)}
+#hv-combo{color:var(--gn);text-shadow:0 0 14px var(--gn)}
+.irow{display:flex;gap:clamp(8px,3vw,18px);align-items:center}
+.iic{font-size:clamp(1rem,4vw,1.45rem);opacity:0;transition:opacity .3s;filter:drop-shadow(0 0 8px #fff)}
+.iic.on{opacity:1;animation:icP .55s infinite alternate}
+@keyframes icP{from{transform:scale(.9)}to{transform:scale(1.2)}}
+.hud-btns{display:flex;gap:4px;pointer-events:auto;padding-right:2px;flex-shrink:0}
+.hdb{height:36px;padding:0 12px;border-radius:50px;cursor:pointer;font-family:'M PLUS Rounded 1c', 'Black Han Sans';font-size:clamp(.75rem,2.5vw,1rem);white-space:nowrap;display:flex;align-items:center;border:1.5px solid rgba(255,255,255,0.3)!important}
+.hdb-quit{background:rgba(255,45,120,.15);border:1px solid var(--pk)!important;color:var(--pk)}
+.hdb-home{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2)!important;color:white}
+
+.mute-btn{height:36px;padding:0 10px;border-radius:8px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2)!important;transition:opacity .2s,border-color .2s}
+.mute-btn.muted{opacity:.4;border-color:rgba(255,255,255,.1)!important}
+
+/* ── 차근차근 모드(같은 비행 화면 + 튜토리얼 말풍선) ── */
+#step-hud{display:none;position:absolute;top:max(14px,env(safe-area-inset-top));left:16px;z-index:21;color:#9fe3c0;font-family:'M PLUS Rounded 1c', 'Black Han Sans',sans-serif;font-size:1rem;background:rgba(0,0,0,.45);border:1px solid rgba(80,200,140,.45);border-radius:999px;padding:6px 14px}
+body.step-mode #step-hud{display:block}
+body.step-mode .hud-left{visibility:hidden}
+body.step-mode .gchoice{pointer-events:auto;cursor:pointer}
+#step-coach{display:none;position:absolute;left:0;right:0;bottom:0;z-index:30;background:linear-gradient(180deg,#0d1830,#0a1120);max-height:34vh;overflow-y:auto}
+#step-coach.show{display:block}
+#step-coach .tut-bubble-text{min-height:0}
+#step-coach .sc-dim{opacity:.72;font-size:.9rem}
+#step-coach .sc-key{color:var(--gd);font-weight:800}
+#step-coach .sc-hint{margin-top:10px;padding:10px 12px;border-radius:12px;background:rgba(255,209,102,.1);border:1px dashed rgba(255,209,102,.45);color:#ffe6a6;font-size:.92rem;line-height:1.75;text-align:center}
+#step-coach .rd p{margin:0 0 .35em}
+#step-coach .sc-btns{display:flex;gap:10px;margin-top:14px}
+#step-coach .sc-btns:empty{display:none}
+#step-coach .sc-btns button{flex:1;min-height:48px;border-radius:14px;font-family:'M PLUS Rounded 1c', 'Black Han Sans',sans-serif;font-size:1rem;cursor:pointer}
+#step-coach .sc-btn{background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.25);color:#fff}
+#step-coach .sc-hintbtn{border-style:dashed;border-color:rgba(255,209,102,.6);color:#ffd166}
+#step-coach .sc-go{border:2px solid var(--cy);color:#021018;background:var(--cy)}
+.gchoice.step-glow{animation:stepGlow 1s ease-in-out infinite}
+.gq mark.step-key{background:var(--gd);color:#020810;padding:0 5px;border-radius:5px;font-weight:900;box-shadow:0 0 12px rgba(255,214,0,.55)}
+@keyframes stepGlow{0%,100%{box-shadow:0 0 0 2px var(--gd),0 0 10px var(--gd)}50%{box-shadow:0 0 0 5px var(--gd),0 0 28px var(--gd)}}
+#glayer{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:12;overflow:hidden}
+.gatel{position:absolute;left:0;width:100%;display:flex;flex-direction:column;align-items:center}
+.gbar{width:100%;height:clamp(14px,2.5vw,20px);background:linear-gradient(90deg,transparent 0%,rgba(15,25,100,.9) 18%,rgba(20,35,130,.95) 50%,rgba(15,25,100,.9) 82%,transparent 100%);border-top:1.5px solid rgba(0,242,255,.22);border-bottom:1.5px solid rgba(0,242,255,.22);box-shadow:0 0 20px rgba(0,242,255,.12)}
+.ginfo{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 0 0}
+.gq{word-break:keep-all;font-size:clamp(1.1rem,4.6vw,1.5rem);font-weight:900;color:#eef0ff;text-align:center;text-shadow:0 2px 10px rgba(0,0,0,.95),0 0 6px rgba(0,0,0,.8);max-width:90vw;line-height:1.4;background:rgba(2,8,20,.82);padding:8px clamp(12px,4vw,30px);border-radius:12px;border:1px solid rgba(255,255,255,.1)}
+.gk{font-family:'M PLUS Rounded 1c', 'Black Han Sans',sans-serif;font-size:clamp(1rem,3.9vw,1.2rem);color:var(--gd);text-shadow:0 0 14px rgba(255,214,0,.75),0 2px 8px rgba(0,0,0,.9);animation:kP 1s infinite alternate}
+@keyframes kP{from{transform:scale(1)}to{transform:scale(1.05)}}
+/* 장부 이름(좌·우 선택지) 위치. 2026-09-15 실기기 제보: "문제가 길면 장부이름과 겹치네.
+   장부 이름을 살짝 아래로 내려야겠어." 문제가 2줄이 되면 모든 폭(360·390·430)에서
+   정확히 13px 겹쳤다. -40px → -14~-17px 로 내려 10~13px 여유를 준다.
+   판정은 g.y 와 기체 x좌표로만 하므로(update() 참고) 이 값은 순전히 보이는 위치다. */
+.gchoices{position:relative;display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;box-sizing:border-box;padding:0 clamp(8px,4vw,80px);top:clamp(-40px,-4vw,-14px)}
+/* 보기 칸 바탕은 거의 불투명하게 — 동전 줄과 같은 높이에 오면 노란 동전이 비쳐 글씨가 안 보였다(2026-09-27 에뮬레이터 QA) */
+.gchoice{font-family:'M PLUS Rounded 1c', 'Black Han Sans',sans-serif;font-size:clamp(1.05rem,4.4vw,1.45rem);white-space:nowrap;max-width:48%;box-sizing:border-box;text-align:center;padding:clamp(8px,2.2vw,11px) clamp(12px,3.5vw,34px);border-radius:50px;border:2.5px solid;backdrop-filter:blur(4px)}
+.gchoice.left{color:var(--pk);border-color:var(--pk);background:linear-gradient(rgba(255,45,120,.12),rgba(255,45,120,.12)),rgba(6,4,16,.9);text-shadow:0 0 10px var(--pk);box-shadow:0 0 18px rgba(255,45,120,.2)}
+.gchoice.right{color:var(--gn);border-color:var(--gn);background:linear-gradient(rgba(57,255,20,.08),rgba(57,255,20,.08)),rgba(6,4,16,.9);text-shadow:0 0 10px var(--gn);box-shadow:0 0 18px rgba(57,255,20,.14)}
+
+#judge-pop{position:absolute;left:50%;transform:translateX(-50%);z-index:40;pointer-events:none;display:none;font-family:'M PLUS Rounded 1c', 'Black Han Sans',sans-serif;font-size:clamp(1.3rem,5vw,2.2rem);padding:10px clamp(20px,6vw,44px);border-radius:50px;white-space:nowrap}
+#judge-pop.ok{background:rgba(57,255,20,.18);border:2px solid #39ff14;color:#39ff14}
+#judge-pop.bad{background:rgba(255,45,120,.18);border:2px solid #ff2d78;color:#ff2d78}
+@keyframes judgeAnim{0%{opacity:0;transform:translateX(-50%) scale(.7)}20%{opacity:1;transform:translateX(-50%) scale(1.08)}70%{opacity:1;transform:translateX(-50%) scale(1)}100%{opacity:0;transform:translateX(-50%) scale(.9)}}
+#flash{position:absolute;inset:0;z-index:30;pointer-events:none;opacity:0}
+#flash.ok{background:rgba(57,255,20,.1);animation:fl .4s ease-out forwards}
+#flash.bad{background:rgba(255,45,120,.2);animation:fl .55s ease-out forwards}
+@keyframes fl{0%{opacity:1}100%{opacity:0}}
+#cpop{position:absolute;top:28%;left:50%;transform:translate(-50%,-50%);font-family:'Orbitron';font-size:clamp(1.8rem,6vw,3rem);font-weight:900;color:var(--gd);pointer-events:none;z-index:50;display:none;text-shadow:0 0 20px var(--gd),2px 2px 0 #000}
+@keyframes cp{0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}40%{opacity:1;transform:translate(-50%,-68%) scale(1.3)}100%{opacity:0;transform:translate(-50%,-115%) scale(1)}}
+
+/* ── 오버레이 공통 ── */
+.ovl{
+  position:absolute;
+  inset:0;
+  z-index:100;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  /* ★ 스크롤 핵심 3가지 */
+  overflow-y:auto;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  padding:max(20px,env(safe-area-inset-top)) 16px 24px;   /* 배너 자리는 .ovl::after 스페이서가 잡는다 */
+}
+.ovl-inner{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:clamp(10px,2vh,18px);
+  width:100%;
+  max-width:760px;
+  /* ★ margin:auto 제거 → 스크롤 시 상단 잘림 방지 */
+  padding-bottom:8px;
+}
+
+#ss{background:radial-gradient(ellipse at 50% 38%,#071530 0%,#020912 65%)}
+.logo{font-family:'M PLUS Rounded 1c', 'Black Han Sans','Noto Sans JP', 'Noto Sans KR',sans-serif;font-size:clamp(1.8rem,7vw,3.5rem);font-weight:900;color:var(--cy);letter-spacing:clamp(2px,1vw,5px);text-align:center;text-shadow:0 0 32px var(--cy),0 0 64px rgba(0,242,255,.22)}
+.sub{font-family:'M PLUS Rounded 1c', 'Black Han Sans';font-size:clamp(.85rem,3vw,1.15rem);color:rgba(255,255,255,.42);letter-spacing:3px;text-align:center}
+.ggrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%}
+.gc{background:rgba(255,255,255,.04);border:1px solid rgba(0,242,255,.18);border-radius:14px;padding:clamp(10px,3vw,16px) clamp(12px,3vw,20px);font-size:clamp(.88rem,3.6vw,1rem);color:rgba(255,255,255,.65);line-height:1.75}
+.gc strong{color:#fff;display:block;font-size:clamp(.78rem,2.5vw,1.02rem);margin-bottom:4px}
+.gc.a{border-left:3px solid var(--cy)}.gc.b{border-left:3px solid var(--pk)}.gc.c{border-left:3px solid var(--gd)}
+.sbtn{padding:clamp(12px,3vw,16px) clamp(36px,8vw,60px);background:transparent;border:3px solid var(--cy);border-radius:50px;cursor:pointer;font-family:'M PLUS Rounded 1c', 'Black Han Sans';font-size:clamp(1.2rem,5vw,1.6rem);color:var(--cy);letter-spacing:2px;text-shadow:0 0 12px var(--cy);box-shadow:0 0 30px rgba(0,242,255,.25),inset 0 0 20px rgba(0,242,255,.05);transition:all .2s;animation:sbP 2s infinite;min-height:52px}
+.sbtn:active{background:var(--cy);color:#000;text-shadow:none;animation:none}
+@keyframes sbP{0%,100%{box-shadow:0 0 26px rgba(0,242,255,.25),inset 0 0 20px rgba(0,242,255,.05)}50%{box-shadow:0 0 46px rgba(0,242,255,.45),inset 0 0 26px rgba(0,242,255,.1)}}
+
+/* ★ 게임오버 화면 — touch-action 스크롤 허용 */
+#gs{background:rgba(2,8,20,.96);backdrop-filter:blur(10px);display:none;touch-action:pan-y}
+#gs .ovl-inner{touch-action:pan-y}
+
+.gtitle{font-family:'M PLUS Rounded 1c', 'Black Han Sans','Noto Sans JP', 'Noto Sans KR',sans-serif;font-size:clamp(2rem,8vw,3.5rem);font-weight:900;color:var(--pk);letter-spacing:4px;text-shadow:0 0 30px var(--pk)}
+.gscore{font-family:'Orbitron';font-size:clamp(2.5rem,10vw,4.2rem);font-weight:900;color:var(--gd);text-shadow:0 0 22px var(--gd);line-height:1}
+.ggrade{font-family:'M PLUS Rounded 1c', 'Black Han Sans';font-size:clamp(.95rem,3.5vw,1.2rem);color:var(--cy);background:rgba(0,242,255,.1);padding:8px 22px;border-radius:50px;border:1px solid rgba(0,242,255,.3);text-align:center}
+.gstats{ box-sizing:border-box; width:100%;display:flex;gap:clamp(12px,4vw,32px);flex-wrap:wrap;justify-content:center;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:12px clamp(16px,4vw,32px);font-size:clamp(.8rem,2.5vw,.95rem);color:rgba(255,255,255,.5)}
+.gstats span{color:#fff;font-weight:700}
+#savesec{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%;}
+#savesec label{font-size:.9rem;color:rgba(0,242,255,.7);letter-spacing:1px}
+#pname{box-sizing:border-box;padding:10px 18px;background:rgba(0,242,255,.07);border:2px solid rgba(0,242,255,.35);border-radius:12px;color:#fff;font-size:1rem;text-align:center;font-family:'Noto Sans JP', 'Noto Sans KR';width:100%;outline:none;transition:border-color .2s;min-height:48px}
+#pname:focus{border-color:var(--cy);box-shadow:0 0 14px rgba(0,242,255,.3)}
+#pname::placeholder{color:rgba(255,255,255,.28)}
+#savemsg{font-size:.85rem;color:rgba(255,255,255,.4);min-height:16px;text-align:center}
+#rkbox{ box-sizing:border-box;width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(0,242,255,.2);border-radius:16px;padding:4px 0;max-height:300px;overflow-y:auto;display:none}
+#rkbox::-webkit-scrollbar{width:4px}
+#rkbox::-webkit-scrollbar-thumb{background:rgba(0,242,255,.3);border-radius:2px}
+.rkhdr{text-align:center;padding:10px 0 6px;font-family:'Orbitron';font-size:.75rem;color:rgba(0,242,255,.42);letter-spacing:3px}
+.rkrow{display:grid;grid-template-columns:44px minmax(46px,1fr) minmax(0,100px) minmax(40px,70px);padding:9px 14px;gap:6px;border-bottom:1px solid rgba(255,255,255,.06);align-items:center;font-size:clamp(.75rem,2.5vw,.9rem)}
+.rkrow:last-child{border-bottom:none}
+.rkn{font-family:'Orbitron';font-size:.82rem;color:rgba(255,255,255,.3)}
+.rkn.top{color:var(--gd)}.rknm{font-weight:700;color:#fff;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rkgr{font-size:.78rem;color:var(--gn);text-align:center;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rksc{color:var(--gd);font-weight:700;text-align:right;font-family:'Orbitron';font-size:.8rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rkme{background:rgba(0,242,255,.07)}
+.rank-delta{font-size:.72rem;margin-left:6px;padding:2px 9px;border-radius:20px;font-weight:700}
+.rank-delta.up{color:#39ff14;background:rgba(57,255,20,.14)}
+.rank-delta.down{color:#ff4757;background:rgba(255,71,87,.14)}
+.rank-delta.flat{color:rgba(255,255,255,.4);background:rgba(255,255,255,.06)}
+#my-rank-neighbors{ box-sizing:border-box;display:none; width:100%;margin-top:8px;border-radius:14px;border:1px solid rgba(0,242,255,.2)}
+.rn-row{display:flex;align-items:center;padding:8px 14px;font-size:.82rem;background:rgba(255,255,255,.02);gap:8px}
+.rn-row.rn-me{background:rgba(0,242,255,.12);font-weight:700}
+.rn-label{color:rgba(255,255,255,.35);font-size:.68rem;width:52px;flex-shrink:0}
+.rn-name{flex:1;color:#fff;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rn-score{color:var(--gd);font-weight:700;flex-shrink:0}
+.next-tier-msg{text-align:center;font-size:.78rem;color:rgba(255,255,255,.75);padding:9px 14px;background:rgba(255,255,255,.03)}
+.spinrow{display:flex;align-items:center;justify-content:center;gap:10px;padding:20px;color:rgba(255,255,255,.3);font-size:.9rem}
+.spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.12);border-top-color:var(--cy);border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.brow{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;width:100%}   /* 결과화면 카드들과 같은 폭 */
+/* 시작화면: 세로 가운데 정렬 + 버튼 크기 통일 (비행시작·사용방법·메인으로 나가기) */
+#ss{justify-content:safe center}
+#ss .brow{flex-direction:column;align-items:stretch;gap:10px;width:100%;margin:0 auto}
+#ss .brow > button{width:100%;box-sizing:border-box;padding:14px 20px;min-height:56px;font-size:1.15rem}
+.pill{padding:clamp(10px,2.5vw,12px) clamp(24px,5vw,36px);border:2px solid;border-radius:50px;font-family:'M PLUS Rounded 1c', 'Black Han Sans';font-size:clamp(.95rem,3.5vw,1.1rem);cursor:pointer;transition:all .18s;min-height:48px}
+.pill.cy{color:var(--cy);border-color:var(--cy);background:transparent}.pill.cy:active{background:var(--cy);color:#000}
+.pill.gn{color:var(--gn);border-color:var(--gn);background:transparent}.pill.gn:active{background:var(--gn);color:#000}
+.pill.wh{color:rgba(255,255,255,.75);border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.08)}.pill.wh:active{background:rgba(255,255,255,.2)}
+
+/* ── 난이도 선택(시작화면) ── */
+.diff-toggle{display:flex;gap:8px;width:100%}
+.diff-btn{flex:1;padding:10px 8px;border-radius:12px;border:1.5px solid rgba(255,255,255,.15);
+  background:rgba(255,255,255,.04);color:rgba(255,255,255,.5);font-family:'M PLUS Rounded 1c', 'Black Han Sans';
+  font-size:.85rem;line-height:1.5;cursor:pointer;transition:all .15s;min-height:48px}
+.diff-btn.active{border-color:var(--gn);background:rgba(57,255,20,.1);color:var(--gn)}
+.diff-btn.locked{opacity:.45}
+.diff-hint{font-size:.72rem;color:rgba(255,255,255,.35);text-align:center;line-height:1.5;margin:8px 0 6px}
+
+/* ── 장부 조회 확인(난이도2) — 정답 게이트를 맞히면 잠깐 멈추고 실제 장부에서 숫자를 찾아 입력 ── */
+#ldg-overlay{display:none;position:absolute;inset:0;z-index:200;background:rgba(2,8,20,.94);
+  backdrop-filter:blur(6px);flex-direction:column;align-items:center;justify-content:center;
+  padding:20px;overflow-y:auto;text-align:center}
+#ldg-overlay.show{display:flex}
+#ldg-book{font-family:'M PLUS Rounded 1c', 'Black Han Sans';font-size:1.15rem;color:var(--gd);text-shadow:0 0 12px rgba(255,214,0,.5);margin-bottom:4px}
+#ldg-q{font-size:.92rem;color:#eef0ff;margin-bottom:14px;max-width:340px;line-height:1.5}
+#ldg-table{width:100%;max-width:320px;background:rgba(255,255,255,.04);border:1px solid rgba(0,242,255,.25);
+  border-radius:12px;padding:4px 0;margin-bottom:14px}
+.ldg-row{display:flex;justify-content:space-between;gap:10px;padding:9px 16px;font-size:.9rem;
+  color:#fff;border-bottom:1px solid rgba(255,255,255,.06)}
+.ldg-row:last-child{border-bottom:none}
+.ldg-row span:first-child{color:rgba(255,255,255,.65)}
+#ldg-hint2{font-size:.78rem;color:rgba(255,255,255,.4);margin-bottom:10px}
+#ldg-input-row{display:flex;gap:8px;width:100%;max-width:280px;margin-bottom:12px}
+#ldg-input{flex:1;min-width:0;background:rgba(0,0,0,.4);border:2px solid rgba(255,255,255,.25);
+  border-radius:10px;color:#fff;padding:11px 12px;font-size:1.05rem;text-align:right;
+  font-family:'M PLUS Rounded 1c', 'Black Han Sans';outline:none}
+#ldg-input:focus{border-color:var(--cy)}
+#ldg-won{color:rgba(255,255,255,.5);align-self:center;flex-shrink:0}
+
+@media(max-width:480px){.ggrid{grid-template-columns:1fr}}
+/* 좁은 폰: 글씨를 키운 뒤(2026-09-24 안드로이드 제보 "글씨가 너무 작다") 열쇠 단어 줄과 장부 버튼이 겹친다 → 버튼을 한 줄 아래로 */
+@media(max-width:480px){.gchoices{top:8px}}
+/* 좁은 폰(iPhone SE 등 320px대)에서 HUD 버튼들이 넘치는 것 방지 — 기본 디자인은 그대로 */
+/* 360~400dp 안드로이드(갤럭시 기본)에서도 여유가 적어 한 단계 줄인다 */
+@media(max-width:400px){
+  .hud-left{gap:8px}
+  .irow{gap:4px}
+  .hud-left .hl{letter-spacing:0;font-size:.56rem}
+  .hud-left .hb:nth-child(2) > div:last-child{display:none}   /* 'ITEMS' 작은 글씨 — 장식이라 좁을 땐 뺀다 */
+  .hdb{padding:0 10px}
+}
+@media(max-width:340px){
+  .hud-btns{gap:2px}
+  .hdb{padding:0 8px;font-size:.68rem;height:32px}
+  .mute-btn{padding:0 6px;height:32px}
+  .hud-left{gap:clamp(4px,1.2vw,30px)}
+  #hud{gap:2px}
+}
+
+        /* ── 공통 하단 버튼 ── */
+        .action-btns {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            
+            margin-top: 16px;
+        }
+        .btn-restart {
+            padding: 13px 28px;
+            border-radius: 50px;
+            border: 2px solid rgba(0,230,118,0.7);
+            background: rgba(0,230,118,0.12);
+            color: #00e676;
+            font-family: 'M PLUS Rounded 1c', 'Black Han Sans', 'M PLUS Rounded 1c', 'Black Han Sans', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.18s;
+            min-height: 48px;
+        }
+        .btn-restart:active { background: rgba(0,230,118,0.3); }
+        .btn-hub {
+            padding: 13px 28px;
+            border-radius: 50px;
+            border: 1.5px solid rgba(255,255,255,0.25);
+            background: rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.75);
+            font-family: 'M PLUS Rounded 1c', 'Black Han Sans', 'M PLUS Rounded 1c', 'Black Han Sans', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.18s;
+            min-height: 48px;
+        }
+        .btn-hub:active { background: rgba(255,255,255,0.18); }
+
+        
+        /* ── 목표달성 팡파레 오버레이 ── */
+        #fanfare-overlay {
+            display: none; position: fixed; inset: 0; z-index: 9999;
+            align-items: center; justify-content: center;
+            pointer-events: none;
+        }
+        #fanfare-overlay.show { display: flex; }
+        #fanfare-box {
+            background: linear-gradient(135deg, rgba(10,15,30,0.97), rgba(5,10,20,0.97));
+            border: 2px solid gold;
+            border-radius: 24px;
+            padding: 36px 32px 28px;
+            text-align: center;
+            max-width: 320px; width: 88%;
+            box-shadow: 0 0 60px rgba(255,215,0,0.4), 0 24px 60px rgba(0,0,0,0.7);
+            animation: fanfareIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+            pointer-events: auto;
+            position: relative;
+            overflow: hidden;
+        }
+        @keyframes fanfareIn {
+            from { opacity:0; transform: scale(0.6) translateY(30px); }
+            to   { opacity:1; transform: scale(1) translateY(0); }
+        }
+        #fanfare-box::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: radial-gradient(ellipse at 50% 0%, rgba(255,215,0,0.12) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .fanfare-emoji { font-size: 3.2rem; margin-bottom: 10px; animation: bounce 0.6s ease infinite alternate; }
+        @keyframes bounce { from { transform:translateY(0) } to { transform:translateY(-8px) } }
+        .fanfare-title {
+            font-family:'M PLUS Rounded 1c', 'Black Han Sans', 'M PLUS Rounded 1c', 'Black Han Sans', sans-serif;
+            font-size: 1.7rem; color: gold;
+            text-shadow: 0 0 20px rgba(255,215,0,0.8);
+            margin-bottom: 6px; line-height: 1.2;
+        }
+        .fanfare-grade {
+            font-size: 1.1rem; color: #fff;
+            margin-bottom: 10px; font-weight: 700;
+        }
+        .fanfare-sub {
+            font-size: 0.82rem; color: rgba(255,255,255,0.5);
+            line-height: 1.6; margin-bottom: 20px;
+        }
+        .fanfare-close-btn {
+            background: linear-gradient(135deg, gold, #f39c12);
+            border: none; border-radius: 50px;
+            padding: 12px 32px;
+            font-family: 'M PLUS Rounded 1c', 'Black Han Sans', sans-serif; font-size: 1rem;
+            color: #000; cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+            box-shadow: 0 4px 16px rgba(255,215,0,0.4);
+        }
+        .fanfare-close-btn:active { transform: scale(0.96); }
+        /* 별 파티클 */
+        .fanfare-stars { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+        .fstar {
+            position: absolute; width: 6px; height: 6px;
+            border-radius: 50%; opacity: 0;
+            animation: fstarAnim var(--dur) var(--delay) ease-out forwards;
+        }
+        @keyframes fstarAnim {
+            0%   { opacity:1; transform: translate(0,0) scale(1); }
+            100% { opacity:0; transform: translate(var(--tx), var(--ty)) scale(0); }
+        }
+        
+        #rewarded-btn {
+            display: none;
+            position: fixed;
+            /* 안전영역과 광고 배너 높이를 피한다(하단 버튼은 이 게임엔 없다) */
+            bottom: calc(30px + env(safe-area-inset-bottom, 0px) + var(--ad-banner-h, 0px));
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 999;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: rgba(255,214,0,0.15);
+            border: 2px solid #ffd600;
+            border-radius: 50px;
+            color: #ffd600;
+            font-family: 'M PLUS Rounded 1c', 'Black Han Sans', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            animation: rewardPulse 1s ease-in-out infinite;
+            white-space: nowrap;
+        }
+        @keyframes rewardPulse {
+            0%,100% { box-shadow: 0 0 12px rgba(255,214,0,0.4); }
+            50%      { box-shadow: 0 0 28px rgba(255,214,0,0.8); }
+        }
+        .revive-btn {
+            display: none;
+            width: 100%;
+            max-width: 320px;
+            padding: 14px;
+            background: rgba(255,214,0,0.12);
+            border: 2px solid #ffd600;
+            border-radius: 50px;
+            color: #ffd600;
+            font-family: 'M PLUS Rounded 1c', 'Black Han Sans', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            animation: rewardPulse 1s ease-in-out infinite;
+            margin-bottom: 4px;
+        }
+
+        /* ── 인터랙티브 튜토리얼 (사용방법) ── */
+        .tut { display:none; position:fixed; inset:0; z-index:9999; flex-direction:column; background:radial-gradient(ellipse at 50% 30%,#0d1830 0%,var(--bg) 100%); }
+        .tut.show { display:flex; animation:tutPop .25s ease; }
+        @keyframes tutPop { from{opacity:0} to{opacity:1} }
+        .tut-top { display:flex; align-items:center; gap:9px; padding:calc(12px + env(safe-area-inset-top)) 18px 10px; }
+        .tut-top .tt-title { font-family:'M PLUS Rounded 1c', 'Black Han Sans',sans-serif; font-size:1.05rem; color:var(--cy); text-shadow:0 0 10px var(--cy); }
+        .tut-top .tt-badge { font-size:.8rem; font-weight:800; color:#021018; background:var(--gd); border-radius:50px; padding:3px 12px; }
+        .tut-top .tt-skip { margin-left:auto; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15); color:rgba(255,255,255,.7);
+            font-family:'Noto Sans JP', 'Noto Sans KR',sans-serif; font-weight:800; font-size:.82rem; padding:8px 14px; border-radius:50px; cursor:pointer; }
+        .tut-stage { flex:1; min-height:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:10px 20px 4px; }
+        .tut-status { font-family:'M PLUS Rounded 1c', 'Black Han Sans',sans-serif; font-size:1.05rem; color:#fff; background:rgba(255,255,255,.04);
+            border:2px solid rgba(0,242,255,.25); border-radius:50px; padding:8px 22px; box-shadow:0 0 16px rgba(0,242,255,.12); transition:.3s; }
+        .tut-status b { color:var(--gn); text-shadow:0 0 8px var(--gn); }
+        .tut-status.tut-glow { box-shadow:0 0 0 4px var(--gd), 0 0 16px rgba(255,214,0,.3); }
+
+        /* 가운데 인터랙티브 영역 — 실제 비행 화면의 축소판(게이트 1개 + 비행기) */
+        .tut-sky { position:relative; width:100%; max-width:330px; height:clamp(190px,40vh,300px);
+            border:2px solid rgba(0,242,255,.25); border-radius:20px; overflow:hidden; background:radial-gradient(ellipse at 50% 38%,#071530 0%,#020912 100%);
+            box-shadow:0 0 24px rgba(0,242,255,.12); touch-action:none; transition:box-shadow .3s; }
+        .tut-sky::before { content:''; position:absolute; left:50%; top:0; bottom:0; border-left:2px dashed rgba(255,255,255,.15); }
+        .tut-sky.tut-live { box-shadow:0 0 0 4px var(--gd),0 0 24px rgba(255,214,0,.25); cursor:pointer; }
+        .tut-sky.tut-live::after { content:'◀   ▶'; position:absolute; left:0; right:0; bottom:78px; text-align:center;
+            font-family:'M PLUS Rounded 1c', 'Black Han Sans',sans-serif; font-size:1.15rem; color:var(--gd); animation:tutBlink 1s ease-in-out infinite; }
+        .tut-gate { position:absolute; left:0; right:0; top:20px; display:flex; flex-direction:column; align-items:center; gap:8px;
+            transition:top .6s cubic-bezier(.45,.05,.35,1), opacity .45s; }
+        .tut-gate.tut-off { display:none; }
+        .tut-gate.tut-pass { top:calc(100% - 18px); opacity:.18; }
+        .tut-gbar { position:relative; width:100%; height:16px;
+            background:linear-gradient(90deg,transparent,rgba(20,35,130,.95) 18%,rgba(20,35,130,.95) 82%,transparent);
+            border-top:1.5px solid rgba(0,242,255,.22); border-bottom:1.5px solid rgba(0,242,255,.22); }
+        .tut-choices { position:absolute; inset:-9px 9px; display:flex; justify-content:space-between; align-items:center; }
+        .tut-choice { font-family:'M PLUS Rounded 1c', 'Black Han Sans',sans-serif; font-size:.82rem; color:#fff; border:2px solid #fff; border-radius:50px;
+            padding:4px 13px; white-space:nowrap; transition:.2s; }
+        .tut-choice.left { background:var(--pk); box-shadow:0 0 10px rgba(255,45,120,.5); }
+        .tut-choice.right { background:var(--gn); color:#021018; box-shadow:0 0 10px rgba(57,255,20,.5); }
+        .tut-choice.sel { transform:scale(1.09); box-shadow:0 0 0 3px var(--gd); }
+        .tut-q { max-width:92%; text-align:center; word-break:keep-all; font-size:.85rem; font-weight:800; line-height:1.45;
+            color:#eef0ff; background:rgba(2,8,20,.82); border:1px solid rgba(255,255,255,.1); border-radius:12px;
+            padding:7px 12px; box-shadow:0 2px 10px rgba(0,0,0,.5); }
+        .tut-key { font-family:'M PLUS Rounded 1c', 'Black Han Sans',sans-serif; font-size:.82rem; color:var(--gd); }
+        .tut-items { position:absolute; left:0; right:0; top:42%; display:none; justify-content:center; gap:26px; }
+        .tut-items.on { display:flex; }
+        .tut-items span { font-size:1.9rem; animation:tutBob 1.1s ease-in-out infinite alternate; }
+        .tut-items span:nth-child(2) { animation-delay:.2s; }
+        .tut-items span:nth-child(3) { animation-delay:.4s; }
+        .tut-ship { position:absolute; bottom:14px; left:50%; width:56px; height:56px; margin-left:-28px;
+            pointer-events:none; transition:left .12s linear; animation:tutBob 1.4s ease-in-out infinite alternate; }
+        .tut-ship img { width:100%; height:100%; display:block; }
+        @keyframes tutBob { from{ transform:translateY(0) } to{ transform:translateY(-7px) } }
+        .tut-judge { position:absolute; left:50%; bottom:82px; transform:translateX(-50%); display:none;
+            font-family:'M PLUS Rounded 1c', 'Black Han Sans',sans-serif; font-size:1rem; color:#021018; background:var(--gn); border:2px solid #fff;
+            border-radius:50px; padding:5px 16px; white-space:nowrap; box-shadow:0 0 12px rgba(57,255,20,.5); }
+        .tut-judge.bad { background:var(--pk); color:#fff; box-shadow:0 0 12px rgba(255,45,120,.5); }
+        .tut-judge.on { display:block; animation:tutJudge .9s ease-out forwards; }
+        @keyframes tutJudge { 0%{opacity:0;transform:translateX(-50%) scale(.7)} 22%{opacity:1;transform:translateX(-50%) scale(1.07)}
+            75%{opacity:1;transform:translateX(-50%) scale(1)} 100%{opacity:0;transform:translateX(-50%) scale(.95)} }
+        @media (max-width:360px){ .tut-sky{ height:clamp(170px,34vh,240px) } .tut-ship{ width:48px;height:48px;margin-left:-24px } }
+
+        .tut-bubble { background:linear-gradient(180deg,#0d1830,#0a1120); border-top:2px solid rgba(0,242,255,.25);
+            border-radius:20px 20px 0 0; box-shadow:0 -4px 18px rgba(0,0,0,.4);
+            padding:20px 22px calc(18px + env(safe-area-inset-bottom)); }
+        .tut-bubble-text { font-size:1rem; line-height:1.8; color:#dfe7ef; word-break:keep-all; text-align:center;
+            min-height:3.2em; display:block; }
+        .tut-bubble-text b { color:var(--cy); }
+        .tut-hint { text-align:center; font-family:'M PLUS Rounded 1c', 'Black Han Sans',sans-serif; color:var(--gd); font-size:1rem; margin-top:10px;
+            animation:tutBlink 1s ease-in-out infinite; }
+        @keyframes tutBlink { 0%,100%{ opacity:1 } 50%{ opacity:.4 } }
+        .tut-next { display:block; width:100%; margin-top:14px; padding:15px; border-radius:14px; border:2.5px solid var(--cy);
+            color:var(--cy); background:transparent; box-shadow:0 0 16px rgba(0,242,255,.2);
+            font-family:'M PLUS Rounded 1c', 'Black Han Sans',sans-serif; font-size:1.15rem; cursor:pointer; }
+        .tut-next:active { background:var(--cy); color:#000; }
+/* 랭킹 열 이름 — 5개 게임 공통(2026-09-14 사용자 지시: "게임2의 순위/이름/직급/점수가
+   HALL OF FAME 보다 낫다"). 각 게임 .rank-row 와 같은 grid 를 그대로 상속받아 열이 맞는다.
+   스크롤 컨테이너 **바깥**에 두어 목록을 내려도 열 이름이 남는다. */
+.rank-colhdr {
+  width: 100%; box-sizing: border-box;
+  display: grid; grid-template-columns: 44px minmax(46px,1fr) minmax(0,100px) minmax(40px,70px);
+  padding: 8px 14px; gap: 6px;
+  background: rgba(0,0,0,0.35);
+  border-radius: 12px 12px 0 0;
+  font-size: 0.8rem; font-weight: 700; text-align: center;
+  color: rgba(255,255,255,0.5); letter-spacing: 1px;
+}
+.rank-colhdr + #rank-box, .rank-colhdr + .rank-box,
+.rank-colhdr + .rank-container, .rank-colhdr + #rkbox { border-radius: 0 0 16px 16px; margin-top: 0; }
+
+/*BTNUNI-START*/
+/* ── 화면 버튼 규격 통일 (2026-09-14 사용자 지시: "제각각인 크기를 통일시켜") ──
+   시작화면(게임 시작/사용방법/메인으로)과 결과화면(다시 하기/메인으로)이 게임마다
+   폭·높이·글자크기가 다 달랐다. 한 줄에 하나씩, 오버레이 폭에 꽉 차게, 높이 52px 로 맞춘다. */
+.overlay .action-btns, .ovl .action-btns, .overlay .brow, .ovl .brow {
+  display: flex; flex-direction: column; align-items: stretch;
+  gap: 10px; width: 100%; max-width: none;
+}
+.overlay .action-btns > button, .overlay .action-btns > a,
+.ovl .action-btns > button, .ovl .action-btns > a,
+.overlay .brow > button, .ovl .brow > button,
+.overlay .btn-restart, .overlay .btn-hub, .overlay .sbtn, .overlay .revive-btn, .overlay .btn, .overlay .pill,
+.ovl .btn-restart, .ovl .btn-hub, .ovl .sbtn, .ovl .revive-btn, .ovl .btn, .ovl .pill,
+.overlay .big-btn, .ovl .big-btn, .overlay .pill-btn, .ovl .pill-btn {
+  width: 100%; max-width: none; box-sizing: border-box;
+  min-height: 52px; height: auto; padding: 13px 20px;
+  border-radius: 50px;
+  font-size: clamp(1rem, 3.6vw, 1.15rem);
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+/* 저장 행은 [입력칸][저장] 가로 배치라 예외 — 버튼만 폭을 줄인다 */
+.overlay .save-row, .ovl .save-row, .overlay #savesec .brow, .ovl #savesec .brow { flex-direction: row; }
+.overlay .save-row > button, .ovl .save-row > button,
+.overlay #savesec .brow > button, .ovl #savesec .brow > button { width: auto; min-width: 104px; flex: 0 0 auto; }
+/*BTNUNI-END*/
+
+/*FONTUNI*/
+/* ── 폰트 통일 (2026-09-14) ──
+   제목·버튼 = Black Han Sans / 본문 = Noto Sans KR. 둘 다 OFL 이라 상업 배포에 제약이 없다.
+   ⚠ Orbitron 은 **라틴 전용**이라 한글에 쓰면 시스템 폰트로 대체되고 자간만 벌어져
+     "회계 플라이트"처럼 멋없게 나온다(사용자 지적). 숫자·영문 전용으로만 쓴다.
+   Jua 는 게임마다 섞여 있어 걷어냈다. */
+.gtitle, .logo, .ov-title, .overlay-title, h1, h2 { font-family: 'M PLUS Rounded 1c', 'Black Han Sans', 'Noto Sans JP', 'Noto Sans KR', sans-serif !important; }
+
+/* 좁은 화면(360dp급 안드로이드)에서 머리줄 버튼이 제각각 줄어들어 '홈'이 28px까지 찌그러졌다 —
+   최소 폭을 맞추고 줄어들지 않게 한다. 대신 왼쪽 시간·점수 칸이 줄어든다(2026-09-27 에뮬레이터 QA) */
+@media (max-width:400px){ .mute-btn, .hdb { min-width:44px; flex-shrink:0; justify-content:center; text-align:center; } }
+</style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="ask.js?v=79"></script>
+    <script src="wrongnote.js?v=79"></script>
+    <script src="growth.js?v=79"></script>
+<script src="streak.js?v=79"></script>
+<script src="examday.js?v=79"></script>
+<script src="remind.js?v=79"></script>
+    <script src="difficulty.js?v=79"></script>
+    <script src="readable.js?v=79"></script>
+    <script src="stepmode.js?v=79"></script>
+    <script src="daylog.js?v=79"></script><script src="amev.js?v=1"></script><script src="skill.js?v=1"></script>
+<script src="haptic.js?v=1"></script>
+    <script src="adlabel.js?v=79"></script>
+    <script src="review-prompt.js?v=79"></script>
+</head>
+<body>
+
+<script src="bgm.js?v=79"></script>
+
+
+<div style="position:fixed;inset:0;background:var(--bg);z-index:-1;"></div>
+
+<div id="canvas-wrap" style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:850px;height:100%;overflow:hidden;background:rgba(0,0,0,.6);">
+
+  <div class="ovl" id="ss">
+    <div class="ovl-inner">
+      <div class="logo">🛩 Ledger Flight</div>
+      <div class="sub">Accounting 101 · Books Master</div>
+      <div class="ggrid">
+        <div class="gc a"><strong>🎮 Controls</strong>Touch or drag left/right<br>Arrow keys work too<br>Fly through the right book!</div>
+        <div class="gc b"><strong>⚡ Items</strong>🛡️ Shield: blocks 1 wrong answer<br>🧲 Magnet: pulls in coins<br>💰 Coin: +100 pts</div>
+        <div class="gc c"><strong>🏆 Score</strong>Correct pass: <b style="color:var(--gd)">+500 pts</b><br>Combo bonus: +50 per streak<br>Wrong = game over without a shield</div>
+      </div>
+      <!-- 난이도 2 보류(2026-09-14) — 위 LV 고정 주석 참고 -->
+      <div class="diff-toggle" id="diff-toggle" style="display:none;max-width:340px;margin:4px auto 0;">
+        <button class="diff-btn" id="diff-btn-1" onclick="selectDifficulty(1)">Level 1<br><span style="font-size:.72rem;opacity:.7">Just pick the book</span></button>
+        <button class="diff-btn locked" id="diff-btn-2" onclick="selectDifficulty(2)">Level 2 🔒<br><span style="font-size:.72rem;opacity:.7">Find the amount too</span></button>
+      </div>
+      <!-- 난이도 2 보류(2026-09-14) — 해금 안내도 같이 끈다. 위 LV 고정 주석 참고 -->
+      <div class="diff-hint" id="diff-hint" style="display:none"></div>
+<div id="step-host" style="width:100%;max-width:420px;margin:0 auto"></div>
+      <div class="brow">
+        <button class="sbtn" onclick="Game.start()">▶ Start</button>
+        <button class="btn-hub" onclick="openGuide()">📖 How to Play</button>
+        <button class="btn-hub" onclick="location.href='index.html'">🏠 Home</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="ovl" id="gs">
+    <div class="ovl-inner">
+      <div class="gtitle">GAME OVER</div>
+      <div class="gscore" id="go-score">0</div>
+      <div class="ggrade" id="go-grade">Pilot Rank: Rookie</div>
+      <div id="lv-unlock-msg" style="display:none; font-family:'M PLUS Rounded 1c', 'Black Han Sans',sans-serif; font-size:1rem; color:#000; background:linear-gradient(135deg,gold,#f39c12); border-radius:50px; padding:8px 22px; text-align:center;">🔓 Level 2 unlocked! Now find the book amounts yourself</div>
+      <div class="gstats">Correct <span id="go-ok">0</span> &nbsp;|&nbsp; Max Combo <span id="go-mc">0</span>x &nbsp;|&nbsp; Best <span id="go-hi">0</span></div>
+      <div id="savesec">
+        <label>Enter your nickname</label>
+        <input type="text" id="pname" placeholder="Enter name" maxlength="20" onkeydown="if(event.key==='Enter') Game.saveScore()">
+        <div id="savemsg"></div>
+        <div class="brow">
+          <button class="pill cy" id="savebtn" onclick="Game.saveScore()">💾 Submit Score</button>
+        </div>
+      </div>
+      <div id="my-rank-badge" style="display:none; font-family:'Orbitron',sans-serif; font-size:1rem; color:var(--cy); background:rgba(0,242,255,0.1); border:1px solid rgba(0,242,255,0.3); border-radius:50px; padding:7px 20px; text-align:center; margin-top:4px;"></div>
+      <div id="my-rank-neighbors"></div>
+      <div class="rank-colhdr"><span>Rank</span><span>Name</span><span>Tier</span><span>Score</span></div>
+      <div id="rkbox"></div>
+      <div class="brow">
+        <button class="revive-btn" id="revive-btn" onclick="Game.requestReviveAd()" style="display:none;" data-ad-label="Revive">Watch Ad to Revive</button>
+        <div class="action-btns" style="align-items:center;">
+            <button class="btn-restart" onclick="Game.restart()">↺ Try Again</button>
+            <button class="btn-hub" onclick="location.href='index.html'">🏠 Home</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="hud">
+    <div class="hud-left">
+      <div class="hb"><div class="hl">SCORE</div><div class="hv" id="hv-score">0</div></div>
+      <div class="hb" style="gap:4px">
+        <div class="irow"><div class="iic" id="ic-shield">🛡️</div><div class="iic" id="ic-magnet">🧲</div></div>
+        <div style="font-family:'Orbitron';font-size:.5rem;color:rgba(255,255,255,.2);letter-spacing:1px">ITEMS</div>
+      </div>
+      <div class="hb"><div class="hl">COMBO</div><div class="hv" id="hv-combo">0x</div></div>
+    </div>
+    <div class="hud-btns">
+      <button class="mute-btn" id="mute-btn" onclick="BGM.toggleMute()" title="Mute music">🎵</button>
+      <button class="hdb hdb-quit" onclick="if(Game.state==='step') Game.stepExit(); else if(Game.state==='playing'||Game.state==='reading') Game.gameOver()">Quit</button>
+      <button class="hdb hdb-home" onclick="(async()=>{if(Game.state==='playing'||Game.state==='reading'||Game.state==='step'){if(!await Ask.confirm('End the game and return home?'))return;}location.href='index.html'})()">Home</button>
+    </div>
+  </div>
+
+  <div id="glayer"></div>
+  <!-- 차근차근 모드 말풍선 — 튜토리얼과 같은 모양 -->
+  <div id="step-coach" class="tut-bubble"><div class="tut-bubble-text"></div><div class="sc-btns"></div></div>
+  <div id="step-hud">🐢 Step Mode</div>
+  <div id="judge-pop"></div>
+  <div id="flash"></div>
+  <div id="cpop"></div>
+  <canvas id="canvas"></canvas>
+
+  <!-- 난이도2 — 정답 게이트를 맞히면 잠깐 멈추고 실제 장부에서 숫자를 찾아 입력 -->
+  <div id="ldg-overlay">
+    <div id="ldg-book"></div>
+    <div id="ldg-q"></div>
+    <div id="ldg-table"><div id="ldg-rows"></div></div>
+    <div id="ldg-hint2">💰 Find the amount in the book above and enter it</div>
+    <div id="ldg-input-row">
+      <input type="number" id="ldg-input" inputmode="numeric" placeholder="0" onkeydown="if(event.key==='Enter'){event.preventDefault();Game.submitLedgerAnswer();}">
+      <span id="ldg-won">$</span>
+    </div>
+    <button class="pill gn" onclick="Game.submitLedgerAnswer()">✔ Submit</button>
+  </div>
+</div>
+
+<!-- ── 인터랙티브 튜토리얼 (사용방법) ──
+     #canvas-wrap 은 transform 이 걸려 있어 그 안의 position:fixed 가 갇힌다.
+     그래서 래퍼 바깥에 둔다(팡파레 오버레이와 같은 이유). -->
+<div id="tutorial" class="tut">
+  <div class="tut-top">
+    <span class="tt-title">📖 How to Play</span>
+    <span class="tt-badge" id="tut-badge">1/6</span>
+    <button class="tt-skip" onclick="Tutorial.close()">Skip</button>
+  </div>
+  <div class="tut-stage">
+    <div class="tut-status" id="tut-status">Score <b id="tut-score">0</b></div>
+    <div class="tut-sky" id="tut-sky">
+      <div class="tut-gate" id="tut-gate">
+        <div class="tut-gbar">
+          <div class="tut-choices">
+            <span class="tut-choice left" id="tut-cl">Accounts Receivable Subsidiary Ledger</span>
+            <span class="tut-choice right" id="tut-cr">General Ledger</span>
+          </div>
+        </div>
+        <div class="tut-q" id="tut-q"></div>
+        <div class="tut-key" id="tut-key"></div>
+      </div>
+      <div class="tut-items" id="tut-items"><span>💰</span><span>🛡️</span><span>🧲</span></div>
+      <div class="tut-judge" id="tut-judge"></div>
+      <div class="tut-ship" id="tut-ship"><img src="../airplane.png" alt=""></div>
+    </div>
+  </div>
+  <div class="tut-bubble">
+    <div class="tut-bubble-text" id="tut-text"></div>
+    <div class="tut-hint" id="tut-hint" style="display:none"></div>
+    <button class="tut-next" id="tut-next" onclick="Tutorial.next()">Next ▶</button>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL="https://pjagaulfivafamhhiveg.supabase.co";
+const SUPABASE_KEY="sb_publishable_yck2tAKApEjVSJOJMVSXuQ_AGaNatuI";
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+const GAME_ID="flight";
+
+
+// XSS 방어
+function escapeHTML(str) { if (!str) return ''; return str.replace(/[&<>'"]/g, function(tag) { const chars = { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }; return chars[tag] || tag; }); }
+
+const BGM={
+  el:BGMAudio.create('../bgm5_flight.mp3?v=79'),
+  // 게임별 키(flight_muted)가 있으면 우선, 없으면 허브 전역 토글(hub_muted) 참조
+  _muted:localStorage.getItem('flight_muted')!==null?localStorage.getItem('flight_muted')==='true':localStorage.getItem('hub_muted')==='true',
+  _fadeTimer:null,
+  init(){this.el.volume=0.5;this.el.muted=this._muted;this._updateBtn()},
+  _updateBtn(){const btn=document.getElementById('mute-btn');if(!btn)return;btn.textContent=this._muted?'🔇':'🎵';btn.classList.toggle('muted',this._muted)},
+  toggleMute(){this._muted=!this._muted;localStorage.setItem('flight_muted',this._muted);this.el.muted=this._muted;this._updateBtn()},
+  play(){if(this._fadeTimer){clearInterval(this._fadeTimer);this._fadeTimer=null}this.el.volume=0.5;if(this.el.paused)this.el.play().catch(()=>{})},
+  stop(){if(this.el.paused)return;if(this._fadeTimer)clearInterval(this._fadeTimer);this._fadeTimer=setInterval(()=>{if(this.el.volume>0.05){this.el.volume=Math.max(0,this.el.volume-0.05)}else{this.el.volume=0;this.el.pause();this.el.currentTime=0;this.el.volume=0.5;clearInterval(this._fadeTimer);this._fadeTimer=null}},50)},
+};
+
+const Problems=JA.flight;   // US edition: en/flight_en.json (2-way choice of books/journals)
+
+// 셔플 백: 전체 문제를 섞어 하나씩 소진, 다 나오면 재셔플(직전 문제 연속 방지)
+let _pBag=[], _pLast=null;
+function _drawP(arr){
+  if(_pBag.length===0){
+    _pBag=arr.map((_,i)=>i);
+    for(let i=_pBag.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[_pBag[i],_pBag[j]]=[_pBag[j],_pBag[i]];}
+    if(_pBag.length>1 && arr[_pBag[0]]===_pLast){[_pBag[0],_pBag[1]]=[_pBag[1],_pBag[0]];}
+  }
+  const item=arr[_pBag.shift()];
+  _pLast=item;
+  return item;
+}
+
+/* ═══════════════════════════════════════════════════════
+ *  난이도2 — 정답 게이트(장부)를 맞히면 그 장부의 가짜 화면을 띄우고
+ *  실제 숫자를 찾아 입력해야 점수가 들어간다(difficulty.js 참고).
+ *  118회 기출 대조 분석 결과 장부조회 문제 정답률이 25%였던 이유가
+ *  "게임은 장부 이름만 2지선다로 고르면 끝"이었기 때문 — 실제 시험은
+ *  그 장부에 들어가 숫자를 읽어내는 것까지 요구함. Problems 48개 전체가
+ *  아니라 "특정 대상의 잔액/금액은?" 유형 14개만 골라 표 데이터를 붙였고
+ *  (달·기간 비교형은 제외), 문제 텍스트(q)를 키로 매칭한다.
+ * ═══════════════════════════════════════════════════════ */
+// US edition: no table data yet for LV2 (reading numbers inside a book) -> LV2 also stops at picking the book
+const LedgerLv2 = {};
+
+const SFX={
+  ctx:null,
+  /* AudioContext 가 없으면 this.ctx 를 null 로 둔다 — tone() 이 이미 null 을 걸러
+     효과음만 조용히 빠진다. 던지면 start() 가 통째로 멈춘다(2026-09-16). */
+  init(){try{if(!this.ctx)this.ctx=new(window.AudioContext||window.webkitAudioContext)();if(this.ctx.state==='suspended')this.ctx.resume()}catch(e){this.ctx=null}},
+  tone(f,t,d,v=0.12){if(!this.ctx)return;const o=this.ctx.createOscillator(),g=this.ctx.createGain();o.type=t;o.frequency.setValueAtTime(f,this.ctx.currentTime);g.gain.setValueAtTime(v,this.ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,this.ctx.currentTime+d);o.connect(g);g.connect(this.ctx.destination);o.start();o.stop(this.ctx.currentTime+d)},
+  ok(){this.tone(660,'sine',.08,.2);setTimeout(()=>this.tone(990,'sine',.15,.2),60)},
+  bad(){this.tone(140,'sawtooth',.45,.4)},
+  coin(){this.tone(1200+Math.random()*400,'triangle',.05,.06)},
+  item(){this.tone(600,'square',.08,.1);setTimeout(()=>this.tone(1200,'square',.15,.1),90)},
+};
+
+// ── 정답/오답 햅틱 — haptic.js(앱=Capacitor Haptics, 웹=navigator.vibrate) ──
+function hapticCorrect() { if (window.Haptic) Haptic.correct(); }
+function hapticWrong() { if (window.Haptic) Haptic.wrong(); }
+
+class Particle{
+  constructor(x,y,col){this.x=x;this.y=y;this.col=col;const a=Math.random()*Math.PI*2,s=3+Math.random()*10;this.vx=Math.cos(a)*s;this.vy=Math.sin(a)*s;this.life=1;this.fade=.025+Math.random()*.04}
+  update(){this.x+=this.vx;this.y+=this.vy;this.vy+=.18;this.life-=this.fade}
+  draw(ctx){ctx.globalAlpha=Math.max(0,this.life);ctx.fillStyle=this.col;ctx.beginPath();ctx.arc(this.x,this.y,3,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1}
+}
+
+let LV=1; // 1=장부만 선택 / 2=장부+숫자 직접 조회(difficulty.js로 해금)
+const Game={
+  canvas:null,ctx:null,w:0,h:0,
+  state:'idle',score:0,hi:0,combo:0,maxCombo:0,okCount:0,wrongCount:0,speed:0,frame:0,
+  player:{x:0,y:0,r:42,shield:false,magnet:false,magT:0},
+  gates:[],items:[],parts:[],stars:[],
+  shipImg:null,shipImgLoaded:false,
+  targetX:0,touchStartX:0,playerStartX:0,
+
+  init(){
+    this.canvas=document.getElementById('canvas');
+    this.ctx=this.canvas.getContext('2d');
+    this.hi=+localStorage.getItem('hub_flight_hi')||0;
+    BGM.init();
+    this.resize();
+    window.addEventListener('resize',()=>this.resize());
+
+    window.addEventListener('mousemove',e=>{
+      if(this.state==='playing'){
+        const rect=document.getElementById('canvas-wrap').getBoundingClientRect();
+        const x=Math.max(55,Math.min(this.w-55,e.clientX-rect.left));
+        this.player.x=x;this.targetX=x;
+      }
+    });
+
+    window.addEventListener('touchstart',e=>{
+      if(this.state==='playing'||this.state==='step'){
+        this.touchStartX=e.touches[0].clientX;
+        this.playerStartX=this.player.x;
+        this.targetX=this.player.x;
+      }
+    },{passive:true});
+
+    window.addEventListener('touchmove',e=>{
+      // ★ playing 상태가 아니면 기본 스크롤 동작 허용
+      if(this.state!=='playing'&&!(this.state==='step'&&!(e.target&&e.target.closest&&e.target.closest('#step-coach')))) return;
+      e.preventDefault();
+      const dx=e.touches[0].clientX-this.touchStartX;
+      const newX=Math.max(55,Math.min(this.w-55,this.playerStartX+dx));
+      this.player.x=newX;this.targetX=newX;
+    },{passive:false});
+
+    window.addEventListener('keydown',e=>{
+      if(this.state==='playing'||this.state==='step'){
+        if(e.key==='ArrowLeft'){this.player.x=Math.max(55,this.player.x-65);this.targetX=this.player.x}
+        if(e.key==='ArrowRight'){this.player.x=Math.min(this.w-55,this.player.x+65);this.targetX=this.player.x}
+      }
+    });
+
+    this.shipImg=new Image();
+    this.shipImg.src="../airplane.png";
+    this.shipImg.onload=()=>{this.shipImgLoaded=true};
+    for(let i=0;i<100;i++)this.stars.push(this.mkStar(true));
+    this.loop();
+  },
+
+  resize(){
+    const wrap=document.getElementById('canvas-wrap');
+    const adH=0;
+    this.w=this.canvas.width=wrap.clientWidth;
+    this.h=this.canvas.height=window.innerHeight-adH;
+    wrap.style.height=this.h+'px';
+    this.player.y=this.state==='step'?Math.round(this.h*0.64):this.h-140;   // 차근차근 모드는 말풍선 위로
+    if(this.state==='idle'){this.player.x=this.w/2;this.targetX=this.w/2}
+  },
+
+  mkStar(init=false){return{x:Math.random()*this.w,y:init?Math.random()*this.h:-2,s:Math.random()*2+.3,v:Math.random()*14+4,c:Math.random()>.85?'#00f2ff':Math.random()>.7?'#b44fff':'#fff'}},
+
+  start(){if(window.DayLog)DayLog.hit('act','flight','start');SFX.init();BGM.play();hideAdPlaceholder();/* 난이도2 보류(2026-09-14, 사용자 지시). 장부 화면에 '유동자산 14,500,000원'이 그대로 보이는데 그 숫자를 받아쓰라는 문제라, 회계가 아니라 받아쓰기였다. 더 나은 안이 정해질 때까지 LV 을 1로 고정한다 — 이미 해금된 학생이 저장값(hub_lv_flight=2) 때문에 계속 LV2 를 만나는 일도 막는다. LV2 코드는 남겨 둔다. */LV=1;document.getElementById('ss').style.display='none';this._reset()},
+  restart(){BGM.play();hideAdPlaceholder();LV=1;   /* 위 start() 주석 참고 — 난이도2 보류 */document.getElementById('gs').style.display='none';this._reset()},
+
+  _reset(){
+    if(window.WrongNote)WrongNote.reset();
+    this.state='playing';this.score=0;this.combo=0;this.maxCombo=0;this.okCount=0;this.wrongCount=0;
+    this._saving=false;this._saved=false;   // 새 판 — 저장 가드 초기화
+    this._saveEpoch=(this._saveEpoch||0)+1; // 지난 판의 지연된 저장 완료가 이번 판의 _saved를 잘못 세우지 못하게
+    this.speed=3.0;this.frame=0;this.gates=[];this.items=[];this.parts=[];
+    this.reviveUsed=false;this.pendingRevive=false;
+    this.player.shield=false;this.player.magnet=false;this.player.magT=0;
+    this.player.x=this.w/2;this.targetX=this.w/2;
+    document.getElementById('ic-shield').classList.remove('on');
+    document.getElementById('ic-magnet').classList.remove('on');
+    document.getElementById('glayer').innerHTML='';
+    document.getElementById('savesec').style.display='flex';
+    document.getElementById('rkbox').style.display='none';
+    document.getElementById('rkbox').innerHTML='';
+    document.getElementById('pname').value = localStorage.getItem('hub_nickname') || '';
+    document.getElementById('savemsg').textContent='';
+    const sb=document.getElementById('savebtn');sb.disabled=false;sb.style.opacity='1';
+    this.updHUD();
+  },
+
+  loop(){this.update();this.draw();requestAnimationFrame(()=>this.loop())},
+
+  spawnGate(){
+    const p=_drawP(Problems);
+    const id='g'+Date.now()+'_'+Math.random().toString(36).slice(2);
+    const g={id,y:-430,q:p.q,k:p.key,lText:p.L,rText:p.R,ans:p.a,passed:false,domEl:null,pauseT:0,pauseDone:false,ledgerData:LedgerLv2[p.q]||null};
+    const layer=document.getElementById('glayer');
+    const el=document.createElement('div');
+    el.id=id;el.className='gatel';el.style.top='-600px';
+    el.innerHTML=`<div class="gbar"></div><div class="ginfo"><div class="gq">${p.q}</div><div class="gk">💡 ${p.key}</div></div><div class="gchoices"><div class="gchoice left">${p.L}</div><div class="gchoice right">${p.R}</div></div>`;
+    layer.appendChild(el);g.domEl=el;this.gates.push(g);
+  },
+  spawnItems(){
+    const pat=Math.floor(Math.random()*5),sx=80+Math.random()*(this.w-160);
+    if(pat===0)for(let i=0;i<5;i++)this.mkItem(sx+(i-2)*55,-60,'coin');
+    else if(pat===1)for(let i=0;i<5;i++)this.mkItem(sx,-60-i*68,'coin');
+    else if(pat===2){this.mkItem(sx,-60,'coin');this.mkItem(sx-55,-130,'coin');this.mkItem(sx+55,-130,'coin')}
+    else if(pat===3)for(let i=0;i<3;i++)this.mkItem(sx+(i-1)*80,-60,'coin');
+    else this.mkItem(50+Math.random()*(this.w-100),-60,Math.random()>.5?'shield':'magnet');
+  },
+  mkItem(x,y,type){this.items.push({x,y,type,r:type==='coin'?20:28})},
+
+  update(){
+    if(this.state==='step'){this.stepUpdate();return}   // 차근차근 모드
+    if(this.state!=='playing')return;
+    this.frame++;
+    this.speed=Math.min(8.5,3.0+this.frame*.0009);
+    this.stars.forEach(s=>{s.y+=s.v*(this.speed*.17);if(s.y>this.h)Object.assign(s,this.mkStar())});
+    const gI=Math.max(65,Math.floor(1500/this.speed));
+    if(this.frame%gI===0)this.spawnGate();
+    if(this.frame%52===0)this.spawnItems();
+    if(this.player.magnet){this.player.magT--;if(this.player.magT<=0){this.player.magnet=false;document.getElementById('ic-magnet').classList.remove('on')}}
+    for(let i=this.gates.length-1;i>=0;i--){
+      const g=this.gates[i];
+      // ▼ 문제를 읽을 수 있도록 화면 중앙 부근에서 한 번만 잠깐 정지
+      //   (배경 별·코인은 계속 흐르므로 속도감은 그대로 유지)
+      if(g.pauseDone){
+        g.y+=this.speed*1.15;   // 정지 전후 낙하 속도를 더 빠르게(기존 .82 → 1.15). 정지(pauseT) 로직은 그대로 유지.
+      } else if(g.pauseT>0){
+        if(--g.pauseT===0)g.pauseDone=true;   // 정지 중에는 멈춰 있음
+      } else if(g.y>=this.h*0.40){
+        g.pauseT=80;                            // 약 1.3초 정지 (숫자를 키우면 더 오래 멈춤)
+      } else {
+        g.y+=this.speed*1.15;   // 정지 전후 낙하 속도를 더 빠르게(기존 .82 → 1.15). 정지(pauseT) 로직은 그대로 유지.
+      }
+      if(g.domEl)g.domEl.style.top=(g.y-140)+'px';
+      // 화면 아래로 완전히 지나간 게이트는 배열/DOM에서 제거 — 긴 판 프레임 드랍 방지
+      if(g.y>this.h+220){if(g.domEl)g.domEl.remove();this.gates.splice(i,1);continue}
+      if(!g.passed&&g.y>=this.player.y-10){
+        const side=this.player.x<this.w/2?'L':'R';g.passed=true;
+        if(g.domEl)g.domEl.style.opacity='.15';
+        if(side===g.ans){
+          if(LV===2&&g.ledgerData){
+            // 난이도2: 장부는 맞혔지만 그 장부에서 실제 숫자를 찾아 입력해야 점수가 들어간다.
+            // 정지 중엔 update() 맨 위 가드(state!=='playing')가 게이트/별/아이템을 전부 멈춰준다.
+            this.state='reading';
+            this.showLedgerCheck(g);
+          } else {
+            this.combo++;if(this.combo>this.maxCombo)this.maxCombo=this.combo;
+            this.score+=500+(this.combo-1)*50;this.okCount++;SFX.ok();if(window.Skill)Skill.hit('ledger');/* 분개 기술 숙련(skill.js) — 장부 */
+            this.burst(this.player.x,this.player.y,'#00f2ff',18);this.burst(this.player.x,this.player.y,'#fff',8);
+            if(this.combo>=2)this.showCombo(this.combo);this.doFlash('ok');
+            this.showJudge(true,this.combo>=2?`✓ ${this.combo} COMBO!`:'✓ Correct!');
+            hapticCorrect();
+          }
+        } else {
+          this.wrongCount++;
+          if(window.WrongNote)WrongNote.add({game:'flight',key:g.q,q:g.q,
+            correct:(g.ans==='L'?g.lText:g.rText),
+            wrong:(side==='L'?g.lText:g.rText),type:'Book choice'});
+          if(this.player.shield){
+            this.player.shield=false;document.getElementById('ic-shield').classList.remove('on');SFX.item();
+            this.burst(this.player.x,this.player.y,'#00f2ff',14);this.showJudge(false,'🛡️ Shield used!');
+          } else {
+            SFX.bad();this.doFlash('bad');this.burst(this.player.x,this.player.y,'#ff2d78',28);
+            this.showJudge(false,'✗ Wrong!');this.state='dying';setTimeout(()=>this.gameOver(),420);
+          }
+          this.combo=0;
+          hapticWrong();
+        }
+        this.updHUD();
+      }
+    }
+    for(let i=this.items.length-1;i>=0;i--){
+      const it=this.items[i];it.y+=this.speed*1.12;
+      if(this.player.magnet&&it.type==='coin'){const dx=this.player.x-it.x,dy=this.player.y-it.y;if(Math.sqrt(dx*dx+dy*dy)<290){it.x+=dx*.13;it.y+=dy*.13}}
+      const dx=this.player.x-it.x,dy=this.player.y-it.y;
+      if(Math.sqrt(dx*dx+dy*dy)<this.player.r+it.r){
+        if(it.type==='coin'){this.score+=100;SFX.coin();this.burst(it.x,it.y,'#ffd600',5)}
+        else if(it.type==='shield'){this.player.shield=true;SFX.item();document.getElementById('ic-shield').classList.add('on');this.burst(it.x,it.y,'#00f2ff',10)}
+        else{this.player.magnet=true;this.player.magT=480;SFX.item();document.getElementById('ic-magnet').classList.add('on');this.burst(it.x,it.y,'#ff0055',10)}
+        this.items.splice(i,1);this.updHUD();
+      } else if(it.y>this.h+60)this.items.splice(i,1);
+    }
+    for(let i=this.parts.length-1;i>=0;i--){this.parts[i].update();if(this.parts[i].life<=0)this.parts.splice(i,1)}
+  },
+
+  draw(){
+    const ctx=this.ctx;
+    ctx.fillStyle='#020810';ctx.fillRect(0,0,this.w,this.h);
+    this.stars.forEach(s=>{ctx.fillStyle=s.c;ctx.globalAlpha=0.7;ctx.beginPath();ctx.arc(s.x,s.y,s.s,0,Math.PI*2);ctx.fill()});ctx.globalAlpha=1;
+    ctx.strokeStyle='rgba(0,242,255,.08)';ctx.lineWidth=1.5;ctx.setLineDash([24,24]);
+    const dOff=(this.frame*this.speed*.7)%48;
+    ctx.beginPath();ctx.moveTo(this.w/2,-dOff);ctx.lineTo(this.w/2,this.h);ctx.stroke();ctx.setLineDash([]);
+    this.items.forEach(it=>{
+      if(it.type==='coin'){
+        ctx.save();ctx.translate(it.x,it.y);ctx.scale(Math.abs(Math.cos(this.frame*.08)),1);
+        ctx.beginPath();ctx.arc(0,0,18,0,Math.PI*2);ctx.fillStyle='#FFD700';ctx.fill();
+        ctx.strokeStyle='#b8860b';ctx.lineWidth=2;ctx.stroke();
+        ctx.fillStyle='#7a5000';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('$',0,1);
+        ctx.restore();
+      } else {ctx.font='28px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(it.type==='shield'?'🛡️':'🧲',it.x,it.y)}
+    });
+    this.parts.forEach(p=>p.draw(ctx));this.drawShip();
+  },
+
+  burst(x,y,col,n){for(let i=0;i<n;i++)this.parts.push(new Particle(x,y,col))},
+  showJudge(isOk,msg){const el=document.getElementById('judge-pop');el.textContent=msg;el.className=isOk?'ok':'bad';el.style.top=(this.player.y-80)+'px';el.style.display='block';el.style.animation='none';void el.offsetWidth;el.style.animation='judgeAnim .9s ease-out forwards';setTimeout(()=>el.style.display='none',900)},
+  doFlash(type){const el=document.getElementById('flash');el.className='';void el.offsetWidth;el.className=type;setTimeout(()=>el.className='',type==='ok'?400:560)},
+  showCombo(n){const el=document.getElementById('cpop');el.textContent=n+'x COMBO! 🔥';el.style.display='block';el.style.animation='none';void el.offsetWidth;el.style.animation='cp .8s ease-out forwards';setTimeout(()=>el.style.display='none',800)},
+
+  // ── 난이도2: 장부 숫자 조회 확인 ──
+  showLedgerCheck(g){
+    const ld=g.ledgerData;
+    const bookName=g.ans==='L'?g.lText:g.rText;
+    document.getElementById('ldg-book').textContent='📖 '+bookName;
+    document.getElementById('ldg-q').textContent=g.q;
+    document.getElementById('ldg-rows').innerHTML=ld.rows.map(r=>
+      `<div class="ldg-row"><span>${escapeHTML(r.label)}</span><span>$${r.amount.toLocaleString()}</span></div>`
+    ).join('');
+    document.getElementById('ldg-input').value='';
+    document.getElementById('ldg-overlay').classList.add('show');
+    this._pendingLedger={g,ld};
+    setTimeout(()=>{const i=document.getElementById('ldg-input');if(i)i.focus()},150);
+  },
+  submitLedgerAnswer(){
+    const p=this._pendingLedger; if(!p) return;
+    const raw=document.getElementById('ldg-input').value;
+    if(!String(raw).trim()) return;
+    const typed=parseInt(String(raw).replace(/[^\d]/g,''),10);
+    const ok=(typed===p.ld.amount);
+    document.getElementById('ldg-overlay').classList.remove('show');
+    this._pendingLedger=null;
+    if(ok){
+      this.combo++;if(this.combo>this.maxCombo)this.maxCombo=this.combo;
+      this.score+=500+(this.combo-1)*50+300; // 장부 숫자까지 맞히면 +300 보너스
+      this.okCount++;SFX.ok();if(window.Skill)Skill.hit('ledger');/* 분개 기술 숙련(skill.js) — 장부 */
+      this.burst(this.player.x,this.player.y,'#00f2ff',18);this.burst(this.player.x,this.player.y,'#fff',8);
+      if(this.combo>=2)this.showCombo(this.combo);this.doFlash('ok');
+      this.showJudge(true,'✓ Correct! +300');
+      hapticCorrect();
+    } else {
+      this.combo=0;this.wrongCount++;SFX.bad();this.doFlash('bad');
+      this.showJudge(false,'Wrong amount (correct: $'+p.ld.amount.toLocaleString()+')');
+      hapticWrong();
+      if(window.WrongNote)WrongNote.add({game:'flight',key:p.g.q+'_amt',q:p.g.q+' (book amount)',
+        correct:'$'+p.ld.amount.toLocaleString(),
+        wrong:'$'+(isNaN(typed)?'?':typed.toLocaleString()),type:'Book amount lookup'});
+    }
+    this.updHUD();
+    this.state='playing';
+  },
+  updHUD(){document.getElementById('hv-score').textContent=this.score.toLocaleString();document.getElementById('hv-combo').textContent=this.combo+'x'},
+  _grade(score){const t=GRADE_TIERS.find(t=>score>=t.min)||GRADE_TIERS[GRADE_TIERS.length-1];return t.label},
+
+  gameOver(){
+    this.state='gameover';
+    // 난이도2 장부조회 모달이 뜬 채로(state='reading') '그만'을 눌러 여기 들어온 경우,
+    // 모달을 안 닫으면 z-index가 더 높아 결과화면 위에 그대로 남아 화면을 막고,
+    // '확인' 버튼도 여전히 살아있어 누르면 게임이 조용히 재개돼버린다.
+    const ldgOverlay = document.getElementById('ldg-overlay');
+    if (ldgOverlay) ldgOverlay.classList.remove('show');
+    this._pendingLedger = null;
+    if(window.Growth) Growth.logPlay(GAME_ID);
+    if(window.WrongNote)WrongNote.flush('flight');
+    BGM.stop();
+    if(this.score>this.hi){this.hi=this.score;localStorage.setItem('hub_flight_hi',this.hi);
+        if(window.Review) Review.maybeAsk();}   // 최고기록 갱신 (gameOver 안이라 플레이 방해 없음)
+    document.getElementById('glayer').innerHTML='';
+
+    // 난이도2 해금 판정 — 이번 판 정답률이 기준(70%, 10문항 이상)을 넘기면 열린다
+    let justUnlocked=false;
+    if(window.Difficulty&&LV===1){
+      justUnlocked=Difficulty.reportRound(GAME_ID,this.okCount,this.okCount+this.wrongCount);
+    }
+    const unlockEl=document.getElementById('lv-unlock-msg');
+    if(unlockEl) unlockEl.style.display='none';   // 난이도2 보류 — 해금 안내 끔
+
+    document.getElementById('go-score').textContent=this.score.toLocaleString();
+    document.getElementById('go-ok').textContent=this.okCount;
+    document.getElementById('go-mc').textContent=this.maxCombo;
+    document.getElementById('go-hi').textContent=this.hi.toLocaleString();
+    document.getElementById('go-grade').textContent='Pilot Rank: '+this._grade(this.score)+(LV===2?' (Level 2)':'');
+    checkAndShowFanfare(this.score, this._grade(this.score));
+    const self = this;
+    requestInterstitialIfNeeded(function() {
+        const gs=document.getElementById('gs');
+        gs.style.display='flex';
+        gs.scrollTop=0;
+        showAdPlaceholder();
+        // 부활 버튼: 아직 부활을 안 썼고, 광고 제거 안 한 경우에만 노출
+        const rb=document.getElementById('revive-btn');
+        // 앱에서만(웹은 광고가 없어 '광고 불러오는 중' 안내만 떠서 지키지 못할 약속이 된다 — 다른 게임의 보상형 단추와 같은 규칙, 2026-10-14)
+        if(rb) rb.style.display = (window.AdBridge && !self.reviveUsed && !(typeof AdBridge.isAdsRemoved==='function' && AdBridge.isAdsRemoved())) ? 'flex' : 'none';
+        if(rb && rb.style.display==='flex' && window.AdBridge && window.DayLog) DayLog.hit('ad','flight','rw_offer');
+        self.loadRanking();
+        const pname = document.getElementById('pname').value || 'Me';
+        self.showMyRank(pname, self.score, { trackDelta: false }); // 랭킹 등록 전 예상 순위 미리보기
+        /* 자동 저장 — 2026-09-16 사용자 요청(팀전 수업 중 "저장 안 눌러도 자동으로 올라가게").
+           팀전 전광판·결과 보기는 저장된 기록만 읽는다. 닉네임이 이미 있으면 여기서 한 번 저장한다.
+           게스트(닉네임 없음)는 그대로 직접 눌러야 한다 — 누구 기록인지 알 수 없다.
+           ⚠ 부활하면 _saved 가드가 풀려 부활 뒤 오른 점수도 다시 저장된다(기존 동작 그대로).
+              upsert_score 는 최고점만 남기므로 중간 점수가 남아도 랭킹에는 영향이 없다. */
+        try {
+          const _n = (document.getElementById('pname').value || '').trim();
+          if (_n.length >= 2 && !self._saved && !self._saving) {
+            const _r = self.saveScore();
+            /* 자동 저장은 했지만 **이름을 바꿔 다시 저장할 길은 열어 둔다**(2026-09-16).
+               _saved 가드도 풀어야 다시 누를 수 있다 — 부활 뒤 재저장과 같은 처리다. */
+            Promise.resolve(_r).then(function () {
+              try {
+                self._saved = false;
+                const _i = document.getElementById('pname'); if (_i) _i.disabled = false;
+                const _b = document.getElementById('savebtn');
+                if (_b) { _b.disabled = false; _b.style.opacity = '1'; _b.textContent = '💾 Submit Again'; }
+              } catch (e) {}
+            }).catch(function () {});
+          }
+        } catch (e) {}
+    });
+  },
+
+  // 📺 광고 보고 부활하기 (게임당 1회)
+  requestReviveAd(){
+    if(this.reviveUsed) return;
+    if(window.AdBridge && AdBridge.isRewardedReady()){
+      this.pendingRevive=true;          // 이 광고의 보상은 '부활'임을 표시
+      AdBridge.showRewarded();
+    } else {
+      // 앱에서 광고를 못 불러오면 막지 않고 부활시킨다 — 오프라인만 막는다(전 앱 공통 규칙, 2026-10-09). 웹은 예전대로.
+      if(!window.AdBridge){ Ask.alert('The ad is loading. Wait a moment and tap again.'); return; }
+      if(navigator.onLine===false){ Ask.alert('Connect to the internet and tap again.'); return; }
+      if(window.DayLog) DayLog.hit('ad','flight','rw_free');
+      this.doRevive();
+    }
+  },
+
+  // 보상 지급 시 호출: 점수 유지한 채 부활
+  doRevive(){
+    if(this.reviveUsed) return;
+    this.reviveUsed=true; this.pendingRevive=false;
+    document.getElementById('gs').style.display='none';
+    const rb=document.getElementById('revive-btn'); if(rb) rb.style.display='none';
+    // 부활 후 더 높은 점수를 다시 저장할 수 있도록 저장 UI 리셋
+    // (버튼만 다시 활성화하고 _saved 가드를 안 풀면, 부활 전 이미 저장한 적이 있을 때
+    //  saveScore()가 조용히 아무것도 안 하고 리턴해버려 부활 후 오른 점수가 영영 저장 안 됨)
+    document.getElementById('savemsg').textContent='';
+    this._saved=false;
+    this._saveEpoch=(this._saveEpoch||0)+1; // 부활 전에 저장이 이미 진행 중이었다면, 그 결과가 뒤늦게 와도 이번 판의 _saved를 못 세우게
+    const sb=document.getElementById('savebtn'); sb.disabled=false; sb.style.opacity='1';
+    hideAdPlaceholder();
+    // 화면 장애물 정리 + 플레이어 가운데로 (부활 직후 즉사 방지)
+    this.gates=[]; this.items=[]; this.parts=[];
+    document.getElementById('glayer').innerHTML='';
+    this.player.x=this.w/2; this.targetX=this.w/2;
+    this.combo=0;
+    // 즉사 방지용 방어막 1회 지급
+    this.player.shield=true; document.getElementById('ic-shield').classList.add('on');
+    this.state='playing'; BGM.play(); this.updHUD();
+  },
+
+  async saveScore(){
+    const name=document.getElementById('pname').value.trim();
+    if(!name){Ask.alert('Please enter a name');return}
+    if(name.length<2){Ask.alert('Use at least 2 characters');return}
+    // Enter 키가 버튼 disabled를 우회해 이중 저장(성장 이력 중복)되는 것 방지
+    if(this._saving||this._saved)return;
+    this._saving=true;
+    const myEpoch=this._saveEpoch; // 저장 도중 부활/재시작이 끼어들면 그 이후 결과는 _saved를 세우지 않는다
+    const btn=document.getElementById('savebtn'),msg=document.getElementById('savemsg');
+    btn.disabled=true;btn.style.opacity='.5';msg.textContent='Saving...';msg.style.color='rgba(255,255,255,.4)';
+    const today=new Date().toLocaleDateString('ko-KR',{month:'2-digit',day:'2-digit'});
+    const data={name,score:this.score,combo:this.maxCombo,correct:this.okCount,date:today,game:GAME_ID,grade:this._grade(this.score)};
+    if(false){this._lsave(data);msg.textContent='✓ Saved on this device';msg.style.color='var(--gd)';this.loadRanking();return}
+    try{
+      await supabaseSaveScore(data.name, data.score, data.combo||0, data.correct||0, GAME_ID);
+      this._lsave(data);
+      if(myEpoch===this._saveEpoch)this._saved=true;
+      msg.textContent='✓ Saved! It will show on the leaderboard';msg.style.color='#39ff14';
+      await new Promise(r=>setTimeout(r,800));await this.loadRanking();
+      await this.showMyRank(data.name, data.score);
+    }catch(e){this._lsave(data);msg.textContent='📴 Saved on this device only (connection error, not on leaderboard)';msg.style.color='var(--gd)';btn.disabled=false;btn.style.opacity='1';this.loadRanking();await this.showMyRank(data.name, data.score)}
+    this._saving=false;
+  },
+  _lsave(d){const l=this._lget();l.push(d);l.sort((a,b)=>b.score-a.score);localStorage.setItem('hub_flight_rank',JSON.stringify(l.slice(0,15)))},
+  _lget(){return JSON.parse(localStorage.getItem('hub_flight_rank')||'[]')},
+
+  async loadRanking(){
+    const box=document.getElementById('rkbox');box.style.display='block';
+    if(false){this._render(this._lget());return}
+    box.innerHTML='<div class="spinrow"><div class="spinner"></div>&nbsp;Loading...</div>';
+    try{const res=await supabaseFetchRanking(GAME_ID);this._render(res)}
+    catch(e){this._render(this._lget())}
+  },
+  _merge(remote,local){const map=new Map();[...(Array.isArray(remote)?remote:[]),...local].forEach(r=>{const p=map.get(r.name);if(!p||(r.score||0)>(p.score||0))map.set(r.name,r)});return[...map.values()].sort((a,b)=>b.score-a.score).slice(0,15)},
+  _render(list){
+    const box=document.getElementById('rkbox');
+    if(!list||!list.length){box.innerHTML='<div style="text-align:center;padding:20px;color:rgba(255,255,255,.3)">No records yet</div>';return}
+    const me=document.getElementById('pname').value.trim();
+    box.innerHTML=list.map((r,i)=>{
+      const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
+      return`<div class="rkrow ${escapeHTML(r.name)===escapeHTML(me)?'rkme':''}"><div class="rkn ${i<3?'top':''}">${medal}</div><div class="rknm">${escapeHTML(r.name)}</div><div class="rkgr">${escapeHTML(r.grade||this._grade(r.score))}</div><div class="rksc">${(r.score||0).toLocaleString()}</div></div>`;
+    }).join('');
+  },
+
+  async showMyRank(name, score){
+    const badge=document.getElementById('my-rank-badge');
+    const nbox=document.getElementById('my-rank-neighbors');
+    const idx=GRADE_TIERS.findIndex(t=>score>=t.min);
+    const next=idx>0?GRADE_TIERS[idx-1]:null;
+    const tierHtml=next
+      ?`<div class="next-tier-msg"><b>${(next.min-score).toLocaleString()}</b> pts to the next tier: <b style="color:${next.color||'var(--cy)'}">${next.label}</b></div>`
+      :`<div class="next-tier-msg">🎉 Top tier reached!</div>`;
+    try{
+      const groupId=localStorage.getItem('hub_group_id')||null;
+      const withGroup = (q) => q;   // 전체 범위(그룹 필터는 아래 반 순위에서만)
+      const countQ=withGroup(db.from('scores').select('*',{count:'exact',head:true}).eq('game_id',GAME_ID).gt('score',score));
+      const aboveQ=withGroup(db.from('scores').select('name,score').eq('game_id',GAME_ID).gt('score',score).order('score',{ascending:true}).limit(1));
+      const belowQ=withGroup(db.from('scores').select('name,score').eq('game_id',GAME_ID).lt('score',score).order('score',{ascending:false}).limit(1));
+      const grpQ = groupId
+        ? db.from('scores').select('*',{count:'exact',head:true})
+            .eq('game_id',GAME_ID).eq('group_id',groupId).gt('score',score)
+        : Promise.resolve({count:null});
+      const [{count,error:cErr},{data:aboveRows},{data:belowRows},grpRes]=await Promise.all([countQ,aboveQ,belowQ,grpQ]);
+      if(cErr) throw cErr;
+      const myRank=(count||0)+1;
+      const above=aboveRows&&aboveRows[0];
+      const below=belowRows&&belowRows[0];
+      const RANK_PREV_KEY='hub_flight_prevRank';
+      const prevRank=parseInt(localStorage.getItem(RANK_PREV_KEY)||'0',10);
+      let deltaHtml='';
+      if(prevRank>0){
+        const diff=prevRank-myRank;
+        if(diff>0) deltaHtml=`<span class="rank-delta up">▲ Up ${diff}</span>`;
+        else if(diff<0) deltaHtml=`<span class="rank-delta down">▼ Down ${Math.abs(diff)}</span>`;
+        else deltaHtml=`<span class="rank-delta flat">− Rank held</span>`;
+      }
+      localStorage.setItem(RANK_PREV_KEY,String(myRank));
+      const grpRank=(grpRes&&grpRes.count!=null)?(grpRes.count+1):null;
+      const grpHtml=grpRank?` <span style="opacity:.75">· Group #${grpRank.toLocaleString()}</span>`:'';
+      badge.innerHTML=`🎯 Your rank: Overall #${myRank.toLocaleString()}${grpHtml} ${deltaHtml}`;
+      badge.style.display='block';
+      const row=(label,r,cls)=>r
+        ?`<div class="rn-row ${cls}"><span class="rn-label">${label}</span><span class="rn-name">${escapeHTML(r.name)}</span><span class="rn-score">${(r.score||0).toLocaleString()}</span></div>`
+        :'';
+      nbox.innerHTML=tierHtml+
+        row(`▲ #${myRank - 1}`,above,'rn-above')+
+        `<div class="rn-row rn-me"><span class="rn-label">You</span><span class="rn-name">${escapeHTML(name)}</span><span class="rn-score">${(score||0).toLocaleString()}</span></div>`+
+        row(`▼ #${myRank + 1}`,below,'rn-below');
+      nbox.style.display='block';
+    }catch(e){
+      badge.style.display='none';
+      nbox.innerHTML=tierHtml;
+      nbox.style.display='block';
+    }
+  },
+
+  drawShip(){
+    const ctx=this.ctx,px=this.player.x,py=this.player.y;
+    ctx.save();ctx.translate(px,py);
+    if(this.player.magnet){ctx.beginPath();ctx.arc(0,0,290,0,Math.PI*2);ctx.strokeStyle=`rgba(255,0,85,${.08+Math.sin(this.frame*.14)*.04})`;ctx.lineWidth=2;ctx.stroke()}
+    const hv=Math.sin(this.frame*.08)*4;ctx.translate(0,hv);
+    if(this.shipImgLoaded){ctx.drawImage(this.shipImg,-50,-50,100,100)}
+    else{ctx.fillStyle='#00f2ff';ctx.beginPath();ctx.moveTo(0,-38);ctx.lineTo(16,20);ctx.lineTo(0,8);ctx.lineTo(-16,20);ctx.closePath();ctx.fill()}
+    if(this.player.shield){ctx.strokeStyle=`rgba(0,242,255,${.65+Math.sin(this.frame*.1)*.3})`;ctx.lineWidth=3;ctx.beginPath();for(let i=0;i<6;i++){const ang=Math.PI/3*i+this.frame*.04,r=76;i===0?ctx.moveTo(r*Math.cos(ang),r*Math.sin(ang)):ctx.lineTo(r*Math.cos(ang),r*Math.sin(ang))}ctx.closePath();ctx.stroke()}
+    ctx.restore();
+  },
+};
+
+
+    // ══════════════════════════════════════
+    // 광고 시스템
+    // ══════════════════════════════════════
+    const AD_GAME_COUNT_KEY = 'hub_ad_game_count';
+    const AD_INTERSTITIAL_EVERY = 10; // N번마다 전면 광고
+
+    function getGameCount() {
+        return parseInt(localStorage.getItem(AD_GAME_COUNT_KEY) || '0');
+    }
+    function incrementGameCount() {
+        const n = getGameCount() + 1;
+        localStorage.setItem(AD_GAME_COUNT_KEY, String(n));
+        return n;
+    }
+
+    // 전면 광고 요청 — 게임 종료 시 호출
+    // 광고 닫히면 onInterstitialClosed() 가 Kotlin에서 호출됨
+    function requestInterstitialIfNeeded(afterFn) {
+        // 광고 제거 구매 시 광고 스킵
+        if (window.AdBridge && typeof AdBridge.isAdsRemoved === 'function' && AdBridge.isAdsRemoved()) {
+            afterFn && afterFn();
+            return;
+        }
+        window._adAfterFn = afterFn;
+        const count = incrementGameCount();
+        if (count % AD_INTERSTITIAL_EVERY === 0 && window.AdBridge) {
+            AdBridge.showInterstitial();
+            // onInterstitialClosed() 에서 afterFn 실행
+        } else {
+            afterFn && afterFn();
+        }
+    }
+
+    // 광고 제거 완료 콜백 (Kotlin에서 호출)
+    function onAdsRemoved() {
+        // 보상형 광고 버튼 숨기기
+        const rewardBtn = document.getElementById('rewarded-btn');
+        if (rewardBtn) rewardBtn.style.display = 'none';
+        // 부활 버튼 숨기기
+        const reviveBtn = document.getElementById('revive-btn');
+        if (reviveBtn) reviveBtn.style.display = 'none';
+    }
+    // Kotlin → JS 콜백
+    function onInterstitialClosed() {
+        if (window._adAfterFn) { window._adAfterFn(); window._adAfterFn = null; }
+    }
+
+    // 보상형 광고 — 시간 부족 시 버튼 클릭으로 호출
+
+    function showRewardedBtn() {
+        if (window.AdBridge && typeof AdBridge.isAdsRemoved === 'function' && AdBridge.isAdsRemoved()) return;
+        const btn = document.getElementById('rewarded-btn');
+        if (btn) btn.style.display = 'flex';
+    }
+    function hideRewardedBtn() {
+        const btn = document.getElementById('rewarded-btn');
+        if (btn) btn.style.display = 'none';
+    }
+
+    function requestRewarded() {
+        if (window.AdBridge && AdBridge.isRewardedReady()) {
+            AdBridge.showRewarded();
+        } else {
+            Ask.alert('The ad is loading. Wait a moment and tap again.');
+        }
+    }
+    // Kotlin → JS 콜백: 보상 지급 → 부활 처리
+    function onRewardGranted() {
+        if (typeof Game !== 'undefined' && Game.pendingRevive) { Game.doRevive(); return; }
+    }
+    function onRewardedFailed() {
+        const wasRevive = typeof Game !== 'undefined' && Game.pendingRevive;
+        if (typeof Game !== 'undefined') Game.pendingRevive = false;
+        if (navigator.onLine === false) { Ask.alert('Connect to the internet and try again.'); return; }
+        // 광고를 못 띄워도 막지 않고 부활시킨다(전 앱 공통 규칙, 2026-10-09)
+        if (wasRevive) { if (window.DayLog) DayLog.hit('ad', 'flight', 'rw_free'); Game.doRevive(); }
+    }
+
+
+    // 앱 시작 시 광고 제거 여부 확인
+    (function() {
+        if (window.AdBridge && typeof AdBridge.isAdsRemoved === 'function' && AdBridge.isAdsRemoved()) {
+            onAdsRemoved();
+        }
+    })();
+
+    function hideAdPlaceholder() {
+    if (window.AdBridge) AdBridge.hide();
+}
+function showAdPlaceholder(){
+    if (window.AdBridge) AdBridge.show();
+    Game.resize();
+}
+
+window.addEventListener('load',()=>Game.init());
+
+/* ── 차근차근 모드(2026-09-24, docs/차근차근모드_기획.md) ──
+   같은 비행 화면을 쓰되, 게이트가 가운데서 **시간 제한 없이** 멈춰 기다린다.
+   ① 문제·단서 읽기 → ② 장부 이름을 탭(또는 비행기를 끌어서) → 그쪽으로 통과
+   틀려도 비행이 끝나지 않는다 — 말풍선이 그 장부가 무엇을 볼 때 쓰는지 알려 주고 게이트가 돌아와 다시.
+   코인·아이템·점수·랭킹 없음. 기록은 StepMode.session(전용 테이블·이 기기 오답노트)만. */
+Object.assign(Game, {
+  step: null,
+  stepStart(){
+    if(!window.StepMode)return;
+    SFX.init();BGM.play();hideAdPlaceholder();LV=1;
+    document.getElementById('ss').style.display='none';
+    document.getElementById('gs').style.display='none';
+    this.gates.forEach(g=>g.domEl&&g.domEl.remove());this.gates=[];this.items=[];this.parts=[];
+    document.getElementById('glayer').innerHTML='';
+    document.body.classList.add('step-mode');
+    this.player.y=Math.round(this.h*0.64);            // 말풍선에 가리지 않게 비행기를 조금 위로
+    this.player.x=this.w/2;this.targetX=this.w/2;
+    const S=StepMode.session('flight');
+    this.step={S,list:S.pick(Problems,8,p=>p.q).map(p=>({p,again:false})),i:0,g:null,hint:0,fly:null};
+    this.state='step';
+    this.stepGate();
+  },
+  stepCoach(html,btns){
+    const c=document.getElementById('step-coach');
+    c.querySelector('.tut-bubble-text').innerHTML=html;
+    const row=c.querySelector('.sc-btns');row.innerHTML='';
+    (btns||[]).forEach(b=>{const e=document.createElement('button');e.type='button';e.className=b.cls||'sc-btn';e.innerHTML=b.label;e.onclick=b.on;row.appendChild(e)});
+    c.classList.add('show');
+  },
+  stepGate(){
+    const st=this.step;
+    if(st.g&&st.g.domEl)st.g.domEl.remove();
+    if(st.i>=st.list.length)return this.stepSummary();
+    const p=st.list[st.i].p;
+    document.getElementById('step-hud').textContent='🐢 Step Mode '+(st.i+1)+' / '+st.list.length;
+    const el=document.createElement('div');el.className='gatel';el.style.top='-600px';
+    el.innerHTML=`<div class="gbar"></div><div class="ginfo"><div class="gq">${this.stepKeyHtml(p)}</div><div class="gk">💡 ${p.key}</div></div><div class="gchoices"><div class="gchoice left">${p.L}</div><div class="gchoice right">${p.R}</div></div>`;
+    el.querySelector('.gchoice.left').addEventListener('click',()=>this.stepChoose('L'));
+    el.querySelector('.gchoice.right').addEventListener('click',()=>this.stepChoose('R'));
+    document.getElementById('glayer').appendChild(el);
+    st.g={p,y:-430,domEl:el,phase:'in'};st.hint=0;
+    st.S.begin(p.q);
+    this.stepCoach('The question gate is coming down...',[]);
+  },
+  /* 열쇠 말 색칠(2026-09-24 성일님: "3분기 중 임차료 지출이 가장 많았던 월은? — '가장 많았던 월'에 색 칠해 잘 보이게").
+     정답 장부를 고르게 만드는 말만 칠한다(기간·계정 이름까지 다 칠하면 오히려 헷갈린다). */
+  stepKeyHtml(p){
+    const ans=p.a==='L'?p.L:p.R;
+    const P={
+      'Accounts Receivable Subsidiary Ledger':[/(each )?customers?('s)?( balance| history)?|receivable/gi],
+      'Accounts Payable Subsidiary Ledger':[/(each )?(supplier|vendor)s?('s)?( balance| history)?|payable/gi],
+      'General Ledger':[/each account|account balance|posted?( to)?/gi],
+      'Cash Payments Journal':[/cash (paid|payments?|going out)/gi],
+      'Cash Receipts Journal':[/cash (received|receipts?|coming in)/gi],
+      'Purchases Journal':[/purchases? (on account|of merchandise)/gi],
+      'Sales Journal':[/sales? (on account|of merchandise)/gi]
+    }[ans]||[];
+    let q=String(p.q),marks=[];
+    P.forEach(re=>{q.replace(re,(m,...a)=>{const i=a[a.length-2];marks.push([i,i+m.length]);return m})});
+    marks.sort((x,y)=>x[0]-y[0]);
+    let out='',at=0;
+    marks.forEach(([a,b])=>{if(a<at)return;out+=StepMode.esc(q.slice(at,a))+'<mark class="step-key">'+StepMode.esc(q.slice(a,b))+'</mark>';at=b});
+    return out+StepMode.esc(q.slice(at));
+  },
+  stepHints(){
+    const p=this.step.g.p,D=StepMode.DATA.flightLedgers,E=StepMode.esc;
+    const u=n=>D[n]?D[n].use:'';
+    return [`Your clue: <b>${E(p.key)}</b>.<br>Think about what the question is looking for.`,
+            `<b>${E(p.L)}</b> → ${E(u(p.L))}<br><b>${E(p.R)}</b> → ${E(u(p.R))}`,
+            `The answer is the <b>${E(p.a==='L'?p.L:p.R)}</b> side.`];
+  },
+  stepAsk(extra){
+    const st=this.step;
+    const hint=st.hint?`<div class="sc-hint">💡 ${this.stepHints()[st.hint-1]}</div>`:'';
+    const btns=[];
+    if(st.hint<3)btns.push({label:st.hint<2?`💡 Hint ${st.hint+1}`:'👀 Show Answer',cls:'sc-btn sc-hintbtn',on:()=>{
+      st.hint++;st.S.hint(st.hint);
+      if(st.hint===3)st.g.domEl.querySelector(st.g.p.a==='L'?'.gchoice.left':'.gchoice.right').classList.add('step-glow');
+      this.stepAsk(extra);
+    }});
+    btns.push({label:'✈ Fly Here',cls:'sc-btn',on:()=>this.stepChoose(this.player.x<this.w/2?'L':'R')});
+    this.stepCoach((extra||'Tap the <b>book name</b> where the answer is found.<br><span class="sc-dim">(You can also drag the plane)</span>')+hint,btns);
+  },
+  stepChoose(side){
+    const st=this.step;
+    if(!st||!st.g||st.g.phase!=='wait')return;
+    st.fly=side==='L'?this.w*0.25:this.w*0.75;
+    st.g.phase='go';
+    this.stepCoach('Whoosh...',[]);
+  },
+  stepUpdate(){
+    const st=this.step;if(!st)return;
+    this.frame++;
+    this.stars.forEach(s=>{s.y+=s.v*0.25;if(s.y>this.h)Object.assign(s,this.mkStar())});
+    if(st.fly!=null){const dx=st.fly-this.player.x;this.player.x+=dx*0.18;this.targetX=this.player.x;if(Math.abs(dx)<1){this.player.x=st.fly;st.fly=null}}
+    for(let i=this.parts.length-1;i>=0;i--){this.parts[i].update();if(this.parts[i].life<=0)this.parts.splice(i,1)}
+    const g=st.g;if(!g)return;
+    const stopY=this.h*0.40;
+    if(g.phase==='in'){g.y+=4;if(g.y>=stopY){g.y=stopY;g.phase='wait';this.stepAsk()}}
+    else if(g.phase==='go'){if(st.fly==null){g.y+=7;if(g.y>=this.player.y-10)this.stepJudge()}}
+    else if(g.phase==='done'){g.y+=7;if(g.domEl)g.domEl.style.opacity=String(Math.max(0,1-(g.y-this.player.y)/200))}
+    if(g.domEl)g.domEl.style.top=(g.y-140)+'px';
+  },
+  stepJudge(){
+    const st=this.step,g=st.g,p=g.p,D=StepMode.DATA.flightLedgers,E=StepMode.esc;
+    const side=this.player.x<this.w/2?'L':'R';
+    const pick=side==='L'?p.L:p.R,ans=p.a==='L'?p.L:p.R;
+    if(side!==p.a){
+      SFX.bad();this.doFlash('bad');this.burst(this.player.x,this.player.y,'#ff2d78',16);this.showJudge(false,'✗ Try again!');hapticWrong();
+      st.S.wrong();
+      g.y=this.h*0.40;g.phase='wait';
+      return this.stepCoach(StepMode.lines([`<b>${E(pick)}</b> → <span class="sc-dim">${E(D[pick]?D[pick].use:'')}</span>: that is what it is for.`,`Clue for this question → <b>${E(p.key)}</b>`]),
+        [{label:'Try Again',cls:'sc-go',on:()=>this.stepAsk()}]);
+    }
+    SFX.ok();this.doFlash('ok');this.burst(this.player.x,this.player.y,'#00f2ff',18);this.showJudge(true,'✓ Correct!');hapticCorrect();
+    g.phase='done';
+    const cur=st.list[st.i];
+    if(window.Skill)Skill.hit('ledger');/* 분개 기술 숙련 — 차근차근도 셈 */
+    const clean=st.S.done(p.q,{label:`${p.q} → ${ans}`,q:p.q,correct:ans,type:'Book choice'});
+    if(!clean&&!cur.again)st.list.splice(Math.min(st.list.length,st.i+4),0,{p,again:true});
+    const last=st.i+1>=st.list.length;
+    this.stepCoach(StepMode.lines([`Correct! <span class="sc-key">${E(ans)}</span>`,D[ans]?`<span class="sc-dim">${StepMode.txt(D[ans].why)}</span>`:'']),
+      [{label:last?'See Results ▶':'Next Gate ▶',cls:'sc-go',on:()=>{st.i++;this.stepGate()}}]);
+  },
+  stepSummary(){
+    const st=this.step,S=st.S;
+    st.g=null;
+    S.finish(true);
+    const L=S.learned(),A=S.again(),E=StepMode.esc;
+    const list=arr=>arr.slice(0,3).map(v=>'· '+E(v)).join('<br>');
+    document.getElementById('step-hud').textContent='🐢 Step Mode complete!';
+    this.stepCoach(`🌱 Learned today: <b>${L.length}</b>`+(L.length?`<br><span class="sc-dim">${list(L)}</span>`:'')+
+      (A.length?`<br>🔁 To review again: <b>${A.length}</b><br><span class="sc-dim">${list(A)}</span>`:''),
+      [{label:'Again',on:()=>{this.stepExit(true);this.stepStart()}},{label:'Done',cls:'sc-go',on:()=>this.stepExit()}]);
+  },
+  stepExit(again){
+    const st=this.step;if(!st)return;
+    if(!st.S.sent)st.S.finish(false);
+    if(st.g&&st.g.domEl)st.g.domEl.remove();
+    this.step=null;this.state='idle';
+    document.getElementById('step-coach').classList.remove('show');
+    document.body.classList.remove('step-mode');
+    this.player.y=this.h-140;this.player.x=this.w/2;this.targetX=this.w/2;
+    if(!again){document.getElementById('ss').style.display='';initDiffUI();showAdPlaceholder()}
+  }
+});
+if(window.StepMode)StepMode.mount({game:'flight',host:document.getElementById('step-host'),onStart:()=>Game.stepStart()});
+
+
+// ── 등급 기준 단일 소스: _grade·팡파레 목표 공용 ──
+const GRADE_TIERS = [
+  { min: 55000, label: '👑 Legend Ace' },
+  { min: 40000, label: '🥇 Veteran Pilot' },
+  { min: 30000, label: '🥈 Expert Pilot' },
+  { min: 18000, label: '🥉 Pilot' },
+  { min: 0,     label: '🛩 Rookie Pilot' }
+];
+
+// ── 난이도 선택 UI(시작화면) — difficulty.js(공통 모듈) 연동 ──
+function updateDiffBtns(lv) {
+    const b1 = document.getElementById('diff-btn-1'), b2 = document.getElementById('diff-btn-2');
+    if (b1) b1.classList.toggle('active', lv === 1);
+    if (b2) b2.classList.toggle('active', lv === 2);
+}
+function selectDifficulty(n) {
+    if (!window.Difficulty) return;
+    if (n === 2 && !Difficulty.isUnlocked(GAME_ID)) {
+        Ask.alert('Unlocks when your accuracy on Level 1 reaches ' + Math.round(Difficulty.UNLOCK_ACC * 100) + '%.\n(After 10+ questions)\n\n' + Difficulty.hint(GAME_ID));
+        return;
+    }
+    Difficulty.set(GAME_ID, n);
+    updateDiffBtns(n);
+}
+function initDiffUI() {
+    if (!window.Difficulty) return;
+    const unlocked = Difficulty.isUnlocked(GAME_ID);
+    const btn2 = document.getElementById('diff-btn-2');
+    if (btn2) {
+        btn2.classList.toggle('locked', !unlocked);
+        btn2.innerHTML = unlocked
+            ? 'Level 2<br><span style="font-size:.72rem;opacity:.7">Find the amount too</span>'
+            : 'Level 2 🔒<br><span style="font-size:.72rem;opacity:.7">Find the amount too</span>';
+    }
+    updateDiffBtns(Difficulty.get(GAME_ID));
+    const hint = document.getElementById('diff-hint');
+    if (hint) hint.textContent = Difficulty.hint(GAME_ID);
+}
+initDiffUI();
+// 서버 기록으로 해금이 복원되면(다른 기기에서 해금한 학생) 잠금 표시를 다시 그린다
+window.addEventListener('difficulty-synced', function () { try { initDiffUI(); } catch (e) {} });
+
+    // ── Supabase 유틸 ──
+    function getGradeForSupabase(gameId, score) {
+        const scales = {
+            acid:    [[15000,"👑 Legend Ace"],[11000,"🥇 Veteran"],[7000,"🥈 Expert"],[3000,"🥉 Pilot"],[0,"🛩 Rookie"]],
+            memory:  [[5000,"👑 CEO"],[4000,"⭐ Executive VP"],[3000,"🎖 Senior VP"],[2200,"🏅 Director"],[1500,"📋 Manager"],[900,"🗂 Asst. Manager"],[500,"📁 Supervisor"],[250,"📝 Team Lead"],[0,"💼 Staff"]],
+            debit:   [[3300,"👑 Legend CFO"],[2800,"🥇 Accounting Director"],[1800,"🥈 Senior Accountant"],[800,"🥉 New Hire"],[0,"📋 In Training"]],
+            factory: [[12000,"👑 Adjusting Master"],[7000,"🥇 Skilled Accountant"],[4000,"🥈 Junior Accountant"],[1500,"🥉 Trainee"],[0,"📋 Intern"]],
+            flight:  [[55000,"👑 Legend Ace"],[40000,"🥇 Veteran Pilot"],[30000,"🥈 Expert Pilot"],[18000,"🥉 Pilot"],[0,"🛩 Rookie Pilot"]]
+        };
+        const tiers = scales[gameId] || scales.flight;
+        return (tiers.find(([min]) => score >= min) || tiers[tiers.length-1])[1];
+    }
+
+    async function supabaseSaveScore(name, score, combo, correct, gameId, retry = 0) {
+        const maxScore = {acid:99999999,memory:99999999,debit:99999999,factory:99999999,flight:99999999};
+        const safeScore = Math.min(Math.max(score,0), maxScore[gameId]||999999);
+        const safeName = String(name).replace(/<[^>]*>/g,'').substring(0,30).trim();
+        if (!safeName) return;
+        const today = new Date().toISOString().split('T')[0];
+        const groupId = localStorage.getItem('hub_group_id') || null;
+        const rpcParams = {
+            p_game_id: gameId,
+            p_name:    safeName,
+            p_score:   safeScore,
+            p_grade:   getGradeForSupabase(gameId, safeScore),
+            p_combo:   Math.max(0, combo||0),
+            p_correct: Math.max(0, correct||0),
+            p_date:    today
+        };
+        if (groupId) rpcParams.p_group_id = groupId;
+        // 로그인 계정이면 uid도 같이 저장 — 기기가 바뀌어도 "내 최고기록"이 계정에 귀속되게
+        try { if (window.Auth) { const uid = await Auth.currentUid(); if (uid) rpcParams.p_uid = uid; } } catch (e) {}
+        // 성장 그래프용 — 매 판 점수 이력 누적(이중저장, 예외 안 던짐; rpc 실패와 무관하게 로컬 기록 보존)
+        if (window.Growth) Growth.record({ game: gameId, name: safeName, score: safeScore, grade: rpcParams.p_grade, combo: rpcParams.p_combo, correct: rpcParams.p_correct });
+        // supabase-js는 실패해도 reject하지 않고 {error}로 resolve — 직접 확인해 throw해야
+        // 호출부 catch(로컬 저장 폴백 안내)가 실제 실패를 사용자에게 알릴 수 있다
+        const { error: rpcError } = await db.rpc('upsert_score', rpcParams);
+        if (rpcError) throw rpcError;
+    }
+
+    async function supabaseFetchRanking(gameId) {
+    /* ⚠ 랭킹 범위 — 표와 순위 배지가 **같은 범위**를 봐야 한다.
+       예전엔 표는 "서버(그룹 필터) + 이 기기 로컬기록"을 섞고, 배지는 "서버(그룹 필터)"만
+       세어서, 그룹에 기록이 없으면 **배지는 1위인데 표에서는 2위**로 보였다(실제 제보).
+       이제 기본을 **전체 범위**로 두고, 그룹 순위는 배지에 따로 덧붙인다.
+       로컬 기록은 서버를 못 불러왔을 때(오프라인)만 폴백으로 쓴다 — 교실 공용 기기에서는
+       여러 학생 닉네임이 남아 있어 랭킹에 섞으면 남의 기록처럼 보인다. */
+        let query = db
+            .from('scores')
+            .select()
+            .eq('game_id', gameId)
+            .order('score', { ascending: false })
+            .limit(20);
+        const { data, error } = await query;
+        if (error) throw error;
+        return data;
+    }
+
+</script>
+
+<script>
+    // ── 팡파레 시스템 ──
+    const FANFARE_TARGET_LABEL = 'Veteran Pilot';
+    // 목표 점수는 GRADE_TIERS(단일 소스)에서 해당 등급의 최소 점수로 산출 (= 40000)
+    const FANFARE_TARGET_SCORE = (GRADE_TIERS.find(t => t.label.includes(FANFARE_TARGET_LABEL)) || GRADE_TIERS[0]).min;
+
+    function checkAndShowFanfare(currentScore, gradeFn) {
+        const grade = typeof gradeFn === 'function' ? gradeFn(currentScore) : gradeFn;
+        const alreadyShown = sessionStorage.getItem('fanfare_shown_game5_flight');
+        if (currentScore >= FANFARE_TARGET_SCORE && !alreadyShown) {
+            sessionStorage.setItem('fanfare_shown_game5_flight', '1');
+            setTimeout(() => showFanfare(grade), 600);
+        }
+    }
+
+    function showFanfare(grade) {
+        document.getElementById('fanfare-grade-text').textContent = grade || ('🥇 ' + FANFARE_TARGET_LABEL);
+        document.getElementById('fanfare-sub-text').textContent =
+            'You reached the target rank [' + FANFARE_TARGET_LABEL + '].\nOne step closer to mastering accounting 🎯';
+        spawnFanfareStars();
+        playFanfareSound();
+        document.getElementById('fanfare-overlay').classList.add('show');
+    }
+
+    function closeFanfare() {
+        document.getElementById('fanfare-overlay').classList.remove('show');
+    }
+
+    function spawnFanfareStars() {
+        const container = document.getElementById('fanfare-stars');
+        container.innerHTML = '';
+        const colors = ['gold','#ff2d78','#00f2ff','#00e676','#b44fff','#fff'];
+        for (let i = 0; i < 28; i++) {
+            const s = document.createElement('div');
+            s.className = 'fstar';
+            const angle = Math.random() * Math.PI * 2;
+            const dist = 80 + Math.random() * 120;
+            s.style.cssText = `
+                left:${40 + Math.random()*20}%;
+                top:${30 + Math.random()*20}%;
+                background:${colors[Math.floor(Math.random()*colors.length)]};
+                --tx:${Math.cos(angle)*dist}px;
+                --ty:${Math.sin(angle)*dist}px;
+                --dur:${0.6 + Math.random()*0.8}s;
+                --delay:${Math.random()*0.3}s;
+                width:${4+Math.random()*6}px;
+                height:${4+Math.random()*6}px;
+            `;
+            container.appendChild(s);
+        }
+    }
+
+    function playFanfareSound() {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            // 팡파레 멜로디: C E G C(high)
+            const notes = [523, 659, 784, 1047];
+            notes.forEach((freq, i) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.frequency.value = freq;
+                osc.type = 'sine';
+                const t = ctx.currentTime + i * 0.18;
+                gain.gain.setValueAtTime(0, t);
+                gain.gain.linearRampToValueAtTime(0.25, t + 0.05);
+                gain.gain.linearRampToValueAtTime(0, t + 0.3);
+                osc.start(t); osc.stop(t + 0.35);
+            });
+            // 마지막에 짧은 트릴
+            const trill = ctx.createOscillator();
+            const tGain = ctx.createGain();
+            trill.connect(tGain); tGain.connect(ctx.destination);
+            trill.frequency.value = 1047;
+            tGain.gain.setValueAtTime(0.3, ctx.currentTime + 0.85);
+            tGain.gain.linearRampToValueAtTime(0, ctx.currentTime + 1.3);
+            trill.start(ctx.currentTime + 0.85);
+            trill.stop(ctx.currentTime + 1.3);
+        } catch(e) {}
+    }
+</script>
+
+    <script>document.addEventListener('contextmenu', e => e.preventDefault()); document.addEventListener('selectstart', e => e.preventDefault()); document.addEventListener('copy', e => e.preventDefault()); document.addEventListener('keydown', e => { if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) || (e.ctrlKey && e.keyCode === 85)) { e.preventDefault(); } });</script>
+
+<!-- 목표달성 팡파레 -->
+<div id="fanfare-overlay">
+  <div id="fanfare-box">
+    <div class="fanfare-stars" id="fanfare-stars"></div>
+    <div class="fanfare-emoji">🏆</div>
+    <div class="fanfare-title">Goal Reached!</div>
+    <div class="fanfare-grade" id="fanfare-grade-text">—</div>
+    <div class="fanfare-sub" id="fanfare-sub-text">—</div>
+    <button class="fanfare-close-btn" onclick="closeFanfare()">Continue 🎮</button>
+  </div>
+</div>
+
+
+<script>
+/* ── 인터랙티브 튜토리얼 (사용방법) ── */
+const Tutorial = (function () {
+  // 실제 문제은행(Problems[0])에서 그대로 가져온 한 문제 — 정답은 왼쪽(거래처원장)
+  const Q = { q:"What is Maple Supply's balance owed?", key:"'Maple Supply' (customer name)",
+              L:'Accounts Receivable Subsidiary Ledger', R:'General Ledger', a:'L' };
+  const STEPS = [
+    { text:'A <b>question gate</b> comes down from above.<br>Fly to the side with the right <b>book</b>.',
+      btn:'Start ▶' },
+    { text:'The gate <b>pauses</b> in the middle.<br>Read the question and the <b>💡 hint</b> then.<br>Each customer\'s balance → <b>Accounts Receivable Subsidiary Ledger</b>.',
+      btn:'Next ▶' },
+    { text:'<b>Drag left or right</b><br>to the side with the <b>Accounts Receivable Subsidiary Ledger</b>.',
+      drag:true, hint:'Drag left or right to move the plane' },
+    { text:'The <b>side your plane is on</b> when the gate arrives is your answer.<br>Correct gives <b>+500 pts</b>.<br>Streaks earn a <b>combo bonus</b>.',
+      btn:'Next ▶', glow:true },
+    { text:'<b>💰 Coins</b> give +100 pts. <b>🧲 Magnets</b> pull coins in.<br>A <b>🛡️ Shield</b> blocks one wrong answer.<br>Without a shield, a wrong answer ends the game.',
+      btn:'Next ▶', hideGate:true, items:true },
+    { text:'Ranks go from <b>Rookie Pilot</b> to <b>👑 Legend Ace</b>.<br>Ready? Take off on your own.',
+      btn:'Start Game ▶', hideGate:true, finish:true },
+  ];
+  let step = 0, shipP = 0.5, live = false, dragging = false, wired = false;
+  let timer = null, judgeTimer = null;   // 예약 연출 타이머 — close() 에서 취소
+
+  function el(id){ return document.getElementById(id); }
+
+  function buildStage() {
+    el('tut-q').textContent   = Q.q;
+    el('tut-key').textContent = '💡 ' + Q.key;
+    el('tut-cl').textContent = Q.L;
+    el('tut-cr').textContent = Q.R;
+    el('tut-score').textContent = '0';
+    el('tut-gate').classList.remove('tut-pass');
+    el('tut-judge').classList.remove('on');
+    setShip(0.5, false);
+  }
+
+  // 비행기 가로 위치(0~1) — 왼쪽/오른쪽 절반 중 어디인지가 실제 판정 기준이다.
+  // (실제 게임도 player.x < w/2 로만 판정한다)
+  // mark=false 면 아직 손대기 전이므로 어느 쪽도 강조하지 않는다.
+  function setShip(p, mark) {
+    shipP = Math.max(0.12, Math.min(0.88, p));
+    el('tut-ship').style.left = (shipP * 100) + '%';
+    const side = shipP < 0.5 ? 'L' : 'R';
+    el('tut-cl').classList.toggle('sel', mark !== false && side === 'L');
+    el('tut-cr').classList.toggle('sel', mark !== false && side === 'R');
+  }
+  function moveTo(clientX) {
+    const b = el('tut-sky').getBoundingClientRect();
+    setShip((clientX - b.left) / b.width);
+  }
+
+  function pop(isOk, msg) {
+    const j = el('tut-judge');
+    // 이전 토스트의 남은 타이머를 취소한다.
+    // 안 그러면 오답 직후 정답을 맞혔을 때, 오답 타이머가 새 '정답 통과' 토스트를 조기에 지운다.
+    if (judgeTimer) { clearTimeout(judgeTimer); judgeTimer = null; }
+    j.className = 'tut-judge' + (isOk ? '' : ' bad');
+    j.textContent = msg;
+    void j.offsetWidth;
+    j.classList.add('on');
+    judgeTimer = setTimeout(function () { judgeTimer = null; j.classList.remove('on'); }, 900);
+  }
+
+  function judge() {
+    if ((shipP < 0.5 ? 'L' : 'R') !== Q.a) {          // 틀린 쪽 — 페널티 없이 다시 시도
+      pop(false, 'You will not find the answer in this book');
+      return;
+    }
+    live = false; dragging = false;
+    el('tut-sky').classList.remove('tut-live');
+    el('tut-gate').classList.add('tut-pass');          // 게이트가 비행기를 지나 내려간다
+    setTimeout(function () {
+      // SFX 도 const — window.SFX 로는 안 잡힌다. 소리만 쓸 뿐 게임 상태는 건드리지 않는다.
+      if (typeof SFX !== 'undefined') { try { SFX.init(); SFX.ok(); } catch (e) {} }
+      if (typeof hapticCorrect === 'function') hapticCorrect();
+      el('tut-score').textContent = '500';
+      pop(true, 'Correct pass  +500');
+    }, 430);
+    timer = setTimeout(function () { timer = null; go(step + 1); }, 1180);
+  }
+
+  function wire() {
+    if (wired) return; wired = true;
+    const sky = el('tut-sky');
+    // 이 프로젝트에선 click 이 안 먹은 전례가 있어 pointer 이벤트로만 받는다
+    sky.addEventListener('pointerdown', function (e) {
+      if (!live) return;
+      dragging = true;
+      if (sky.setPointerCapture) sky.setPointerCapture(e.pointerId);
+      moveTo(e.clientX);
+    });
+    sky.addEventListener('pointermove', function (e) {
+      if (!live || !dragging) return;
+      moveTo(e.clientX);
+    });
+    sky.addEventListener('pointerup', function (e) {
+      if (!live || !dragging) return;
+      dragging = false; moveTo(e.clientX); judge();
+    });
+    sky.addEventListener('pointercancel', function () { dragging = false; });
+  }
+
+  function render() {
+    const s = STEPS[step];
+    el('tut-badge').textContent = (step + 1) + '/' + STEPS.length;
+    el('tut-text').innerHTML = s.text;
+    el('tut-gate').classList.toggle('tut-off', !!s.hideGate);
+    el('tut-items').classList.toggle('on', !!s.items);
+    live = !!s.drag;
+    el('tut-sky').classList.toggle('tut-live', live);
+    el('tut-status').classList.toggle('tut-glow', !!s.glow);
+    const hint = el('tut-hint');
+    if (s.hint) { hint.style.display = 'block'; hint.textContent = '👆 ' + s.hint; }
+    else { hint.style.display = 'none'; }
+    const btn = el('tut-next');
+    if (s.btn) { btn.style.display = 'block'; btn.textContent = s.btn; }
+    else { btn.style.display = 'none'; }
+  }
+
+  function go(n) { step = n; if (step >= STEPS.length) return finish(); render(); }
+  function nextBtn() { if (STEPS[step].finish) return finish(); go(step + 1); }
+  function clearTimers() { if (timer) { clearTimeout(timer); timer = null; } if (judgeTimer) { clearTimeout(judgeTimer); judgeTimer = null; } }
+  function start() {
+    /* 게임 방법(튜토리얼) 중에도 배너를 내린다 — 실기기 제보(2026-09-15).
+       닫을 때는 곧바로 되돌리지 않는다: finish() 는 close() 뒤에 게임을 시작하는데,
+       거기서 show 를 해 버리면 게임 중에 배너가 다시 올라온다. 대신 시작화면으로
+       돌아가는 경우만 되살리도록 startGame/startQuiz 쪽 hide 와 짝을 맞춰 뒀다. */
+    if (typeof hideAdPlaceholder === 'function') hideAdPlaceholder(); clearTimers(); step = 0; wire(); buildStage(); render(); el('tutorial').classList.add('show'); }
+  function close() {
+    if (typeof showAdPlaceholder === 'function') showAdPlaceholder(); clearTimers(); live = false; dragging = false; el('tutorial').classList.remove('show'); }
+  // Game 은 const 로 선언돼 window 프로퍼티가 아니다 → window.Game 으로 확인하면 안 된다
+  function finish() {
+    close();
+    if (typeof Game !== 'undefined' && typeof Game.start === 'function') Game.start();
+  }
+
+  return { start:start, close:close, next:nextBtn };
+})();
+
+// 사용방법 버튼 → 인터랙티브 튜토리얼
+function openGuide() { Tutorial.start(); }
+</script>
+
+<script src="emoji-icons.js?v=79"></script>
+<!-- 웹 전용 광고(시작·결과 화면만, 앱에선 adsense.js 가 스스로 멈춘다) -->
+<script src="adsense.js?v=79"></script>
+</body>
+</html>

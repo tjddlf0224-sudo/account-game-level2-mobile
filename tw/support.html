@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
+         **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
+         이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
+    <script src="tw/tw_data.js?v=1"></script>
+<script src="tw/server_tw.js?v=1"></script>
+<link rel="stylesheet" href="tw/tw.css?v=1">
+<script src="safestore.js?v=79"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<style>html{-webkit-text-size-adjust:100%;text-size-adjust:100%}</style>
+<title>會計電玩館 — 客服支援</title>
+<meta name="description" content="會計學習遊戲「會計電玩館」的客服支援與聯絡頁面。">
+<style>
+  :root{
+    --bg:#0f1226; --card:#1a1f3a; --accent:#5b8cff; --accent2:#7af2c8;
+    --text:#eef1ff; --muted:#a8b0d8; --line:#2a3157;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",Roboto,sans-serif;
+    background:linear-gradient(160deg,#0f1226 0%,#161a35 100%);
+    color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:calc(48px + env(safe-area-inset-top)) 20px calc(80px + max(var(--ad-banner-h, 0px), var(--ad-safe-h, 0px)))}
+  header{text-align:center;margin-bottom:40px}
+  .badge{
+    display:inline-block;font-size:13px;color:var(--accent2);
+    border:1px solid var(--line);border-radius:999px;padding:6px 14px;margin-bottom:18px;
+    letter-spacing:.5px;
+  }
+  h1{font-size:30px;font-weight:800;margin-bottom:10px;letter-spacing:-.5px}
+  .sub{color:var(--muted);font-size:16px}
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:18px;
+    padding:28px 26px;margin-bottom:20px;
+  }
+  .card h2{font-size:19px;margin-bottom:14px;display:flex;align-items:center;gap:9px}
+  .card h2 .dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+  .card p{color:var(--muted);margin-bottom:10px}
+  ul{list-style:none;margin-top:8px}
+  ul li{color:var(--muted);padding:7px 0 7px 26px;position:relative}
+  ul li::before{content:"▸";position:absolute;left:6px;color:var(--accent)}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .contact{
+    display:flex;align-items:center;gap:12px;background:#11152e;
+    border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-top:6px;
+  }
+  .contact .label{color:var(--muted);font-size:14px}
+  .contact .val{font-size:17px;font-weight:700}
+  .faq{border-top:1px solid var(--line);padding:16px 0}
+  .faq:first-of-type{border-top:none;padding-top:4px}
+  .faq .q{font-weight:700;margin-bottom:6px}
+  .faq .a{color:var(--muted)}
+  footer{text-align:center;color:var(--muted);font-size:13px;margin-top:34px;line-height:1.9}
+  footer a{color:var(--muted);text-decoration:underline}
+</style>
+</head>
+<body>
+  <script src="daylog.js?v=79"></script><script src="amev.js?v=1"></script><script src="skill.js?v=1"></script>
+  <div class="wrap">
+    <header>
+      <span class="badge">客服支援 · Customer Support</span>
+      <h1>會計電玩館</h1>
+      <p class="sub">用遊戲學會計的 App（對應會計事務丙級學科範圍）</p>
+    </header>
+
+    <div class="card">
+      <h2><span class="dot"></span>App 介紹</h2>
+      <p>「會計電玩館」是專為學習會計打造的 App，
+         把分錄、會計項目、財務報表等會計丙級的重要觀念，
+         做成測驗和小遊戲，讓你輕鬆學會。考前準備和複習，都能像玩遊戲一樣反覆練習。</p>
+      <ul>
+        <li>分錄練習與會計項目學習</li>
+        <li>分難度的會計測驗與分數功能</li>
+        <li>反覆練習，自然學會會計基礎</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2><span class="dot"></span>聯絡我們</h2>
+      <p>使用上遇到問題、發現錯誤或有任何建議，請寄信到下方的電子郵件信箱。
+         我們會在 2 至 3 個工作天內回覆。</p>
+      <div class="contact">
+        <span class="label">電子郵件</span>
+        <a class="val" href="mailto:tjddlf0224@gmail.com">tjddlf0224@gmail.com</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="dot"></span>常見問題</h2>
+      <div class="faq">
+        <div class="q">Q. App 是免費的嗎？</div>
+        <div class="a">是的，可以免費使用，部分畫面會有廣告。</div>
+      </div>
+      <div class="faq">
+        <div class="q">Q. 我的學習紀錄不見了。</div>
+        <div class="a">刪除 App 時，存在裝置上的紀錄可能會一併被刪除。
+          如果問題持續發生，請附上裝置型號，寄信到上方信箱詢問。</div>
+      </div>
+      <div class="faq">
+        <div class="q">Q. 可以關掉廣告嗎？</div>
+        <div class="a">廣告收益用於維持 App 免費營運並持續更新。
+          歡迎隨時提供意見。</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="dot"></span>隱私權政策</h2>
+      <p>不登入也能使用。為了提供登入、排行榜、學習紀錄儲存與廣告，
+         本 App 會處理登入用電子郵件、暱稱與學習紀錄、使用統計（含 Android 安裝來源）、廣告識別碼等部分資料。</p>
+      <p><a href="https://tjddlf0224-sudo.github.io/ledger-arcade-tw/privacy.html" target="_blank" rel="noopener">完整隱私權政策 →</a></p>
+    </div>
+
+    <footer>
+      <p style="font-size:12px;margin:0 0 8px">本 App 與勞動部及任何政府機關無關，題目皆為自行編寫。</p>
+      © 2026 會計電玩館 · 開發者 Yun<br>
+      聯絡我們：<a href="mailto:tjddlf0224@gmail.com">tjddlf0224@gmail.com</a>
+    </footer>
+  </div>
+</body>
+</html>

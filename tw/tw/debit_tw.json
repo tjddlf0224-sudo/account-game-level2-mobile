@@ -1,0 +1,653 @@
+{
+ "meta": {
+  "title": "遊戲3 借方與貸方（會計事務丙級）",
+  "lv1": 60,
+  "lv2": 40,
+  "note": "lv2採三式傳票制（現金收入傳票：借方為現金；現金支出傳票：貸方為現金；其餘為轉帳傳票）；銀行存款不屬於現金",
+  "generated": "2026-11-15"
+ },
+ "lv1": [
+  {
+   "sentence": "以現金購買商品$20,000 → <b class=\"target-account\">進貨</b>",
+   "target": "進貨",
+   "type": "left",
+   "hint": "進貨(費損)增加 → 借方"
+  },
+  {
+   "sentence": "賒銷商品予大安商行$50,000 → <b class=\"target-account\">應收帳款</b>",
+   "target": "應收帳款",
+   "type": "left",
+   "hint": "應收帳款(資產)增加 → 借方"
+  },
+  {
+   "sentence": "收到信義商店匯入貨款$30,000，存入銀行（收回前欠貨款） → <b class=\"target-account\">銀行存款</b>",
+   "target": "銀行存款",
+   "type": "left",
+   "hint": "銀行存款(資產)增加 → 借方"
+  },
+  {
+   "sentence": "以現金收回永和企業社前欠貨款$8,000 → <b class=\"target-account\">現金</b>",
+   "target": "現金",
+   "type": "left",
+   "hint": "現金(資產)增加 → 借方"
+  },
+  {
+   "sentence": "開立支票購買辦公設備$25,000 → <b class=\"target-account\">辦公設備</b>",
+   "target": "辦公設備",
+   "type": "left",
+   "hint": "辦公設備(資產)增加 → 借方"
+  },
+  {
+   "sentence": "以銀行存款購入土地$800,000 → <b class=\"target-account\">土地</b>",
+   "target": "土地",
+   "type": "left",
+   "hint": "土地(資產)增加 → 借方"
+  },
+  {
+   "sentence": "預先支付明年度保險費$6,000，列為資產 → <b class=\"target-account\">預付保險費</b>",
+   "target": "預付保險費",
+   "type": "left",
+   "hint": "預付保險費(資產)增加 → 借方"
+  },
+  {
+   "sentence": "收到中山行開來的本票$40,000，抵付貨款 → <b class=\"target-account\">應收票據</b>",
+   "target": "應收票據",
+   "type": "left",
+   "hint": "應收票據(資產)增加 → 借方"
+  },
+  {
+   "sentence": "購買商品支付營業稅$1,000（進貨時的稅額） → <b class=\"target-account\">進項稅額</b>",
+   "target": "進項稅額",
+   "type": "left",
+   "hint": "進項稅額(資產)增加 → 借方"
+  },
+  {
+   "sentence": "以現金支付本月員工薪資$32,000 → <b class=\"target-account\">薪資支出</b>",
+   "target": "薪資支出",
+   "type": "left",
+   "hint": "薪資支出(費損)增加 → 借方"
+  },
+  {
+   "sentence": "以現金支付本月店面租金$15,000 → <b class=\"target-account\">租金支出</b>",
+   "target": "租金支出",
+   "type": "left",
+   "hint": "租金支出(費損)增加 → 借方"
+  },
+  {
+   "sentence": "以銀行存款償還合作銀行短期借款$100,000 → <b class=\"target-account\">短期借款</b>",
+   "target": "短期借款",
+   "type": "left",
+   "hint": "短期借款(負債)減少 → 借方"
+  },
+  {
+   "sentence": "以現金償還長春貿易行貨款$35,000 → <b class=\"target-account\">應付帳款</b>",
+   "target": "應付帳款",
+   "type": "left",
+   "hint": "應付帳款(負債)減少 → 借方"
+  },
+  {
+   "sentence": "應付票據到期，以銀行存款兌付$20,000 → <b class=\"target-account\">應付票據</b>",
+   "target": "應付票據",
+   "type": "left",
+   "hint": "應付票據(負債)減少 → 借方"
+  },
+  {
+   "sentence": "大安商行退回已售商品$4,000，貨款尚未收取 → <b class=\"target-account\">銷貨退回</b>",
+   "target": "銷貨退回",
+   "type": "left",
+   "hint": "銷貨退回(收益抵銷科目)增加 → 借方"
+  },
+  {
+   "sentence": "給予青田商號銷貨折讓$2,000，貨款尚未收取 → <b class=\"target-account\">銷貨折讓</b>",
+   "target": "銷貨折讓",
+   "type": "left",
+   "hint": "銷貨折讓(收益抵銷科目)增加 → 借方"
+  },
+  {
+   "sentence": "年底提列辦公設備折舊$10,800 → <b class=\"target-account\">折舊</b>",
+   "target": "折舊",
+   "type": "left",
+   "hint": "折舊(費損)增加 → 借方"
+  },
+  {
+   "sentence": "業主自店內提用現金$10,000供家用 → <b class=\"target-account\">業主往來</b>",
+   "target": "業主往來",
+   "type": "left",
+   "hint": "業主往來(權益抵銷科目)增加 → 借方"
+  },
+  {
+   "sentence": "出售舊運輸設備，轉銷其累計折舊$90,000 → <b class=\"target-account\">累計折舊-運輸設備</b>",
+   "target": "累計折舊-運輸設備",
+   "type": "left",
+   "hint": "累計折舊-運輸設備(資產抵銷科目)減少 → 借方"
+  },
+  {
+   "sentence": "確定信義商店的帳款無法收回，沖銷已提列的備抵損失$3,000 → <b class=\"target-account\">備抵損失-應收帳款</b>",
+   "target": "備抵損失-應收帳款",
+   "type": "left",
+   "hint": "備抵損失-應收帳款(資產抵銷科目)減少 → 借方"
+  },
+  {
+   "sentence": "年底估計應收帳款無法全數收回，提列$6,000 → <b class=\"target-account\">預期信用減損損失</b>",
+   "target": "預期信用減損損失",
+   "type": "left",
+   "hint": "預期信用減損損失(費損)增加 → 借方"
+  },
+  {
+   "sentence": "盤點現金，發現現金短少$200 → <b class=\"target-account\">現金短溢</b>",
+   "target": "現金短溢",
+   "type": "left",
+   "hint": "現金短少 → 現金短溢記借方"
+  },
+  {
+   "sentence": "客戶預付的貨款，於出貨時轉列銷貨 → <b class=\"target-account\">預收貨款</b>",
+   "target": "預收貨款",
+   "type": "left",
+   "hint": "預收貨款(負債)減少 → 借方"
+  },
+  {
+   "sentence": "申報營業稅，將本期銷項稅額沖轉 → <b class=\"target-account\">銷項稅額</b>",
+   "target": "銷項稅額",
+   "type": "left",
+   "hint": "銷項稅額(負債)減少 → 借方"
+  },
+  {
+   "sentence": "以現金支付本月電費$2,800 → <b class=\"target-account\">水電瓦斯費</b>",
+   "target": "水電瓦斯費",
+   "type": "left",
+   "hint": "水電瓦斯費(費損)增加 → 借方"
+  },
+  {
+   "sentence": "業主抽回資本$50,000，以銀行存款支付 → <b class=\"target-account\">業主資本</b>",
+   "target": "業主資本",
+   "type": "left",
+   "hint": "業主資本(權益)減少 → 借方"
+  },
+  {
+   "sentence": "以銀行存款支付借款利息$1,500 → <b class=\"target-account\">利息費用</b>",
+   "target": "利息費用",
+   "type": "left",
+   "hint": "利息費用(費損)增加 → 借方"
+  },
+  {
+   "sentence": "以現金支付報紙廣告費$5,000 → <b class=\"target-account\">廣告費</b>",
+   "target": "廣告費",
+   "type": "left",
+   "hint": "廣告費(費損)增加 → 借方"
+  },
+  {
+   "sentence": "退還承租人的押金$30,000，以現金支付 → <b class=\"target-account\">存入保證金</b>",
+   "target": "存入保證金",
+   "type": "left",
+   "hint": "存入保證金(負債)減少 → 借方"
+  },
+  {
+   "sentence": "設立零用金，由出納撥付現金$5,000 → <b class=\"target-account\">零用金</b>",
+   "target": "零用金",
+   "type": "left",
+   "hint": "零用金(資產)增加 → 借方"
+  },
+  {
+   "sentence": "賒銷商品予信義商店$60,000 → <b class=\"target-account\">銷貨收入</b>",
+   "target": "銷貨收入",
+   "type": "right",
+   "hint": "銷貨收入(收益)增加 → 貸方"
+  },
+  {
+   "sentence": "以現金收到存款利息$800 → <b class=\"target-account\">利息收入</b>",
+   "target": "利息收入",
+   "type": "right",
+   "hint": "利息收入(收益)增加 → 貸方"
+  },
+  {
+   "sentence": "以現金收取本月出租店面租金$12,000 → <b class=\"target-account\">租金收入</b>",
+   "target": "租金收入",
+   "type": "right",
+   "hint": "租金收入(收益)增加 → 貸方"
+  },
+  {
+   "sentence": "賒購商品自松山商行$45,000 → <b class=\"target-account\">應付帳款</b>",
+   "target": "應付帳款",
+   "type": "right",
+   "hint": "應付帳款(負債)增加 → 貸方"
+  },
+  {
+   "sentence": "開立本票償付建國實業社貨款$50,000 → <b class=\"target-account\">應付票據</b>",
+   "target": "應付票據",
+   "type": "right",
+   "hint": "應付票據(負債)增加 → 貸方"
+  },
+  {
+   "sentence": "向合作銀行借款$200,000，期限六個月 → <b class=\"target-account\">短期借款</b>",
+   "target": "短期借款",
+   "type": "right",
+   "hint": "短期借款(負債)增加 → 貸方"
+  },
+  {
+   "sentence": "向光明銀行借款$500,000，期限三年 → <b class=\"target-account\">長期借款</b>",
+   "target": "長期借款",
+   "type": "right",
+   "hint": "長期借款(負債)增加 → 貸方"
+  },
+  {
+   "sentence": "業主以現金投資開店$300,000 → <b class=\"target-account\">業主資本</b>",
+   "target": "業主資本",
+   "type": "right",
+   "hint": "業主資本(權益)增加 → 貸方"
+  },
+  {
+   "sentence": "銷售商品，向客戶收取營業稅$2,500 → <b class=\"target-account\">銷項稅額</b>",
+   "target": "銷項稅額",
+   "type": "right",
+   "hint": "銷項稅額(負債)增加 → 貸方"
+  },
+  {
+   "sentence": "退回長春貿易行商品$5,000，貨款尚未支付 → <b class=\"target-account\">進貨退出</b>",
+   "target": "進貨退出",
+   "type": "right",
+   "hint": "進貨退出(費損抵銷科目)增加 → 貸方"
+  },
+  {
+   "sentence": "取得民生商店進貨折讓$1,200，貨款尚未支付 → <b class=\"target-account\">進貨折讓</b>",
+   "target": "進貨折讓",
+   "type": "right",
+   "hint": "進貨折讓(費損抵銷科目)增加 → 貸方"
+  },
+  {
+   "sentence": "以現金購買文具用品$3,000 → <b class=\"target-account\">現金</b>",
+   "target": "現金",
+   "type": "right",
+   "hint": "現金(資產)減少 → 貸方"
+  },
+  {
+   "sentence": "以銀行存款支付水電費$3,200 → <b class=\"target-account\">銀行存款</b>",
+   "target": "銀行存款",
+   "type": "right",
+   "hint": "銀行存款(資產)減少 → 貸方"
+  },
+  {
+   "sentence": "收回中山行前欠帳款$18,000 → <b class=\"target-account\">應收帳款</b>",
+   "target": "應收帳款",
+   "type": "right",
+   "hint": "應收帳款(資產)減少 → 貸方"
+  },
+  {
+   "sentence": "應收票據到期，收回票款$40,000存入銀行 → <b class=\"target-account\">應收票據</b>",
+   "target": "應收票據",
+   "type": "right",
+   "hint": "應收票據(資產)減少 → 貸方"
+  },
+  {
+   "sentence": "年底提列機器設備折舊$21,600 → <b class=\"target-account\">累計折舊-機器設備</b>",
+   "target": "累計折舊-機器設備",
+   "type": "right",
+   "hint": "累計折舊-機器設備(資產抵銷科目)增加 → 貸方"
+  },
+  {
+   "sentence": "年底提列應收帳款預期信用減損損失$6,000 → <b class=\"target-account\">備抵損失-應收帳款</b>",
+   "target": "備抵損失-應收帳款",
+   "type": "right",
+   "hint": "備抵損失-應收帳款(資產抵銷科目)增加 → 貸方"
+  },
+  {
+   "sentence": "向永和企業社預收貨款$20,000 → <b class=\"target-account\">預收貨款</b>",
+   "target": "預收貨款",
+   "type": "right",
+   "hint": "預收貨款(負債)增加 → 貸方"
+  },
+  {
+   "sentence": "月底員工薪資$9,000尚未發放 → <b class=\"target-account\">應付薪資</b>",
+   "target": "應付薪資",
+   "type": "right",
+   "hint": "應付薪資(負債)增加 → 貸方"
+  },
+  {
+   "sentence": "年底電話費帳單未到，估列郵電費$600 → <b class=\"target-account\">應付費用</b>",
+   "target": "應付費用",
+   "type": "right",
+   "hint": "應付費用(負債)增加 → 貸方"
+  },
+  {
+   "sentence": "為青田商號代銷商品，收取佣金$6,000 → <b class=\"target-account\">佣金收入</b>",
+   "target": "佣金收入",
+   "type": "right",
+   "hint": "佣金收入(收益)增加 → 貸方"
+  },
+  {
+   "sentence": "提供記帳服務，收取服務費$8,000 → <b class=\"target-account\">勞務收入</b>",
+   "target": "勞務收入",
+   "type": "right",
+   "hint": "勞務收入(收益)增加 → 貸方"
+  },
+  {
+   "sentence": "出售舊辦公設備，售價高於帳面價值$3,000 → <b class=\"target-account\">處分資產利益</b>",
+   "target": "處分資產利益",
+   "type": "right",
+   "hint": "處分資產利益(收益)增加 → 貸方"
+  },
+  {
+   "sentence": "收到房客現金押金$30,000 → <b class=\"target-account\">存入保證金</b>",
+   "target": "存入保證金",
+   "type": "right",
+   "hint": "存入保證金(負債)增加 → 貸方"
+  },
+  {
+   "sentence": "代客戶收取款項$7,000，尚未轉交 → <b class=\"target-account\">代收款</b>",
+   "target": "代收款",
+   "type": "right",
+   "hint": "代收款(負債)增加 → 貸方"
+  },
+  {
+   "sentence": "預付保險費期滿，轉列保險費$2,000 → <b class=\"target-account\">預付保險費</b>",
+   "target": "預付保險費",
+   "type": "right",
+   "hint": "預付保險費(資產)減少 → 貸方"
+  },
+  {
+   "sentence": "期末結帳，將期初商品存貨轉入銷貨成本 → <b class=\"target-account\">商品存貨</b>",
+   "target": "商品存貨",
+   "type": "right",
+   "hint": "商品存貨(資產)減少 → 貸方"
+  },
+  {
+   "sentence": "申報營業稅，以進項稅額抵減銷項稅額 → <b class=\"target-account\">進項稅額</b>",
+   "target": "進項稅額",
+   "type": "right",
+   "hint": "進項稅額(資產)減少 → 貸方"
+  },
+  {
+   "sentence": "盤點現金，發現現金溢餘$150 → <b class=\"target-account\">現金短溢</b>",
+   "target": "現金短溢",
+   "type": "right",
+   "hint": "現金溢餘 → 現金短溢記貸方"
+  },
+  {
+   "sentence": "業主以現金補回先前提用的款項$10,000 → <b class=\"target-account\">業主往來</b>",
+   "target": "業主往來",
+   "type": "right",
+   "hint": "業主往來(權益抵銷科目)減少 → 貸方"
+  }
+ ],
+ "lv2": [
+  {
+   "sentence": "業主以現金追加投資$100,000",
+   "debitAcc": "現金",
+   "creditAcc": "業主資本",
+   "vendor": "",
+   "voucherType": "現金收入傳票"
+  },
+  {
+   "sentence": "收到中山行本票$40,000，抵償前欠貨款",
+   "debitAcc": "應收票據",
+   "creditAcc": "應收帳款",
+   "vendor": "中山行",
+   "voucherType": "轉帳傳票"
+  },
+  {
+   "sentence": "信義商店的本票到期，收到現金$60,000",
+   "debitAcc": "現金",
+   "creditAcc": "應收票據",
+   "vendor": "信義商店",
+   "voucherType": "現金收入傳票"
+  },
+  {
+   "sentence": "以現金繳納本月水費$1,650",
+   "debitAcc": "水電瓦斯費",
+   "creditAcc": "現金",
+   "vendor": "",
+   "voucherType": "現金支出傳票"
+  },
+  {
+   "sentence": "以現金向松山商行購買商品$40,000",
+   "debitAcc": "進貨",
+   "creditAcc": "現金",
+   "vendor": "松山商行",
+   "voucherType": "現金支出傳票"
+  },
+  {
+   "sentence": "收到永和企業社現金押金$30,000",
+   "debitAcc": "現金",
+   "creditAcc": "存入保證金",
+   "vendor": "永和企業社",
+   "voucherType": "現金收入傳票"
+  },
+  {
+   "sentence": "以銀行存款償還民生商店帳款$25,000",
+   "debitAcc": "應付帳款",
+   "creditAcc": "銀行存款",
+   "vendor": "民生商店",
+   "voucherType": "轉帳傳票"
+  },
+  {
+   "sentence": "業主提用現金$20,000購買家用電器",
+   "debitAcc": "業主往來",
+   "creditAcc": "現金",
+   "vendor": "",
+   "voucherType": "現金支出傳票"
+  },
+  {
+   "sentence": "為中山行提供記帳服務，收取現金$8,000",
+   "debitAcc": "現金",
+   "creditAcc": "勞務收入",
+   "vendor": "中山行",
+   "voucherType": "現金收入傳票"
+  },
+  {
+   "sentence": "收到稅捐機關退還留抵稅額，現金$4,000",
+   "debitAcc": "現金",
+   "creditAcc": "留抵稅額",
+   "vendor": "",
+   "voucherType": "現金收入傳票"
+  },
+  {
+   "sentence": "以銀行存款購入運輸設備$300,000",
+   "debitAcc": "運輸設備",
+   "creditAcc": "銀行存款",
+   "vendor": "建國實業社",
+   "voucherType": "轉帳傳票"
+  },
+  {
+   "sentence": "以現金銷售商品予大安商行$50,000",
+   "debitAcc": "現金",
+   "creditAcc": "銷貨收入",
+   "vendor": "大安商行",
+   "voucherType": "現金收入傳票"
+  },
+  {
+   "sentence": "賒銷商品予大安商行$80,000",
+   "debitAcc": "應收帳款",
+   "creditAcc": "銷貨收入",
+   "vendor": "大安商行",
+   "voucherType": "轉帳傳票"
+  },
+  {
+   "sentence": "以現金購買文具用品$3,000",
+   "debitAcc": "文具用品",
+   "creditAcc": "現金",
+   "vendor": "文心企業社",
+   "voucherType": "現金支出傳票"
+  },
+  {
+   "sentence": "年底借款利息$2,400尚未支付",
+   "debitAcc": "利息費用",
+   "creditAcc": "應付利息",
+   "vendor": "合作銀行",
+   "voucherType": "轉帳傳票"
+  },
+  {
+   "sentence": "以現金支付民生商店店面租金$15,000",
+   "debitAcc": "租金支出",
+   "creditAcc": "現金",
+   "vendor": "民生商店",
+   "voucherType": "現金支出傳票"
+  },
+  {
+   "sentence": "以現金預付一年保險費$12,000",
+   "debitAcc": "預付保險費",
+   "creditAcc": "現金",
+   "vendor": "",
+   "voucherType": "現金支出傳票"
+  },
+  {
+   "sentence": "收到信義商店匯款$45,000，存入合作銀行",
+   "debitAcc": "銀行存款",
+   "creditAcc": "應收帳款",
+   "vendor": "信義商店",
+   "voucherType": "轉帳傳票"
+  },
+  {
+   "sentence": "以現金退還大安商行銷貨退回款$4,000",
+   "debitAcc": "銷貨退回",
+   "creditAcc": "現金",
+   "vendor": "大安商行",
+   "voucherType": "現金支出傳票"
+  },
+  {
+   "sentence": "以現金支付銷貨運費$1,200",
+   "debitAcc": "運費",
+   "creditAcc": "現金",
+   "vendor": "建國實業社",
+   "voucherType": "現金支出傳票"
+  },
+  {
+   "sentence": "以現金支付員工小陳本月薪資$32,000",
+   "debitAcc": "薪資支出",
+   "creditAcc": "現金",
+   "vendor": "小陳",
+   "voucherType": "現金支出傳票"
+  },
+  {
+   "sentence": "青田商號退回賒銷的商品$6,000",
+   "debitAcc": "銷貨退回",
+   "creditAcc": "應收帳款",
+   "vendor": "青田商號",
+   "voucherType": "轉帳傳票"
+  },
+  {
+   "sentence": "為青田商號代銷商品，收取現金佣金$6,000",
+   "debitAcc": "現金",
+   "creditAcc": "佣金收入",
+   "vendor": "青田商號",
+   "voucherType": "現金收入傳票"
+  },
+  {
+   "sentence": "以現金繳納上期應付營業稅$6,500",
+   "debitAcc": "應付營業稅",
+   "creditAcc": "現金",
+   "vendor": "",
+   "voucherType": "現金支出傳票"
+  },
+  {
+   "sentence": "以銀行存款償還光明銀行短期借款$100,000",
+   "debitAcc": "短期借款",
+   "creditAcc": "銀行存款",
+   "vendor": "光明銀行",
+   "voucherType": "轉帳傳票"
+  },
+  {
+   "sentence": "代大安商行收取款項，現金$7,000尚未轉交",
+   "debitAcc": "現金",
+   "creditAcc": "代收款",
+   "vendor": "大安商行",
+   "voucherType": "現金收入傳票"
+  },
+  {
+   "sentence": "收到永和企業社現金$20,000，預付貨款",
+   "debitAcc": "現金",
+   "creditAcc": "預收貨款",
+   "vendor": "永和企業社",
+   "voucherType": "現金收入傳票"
+  },
+  {
+   "sentence": "收到信義商店現金$30,000，償還前欠貨款",
+   "debitAcc": "現金",
+   "creditAcc": "應收帳款",
+   "vendor": "信義商店",
+   "voucherType": "現金收入傳票"
+  },
+  {
+   "sentence": "退回賒購自松山商行的商品$4,000",
+   "debitAcc": "應付帳款",
+   "creditAcc": "進貨退出",
+   "vendor": "松山商行",
+   "voucherType": "轉帳傳票"
+  },
+  {
+   "sentence": "應付票據到期，以現金兌付建國實業社$28,000",
+   "debitAcc": "應付票據",
+   "creditAcc": "現金",
+   "vendor": "建國實業社",
+   "voucherType": "現金支出傳票"
+  },
+  {
+   "sentence": "賒購商品自長春貿易行$60,000",
+   "debitAcc": "進貨",
+   "creditAcc": "應付帳款",
+   "vendor": "長春貿易行",
+   "voucherType": "轉帳傳票"
+  },
+  {
+   "sentence": "以銀行存款支付本月租金$18,000",
+   "debitAcc": "租金支出",
+   "creditAcc": "銀行存款",
+   "vendor": "民生商店",
+   "voucherType": "轉帳傳票"
+  },
+  {
+   "sentence": "以現金支付店面冷氣機修理費$3,600",
+   "debitAcc": "修繕費",
+   "creditAcc": "現金",
+   "vendor": "建國實業社",
+   "voucherType": "現金支出傳票"
+  },
+  {
+   "sentence": "向合作銀行借入現金$200,000，期限六個月",
+   "debitAcc": "現金",
+   "creditAcc": "短期借款",
+   "vendor": "合作銀行",
+   "voucherType": "現金收入傳票"
+  },
+  {
+   "sentence": "賒購辦公設備$32,000自文心企業社",
+   "debitAcc": "辦公設備",
+   "creditAcc": "其他應付款",
+   "vendor": "文心企業社",
+   "voucherType": "轉帳傳票"
+  },
+  {
+   "sentence": "收到青田商號現金利息$800",
+   "debitAcc": "現金",
+   "creditAcc": "利息收入",
+   "vendor": "青田商號",
+   "voucherType": "現金收入傳票"
+  },
+  {
+   "sentence": "以現金收取中山行本月租金$12,000",
+   "debitAcc": "現金",
+   "creditAcc": "租金收入",
+   "vendor": "中山行",
+   "voucherType": "現金收入傳票"
+  },
+  {
+   "sentence": "以現金向建國實業社購入辦公設備$25,000",
+   "debitAcc": "辦公設備",
+   "creditAcc": "現金",
+   "vendor": "建國實業社",
+   "voucherType": "現金支出傳票"
+  },
+  {
+   "sentence": "退回松山商行商品，收到現金退款$5,000",
+   "debitAcc": "現金",
+   "creditAcc": "進貨退出",
+   "vendor": "松山商行",
+   "voucherType": "現金收入傳票"
+  },
+  {
+   "sentence": "將現金$50,000存入合作銀行",
+   "debitAcc": "銀行存款",
+   "creditAcc": "現金",
+   "vendor": "合作銀行",
+   "voucherType": "現金支出傳票"
+  }
+ ]
+}

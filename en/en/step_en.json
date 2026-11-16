@@ -1,0 +1,349 @@
+{
+ "meta": {
+  "note": "Data for Step Mode explanations. Plain US English, short lines, \\n for line breaks. factoryRules: first match wins; each regex runs on \"DebitAccount|CreditAccount\"."
+ },
+ "acidFake": {
+  "Allowance (kid's)": {
+   "name": "A child's pocket money",
+   "why": "Personal money for a child.\nIt never shows up in company books."
+  },
+  "Pay Stub": {
+   "name": "A document",
+   "why": "A paper showing one paycheck.\nThe books record Salaries Expense."
+  },
+  "Receipt": {
+   "name": "A source document",
+   "why": "Proof that a payment happened.\nThe books record the deal itself."
+  },
+  "Budget": {
+   "name": "A plan",
+   "why": "A plan for future spending.\nIt is not a real transaction."
+  },
+  "Invoice": {
+   "name": "A source document",
+   "why": "A bill that asks for payment.\nThe books record the sale or purchase."
+  },
+  "Grocery List": {
+   "name": "A shopping note",
+   "why": "A note of items to buy.\nIt is not a business record."
+  },
+  "Piggy Bank": {
+   "name": "A container",
+   "why": "A box for saving coins.\nCompany money inside is Cash."
+  },
+  "Wallet": {
+   "name": "A container",
+   "why": "A holder for bills and cards.\nThe money inside is Cash."
+  },
+  "Calculator": {
+   "name": "A tool",
+   "why": "A tool for doing math.\nBought for work, it is Office Expense."
+  },
+  "Credit Score": {
+   "name": "A rating",
+   "why": "A number about borrowing habits.\nIt is not an amount owed."
+  },
+  "Price Tag": {
+   "name": "A label",
+   "why": "A label showing a price.\nThe books record the actual sale."
+  },
+  "Coupon": {
+   "name": "A discount offer",
+   "why": "A voucher for a lower price.\nIt is not a ledger account."
+  },
+  "Gift Card": {
+   "name": "A prepaid card",
+   "why": "A card with stored value.\nWhen sold, it is a liability until used."
+  },
+  "Loyalty Card": {
+   "name": "A rewards card",
+   "why": "A card for shop rewards.\nIt is not a ledger account."
+  },
+  "Bank Statement": {
+   "name": "A report",
+   "why": "A list of bank activity.\nUse it to check Cash, not as an account."
+  },
+  "Checkbook": {
+   "name": "A tool",
+   "why": "A book of blank checks.\nThe money in the bank is Cash."
+  },
+  "Tax Return": {
+   "name": "A filing",
+   "why": "A form sent to the government.\nTax owed is Income Taxes Payable."
+  },
+  "Accountant": {
+   "name": "A person",
+   "why": "A person who keeps or checks books.\nPeople are not accounts."
+  },
+  "Board Meeting": {
+   "name": "An event",
+   "why": "A meeting of company leaders.\nMeetings are not transactions."
+  },
+  "Shareholder Meeting": {
+   "name": "An event",
+   "why": "A meeting of the owners.\nOwner money is Common Stock."
+  },
+  "Business Hours": {
+   "name": "A schedule",
+   "why": "When the shop is open.\nIt is not a money item."
+  },
+  "Lunch Money": {
+   "name": "A personal habit",
+   "why": "Personal money for a meal.\nIt is not a company account."
+  },
+  "Gas Money": {
+   "name": "A personal habit",
+   "why": "Personal money for fuel.\nFuel for business trips is Travel Expense."
+  },
+  "Bus Fare": {
+   "name": "A travel cost",
+   "why": "A ride ticket cost.\nBusiness trips go to Travel Expense."
+  },
+  "Online Store": {
+   "name": "A sales channel",
+   "why": "A place to sell online.\nSales made there are Sales Revenue."
+  },
+  "Paycheck": {
+   "name": "A document",
+   "why": "A check for pay earned.\nThe company records Salaries or Wages Expense."
+  },
+  "Tip Jar": {
+   "name": "A container",
+   "why": "A jar for tips.\nIt is not a ledger account."
+  },
+  "Business Card": {
+   "name": "A card",
+   "why": "A card with contact info.\nPrinting it is an Office Expense."
+  },
+  "Calendar": {
+   "name": "A schedule",
+   "why": "A chart of dates.\nIt is not a ledger account."
+  },
+  "Price Quote": {
+   "name": "An offer",
+   "why": "An estimate of cost.\nNo deal yet, so no entry."
+  },
+  "Packing Slip": {
+   "name": "A source document",
+   "why": "A list of items in a box.\nIt supports a sale or purchase."
+  },
+  "Purchase Order": {
+   "name": "A request",
+   "why": "A request to buy goods.\nNo entry until the goods arrive."
+  },
+  "Stock Ticker": {
+   "name": "A display",
+   "why": "A feed of share prices.\nIt is not a ledger account."
+  },
+  "Savings Goal": {
+   "name": "A target",
+   "why": "An amount a person hopes to save.\nA goal is not a real balance."
+  },
+  "Rainy Day Fund": {
+   "name": "A personal habit",
+   "why": "Money set aside by a person.\nCompany cash is just Cash."
+  },
+  "Garage Sale": {
+   "name": "A personal event",
+   "why": "A home sale of used things.\nIt is not a business account."
+  },
+  "Black Friday": {
+   "name": "A sales day",
+   "why": "A big shopping day.\nSales made then are Sales Revenue."
+  },
+  "Sticky Note": {
+   "name": "A tool",
+   "why": "A small paper reminder.\nIt is not a ledger account."
+  },
+  "Job Offer": {
+   "name": "A promise",
+   "why": "A promise of a job.\nNo entry until work is done."
+  },
+  "Wish List": {
+   "name": "A personal list",
+   "why": "A list of things to want.\nIt is not a business record."
+  }
+ },
+ "factoryTypes": {
+  "Prepaid Expense": {
+   "rule": "Cash was paid, but part of it covers next period",
+   "how": "Booked as an expense? Move the unused part to Prepaid.\nBooked as Prepaid? Move the used part to expense.",
+   "je": "Dr Prepaid Insurance / Cr Insurance Expense (or the reverse)"
+  },
+  "Unearned Revenue": {
+   "rule": "Cash was received, but the work is not done yet",
+   "how": "The unearned part is a liability.\nRevenue is earned only after the work.",
+   "je": "Dr Unearned Revenue / Cr Service Revenue"
+  },
+  "Accrued Revenue": {
+   "rule": "Revenue was earned, but no cash yet",
+   "how": "The right to collect is an asset.\nRecord the revenue in this period.",
+   "je": "Dr Interest Receivable / Cr Interest Revenue"
+  },
+  "Accrued Expense": {
+   "rule": "A cost was used, but not yet paid",
+   "how": "The duty to pay is a liability.\nRecord the expense in this period.",
+   "je": "Dr Interest Expense / Cr Interest Payable"
+  },
+  "Depreciation": {
+   "rule": "A long-lived asset wore out for another year",
+   "how": "The used-up cost is Depreciation Expense.\nThe contra account holds the total.",
+   "je": "Dr Depreciation Expense / Cr Accumulated Depreciation—Equipment"
+  },
+  "Bad Debt": {
+   "rule": "Some customers may never pay",
+   "how": "Estimate the loss as Bad Debt Expense.\nThe allowance lowers receivables.",
+   "je": "Dr Bad Debt Expense / Cr Allowance for Doubtful Accounts"
+  },
+  "Supplies Used": {
+   "rule": "Some supplies on hand were used up",
+   "how": "Count what is left at year-end.\nThe used part becomes expense.",
+   "je": "Dr Supplies Expense / Cr Supplies"
+  },
+  "Inventory Shrinkage": {
+   "rule": "The count of goods is lower than the records",
+   "how": "Write off the missing goods.\nThe loss goes to Cost of Goods Sold.",
+   "je": "Dr Cost of Goods Sold / Cr Merchandise Inventory"
+  },
+  "Cash Over and Short": {
+   "rule": "The cash count does not match the records",
+   "how": "A shortage is a debit.\nAn overage is a credit.",
+   "je": "Shortage: Dr Cash Over and Short / Cr Cash"
+  },
+  "Income Tax": {
+   "rule": "Tax on this year's profit must be recorded",
+   "how": "Expense it now.\nWhat is not yet paid is a liability.",
+   "je": "Dr Income Tax Expense / Cr Income Taxes Payable"
+  },
+  "Closing Entries": {
+   "rule": "The year ends and temporary accounts must reset",
+   "how": "Close revenue and expenses to Income Summary.\nThen close it and Dividends to Retained Earnings.",
+   "je": "Dr Sales Revenue / Cr Income Summary"
+  }
+ },
+ "factoryTypeLabel": {
+  "Prepaid Expense": "Prepaid Expense (paid ahead)",
+  "Unearned Revenue": "Unearned Revenue (paid to us early)",
+  "Accrued Revenue": "Accrued Revenue (earned, not collected)",
+  "Accrued Expense": "Accrued Expense (used, not paid)",
+  "Depreciation": "Depreciation",
+  "Bad Debt": "Bad Debt (uncollectible accounts)",
+  "Supplies Used": "Supplies Used",
+  "Inventory Shrinkage": "Inventory Shrinkage",
+  "Cash Over and Short": "Cash Over and Short",
+  "Income Tax": "Income Tax",
+  "Closing Entries": "Closing Entries"
+ },
+ "factoryRules": [
+  [
+   "Income Summary|^Retained Earnings\\|Dividends$",
+   "Closing Entries"
+  ],
+  [
+   "Prepaid",
+   "Prepaid Expense"
+  ],
+  [
+   "Unearned",
+   "Unearned Revenue"
+  ],
+  [
+   "^(Interest Receivable|Rent Receivable)\\||^Accounts Receivable\\|(Service Revenue|Fees Earned|Commission Revenue)$",
+   "Accrued Revenue"
+  ],
+  [
+   "\\|(Interest|Salaries|Wages|Utilities) Payable$|^Payroll Tax Expense\\|FICA Taxes Payable$",
+   "Accrued Expense"
+  ],
+  [
+   "Depreciation",
+   "Depreciation"
+  ],
+  [
+   "Bad Debt|Allowance for Doubtful",
+   "Bad Debt"
+  ],
+  [
+   "^Supplies Expense\\|Supplies$",
+   "Supplies Used"
+  ],
+  [
+   "^Supplies\\|Supplies Expense$",
+   "Prepaid Expense"
+  ],
+  [
+   "^(Cost of Goods Sold|Loss from Theft)\\|Merchandise Inventory$",
+   "Inventory Shrinkage"
+  ],
+  [
+   "Cash Over and Short",
+   "Cash Over and Short"
+  ],
+  [
+   "^Income Tax Expense\\|",
+   "Income Tax"
+  ]
+ ],
+ "flightLedgers": {
+  "General Journal": {
+   "use": "Any entry with no special journal, in date order",
+   "why": "The first record of transactions that no special journal covers."
+  },
+  "General Ledger": {
+   "use": "Account balances for every account",
+   "why": "Holds one page per account and feeds the trial balance."
+  },
+  "Accounts Receivable Subsidiary Ledger": {
+   "use": "What each customer owes",
+   "why": "Tracks each customer's balance; it must match Accounts Receivable."
+  },
+  "Accounts Payable Subsidiary Ledger": {
+   "use": "What we owe each supplier",
+   "why": "Tracks each supplier's balance; it must match Accounts Payable."
+  },
+  "Sales Journal": {
+   "use": "Merchandise sold on account",
+   "why": "Records merchandise sold on account, in date order."
+  },
+  "Purchases Journal": {
+   "use": "Merchandise bought on account",
+   "why": "Records credit purchases in one place, in date order."
+  },
+  "Cash Receipts Journal": {
+   "use": "All cash coming in",
+   "why": "Records every receipt of cash in one place."
+  },
+  "Cash Payments Journal": {
+   "use": "All cash going out",
+   "why": "Records every payment of cash in one place."
+  },
+  "Petty Cash Record": {
+   "use": "Small payments from the petty cash fund",
+   "why": "Lists each small payment and the fund balance."
+  },
+  "Inventory Subsidiary Ledger": {
+   "use": "Units and cost for each product",
+   "why": "The perpetual record of each item's units in, out, and on hand."
+  },
+  "Plant Asset Subsidiary Ledger": {
+   "use": "Cost and depreciation of each long-lived asset",
+   "why": "Tracks each asset's cost, date, and depreciation."
+  },
+  "Trial Balance": {
+   "use": "Checking that debits equal credits",
+   "why": "A list of ledger balances used to test the books."
+  },
+  "Worksheet": {
+   "use": "Planning adjustments before the statements",
+   "why": "A working paper that lines up balances and adjustments."
+  },
+  "Bank Reconciliation": {
+   "use": "Matching the bank statement to the books",
+   "why": "Explains differences between the bank balance and the Cash balance."
+  },
+  "Payroll Register": {
+   "use": "Pay, withholdings, and net pay for each employee",
+   "why": "Summarizes gross pay, taxes withheld, and net pay for a pay period."
+  }
+ }
+}

@@ -4,9 +4,10 @@
     <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
          **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
          이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-    <script src="safestore.js?v=79"></script>
+    <script src="safestore.js?v=81"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<style>html{-webkit-text-size-adjust:100%;text-size-adjust:100%}</style>
 <title>오답노트 · 약점복습 | 전산회계 2급</title>
 <meta name="description" content="틀린 문제만 모아 다시 풀고 약점을 잡는 오답노트">
 <style>
@@ -126,6 +127,18 @@
 
 .ad-slot { margin: 24px auto 8px; max-width: 728px; text-align: center; }
 .ad-slot-label { font-size: .68rem; color: rgba(255,255,255,.35); margin-bottom: 4px; letter-spacing: .05em; }
+/* 숨은 보스 '감사관'(boss.js, 2026-11-03) */
+.boss{background:linear-gradient(135deg,#1a1230,#0c1626);border:1px solid rgba(180,79,255,.35);border-radius:16px;padding:14px 16px;margin-bottom:14px;}
+.boss.open{border-color:rgba(255,210,74,.55);}
+.boss h2{margin:0 0 6px;font-size:1rem;}
+.boss p{margin:0;font-size:.84rem;color:var(--dim);line-height:1.55;}
+.boss .gauge{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.boss .gauge span{font-size:.76rem;border-radius:20px;padding:3px 10px;background:rgba(255,255,255,.06);color:var(--dim);font-variant-numeric:tabular-nums;}
+.boss .gauge span.done{color:var(--green);background:rgba(46,204,113,.12);}
+.boss .title{display:inline-block;margin-top:10px;font-size:.78rem;color:var(--gold);background:rgba(255,210,74,.1);border:1px solid rgba(255,210,74,.35);border-radius:20px;padding:3px 10px;}
+.boss .cta{margin-top:12px;}
+.boss-hud{display:flex;justify-content:space-between;align-items:center;font-size:.82rem;color:var(--dim);margin-bottom:10px;font-variant-numeric:tabular-nums;}
+.boss-hud b{color:var(--gold);}
 </style>
   <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 </head>
@@ -161,9 +174,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="wrongnote.js?v=79"></script>
-<script src="daylog.js?v=79"></script>
-<script src="adsense.js?v=79"></script>
+<script src="wrongnote.js?v=81"></script>
+<script src="boss.js?v=81"></script>
+<script src="daylog.js?v=81"></script><script src="amev.js?v=81"></script><script src="skill.js?v=81"></script>
+<script src="adsense.js?v=81"></script>
 <script>
 // 로그인 체크
 (function(){
@@ -218,7 +232,7 @@ async function load(){
 function render(){
   var box = document.getElementById('content');
   if(!ITEMS.length){
-    box.innerHTML = '<div class="empty"><span class="em">🎉</span>'+
+    box.innerHTML = bossPanel() + '<div class="empty"><span class="em">🎉</span>'+
       '저장된 오답이 없어요!<br>게임에서 문제를 틀리면 여기에 자동으로 모입니다.</div>';
     return;
   }
@@ -233,7 +247,7 @@ function render(){
   var maxT = typeKeys.length ? Math.max.apply(null, typeKeys.map(function(t){return s.byType[t];})) : 1;
   var typeBars = typeKeys.map(function(t){ return bar(t, s.byType[t], maxT); }).join('');
 
-  var html =
+  var html = bossPanel() +
     '<div class="panel">'+
       '<div class="bigstat"><b>'+s.total+'</b> 회 틀림 · '+ITEMS.length+'문제</div>'+
       '<button class="cta" onclick="startQuiz()">▶ 틀린 문제만 다시 풀기</button>'+
@@ -268,6 +282,23 @@ function render(){
 
   html += '<span class="clear-link" onclick="wipe()">오답노트 전체 비우기</span>';
   box.innerHTML = html;
+}
+
+/* 숨은 보스 '감사관' 띠 — 정복 수·정복률, 열리면 도전 버튼 */
+function bossPanel(){
+  if(!window.Boss) return '';
+  var st = Boss.state(ITEMS.length), C = Boss.CONFIG;
+  var pct = Math.round(st.rate*100), need = Math.round(C.RATE*100);
+  if(!st.open){
+    return '<div class="boss"><h2>감사관이 장부를 보러 올 날이 가까워요</h2>'+
+      '<p>오답노트에서 틀린 문제를 다시 맞혀 정복하면 숨은 상대가 찾아와요.</p>'+
+      '<div class="gauge"><span class="'+(st.n>=C.NEED?'done':'')+'">정복 '+Math.min(st.n,C.NEED)+'/'+C.NEED+'</span>'+
+      '<span class="'+(pct>=need?'done':'')+'">정복률 '+pct+'%/'+need+'%</span></div></div>';
+  }
+  return '<div class="boss open"><h2>감사관이 도착했습니다!</h2>'+
+    '<p>내가 틀렸던 문제로 결산을 감사받아 보세요. '+C.QN+'문제 중 '+C.WIN+'문제 이상 맞히면 통과, 기회는 '+C.LIVES+'번이에요.</p>'+
+    (st.won ? '<div class="title">칭호 · '+esc(st.title)+(st.best?' · 최고 '+st.best+'/'+C.QN:'')+'</div>' : '')+
+    '<button class="cta" onclick="startBoss()">감사 받기</button></div>';
 }
 
 function bar(label, val, max){
@@ -368,6 +399,7 @@ async function pick(btn, r, btns){
   if(chosen === String(r.correct)){
     btn.classList.add('correct');
     solved++;
+    if (window.Boss) Boss.conquer(r);           // 정복 기록(숨은 보스 '감사관' 열기용)
     await WrongNote.resolve(r.game, r.key);   // 맞히면 오답노트에서 제거
   } else {
     btn.classList.add('wrong');
@@ -378,14 +410,62 @@ async function pick(btn, r, btns){
 
 async function solveCard(game, key){
   solved++;
+  if (window.Boss) { var _r = QUEUE.find(function(x){ return x.game===game && String(x.key)===String(key); }); if (_r) Boss.conquer(_r); }
   await WrongNote.resolve(game, key);
   nextQ();
 }
 
 function nextQ(){ qi++; showQ(); }
 
+/* ───────── 숨은 보스 '감사관' 모드(오답노트 화면 안) ───────── */
+var BQ = [], bi = 0, bOk = 0, bLives = 0;
+function startBoss(){
+  if(!window.Boss) return;
+  BQ = Boss.build(ITEMS); bi = 0; bOk = 0; bLives = Boss.CONFIG.LIVES;
+  if(!BQ.length) return;
+  if (window.DayLog) DayLog.hit('act', 'boss', 'start');
+  document.getElementById('home').style.display='none';
+  document.getElementById('quiz').style.display='block';
+  showBoss();
+}
+function showBoss(){
+  var prog = document.getElementById('quiz-progress'), body = document.getElementById('quiz-body');
+  if(bi >= BQ.length || bLives <= 0){ return endBoss(); }
+  var q = BQ[bi];
+  prog.textContent = '';
+  body.innerHTML =
+    '<div class="quiz-card">'+
+      '<div class="boss-hud"><span>감사관 · '+(bi+1)+' / '+BQ.length+'</span><span>맞힘 <b>'+bOk+'</b> · 남은 기회 <b>'+bLives+'</b></span></div>'+
+      '<div class="quiz-tag">'+esc(gameName(q.game))+(q.type?' · '+esc(q.type):'')+'</div>'+
+      '<div class="quiz-q">'+safeQ(q.q)+'</div>'+
+      q.options.map(function(o){ return '<button class="choice" data-v="'+esc(o)+'">'+esc(o)+'</button>'; }).join('')+
+      '<div class="quiz-next"><button class="cta" onclick="bi++;showBoss()">다음 →</button></div>'+
+    '</div>';
+  var btns = body.querySelectorAll('.choice');
+  btns.forEach(function(b){ b.onclick = function(){
+    btns.forEach(function(x){ x.disabled = true; });
+    if(b.getAttribute('data-v') === q.correct){ b.classList.add('correct'); bOk++; }
+    else { b.classList.add('wrong'); bLives--; btns.forEach(function(x){ if(x.getAttribute('data-v')===q.correct) x.classList.add('correct'); }); }
+    document.querySelector('.quiz-next').style.display='block';
+  }; });
+}
+function endBoss(){
+  var C = Boss.CONFIG, res = Boss.finish(bOk, BQ.length), body = document.getElementById('quiz-body');
+  if (window.DayLog) DayLog.hit('act', 'boss', res.win ? 'win' : 'lose');
+  document.getElementById('quiz-progress').textContent = '';
+  body.innerHTML = res.win
+    ? '<div class="quiz-card quiz-done"><div style="font-size:1.15rem;margin-bottom:8px;">감사 통과!</div>'+
+      '<div style="color:var(--gold);margin-bottom:6px;">칭호 \u2018'+esc(res.title)+'\u2019 '+(res.firstWin?'획득':'유지')+'</div>'+
+      '<div style="color:var(--dim);font-size:.9rem;">'+BQ.length+'문제 중 '+bOk+'문제 · 최고 '+res.best+'문제</div>'+
+      '<button class="cta" style="margin-top:20px;" onclick="exitQuiz()">오답노트로 돌아가기</button></div>'
+    : '<div class="quiz-card quiz-done"><div style="font-size:1.1rem;margin-bottom:8px;">감사 지적 '+(C.LIVES - Math.max(0,bLives))+'건…</div>'+
+      '<div style="color:var(--dim);font-size:.9rem;">'+bOk+'문제 맞힘('+C.WIN+'문제 필요). 오답노트를 조금 더 정복하고 다시 오세요.</div>'+
+      '<button class="cta" style="margin-top:20px;" onclick="startBoss()">다시 도전</button>'+
+      '<button class="keep" style="margin-top:10px;display:block;width:100%;" onclick="exitQuiz()">오답노트로 돌아가기</button></div>';
+}
+
 load();
 </script>
-<script src="emoji-icons.js?v=79"></script>
+<script src="emoji-icons.js?v=81"></script>
 </body>
 </html>

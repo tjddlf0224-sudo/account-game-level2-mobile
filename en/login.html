@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
+         **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
+         이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
+    <script src="en/en_data.js?v=1"></script>
+<script src="en/server_en.js?v=1"></script>
+<link rel="stylesheet" href="en/en.css?v=1">
+<script src="safestore.js?v=79"></script><script src="../nickfilter.js?v=2"></script>
+    <script>
+    /* 웹은 로그인 화면을 건너뛴다(2026-09-22) — safestore.js 가 이미 자동 닉네임을 채웠다.
+       예전 링크·즐겨찾기·로그아웃으로 여기 와도 바로 허브로 간다. 앱(네이티브)은 구글/애플 로그인 때문에 그대로 둔다. */
+    (function(){ try{
+      var C = window.Capacitor; if (C && C.isNativePlatform && C.isNativePlatform()) return;
+      // 닉네임이 실제로 있을 때만 — 자동 이름 저장이 어떤 이유로 실패하면 허브↔로그인이 무한히 서로를 부른다
+      // (그땐 예전처럼 이 로그인 화면을 그대로 보여 준다)
+      if (!(localStorage.getItem('hub_nickname') || '').trim()) return;
+      location.replace(localStorage.getItem('hub_level') === 'lv1' ? 'index_lv1.html' : 'index.html');
+    }catch(e){} })();
+    </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<style>html{-webkit-text-size-adjust:100%;text-size-adjust:100%}</style>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#020810">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="manifest" href="manifest.json">
+<title>Ledger Arcade — Sign In</title>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;800&family=Noto+Sans+JP:wght@400;500;700;900&family=Black+Han+Sans&family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@400;500;700;900&family=Google+Sans:wght@500&display=swap" rel="stylesheet">
+<script src="daylog.js?v=79"></script><script src="amev.js?v=1"></script><script src="skill.js?v=1"></script><script src="installref.js?v=1"></script><!-- 설치 경로 합계(안드 새 설치 한 번, 11/13 홍보팀) — 다른 저장보다 먼저 읽어야 기존 사용자를 가른다 -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --cy: #00f2ff;
+  --pk: #ff2d78;
+  --gd: #ffd600;
+  --gn: #00e676;
+  --pu: #b44fff;
+  --bg: #020810;
+  --panel: rgba(255,255,255,0.04);
+  --border: rgba(255,255,255,0.10);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { width: 100%; height: 100%; }
+body {
+  font-family: 'Noto Sans JP', 'Noto Sans KR', sans-serif;
+  background: var(--bg);
+  color: white;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: var(--ad-banner-h, 0px);
+  background-image:
+    radial-gradient(ellipse 60% 40% at 15% 20%, rgba(0,242,255,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 35% at 85% 80%, rgba(180,79,255,0.07) 0%, transparent 55%),
+    radial-gradient(ellipse 40% 30% at 50% 50%, rgba(255,45,120,0.04) 0%, transparent 60%);
+}
+
+/* ── 별 캔버스 ── */
+#starfield { position:fixed; inset:0; z-index:0; pointer-events:none; }
+
+/* ── 그룹 모드 버튼 (우측 상단) ── */
+.group-mode-btn {
+  position: fixed;
+  top: calc(20px + env(safe-area-inset-top)); right: 20px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 18px;
+  background: rgba(180,79,255,0.10);
+  border: 1px solid rgba(180,79,255,0.35);
+  border-radius: 50px;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 1.5px;
+  color: var(--pu);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.group-mode-btn:hover, .group-mode-btn:active {
+  background: rgba(180,79,255,0.2);
+  border-color: var(--pu);
+  box-shadow: 0 0 18px rgba(180,79,255,0.25);
+}
+.group-mode-btn .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--pu);
+  box-shadow: 0 0 8px var(--pu);
+  animation: blink 2s ease-in-out infinite;
+}
+@keyframes blink {
+  0%,100% { opacity:1; } 50% { opacity:0.3; }
+}
+
+/* ── 메인 카드 ── */
+.login-wrap {
+  position: relative; z-index: 1;
+  width: 100%;
+  max-width: 420px;
+  padding: 0 24px;
+  animation: fadeInUp 0.6s ease both;
+}
+
+@keyframes fadeInUp {
+  from { opacity:0; transform:translateY(28px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* 로고/타이틀 */
+.login-logo {
+  text-align: center;
+  margin-bottom: 44px;
+}
+.login-badge {
+  display: inline-block;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.65rem; letter-spacing: 4px;
+  color: rgba(0,242,255,0.6);
+  border: 1px solid rgba(0,242,255,0.2);
+  padding: 5px 18px; border-radius: 50px;
+  margin-bottom: 20px;
+  background: rgba(0,242,255,0.04);
+}
+.login-title {
+  font-family: 'M PLUS Rounded 1c', 'Black Han Sans', sans-serif;
+  font-size: 2.6rem;
+  line-height: 1.15;
+  margin-bottom: 10px;
+}
+.login-title .t1 { color: #fff; }
+.login-title .t2 {
+  background: linear-gradient(90deg, var(--cy), var(--pu));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.login-sub {
+  font-size: 0.88rem;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 0.3px;
+}
+
+/* 입력 카드 */
+.login-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 24px;
+  padding: 36px 32px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.4);
+}
+
+.field-label {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 3px;
+  color: rgba(255,255,255,0.35);
+  margin-bottom: 12px;
+  display: block;
+}
+
+.nickname-input {
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 14px;
+  padding: 16px 20px;
+  font-family: 'Noto Sans JP', 'Noto Sans KR', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  margin-bottom: 8px;
+  -webkit-appearance: none;
+}
+.nickname-input::placeholder {
+  color: rgba(255,255,255,0.2);
+  font-weight: 400;
+}
+.nickname-input:focus {
+  border-color: var(--cy);
+  box-shadow: 0 0 0 3px rgba(0,242,255,0.12);
+}
+
+.input-hint {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.25);
+  margin-bottom: 28px;
+  padding-left: 4px;
+}
+
+/* 에러 메시지 */
+.err-msg {
+  font-size: 0.8rem;
+  color: var(--pk);
+  margin-bottom: 16px;
+  padding-left: 4px;
+  min-height: 18px;
+  display: none;
+}
+.err-msg.show { display: block; }
+
+/* ── 소셜 로그인 (앱에서만 표시 — Auth.socialAvailable()로 판단) ── */
+.social-block { display: none; margin-bottom: 22px; }
+.social-block.show { display: block; }
+.social-btn {
+  width: 100%;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  padding: 14px;
+  border-radius: 14px;
+  font-family: 'Noto Sans JP', 'Noto Sans KR', sans-serif;
+  font-size: 0.98rem; font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s, opacity 0.2s;
+  margin-bottom: 10px;
+  border: 1px solid transparent;
+}
+.social-btn:active { transform: scale(0.98); }
+.social-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.social-btn svg { width: 20px; height: 20px; flex: none; }
+/* 2026-09-28 Google 브랜딩 가이드(developers.google.com/identity/branding-guidelines) 규격으로 — 직접 옮겨 그린 G 를 버리고
+   공식 자료 묶음(signin-assets.zip, iOS PNG@4x Light)의 G 를 그대로 잘라 ../assets/brand/google-g.png 로.
+   밝은 테마: 바탕 #FFFFFF · 안쪽 1px 테두리 #747775 · 글자 #1F1F1F · Google Sans Medium(OFL) · iOS 여백 16/12/16 · G 20px.
+   모양은 가이드가 허용하는 알약형 — Apple 버튼도 같은 모양·크기로 맞춘다. */
+.social-btn.google { background: #fff; color: #1f1f1f; border: 1px solid #747775; height: 50px; padding: 0 16px; gap: 12px;
+  border-radius: 25px; font-family: 'Google Sans', 'Noto Sans JP', 'Noto Sans KR', sans-serif; font-weight: 500; font-size: 20px; }   /* 11/4 성일님 A안: 애플 그림 글자 크기(높이 50 → 20px)에 맞춤 */
+.social-btn.google img { width: 20px; height: 20px; flex: none; }
+.social-btn.apple { background: #fff; color: #000; border: 1px solid #747775; height: 50px; border-radius: 25px;   /* 오프라인 글자 버튼도 Google 과 같은 테두리·글자 크기 */
+  font-family: 'Google Sans', 'Noto Sans JP', 'Noto Sans KR', sans-serif; font-weight: 500; font-size: 20px; }
+/* 공식 이미지가 올 때까지(최대 4초) 같은 흰 알약으로 자리만 — 검은 글자 버튼이 잠깐 보였다 바뀌는 깜빡임 방지 */
+.social-btn.apple.waiting { color: transparent; }
+/* 2026-09-28 App Store 심사 거절(Guideline 4): 직접 그린 사과 로고 금지 → Apple 공식 버튼 이미지(appleid.cdn-apple.com)를
+   버튼 전체로 쓴다. 글자·로고·여백은 Apple 이 만든 그대로. 이미지를 못 받으면(오프라인) 로고 없이 글자만. */
+/* 11/4 성일님 "미묘하게 다르고 이상해" → A안(~/개발팀/넘김/로그인버튼_통일_2026-11-04.md): 애플 그림은 테두리 없이(border=false) 받아
+   Google 과 같은 #747775 1px 테두리를 바깥에 — 로고·글자는 애플 그림 그대로 */
+.social-btn.apple.official { padding: 0; background: #fff; border: 1px solid #747775; overflow: hidden; border-radius: 25px; box-sizing: border-box; }   /* 흰색·알약형 = Google 버튼과 같은 모양 */
+.social-btn.apple.official img { display: block; width: 100%; height: 100%; }
+.social-divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 18px 0;
+  font-size: 0.72rem; color: rgba(255,255,255,0.3);
+  letter-spacing: 0.5px;
+}
+.social-divider::before, .social-divider::after {
+  content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.1);
+}
+.pending-auth-hint {
+  font-size: 0.8rem; color: var(--cy);
+  background: rgba(0,242,255,0.08); border: 1px solid rgba(0,242,255,0.2);
+  border-radius: 12px; padding: 10px 14px;
+  margin-bottom: 16px; display: none; line-height: 1.5;
+}
+.pending-auth-hint.show { display: block; }
+
+/* 시작 버튼 */
+.start-btn {
+  width: 100%;
+  padding: 18px;
+  background: linear-gradient(135deg, var(--cy), var(--pu));
+  border: none;
+  border-radius: 14px;
+  font-family: 'M PLUS Rounded 1c', 'Black Han Sans', sans-serif;
+  font-size: 1.2rem;
+  color: #fff;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+  letter-spacing: 1px;
+  min-height: 58px;
+  box-shadow: 0 8px 28px rgba(0,242,255,0.2);
+  position: relative;
+  overflow: hidden;
+}
+.start-btn::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.start-btn:hover::before, .start-btn:active::before { opacity: 1; }
+.start-btn:active { transform: scale(0.98); }
+.start-btn:disabled {
+  opacity: 0.5; cursor: not-allowed; transform: none;
+}
+
+/* 그룹 상태 표시 (이미 그룹에 있는 경우) */
+.group-status {
+  margin-top: 20px;
+  padding: 14px 18px;
+  background: rgba(180,79,255,0.08);
+  border: 1px solid rgba(180,79,255,0.2);
+  border-radius: 12px;
+  display: none;
+  align-items: center;
+  gap: 10px;
+}
+.group-status.show { display: flex; }
+.group-status .gs-icon { font-size: 1.2rem; }
+.group-status .gs-info { flex: 1; }
+.group-status .gs-label {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 2px;
+  color: rgba(180,79,255,0.7);
+  margin-bottom: 2px;
+}
+.group-status .gs-name {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.85);
+}
+.group-status .gs-clear {
+  background: none; border: none;
+  color: rgba(255,255,255,0.3);
+  cursor: pointer; font-size: 1rem;
+  padding: 4px; line-height: 1;
+  transition: color 0.2s;
+}
+.group-status .gs-clear:hover { color: var(--pk); }
+
+/* 모바일 */
+@media (max-width: 480px) {
+  .login-title { font-size: 2.1rem; }
+  .login-card { padding: 28px 22px; border-radius: 20px; }
+  .group-mode-btn { top: 14px; right: 14px; font-size: 0.62rem; padding: 8px 14px; }
+}
+
+/* ── 시스템 큰글자모드 대응 ──
+ * 평소엔 body를 overflow:hidden + 세로중앙정렬로 고정해도 카드가 화면에 다 들어오지만,
+ * OS 글자크기 접근성 설정이 켜지면 rem 기준값이 커져 카드 높이가 화면을 넘는데
+ * 스크롤이 막혀있어 아래쪽(시작 버튼 등)에 닿을 수 없었다. JS가 감지해 붙이는
+ * .large-font-mode 클래스가 있을 때만 스크롤 가능한 레이아웃으로 전환한다
+ * (기본 디자인·레이아웃은 그대로, 이 클래스가 없으면 위 규칙 전혀 영향 없음). */
+html.large-font-mode body {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  align-items: flex-start;
+  padding-top: max(28px, env(safe-area-inset-top));
+  padding-bottom: calc(28px + var(--ad-banner-h, 0px));
+}
+html.large-font-mode .login-wrap {
+  margin: auto;
+}
+/* -- short screens (landscape phones, SE): the Start button could not be tapped (KR 6e8a770, 2026-11-15) --
+ * Centered + overflow:hidden, so at 844x390 the card top went off screen and Start sat under the ad strip (bottom 472 > 340) with
+ * scrolling blocked (SE 320x568 too). Only at height <= 600px, same as large-font mode: safe area on top, auto margins center it
+ * when it fits, otherwise it starts at the top and scrolls, with ad-strip-height space at the end. Normal portrait phones and iPads unchanged. */
+@media (max-height: 600px) {
+  html:not(.large-font-mode) body { height: auto; flex-direction: column; justify-content: flex-start; padding-top: env(safe-area-inset-top); padding-bottom: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  html:not(.large-font-mode) body::after { content: ''; flex: none; height: var(--ad-banner-h, 0px); }
+  html:not(.large-font-mode) .login-wrap { margin: auto; }
+}
+</style>
+</head>
+<body>
+
+<script>
+/* 시스템 큰글자모드 감지 — 1rem이 기본 16px보다 눈에 띄게 크면(안드로이드 글자크기
+ * 접근성 설정 등) 켜진 것으로 보고 <html>에 large-font-mode 클래스를 붙인다.
+ * 화면이 그려지기 전에(첫 콘텐츠보다 먼저) 실행해 깜빡임 없이 적용한다. */
+(function () {
+  try {
+    var probe = document.createElement('div');
+    probe.style.cssText = 'position:absolute;visibility:hidden;pointer-events:none;height:0;width:0;font-size:1rem;';
+    document.documentElement.appendChild(probe);
+    var px = parseFloat(getComputedStyle(probe).fontSize) || 16;
+    document.documentElement.removeChild(probe);
+    if (px / 16 > 1.15) document.documentElement.classList.add('large-font-mode');
+  } catch (e) {}
+})();
+</script>
+
+<canvas id="starfield"></canvas>
+
+<!-- 우측 상단 그룹 모드 버튼 -->
+<a class="group-mode-btn" href="#" style="display:none" aria-hidden="true"><!-- US edition: no group feature -->
+  <div class="dot"></div>
+  Group
+</a>
+
+<div class="login-wrap">
+  <!-- 로고 -->
+  <div class="login-logo">
+    <div class="login-badge">Ledger Arcade</div>
+    <div class="login-title">
+      <div class="t1">Ledger</div>
+      <div class="t2">Arcade</div>
+    </div>
+    <div class="login-sub">Enter a nickname to get started</div>
+  </div>
+
+  <!-- 입력 카드 -->
+  <div class="login-card">
+    <!-- 소셜 로그인 (앱에서만 노출, 웹에서는 JS가 숨김 유지) -->
+    <div class="social-block" id="social-block">
+      <button class="social-btn google" id="google-btn" onclick="socialLogin('google')">
+        <img src="../assets/brand/google-g.png" alt="" width="20" height="20">
+        Continue with Google
+      </button>
+      <button class="social-btn apple waiting" id="apple-btn" aria-label="Continue with Apple" onclick="socialLogin('apple')">Continue with Apple</button>
+    </div>
+    <div class="social-divider" id="social-divider" style="display:none">or use a nickname</div>
+    <div class="pending-auth-hint" id="pending-auth-hint">Signed in! Pick a nickname to start.</div>
+
+    <label class="field-label" for="nickname">NICKNAME</label>
+    <input
+      class="nickname-input"
+      type="text"
+      id="nickname"
+      placeholder="Auto-created (or type your own)"
+      maxlength="12"
+      autocomplete="off"
+      autocorrect="off"
+      spellcheck="false"
+    >
+    <div class="input-hint">Keep the auto name or change it. Shown on the leaderboard.</div>
+    <div class="err-msg" id="err-msg"></div>
+
+    <button class="start-btn" id="start-btn" onclick="doLogin()">
+      🚀 Start
+    </button>
+
+    <!-- 이미 그룹에 속한 경우 표시 -->
+    <div class="group-status" id="group-status">
+      <div class="gs-icon">👥</div>
+      <div class="gs-info">
+        <div class="gs-label">CURRENT GROUP</div>
+        <div class="gs-name" id="gs-name-el">—</div>
+      </div>
+      <button class="gs-clear" onclick="clearGroup()" title="Leave group">✕</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── 별 배경 ── */
+const canvas = document.getElementById('starfield');
+const ctx = canvas.getContext('2d');
+let stars = [];
+const isMobile = window.innerWidth <= 600;
+const STAR_COUNT = isMobile ? 80 : 160;
+function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+function mkStar() {
+  return {
+    x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+    r: Math.random() * 1.4 + 0.2, v: Math.random() * 0.3 + 0.05,
+    o: Math.random() * 0.6 + 0.2,
+    c: Math.random() > 0.88 ? '#00f2ff' : Math.random() > 0.75 ? '#b44fff' : '#ffffff'
+  };
+}
+function initStars() { stars = Array.from({length: STAR_COUNT}, mkStar); }
+function animStars() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  stars.forEach(s => {
+    s.y += s.v;
+    if (s.y > canvas.height) { s.y = -2; s.x = Math.random() * canvas.width; }
+    ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = s.c; ctx.globalAlpha = s.o; ctx.fill(); ctx.globalAlpha = 1;
+  });
+  requestAnimationFrame(animStars);
+}
+resize(); initStars(); animStars();
+window.addEventListener('resize', () => { resize(); initStars(); });
+
+/* ── 로그인 로직 ── */
+const input = document.getElementById('nickname');
+const errMsg = document.getElementById('err-msg');
+
+/* 로그인 후 이동할 곳 — 마지막에 고른 급수가 있으면 그 허브로 바로,
+   없으면(=처음 오는 사람) 급수 선택 화면으로. 선택 화면에서 hub_level을 심는다. */
+function afterLoginHref(){
+  try{
+    const lv = localStorage.getItem('hub_level');
+    if(lv === 'lv1') return 'index_lv1.html';
+    if(lv === 'lv2') return 'index.html';
+  }catch(e){}
+  return 'index.html';   // US edition: no level-select screen
+}
+
+// 이미 저장된 닉네임이 있으면 채워넣기
+// 자동 닉네임 생성
+function genNickname() {
+  const adjs = ['Quick','Brave','Wise','Sharp','Cool','Bold','Calm','Keen','Fast','Neat'];
+  const nouns = ['Tiger','Eagle','Lion','Wolf','Panda','Fox','Hawk','Bear','Otter','Moose'];
+  const adj = adjs[Math.floor(Math.random() * adjs.length)];
+  const noun = nouns[Math.floor(Math.random() * nouns.length)];
+  const num = Math.floor(Math.random() * 90) + 10;
+  return adj + noun + num;
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('hub_nickname');
+  if (saved) {
+    input.value = saved;
+  } else {
+    // 저장된 닉네임 없으면 자동 생성해서 채워넣기
+    input.value = genNickname();
+    // 자동 생성된 닉네임은 첫 입력 시 바로 지워지게
+    input.dataset.autoGenerated = 'true';
+  }
+
+  // 그룹 상태 표시
+  const gid = localStorage.getItem('hub_group_id');
+  const gname = localStorage.getItem('hub_group_name');
+  if (gid && gname) {
+    document.getElementById('gs-name-el').textContent = gname;
+    document.getElementById('group-status').classList.add('show');
+  }
+
+  // 앱(캡차시터)에서만 소셜 로그인 버튼 노출 — 웹(깃허브 페이지)에서는 기존 닉네임 로그인만
+  if (window.Auth && Auth.socialAvailable()) {
+    document.getElementById('social-block').classList.add('show');
+    document.getElementById('social-divider').style.display = 'flex';
+    officialAppleButton();
+  }
+});
+
+/* Apple 공식 버튼 이미지 — 폭·높이는 실제 버튼(Google 버튼)에 맞춰 요청(Apple 허용 폭 130~375·높이 30~64, 모서리 50% 알약형 = Google 버튼과 같게) */
+function officialAppleButton() {
+  const btn = document.getElementById('apple-btn');
+  const g = document.getElementById('google-btn');
+  const H = Math.round((g && g.offsetHeight) || 50);
+  const w = Math.max(130, Math.min(375, Math.round(btn.offsetWidth || 320) - 2));   // 바깥 테두리 1px 씩 뺀 안쪽 크기
+  const h = Math.max(30, Math.min(64, H - 2));
+  const img = new Image();
+  img.alt = 'Continue with Apple';
+  const giveUp = setTimeout(() => btn.classList.remove('waiting'), 4000);   // 못 받으면 로고 없이 글자만
+  img.onload = () => { clearTimeout(giveUp); btn.textContent = ''; btn.style.height = H + 'px'; btn.appendChild(img); btn.classList.add('official'); btn.classList.remove('waiting'); };
+  img.onerror = () => { clearTimeout(giveUp); btn.classList.remove('waiting'); };
+  img.src = 'https://appleid.cdn-apple.com/appleid/button?type=continue&color=white&border=false&border_radius=50'
+          + '&height=' + h + '&width=' + w + '&scale=3&locale=ja_JP';
+}
+
+/* ── 소셜 로그인 (Google / Apple) ──
+ * 이미 등록된 uid면 바로 허브로, 처음 온 uid면 닉네임 확정 단계로 이어간다
+ * (기존 닉네임 입력창을 그대로 재사용 — window._pendingAuth 로 상태만 표시). */
+window._pendingAuth = null;
+async function socialLogin(kind) {
+  const gBtn = document.getElementById('google-btn');
+  const aBtn = document.getElementById('apple-btn');
+  gBtn.disabled = true; aBtn.disabled = true;
+  errMsg.classList.remove('show');
+  try {
+    const res = await Auth.signIn(kind);               // { uid, email, provider }
+    const player = await Auth.loadPlayer(res.uid);      // 이전에 가입한 적 있으면 {name,avatar,group_id}
+    if (player && player.name) {
+      Auth.applyLocal(res.uid, player.name, player.avatar);
+      window.location.href = afterLoginHref();
+      return;
+    }
+    // 처음 로그인 — 닉네임을 정해야 함. 기존 입력창을 그대로 사용.
+    window._pendingAuth = { uid: res.uid, provider: res.provider };
+    document.getElementById('pending-auth-hint').classList.add('show');
+    if (input.dataset.autoGenerated === 'true') { input.select(); }
+    input.focus();
+  } catch (e) {
+    const msg = socialErrMsg(e);
+    if (msg) showErr(msg);
+  } finally {
+    gBtn.disabled = false; aBtn.disabled = false;
+  }
+}
+/* 로그인 오류 문구(2026-10-23 개발팀 점검 — 장원급제반에서 겪은 함정).
+ * 확실한 취소만 조용히(null). '/cancel/' 처럼 넓게 잡으면 안드로이드 Credential Manager 의 진짜 오류
+ * (예: "too many canceled sign-in prompts" 로 막힘)까지 삼켜서 아무 안내 없이 버튼만 안 먹는 것처럼 보인다. */
+function socialErrMsg(e) {
+  const c = String((e && e.code) || '') + ' ' + String((e && (e.message || e)) || '');
+  if (/popup-closed-by-user|\b12501\b|\b1001\b|The user canceled|The user cancelled|activity is cancelled by the user/i.test(c)) return null;
+  if (/no credentials available|NoCredential/i.test(c))
+    return 'No Google account is signed in on this device. Add one in your device settings, then tap again.';
+  return 'Sign-in failed. Please try again.';
+}
+
+input.addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+  errMsg.classList.remove('show');
+});
+input.addEventListener('input', () => {
+  errMsg.classList.remove('show');
+  // 경고 뜬 뒤 이름을 바꾸면 이전 이름에 대한 중복검사 면제를 초기화
+  window._claimedName = null;
+  document.getElementById('start-btn').textContent = '🚀 Start';
+});
+// 첫 글자 입력 시 자동 생성 닉네임 즉시 대체
+input.addEventListener('keydown', e => {
+  if (input.dataset.autoGenerated === 'true') {
+    const ignore = ['Enter','Tab','Shift','Control','Alt','Meta','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','CapsLock'];
+    if (!ignore.includes(e.key)) {
+      input.value = '';
+      delete input.dataset.autoGenerated;
+    }
+  }
+}, true);
+input.addEventListener('focus', () => {
+  if (input.dataset.autoGenerated === 'true') {
+    input.select(); // 포커스 시 전체 선택 — 바로 덮어쓰기 가능
+  }
+});
+
+function showErr(msg) {
+  errMsg.textContent = msg;
+  errMsg.classList.add('show');
+  input.focus();
+}
+
+const _SB_URL = "https://pjagaulfivafamhhiveg.supabase.co";
+const _SB_KEY = "sb_publishable_yck2tAKApEjVSJOJMVSXuQ_AGaNatuI";
+
+async function doLogin() {
+  const name = input.value.trim();
+  if (!name) { showErr('Please enter a nickname'); return; }
+  if (name.length < 2) { showErr('Use at least 2 characters'); return; }
+  if (name.length > 12) { showErr('Use 12 characters or fewer'); return; }
+  { const why = window.AmNick && AmNick.bad(name); if (why) { showErr(AmNick.msg ? AmNick.msg(why) : 'That nickname is not allowed. Please choose another.'); return; } }
+
+  const btn = document.getElementById('start-btn');
+  btn.disabled = true;
+  btn.textContent = 'Checking...';
+
+  // 소셜 로그인 직후 첫 닉네임 확정 단계라면, players 표에 uid로 등록하고 끝낸다
+  // (scores 표 기준 중복검사가 아니라 Auth.nameAvailable — 내 uid가 이미 쓰던 이름이면 통과)
+  if (window._pendingAuth) {
+    const { uid, provider } = window._pendingAuth;
+    const available = await Auth.nameAvailable(name, uid);
+    if (!available) {
+      btn.disabled = false; btn.textContent = '🚀 Start';
+      showErr('That nickname is already taken. Please choose another.');
+      return;
+    }
+    const saved = await Auth.savePlayer(uid, name, 'rookie', provider);
+    if (!saved) {
+      btn.disabled = false; btn.textContent = '🚀 Start';
+      showErr('Save failed. Check your connection and try again.');
+      return;
+    }
+    Auth.applyLocal(uid, name, 'rookie');
+    btn.textContent = 'Loading...';
+    window.location.href = afterLoginHref();
+    return;
+  }
+
+  // 서버 닉네임 중복 확인 — 동명이인의 점수가 한 기록으로 병합되는 것 방지
+  // (이 기기에서 쓰던 닉네임 그대로면 본인이므로 통과, 오프라인이면 검사 생략)
+  // 다른 기기/브라우저에서 예전 닉네임 그대로 이어하려는 학생을 막지 않도록,
+  // 하드 블록 대신 경고만 띄우고 같은 버튼을 한 번 더 누르면 통과시킨다.
+  // (구글/애플 소셜 로그인은 위 window._pendingAuth 분기에서 uid 기준으로 여전히 확실하게 막는다)
+  const saved = (localStorage.getItem('hub_nickname') || '').trim();
+  if (name !== saved && window._claimedName !== name) {
+    try {
+      const db = (window.supabase && supabase.createClient)
+        ? supabase.createClient(_SB_URL, _SB_KEY) : null;
+      if (db) {
+        const { data, error } = await db.from('scores').select('name').eq('name', name).limit(1);
+        // US edition: shares Supabase with other editions. Name-only lookups return rows of all apps; game_id lookups are filtered by
+        // server_en.js to keep only this edition's rows -> names only in other editions belong to others, so block them
+        if (!error && data && data.length) {
+          const { data: mine } = await db.from('scores').select('name,game_id').eq('name', name).limit(50);
+          if (!mine || !mine.length) {
+            btn.disabled = false;
+            showErr('That nickname is already taken. Please choose another.');
+            return;
+          }
+        }
+        if (!error && data && data.length) {
+          btn.disabled = false;
+          btn.textContent = '⚠️ Tap again to continue';
+          showErr('This nickname is already registered. If it is your own, tap "Start" again to continue. If not, choose a different nickname.');
+          window._claimedName = name; // 다음 클릭부터는 이 이름에 한해 중복검사 통과
+          return;
+        }
+      }
+    } catch (e) { /* 오프라인이면 검사 생략 */ }
+  }
+
+  // localStorage에 닉네임 저장
+  localStorage.setItem('hub_nickname', name);
+  // 게임별 기존 myName도 동기화
+  ['acid','memory','debit','factory'].forEach(g =>
+    localStorage.setItem(`hub_${g}_myName`, name)
+  );
+
+  btn.textContent = 'Loading...';
+  window.location.href = afterLoginHref();
+}
+
+function clearGroup() {
+  localStorage.removeItem('hub_group_id');
+  localStorage.removeItem('hub_group_name');
+  document.getElementById('group-status').classList.remove('show');
+}
+
+// 안드로이드 WebView
+function hideAdPlaceholder() {}
+</script>
+<script src="emoji-icons.js?v=79"></script>
+</body>
+</html>

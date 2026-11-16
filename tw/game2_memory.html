@@ -1,0 +1,2444 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; img-src 'self' data:; connect-src 'self' https://pjagaulfivafamhhiveg.supabase.co https://cdn.jsdelivr.net; media-src 'self';">
+<!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
+     **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
+     이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
+<script src="tw/tw_data.js?v=1"></script>
+<script src="tw/server_tw.js?v=1"></script>
+<link rel="stylesheet" href="tw/tw.css?v=1">
+<script src="safestore.js?v=79"></script>
+<script src="../nickfilter.js?v=2"></script><!-- 暱稱禁用詞(新訂或變更時才用，與韓國版 d772713 相同，2026-11-14) -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<style>html{-webkit-text-size-adjust:100%;text-size-adjust:100%}</style>
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>會計 記憶翻牌</title>
+<meta name="description" content="用卡片配對會計項目和意思！用遊戲學會計丙級">
+<meta name="theme-color" content="#020810">
+<meta property="og:title" content="記憶翻牌 | 會計電玩館">
+<meta property="og:description" content="用卡片配對會計項目和意思！用遊戲學會計丙級">
+<meta property="og:type" content="website">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800;900&family=Black+Han+Sans&family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+:root{
+  /* 앱에서 하단 광고 배너가 가릴 수 있는 최대 높이. JS(--ad-safe-h)가 안 걸려도
+     이 값 덕분에 오버레이는 항상 스크롤 여지를 갖는다(2026-09-14). 웹에서는
+     스크롤 끝에 빈 공간이 조금 더 생길 뿐이라 손해가 없다. */
+  --ad-reserve: 96px;
+}
+
+/*ADSPACER*/
+/* ── 하단 배너 안전영역을 padding 이 아니라 **실제 요소**로 잡는다 (2026-09-14) ──
+   iOS WKWebView 는 flex 스크롤 컨테이너의 padding-bottom 을 스크롤 영역
+   (scrollable overflow)에 넣어 주지 않는 경우가 있다. 그러면 배너가 버튼을 덮고
+   있는데도 브라우저는 "더 내릴 것이 없다"고 보고 **스크롤 자체가 안 생긴다**.
+   Chromium 은 제대로 처리해서 자동 테스트만으로는 안 잡혔다.
+   실기기 제보(b69, 記憶翻牌 시작화면): '메인으로 나가기'가 배너에 잘린 채
+   손가락으로 내려지지 않았다. 사용자 진단 그대로 — "아래에 공란을 만들어 달라".
+   ::after 는 진짜 박스라 scrollable overflow 에 반드시 포함된다.
+   flex:0 0 auto 가 없으면 내용이 넘칠 때 이 여백부터 찌그러져서 의미가 없다. */
+.overlay::after, .ovl::after{
+  content:''; display:block; flex:0 0 auto; width:100%;
+  height: calc(env(safe-area-inset-bottom, 0px) + max(var(--ad-banner-h, 0px), var(--ad-safe-h, 0px), var(--ad-reserve)));
+}
+
+        :root {
+            --bg-color: #2c3e50;
+            --card-back: #34495e;
+            --card-front: #ecf0f1;
+            --accent: #e67e22;
+            --accent2: #e74c3c;
+            --text-color: #2c3e50;
+            --blue: #3498db;
+            --green: #2ecc71;
+        }
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+
+        html { height: 100%; }
+        body {
+            font-family: 'Noto Sans TC', 'Noto Sans KR', sans-serif;
+            background-color: var(--bg-color);
+            color: white;
+            margin: 0; padding: 0;
+            min-height: 100vh; /* 100vh 먼저: dvh 를 모르는 옛 웹뷰(크롬 108 미만, 안드 9 기본 등)는 dvh 줄을 버린다 — 보카 Play 거절 원인(10/28) */
+            min-height: 100dvh;
+
+            display: flex; flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            padding: max(14px, env(safe-area-inset-top)) 16px 0;
+            display: flex; align-items: center; justify-content: center;
+            width: 100%; position: relative;
+        }
+        h1 {
+            margin: 0; font-family:'Noto Sans TC', 'Black Han Sans','Noto Sans TC', 'Noto Sans KR',sans-serif;
+            color: var(--accent); text-shadow: 2px 2px 0 #000;
+            font-size: clamp(1.5rem, 5vw, 2.4rem);
+            flex: 1; text-align: center;
+        }
+        .hub-link {
+            font-family:'Noto Sans TC', 'Black Han Sans','Noto Sans TC', 'Noto Sans KR',sans-serif; font-size: 0.95rem; color: rgba(255,255,255,0.7);
+            text-decoration: none; border: 1px solid rgba(255,255,255,0.3);
+            padding: 7px 14px; border-radius: 50px; background: rgba(0,0,0,0.2);
+            transition: all 0.18s; white-space: nowrap; min-height: 44px;
+            display: flex; align-items: center;
+        }
+
+        /* 🎵 음소거 버튼 */
+        .mute-btn {
+            background: none;
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            border-radius: 50px;
+            padding: 7px 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            min-height: 44px;
+            transition: opacity 0.2s, border-color 0.2s;
+            white-space: nowrap;
+        }
+        .mute-btn.muted {
+            opacity: 0.4;
+            border-color: rgba(255,255,255,0.15);
+        }
+
+        /* 상단 상태바 */
+        .status-bar {
+            display: flex; gap: clamp(14px,4vw,28px);
+            margin: 12px 0 6px;
+            background: rgba(0,0,0,0.3);
+            padding: 10px clamp(18px,5vw,36px);
+            border-radius: 40px;
+            font-size: clamp(1.1rem,3.5vw,1.4rem);
+            font-weight: bold; align-items: center;
+        }
+        .moves   { color: var(--accent2); }
+        .matches { color: var(--green); }
+        .timer   { color: #f39c12; font-size: clamp(1.1rem,3.5vw,1.5rem); min-width: 90px; text-align: center; }
+        .timer.warning { color: var(--accent2); animation: blink 0.5s infinite; }
+        @keyframes blink { 50% { opacity: 0.4; } }
+
+        .score-formula {
+            font-size: clamp(0.75rem,2.5vw,0.92rem);
+            color: rgba(255,255,255,0.45);
+            margin-bottom: 10px; text-align: center;
+            padding: 0 12px;
+        }
+
+        /* 카드 그리드 */
+        .grid-container {
+            display: grid;
+            gap: clamp(8px,2.5vw,14px);
+            padding: 4px clamp(8px,3vw,16px) 20px;
+            width: 100%;
+            justify-content: center;
+            align-content: start;
+        }
+
+        /* 카드 — 모바일 기준으로 크게 */
+        /* ── 慢慢學 모드(같은 카드판, 카드는 처음부터 앞면 + 튜토리얼 말풍선) ── */
+        body.step-mode .status-bar { display: none !important; }
+        body.step-mode .score-formula { color: #9fe3c0; }
+        #step-coach { display: none; position: fixed; left: 0; right: 0; bottom: 0; z-index: 80; background: linear-gradient(180deg,#0d1830,#0a1120); max-height: 50vh; overflow-y: auto; }
+        #step-coach.show { display: block; }
+        #step-coach .tut-bubble-text { min-height: 0; text-align: center; }
+        #step-coach .sc-dim { opacity: .72; font-size: .9rem; }
+        #step-coach .sc-key { color: #f1c40f; font-weight: 800; }
+        #step-coach .sc-hint { margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: rgba(255,209,102,.1); border: 1px dashed rgba(255,209,102,.45); color: #ffe6a6; font-size: .92rem; line-height: 1.75; text-align: center; }
+        #step-coach .rd p { margin: 0 0 .35em; }
+        #step-coach .sc-btns { display: flex; gap: 10px; margin-top: 14px; }
+        #step-coach .sc-btns:empty { display: none; }
+        #step-coach .sc-btns button { flex: 1; min-height: 48px; border-radius: 14px; font-family: 'Noto Sans TC', 'Black Han Sans', sans-serif; font-size: 1rem; cursor: pointer; }
+        #step-coach .sc-btn { background: rgba(255,255,255,.08); border: 1.5px solid rgba(255,255,255,.25); color: #fff; }
+        #step-coach .sc-hintbtn { border-style: dashed; border-color: rgba(255,209,102,.6); color: #ffd166; }
+        #step-coach .sc-go { border: 2px solid #00f2ff; color: #021018; background: #00f2ff; }
+        .card.step-sel .card-front { box-shadow: 0 0 0 4px #00f2ff, 0 0 18px #00f2ff; }
+        .card.step-bad .card-front { box-shadow: 0 0 0 4px #e74c3c; }
+        .card.step-glow .card-front { animation: stepGlow 1s ease-in-out infinite; }
+        @keyframes stepGlow { 0%,100% { box-shadow: 0 0 0 2px #f1c40f, 0 0 10px #f1c40f; } 50% { box-shadow: 0 0 0 5px #f1c40f, 0 0 26px #f1c40f; } }
+        .card {
+            background-color: transparent;
+            perspective: 1200px;
+            cursor: pointer;
+            width: var(--card-w, 140px);
+            height: var(--card-h, 90px);
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%; height: 100%;
+            text-align: center;
+            transition: transform 0.38s;
+            transform-style: preserve-3d;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+        }
+
+        .card.flipped .card-inner  { transform: rotateY(180deg); }
+        .card.matched .card-inner  { transform: rotateY(180deg); }
+        .card.matched              { animation: pop 0.3s ease-out; opacity: 0.4; pointer-events: none; }
+        .card.wrong-flash .card-inner { animation: shakeCard 0.4s ease; }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%; height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 12px;
+            padding: 6px;
+        }
+
+        .card-back {
+            background-color: var(--card-back);
+            color: #7f8c8d;
+            font-size: clamp(1.8rem,5vw,2.6rem);
+            border: 2px solid #5d6d7e;
+        }
+
+        .card-front {
+            background-color: var(--card-front);
+            color: var(--text-color);
+            transform: rotateY(180deg);
+            font-family:'Noto Sans TC', 'Black Han Sans','Noto Sans TC', 'Noto Sans KR',sans-serif;
+            font-size: clamp(1rem,3.5vw,1.35rem);
+            word-break: keep-all;
+            line-height: 1.3;
+            border: 3px solid var(--accent);
+        }
+
+        /* ── 난이도 선택(시작화면) ── */
+        .diff-toggle { display: flex; gap: 8px; width: 100%; max-width: 320px; margin: 4px auto 0; }
+        .diff-btn {
+            flex: 1; padding: 10px 8px; border-radius: 12px; border: 1.5px solid rgba(255,255,255,0.2);
+            background: rgba(0,0,0,0.25); color: rgba(255,255,255,0.5);
+            font-family: 'Noto Sans TC', 'Black Han Sans', sans-serif; font-size: 0.85rem; line-height: 1.5;
+            cursor: pointer; transition: all 0.15s; min-height: 48px;
+        }
+        .diff-btn.active { border-color: var(--green); background: rgba(46,204,113,0.14); color: var(--green); }
+        .diff-btn.locked { opacity: 0.45; }
+        .diff-hint { font-size: 0.72rem; color: rgba(255,255,255,0.35); text-align: center; line-height: 1.5; margin: 8px 0 6px; }
+
+
+        /* 오버레이 */
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(22,32,42,0.97);
+            display: flex; flex-direction: column;
+            justify-content: flex-start; align-items: center;
+            z-index: 100; padding: max(20px,env(safe-area-inset-top)) 20px 24px;   /* 배너 자리는 .overlay::after 스페이서가 잡는다 */
+            overflow-y: auto;
+            touch-action: pan-y;
+            overscroll-behavior: contain;
+        }
+        .overlay-inner {
+            display: flex; flex-direction: column;
+            align-items: center; gap: 10px;
+            width: 100%; max-width: 480px;
+            margin: auto;
+        }
+        .overlay h2 { color: var(--accent); font-family:'Noto Sans TC', 'Black Han Sans','Noto Sans TC', 'Noto Sans KR',sans-serif; font-size: clamp(1.6rem,5vw,2.6rem); margin-bottom: 4px; text-align: center; }
+        .overlay p  { font-size: clamp(0.95rem,3vw,1.2rem); color: #ecf0f1; text-align: center; line-height: 1.7; word-break: keep-all; }
+
+        .btn {
+            background: var(--accent); color: white; border: none;
+            padding: 14px 40px; font-size: clamp(1.2rem,4vw,1.5rem); font-family:'Noto Sans TC', 'Black Han Sans','Noto Sans TC', 'Noto Sans KR',sans-serif;
+            border-radius: 50px; cursor: pointer; box-shadow: 0 5px 18px rgba(0,0,0,0.4);
+            transition: transform 0.1s, background 0.2s;
+            min-height: 52px; touch-action: manipulation;
+        }
+        .btn:active { transform: scale(0.96); background: #d35400; }
+        .btn-secondary {
+            background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.75);
+            border: 1px solid rgba(255,255,255,0.25);
+        }
+        .btn-secondary:active { background: rgba(255,255,255,0.22); }
+
+
+        /* ── 스테이지 클리어 직급 미리보기 ── */
+        .rank-preview-box { box-sizing:border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 14px;
+            padding: 12px 20px;
+            width: 100%;
+            
+            margin: 4px auto;
+        }
+        .rank-preview-title {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.35);
+            font-family: 'Noto Sans TC', 'Black Han Sans', sans-serif;
+            letter-spacing: 2px;
+        }
+        .rank-preview-grade {
+            font-family: 'Noto Sans TC', 'Black Han Sans', sans-serif;
+            font-size: clamp(1.1rem, 4vw, 1.5rem);
+            font-weight: bold;
+            text-align: center;
+        }
+        .rank-preview-next {
+            font-size: 0.78rem;
+            color: rgba(255,255,255,0.4);
+            text-align: center;
+            line-height: 1.5;
+        }
+        .rank-preview-bar-wrap {
+            width: 100%;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50px;
+            height: 6px;
+            overflow: hidden;
+        }
+        .rank-preview-bar {
+            height: 100%;
+            border-radius: 50px;
+            transition: width 0.6s ease;
+        }
+
+
+        /* ── 스테이지 클리어 미니 랭킹 ── */
+        .mini-rank-wrap { box-sizing:border-box;
+            width: 100%;
+            
+            margin: 4px auto 0;
+        }
+        .mini-rank-title {
+            font-size: 0.72rem;
+            color: rgba(255,255,255,0.3);
+            font-family: 'Noto Sans TC', 'Black Han Sans', sans-serif;
+            letter-spacing: 2px;
+            text-align: center;
+            margin-bottom: 4px;
+        }
+        .mini-rank-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            margin-bottom: 2px;
+            background: rgba(255,255,255,0.03);
+        }
+        .mini-rank-row.mini-me {
+            background: rgba(52,152,219,0.18);
+            border: 1px solid rgba(52,152,219,0.35);
+        }
+        .mini-rank-row.mini-me-projected {
+            background: rgba(46,204,113,0.15);
+            border: 1px solid rgba(46,204,113,0.4);
+        }
+        .mini-rank-num { font-family:'Noto Sans TC', 'Black Han Sans','Noto Sans TC', 'Noto Sans KR',sans-serif; width: 28px; text-align:center; flex-shrink:0; }
+        .mini-rank-name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:rgba(255,255,255,0.8); }
+        .mini-rank-score { font-family:'Noto Sans TC', 'Black Han Sans','Noto Sans TC', 'Noto Sans KR',sans-serif; color:#f1c40f; white-space:nowrap; font-size:0.8rem; }
+        .mini-rank-loading { text-align:center; padding:8px; color:rgba(255,255,255,0.3); font-size:0.8rem; }
+
+        /* 결과 점수 */
+        .result-score-box {
+            background: rgba(0,0,0,0.3); border-radius: 16px;
+            padding: 14px 36px;
+            text-align: center; border: 2px solid var(--accent);
+            width: 100%;
+        }
+        .result-score-box .big-score   { font-family:'Noto Sans TC', 'Black Han Sans','Noto Sans TC', 'Noto Sans KR',sans-serif; font-size: clamp(2rem,7vw,3rem); color: #f1c40f; }
+        .result-score-box .score-detail{ font-size: clamp(0.78rem,2.5vw,0.95rem); color: rgba(255,255,255,0.6); margin-top: 4px; }
+
+        /* 이름 등록 */
+        .name-row { display: flex; gap: 8px; width: 100%; }
+        .name-row input {
+            width: 0; flex: 1; min-width: 0; max-width: 180px;
+            padding: 11px 14px; border-radius: 10px; border: 2px solid #5d6d7e;
+            background: rgba(255,255,255,0.1); color: white;
+            font-size: clamp(1rem,3vw,1.1rem); font-family: 'Noto Sans TC', 'Noto Sans KR';
+            outline: none; text-align: center; min-height: 48px;
+        }
+        .name-row input::placeholder { color: rgba(255,255,255,0.4); }
+        .name-row input:focus { border-color: var(--accent); }
+        .name-row button {
+            padding: 11px 18px; background: var(--blue); border: none;
+            border-radius: 10px; color: white; font-weight: bold;
+            font-size: clamp(0.9rem,3vw,1rem); cursor: pointer;
+            font-family: 'Noto Sans TC', 'Noto Sans KR'; min-height: 48px; white-space: nowrap;
+        }
+        .name-row button:active { opacity: 0.8; }
+
+        /* 랭킹 */
+        .rank-wrap {
+            width: 100%;
+            background: rgba(0,0,0,0.25); border-radius: 12px;
+            overflow: hidden;
+        }
+        .rank-header {
+            display: grid; grid-template-columns: 44px minmax(46px,1fr) minmax(0,70px) minmax(40px,70px);
+            padding: 8px 12px;
+            background: rgba(0,0,0,0.35);
+            font-size: 0.82rem; color: rgba(255,255,255,0.5);
+            font-weight: bold; text-align: center;
+        }
+        /* 본문만 스크롤한다 — 헤더(순위/이름/직급/점수)는 고정.
+           예전엔 상한이 없어 목록이 15행 통째로 늘어나고 스크롤도 안 됐다(2026-09-14 제보). */
+        #rank-body { max-height: 300px; overflow-y: auto; }
+        #rank-body::-webkit-scrollbar { width: 4px; }
+        #rank-body::-webkit-scrollbar-thumb { background: rgba(52,152,219,0.35); border-radius: 2px; }
+        .rank-row {
+            display: grid; grid-template-columns: 44px minmax(46px,1fr) minmax(0,70px) minmax(40px,70px);
+            padding: 9px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            font-size: clamp(0.82rem,2.5vw,0.96rem); text-align: center; align-items: center;
+        }
+        .rank-row .rank-name, .rank-row .rank-grade { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .rank-row .rank-num        { font-family:'Noto Sans TC', 'Black Han Sans','Noto Sans TC', 'Noto Sans KR',sans-serif; }
+        .rank-row .rank-num.gold   { color: #f1c40f; }
+        .rank-row .rank-num.silver { color: #bdc3c7; }
+        .rank-row .rank-num.bronze { color: #cd7f32; }
+        .rank-row .rank-score      { color: #f1c40f; font-weight: bold; font-family:'Noto Sans TC', 'Black Han Sans','Noto Sans TC', 'Noto Sans KR',sans-serif; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .rank-me { background: rgba(52,152,219,0.15); }
+        .rank-delta { font-size:0.72rem; margin-left:6px; padding:2px 9px; border-radius:20px; font-weight:700; }
+        .rank-delta.up { color:#2ecc71; background:rgba(46,204,113,0.14); }
+        .rank-delta.down { color:#e74c3c; background:rgba(231,76,60,0.14); }
+        .rank-delta.flat { color:rgba(255,255,255,0.4); background:rgba(255,255,255,0.06); }
+        #my-rank-neighbors { box-sizing:border-box; display:none; width:100%; margin-top:8px; border-radius:14px; border:1px solid rgba(52,152,219,0.25); }
+        .rn-row { display:flex; align-items:center; padding:8px 14px; font-size:0.82rem; background:rgba(255,255,255,0.02); gap:8px; }
+        .rn-row.rn-me { background:rgba(52,152,219,0.15); font-weight:700; }
+        .rn-label { color:rgba(255,255,255,0.35); font-size:0.68rem; width:52px; flex-shrink:0; }
+        .rn-name { flex:1; color:#fff; text-align:left; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .rn-score { color:var(--blue); font-weight:700; flex-shrink:0; }
+        .next-tier-msg { text-align:center; font-size:0.78rem; color:rgba(255,255,255,0.75); padding:9px 14px; background:rgba(255,255,255,0.03); }
+
+        .spinner { width: 28px; height: 28px; border: 3px solid rgba(255,255,255,0.2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 12px auto; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .status-msg { font-size: 0.88rem; min-height: 20px; text-align: center; }
+        .status-msg.ok  { color: var(--green); }
+        .status-msg.err { color: var(--accent2); }
+
+        @keyframes pop       { 50% { transform: scale(1.08); } }
+        @keyframes shakeCard {
+            0%,100% { transform: rotateY(180deg); }
+            25%     { transform: rotateY(172deg); }
+            75%     { transform: rotateY(188deg); }
+        }
+    
+        
+
+        /* ── 공통 하단 버튼 ── */
+        .action-btns {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            
+            margin-top: 16px;
+        }
+        .btn-restart {
+            padding: 13px 28px;
+            border-radius: 50px;
+            border: 2px solid rgba(0,230,118,0.7);
+            background: rgba(0,230,118,0.12);
+            color: #00e676;
+            font-family: 'Noto Sans TC', 'Black Han Sans', 'Noto Sans TC', 'Black Han Sans', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.18s;
+            min-height: 48px;
+        }
+        .btn-restart:active { background: rgba(0,230,118,0.3); }
+        .btn-hub {
+            padding: 13px 28px;
+            border-radius: 50px;
+            border: 1.5px solid rgba(255,255,255,0.25);
+            background: rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.75);
+            font-family: 'Noto Sans TC', 'Black Han Sans', 'Noto Sans TC', 'Black Han Sans', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.18s;
+            min-height: 48px;
+        }
+        .btn-hub:active { background: rgba(255,255,255,0.18); }
+        /* 시작화면 버튼 크기 통일 (게임시작·사용방법·메인으로 나가기) */
+        #start-screen .action-btns > button {
+            width: 100%; box-sizing: border-box;
+            padding: 14px 20px; min-height: 56px; font-size: 1.15rem;
+        }
+
+        
+        /* ── 목표달성 팡파레 오버레이 ── */
+        #fanfare-overlay {
+            display: none; position: fixed; inset: 0; z-index: 9999;
+            align-items: center; justify-content: center;
+            pointer-events: none;
+        }
+        #fanfare-overlay.show { display: flex; }
+        #fanfare-box {
+            background: linear-gradient(135deg, rgba(10,15,30,0.97), rgba(5,10,20,0.97));
+            border: 2px solid gold;
+            border-radius: 24px;
+            padding: 36px 32px 28px;
+            text-align: center;
+            max-width: 320px; width: 88%;
+            box-shadow: 0 0 60px rgba(255,215,0,0.4), 0 24px 60px rgba(0,0,0,0.7);
+            animation: fanfareIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+            pointer-events: auto;
+            position: relative;
+            overflow: hidden;
+        }
+        @keyframes fanfareIn {
+            from { opacity:0; transform: scale(0.6) translateY(30px); }
+            to   { opacity:1; transform: scale(1) translateY(0); }
+        }
+        #fanfare-box::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: radial-gradient(ellipse at 50% 0%, rgba(255,215,0,0.12) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .fanfare-emoji { font-size: 3.2rem; margin-bottom: 10px; animation: bounce 0.6s ease infinite alternate; }
+        @keyframes bounce { from { transform:translateY(0) } to { transform:translateY(-8px) } }
+        .fanfare-title {
+            font-family:'Noto Sans TC', 'Black Han Sans', 'Noto Sans TC', 'Black Han Sans', sans-serif;
+            font-size: 1.7rem; color: gold;
+            text-shadow: 0 0 20px rgba(255,215,0,0.8);
+            margin-bottom: 6px; line-height: 1.2;
+        }
+        .fanfare-grade {
+            font-size: 1.1rem; color: #fff;
+            margin-bottom: 10px; font-weight: 700;
+        }
+        .fanfare-sub {
+            font-size: 0.82rem; color: rgba(255,255,255,0.5);
+            line-height: 1.6; margin-bottom: 20px;
+        }
+        .fanfare-close-btn {
+            background: linear-gradient(135deg, gold, #f39c12);
+            border: none; border-radius: 50px;
+            padding: 12px 32px;
+            font-family: 'Noto Sans TC', 'Black Han Sans', sans-serif; font-size: 1rem;
+            color: #000; cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+            box-shadow: 0 4px 16px rgba(255,215,0,0.4);
+        }
+        .fanfare-close-btn:active { transform: scale(0.96); }
+        /* 별 파티클 */
+        .fanfare-stars { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+        .fstar {
+            position: absolute; width: 6px; height: 6px;
+            border-radius: 50%; opacity: 0;
+            animation: fstarAnim var(--dur) var(--delay) ease-out forwards;
+        }
+        @keyframes fstarAnim {
+            0%   { opacity:1; transform: translate(0,0) scale(1); }
+            100% { opacity:0; transform: translate(var(--tx), var(--ty)) scale(0); }
+        }
+
+        /* ── 인터랙티브 튜토리얼 (사용방법) ──────────────────────────────
+           2026-09-15: 게임2만 옛 스크린샷 방식(guide/g2_*.png)을 쓰고 있었다.
+           나머지 네 게임은 이미 "직접 눌러 보는" 튜토리얼로 바뀌어 있었는데
+           게임2만 남아 UI 가 어긋났다(사용자 지적: "게임2는 왜 아직도 옛
+           스크린샷 방식이지?"). game1_acid 의 구조를 그대로 따르되, 카드는
+           이 게임의 실제 카드(뒤집기·짝맞춤)를 흉내 낸다. */
+        .tut { display:none; position:fixed; inset:0; z-index:9999; flex-direction:column;
+            background: rgba(2,8,16,0.92); backdrop-filter: blur(6px); }
+        .tut.show { display:flex; animation: tutPop .25s ease; }
+        @keyframes tutPop { from{opacity:0} to{opacity:1} }
+        .tut-top { display:flex; align-items:center; gap:9px; padding:calc(12px + env(safe-area-inset-top)) 18px 10px; }
+        .tut-top .tt-title { font-family:'Noto Sans TC', 'Black Han Sans',sans-serif; font-size:1.05rem; color:#00f2ff; }
+        .tut-top .tt-badge { font-size:.8rem; font-weight:800; color:#021018; background:#ffd700; border-radius:50px; padding:3px 12px; }
+        .tut-top .tt-skip { margin-left:auto; background:rgba(255,255,255,0.08); border:none; color:#ccc;
+            font-family:'Noto Sans TC', 'Noto Sans KR',sans-serif; font-weight:800; font-size:.82rem; padding:8px 14px; border-radius:50px; cursor:pointer; }
+        .tut-stage { flex:1; min-height:0; overflow-y:auto; display:flex; flex-direction:column;
+            align-items:center; justify-content:safe center; gap:16px; padding:10px 20px 4px; }
+        .tut-status { display:flex; align-items:center; gap:9px;
+            font-family:'Noto Sans TC', 'Black Han Sans',sans-serif; font-size:1.05rem; color:#fff;
+            background:linear-gradient(180deg,#0d1830,#0a1120);
+            border:2px solid rgba(0,242,255,0.25); border-radius:50px; padding:8px 22px;
+            box-shadow: 0 0 12px rgba(0,242,255,0.15); transition:.3s; }
+        .tut-status b { display:inline-block; min-width:1.5em; text-align:center; color:#2ecc71; }
+        .tut-status .tt-bar { color:#8aa; }
+        .tut-status.tut-hurt { animation:shakeCard .4s; }
+        .tut-status.tut-hurt b { color:#e74c3c; }
+
+        /* 실제 카드판을 흉내낸 미니 그리드 (3×2) */
+        .tut-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px;
+            width:100%; max-width:330px; }
+        .tut-card { perspective:900px; height:78px; }
+        .tut-card.tut-live { cursor:pointer; }
+        .tut-ci { position:relative; width:100%; height:100%; transition:transform .38s;
+            transform-style:preserve-3d; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.35); }
+        .tut-card.flip .tut-ci { transform:rotateY(180deg); }
+        .tut-cb, .tut-cf { position:absolute; inset:0; border-radius:12px; padding:5px;
+            -webkit-backface-visibility:hidden; backface-visibility:hidden;
+            display:flex; align-items:center; justify-content:center; text-align:center; }
+        .tut-cb { background:#34495e; color:#7f8c8d; font-size:1.6rem; border:2px solid #5d6d7e; }
+        .tut-cf { background:#ecf0f1; transform:rotateY(180deg); border:3px solid #e67e22;
+            font-family:'Noto Sans TC', 'Black Han Sans','Noto Sans TC', 'Noto Sans KR',sans-serif; font-size:.8rem;
+            line-height:1.25; word-break:keep-all; }
+        .tut-card.tut-target .tut-ci { box-shadow:0 0 0 4px #ffd700, 0 0 18px rgba(255,215,0,0.5);
+            animation:tutPulse 1.05s ease-in-out infinite; }
+        .tut-card.tut-ok { opacity:.55; }
+        .tut-card.tut-ok .tut-cf { border-color:#2ecc71; }
+        .tut-card.tut-bad .tut-ci { animation:shakeCard .4s ease; }
+        .tut-card.tut-bad .tut-cf { border-color:#e74c3c; }
+        @keyframes tutPulse { 0%,100%{ transform:scale(1) } 50%{ transform:scale(1.05) } }
+        @media (max-width:360px){ .tut-card{ height:68px; } .tut-cf{ font-size:.72rem; } }
+
+        .tut-float { position:absolute; font-family:'Noto Sans TC', 'Black Han Sans',sans-serif; font-size:1.05rem;
+            font-weight:bold; pointer-events:none; z-index:5; animation:tutFloatUp .9s forwards;
+            color:#fff; text-shadow:0 0 6px rgba(0,0,0,0.8); }
+        @keyframes tutFloatUp { 0%{opacity:1;transform:translateY(0)} 100%{opacity:0;transform:translateY(-26px)} }
+        .tut-bubble { background: linear-gradient(180deg,#0d1830,#0a1120); border-top:2px solid rgba(0,242,255,0.25);
+            border-radius:20px 20px 0 0; box-shadow: 0 -4px 18px rgba(0,242,255,0.1);
+            padding:20px 22px calc(18px + env(safe-area-inset-bottom)); }
+        .tut-bubble-text { font-size:1rem; line-height:1.8; color:#dfe7ef; word-break:keep-all;
+            text-align:center; min-height:3.2em; display:block; }
+        .tut-bubble-text b { color:#00f2ff; }
+        .tut-hint { text-align:center; font-family:'Noto Sans TC', 'Black Han Sans',sans-serif; color:#ffd700;
+            font-size:1rem; margin-top:10px; animation:tutBlink 1s ease-in-out infinite; }
+        @keyframes tutBlink { 0%,100%{ opacity:1 } 50%{ opacity:.4 } }
+        .tut-next { display:block; width:100%; margin-top:14px; padding:15px; border-radius:14px;
+            border:2px solid #00f2ff; color:#021018;
+            background: linear-gradient(135deg,#00f2ff,#0084ff); box-shadow: 0 0 16px rgba(0,242,255,0.4);
+            font-family:'Noto Sans TC', 'Black Han Sans',sans-serif; font-size:1.15rem; cursor:pointer; }
+
+        /*BTNUNI-START*/
+/* ── 화면 버튼 규격 통일 (2026-09-14 사용자 지시: "제각각인 크기를 통일시켜") ──
+   시작화면(게임 시작/사용방법/메인으로)과 결과화면(다시 하기/메인으로)이 게임마다
+   폭·높이·글자크기가 다 달랐다. 한 줄에 하나씩, 오버레이 폭에 꽉 차게, 높이 52px 로 맞춘다. */
+.overlay .action-btns, .ovl .action-btns, .overlay .brow, .ovl .brow {
+  display: flex; flex-direction: column; align-items: stretch;
+  gap: 10px; width: 100%; max-width: none;
+}
+.overlay .action-btns > button, .overlay .action-btns > a,
+.ovl .action-btns > button, .ovl .action-btns > a,
+.overlay .brow > button, .ovl .brow > button,
+.overlay .btn-restart, .overlay .btn-hub, .overlay .sbtn, .overlay .revive-btn, .overlay .btn, .overlay .pill,
+.ovl .btn-restart, .ovl .btn-hub, .ovl .sbtn, .ovl .revive-btn, .ovl .btn, .ovl .pill,
+.overlay .big-btn, .ovl .big-btn, .overlay .pill-btn, .ovl .pill-btn {
+  width: 100%; max-width: none; box-sizing: border-box;
+  min-height: 52px; height: auto; padding: 13px 20px;
+  border-radius: 50px;
+  font-size: clamp(1rem, 3.6vw, 1.15rem);
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+/* 저장 행은 [입력칸][저장] 가로 배치라 예외 — 버튼만 폭을 줄인다 */
+.overlay .save-row, .ovl .save-row, .overlay #savesec .brow, .ovl #savesec .brow { flex-direction: row; }
+.overlay .save-row > button, .ovl .save-row > button,
+.overlay #savesec .brow > button, .ovl #savesec .brow > button { width: auto; min-width: 104px; flex: 0 0 auto; }
+/*BTNUNI-END*/
+
+/*FONTUNI*/
+/* ── 폰트 통일 (2026-09-14) ──
+   제목·버튼 = Black Han Sans / 본문 = Noto Sans KR. 둘 다 OFL 이라 상업 배포에 제약이 없다.
+   ⚠ Orbitron 은 **라틴 전용**이라 한글에 쓰면 시스템 폰트로 대체되고 자간만 벌어져
+     "회계 플라이트"처럼 멋없게 나온다(사용자 지적). 숫자·영문 전용으로만 쓴다.
+   Jua 는 게임마다 섞여 있어 걷어냈다. */
+.gtitle, .logo, .ov-title, .overlay-title, h1, h2 { font-family: 'Noto Sans TC', 'Black Han Sans', 'Noto Sans TC', 'Noto Sans KR', sans-serif !important; }
+
+/* 좁은 화면(360dp급 안드로이드)에서 머리줄 버튼이 제각각 줄어들어 '홈'이 28px까지 찌그러졌다 —
+   최소 폭을 맞추고 줄어들지 않게 한다. 대신 왼쪽 시간·점수 칸이 줄어든다(2026-09-27 에뮬레이터 QA) */
+@media (max-width:400px){ .mute-btn { min-width:44px; flex-shrink:0; justify-content:center; text-align:center; } }
+        /* 小直式螢幕(320×568)— 標題曾折成3行(右邊有3個按鈕)→ 改成1行，拿掉裝飾拼圖 */
+        header h1 { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+        @media (max-width: 400px) {
+            header { padding-left: 10px; padding-right: 10px; }
+            header h1 { font-size: 1.05rem; }
+            header h1 .deco { display: none; }
+            header button:not(.mute-btn), header .hub-link { padding-left: 9px !important; padding-right: 9px !important; }
+        }
+        /* 橫向螢幕(高度較矮): 壓縮標題與狀態列以讓出卡片高度(排列由 calcCardSize 處理) */
+        @media (orientation: landscape) and (max-height: 520px) {
+            header { padding-top: max(6px, env(safe-area-inset-top)); }
+            h1 { font-size: clamp(1.1rem, 3vw, 1.5rem); }
+            .status-bar { margin-top: 4px; margin-bottom: 2px; padding-top: 4px; padding-bottom: 4px; }
+            .score-formula { margin-top: 0; margin-bottom: 2px; font-size: .72rem; }
+            .grid-container { padding-bottom: 6px; }
+        }
+</style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="ask.js?v=79"></script>
+    <script src="wrongnote.js?v=79"></script>
+    <script src="growth.js?v=79"></script>
+<script src="streak.js?v=79"></script>
+<script src="examday.js?v=79"></script>
+<script src="remind.js?v=79"></script>
+    <script src="difficulty.js?v=79"></script>
+    <script src="readable.js?v=79"></script>
+    <script src="stepmode.js?v=79"></script>
+    <script src="daylog.js?v=79"></script><script src="amev.js?v=1"></script><script src="skill.js?v=1"></script>
+<script src="haptic.js?v=1"></script>
+    <script src="review-prompt.js?v=79"></script>
+</head>
+<body>
+
+
+
+    <!-- 🎵 BGM 오디오 엘리먼트 -->
+    <script src="bgm.js?v=79"></script>
+
+    <header>
+        <h1 style="flex:1;text-align:center;"><span class="deco">🧩 </span>記憶翻牌<span class="deco"> 🧩</span></h1>
+        <div style="display:flex;gap:6px;flex-shrink:0;">
+            <!-- 🎵 음소거 버튼 -->
+            <button class="mute-btn" id="mute-btn" onclick="toggleMute()" title="背景音樂靜音">🎵</button>
+            <button onclick="quitGame()" style="font-family:'Noto Sans TC', 'Black Han Sans','Noto Sans TC', 'Noto Sans KR',sans-serif;font-size:0.9rem;color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.3);padding:7px 12px;border-radius:50px;background:rgba(0,0,0,0.2);cursor:pointer;min-height:44px;">離開</button>
+            <a class="hub-link" href="index.html">首頁</a>
+        </div>
+    </header>
+
+    <div class="status-bar">
+        <div class="moves">答錯: <span id="move-count">0</span>次</div>
+        <div class="matches">配對: <span id="match-count">0</span> / <span id="total-pairs">2</span></div>
+        <div class="timer" id="timer-display">⏱ 0.0s</div>
+    </div>
+    <div class="score-formula" id="score-formula">第 1 關 (2×2)</div>
+
+    <div class="grid-container" id="grid"></div>
+    <!-- 慢慢學 모드 말풍선 — 튜토리얼과 같은 모양 -->
+    <div id="step-coach" class="tut-bubble"><div class="tut-bubble-text"></div><div class="sc-btns"></div></div>
+
+    <!-- 시작 화면 -->
+    <div id="start-screen" class="overlay">
+        <div class="overlay-inner">
+            <h2>🧩 記憶翻牌</h2>
+            <p style="margin-bottom:6px;line-height:1.8;">會計項目和它的說明是一組配對。<br>
+               例：<b style="color:var(--blue)">郵電費</b> ↔ <b style="color:var(--accent)">電話費、郵資</b><br><br>
+               <span style="font-size:0.92rem;color:rgba(255,255,255,0.6)">
+                 全部配對完就進入下一關！<br><b>可以一直玩下去</b>，卡片和分數會越來越多。
+               </span>
+            </p>
+
+            <div class="diff-toggle" id="diff-toggle">
+                <button class="diff-btn" id="diff-btn-1" onclick="selectDifficulty(1)">難度1<br><span style="font-size:.72rem;opacity:.7">會計項目 ↔ 意思</span></button>
+                <button class="diff-btn locked" id="diff-btn-2" onclick="selectDifficulty(2)">難度2 🔒<br><span style="font-size:.72rem;opacity:.7">會計項目 ↔ 類別</span></button>
+            </div>
+            <div class="diff-hint" id="diff-hint"></div>
+<div id="step-host" style="width:100%"></div>
+
+            <!-- 계급 기준표 -->
+            <div style="
+                background:rgba(0,0,0,0.3);
+                border:1px solid rgba(255,255,255,0.12);
+                border-radius:14px;
+                padding:12px 16px;
+                width:100%;
+                font-size:0.82rem;
+                line-height:2;
+            ">
+                <div style="text-align:center;color:#f39c12;font-family:'Noto Sans TC', 'Black Han Sans','Noto Sans TC', 'Noto Sans KR',sans-serif;font-size:0.88rem;margin-bottom:4px;letter-spacing:2px;">📊 等級標準 (累計分數)</div>
+                <!-- RANK_TIERS(단일 소스)에서 렌더링 -->
+                <div id="grade-table"></div>
+            </div>
+
+            <div class="action-btns" style="align-items:stretch; margin-top:20px; gap:10px;">
+                <button class="btn" onclick="startGame()">▶ 開始</button>
+                <button class="btn-hub" onclick="openGuide()">📖 玩法說明</button>
+                <button class="btn-hub" onclick="exitToHub(this)">🏠 回首頁</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── 인터랙티브 튜토리얼 (사용방법) ── -->
+    <div id="tutorial" class="tut">
+      <div class="tut-top">
+        <span class="tt-title">📖 玩法說明</span>
+        <span class="tt-badge" id="tut-badge">1/6</span>
+        <button class="tt-skip" onclick="Tutorial.close()">略過</button>
+      </div>
+      <div class="tut-stage">
+        <div class="tut-status" id="tut-status">
+          <span>❌ 答錯 <b id="tut-wrong">0</b></span>
+          <span class="tt-bar">|</span>
+          <span>✅ 配對 <b id="tut-match">0</b>/3</span>
+        </div>
+        <div class="tut-grid" id="tut-grid"></div>
+      </div>
+      <div class="tut-bubble">
+        <div class="tut-bubble-text" id="tut-text"></div>
+        <div class="tut-hint" id="tut-hint" style="display:none"></div>
+        <button class="tut-next" id="tut-next" onclick="Tutorial.next()">下一步 ▶</button>
+      </div>
+    </div>
+
+    <!-- 결과 화면 -->
+    <div id="result-screen" class="overlay" style="display:none;">
+        <div class="overlay-inner">
+            <h2>CLEAR! 🎉</h2>
+            <div id="result-rank" style="font-family:'Noto Sans TC', 'Black Han Sans','Noto Sans TC', 'Noto Sans KR',sans-serif;font-size:clamp(1.4rem,5vw,2rem);margin-bottom:4px;">等級</div>
+            <p id="result-msg" style="margin-bottom:8px;">記憶力超強！</p>
+
+            <div class="result-score-box">
+                <div class="big-score" id="final-score">0分</div>
+                <div class="score-detail" id="score-detail">0分</div>
+            </div>
+
+            <div id="lv-unlock-msg" style="display:none; font-family:'Noto Sans TC', 'Black Han Sans',sans-serif; font-size:1rem; color:#000; background:linear-gradient(135deg,gold,#f39c12); border-radius:50px; padding:8px 22px; text-align:center; margin-top:2px;">🔓 難度2 解鎖！這次改成和<b>類別</b>(資產、負債、權益、收益、費損)配對</div>
+
+            <!-- 스테이지 클리어 직급 미리보기 -->
+            <div id="rank-preview-box" class="rank-preview-box" style="display:none;"></div>
+
+            <!-- 스테이지 클리어 미니 랭킹 -->
+            <div class="mini-rank-wrap" id="mini-rank-wrap" style="display:none;">
+                <div class="mini-rank-title">🏆 目前排行榜</div>
+                <div id="mini-rank-body"><div class="mini-rank-loading">載入中...</div></div>
+            </div>
+
+            <div class="name-row">
+                <input type="text" id="player-name" placeholder="輸入暱稱" maxlength="20">
+                <button id="save-btn" onclick="saveScore()">登錄 📝</button>
+            </div>
+            <div class="status-msg" id="save-status"></div>
+            <div id="my-rank-badge" style="display:none; font-family:'Noto Sans TC', 'Black Han Sans',sans-serif; font-size:0.95rem; color:var(--blue); background:rgba(52,152,219,0.12); border:1px solid rgba(52,152,219,0.3); border-radius:50px; padding:6px 18px; text-align:center;"></div>
+            <div id="my-rank-neighbors"></div>
+
+            <div class="rank-wrap">
+                <div id="rank-lv-label" style="text-align:center;font-size:.78rem;font-weight:700;letter-spacing:.5px;color:rgba(255,255,255,.55);margin:6px 0 4px;"></div>
+                <div class="rank-header">
+                    <span>名次</span><span>暱稱</span><span>等級</span><span>分數</span>
+                </div>
+                <div id="rank-body"><div class="spinner"></div></div>
+            </div>
+
+            <button class="btn" id="stage-save-btn" onclick="stageSaveScore()" style="display:none;background:linear-gradient(135deg,#f1c40f,#e67e22);color:#1a1a2e;">🏆 登錄排行榜</button>
+            <button class="btn" id="next-stage-btn" onclick="nextStage()" style="display:none;background:var(--accent2);">下一關 ▶</button>
+            <div class="action-btns" style="align-items:center;">
+                <button class="btn-restart" id="restart-btn" onclick="startGame()">↺ 再玩一次</button>
+                <button class="btn-hub" onclick="exitToHub(this)">🏠 回首頁</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = "https://pjagaulfivafamhhiveg.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_yck2tAKApEjVSJOJMVSXuQ_AGaNatuI";
+    const { createClient } = supabase;
+    const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+        const GAME_ID = "memory";
+
+    // ── 難度2 점수는 따로 저장하고 따로 랭킹을 낸다(2026-09-18, 사용자 요청).
+    //    game_id 는 '<게임>_d2'. 랭킹·내 순위는 결과 화면에만 있고, LV 는 다음 판을 시작할 때까지
+    //    방금 끝낸 판의 값을 유지하므로 LV 하나로 저장·조회 대상을 정한다.
+    //    (허브 스테이지 해금용 hub_<게임>_best 는 단계와 무관하게 그대로 둔다 — 2단계로 잘해도 다음 게임은 열려야 한다.)
+    function scoreIdFor(lv) { return lv === 2 ? GAME_ID + '_d2' : GAME_ID; }
+    function rankId() { return scoreIdFor(typeof LV !== 'undefined' ? LV : 1); }
+
+        // ══════════════════════════════════════
+        // 🎵 BGM 관리
+        // ══════════════════════════════════════
+        const bgm = BGMAudio.create('../bgm2_memory.mp3?v=79');
+        bgm.volume = 0.5;
+
+        // 음소거 상태: localStorage에 저장해서 다음 게임에도 유지
+        // 게임별 키(memory_muted)가 있으면 우선, 없으면 허브 전역 토글(hub_muted) 참조
+        let isMuted = localStorage.getItem('memory_muted') !== null
+            ? localStorage.getItem('memory_muted') === 'true'
+            : localStorage.getItem('hub_muted') === 'true';
+        applyMuteState();
+
+        function applyMuteState() {
+            bgm.muted = isMuted;
+            const btn = document.getElementById('mute-btn');
+            if (btn) {
+                btn.textContent = isMuted ? '🔇' : '🎵';
+                btn.classList.toggle('muted', isMuted);
+            }
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            localStorage.setItem('memory_muted', isMuted);
+            applyMuteState();
+        }
+
+        // ── 정답/오답 햅틱 — haptic.js(앱=Capacitor Haptics, 웹=navigator.vibrate) ──
+        function hapticCorrect() { if (window.Haptic) Haptic.correct(); }
+        function hapticWrong() { if (window.Haptic) Haptic.wrong(); }
+
+        // BGM 재생 (브라우저 자동재생 정책 대응: 반드시 사용자 인터랙션 이후 호출)
+        let bgmFadeInterval = null; // 진행 중인 페이드아웃(bgmStop) 있으면 재생 시작 시 정리 — '다시 하기' 연타 시 무음 시작 방지
+        function bgmPlay() {
+            if (bgmFadeInterval) { clearInterval(bgmFadeInterval); bgmFadeInterval = null; }
+            bgm.volume = 0.5;
+            if (bgm.paused) {
+                bgm.play().catch(() => {
+                    // 자동재생 차단 시 조용히 무시
+                });
+            }
+        }
+
+        // BGM 정지 (페이드 아웃)
+        function bgmStop() {
+            if (bgm.paused) return;
+            if (bgmFadeInterval) clearInterval(bgmFadeInterval);
+            bgmFadeInterval = setInterval(() => {
+                if (bgm.volume > 0.05) {
+                    bgm.volume = Math.max(0, bgm.volume - 0.05);
+                } else {
+                    bgm.volume = 0;
+                    bgm.pause();
+                    bgm.currentTime = 0;
+                    bgm.volume = 0.5; // 다음 재생을 위해 볼륨 복원
+                    clearInterval(bgmFadeInterval);
+                    bgmFadeInterval = null;
+                }
+            }, 50);
+        }
+
+        // ══════════════════════════════════════
+        // 🔊 오디오 (효과음)
+        // ══════════════════════════════════════
+        /* ⚠ AudioContext 가 없거나 막힌 환경(오래된 WebView·잠금 모드·일부 관리 브라우저)에서
+           이 줄이 그냥 던지면 **이 <script> 블록 전체가 중단**되어 게임이 통째로 안 켜진다.
+           보카바리스타가 speechSynthesis 로, 우리가 localStorage 로 똑같이 당했다.
+           효과음은 없어도 게임은 돌아야 한다(2026-09-16 다른 프로젝트 기록 대조에서 발견). */
+        let audioCtx = null;
+        try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
+        function initAudio() {
+            try { if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); } catch (e) {}
+            bgmPlay(); // 첫 인터랙션(게임 시작 버튼 클릭) 시 BGM 시작
+        }
+
+        function playSound(type) {
+            try {
+                const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                const now = audioCtx.currentTime;
+                if (type === 'flip') {
+                    osc.type = 'sine'; osc.frequency.setValueAtTime(400, now);
+                    gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                    osc.start(now); osc.stop(now + 0.1);
+                } else if (type === 'match') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(600, now); osc.frequency.linearRampToValueAtTime(1200, now + 0.15);
+                    gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                    osc.start(now); osc.stop(now + 0.4);
+                } else if (type === 'wrong') {
+                    osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, now);
+                    gain.gain.setValueAtTime(0.15, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
+                    osc.start(now); osc.stop(now + 0.25);
+                } else if (type === 'clear') {
+                    [523, 659, 784].forEach((freq, i) => {
+                        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+                        o.connect(g); g.connect(audioCtx.destination); o.type = 'triangle';
+                        o.frequency.setValueAtTime(freq, now + i * 0.12);
+                        g.gain.setValueAtTime(0.2, now + i * 0.12);
+                        g.gain.exponentialRampToValueAtTime(0.01, now + i * 0.12 + 0.3);
+                        o.start(now + i * 0.12); o.stop(now + i * 0.12 + 0.3);
+                    });
+                }
+            } catch(e) {}
+        }
+
+        const allPairs = JA.memoryPairs;   // 台灣版: 取自 tw/accounts_tw.json 的 name・clue・type
+
+        let flippedCards = [], matchedCount = 0, wrongCount = 0, isLocked = false;
+        let seenCards = new Set();
+        let timerInterval = null, startTime = 0, elapsedSeconds = 0;
+        let stage = 1, totalScore = 0, usedPairIds = new Set();
+        let LV = 1; // 1=카드 뒤집어 짝맞추기 / 2=뜻 보고 계정과목 선택(difficulty.js로 해금)
+        // 라운드(Stage 1~MAX_STAGE) 전체 누적 — 難度2 해금 판정(정답률)과 랭킹 저장용
+        let roundWrongTotal = 0, roundMatchedTotal = 0;
+        let lastSnapKey = '';   // 중도 이탈 스냅샷 중복 방지(snapshotPartialRound)
+        // 카드/보기 판정의 setTimeout이 끝나기 전에 '그만'→'다시 하기'로 라운드가 바뀌면,
+        // 지난 라운드의 지연 콜백이 새 라운드의 matchedCount 등을 잘못 건드릴 수 있다.
+        // startGame()마다 값을 올려서, 각 콜백이 예약 당시의 라운드인지 확인하게 한다.
+        let roundToken = 0;
+
+        const STAGES = [
+            null,
+            { pairs:2,  cols:2, rows:2,  baseScore:200 },
+            { pairs:3,  cols:2, rows:3,  baseScore:300 },
+            { pairs:4,  cols:2, rows:4,  baseScore:400 },
+            { pairs:5,  cols:2, rows:5,  baseScore:500 },
+        ];
+        // 카드가 너무 많아지면 짝맞추기가 실력이 아니라 운이 되어버린다 — 최대 5쌍(10장)에서 고정.
+        const MAX_STAGE = 4;
+
+        function currentStageConfig() {
+            if (stage <= MAX_STAGE) return STAGES[stage];
+            return { pairs:5, cols:2, rows:5, baseScore:500 };
+        }
+
+        const grid      = document.getElementById('grid');
+        const movesEl   = document.getElementById('move-count');
+        const matchesEl = document.getElementById('match-count');
+        const timerEl   = document.getElementById('timer-display');
+
+        /* 橫向螢幕(矮螢幕)— 2026-11-14 組長目視檢查: 844×390 時 2×2 的下排跑出畫面外。
+           橫向高度不足時改變排列(2×5 → 5×2 等)，高度從格子實際頂端起扣除後平分。 */
+        function landShort() { return window.innerWidth > window.innerHeight && window.innerHeight <= 520; }
+        function gridDims(cfg) { return landShort() && cfg.rows > cfg.cols ? { cols: cfg.rows, rows: cfg.cols } : { cols: cfg.cols, rows: cfg.rows }; }
+        function calcCardSize(cfg) {
+            const d = gridDims(cfg), land = landShort();
+            const GAP = Math.max(8, Math.min(14, window.innerWidth * 0.025));
+            const sidePad = Math.max(16, window.innerWidth * 0.04);
+            const availW = Math.min(window.innerWidth, land ? 960 : 600) - sidePad * 2;
+            const cardW  = Math.floor((availW - GAP * (d.cols - 1)) / d.cols);
+            // 直向 320×568 的 Stage4(10張)下排也跑出畫面 → 直橫向都從實際頂端量起(量不到就用原本的 150)
+            const top = grid.getBoundingClientRect().top || 150;
+            const availH = window.innerHeight - top - 12 - (window.__memStep ? 230 : 0);   // 慢慢學 말풍선 자리
+            const cardH  = Math.floor((availH - GAP * (d.rows - 1)) / d.rows);
+            return {
+                w: Math.max(80, Math.min(cardW, 180)),
+                h: Math.max(land ? 44 : 50, Math.min(cardH, 110)),
+                gap: GAP, cols: d.cols
+            };
+        }
+
+        function applyGridStyle(cfg) {
+            const { w, h, gap, cols } = calcCardSize(cfg);
+            document.documentElement.style.setProperty('--card-w', w + 'px');
+            document.documentElement.style.setProperty('--card-h', h + 'px');
+            grid.style.gridTemplateColumns = `repeat(${cols}, ${w}px)`;
+            grid.style.gap = gap + 'px';
+            const fs = Math.max(0.78, Math.min(w / 100, 1.4));
+            document.querySelectorAll('.card-front').forEach(el => {
+                el.style.fontSize = fs + 'rem';
+                // edition: long account names/clues — shrink each card until the text fits (min 0.55rem)
+                let s = fs; el.style.overflow = 'hidden'; el.style.textAlign = 'center';
+                while (s > 0.55 && (el.scrollHeight > el.clientHeight + 1 || el.scrollWidth > el.clientWidth + 1)) { s -= 0.05; el.style.fontSize = s.toFixed(2) + 'rem'; }
+            });
+        }
+
+        function startTimer() {
+            startTime = Date.now();
+            timerInterval = setInterval(() => {
+                elapsedSeconds = (Date.now() - startTime) / 1000;
+                timerEl.textContent = `⏱ ${elapsedSeconds.toFixed(1)}s`;
+                timerEl.classList.toggle('warning', elapsedSeconds > 60);
+            }, 100);
+        }
+        function stopTimer() {
+            clearInterval(timerInterval); timerInterval = null;
+            // startTime이 아직 0(카드 한 장도 안 뒤집고 '그만')이면 경과시간도 0으로 — 안 그러면 현재 시각 그대로가 들어가 버림
+            elapsedSeconds = startTime ? (Date.now() - startTime) / 1000 : 0;
+        }
+
+        function calcScore(wrong, secs, cfg) {
+            return Math.max(0, Math.round(cfg.baseScore - wrong * 20 - secs * 0.5));
+        }
+
+
+
+        // ── 스테이지 클리어 미니 랭킹 ──
+        async function loadMiniRanking(myScore) {
+            const wrap = document.getElementById('mini-rank-wrap');
+            const body = document.getElementById('mini-rank-body');
+            if (!wrap || !body) return;
+
+            wrap.style.display = 'block';
+            body.innerHTML = '<div class="mini-rank-loading">🔄 讀取排行榜中...</div>';
+
+            try {
+                const list = await supabaseFetchRanking(rankId());
+                renderMiniRanking(list, myScore);
+            } catch(e) {
+                body.innerHTML = '<div class="mini-rank-loading">排行榜載入失敗</div>';
+            }
+        }
+
+        function renderMiniRanking(list, myScore) {
+            const body = document.getElementById('mini-rank-body');
+            if (!body) return;
+
+            // 현재 내 점수가 몇 위인지 계산
+            const myRank = list.filter(r => (r.score || 0) > myScore).length + 1;
+            const myName = document.getElementById('player-name').value.trim();
+
+            // 내 순위 기준 앞뒤 2명씩 슬라이싱
+            const startIdx = Math.max(0, myRank - 3);
+            const endIdx   = Math.min(list.length, myRank + 2);
+            const slice    = list.slice(startIdx, endIdx);
+
+            // 내 점수가 목록에 없는 경우 (아직 저장 전) 임시 삽입
+            const myInList = list.some(r => r.name === myName && r.score >= myScore);
+
+            let rows = '';
+
+            // 1위가 보이지 않으면 1위 먼저 표시
+            if (startIdx > 0) {
+                const top = list[0];
+                const rk = getRank(top.score);
+                rows += `<div class="mini-rank-row">
+                    <span class="mini-rank-num">🥇</span>
+                    <span class="mini-rank-name">${escapeHTML(top.name)}</span>
+                    <span class="mini-rank-score">${(top.score||0).toLocaleString()}分</span>
+                </div>
+                <div style="text-align:center;font-size:0.7rem;color:rgba(255,255,255,0.2);padding:2px 0;">···</div>`;
+            }
+
+            // 슬라이스 범위 표시
+            slice.forEach((r, si) => {
+                const globalIdx = startIdx + si;
+                const medal = globalIdx === 0 ? '🥇' : globalIdx === 1 ? '🥈' : globalIdx === 2 ? '🥉' : '第'+(globalIdx+1)+'名';
+                const isMe = r.name === myName;
+                rows += `<div class="mini-rank-row${isMe ? ' mini-me' : ''}">
+                    <span class="mini-rank-num">${medal}</span>
+                    <span class="mini-rank-name">${escapeHTML(r.name)}${isMe ? ' 👈' : ''}</span>
+                    <span class="mini-rank-score">${(r.score||0).toLocaleString()}分</span>
+                </div>`;
+            });
+
+            // 내 점수가 목록에 없으면 예상 순위로 표시
+            if (!myInList) {
+                const medal = myRank <= 3 ? ['🥇','🥈','🥉'][myRank-1] : '第'+myRank+'名';
+                // 이미 등록한 점수(랭킹 20위 밖 포함)면 "저장됨"으로 — 미저장 오해 방지
+                const savedTag = myScore > 0 && (window._savedScore || 0) >= myScore
+                    ? '<span style="font-size:0.7rem;color:#00e676">已儲存 ✓</span>'
+                    : '<span style="font-size:0.7rem;color:rgba(255,255,255,0.4)">未儲存</span>';
+                rows += `<div class="mini-rank-row mini-me-projected">
+                    <span class="mini-rank-num">${medal}</span>
+                    <span class="mini-rank-name">你 (目前) 👈</span>
+                    <span class="mini-rank-score">${myScore.toLocaleString()}分 ${savedTag}</span>
+                </div>`;
+            }
+
+            // 순위 요약
+            const totalCount = list.length;
+            const summaryMsg = myRank === 1
+                ? '🏆 目前 <b style="color:#f1c40f">第1名</b>！'
+                : `目前 <b style="color:#00e676">第${myRank}名</b> / ${totalCount}${totalCount >= 20 ? '+' : ''}人`;
+
+            body.innerHTML = `<div style="text-align:center;font-size:0.82rem;margin-bottom:6px;color:rgba(255,255,255,0.7);">${summaryMsg}</div>` + rows;
+        }
+
+        // ── 직급 기준 단일 소스: getRank·미리보기·시작화면 기준표·팡파레 목표 공용 ──
+        // 다른 4개 게임과 같은 5단계로 통일 (표시만 — Supabase 저장 문자열은 getGradeForSupabase 가 별도 관리, 손대지 않음)
+        const RANK_TIERS = [
+            { min:5000, title:'👑 董事長',   color:'#f1c40f', msg:'傳奇董事長！實力超強！' },
+            { min:3000, title:'🥇 經理',  color:'#e67e22', msg:'資深經理！實力很棒！' },
+            { min:1500, title:'🥈 課長',  color:'#3498db', msg:'可靠的課長！做得好！' },
+            { min:500,  title:'🥉 主任',  color:'#2ecc71', msg:'成長中的主任！不錯喔！' },
+            { min:0,    title:'💼 職員',  color:'#7f8c8d', msg:'先從這裡開始！再挑戰一次吧！' },
+        ];
+
+        // 시작화면 직급 기준표 렌더링 (RANK_TIERS 단일 소스)
+        (function renderGradeTable() {
+            const box = document.getElementById('grade-table');
+            if (!box) return;
+            box.innerHTML = RANK_TIERS.map((t, i) => {
+                const req = i < RANK_TIERS.length - 1
+                    ? t.min.toLocaleString() + '分以上'
+                    : RANK_TIERS[i - 1].min.toLocaleString() + '分未滿';
+                return `<div style="display:flex;justify-content:space-between;"><span>${t.title}</span><span style="color:${t.color}">${req}</span></div>`;
+            }).join('');
+        })();
+
+        // ── 난이도 선택 UI(시작화면) — difficulty.js(공통 모듈) 연동 ──
+        function updateDiffBtns(lv) {
+            const b1 = document.getElementById('diff-btn-1'), b2 = document.getElementById('diff-btn-2');
+            if (b1) b1.classList.toggle('active', lv === 1);
+            if (b2) b2.classList.toggle('active', lv === 2);
+        }
+        function selectDifficulty(n) {
+            if (!window.Difficulty) return;
+            if (n === 2 && !Difficulty.isUnlocked(GAME_ID)) {
+                Ask.alert('難度1的答對率達 ' + Math.round(Difficulty.UNLOCK_ACC * 100) + '% 以上就會解鎖！\n(需答滿10題)\n\n' + Difficulty.hint(GAME_ID));
+                return;
+            }
+            Difficulty.set(GAME_ID, n);
+            updateDiffBtns(n);
+        }
+        function initDiffUI() {
+            if (!window.Difficulty) return;
+            const unlocked = Difficulty.isUnlocked(GAME_ID);
+            const btn2 = document.getElementById('diff-btn-2');
+            if (btn2) {
+                btn2.classList.toggle('locked', !unlocked);
+                btn2.innerHTML = (unlocked ? '難度2' : '難度2 🔒')
+                    + '<br><span style="font-size:.72rem;opacity:.7">會計項目 ↔ 類別</span>';
+            }
+            updateDiffBtns(Difficulty.get(GAME_ID));
+            const hint = document.getElementById('diff-hint');
+            if (hint) hint.textContent = Difficulty.hint(GAME_ID);
+        }
+        initDiffUI();
+        // 서버 기록으로 해금이 복원되면(다른 기기에서 해금한 학생) 잠금 표시를 다시 그린다
+        window.addEventListener('difficulty-synced', function () { try { initDiffUI(); } catch (e) {} });
+
+        /* ── 慢慢學 모드(2026-09-24, docs/慢慢學모드_기획.md) ──
+           같은 카드판을 쓰되, 카드를 **처음부터 모두 앞면으로** 깐다(위치 외우기 대신 뜻을 익히게).
+           ① 파란 계정 카드 하나 고르기  ② 그 짝(뜻·難度2는 분류)을 빨간 카드에서 찾기
+           틀리면 말풍선이 "그건 ○○의 뜻이에요"로 알려 주고 다시. 한 판 3쌍 × 3판.
+           시간·점수·랭킹 없음. 기록은 StepMode.session(전용 테이블·이 기기 오답노트)만. */
+        let STEP = null;
+        const STEP_PER = 3, STEP_ROUNDS = 3;
+        const STEP_CAT_RULE = '店裡擁有的 → 資產 ・ 要還給別人的 → 負債<br>業主的本錢 → 權益 ・ 賺進來的 → 收益 ・ 營業耗用的 → 費損';
+        function startMemoryStep() {
+            if (!window.StepMode) return;
+            initAudio();
+            hideAdPlaceholder();
+            LV = window.Difficulty ? Difficulty.get(GAME_ID) : 1;
+            roundToken++;
+            clearInterval(timerInterval);
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('result-screen').style.display = 'none';
+            window.__memStep = true;
+            document.body.classList.add('step-mode');
+            const S = StepMode.session('memory');
+            const pool = (LV === 2) ? allPairs.filter(p => p.c) : allPairs;
+            STEP = { S, list: S.pick(pool, STEP_PER * STEP_ROUNDS, p => p.a), r: 0, sel: null, phase: '', hint: 0, left: 0 };
+            stepRound();
+        }
+        function stepCoach(html, btns) {
+            const c = document.getElementById('step-coach');
+            c.querySelector('.tut-bubble-text').innerHTML = html;
+            const row = c.querySelector('.sc-btns'); row.innerHTML = '';
+            (btns || []).forEach(b => { const e = document.createElement('button'); e.type = 'button'; e.className = b.cls || 'sc-btn'; e.innerHTML = b.label; e.onclick = b.on; row.appendChild(e); });
+            c.classList.add('show');
+        }
+        function stepPairOf(card) { return allPairs.find(x => String(x.id) === String(card.dataset.id)); }
+        function stepRound() {
+            const pairs = STEP.list.slice(STEP.r * STEP_PER, STEP.r * STEP_PER + STEP_PER);
+            if (!pairs.length) return stepSummary();
+            document.getElementById('score-formula').textContent = `🐢 慢慢學 ${STEP.r + 1} / ${Math.ceil(STEP.list.length / STEP_PER)} 輪`;
+            grid.style.display = ''; grid.innerHTML = '';
+            const cards = [];
+            pairs.forEach(p => {
+                const mk = (LV === 2) ? p.c : String(p.id);
+                cards.push({ id: p.id, mk, text: p.a, type: 'account' });
+                cards.push({ id: p.id, mk, text: (LV === 2 ? p.c : p.b), type: 'pair' });
+            });
+            StepMode.shuffle(cards).forEach(d => appendCard(d));
+            const cfg = { pairs: pairs.length, cols: 2, rows: pairs.length };
+            applyGridStyle(cfg);
+            grid.querySelectorAll('.card').forEach(c => c.classList.add('flipped'));   // 처음부터 앞면
+            STEP.left = pairs.length;
+            stepAsk();
+        }
+        function stepAsk() {
+            STEP.phase = 'acc'; STEP.sel = null; STEP.hint = 0;
+            grid.querySelectorAll('.card').forEach(c => c.classList.remove('step-sel', 'step-bad', 'step-glow'));
+            stepCoach('① 選一張<b style="color:#3498db">藍色字</b>的會計項目卡。', []);
+        }
+        function stepHints(p) {
+            if (LV === 2) return [STEP_CAT_RULE, `<b>${p.a}</b> — ${StepMode.esc(p.b)}`, `答案是<b>${p.c}</b>！`];
+            return [p.c ? `<b>${p.a}</b>是<b>${p.c}</b>類的會計項目。` : `想想<b>${p.a}</b>是什麼意思。`, `說明是以「<b>${StepMode.esc(String(p.b).slice(0, 4))}</b>…」開頭。`, '答對的卡片已加上黃框。'];
+        }
+        function stepMatchCoach(extra) {
+            const p = stepPairOf(STEP.sel);
+            const hint = STEP.hint ? `<div class="sc-hint">💡 ${stepHints(p)[STEP.hint - 1]}</div>` : '';
+            const btns = STEP.hint < 3 ? [{ label: STEP.hint < 2 ? `💡 提示 ${STEP.hint + 1}` : '👀 看答案', cls: 'sc-btn sc-hintbtn', on: () => {
+                STEP.hint++; STEP.S.hint(STEP.hint);
+                if (STEP.hint === 3) grid.querySelectorAll('.card[data-type="pair"]').forEach(c => { if (c.dataset.mk === STEP.sel.dataset.mk && !c.classList.contains('matched')) c.classList.add('step-glow'); });
+                stepMatchCoach(extra);
+            } }] : [];
+            stepCoach((extra || `② 從<b style="color:#e74c3c">紅色字</b>的卡片中，<br>找出<b>${p.a}</b>的${LV === 2 ? '類別' : '意思'}。`) + hint, btns);
+        }
+        function stepCardTap(card) {
+            if (!STEP || card.classList.contains('matched')) return;
+            if (STEP.phase === 'acc') {
+                if (card.dataset.type !== 'account') { playSound('wrong'); return stepCoach('請選<b style="color:#3498db">藍色字</b>的會計項目卡！', []); }
+                playSound('flip');
+                STEP.sel = card; card.classList.add('step-sel');
+                STEP.phase = 'match'; STEP.hint = 0;
+                STEP.S.begin(stepPairOf(card).a);
+                return stepMatchCoach();
+            }
+            if (STEP.phase !== 'match') return;
+            const p = stepPairOf(STEP.sel);
+            if (card.dataset.type === 'account') {
+                if (card === STEP.sel) return;
+                return stepMatchCoach(`現在要找<b>${p.a}</b>的配對。<br>請選<b style="color:#e74c3c">紅色字</b>的卡片。`);
+            }
+            if (card.dataset.mk !== STEP.sel.dataset.mk) {
+                playSound('wrong'); hapticWrong();
+                STEP.S.wrong();
+                card.classList.add('step-bad'); setTimeout(() => card.classList.remove('step-bad'), 600);
+                const other = stepPairOf(card);
+                return stepMatchCoach(LV === 2 ? `<b>${p.a}</b>不是<b>${card.dataset.mk}</b>。<br>再找找看吧。`
+                    : `那是<b>${other ? other.a : '別的會計項目'}</b>的意思。<br>再找找<b>${p.a}</b>的意思吧。`);
+            }
+            if (window.Skill) Skill.hitAccount(p.a);   // 분개 기술 숙련(skill.js) — 慢慢學도 셈
+            playSound('match'); hapticCorrect();
+            STEP.sel.classList.remove('step-sel'); card.classList.remove('step-glow');
+            STEP.sel.classList.add('matched'); card.classList.add('matched');
+            STEP.S.done(p.a, { label: LV === 2 ? `${p.a} = ${p.c}` : `${p.a} = ${p.b}`, q: '"<b class="target-account">' + p.a + '</b>"' + (LV === 2 ? '屬於哪一類？' : '是什麼意思？'), correct: LV === 2 ? p.c : p.b, type: LV === 2 ? '會計項目的類別' : '會計項目的意思' });
+            STEP.phase = 'right';
+            STEP.left--;
+            const roundDone = STEP.left <= 0;
+            const allDone = roundDone && (STEP.r + 1) * STEP_PER >= STEP.list.length;
+            stepCoach(StepMode.lines([`答對！<b>${p.a}</b> = <span class="sc-key">${StepMode.esc(LV === 2 ? p.c : p.b)}</span>`, p.c && LV !== 2 ? `<span class="sc-dim">${p.c}類的會計項目</span>` : '']),
+                [{ label: allDone ? '看結果 ▶' : roundDone ? '下一關 ▶' : '下一組 ▶', cls: 'sc-go', on: () => { if (roundDone) { STEP.r++; stepRound(); } else stepAsk(); } }]);
+        }
+        function stepSummary() {
+            STEP.phase = 'summary';
+            const S = STEP.S;
+            S.finish(true);
+            const L = S.learned(), A = S.again();
+            const list = arr => arr.slice(0, 3).map(v => '· ' + StepMode.esc(v)).join('<br>');
+            grid.innerHTML = '';
+            document.getElementById('score-formula').textContent = '🐢 慢慢學完成！';
+            stepCoach(`🌱 今天學會的詞 <b>${L.length}</b> 個` + (L.length ? `<br><span class="sc-dim">${list(L)}</span>` : '') +
+                (A.length ? `<br>🔁 要再看一次的詞 <b>${A.length}</b> 個<br><span class="sc-dim">${list(A)}</span>` : ''),
+                [{ label: '再玩一次', on: () => { stepExit(true); startMemoryStep(); } }, { label: '結束', cls: 'sc-go', on: () => stepExit() }]);
+        }
+        function stepExit(again) {
+            if (!STEP) return;
+            if (!STEP.S.sent) STEP.S.finish(false);
+            STEP = null;
+            window.__memStep = false;
+            document.getElementById('step-coach').classList.remove('show');
+            document.body.classList.remove('step-mode');
+            if (!again) { grid.innerHTML = ''; document.getElementById('start-screen').style.display = ''; initDiffUI(); showAdPlaceholder(); }
+        }
+        if (window.StepMode) StepMode.mount({ game: 'memory', host: document.getElementById('step-host'), onStart: startMemoryStep });
+
+
+        // ── 스테이지 클리어 직급 미리보기 ──
+        function getRankPreviewInfo(score) {
+            const tiers = RANK_TIERS;
+            const base = tiers.find(t => score >= t.min) || tiers[tiers.length-1];
+            const curIdx = tiers.indexOf(base);
+            const prevTier = curIdx > 0 ? tiers[curIdx-1] : null;
+            const cur = Object.assign({}, base, {
+                next:    prevTier ? prevTier.title : null,
+                nextMin: prevTier ? prevTier.min   : null
+            });
+            const progress = prevTier
+                ? Math.min(100, Math.round((score - cur.min) / (prevTier.min - cur.min) * 100))
+                : 100;
+            return { cur, progress };
+        }
+
+        function updateRankPreview(score) {
+            const box = document.getElementById('rank-preview-box');
+            if (!box) return;
+            // 미니 랭킹도 함께 로드
+            loadMiniRanking(score);
+            const { cur, progress } = getRankPreviewInfo(score);
+            const nextMsg = cur.next
+                ? `下一個等級 <b style="color:${cur.color}">${cur.next}</b>還差${cur.nextMin - score}分！`
+                : '已達最高等級！ 🎉';
+            box.innerHTML = `
+                <div class="rank-preview-title">📊 目前累計等級</div>
+                <div class="rank-preview-grade" style="color:${cur.color}">${cur.title}</div>
+                <div class="rank-preview-bar-wrap">
+                    <div class="rank-preview-bar" style="width:${progress}%;background:${cur.color};"></div>
+                </div>
+                <div class="rank-preview-next">${nextMsg}</div>
+            `;
+            box.style.display = 'flex';
+        }
+
+        function getRank(score) {
+            return RANK_TIERS.find(t => score >= t.min) || RANK_TIERS[RANK_TIERS.length-1];
+        }
+
+        function quitGame() {
+            if (STEP) return stepExit();
+            stopTimer(); endGame(true);
+        }
+
+        // 메인 이탈: 진행 중(stage>1)이면 두 번 눌러 확인 — Android WebView는
+        // confirm()이 무동작(항상 false)이라 대화상자 대신 2-스텝 버튼 사용
+        function exitToHub(btn) {
+            // saveScore()/stageSaveScore() 가 성공할 때만 window._savedScore 를 올리므로
+            // (오프라인 로컬저장은 제외) 이미 화면 점수만큼 등록됐으면 경고 없이 바로 나간다.
+            const shownScore = parseInt((document.getElementById('final-score') || {}).textContent) || 0;
+            const alreadySaved = (window._savedScore || 0) >= shownScore && shownScore > 0;
+            if (typeof stage === 'undefined' || stage <= 1 || alreadySaved || btn.dataset.armed === '1') {
+                location.href = 'index.html';
+                return;
+            }
+            btn.dataset.armed = '1';
+            const orig = btn.textContent;
+            btn.textContent = '⚠️ 再點一次就結束 (分數未儲存)';
+            setTimeout(() => { btn.dataset.armed = ''; btn.textContent = orig; }, 2500);
+        }
+
+        function startGame() {
+
+            if (window.DayLog) DayLog.hit('act', 'memory', 'start');   // 시작 횟수(끝까지 한 판은 Growth.logPlay → 'finish')
+            initAudio(); // ← AudioContext resume + BGM 시작
+            hideAdPlaceholder();
+            /* ⚠ 難度2 는 **카드 뒤집기를 그대로 둔 채 짝의 정의만** 바꾼다.
+               (LV1 = 계정과목↔뜻, LV2 = 계정과목↔분류)
+               2026-09-12 에 한 번 4지선다 퀴즈로 바꿨다가 되돌렸다 —
+               위치 암기를 막으려다 이 게임의 정체성인 카드 뒤집기를 버린 것이 문제였다.
+               난이도는 카드 위에 얹는 것이지, 카드를 치우는 게 아니다. */
+            LV = window.Difficulty ? Difficulty.get(GAME_ID) : 1;
+            window._roundOver = false;   // 새 게임 — endGame 재허용
+            roundToken++;                // 지난 라운드의 지연 setTimeout 콜백을 전부 무효화
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('result-screen').style.display = 'none';
+            const unlockEl = document.getElementById('lv-unlock-msg');
+            if (unlockEl) unlockEl.style.display = 'none';
+            stage = 1; totalScore = 0; usedPairIds = new Set();
+            roundWrongTotal = 0; roundMatchedTotal = 0;
+            lastSnapKey = '';
+            if (window.WrongNote) WrongNote.reset();
+            resetStage();
+        }
+
+        function resetStage() {
+            wrongCount = 0; matchedCount = 0; isLocked = false; flippedCards = []; seenCards = new Set();
+            elapsedSeconds = 0;
+            movesEl.innerText = 0;
+            timerEl.textContent = '⏱ 0.0s'; timerEl.classList.remove('warning');
+            clearInterval(timerInterval);
+            const cfg = currentStageConfig();
+            matchesEl.innerText = 0;
+            document.getElementById('total-pairs').textContent = cfg.pairs;
+            document.getElementById('score-formula').textContent = LV === 2
+                ? `第 ${stage} 關 (${cfg.pairs}組) — 基本${cfg.baseScore}分 | 累計: ${totalScore}分`
+                : `第 ${stage} 關 (${cfg.cols}×${cfg.rows}) — 基本${cfg.baseScore}分 | 累計: ${totalScore}分`;
+            setupBoard(cfg);
+        }
+
+        /* 이번 판에 쓸 문항 고르기.
+           難度2 는 분류 카드가 짝이므로 (1) 분류가 명확한 과목만 쓰고,
+           (2) 한 판에 같은 분류가 3장 이상 깔리지 않게 막는다 —
+           같은 분류가 많으면 아무 거나 맞아 버려서 판이 쉬워진다. */
+        function pickPairs(n) {
+            const pool = (LV === 2) ? allPairs.filter(p => p.c) : allPairs;
+            let available = pool.filter(p => !usedPairIds.has(p.id));
+            if (available.length < n) { usedPairIds = new Set(); available = [...pool]; }
+            const shuffled = [...available].sort(() => 0.5 - Math.random());
+            if (LV !== 2) return shuffled.slice(0, n);
+
+            const out = [], used = {};
+            for (const p of shuffled) {
+                if ((used[p.c] || 0) >= 2) continue;
+                used[p.c] = (used[p.c] || 0) + 1;
+                out.push(p);
+                if (out.length === n) break;
+            }
+            // 제약 때문에 못 채우면(자본 계정이 하나뿐인 경우 등) 제약 없이 마저 채운다
+            for (const p of shuffled) {
+                if (out.length >= n) break;
+                if (out.indexOf(p) === -1) out.push(p);
+            }
+            return out;
+        }
+
+        function setupBoard(cfg) {
+            grid.style.display = '';
+            grid.innerHTML = '';
+
+            const selected = pickPairs(cfg.pairs);
+            selected.forEach(p => usedPairIds.add(p.id));
+
+            /* mk = 짝 판정 키. 難度1 은 문항 id, 難度2 는 분류명이다.
+               難度2 에서 같은 분류 카드가 두 쌍 깔리면 서로 엇갈려 맞아도 정답인데,
+               분류가 같으면 실제로 맞는 말이므로 그게 맞다. */
+            let cardData = [];
+            selected.forEach(p => {
+                const mk = (LV === 2) ? p.c : String(p.id);
+                cardData.push({ id: p.id, mk: mk, text: p.a, type: 'account' });
+                cardData.push({ id: p.id, mk: mk, text: (LV === 2 ? p.c : p.b), type: 'pair' });
+            });
+            cardData.sort(() => 0.5 - Math.random());
+
+            const totalSlots = cfg.cols * cfg.rows;
+            const blankCount = totalSlots - cardData.length;
+
+            if (blankCount > 0) {
+                const centerIdx = Math.floor(totalSlots / 2);
+                const blankPositions = new Set([centerIdx]);
+                while (blankPositions.size < blankCount) blankPositions.add(Math.floor(Math.random() * totalSlots));
+                let ci = 0;
+                for (let i = 0; i < totalSlots; i++) {
+                    if (blankPositions.has(i)) {
+                        const blank = document.createElement('div');
+                        blank.style.visibility = 'hidden';
+                        blank.style.width = 'var(--card-w, 140px)';
+                        blank.style.height = 'var(--card-h, 90px)';
+                        grid.appendChild(blank);
+                    } else { appendCard(cardData[ci++]); }
+                }
+            } else {
+                cardData.forEach(data => appendCard(data));
+            }
+
+            applyGridStyle(cfg);
+        }
+
+        function appendCard(data) {
+            const card = document.createElement('div');
+            card.classList.add('card');
+            card.dataset.id = data.id;
+            card.dataset.mk = data.mk;
+            card.dataset.type = data.type;
+            card.innerHTML = `
+                <div class="card-inner">
+                    <div class="card-back">?</div>
+                    <div class="card-front" style="color:${data.type === 'account' ? '#2980b9' : '#c0392b'}">
+                        ${data.text}
+                    </div>
+                </div>`;
+            let pressing = false;
+            card.addEventListener('pointerdown', function(e) {
+                if (pressing) return;
+                pressing = true;
+                e.preventDefault();
+                if (window.__memStep) { stepCardTap(this); return; }   // 慢慢學 모드: 말풍선이 한 단계씩
+                if (!timerInterval) startTimer();
+                flipCard.call(this);
+            });
+            card.addEventListener('pointerup',   () => { pressing = false; });
+            card.addEventListener('pointercancel',() => { pressing = false; });
+            grid.appendChild(card);
+        }
+
+        function flipCard() {
+            if (isLocked) return;
+            if (this.classList.contains('flipped') || this.classList.contains('matched')) return;
+            if (flippedCards.length === 1 && this === flippedCards[0]) return;
+            if (flippedCards.length >= 2) return;
+
+            playSound('flip');
+            this.classList.add('flipped');
+            flippedCards.push(this);
+
+            if (flippedCards.length === 2) {
+                isLocked = true;
+                checkForMatch();
+            }
+        }
+
+        function checkForMatch() {
+            const [c1, c2] = flippedCards;
+            const cfg = currentStageConfig();
+
+            const c1Seen = seenCards.has(c1);
+            const c2Seen = seenCards.has(c2);
+            seenCards.add(c1);
+            seenCards.add(c2);
+
+            if (c1.dataset.mk === c2.dataset.mk && c1.dataset.type !== c2.dataset.type) {
+                try {   // 분개 기술 숙련(skill.js) — 맞춘 쌍의 계정과목
+                    var _sp = allPairs.find(function (x) { return String(x.id) === String(c1.dataset.id) || String(x.id) === String(c2.dataset.id); });
+                    if (window.Skill && _sp) Skill.hitAccount(_sp.a);
+                } catch (e) {}
+                playSound('match');
+                hapticCorrect();
+                const myToken1 = roundToken;
+                setTimeout(() => {
+                    if (myToken1 !== roundToken) return; // 그 사이 라운드가 새로 시작됨 — 무시
+                    c1.classList.add('matched'); c2.classList.add('matched');
+                    seenCards.delete(c1); seenCards.delete(c2);
+                    matchedCount++; matchesEl.innerText = matchedCount;
+                    flippedCards = [];
+                    isLocked = false;
+                    if (matchedCount === cfg.pairs) endGame();
+                }, 400);
+            } else {
+                if (c1Seen && c2Seen) {
+                    wrongCount++;
+                    movesEl.innerText = wrongCount;
+                    if (window.WrongNote) {
+                        [c1, c2].forEach(function(c){
+                            var p = allPairs.find(function(x){ return String(x.id) === String(c.dataset.id); });
+                            if (!p) return;
+                            if (LV === 2) WrongNote.add({ game:'memory', key:p.a,
+                                q:'"<b class="target-account">'+p.a+'</b>" 屬於哪一類？',
+                                correct:p.c, wrong:null, type:'會計項目的類別' });
+                            else WrongNote.add({ game:'memory', key:p.a,
+                                q:'"<b class="target-account">'+p.a+'</b>" 是什麼意思？',
+                                correct:p.b, wrong:null, type:'會計項目的意思' });
+                        });
+                    }
+                }
+                playSound('wrong');
+                hapticWrong();
+                c1.classList.add('wrong-flash'); c2.classList.add('wrong-flash');
+                const myToken2 = roundToken;
+                setTimeout(() => {
+                    if (myToken2 !== roundToken) return; // 그 사이 라운드가 새로 시작됨 — 무시
+                    c1.classList.remove('flipped', 'wrong-flash');
+                    c2.classList.remove('flipped', 'wrong-flash');
+                    flippedCards = [];
+                    isLocked = false;
+                }, 900);
+            }
+        }
+
+        /* 스테이지를 깨는 도중에 나가는 경우(앱을 닫거나 백그라운드로 보냄, 탭 닫기)의 판정·기록.
+           '그만'도 스테이지 클리어도 없이 끝나면 그 스테이지에서 맞힌 만큼이 통째로 사라졌다.
+           지금까지의 누적(앞 스테이지 + 지금 스테이지에서 맞히고 틀린 것)으로 endGame 과 같은 방식으로 해금 판정·기록한다.
+           _roundOver 가 정확히 false 인 동안만 '플레이 중'이다(시작 화면은 undefined, 스테이지 클리어·그만 뒤엔 true).
+           같은 누적값(lastSnapKey)이면 다시 안 쌓는다 — visibilitychange 와 pagehide 가 연달아 와도 한 줄. */
+        function snapshotPartialRound() {
+            try {
+                if (window._roundOver !== false || !window.Difficulty) return;
+                const pm = roundMatchedTotal + matchedCount, pw = roundWrongTotal + wrongCount;
+                if (pm + pw === 0) return;
+                const key = pm + '/' + pw;
+                if (key === lastSnapKey) return;
+                lastSnapKey = key;
+                if (LV === 1) Difficulty.reportRound(GAME_ID, pm, pm + pw);
+                const cfg = currentStageConfig();
+                const part = Math.max(0, Math.round(cfg.baseScore * (matchedCount / cfg.pairs) - wrongCount * 20 - Math.round(elapsedSeconds) * 0.5));
+                if (Difficulty.logRound) Difficulty.logRound(GAME_ID, LV, pm, pm + pw, totalScore + part);
+            } catch (e) {}
+        }
+        document.addEventListener('visibilitychange', function () { if (document.hidden) snapshotPartialRound(); });
+        window.addEventListener('pagehide', snapshotPartialRound);
+
+        function endGame(quit = false) {
+            // 마지막 짝 매칭 직후 '그만'을 누르는 등 이중 호출 방지
+            if (window._roundOver) return;
+            window._roundOver = true;
+            if (window.Growth) Growth.logPlay(GAME_ID);
+            stopTimer();
+            if (window.WrongNote) WrongNote.flush('memory');
+            bgmStop(); // 🎵 게임 종료/포기 시 BGM 페이드 아웃
+            const cfg = currentStageConfig();
+            const secs = Math.round(elapsedSeconds);
+            const stageScore = quit
+                ? Math.max(0, Math.round(cfg.baseScore * (matchedCount / cfg.pairs) - wrongCount * 20 - secs * 0.5))
+                : calcScore(wrongCount, secs, cfg);
+            const detail = quit
+                ? `放棄(${matchedCount}/${cfg.pairs}組) — 基本${Math.round(cfg.baseScore*(matchedCount/cfg.pairs))} - 答錯${wrongCount}×20 - ${secs}秒×0.5 = ${Math.round(stageScore)}分`
+                : `基本${cfg.baseScore} - 答錯${wrongCount}×20 - ${secs}秒×0.5 = +${stageScore}分`;
+
+            // 라운드(Stage 1~MAX_STAGE) 누적 — 難度2 해금 판정용 정답률 계산에 사용
+            roundWrongTotal += wrongCount;
+            roundMatchedTotal += matchedCount;
+
+            function reportDifficultyAndUpdateBanner() {
+                lastSnapKey = roundMatchedTotal + '/' + roundWrongTotal;   // 중도 이탈 스냅샷이 같은 값을 또 쌓지 않게
+                const unlockEl = document.getElementById('lv-unlock-msg');
+                if (!window.Difficulty) { if (unlockEl) unlockEl.style.display = 'none'; return; }
+                const justUnlocked = LV === 1
+                    ? Difficulty.reportRound(GAME_ID, roundMatchedTotal, roundMatchedTotal + roundWrongTotal)
+                    : false;
+                // 판별 단계 기록 — 1·2단계 모두. LV 는 이 판의 카드를 그린 값 그대로.
+                if (Difficulty.logRound) Difficulty.logRound(GAME_ID, LV, roundMatchedTotal, roundMatchedTotal + roundWrongTotal, totalScore + Math.round(stageScore));
+                if (unlockEl) unlockEl.style.display = justUnlocked ? 'block' : 'none';
+            }
+
+            if (quit) {
+                requestInterstitialIfNeeded(function() {
+                    reportDifficultyAndUpdateBanner();
+                    showResult(totalScore + Math.round(stageScore), true, detail);
+                });
+                return;
+            }
+
+            // 스테이지를 깨고 계속 이어 가는 경로 — 여기서도 해금 판정과 판별 기록을 한다(1·2단계 모두).
+            // ⚠ 이 게임은 스테이지가 무한 반복이라 '그만'이 유일한 정상 종료인데, 학생들은 끝까지 하다가
+            //   그냥 앱을 나가거나 화면을 닫는 경우가 많다. 예전엔 '포기' 경로에서만 해금 판정·기록을 해서,
+            //   그렇게 나가면 아무리 잘 해도 2단계가 영영 안 열리고 대시보드엔 "단계 기록 없음"이 떴다
+            //   (2026-09-21 엄현일: 한 판에 434문제 정답·36,699점인데 미해금·기록 0건. 박수현은 2단계 쪽 같은 증상).
+            //   해금 기준(누적 10문항 이상·정답률 70%)은 그대로이고, 판정 시점만 스테이지를 깰 때로 앞당겼다.
+            //   같은 판에서 스테이지마다 한 줄씩 쌓이지만 대시보드는 최고 정답률·최고 점수·도전 여부만 쓰므로 무해하다.
+            reportDifficultyAndUpdateBanner();
+
+            const clearedStage = stage;
+
+            /* ⚠ 여기서 Stage MAX_STAGE 에 라운드를 끝내지 말 것.
+               2026-08-29(커밋 d5d3cd2)에 내가 '점수 무한누적 버그'로 오인해 4스테이지에서
+               강제 종료시켰다가 되돌렸다. **무한 진행은 원래 의도된 설계다** —
+               카드 수만 보기 좋게 상한을 두고(Stage 4 배치 유지) 스테이지는 계속 이어진다.
+               d764726(08-14) 의 '10스테이지마다 전면광고' 도 그 전제 위에 있었고,
+               지운 코드에는 isEndless 변수와 '繼續挑戰 ▶' 버튼까지 있었다. */
+            requestStageInterstitialIfNeeded(clearedStage, function () {
+                playSound('clear');
+                totalScore += stageScore;
+                document.querySelector('#result-screen h2').textContent = `第 ${clearedStage} 關 過關！🎉`;
+                document.getElementById('result-rank').textContent = `+${stageScore}分！`;
+                document.getElementById('result-rank').style.color = '#2ecc71';
+                const isEndless = clearedStage >= MAX_STAGE;   // 그 뒤로는 같은 판 크기로 계속 이어진다
+                document.getElementById('result-msg').textContent = isEndless
+                    ? `累計分數: ${totalScore}分 — 繼續挑戰吧！`
+                    : `累計分數: ${totalScore}分 — 前往下一關！`;
+                document.getElementById('final-score').textContent = totalScore + '分';
+                document.getElementById('score-detail').textContent = detail;
+                // 원탭 랭킹 등록: 허브 닉네임 자동 사용, 없으면 입력칸 노출
+                const prefillName = (localStorage.getItem('hub_nickname') || getMyName() || '').trim();
+                document.getElementById('player-name').value = prefillName;
+                document.querySelector('.name-row').style.display = prefillName ? 'none' : 'flex';
+                const stEl = document.getElementById('save-status');
+                stEl.textContent = ''; stEl.className = 'status-msg'; stEl.style.display = 'block';
+                // 다른 게임들과 동일한 정확한 랭킹 위젯 사용 (구 미니랭킹의 "20위 밖은 항상 21위" 근사치 버그 제거)
+                document.getElementById('rank-preview-box').style.display = 'none';
+                document.getElementById('mini-rank-wrap').style.display = 'none';
+                document.querySelector('.rank-wrap').style.display = '';
+                showMyRank(prefillName || '你', totalScore, { trackDelta: false });
+                loadRanking();
+                const stageSaveBtn = document.getElementById('stage-save-btn');
+                stageSaveBtn.style.display = 'inline-block';
+                stageSaveBtn.disabled = false;
+                stageSaveBtn.textContent = '🏆 登錄排行榜';
+                document.getElementById('result-screen').style.display = 'flex';
+                document.getElementById('next-stage-btn').style.display = 'inline-block';
+                document.getElementById('next-stage-btn').textContent = isEndless ? '繼續挑戰 ▶' : '下一關 ▶';
+                document.getElementById('restart-btn').style.display = 'none';
+            });
+        }
+
+        /* 스테이지 해금·개인 최고기록은 **플레이했는가**로 판단한다.
+           예전엔 이 갱신이 saveScore() 안(그것도 서버 저장 성공 뒤)에 있어서,
+           ① 랭킹 등록을 안 누르거나 ② 닉네임이 중복이거나 ③ 네트워크가 끊기면
+           점수를 아무리 높게 받아도 다음 스테이지가 영영 안 열렸다.
+           랭킹 등록은 학생의 선택이고 학습 진행과는 별개다. */
+        function recordBest(sc){
+            try{
+                const v = Math.max(0, parseInt(sc,10) || 0);
+                if (v > (parseInt(localStorage.getItem('hub_memory_best')||'0',10)||0))
+                    localStorage.setItem('hub_memory_best', String(v));
+            }catch(e){}
+        }
+
+        function showResult(finalScore, quit, detail) {
+            recordBest(finalScore);
+            const box = document.getElementById('rank-preview-box'); if(box) box.style.display='none';
+            const mw = document.getElementById('mini-rank-wrap'); if(mw) mw.style.display='none';
+            const ssb = document.getElementById('stage-save-btn');
+            const rank = getRank(finalScore);
+            // 이 게임은 스테이지가 무한 반복이라 '그만'이 유일한 종료 수단이다.
+            // 그래서 quit=true 를 실패로 취급하면, 끝까지 잘 하고 랭킹에 올리려는 학생까지
+            // '放棄了... 😢' 를 보게 된다(3000점 팡파레가 그 위에 겹치기까지 한다).
+            // → 한 판도 못 깬 경우만 '포기'로 보고, 나머지는 정상 종료로 축하한다.
+            const gaveUp = quit && finalScore <= 0;
+            // FANFARE_TARGET_SCORE 는 다른 <script> 블록의 const 라 typeof 로 안전하게 참조한다
+            // (이 프로젝트에서 TDZ 를 try/catch 가 삼켜 조용히 죽은 전례가 있다)
+            const targetScore = (typeof FANFARE_TARGET_SCORE === 'number') ? FANFARE_TARGET_SCORE : 3000;
+            const allClear = finalScore >= targetScore;
+            document.querySelector('#result-screen h2').textContent =
+                gaveUp ? '放棄了... 😢' : (allClear ? 'ALL CLEAR! 🏆' : '遊戲結束！ 🏁');
+            document.getElementById('result-rank').textContent = rank.title + (LV === 2 ? ' · 難度2' : '');
+            document.getElementById('result-rank').style.color = rank.color;
+            document.getElementById('result-msg').innerHTML = gaveUp
+                ? `${rank.msg}<br>目前的分數可以登錄到排行榜！` : rank.msg;
+            document.getElementById('final-score').textContent = finalScore + '分';
+            document.getElementById('score-detail').textContent = detail;
+            document.getElementById('save-status').textContent = '';
+            const prefill = (localStorage.getItem('hub_nickname') || getMyName() || '').trim();
+            document.getElementById('player-name').value = prefill;
+            const saveBtn = document.getElementById('save-btn');
+            if (saveBtn) saveBtn.disabled = false;
+            showMyRank(prefill || '你', finalScore, { trackDelta: false }); // 랭킹 등록 전 예상 순위 미리보기
+            /* 닉네임이 이미 있으면 스테이지 클리어 화면과 똑같이 **큼직한 등록 버튼**을 준다.
+               예전엔 최종 화면에만 닉네임 칸 옆 작은 '登錄 📝' 이라, 학생이 랭킹 등록
+               버튼이 없다고 여겼다(실제 제보). 닉네임이 없을 때만 입력칸을 연다. */
+            document.querySelector('.name-row').style.display = prefill ? 'none' : 'flex';
+            if (ssb) {
+                ssb.style.display = 'inline-block';
+                ssb.disabled = false;
+                ssb.textContent = '🏆 登錄排行榜';
+            }
+            document.getElementById('save-status').style.display = 'block';
+            /* 자동 저장 — 2026-09-16 사용자 요청(팀전 수업 중 "저장 안 눌러도 자동으로 올라가게").
+               팀전 전광판·결과 보기는 저장된 기록만 읽는다. 닉네임이 이미 있으면
+               (허브 로그인 또는 이전 저장) 결과화면에서 한 번 저장해 준다.
+               게스트(닉네임 없음)는 그대로 직접 눌러야 한다 — 누구 기록인지 알 수 없다.
+               저장 함수의 연타 방지 가드를 그대로 쓰므로 중복 저장되지 않는다. */
+            try {
+                const _b = document.getElementById('save-btn'), _s = document.getElementById('stage-save-btn');
+                if (prefill.length >= 2 && ((_b && !_b.disabled) || (_s && !_s.disabled))) {
+                    const _r = saveScore();
+                    /* 자동 저장은 했지만 **이름을 바꿔 다시 저장할 길은 열어 둔다**(2026-09-16).
+                       이 게임은 닉네임이 있으면 이름칸을 숨기므로 그것도 함께 되살린다. */
+                    Promise.resolve(_r).then(function () {
+                        try {
+                            const _i = document.getElementById('player-name');
+                            if (_i) _i.disabled = false;
+                            if (_b) { _b.disabled = false; _b.textContent = '再儲存一次'; }
+                            if (_s) { _s.disabled = false; _s.textContent = '🏆 再登錄一次'; }
+                            const _row = document.querySelector('.name-row');
+                            if (_row) _row.style.display = 'flex';
+                        } catch (e) {}
+                    }).catch(function () {});
+                }
+            } catch (e) {}
+            document.getElementById('next-stage-btn').style.display = 'none';
+            document.getElementById('restart-btn').style.display = 'inline-block';
+            document.querySelector('.rank-wrap').style.display = '';
+            document.getElementById('result-screen').style.display = 'flex';
+            checkAndShowFanfare(finalScore, rank.title);
+            showAdPlaceholder();
+            loadRanking();
+        }
+
+        function nextStage() {
+            stage++;
+            window._roundOver = false;   // 새 스테이지 — endGame 재허용
+            document.getElementById('result-screen').style.display = 'none';
+            bgmPlay(); // 🎵 다음 스테이지 진행 시 BGM 재개
+            resetStage();
+        }
+
+        window.addEventListener('resize', () => {
+            const cfg = currentStageConfig();
+            if (cfg) applyGridStyle(cfg);
+        });
+
+        function _lget() { return JSON.parse(localStorage.getItem('hub_memory') || '[]'); }
+        function _lsave(d) {
+            const l = _lget(); l.push(d);
+            l.sort((a, b) => b.score - a.score);
+            localStorage.setItem('hub_memory', JSON.stringify(l.slice(0, 20)));
+        }
+        function saveMyName(n) { localStorage.setItem('hub_memory_myName', n); }
+        function getMyName()   { return localStorage.getItem('hub_memory_myName') || ''; }
+
+        async function saveScore() {
+            const name = document.getElementById('player-name').value.trim();
+            if (!name) { showStatus('請輸入暱稱', 'err'); return false; }
+            if (name.length < 2) { showStatus('請輸入2個字以上', 'err'); return false; }
+            { const _nb = window.AmNick && AmNick.bad(name); if (_nb && name !== (localStorage.getItem('hub_nickname') || '') && name !== (typeof getMyName === 'function' ? getMyName() : '')) { showStatus((AmNick.msg ? AmNick.msg(_nb) : '這個暱稱不能使用，請換一個'), 'err'); return false; } }   // 禁用詞 — 目前使用中的名字可通過
+            const saveBtn = document.getElementById('save-btn');
+            const stageBtn = document.getElementById('stage-save-btn');
+            if (saveBtn) saveBtn.disabled = true; // 저장 중 연타로 인한 중복 저장 방지
+            if (stageBtn) stageBtn.disabled = true; // 두 등록 버튼이 함께 보일 때 교차 연타 방지
+            showStatus('檢查中...', '');
+
+            const myStoredName = getMyName();
+            // 허브 로그인 닉네임(login.html에서 본인 확인 완료)은 중복검사 대상에서 제외
+            // — 앱 재설치/기기 변경 후 자기 이름이 "이미 사용 중"으로 막히던 문제 해결
+            const hubName = (localStorage.getItem('hub_nickname') || '').trim();
+            if (name !== myStoredName && name !== hubName) {
+                let existingList = [];
+                try {
+                    if (true) {
+                        const res = { json: async () => await supabaseFetchRanking(rankId()) };
+                        existingList = await res.json();
+                    }
+                } catch(e) {}
+                existingList = mergeRank(existingList, _lget());
+                if (existingList.find(r => r.name === name)) {
+                    showStatus('⚠️ 這個暱稱已經有人用了，請換一個。', 'err');
+                    if (saveBtn) saveBtn.disabled = false;
+                    if (stageBtn) { stageBtn.disabled = false; stageBtn.textContent = '🏆 登錄排行榜'; }
+                    return false;
+                }
+            }
+
+            const score = parseInt(document.getElementById('final-score').textContent) || 0;
+            const today = new Date().toLocaleDateString('ko-KR', {month:'2-digit', day:'2-digit'});
+            const data  = { game: scoreIdFor(LV), name, score, combo: stage, correct: roundMatchedTotal, date: today };
+            _lsave(data);
+            saveMyName(name);
+            showStatus('儲存中...', '');
+            try {
+                // 개인 최고기록 갱신
+            const _g2best = parseInt(localStorage.getItem('hub_memory_best')||'0');
+            if((data.score||0) > _g2best) { localStorage.setItem('hub_memory_best', String(data.score||0));
+              if (window.Review) Review.maybeAsk(); }   // 최고기록 갱신 = 만족스러운 순간
+            await supabaseSaveScore(data.name, data.score, data.combo||0, data.correct||0, scoreIdFor(LV));
+                showStatus('✓ 已登錄！', 'ok');
+                await new Promise(r => setTimeout(r, 800));
+                await loadRanking();
+                await showMyRank(name, score);
+            } catch(e) {
+                // 서버 미반영(오프라인 등) — 성공처럼 보이지 않게 구분해서 안내
+                showStatus('📴 只儲存在這台裝置 — 連上網路後再登錄，就會反映到排行榜', 'ok');
+                renderRanking(_lget());
+                await showMyRank(name, score);
+                const mwOff = document.getElementById('mini-rank-wrap');
+                if (mwOff && mwOff.style.display !== 'none' && stageBtn) {
+                    stageBtn.textContent = '📴 已存在裝置 — 重新登錄';
+                    stageBtn.disabled = false;   // 재시도 허용
+                }
+                return 'local';
+            }
+            window._savedScore = Math.max(window._savedScore || 0, score); // 미니 랭킹 "저장됨" 표시용
+            // ⚠ 예전엔 이 버튼 갱신이 미니랭킹 위젯(mini-rank-wrap) 표시 여부에 묶여있었는데,
+            //   지금은 스테이지 클리어 화면이 항상 신형 .rank-wrap 위젯을 쓰고 mini-rank-wrap은
+            //   항상 숨겨져 있어서(endGame() 참고) 조건이 영영 참이 안 되고, 저장은 성공했는데
+            //   버튼만 "등록 중..."에 영원히 갇혀있었다. 위젯 종류와 무관하게 항상 갱신한다.
+            if (stageBtn) stageBtn.textContent = '✓ 已登錄！';
+            // 스테이지 클리어 화면(미니 랭킹 표시 중)이면: 배지 숨기고 미니 랭킹 갱신
+            const mw = document.getElementById('mini-rank-wrap');
+            if (mw && mw.style.display !== 'none') {
+                document.getElementById('my-rank-badge').style.display = 'none'; document.getElementById('my-rank-neighbors').style.display = 'none';
+                loadMiniRanking(score);   // "미저장" → 저장된 순위로 갱신
+            }
+            return true;
+        }
+
+        // ── 스테이지 클리어 화면 원탭 랭킹 등록 ──
+        async function stageSaveScore() {
+            const btn = document.getElementById('stage-save-btn');
+            if (btn) { btn.disabled = true; btn.textContent = '登錄中...'; }
+            const ok = await saveScore();   // 성공 시 버튼 텍스트·미니 랭킹 갱신은 saveScore가 처리
+            if (!ok) {
+                // 닉네임 미입력/중복 → 입력칸 열어서 바꿔 쓰게
+                document.querySelector('.name-row').style.display = 'flex';
+                document.getElementById('player-name').focus();
+                if (btn) { btn.disabled = false; btn.textContent = '🏆 登錄排行榜'; }
+            }
+        }
+
+        const RANK_PREV_KEY = 'hub_memory_prevRank';
+
+        function nextTierHtml(score) {
+            const idx = RANK_TIERS.findIndex(t => score >= t.min);
+            const next = idx > 0 ? RANK_TIERS[idx - 1] : null;
+            return next
+                ? `<div class="next-tier-msg">下一個等級 <b style="color:${next.color}">${next.title}</b>還差<b>${(next.min - score).toLocaleString()}分</b>！</div>`
+                : `<div class="next-tier-msg">🎉 已達最高等級！</div>`;
+        }
+
+        async function showMyRank(name, score, opts) {
+            const trackDelta = !opts || opts.trackDelta !== false;
+            const badge = document.getElementById('my-rank-badge');
+            const nbox = document.getElementById('my-rank-neighbors');
+            const tierHtml = nextTierHtml(score);
+            try {
+                const groupId = localStorage.getItem('hub_group_id') || null;
+                const withGroup = (q) => q;   // 전체 범위(그룹 필터는 아래 반 순위에서만)
+
+                const countQ = withGroup(db.from('scores').select('*', { count: 'exact', head: true }).eq('game_id', rankId()).gt('score', score));
+                const aboveQ = withGroup(db.from('scores').select('name,score').eq('game_id', rankId()).gt('score', score).order('score', { ascending: true }).limit(1));
+                const belowQ = withGroup(db.from('scores').select('name,score').eq('game_id', rankId()).lt('score', score).order('score', { ascending: false }).limit(1));
+
+                // 반 순위는 따로 센다 — 전체 순위와 함께 보여 준다
+                const grpQ = groupId
+                  ? db.from('scores').select('*', { count: 'exact', head: true })
+                      .eq('game_id', rankId()).eq('group_id', groupId).gt('score', score)
+                  : Promise.resolve({ count: null });
+                const [{ count, error: cErr }, { data: aboveRows }, { data: belowRows }, grpRes] =
+                  await Promise.all([countQ, aboveQ, belowQ, grpQ]);
+                if (cErr) throw cErr;
+
+                const myRank = (count || 0) + 1;
+                const above = aboveRows && aboveRows[0];
+                const below = belowRows && belowRows[0];
+
+                let deltaHtml = '';
+                if (trackDelta) {
+                    const prevRank = parseInt(localStorage.getItem(RANK_PREV_KEY + (LV === 2 ? '_d2' : '')) || '0', 10);
+                    if (prevRank > 0) {
+                        const diff = prevRank - myRank;
+                        if (diff > 0) deltaHtml = `<span class="rank-delta up">▲ 進步 ${diff} 名</span>`;
+                        else if (diff < 0) deltaHtml = `<span class="rank-delta down">▼ 退步 ${Math.abs(diff)} 名</span>`;
+                        else deltaHtml = `<span class="rank-delta flat">− 名次不變</span>`;
+                    }
+                    localStorage.setItem(RANK_PREV_KEY + (LV === 2 ? '_d2' : ''), String(myRank));
+                }
+
+                const grpRank = (grpRes && grpRes.count != null) ? (grpRes.count + 1) : null;
+                const grpHtml = grpRank ? ` <span style="opacity:.75">· 班級第 ${grpRank.toLocaleString()} 名</span>` : '';
+                badge.innerHTML = `🎯 ${trackDelta ? '你的名次' : '預估名次'}: 全體第 ${myRank.toLocaleString()} 名${grpHtml} ${deltaHtml}`;
+                badge.style.display = 'block';
+
+                const row = (label, r, cls) => r
+                    ? `<div class="rn-row ${cls}"><span class="rn-label">${label}</span><span class="rn-name">${escapeHTML(r.name)}</span><span class="rn-score">${(r.score || 0).toLocaleString()}</span></div>`
+                    : '';
+                nbox.innerHTML = tierHtml +
+                    row(`▲ 第${myRank - 1}名`, above, 'rn-above') +
+                    `<div class="rn-row rn-me"><span class="rn-label">我的紀錄</span><span class="rn-name">${escapeHTML(name)}</span><span class="rn-score">${(score || 0).toLocaleString()}</span></div>` +
+                    row(`▼ 第${myRank + 1}名`, below, 'rn-below');
+                nbox.style.display = 'block';
+            } catch (e) {
+                badge.style.display = 'none';
+                nbox.innerHTML = tierHtml;
+                nbox.style.display = 'block';
+            }
+        }
+
+        async function loadRanking() {
+        { const _l = document.getElementById('rank-lv-label'); if (_l) _l.textContent = (LV === 2 ? '🔥 難度2 排行榜' : '難度1 排行榜'); }
+            const body = document.getElementById('rank-body');
+            body.innerHTML = '<div class="spinner"></div>';
+            try {
+                const res = { json: async () => await supabaseFetchRanking(rankId()) };
+                renderRanking(await res.json());
+            } catch(e) { renderRanking(_lget()); }
+        }
+
+        function mergeRank(remote, local) {
+            const map = new Map();
+            // 이름별 최고점 1행만 유지 — 같은 사람이 점수별로 여러 줄 나오는 중복 방지
+            [...(Array.isArray(remote) ? remote : []), ...local].forEach(r => {
+                const prev = map.get(r.name);
+                if (!prev || (r.score || 0) > (prev.score || 0)) map.set(r.name, r);
+            });
+            return [...map.values()].sort((a, b) => b.score - a.score).slice(0, 15);
+        }
+
+        function escapeHTML(str) { if (!str) return ''; return str.replace(/[&<>'"]/g, function(tag) { const chars = { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }; return chars[tag] || tag; }); }
+        function renderRanking(list) {
+            const body = document.getElementById('rank-body');
+            const me   = document.getElementById('player-name').value.trim();
+            if (!list || list.length === 0) {
+                body.innerHTML = '<div style="color:rgba(255,255,255,0.4);text-align:center;padding:14px;font-size:0.9rem;">還沒有紀錄</div>';
+                return;
+            }
+            const colors = ['gold', 'silver', 'bronze'];
+            body.innerHTML = list.slice(0, 15).map((r, i) => {
+                const rk = getRank(Number(r.score));
+                return `<div class="rank-row${escapeHTML(r.name) === escapeHTML(me) ? ' rank-me' : ''}">
+                    <span class="rank-num ${colors[i] || ''}">第${i + 1}名</span>
+                    <span class="rank-name">${escapeHTML(r.name)}</span>
+                    <span class="rank-grade" style="color:${rk.color};font-family:'Noto Sans TC', 'Black Han Sans','Noto Sans TC', 'Noto Sans KR',sans-serif;font-size:0.85rem;">${escapeHTML(rk.title)}</span>
+                    <span class="rank-score">${(r.score||0).toLocaleString()}分</span>
+                </div>`;
+            }).join('');
+        }
+
+        function showStatus(msg, type) {
+            const el = document.getElementById('save-status');
+            el.textContent = msg; el.className = 'status-msg ' + type;
+        }
+    
+    // ══════════════════════════════════════
+    // 광고 시스템
+    // ══════════════════════════════════════
+    const AD_GAME_COUNT_KEY = 'hub_ad_game_count';
+    const AD_INTERSTITIAL_EVERY = 10; // N번마다 전면 광고
+
+    function getGameCount() {
+        return parseInt(localStorage.getItem(AD_GAME_COUNT_KEY) || '0');
+    }
+    function incrementGameCount() {
+        const n = getGameCount() + 1;
+        localStorage.setItem(AD_GAME_COUNT_KEY, String(n));
+        return n;
+    }
+
+    // 전면 광고 요청 — 게임 종료 시 호출
+    // 광고 닫히면 onInterstitialClosed() 가 Kotlin에서 호출됨
+    function requestInterstitialIfNeeded(afterFn) {
+        // 광고 제거 구매 시 광고 스킵
+        if (window.AdBridge && typeof AdBridge.isAdsRemoved === 'function' && AdBridge.isAdsRemoved()) {
+            afterFn && afterFn();
+            return;
+        }
+        window._adAfterFn = afterFn;
+        const count = incrementGameCount();
+        if (count % AD_INTERSTITIAL_EVERY === 0 && window.AdBridge) {
+            AdBridge.showInterstitial();
+            // onInterstitialClosed() 에서 afterFn 실행
+        } else {
+            afterFn && afterFn();
+        }
+    }
+
+    // 이 게임은 스테이지가 무한 반복이라 위 requestInterstitialIfNeeded()(그만두기 시에만,
+    // 5게임 공용 카운터 10회마다)로는 정상 클리어 흐름에서 광고 노출 기회가 거의 없었다.
+    // 그래서 정상 클리어 쪽엔 이 게임 전용으로 "N스테이지 클리어마다" 별도 트리거를 둔다.
+    const STAGE_AD_EVERY = 20;   // 10 → 20(2026-10-27): 한 스테이지가 카드 2~5쌍이라 짧아 10이면 약 3분마다 전면 — 지난주 전면의 62%가 여기서 나왔다
+    function requestStageInterstitialIfNeeded(clearedStage, afterFn) {
+        if (window.AdBridge && typeof AdBridge.isAdsRemoved === 'function' && AdBridge.isAdsRemoved()) {
+            afterFn && afterFn();
+            return;
+        }
+        if (clearedStage % STAGE_AD_EVERY === 0 && window.AdBridge) {
+            window._adAfterFn = afterFn;
+            window.__adPlace = 'memory_stage10';   // 광고 기록(daylog): 그만두기 전면과 가른다
+            try { AdBridge.showInterstitial(); } finally { window.__adPlace = null; }
+            // onInterstitialClosed() 에서 afterFn 실행
+        } else {
+            afterFn && afterFn();
+        }
+    }
+
+    // 광고 제거 완료 콜백 (Kotlin에서 호출)
+    function onAdsRemoved() {
+        // 보상형 광고 버튼 숨기기
+        const rewardBtn = document.getElementById('rewarded-btn');
+        if (rewardBtn) rewardBtn.style.display = 'none';
+        // 부활 버튼 숨기기
+        const reviveBtn = document.getElementById('revive-btn');
+        if (reviveBtn) reviveBtn.style.display = 'none';
+    }
+    // Kotlin → JS 콜백
+    function onInterstitialClosed() {
+        if (window._adAfterFn) { window._adAfterFn(); window._adAfterFn = null; }
+    }
+
+    // 보상형 광고 — 시간 부족 시 버튼 클릭으로 호출
+
+
+    function requestRewarded() {
+        if (window.AdBridge && AdBridge.isRewardedReady()) {
+            AdBridge.showRewarded();
+        } else {
+            Ask.alert('廣告載入中，請稍等一下再點一次！');
+        }
+    }
+    // Kotlin → JS 콜백: 보상 지급
+    function onRewardGranted() {
+        // 각 게임 파일에서 오버라이드
+    }
+    function onRewardedFailed() {
+        Ask.alert('廣告載入失敗，請稍等一下再試一次。');
+    }
+
+
+    // 앱 시작 시 광고 제거 여부 확인
+    (function() {
+        if (window.AdBridge && typeof AdBridge.isAdsRemoved === 'function' && AdBridge.isAdsRemoved()) {
+            onAdsRemoved();
+        }
+    })();
+
+    function hideAdPlaceholder() {
+        if (window.AdBridge) AdBridge.hide();
+    }
+    function showAdPlaceholder() {
+        if (window.AdBridge) AdBridge.show();
+    }
+    
+    // ── Supabase 유틸 ──
+    function getGradeForSupabase(gameId, score) {
+        const scales = {
+            acid:    [[15000,"👑 傳奇王牌"],[11000,"🥇 資深飛行員"],[7000,"🥈 熟練飛行員"],[3000,"🥉 正式飛行員"],[0,"🛩 見習生"]],
+            memory:  [[5000,"👑 董事長"],[4000,"⭐ 總經理"],[3000,"🎖 副總經理"],[2200,"🏅 協理"],[1500,"📋 經理"],[900,"🗂 副理"],[500,"📁 課長"],[250,"📝 主任"],[0,"💼 職員"]],
+            debit:   [[3300,"👑 傳奇財務長"],[2800,"🥇 會計經理"],[1800,"🥈 會計主任"],[800,"🥉 新進員工"],[0,"📋 實習中"]],
+            factory: [[12000,"👑 期末達人"],[7000,"🥇 資深會計"],[4000,"🥈 見習會計"],[1500,"🥉 實習生"],[0,"📋 工讀生"]],
+            flight:  [[55000,"👑 傳奇王牌"],[40000,"🥇 資深機師"],[30000,"🥈 熟練機師"],[18000,"🥉 正式機師"],[0,"🛩 見習機師"]]
+        };
+        const tiers = scales[String(gameId).replace(/_d2$/, '')] || scales.flight;
+        return (tiers.find(([min]) => score >= min) || tiers[tiers.length-1])[1];
+    }
+
+    async function supabaseSaveScore(name, score, combo, correct, gameId, retry = 0) {
+        const maxScore = {acid:99999999,memory:99999999,debit:99999999,factory:99999999,flight:99999999};
+        const safeScore = Math.min(Math.max(score,0), maxScore[String(gameId).replace(/_d2$/, '')]||999999);
+        const safeName = String(name).replace(/<[^>]*>/g,'').substring(0,30).trim();
+        if (!safeName) return;
+        const today = new Date().toISOString().split('T')[0];
+        const groupId = localStorage.getItem('hub_group_id') || null;
+        const rpcParams = {
+            p_game_id: gameId,
+            p_name:    safeName,
+            p_score:   safeScore,
+            p_grade:   getGradeForSupabase(gameId, safeScore),
+            p_combo:   Math.max(0, combo||0),
+            p_correct: Math.max(0, correct||0),
+            p_date:    today
+        };
+        if (groupId) rpcParams.p_group_id = groupId;
+        // 로그인 계정이면 uid도 같이 저장 — 기기가 바뀌어도 "내 최고기록"이 계정에 귀속되게
+        try { if (window.Auth) { const uid = await Auth.currentUid(); if (uid) rpcParams.p_uid = uid; } } catch (e) {}
+        // 성장 그래프용 — 매 판 점수 이력 누적(이중저장, 예외 안 던짐; rpc 실패와 무관하게 로컬 기록 보존)
+        if (window.Growth) Growth.record({ game: gameId, name: safeName, score: safeScore, grade: rpcParams.p_grade, combo: rpcParams.p_combo, correct: rpcParams.p_correct });
+        // supabase-js는 실패해도 reject하지 않고 {error}로 resolve — 직접 확인해 throw해야
+        // 호출부 catch(로컬 저장 폴백 안내)가 실제 실패를 사용자에게 알릴 수 있다
+        const { error: rpcError } = await db.rpc('upsert_score', rpcParams);
+        if (rpcError) throw rpcError;
+    }
+
+    async function supabaseFetchRanking(gameId) {
+    /* ⚠ 랭킹 범위 — 표와 순위 배지가 **같은 범위**를 봐야 한다.
+       예전엔 표는 "서버(그룹 필터) + 이 기기 로컬기록"을 섞고, 배지는 "서버(그룹 필터)"만
+       세어서, 그룹에 기록이 없으면 **배지는 1위인데 표에서는 2위**로 보였다(실제 제보).
+       이제 기본을 **전체 범위**로 두고, 그룹 순위는 배지에 따로 덧붙인다.
+       로컬 기록은 서버를 못 불러왔을 때(오프라인)만 폴백으로 쓴다 — 교실 공용 기기에서는
+       여러 학생 닉네임이 남아 있어 랭킹에 섞으면 남의 기록처럼 보인다. */
+        let query = db
+            .from('scores')
+            .select()
+            .eq('game_id', gameId)
+            .order('score', { ascending: false })
+            .limit(20);
+        const { data, error } = await query;
+        if (error) throw error;
+        return data;
+    }
+
+</script>
+
+<script>
+    // ── 팡파레 시스템 ──
+    const FANFARE_TARGET_LABEL = '經理';
+    // 목표 점수는 RANK_TIERS(단일 소스)에서 해당 직급의 최소 점수로 산출 (현재 '부장' = 3000)
+    const FANFARE_TARGET_SCORE = (RANK_TIERS.find(t => t.title.includes(FANFARE_TARGET_LABEL)) || RANK_TIERS[0]).min;
+
+    function checkAndShowFanfare(currentScore, gradeFn) {
+        const grade = typeof gradeFn === 'function' ? gradeFn(currentScore) : gradeFn;
+        const alreadyShown = sessionStorage.getItem('fanfare_shown_game2_memory');
+        if (currentScore >= FANFARE_TARGET_SCORE && !alreadyShown) {
+            sessionStorage.setItem('fanfare_shown_game2_memory', '1');
+            setTimeout(() => showFanfare(grade), 600);
+        }
+    }
+
+    function showFanfare(grade) {
+        document.getElementById('fanfare-grade-text').textContent = grade || ('🥇 ' + FANFARE_TARGET_LABEL);
+        document.getElementById('fanfare-sub-text').textContent =
+            '達成目標等級 [' + FANFARE_TARGET_LABEL + ']！\n離會計丙級合格又近了一步 🎯';
+        spawnFanfareStars();
+        playFanfareSound();
+        document.getElementById('fanfare-overlay').classList.add('show');
+    }
+
+    function closeFanfare() {
+        document.getElementById('fanfare-overlay').classList.remove('show');
+    }
+
+    function spawnFanfareStars() {
+        const container = document.getElementById('fanfare-stars');
+        container.innerHTML = '';
+        const colors = ['gold','#ff2d78','#00f2ff','#00e676','#b44fff','#fff'];
+        for (let i = 0; i < 28; i++) {
+            const s = document.createElement('div');
+            s.className = 'fstar';
+            const angle = Math.random() * Math.PI * 2;
+            const dist = 80 + Math.random() * 120;
+            s.style.cssText = `
+                left:${40 + Math.random()*20}%;
+                top:${30 + Math.random()*20}%;
+                background:${colors[Math.floor(Math.random()*colors.length)]};
+                --tx:${Math.cos(angle)*dist}px;
+                --ty:${Math.sin(angle)*dist}px;
+                --dur:${0.6 + Math.random()*0.8}s;
+                --delay:${Math.random()*0.3}s;
+                width:${4+Math.random()*6}px;
+                height:${4+Math.random()*6}px;
+            `;
+            container.appendChild(s);
+        }
+    }
+
+    function playFanfareSound() {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            // 팡파레 멜로디: C E G C(high)
+            const notes = [523, 659, 784, 1047];
+            notes.forEach((freq, i) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.frequency.value = freq;
+                osc.type = 'sine';
+                const t = ctx.currentTime + i * 0.18;
+                gain.gain.setValueAtTime(0, t);
+                gain.gain.linearRampToValueAtTime(0.25, t + 0.05);
+                gain.gain.linearRampToValueAtTime(0, t + 0.3);
+                osc.start(t); osc.stop(t + 0.35);
+            });
+            // 마지막에 짧은 트릴
+            const trill = ctx.createOscillator();
+            const tGain = ctx.createGain();
+            trill.connect(tGain); tGain.connect(ctx.destination);
+            trill.frequency.value = 1047;
+            tGain.gain.setValueAtTime(0.3, ctx.currentTime + 0.85);
+            tGain.gain.linearRampToValueAtTime(0, ctx.currentTime + 1.3);
+            trill.start(ctx.currentTime + 0.85);
+            trill.stop(ctx.currentTime + 1.3);
+        } catch(e) {}
+    }
+</script>
+
+    <script>document.addEventListener('contextmenu', e => e.preventDefault()); document.addEventListener('selectstart', e => e.preventDefault()); document.addEventListener('copy', e => e.preventDefault()); document.addEventListener('keydown', e => { if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) || (e.ctrlKey && e.keyCode === 85)) { e.preventDefault(); } });</script>
+
+<!-- 목표달성 팡파레 -->
+<div id="fanfare-overlay">
+  <div id="fanfare-box">
+    <div class="fanfare-stars" id="fanfare-stars"></div>
+    <div class="fanfare-emoji">🏆</div>
+    <div class="fanfare-title">達成目標！</div>
+    <div class="fanfare-grade" id="fanfare-grade-text">—</div>
+    <div class="fanfare-sub" id="fanfare-sub-text">—</div>
+    <button class="fanfare-close-btn" onclick="closeFanfare()">繼續 🎮</button>
+  </div>
+</div>
+
+<script>
+/* ── 인터랙티브 튜토리얼 (사용방법) ─────────────────────────────────
+   2026-09-15: 게임2만 옛 스크린샷 방식(guide/g2_*.png 5장)을 쓰고 있었다.
+   나머지 네 게임은 이미 "직접 눌러 보는" 방식으로 바뀌었는데 게임2만 남아
+   UI 가 어긋났다. game1_acid 의 Tutorial 구조를 그대로 따른다.
+
+   각 단계가 **화면의 완성된 상태**(matched/open/wrongN)를 통째로 들고 있다.
+   누적 변수로 굴리면 건너뛰기→재진입 때 카드가 어긋나는데, 이렇게 두면
+   render() 가 언제 불려도 같은 그림이 나온다(게임1에서 얻은 교훈). */
+const Tutorial = (function () {
+  // 3×2. 짝을 일부러 떨어뜨려 놓아 실제 섞인 판처럼 보이게 한다.
+  const CARDS = [
+    { text:'郵電費',  kind:'account' },  // 0 ↔ 3
+    { text:'把設備成本減殘值，分攤到各期', kind:'desc'    },  // 1 ↔ 4
+    { text:'保險費',          kind:'account' },  // 2 ↔ 5
+    { text:'電話費、郵資',    kind:'desc'    },  // 3 ↔ 0
+    { text:'折舊',       kind:'account' },  // 4 ↔ 1
+    { text:'火災險的保費',   kind:'desc'    }   // 5 ↔ 2
+  ];
+  const STEPS = [
+    { text:'<b>會計項目</b>和<b>說明</b>是一組配對。<br>所有卡片都蓋著，顯示<b>?</b>。',
+      matched:[], open:[], wrongN:0, btn:'開始 ▶' },
+
+    { text:'點一下發光的卡片，把它翻開。',
+      matched:[], open:[], wrongN:0, tapSlot:0, result:'open', hint:'點發光的卡片！' },
+
+    { text:'<b>郵電費</b>翻出來了！<br><b>藍色字</b> = 會計項目。<br>接著找寫著意思的<b>紅色卡片</b>。',
+      matched:[], open:[0], wrongN:0, tapSlot:3, result:'match', pair:[0,3], hint:'點配對的說明！' },
+
+    { text:'配對成功的卡片會<b>保持翻開</b>。<br>我先翻開了<b>折舊</b>的卡片。<br>點一下發光的卡片吧。',
+      matched:[0,3], open:[4], wrongN:0, tapSlot:5, result:'wrong', pair:[4,5], hint:'點發光的卡片！' },
+
+    { text:'配對失敗，卡片會<b>再蓋回去</b>，答錯 +1。<br>訣竅是<b>記住卡片位置</b>！<br><b>折舊</b>的說明在哪裡呢？',
+      matched:[0,3], open:[4], wrongN:1, tapSlot:1, trapSlot:5, quiz:true,
+      result:'match', pair:[4,1], hint:'點折舊的說明！' },
+
+    { text:'答對了！全部配對完就結束。<br><b>越快</b>、<b>答錯越少</b>，分數越高。<br>關卡提升，卡片也會變多。',
+      matched:[0,3,4,1], open:[], wrongN:1, btn:'開始遊戲 ▶', finish:true }
+  ];
+
+  let step = 0, busy = false;
+  let timers = [];   // 예약된 연출 — close() 에서 전부 취소(안 하면 재진입 시 단계가 튄다)
+
+  function el(id){ return document.getElementById(id); }
+  function cardAt(i){ return el('tut-grid').children[i]; }
+  function after(ms, fn){ const t = setTimeout(function(){ fn(); }, ms); timers.push(t); return t; }
+  function clearTimers(){ timers.forEach(clearTimeout); timers = []; }
+  function beep(type){ try { if (window.playSound) playSound(type); } catch (e) {} }
+  function buzz(p){ try { if (window.Haptic) (Array.isArray(p) ? Haptic.wrong() : Haptic.correct()); } catch (e) {} }   // haptic.js(앱=Capacitor Haptics)
+
+  function buildGrid() {
+    const g = el('tut-grid');
+    g.innerHTML = '';
+    CARDS.forEach(function (c, i) {
+      const node = document.createElement('div');
+      node.className = 'tut-card';
+      node.dataset.slot = i;
+      node.innerHTML =
+        '<div class="tut-ci">' +
+          '<div class="tut-cb">?</div>' +
+          '<div class="tut-cf" style="color:' + (c.kind === 'account' ? '#2980b9' : '#c0392b') + '">' +
+            c.text +
+          '</div>' +
+        '</div>';
+      // click 이 안 먹은 전례가 있어 이 프로젝트는 pointerdown 으로 받는다
+      node.addEventListener('pointerdown', function (e) { e.preventDefault(); onTap(i, node); });
+      g.appendChild(node);
+    });
+  }
+
+  function floatText(node, msg, color) {
+    const f = document.createElement('div');
+    f.className = 'tut-float';
+    f.textContent = msg;
+    f.style.color = color;
+    f.style.left = Math.max(4, node.offsetLeft) + 'px';
+    f.style.top  = Math.max(0, node.offsetTop - 6) + 'px';
+    el('tut-grid').appendChild(f);
+    after(900, function () { f.remove(); });
+  }
+
+  function onTap(slot, node) {
+    const s = STEPS[step];
+    if (!s || busy) return;
+
+    if (s.tapSlot === slot) {
+      busy = true;
+      node.classList.add('flip');
+      node.classList.remove('tut-target');
+
+      if (s.result === 'open') {                       // 그냥 한 장 열어 보는 단계
+        beep('flip'); buzz(12);
+        after(780, function () { busy = false; go(step + 1); });
+        return;
+      }
+
+      if (s.result === 'match') {                      // 짝이 맞았다
+        after(430, function () {
+          beep('correct'); buzz(15);
+          s.pair.forEach(function (i) { cardAt(i).classList.add('tut-ok'); });
+          el('tut-match').textContent = String(s.matched.length / 2 + 1);
+          floatText(node, '配對成功！', '#2ecc71');
+          after(820, function () { busy = false; go(step + 1); });
+        });
+        return;
+      }
+
+      if (s.result === 'wrong') {                      // 일부러 틀려 보는 단계
+        after(520, function () {
+          beep('wrong'); buzz([30, 40, 30]);
+          s.pair.forEach(function (i) { cardAt(i).classList.add('tut-bad'); });
+          el('tut-wrong').textContent = String(s.wrongN + 1);
+          const st = el('tut-status');
+          st.classList.add('tut-hurt');
+          floatText(node, '不是一組', '#e74c3c');
+          after(430, function () { st.classList.remove('tut-hurt'); });
+          after(620, function () {
+            s.pair.forEach(function (i) {
+              cardAt(i).classList.remove('tut-bad', 'flip');
+            });
+          });
+          after(1150, function () { busy = false; go(step + 1); });
+        });
+        return;
+      }
+    }
+
+    if (s.trapSlot === slot) {                         // 함정은 눌러 보게 두되 왜 아닌지 바로 알려준다
+      busy = true;
+      node.classList.add('flip');
+      after(450, function () {
+        beep('wrong'); buzz([30, 40, 30]);
+        node.classList.add('tut-bad');
+        floatText(node, '不是一組', '#e74c3c');
+        el('tut-hint').textContent = '👆 火災險的保費是「保險費」的說明。再選一次吧';
+        after(600, function () { node.classList.remove('tut-bad', 'flip'); busy = false; });
+      });
+    }
+  }
+
+  function render() {
+    const s = STEPS[step];
+    el('tut-badge').textContent = (step + 1) + '/' + STEPS.length;
+    el('tut-text').innerHTML = s.text;
+    el('tut-wrong').textContent = String(s.wrongN);
+    el('tut-match').textContent = String(s.matched.length / 2);
+    el('tut-status').classList.remove('tut-hurt');
+
+    CARDS.forEach(function (_, i) {
+      const node = cardAt(i);
+      node.className = 'tut-card';
+      if (s.matched.indexOf(i) >= 0) node.classList.add('flip', 'tut-ok');
+      else if (s.open.indexOf(i) >= 0) node.classList.add('flip');
+    });
+    // quiz 단계에선 금빛 링을 빼서 정답이 눈으로 드러나지 않게 한다 — 탭은 그대로 가능
+    if (s.tapSlot != null) {
+      const tn = cardAt(s.tapSlot);
+      tn.classList.add('tut-live');
+      if (!s.quiz) tn.classList.add('tut-target');
+    }
+    if (s.trapSlot != null) cardAt(s.trapSlot).classList.add('tut-live');
+
+    const hint = el('tut-hint');
+    if (s.hint) { hint.style.display = 'block'; hint.textContent = '👆 ' + s.hint; }
+    else { hint.style.display = 'none'; }
+    const btn = el('tut-next');
+    if (s.btn) { btn.style.display = 'block'; btn.textContent = s.btn; }
+    else { btn.style.display = 'none'; }
+  }
+
+  function go(n) { step = n; if (step >= STEPS.length) return finish(); render(); }
+  function nextBtn() { if (STEPS[step].finish) return finish(); go(step + 1); }
+
+  function start() {
+    /* 게임 방법(튜토리얼) 중에도 배너를 내린다 — 실기기 제보(2026-09-15).
+       닫을 때 되살리는 것은 close() 에서만. finish() 는 close() 뒤 게임을 시작하므로
+       거기서 show 를 하면 게임 중에 배너가 다시 올라온다. */
+    if (typeof hideAdPlaceholder === 'function') hideAdPlaceholder();
+    clearTimers(); busy = false; step = 0;
+    buildGrid(); render();
+    el('tutorial').classList.add('show');
+  }
+  function close() {
+    if (typeof showAdPlaceholder === 'function') showAdPlaceholder();
+    clearTimers(); busy = false;
+    el('tutorial').classList.remove('show');
+  }
+  function finish() { close(); if (window.startGame) startGame(); }
+
+  return { start:start, close:close, next:nextBtn };
+})();
+
+// 시작화면 '📖 玩法說明' 버튼 → 인터랙티브 튜토리얼
+function openGuide() { Tutorial.start(); }
+
+</script>
+
+<script src="emoji-icons.js?v=79"></script>
+<!-- 웹 전용 광고(시작·결과 화면만, 앱에선 adsense.js 가 스스로 멈춘다) -->
+<script src="adsense.js?v=79"></script>
+</body>
+</html>

@@ -4,10 +4,11 @@
     <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
          **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
          이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-    <script src="safestore.js?v=79"></script>
-<script src="readable.js?v=79"></script>
+    <script src="safestore.js?v=81"></script>
+<script src="readable.js?v=81"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<style>html{-webkit-text-size-adjust:100%;text-size-adjust:100%}</style>
     <title>자본의 제왕 — 전산회계 1급 스테이지 2</title>
     <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
     <style>
@@ -155,6 +156,7 @@
                한 프레임 늦게 잡히면 % 가 안 걸리고 max-width(84%=330px) 만 남아 **1.5배
                크게** 그려졌다가 줄어든다(boss.webp 는 700x700, 제자리 크기는 223px).
                dvh 상한을 같이 걸어 부모 높이를 몰라도 그 정도 크기를 넘지 않게 한다. */
+            max-height: 30vh; /* 옛 웹뷰 대체(min()·dvh 모름) */
             max-height: min(66%, 30dvh); max-width: 84%; width: auto; height: auto;
             object-fit: contain; object-position: bottom center;
             filter: drop-shadow(0 14px 24px rgba(0,0,0,0.55));
@@ -238,6 +240,7 @@
                왜 배너 높이의 **2배**를 빼는가. 이 팝업은 top:50% + translateY(-50%) 로
                가운데 정렬돼 있어서, 높이를 h 만큼 줄이면 아래쪽은 h/2 만 올라온다.
                팝업 아래끝을 배너 위로 올리려면 배너 높이의 두 배를 빼야 한다. */
+            max-height: 80vh; /* 옛 웹뷰 대체(min()·max()·dvh 모름) */
             max-height: calc(min(88vh, 88dvh) - 2 * max(var(--ad-banner-h, 0px),
                              var(--ad-safe-h, 0px), var(--ad-reserve))
                              - env(safe-area-inset-bottom, 0px));
@@ -306,7 +309,7 @@
             .folder-grid { grid-template-columns: 1fr 1fr; }
 
             /* 2. 대화창: 꽉 차게 */
-            .char-cutscene { max-height:min(58%, 27dvh); bottom:200px; }   /* 좁은 화면도 같이 올린다(2026-09-15) */
+            .char-cutscene { max-height:27vh; max-height:min(58%, 27dvh); bottom:200px; }   /* 좁은 화면도 같이 올린다(2026-09-15) */
             .dialogue-box { width: 100%; padding: 15px; }
 
             /* 3. 분개 화면: 상하 배치 — 차변/대변 칸은 보통 1~2줄만 들어가므로
@@ -951,6 +954,7 @@
         function checkClass(type) {
             if (CSTEP) return stepClass(type);
             if (currentClassPool[classIdx].t === type) {
+                if (window.Skill) Skill.hitAccount(currentClassPool[classIdx].w);   // 분개 기술 숙련(skill.js)
                 state.score += 10;
                 state.classCorrect++;
                 Sound.playClick();
@@ -1186,6 +1190,7 @@
             const isCorrect = (uDrStr === aDrStr && uCrStr === aCrStr);
 
             if (isCorrect) {
+                if (window.Skill) Skill.hitEntry(a.dr.concat(a.cr));   // 분개 기술 숙련(skill.js) — 차변·대변 계정
                 state.score += 20;
                 state.journalCorrect++;
                 Sound.playSuccess();
@@ -1840,23 +1845,23 @@
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="emoji-icons.js?v=79"></script>
-    <script src="ask.js?v=79"></script>
-    <script src="growth.js?v=79"></script>
-<script src="streak.js?v=79"></script>
-<script src="examday.js?v=79"></script>
-<script src="remind.js?v=79"></script>
-    <script src="daylog.js?v=79"></script>
-    <script src="wrongnote.js?v=79"></script>
-    <script src="stepmode.js?v=79"></script>
-<script src="bgm.js?v=79"></script>
-<script src="stagebgm.js?v=79"></script>
-<script>StageBGM.init('bgm_lv1_capital.mp3?v=79', 'capital_muted');</script>
+    <script src="emoji-icons.js?v=81"></script>
+    <script src="ask.js?v=81"></script>
+    <script src="growth.js?v=81"></script>
+<script src="streak.js?v=81"></script>
+<script src="examday.js?v=81"></script>
+<script src="remind.js?v=81"></script>
+    <script src="daylog.js?v=81"></script><script src="amev.js?v=81"></script><script src="skill.js?v=81"></script>
+    <script src="wrongnote.js?v=81"></script>
+    <script src="stepmode.js?v=81"></script>
+<script src="bgm.js?v=81"></script>
+<script src="stagebgm.js?v=81"></script>
+<script>StageBGM.init('bgm_lv1_capital.mp3?v=81', 'capital_muted');</script>
     <script>
         // 차근차근 모드 버튼(시작 화면에 항상)
         if (window.StepMode) StepMode.mount({ game: GAME_ID, host: document.getElementById('step-host'), sub: '힌트 보며 천천히', onStart: startCapitalStep });
     </script>
 <!-- 웹 전용 광고(시작·결과 화면만, 앱에선 adsense.js 가 스스로 멈춘다) -->
-<script src="adsense.js?v=79"></script>
+<script src="adsense.js?v=81"></script>
 </body>
 </html>

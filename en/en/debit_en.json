@@ -1,0 +1,653 @@
+{
+ "meta": {
+  "title": "Game 3 Debit & Credit (US Principles of Accounting)",
+  "lv1": 60,
+  "lv2": 40,
+  "note": "lv2 uses the three-journal rule (cash received = Cash Receipts Journal, cash paid = Cash Payments Journal, everything else = General Journal); no merchandise sales or purchases on account",
+  "generated": "2026-11-15"
+ },
+ "lv1": [
+  {
+   "sentence": "Bought supplies for cash → <b class=\"target-account\">Supplies</b>",
+   "target": "Supplies",
+   "type": "left",
+   "hint": "Supplies (asset) increase → debit"
+  },
+  {
+   "sentence": "Paid the monthly rent → <b class=\"target-account\">Rent Expense</b>",
+   "target": "Rent Expense",
+   "type": "left",
+   "hint": "Rent Expense (expense) increase → debit"
+  },
+  {
+   "sentence": "Received cash from a customer → <b class=\"target-account\">Cash</b>",
+   "target": "Cash",
+   "type": "left",
+   "hint": "Cash (asset) increase → debit"
+  },
+  {
+   "sentence": "Sold merchandise on account → <b class=\"target-account\">Accounts Receivable</b>",
+   "target": "Accounts Receivable",
+   "type": "left",
+   "hint": "Accounts Receivable (asset) increase → debit"
+  },
+  {
+   "sentence": "Paid a supplier on account → <b class=\"target-account\">Accounts Payable</b>",
+   "target": "Accounts Payable",
+   "type": "left",
+   "hint": "Accounts Payable (liability) decrease → debit"
+  },
+  {
+   "sentence": "Paid the electric bill → <b class=\"target-account\">Utilities Expense</b>",
+   "target": "Utilities Expense",
+   "type": "left",
+   "hint": "Utilities Expense (expense) increase → debit"
+  },
+  {
+   "sentence": "Bought a delivery truck for cash → <b class=\"target-account\">Vehicles</b>",
+   "target": "Vehicles",
+   "type": "left",
+   "hint": "Vehicles (asset) increase → debit"
+  },
+  {
+   "sentence": "Paid a cash dividend with no earlier declaration → <b class=\"target-account\">Dividends</b>",
+   "target": "Dividends",
+   "type": "left",
+   "hint": "Dividends (contra equity) increase → debit"
+  },
+  {
+   "sentence": "Recorded the cost of merchandise sold → <b class=\"target-account\">Cost of Goods Sold</b>",
+   "target": "Cost of Goods Sold",
+   "type": "left",
+   "hint": "Cost of Goods Sold (expense) increase → debit"
+  },
+  {
+   "sentence": "Purchased merchandise on account → <b class=\"target-account\">Merchandise Inventory</b>",
+   "target": "Merchandise Inventory",
+   "type": "left",
+   "hint": "Merchandise Inventory (asset) increase → debit"
+  },
+  {
+   "sentence": "Paid a three-year insurance premium in advance → <b class=\"target-account\">Prepaid Insurance</b>",
+   "target": "Prepaid Insurance",
+   "type": "left",
+   "hint": "Prepaid Insurance (asset) increase → debit"
+  },
+  {
+   "sentence": "A customer returned merchandise for a credit → <b class=\"target-account\">Sales Returns and Allowances</b>",
+   "target": "Sales Returns and Allowances",
+   "type": "left",
+   "hint": "Sales Returns and Allowances (contra revenue) increase → debit"
+  },
+  {
+   "sentence": "A customer paid early and took a discount → <b class=\"target-account\">Sales Discounts</b>",
+   "target": "Sales Discounts",
+   "type": "left",
+   "hint": "Sales Discounts (contra revenue) increase → debit"
+  },
+  {
+   "sentence": "Wrote off an uncollectible customer account → <b class=\"target-account\">Allowance for Doubtful Accounts</b>",
+   "target": "Allowance for Doubtful Accounts",
+   "type": "left",
+   "hint": "Allowance for Doubtful Accounts (contra asset) decrease → debit"
+  },
+  {
+   "sentence": "Paid employee salaries → <b class=\"target-account\">Salaries Expense</b>",
+   "target": "Salaries Expense",
+   "type": "left",
+   "hint": "Salaries Expense (expense) increase → debit"
+  },
+  {
+   "sentence": "Paid interest on a bank loan → <b class=\"target-account\">Interest Expense</b>",
+   "target": "Interest Expense",
+   "type": "left",
+   "hint": "Interest Expense (expense) increase → debit"
+  },
+  {
+   "sentence": "Paid for a newspaper advertisement → <b class=\"target-account\">Advertising Expense</b>",
+   "target": "Advertising Expense",
+   "type": "left",
+   "hint": "Advertising Expense (expense) increase → debit"
+  },
+  {
+   "sentence": "Repaid part of a bank loan → <b class=\"target-account\">Bank Loan Payable</b>",
+   "target": "Bank Loan Payable",
+   "type": "left",
+   "hint": "Bank Loan Payable (liability) decrease → debit"
+  },
+  {
+   "sentence": "Earned revenue that a customer had paid for in advance → <b class=\"target-account\">Unearned Revenue</b>",
+   "target": "Unearned Revenue",
+   "type": "left",
+   "hint": "Unearned Revenue (liability) decrease → debit"
+  },
+  {
+   "sentence": "Sold old equipment for less than its book value → <b class=\"target-account\">Loss on Sale of Equipment</b>",
+   "target": "Loss on Sale of Equipment",
+   "type": "left",
+   "hint": "Loss on Sale of Equipment (expense) increase → debit"
+  },
+  {
+   "sentence": "Removed the depreciation on a piece of equipment that was sold → <b class=\"target-account\">Accumulated Depreciation—Equipment</b>",
+   "target": "Accumulated Depreciation—Equipment",
+   "type": "left",
+   "hint": "Accumulated Depreciation—Equipment (contra asset) decrease → debit"
+  },
+  {
+   "sentence": "Bought office furniture for cash → <b class=\"target-account\">Furniture</b>",
+   "target": "Furniture",
+   "type": "left",
+   "hint": "Furniture (asset) increase → debit"
+  },
+  {
+   "sentence": "Lent money to a customer in exchange for a note → <b class=\"target-account\">Notes Receivable</b>",
+   "target": "Notes Receivable",
+   "type": "left",
+   "hint": "Notes Receivable (asset) increase → debit"
+  },
+  {
+   "sentence": "Gave an employee a cash advance → <b class=\"target-account\">Advances to Employees</b>",
+   "target": "Advances to Employees",
+   "type": "left",
+   "hint": "Advances to Employees (asset) increase → debit"
+  },
+  {
+   "sentence": "Sent withheld FICA taxes to the government → <b class=\"target-account\">FICA Taxes Payable</b>",
+   "target": "FICA Taxes Payable",
+   "type": "left",
+   "hint": "FICA Taxes Payable (liability) decrease → debit"
+  },
+  {
+   "sentence": "Paid a dividend that was declared last month → <b class=\"target-account\">Dividends Payable</b>",
+   "target": "Dividends Payable",
+   "type": "left",
+   "hint": "Dividends Payable (liability) decrease → debit"
+  },
+  {
+   "sentence": "The cash drawer count was $5 short → <b class=\"target-account\">Cash Over and Short</b>",
+   "target": "Cash Over and Short",
+   "type": "left",
+   "hint": "Cash Over and Short (other) shortage → debit"
+  },
+  {
+   "sentence": "Bought land for a new store → <b class=\"target-account\">Land</b>",
+   "target": "Land",
+   "type": "left",
+   "hint": "Land (asset) increase → debit"
+  },
+  {
+   "sentence": "Recorded the employer's share of payroll taxes → <b class=\"target-account\">Payroll Tax Expense</b>",
+   "target": "Payroll Tax Expense",
+   "type": "left",
+   "hint": "Payroll Tax Expense (expense) increase → debit"
+  },
+  {
+   "sentence": "Sent the sales tax collected to the state → <b class=\"target-account\">Sales Tax Payable</b>",
+   "target": "Sales Tax Payable",
+   "type": "left",
+   "hint": "Sales Tax Payable (liability) decrease → debit"
+  },
+  {
+   "sentence": "Sold merchandise for cash → <b class=\"target-account\">Sales Revenue</b>",
+   "target": "Sales Revenue",
+   "type": "right",
+   "hint": "Sales Revenue (revenue) increase → credit"
+  },
+  {
+   "sentence": "Earned fees from a client → <b class=\"target-account\">Fees Earned</b>",
+   "target": "Fees Earned",
+   "type": "right",
+   "hint": "Fees Earned (revenue) increase → credit"
+  },
+  {
+   "sentence": "Paid cash for supplies → <b class=\"target-account\">Cash</b>",
+   "target": "Cash",
+   "type": "right",
+   "hint": "Cash (asset) decrease → credit"
+  },
+  {
+   "sentence": "Received cash from a customer on account → <b class=\"target-account\">Accounts Receivable</b>",
+   "target": "Accounts Receivable",
+   "type": "right",
+   "hint": "Accounts Receivable (asset) decrease → credit"
+  },
+  {
+   "sentence": "Bought merchandise on account → <b class=\"target-account\">Accounts Payable</b>",
+   "target": "Accounts Payable",
+   "type": "right",
+   "hint": "Accounts Payable (liability) increase → credit"
+  },
+  {
+   "sentence": "Issued shares of stock for cash → <b class=\"target-account\">Common Stock</b>",
+   "target": "Common Stock",
+   "type": "right",
+   "hint": "Common Stock (equity) increase → credit"
+  },
+  {
+   "sentence": "Borrowed money from the bank → <b class=\"target-account\">Bank Loan Payable</b>",
+   "target": "Bank Loan Payable",
+   "type": "right",
+   "hint": "Bank Loan Payable (liability) increase → credit"
+  },
+  {
+   "sentence": "Signed a note to buy equipment → <b class=\"target-account\">Notes Payable</b>",
+   "target": "Notes Payable",
+   "type": "right",
+   "hint": "Notes Payable (liability) increase → credit"
+  },
+  {
+   "sentence": "Received payment in advance for future services → <b class=\"target-account\">Unearned Revenue</b>",
+   "target": "Unearned Revenue",
+   "type": "right",
+   "hint": "Unearned Revenue (liability) increase → credit"
+  },
+  {
+   "sentence": "Earned a sales commission → <b class=\"target-account\">Commission Revenue</b>",
+   "target": "Commission Revenue",
+   "type": "right",
+   "hint": "Commission Revenue (revenue) increase → credit"
+  },
+  {
+   "sentence": "Recorded depreciation on equipment → <b class=\"target-account\">Accumulated Depreciation—Equipment</b>",
+   "target": "Accumulated Depreciation—Equipment",
+   "type": "right",
+   "hint": "Accumulated Depreciation—Equipment (contra asset) increase → credit"
+  },
+  {
+   "sentence": "Estimated that some customer accounts will not be collected → <b class=\"target-account\">Allowance for Doubtful Accounts</b>",
+   "target": "Allowance for Doubtful Accounts",
+   "type": "right",
+   "hint": "Allowance for Doubtful Accounts (contra asset) increase → credit"
+  },
+  {
+   "sentence": "Earned rent from a tenant → <b class=\"target-account\">Rent Revenue</b>",
+   "target": "Rent Revenue",
+   "type": "right",
+   "hint": "Rent Revenue (revenue) increase → credit"
+  },
+  {
+   "sentence": "Earned interest on a bank deposit → <b class=\"target-account\">Interest Revenue</b>",
+   "target": "Interest Revenue",
+   "type": "right",
+   "hint": "Interest Revenue (revenue) increase → credit"
+  },
+  {
+   "sentence": "Collected sales tax from customers → <b class=\"target-account\">Sales Tax Payable</b>",
+   "target": "Sales Tax Payable",
+   "type": "right",
+   "hint": "Sales Tax Payable (liability) increase → credit"
+  },
+  {
+   "sentence": "Withheld FICA taxes from employees' pay → <b class=\"target-account\">FICA Taxes Payable</b>",
+   "target": "FICA Taxes Payable",
+   "type": "right",
+   "hint": "FICA Taxes Payable (liability) increase → credit"
+  },
+  {
+   "sentence": "Withheld federal income tax from employees' pay → <b class=\"target-account\">Federal Income Taxes Payable</b>",
+   "target": "Federal Income Taxes Payable",
+   "type": "right",
+   "hint": "Federal Income Taxes Payable (liability) increase → credit"
+  },
+  {
+   "sentence": "Declared a cash dividend → <b class=\"target-account\">Dividends Payable</b>",
+   "target": "Dividends Payable",
+   "type": "right",
+   "hint": "Dividends Payable (liability) increase → credit"
+  },
+  {
+   "sentence": "Wages for the last week of the year are unpaid → <b class=\"target-account\">Wages Payable</b>",
+   "target": "Wages Payable",
+   "type": "right",
+   "hint": "Wages Payable (liability) increase → credit"
+  },
+  {
+   "sentence": "Interest on a loan is owed but unpaid at year-end → <b class=\"target-account\">Interest Payable</b>",
+   "target": "Interest Payable",
+   "type": "right",
+   "hint": "Interest Payable (liability) increase → credit"
+  },
+  {
+   "sentence": "Recorded the supplies that were used up → <b class=\"target-account\">Supplies</b>",
+   "target": "Supplies",
+   "type": "right",
+   "hint": "Supplies (asset) decrease → credit"
+  },
+  {
+   "sentence": "Recorded the insurance that expired → <b class=\"target-account\">Prepaid Insurance</b>",
+   "target": "Prepaid Insurance",
+   "type": "right",
+   "hint": "Prepaid Insurance (asset) decrease → credit"
+  },
+  {
+   "sentence": "Merchandise was sold to a customer → <b class=\"target-account\">Merchandise Inventory</b>",
+   "target": "Merchandise Inventory",
+   "type": "right",
+   "hint": "Merchandise Inventory (asset) decrease → credit"
+  },
+  {
+   "sentence": "Sold equipment for more than its book value → <b class=\"target-account\">Gain on Sale of Equipment</b>",
+   "target": "Gain on Sale of Equipment",
+   "type": "right",
+   "hint": "Gain on Sale of Equipment (gain) increase → credit"
+  },
+  {
+   "sentence": "Closed net income into the stockholders' equity account → <b class=\"target-account\">Retained Earnings</b>",
+   "target": "Retained Earnings",
+   "type": "right",
+   "hint": "Retained Earnings (equity) increase → credit"
+  },
+  {
+   "sentence": "Closed the Rent Expense account at year-end → <b class=\"target-account\">Rent Expense</b>",
+   "target": "Rent Expense",
+   "type": "right",
+   "hint": "Rent Expense (expense) decrease → credit"
+  },
+  {
+   "sentence": "Received a deposit from a customer for a future order → <b class=\"target-account\">Customer Deposits</b>",
+   "target": "Customer Deposits",
+   "type": "right",
+   "hint": "Customer Deposits (liability) increase → credit"
+  },
+  {
+   "sentence": "Received the water bill but have not paid it yet → <b class=\"target-account\">Utilities Payable</b>",
+   "target": "Utilities Payable",
+   "type": "right",
+   "hint": "Utilities Payable (liability) increase → credit"
+  },
+  {
+   "sentence": "The cash drawer count was $5 over → <b class=\"target-account\">Cash Over and Short</b>",
+   "target": "Cash Over and Short",
+   "type": "right",
+   "hint": "Cash Over and Short (other) overage → credit"
+  },
+  {
+   "sentence": "Sold a piece of equipment → <b class=\"target-account\">Equipment</b>",
+   "target": "Equipment",
+   "type": "right",
+   "hint": "Equipment (asset) decrease → credit"
+  }
+ ],
+ "lv2": [
+  {
+   "sentence": "Received $3,000 cash from Maple Supply on account.",
+   "debitAcc": "Cash",
+   "creditAcc": "Accounts Receivable",
+   "vendor": "Maple Supply",
+   "voucherType": "Cash Receipts Journal"
+  },
+  {
+   "sentence": "Sold merchandise to Harbor Goods for $1,800 cash. Record the sale side.",
+   "debitAcc": "Cash",
+   "creditAcc": "Sales Revenue",
+   "vendor": "Harbor Goods",
+   "voucherType": "Cash Receipts Journal"
+  },
+  {
+   "sentence": "Issued common stock for $10,000 cash.",
+   "debitAcc": "Cash",
+   "creditAcc": "Common Stock",
+   "vendor": "",
+   "voucherType": "Cash Receipts Journal"
+  },
+  {
+   "sentence": "Borrowed $20,000 from First Valley Bank.",
+   "debitAcc": "Cash",
+   "creditAcc": "Bank Loan Payable",
+   "vendor": "First Valley Bank",
+   "voucherType": "Cash Receipts Journal"
+  },
+  {
+   "sentence": "Received $2,400 cash from Redwood Studio for services to be performed next month.",
+   "debitAcc": "Cash",
+   "creditAcc": "Unearned Revenue",
+   "vendor": "Redwood Studio",
+   "voucherType": "Cash Receipts Journal"
+  },
+  {
+   "sentence": "Performed services for Pine & Co. and received $900 cash.",
+   "debitAcc": "Cash",
+   "creditAcc": "Service Revenue",
+   "vendor": "Pine & Co.",
+   "voucherType": "Cash Receipts Journal"
+  },
+  {
+   "sentence": "Received $450 cash interest from Lakeside Bank.",
+   "debitAcc": "Cash",
+   "creditAcc": "Interest Revenue",
+   "vendor": "Lakeside Bank",
+   "voucherType": "Cash Receipts Journal"
+  },
+  {
+   "sentence": "Received $1,200 cash rent from a tenant.",
+   "debitAcc": "Cash",
+   "creditAcc": "Rent Revenue",
+   "vendor": "",
+   "voucherType": "Cash Receipts Journal"
+  },
+  {
+   "sentence": "Received a $500 cash deposit from Bright Path Co. for a future order.",
+   "debitAcc": "Cash",
+   "creditAcc": "Customer Deposits",
+   "vendor": "Bright Path Co.",
+   "voucherType": "Cash Receipts Journal"
+  },
+  {
+   "sentence": "Collected a $2,000 note receivable from Maple Supply in cash.",
+   "debitAcc": "Cash",
+   "creditAcc": "Notes Receivable",
+   "vendor": "Maple Supply",
+   "voucherType": "Cash Receipts Journal"
+  },
+  {
+   "sentence": "Earned a $600 commission and received it in cash from Pine & Co.",
+   "debitAcc": "Cash",
+   "creditAcc": "Commission Revenue",
+   "vendor": "Pine & Co.",
+   "voucherType": "Cash Receipts Journal"
+  },
+  {
+   "sentence": "Sold land at its cost for $8,000 cash.",
+   "debitAcc": "Cash",
+   "creditAcc": "Land",
+   "vendor": "",
+   "voucherType": "Cash Receipts Journal"
+  },
+  {
+   "sentence": "Received a $250 cash refund from Summit Wholesale for supplies returned.",
+   "debitAcc": "Cash",
+   "creditAcc": "Supplies",
+   "vendor": "Summit Wholesale",
+   "voucherType": "Cash Receipts Journal"
+  },
+  {
+   "sentence": "Received $700 cash from employee Alex, who repaid an advance.",
+   "debitAcc": "Cash",
+   "creditAcc": "Advances to Employees",
+   "vendor": "Alex",
+   "voucherType": "Cash Receipts Journal"
+  },
+  {
+   "sentence": "Paid $2,500 cash to Summit Wholesale on account.",
+   "debitAcc": "Accounts Payable",
+   "creditAcc": "Cash",
+   "vendor": "Summit Wholesale",
+   "voucherType": "Cash Payments Journal"
+  },
+  {
+   "sentence": "Paid $1,500 cash for the month's rent.",
+   "debitAcc": "Rent Expense",
+   "creditAcc": "Cash",
+   "vendor": "",
+   "voucherType": "Cash Payments Journal"
+  },
+  {
+   "sentence": "Purchased supplies for $400 cash from Oakridge Supply.",
+   "debitAcc": "Supplies",
+   "creditAcc": "Cash",
+   "vendor": "Oakridge Supply",
+   "voucherType": "Cash Payments Journal"
+  },
+  {
+   "sentence": "Paid the $600 electric bill in cash.",
+   "debitAcc": "Utilities Expense",
+   "creditAcc": "Cash",
+   "vendor": "",
+   "voucherType": "Cash Payments Journal"
+  },
+  {
+   "sentence": "Paid $3,200 cash in salaries to employees.",
+   "debitAcc": "Salaries Expense",
+   "creditAcc": "Cash",
+   "vendor": "",
+   "voucherType": "Cash Payments Journal"
+  },
+  {
+   "sentence": "Paid a $2,000 cash dividend to shareholders. No dividend was declared earlier.",
+   "debitAcc": "Dividends",
+   "creditAcc": "Cash",
+   "vendor": "",
+   "voucherType": "Cash Payments Journal"
+  },
+  {
+   "sentence": "Purchased merchandise from Bluebird Traders for $1,900 cash.",
+   "debitAcc": "Merchandise Inventory",
+   "creditAcc": "Cash",
+   "vendor": "Bluebird Traders",
+   "voucherType": "Cash Payments Journal"
+  },
+  {
+   "sentence": "Paid First Valley Bank $1,000 cash on the loan principal.",
+   "debitAcc": "Bank Loan Payable",
+   "creditAcc": "Cash",
+   "vendor": "First Valley Bank",
+   "voucherType": "Cash Payments Journal"
+  },
+  {
+   "sentence": "Paid $300 cash for advertising.",
+   "debitAcc": "Advertising Expense",
+   "creditAcc": "Cash",
+   "vendor": "",
+   "voucherType": "Cash Payments Journal"
+  },
+  {
+   "sentence": "Paid $1,200 cash for a one-year insurance policy.",
+   "debitAcc": "Prepaid Insurance",
+   "creditAcc": "Cash",
+   "vendor": "",
+   "voucherType": "Cash Payments Journal"
+  },
+  {
+   "sentence": "Purchased equipment from Clearwater Inc. for $6,000 cash.",
+   "debitAcc": "Equipment",
+   "creditAcc": "Cash",
+   "vendor": "Clearwater Inc.",
+   "voucherType": "Cash Payments Journal"
+  },
+  {
+   "sentence": "Paid Cedar Lane Co. $180 cash to deliver goods to customers.",
+   "debitAcc": "Delivery Expense",
+   "creditAcc": "Cash",
+   "vendor": "Cedar Lane Co.",
+   "voucherType": "Cash Payments Journal"
+  },
+  {
+   "sentence": "Paid Lakeside Bank $2,000 cash on a note payable.",
+   "debitAcc": "Notes Payable",
+   "creditAcc": "Cash",
+   "vendor": "Lakeside Bank",
+   "voucherType": "Cash Payments Journal"
+  },
+  {
+   "sentence": "Paid $450 cash to the state for sales tax collected.",
+   "debitAcc": "Sales Tax Payable",
+   "creditAcc": "Cash",
+   "vendor": "",
+   "voucherType": "Cash Payments Journal"
+  },
+  {
+   "sentence": "Issued a $1,800 note payable to Summit Wholesale in settlement of an account payable.",
+   "debitAcc": "Accounts Payable",
+   "creditAcc": "Notes Payable",
+   "vendor": "Summit Wholesale",
+   "voucherType": "General Journal"
+  },
+  {
+   "sentence": "Purchased equipment on account from Oakridge Supply for $4,500.",
+   "debitAcc": "Equipment",
+   "creditAcc": "Accounts Payable",
+   "vendor": "Oakridge Supply",
+   "voucherType": "General Journal"
+  },
+  {
+   "sentence": "Purchased supplies on account from Cedar Lane Co. for $350.",
+   "debitAcc": "Supplies",
+   "creditAcc": "Accounts Payable",
+   "vendor": "Cedar Lane Co.",
+   "voucherType": "General Journal"
+  },
+  {
+   "sentence": "Issued a $3,000 note payable to Clearwater Inc. for equipment.",
+   "debitAcc": "Equipment",
+   "creditAcc": "Notes Payable",
+   "vendor": "Clearwater Inc.",
+   "voucherType": "General Journal"
+  },
+  {
+   "sentence": "Recorded $800 of supplies used during the month.",
+   "debitAcc": "Supplies Expense",
+   "creditAcc": "Supplies",
+   "vendor": "",
+   "voucherType": "General Journal"
+  },
+  {
+   "sentence": "Recorded $1,500 of depreciation on equipment.",
+   "debitAcc": "Depreciation Expense",
+   "creditAcc": "Accumulated Depreciation—Equipment",
+   "vendor": "",
+   "voucherType": "General Journal"
+  },
+  {
+   "sentence": "Accrued $2,100 of salaries owed to employees at month-end.",
+   "debitAcc": "Salaries Expense",
+   "creditAcc": "Salaries Payable",
+   "vendor": "",
+   "voucherType": "General Journal"
+  },
+  {
+   "sentence": "Declared a $2,500 cash dividend.",
+   "debitAcc": "Dividends",
+   "creditAcc": "Dividends Payable",
+   "vendor": "",
+   "voucherType": "General Journal"
+  },
+  {
+   "sentence": "Wrote off Harbor Goods' $400 uncollectible account against the allowance.",
+   "debitAcc": "Allowance for Doubtful Accounts",
+   "creditAcc": "Accounts Receivable",
+   "vendor": "Harbor Goods",
+   "voucherType": "General Journal"
+  },
+  {
+   "sentence": "Accepted a $1,500 note from Bright Path Co. in settlement of its account.",
+   "debitAcc": "Notes Receivable",
+   "creditAcc": "Accounts Receivable",
+   "vendor": "Bright Path Co.",
+   "voucherType": "General Journal"
+  },
+  {
+   "sentence": "Recorded $300 of prepaid insurance that expired.",
+   "debitAcc": "Insurance Expense",
+   "creditAcc": "Prepaid Insurance",
+   "vendor": "",
+   "voucherType": "General Journal"
+  },
+  {
+   "sentence": "Earned $600 of the revenue that Redwood Studio paid in advance.",
+   "debitAcc": "Unearned Revenue",
+   "creditAcc": "Service Revenue",
+   "vendor": "Redwood Studio",
+   "voucherType": "General Journal"
+  }
+ ]
+}

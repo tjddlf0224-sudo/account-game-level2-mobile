@@ -1,0 +1,4218 @@
+{
+ "meta": {
+  "title": "US edition theory quiz (Accounting 101 level, original)",
+  "count": 150,
+  "topics": {
+   "T1": "Accounting basics & the accounting cycle",
+   "T2": "Cash & internal control",
+   "T3": "Receivables & payables",
+   "T4": "Merchandising",
+   "T5": "Long-term assets & depreciation",
+   "T6": "Adjusting, closing & financial statements",
+   "T7": "Corporations, payroll & sales tax"
+  },
+  "generated": "2026-11-15"
+ },
+ "questions": [
+  {
+   "id": "TE-T1-01",
+   "topic": "T1",
+   "topicName": "Accounting basics & the accounting cycle",
+   "format": [
+    "calculation"
+   ],
+   "stem": "The company has total assets of $80,000 and total liabilities of $30,000. What is total equity?",
+   "options": [
+    "$110,000",
+    "$30,000",
+    "$80,000",
+    "$50,000"
+   ],
+   "answer": 4,
+   "answerText": "$50,000",
+   "explanation": "Equity is assets minus liabilities, so $80,000 - $30,000 = $50,000. This comes straight from the accounting equation.",
+   "deepDive": {
+    "concept": "Accounting equation",
+    "conceptExplain": "Assets = Liabilities + Equity. If you know two parts, you can find the third by subtraction.",
+    "whyCorrect": "Equity = $80,000 - $30,000 = $50,000.",
+    "wrongReasons": {
+     "1": "Adding assets and liabilities does not follow the equation.",
+     "2": "$30,000 is the liabilities, not the equity.",
+     "3": "$80,000 is total assets, which equals liabilities plus equity."
+    }
+   }
+  },
+  {
+   "id": "TE-T1-02",
+   "topic": "T1",
+   "topicName": "Accounting basics & the accounting cycle",
+   "format": [
+    "definition"
+   ],
+   "stem": "Which of the following best describes a liability?",
+   "options": [
+    "Something the company owns that has value",
+    "An obligation to pay or provide something to another party",
+    "The owners' claim on the assets",
+    "A cost used up to earn revenue"
+   ],
+   "answer": 2,
+   "answerText": "An obligation to pay or provide something to another party",
+   "explanation": "A liability is something the company owes, such as accounts payable or a loan. It is a claim by outsiders on the company's assets.",
+   "deepDive": {
+    "concept": "Liability",
+    "conceptExplain": "Liabilities are present obligations that come from past events. They will be settled with cash, goods, or services.",
+    "whyCorrect": "A liability is an obligation owed to someone outside the business.",
+    "wrongReasons": {
+     "1": "That describes an asset.",
+     "3": "That describes equity.",
+     "4": "That describes an expense."
+    }
+   }
+  },
+  {
+   "id": "TE-T1-03",
+   "topic": "T1",
+   "topicName": "Accounting basics & the accounting cycle",
+   "format": [
+    "definition"
+   ],
+   "stem": "Which account normally has a credit balance?",
+   "options": [
+    "Dividends",
+    "Supplies",
+    "Rent Expense",
+    "Common Stock"
+   ],
+   "answer": 4,
+   "answerText": "Common Stock",
+   "explanation": "Common Stock is an equity account, and equity increases with credits. Dividends, supplies, and expenses all increase with debits.",
+   "deepDive": {
+    "concept": "Normal balances",
+    "conceptExplain": "Assets, expenses, and dividends normally have debit balances. Liabilities, equity, and revenue normally have credit balances.",
+    "whyCorrect": "Common Stock is equity, so its normal balance is a credit.",
+    "wrongReasons": {
+     "1": "Dividends is a contra equity account with a normal debit balance.",
+     "2": "Supplies is an asset, so it normally has a debit balance.",
+     "3": "Expenses increase with debits, so Rent Expense has a debit balance."
+    }
+   }
+  },
+  {
+   "id": "TE-T1-04",
+   "topic": "T1",
+   "topicName": "Accounting basics & the accounting cycle",
+   "format": [
+    "which is correct"
+   ],
+   "stem": "Which event is recorded as an accounting transaction?",
+   "options": [
+    "A customer says it will place a large order next month",
+    "The company signed a letter promising to hire an employee",
+    "The owner predicts that sales will rise",
+    "Paid $900 cash for 12 months of insurance"
+   ],
+   "answer": 4,
+   "answerText": "Paid $900 cash for 12 months of insurance",
+   "explanation": "A transaction changes assets, liabilities, or equity and can be measured. Paying for insurance does that; promises and predictions do not.",
+   "deepDive": {
+    "concept": "What counts as a transaction",
+    "conceptExplain": "An event is recorded only if it changes the accounting equation and has a reliable dollar amount.",
+    "whyCorrect": "Paying cash for insurance reduces Cash and creates Prepaid Insurance.",
+    "wrongReasons": {
+     "1": "A future order does not change any account yet.",
+     "2": "A promise to hire is not yet an exchange of value.",
+     "3": "A prediction is not a completed event."
+    }
+   }
+  },
+  {
+   "id": "TE-T1-05",
+   "topic": "T1",
+   "topicName": "Accounting basics & the accounting cycle",
+   "format": [
+    "true statement"
+   ],
+   "stem": "The company bought equipment for $5,000 cash. What happens to total assets?",
+   "options": [
+    "They increase by $5,000",
+    "They stay the same",
+    "They decrease by $5,000",
+    "They increase by $10,000"
+   ],
+   "answer": 2,
+   "answerText": "They stay the same",
+   "explanation": "Equipment goes up by $5,000 and Cash goes down by $5,000. One asset replaces another, so the total is unchanged.",
+   "deepDive": {
+    "concept": "Effects on the equation",
+    "conceptExplain": "Some transactions only swap one asset for another. Then both sides of the equation stay the same.",
+    "whyCorrect": "Equipment +$5,000 and Cash -$5,000 net to zero.",
+    "wrongReasons": {
+     "1": "Cash decreased by the same amount, so the total did not rise.",
+     "3": "Total assets did not fall because equipment was received.",
+     "4": "Nothing doubles the amount."
+    }
+   }
+  },
+  {
+   "id": "TE-T1-06",
+   "topic": "T1",
+   "topicName": "Accounting basics & the accounting cycle",
+   "format": [
+    "which is correct"
+   ],
+   "stem": "Purchased supplies on account for $400. How is the accounting equation affected?",
+   "options": [
+    "Assets +$400 and equity +$400",
+    "Assets +$400 and liabilities +$400",
+    "Assets +$400 and assets -$400",
+    "Liabilities +$400 and equity -$400"
+   ],
+   "answer": 2,
+   "answerText": "Assets +$400 and liabilities +$400",
+   "explanation": "Supplies is an asset that increases. Because it was bought on account, Accounts Payable (a liability) also increases by $400.",
+   "deepDive": {
+    "concept": "Buying on account",
+    "conceptExplain": "Buying on credit adds an asset and a liability together. No cash moves until the bill is paid.",
+    "whyCorrect": "Dr Supplies 400 / Cr Accounts Payable 400.",
+    "wrongReasons": {
+     "1": "Equity does not change when you buy on account.",
+     "3": "Cash was not used, so no asset decreased.",
+     "4": "Nothing reduces equity in this purchase."
+    }
+   }
+  },
+  {
+   "id": "TE-T1-07",
+   "topic": "T1",
+   "topicName": "Accounting basics & the accounting cycle",
+   "format": [
+    "which is correct"
+   ],
+   "stem": "Performed a service and received $2,000 cash. Which entry is correct?",
+   "options": [
+    "Dr Service Revenue 2,000 / Cr Cash 2,000",
+    "Dr Cash 2,000 / Cr Unearned Revenue 2,000",
+    "Dr Accounts Receivable 2,000 / Cr Cash 2,000",
+    "Dr Cash 2,000 / Cr Service Revenue 2,000"
+   ],
+   "answer": 4,
+   "answerText": "Dr Cash 2,000 / Cr Service Revenue 2,000",
+   "explanation": "Cash increases, so Cash is debited. Service Revenue increases, so it is credited.",
+   "deepDive": {
+    "concept": "Recording revenue",
+    "conceptExplain": "Revenue is earned when the service is done. Cash is debited and the revenue account is credited.",
+    "whyCorrect": "Cash is an asset that rises with a debit; revenue rises with a credit.",
+    "wrongReasons": {
+     "1": "That reverses the debit and credit.",
+     "2": "The service was already performed, so it is earned, not unearned.",
+     "3": "No receivable exists because cash was received."
+    }
+   }
+  },
+  {
+   "id": "TE-T1-08",
+   "topic": "T1",
+   "topicName": "Accounting basics & the accounting cycle",
+   "format": [
+    "definition"
+   ],
+   "stem": "What is the main purpose of a trial balance?",
+   "options": [
+    "To show the company's net income for the year",
+    "To record transactions in date order",
+    "To check that total debits equal total credits",
+    "To prove that every entry was posted to the right account"
+   ],
+   "answer": 3,
+   "answerText": "To check that total debits equal total credits",
+   "explanation": "A trial balance lists all ledger balances. If debits equal credits, the ledger is mathematically balanced.",
+   "deepDive": {
+    "concept": "Trial balance",
+    "conceptExplain": "The trial balance is a check, not a financial statement. It shows balance, but not that every entry is correct.",
+    "whyCorrect": "Equal totals show that debits and credits match.",
+    "wrongReasons": {
+     "1": "Net income is shown on the income statement.",
+     "2": "Recording in date order is the job of the journal.",
+     "4": "A trial balance can balance even with wrong-account errors."
+    }
+   }
+  },
+  {
+   "id": "TE-T1-09",
+   "topic": "T1",
+   "topicName": "Accounting basics & the accounting cycle",
+   "format": [
+    "which is correct"
+   ],
+   "stem": "Which error would NOT cause the trial balance to be out of balance?",
+   "options": [
+    "Posting a debit twice",
+    "Leaving a credit out of the ledger",
+    "Debiting Supplies instead of Equipment for the right amount",
+    "Recording $63 as $36 in one account"
+   ],
+   "answer": 3,
+   "answerText": "Debiting Supplies instead of Equipment for the right amount",
+   "explanation": "Wrong-account errors keep total debits equal to total credits. The other errors upset the totals.",
+   "deepDive": {
+    "concept": "Limits of a trial balance",
+    "conceptExplain": "A trial balance cannot find errors that keep debits equal to credits, such as the wrong account or an omitted entry.",
+    "whyCorrect": "Both sides stay equal, so the trial balance still balances.",
+    "wrongReasons": {
+     "1": "A duplicate debit makes debits too high.",
+     "2": "A missing credit makes credits too low.",
+     "4": "A transposition changes one side only."
+    }
+   }
+  },
+  {
+   "id": "TE-T1-10",
+   "topic": "T1",
+   "topicName": "Accounting basics & the accounting cycle",
+   "format": [
+    "definition"
+   ],
+   "stem": "A trial balance is out by an amount that is evenly divisible by 9. What does this often indicate?",
+   "options": [
+    "A transposition error",
+    "An unrecorded transaction",
+    "Posting to the wrong account",
+    "A missing account"
+   ],
+   "answer": 1,
+   "answerText": "A transposition error",
+   "explanation": "Swapping two digits, such as 63 to 36, changes the total by a multiple of 9. Look for this when the difference divides by 9.",
+   "deepDive": {
+    "concept": "Transposition errors",
+    "conceptExplain": "A transposition switches adjacent digits. The resulting difference is always a multiple of 9.",
+    "whyCorrect": "Digit swaps create differences divisible by 9.",
+    "wrongReasons": {
+     "2": "An unrecorded transaction would not unbalance the trial balance.",
+     "3": "A wrong-account error keeps totals equal.",
+     "4": "A missing account would not give a multiple of 9."
+    }
+   }
+  },
+  {
+   "id": "TE-T1-11",
+   "topic": "T1",
+   "topicName": "Accounting basics & the accounting cycle",
+   "format": [
+    "which is correct"
+   ],
+   "stem": "Under the accrual basis, revenue is recognized when it is:",
+   "options": [
+    "Earned",
+    "Billed to the customer",
+    "Collected in cash",
+    "Ordered by the customer"
+   ],
+   "answer": 1,
+   "answerText": "Earned",
+   "explanation": "Accrual accounting records revenue when the company earns it, no matter when cash arrives.",
+   "deepDive": {
+    "concept": "Revenue recognition",
+    "conceptExplain": "Revenue is recorded when the performance obligation is met. Cash timing does not matter.",
+    "whyCorrect": "Earning the revenue triggers recognition.",
+    "wrongReasons": {
+     "2": "Billing does not always match when it is earned.",
+     "3": "That is the cash basis.",
+     "4": "An order is only a promise."
+    }
+   }
+  },
+  {
+   "id": "TE-T1-12",
+   "topic": "T1",
+   "topicName": "Accounting basics & the accounting cycle",
+   "format": [
+    "definition"
+   ],
+   "stem": "Which principle says expenses should be recorded in the same period as the revenues they helped earn?",
+   "options": [
+    "Matching",
+    "Economic entity",
+    "Going concern",
+    "Cost"
+   ],
+   "answer": 1,
+   "answerText": "Matching",
+   "explanation": "Matching links expenses to the revenue they produced. It is why adjusting entries are needed.",
+   "deepDive": {
+    "concept": "Matching principle",
+    "conceptExplain": "Costs used to earn a period's revenue are reported in that same period.",
+    "whyCorrect": "Matching puts expenses and related revenue together.",
+    "wrongReasons": {
+     "2": "Economic entity separates business and owners.",
+     "3": "Going concern assumes the business will keep operating.",
+     "4": "The cost principle records assets at what was paid."
+    }
+   }
+  },
+  {
+   "id": "TE-T1-13",
+   "topic": "T1",
+   "topicName": "Accounting basics & the accounting cycle",
+   "format": [
+    "which is correct"
+   ],
+   "stem": "Paid $1,200 for three months of rent in advance. Which entry is correct?",
+   "options": [
+    "Dr Rent Expense 1,200 / Cr Accounts Payable 1,200",
+    "Dr Prepaid Rent 1,200 / Cr Cash 1,200",
+    "Dr Cash 1,200 / Cr Prepaid Rent 1,200",
+    "Dr Rent Receivable 1,200 / Cr Cash 1,200"
+   ],
+   "answer": 2,
+   "answerText": "Dr Prepaid Rent 1,200 / Cr Cash 1,200",
+   "explanation": "Rent paid in advance is an asset until used up. Cash decreases with a credit.",
+   "deepDive": {
+    "concept": "Prepaid expenses",
+    "conceptExplain": "A prepayment gives future benefit, so it is first recorded as an asset.",
+    "whyCorrect": "Prepaid Rent is debited and Cash is credited.",
+    "wrongReasons": {
+     "1": "The company paid cash, not on account.",
+     "3": "That reverses the entry.",
+     "4": "The company is the tenant, so it has no rent receivable."
+    }
+   }
+  },
+  {
+   "id": "TE-T1-14",
+   "topic": "T1",
+   "topicName": "Accounting basics & the accounting cycle",
+   "format": [
+    "which is correct"
+   ],
+   "stem": "Which sequence shows the first steps of the accounting cycle in the right order?",
+   "options": [
+    "Post to the ledger, journalize, analyze transactions, prepare financial statements",
+    "Prepare financial statements, journalize, analyze transactions, close",
+    "Analyze transactions, journalize, post to the ledger, prepare an unadjusted trial balance",
+    "Journalize, close the books, analyze transactions, post"
+   ],
+   "answer": 3,
+   "answerText": "Analyze transactions, journalize, post to the ledger, prepare an unadjusted trial balance",
+   "explanation": "You first analyze each event, then record it in the journal, post to ledger accounts, and test with a trial balance.",
+   "deepDive": {
+    "concept": "Accounting cycle",
+    "conceptExplain": "The cycle starts with analysis and ends with a post-closing trial balance.",
+    "whyCorrect": "That order follows the cycle.",
+    "wrongReasons": {
+     "1": "Posting cannot come before journalizing.",
+     "2": "Statements come after adjusting, not first.",
+     "4": "Closing is near the end of the cycle."
+    }
+   }
+  },
+  {
+   "id": "TE-T1-15",
+   "topic": "T1",
+   "topicName": "Accounting basics & the accounting cycle",
+   "format": [
+    "definition"
+   ],
+   "stem": "What does posting mean?",
+   "options": [
+    "Recording an event in the journal for the first time",
+    "Transferring journal entry amounts to ledger accounts",
+    "Listing ledger balances to prove equality",
+    "Preparing the income statement"
+   ],
+   "answer": 2,
+   "answerText": "Transferring journal entry amounts to ledger accounts",
+   "explanation": "Posting copies debits and credits from the journal into the ledger accounts. It gives each account an up-to-date balance.",
+   "deepDive": {
+    "concept": "Posting",
+    "conceptExplain": "Journalizing comes first. Posting then sorts the amounts by account.",
+    "whyCorrect": "Posting moves amounts from journal to ledger.",
+    "wrongReasons": {
+     "1": "That describes journalizing.",
+     "3": "That describes a trial balance.",
+     "4": "Statements are prepared from the ledger balances."
+    }
+   }
+  },
+  {
+   "id": "TE-T1-16",
+   "topic": "T1",
+   "topicName": "Accounting basics & the accounting cycle",
+   "format": [
+    "calculation"
+   ],
+   "stem": "The Cash account has debits of $12,000 and credits of $7,500. What is the balance?",
+   "options": [
+    "$4,500 credit",
+    "$19,500 debit",
+    "$4,500 debit",
+    "$7,500 debit"
+   ],
+   "answer": 3,
+   "answerText": "$4,500 debit",
+   "explanation": "Subtract the smaller side from the larger: $12,000 - $7,500 = $4,500. Debits are larger, so it is a debit balance.",
+   "deepDive": {
+    "concept": "Ledger balances",
+    "conceptExplain": "Balance = larger side minus smaller side. The larger side tells you the balance type.",
+    "whyCorrect": "$12,000 - $7,500 = $4,500 on the debit side.",
+    "wrongReasons": {
+     "1": "Debits are larger, so it is not a credit.",
+     "2": "You do not add debits and credits.",
+     "4": "$7,500 is just the credit total."
+    }
+   }
+  },
+  {
+   "id": "TE-T1-17",
+   "topic": "T1",
+   "topicName": "Accounting basics & the accounting cycle",
+   "format": [
+    "calculation"
+   ],
+   "stem": "Revenues for the year were $25,000 and expenses were $18,400. What is net income?",
+   "options": [
+    "$43,400",
+    "$18,400",
+    "$6,600",
+    "$25,000"
+   ],
+   "answer": 3,
+   "answerText": "$6,600",
+   "explanation": "Net income is revenues minus expenses: $25,000 - $18,400 = $6,600.",
+   "deepDive": {
+    "concept": "Net income",
+    "conceptExplain": "Net income = Revenues - Expenses. A negative result is a net loss.",
+    "whyCorrect": "$25,000 - $18,400 = $6,600.",
+    "wrongReasons": {
+     "1": "Adding revenues and expenses is not net income.",
+     "2": "$18,400 is total expenses.",
+     "4": "$25,000 is revenue before subtracting expenses."
+    }
+   }
+  },
+  {
+   "id": "TE-T1-18",
+   "topic": "T1",
+   "topicName": "Accounting basics & the accounting cycle",
+   "format": [
+    "calculation"
+   ],
+   "stem": "Beginning Retained Earnings were $40,000, net income was $12,000, and dividends were $5,000. What is ending Retained Earnings?",
+   "options": [
+    "$57,000",
+    "$47,000",
+    "$52,000",
+    "$35,000"
+   ],
+   "answer": 2,
+   "answerText": "$47,000",
+   "explanation": "Ending = beginning + net income - dividends: $40,000 + $12,000 - $5,000 = $47,000.",
+   "deepDive": {
+    "concept": "Retained Earnings",
+    "conceptExplain": "Retained Earnings grows with net income and shrinks with dividends.",
+    "whyCorrect": "$40,000 + $12,000 - $5,000 = $47,000.",
+    "wrongReasons": {
+     "1": "That adds the dividends instead of subtracting them.",
+     "3": "That ignores the dividends.",
+     "4": "That ignores the net income."
+    }
+   }
+  },
+  {
+   "id": "TE-T1-19",
+   "topic": "T1",
+   "topicName": "Accounting basics & the accounting cycle",
+   "format": [
+    "which is correct"
+   ],
+   "stem": "Which financial statement reports assets, liabilities, and equity at a single point in time?",
+   "options": [
+    "Income statement",
+    "Balance sheet",
+    "Statement of retained earnings",
+    "Trial balance"
+   ],
+   "answer": 2,
+   "answerText": "Balance sheet",
+   "explanation": "The balance sheet is a snapshot on a specific date. The income statement covers a period.",
+   "deepDive": {
+    "concept": "Balance sheet",
+    "conceptExplain": "It follows the equation: assets equal liabilities plus equity at that date.",
+    "whyCorrect": "A balance sheet shows financial position on one date.",
+    "wrongReasons": {
+     "1": "The income statement covers a period of time.",
+     "3": "That statement explains changes in Retained Earnings.",
+     "4": "A trial balance is an internal check, not a statement."
+    }
+   }
+  },
+  {
+   "id": "TE-T1-20",
+   "topic": "T1",
+   "topicName": "Accounting basics & the accounting cycle",
+   "format": [
+    "which is correct"
+   ],
+   "stem": "Which account is reported on the income statement?",
+   "options": [
+    "Dividends",
+    "Common Stock",
+    "Rent Expense",
+    "Unearned Revenue"
+   ],
+   "answer": 3,
+   "answerText": "Rent Expense",
+   "explanation": "Revenues and expenses go on the income statement. Rent Expense is an expense.",
+   "deepDive": {
+    "concept": "Income statement accounts",
+    "conceptExplain": "Only revenue, expense, gain, and loss accounts appear on the income statement.",
+    "whyCorrect": "Rent Expense reduces net income.",
+    "wrongReasons": {
+     "1": "Dividends appear in the statement of retained earnings.",
+     "2": "Common Stock is on the balance sheet.",
+     "4": "Unearned Revenue is a liability on the balance sheet."
+    }
+   }
+  },
+  {
+   "id": "TE-T1-21",
+   "topic": "T1",
+   "topicName": "Accounting basics & the accounting cycle",
+   "format": [
+    "definition"
+   ],
+   "stem": "Which assumption requires the company's records to be kept separate from its owners' personal affairs?",
+   "options": [
+    "Going concern assumption",
+    "Economic entity assumption",
+    "Monetary unit assumption",
+    "Time period assumption"
+   ],
+   "answer": 2,
+   "answerText": "Economic entity assumption",
+   "explanation": "The business is treated as its own accounting unit. Owners' personal items stay out of its books.",
+   "deepDive": {
+    "concept": "Economic entity",
+    "conceptExplain": "Each business is a separate unit, even if it is owned by people with other interests.",
+    "whyCorrect": "That assumption separates the business from its owners.",
+    "wrongReasons": {
+     "1": "Going concern assumes the business will continue.",
+     "3": "Monetary unit says to record things in dollars.",
+     "4": "Time period divides life into reporting periods."
+    }
+   }
+  },
+  {
+   "id": "TE-T1-22",
+   "topic": "T1",
+   "topicName": "Accounting basics & the accounting cycle",
+   "format": [
+    "which is correct"
+   ],
+   "stem": "Provided services for $2,000: received $500 cash and the rest is due later. Which entry is correct?",
+   "options": [
+    "Dr Cash 500, Dr Accounts Receivable 1,500 / Cr Service Revenue 2,000",
+    "Dr Cash 2,000 / Cr Service Revenue 2,000",
+    "Dr Cash 500 / Cr Service Revenue 500",
+    "Dr Accounts Receivable 2,000 / Cr Service Revenue 2,000"
+   ],
+   "answer": 1,
+   "answerText": "Dr Cash 500, Dr Accounts Receivable 1,500 / Cr Service Revenue 2,000",
+   "explanation": "The company earned $2,000. It collected $500 and expects $1,500 more, so both Cash and Accounts Receivable are debited.",
+   "deepDive": {
+    "concept": "Compound entries",
+    "conceptExplain": "A compound entry has more than two accounts, but total debits still equal total credits.",
+    "whyCorrect": "500 + 1,500 = 2,000 on the debit side, matching the credit.",
+    "wrongReasons": {
+     "2": "Only $500 cash was received.",
+     "3": "That records only part of the revenue.",
+     "4": "That ignores the cash collected."
+    }
+   }
+  },
+  {
+   "id": "TE-T2-01",
+   "topic": "T2",
+   "topicName": "Cash & internal control",
+   "format": [
+    "which is correct"
+   ],
+   "stem": "Which item is reported as Cash on the balance sheet?",
+   "options": [
+    "Funds in a checking account",
+    "A postdated check from a customer",
+    "Postage stamps on hand",
+    "An IOU from an employee"
+   ],
+   "answer": 1,
+   "answerText": "Funds in a checking account",
+   "explanation": "Cash includes currency, checking balances, and money orders. The other items are not available to spend now.",
+   "deepDive": {
+    "concept": "What cash includes",
+    "conceptExplain": "Cash is anything the bank accepts at face value for deposit now.",
+    "whyCorrect": "A checking balance is available cash.",
+    "wrongReasons": {
+     "2": "A postdated check cannot be deposited yet.",
+     "3": "Stamps are supplies.",
+     "4": "An IOU is a receivable."
+    }
+   }
+  },
+  {
+   "id": "TE-T2-02",
+   "topic": "T2",
+   "topicName": "Cash & internal control",
+   "format": [
+    "definition"
+   ],
+   "stem": "Which internal control principle is shown when the person who handles cash receipts does not keep the accounting records?",
+   "options": [
+    "Prenumbered documents",
+    "Mandatory vacations",
+    "Establishing responsibility",
+    "Separation of duties"
+   ],
+   "answer": 4,
+   "answerText": "Separation of duties",
+   "explanation": "Splitting custody from record keeping makes it harder to hide theft.",
+   "deepDive": {
+    "concept": "Separation of duties",
+    "conceptExplain": "Different people should handle assets, record transactions, and approve them.",
+    "whyCorrect": "Cash handling and record keeping are split.",
+    "wrongReasons": {
+     "1": "That means forms are in number order.",
+     "2": "That means employees take time off.",
+     "3": "That means one person is accountable for each task."
+    }
+   }
+  },
+  {
+   "id": "TE-T2-03",
+   "topic": "T2",
+   "topicName": "Cash & internal control",
+   "format": [
+    "definition"
+   ],
+   "stem": "Why does a company use prenumbered invoices and checks?",
+   "options": [
+    "To speed up bank deposits",
+    "To account for every document and detect missing ones",
+    "To prevent customers from paying late",
+    "To reduce sales tax"
+   ],
+   "answer": 2,
+   "answerText": "To account for every document and detect missing ones",
+   "explanation": "A missing number signals a lost or hidden document. This supports accountability.",
+   "deepDive": {
+    "concept": "Documentation controls",
+    "conceptExplain": "Prenumbered forms must be accounted for in sequence.",
+    "whyCorrect": "Gaps in numbering point to problems.",
+    "wrongReasons": {
+     "1": "They do not speed deposits.",
+     "3": "They have no effect on customers' payment dates.",
+     "4": "They are unrelated to taxes."
+    }
+   }
+  },
+  {
+   "id": "TE-T2-04",
+   "topic": "T2",
+   "topicName": "Cash & internal control",
+   "format": [
+    "definition"
+   ],
+   "stem": "Requiring employees to take vacations and rotating their duties is mostly meant to:",
+   "options": [
+    "Increase sales",
+    "Help uncover fraud",
+    "Reduce payroll costs",
+    "Speed up closing"
+   ],
+   "answer": 2,
+   "answerText": "Help uncover fraud",
+   "explanation": "Someone covering the job may notice hidden errors or theft.",
+   "deepDive": {
+    "concept": "Rotation and vacations",
+    "conceptExplain": "Fraud is easier to hide when one person always does the same task.",
+    "whyCorrect": "A substitute may find irregularities.",
+    "wrongReasons": {
+     "1": "These steps are not for sales.",
+     "3": "They do not cut payroll costs.",
+     "4": "They do not affect closing time."
+    }
+   }
+  },
+  {
+   "id": "TE-T2-05",
+   "topic": "T2",
+   "topicName": "Cash & internal control",
+   "format": [
+    "which is correct"
+   ],
+   "stem": "Only one cashier is assigned to each cash register drawer. Which control principle is this?",
+   "options": [
+    "Separation of duties",
+    "Independent verification",
+    "Establishing responsibility",
+    "Physical controls"
+   ],
+   "answer": 3,
+   "answerText": "Establishing responsibility",
+   "explanation": "If one person uses a drawer, any shortage can be traced to that person.",
+   "deepDive": {
+    "concept": "Establishing responsibility",
+    "conceptExplain": "Each task should be assigned to one person, so accountability is clear.",
+    "whyCorrect": "One cashier per drawer sets clear responsibility.",
+    "wrongReasons": {
+     "1": "That is about splitting roles.",
+     "2": "That is checking work by someone else.",
+     "4": "That is locks, safes, or cameras."
+    }
+   }
+  },
+  {
+   "id": "TE-T2-06",
+   "topic": "T2",
+   "topicName": "Cash & internal control",
+   "format": [
+    "true statement"
+   ],
+   "stem": "Which statement about the limits of internal control is correct?",
+   "options": [
+    "Collusion between employees can defeat controls",
+    "Good controls guarantee there will be no fraud",
+    "Controls are never worth the cost",
+    "Controls only work in large companies"
+   ],
+   "answer": 1,
+   "answerText": "Collusion between employees can defeat controls",
+   "explanation": "When two employees work together, they can get around separation of duties.",
+   "deepDive": {
+    "concept": "Limits of controls",
+    "conceptExplain": "Controls reduce risk but cannot eliminate it. People can collude or make mistakes.",
+    "whyCorrect": "Collusion can bypass controls.",
+    "wrongReasons": {
+     "2": "No system gives a guarantee.",
+     "3": "Many controls are cheap and useful.",
+     "4": "Small firms use controls too."
+    }
+   }
+  },
+  {
+   "id": "TE-T2-07",
+   "topic": "T2",
+   "topicName": "Cash & internal control",
+   "format": [
+    "calculation"
+   ],
+   "stem": "The bank balance is $8,200. Deposits in transit are $1,300 and outstanding checks are $900. What is the adjusted bank balance?",
+   "options": [
+    "$6,000",
+    "$8,600",
+    "$10,400",
+    "$9,500"
+   ],
+   "answer": 2,
+   "answerText": "$8,600",
+   "explanation": "Add deposits in transit and subtract outstanding checks: $8,200 + $1,300 - $900 = $8,600.",
+   "deepDive": {
+    "concept": "Bank side of the reconciliation",
+    "conceptExplain": "The bank side corrects for items the bank does not know about yet.",
+    "whyCorrect": "$8,200 + $1,300 - $900 = $8,600.",
+    "wrongReasons": {
+     "1": "That subtracts deposits and adds checks.",
+     "3": "That adds both items.",
+     "4": "That ignores the outstanding checks."
+    }
+   }
+  },
+  {
+   "id": "TE-T2-08",
+   "topic": "T2",
+   "topicName": "Cash & internal control",
+   "format": [
+    "calculation"
+   ],
+   "stem": "The book balance is $5,000. The bank collected a $600 note for the company, charged a $25 service fee, and returned a $150 NSF check. What is the adjusted book balance?",
+   "options": [
+    "$5,775",
+    "$5,625",
+    "$4,575",
+    "$5,425"
+   ],
+   "answer": 4,
+   "answerText": "$5,425",
+   "explanation": "$5,000 + $600 - $25 - $150 = $5,425.",
+   "deepDive": {
+    "concept": "Book side of the reconciliation",
+    "conceptExplain": "Items the bank has recorded but the company has not are adjusted on the book side.",
+    "whyCorrect": "Add the collection; subtract the fee and the NSF check.",
+    "wrongReasons": {
+     "1": "That adds the NSF check back.",
+     "2": "That does not subtract the fee.",
+     "3": "That subtracts the collection."
+    }
+   }
+  },
+  {
+   "id": "TE-T2-09",
+   "topic": "T2",
+   "topicName": "Cash & internal control",
+   "format": [
+    "which is correct"
+   ],
+   "stem": "Which item on a bank reconciliation requires the company to make a journal entry?",
+   "options": [
+    "Outstanding check",
+    "Deposit in transit",
+    "Bank service charge",
+    "A bank error in the company's favor"
+   ],
+   "answer": 3,
+   "answerText": "Bank service charge",
+   "explanation": "Items the bank has recorded but the company has not are new to the company and need an entry. The bank has already recorded the service charge, but the company has not.",
+   "deepDive": {
+    "concept": "Reconciling items",
+    "conceptExplain": "Timing items on the bank side need no entry. Items the company has not yet recorded do.",
+    "whyCorrect": "The service charge must be recorded: Dr Bank Service Charges / Cr Cash.",
+    "wrongReasons": {
+     "1": "It was already recorded in the books when the check was written.",
+     "2": "It was already recorded in the books when the deposit was made.",
+     "4": "The bank corrects its own error, so the company makes no entry."
+    }
+   }
+  },
+  {
+   "id": "TE-T2-10",
+   "topic": "T2",
+   "topicName": "Cash & internal control",
+   "format": [
+    "which is correct"
+   ],
+   "stem": "Which reconciling item is subtracted from the bank balance?",
+   "options": [
+    "Outstanding checks",
+    "Deposits in transit",
+    "NSF checks",
+    "Interest earned"
+   ],
+   "answer": 1,
+   "answerText": "Outstanding checks",
+   "explanation": "Outstanding checks have been recorded in the books but have not yet cleared the bank.",
+   "deepDive": {
+    "concept": "Bank side adjustments",
+    "conceptExplain": "Deposits in transit are added, and outstanding checks are subtracted.",
+    "whyCorrect": "Outstanding checks reduce the bank side.",
+    "wrongReasons": {
+     "2": "Those are added to the bank balance.",
+     "3": "Those are adjustments to the book side.",
+     "4": "Those are adjustments to the book side."
+    }
+   }
+  },
+  {
+   "id": "TE-T2-11",
+   "topic": "T2",
+   "topicName": "Cash & internal control",
+   "format": [
+    "which is correct"
+   ],
+   "stem": "A customer's check from Harbor Goods is returned NSF. Which entry is correct?",
+   "options": [
+    "Dr Cash / Cr Accounts Receivable",
+    "Dr Bad Debt Expense / Cr Cash",
+    "Dr Sales Revenue / Cr Cash",
+    "Dr Accounts Receivable / Cr Cash"
+   ],
+   "answer": 4,
+   "answerText": "Dr Accounts Receivable / Cr Cash",
+   "explanation": "The money did not arrive, so the company again has a receivable. The deposit is reversed with a credit to Cash.",
+   "deepDive": {
+    "concept": "NSF checks",
+    "conceptExplain": "An NSF check means the customer still owes the company.",
+    "whyCorrect": "Receivable is restored and Cash reduced.",
+    "wrongReasons": {
+     "1": "That reverses the entry.",
+     "2": "It is too early to call the debt uncollectible.",
+     "3": "Revenue is not reversed."
+    }
+   }
+  },
+  {
+   "id": "TE-T2-12",
+   "topic": "T2",
+   "topicName": "Cash & internal control",
+   "format": [
+    "which is correct"
+   ],
+   "stem": "The company sets up a $200 petty cash fund by writing a check. Which entry is correct?",
+   "options": [
+    "Dr Cash 200 / Cr Petty Cash 200",
+    "Dr Office Expense 200 / Cr Cash 200",
+    "Dr Petty Cash 200 / Cr Cash 200",
+    "Dr Petty Cash 200 / Cr Office Expense 200"
+   ],
+   "answer": 3,
+   "answerText": "Dr Petty Cash 200 / Cr Cash 200",
+   "explanation": "Cash moves from the bank account to the fund, both of which are assets.",
+   "deepDive": {
+    "concept": "Petty cash",
+    "conceptExplain": "A fund is created by moving cash into the Petty Cash account.",
+    "whyCorrect": "Petty Cash increases and Cash decreases.",
+    "wrongReasons": {
+     "1": "That reverses the entry.",
+     "2": "The expenses are recorded when the fund is replenished.",
+     "4": "That has no cash effect."
+    }
+   }
+  },
+  {
+   "id": "TE-T2-13",
+   "topic": "T2",
+   "topicName": "Cash & internal control",
+   "format": [
+    "calculation"
+   ],
+   "stem": "A $200 petty cash fund has receipts of $186 and $14 in cash. How much is the replenishment check?",
+   "options": [
+    "$186",
+    "$14",
+    "$200",
+    "$0"
+   ],
+   "answer": 1,
+   "answerText": "$186",
+   "explanation": "The check must bring cash back to $200: $200 - $14 = $186, equal to the receipts.",
+   "deepDive": {
+    "concept": "Replenishing the fund",
+    "conceptExplain": "The check equals the amount spent.",
+    "whyCorrect": "$200 - $14 = $186.",
+    "wrongReasons": {
+     "2": "That is the cash still in the box.",
+     "3": "That would overfund the box.",
+     "4": "The fund is not full."
+    }
+   }
+  },
+  {
+   "id": "TE-T2-14",
+   "topic": "T2",
+   "topicName": "Cash & internal control",
+   "format": [
+    "calculation"
+   ],
+   "stem": "A $150 petty cash fund has $128 in receipts and $20 in cash. What is the replenishment check, and what does the difference mean?",
+   "options": [
+    "$130; Cash Over and Short is debited $2",
+    "$128; no entry is needed",
+    "$130; Cash Over and Short is credited $2",
+    "$20; Petty Cash is debited"
+   ],
+   "answer": 1,
+   "answerText": "$130; Cash Over and Short is debited $2",
+   "explanation": "The fund must be restored to $150, so the check is $150 - $20 = $130. That is $2 more than receipts, which means a shortage.",
+   "deepDive": {
+    "concept": "Cash short",
+    "conceptExplain": "A shortage is debited to Cash Over and Short.",
+    "whyCorrect": "$130 = $128 expenses + $2 shortage.",
+    "wrongReasons": {
+     "2": "The check must cover the missing $2 too.",
+     "3": "A credit would mean an overage.",
+     "4": "The fund is restored via Cash, not Petty Cash."
+    }
+   }
+  },
+  {
+   "id": "TE-T2-15",
+   "topic": "T2",
+   "topicName": "Cash & internal control",
+   "format": [
+    "true statement"
+   ],
+   "stem": "The Petty Cash account is debited or credited only when:",
+   "options": [
+    "Any small expense is paid",
+    "The fund is replenished",
+    "The fund is created or its size changes",
+    "Cash is counted"
+   ],
+   "answer": 3,
+   "answerText": "The fund is created or its size changes",
+   "explanation": "Normal payments are tracked on receipts. The account balance stays fixed unless the fund size changes.",
+   "deepDive": {
+    "concept": "Imprest fund",
+    "conceptExplain": "An imprest fund keeps a fixed total of cash plus receipts.",
+    "whyCorrect": "Only changes to the fund size affect the account.",
+    "wrongReasons": {
+     "1": "Expenses are recorded at replenishment.",
+     "2": "Replenishment debits expenses and credits Cash.",
+     "4": "Counting does not change the account."
+    }
+   }
+  },
+  {
+   "id": "TE-T2-16",
+   "topic": "T2",
+   "topicName": "Cash & internal control",
+   "format": [
+    "which is correct"
+   ],
+   "stem": "A debit balance in Cash Over and Short at year-end means that:",
+   "options": [
+    "The company had net cash shortages",
+    "The company had net cash overages",
+    "The bank made an error",
+    "Cash was recorded twice"
+   ],
+   "answer": 1,
+   "answerText": "The company had net cash shortages",
+   "explanation": "Debits increase expenses and losses. Shortages are losses.",
+   "deepDive": {
+    "concept": "Cash Over and Short",
+    "conceptExplain": "Shortages are debited and overages are credited.",
+    "whyCorrect": "A debit balance means shortages exceeded overages.",
+    "wrongReasons": {
+     "2": "Overages are credits.",
+     "3": "This account is about the company's own cash handling.",
+     "4": "Doubles would not be tracked here."
+    }
+   }
+  },
+  {
+   "id": "TE-T2-17",
+   "topic": "T2",
+   "topicName": "Cash & internal control",
+   "format": [
+    "which is correct"
+   ],
+   "stem": "Which task is the best example of independent verification?",
+   "options": [
+    "Someone who does not handle cash prepares the bank reconciliation",
+    "The cashier prepares the bank reconciliation",
+    "The cashier counts and also deposits the cash alone",
+    "A manager signs checks without looking at them"
+   ],
+   "answer": 1,
+   "answerText": "Someone who does not handle cash prepares the bank reconciliation",
+   "explanation": "A different person checking the records can catch errors and theft.",
+   "deepDive": {
+    "concept": "Independent verification",
+    "conceptExplain": "Records should be checked by someone not involved in the work.",
+    "whyCorrect": "A person outside the cash function reviews the records.",
+    "wrongReasons": {
+     "2": "The cashier would be checking their own work.",
+     "3": "No one else is involved.",
+     "4": "Signing without review is not a real check."
+    }
+   }
+  },
+  {
+   "id": "TE-T2-18",
+   "topic": "T2",
+   "topicName": "Cash & internal control",
+   "format": [
+    "definition"
+   ],
+   "stem": "What is a deposit in transit?",
+   "options": [
+    "A check the company wrote but not yet cashed",
+    "A deposit the bank recorded but the company did not",
+    "A deposit recorded by the company but not yet shown by the bank",
+    "A note collected by the bank"
+   ],
+   "answer": 3,
+   "answerText": "A deposit recorded by the company but not yet shown by the bank",
+   "explanation": "It happens when a deposit is made near the end of the month. The bank adds it a day or two later.",
+   "deepDive": {
+    "concept": "Deposits in transit",
+    "conceptExplain": "These are timing differences, not errors.",
+    "whyCorrect": "The company has recorded it but the bank has not.",
+    "wrongReasons": {
+     "1": "That is an outstanding check.",
+     "2": "That would be a book-side item.",
+     "4": "That is a book-side item."
+    }
+   }
+  },
+  {
+   "id": "TE-T2-19",
+   "topic": "T2",
+   "topicName": "Cash & internal control",
+   "format": [
+    "definition"
+   ],
+   "stem": "Which item is usually classified as a cash equivalent?",
+   "options": [
+    "A two-year loan to a supplier",
+    "A short-term investment with an original maturity of three months or less",
+    "Inventory held for sale",
+    "A building"
+   ],
+   "answer": 2,
+   "answerText": "A short-term investment with an original maturity of three months or less",
+   "explanation": "Cash equivalents are highly liquid and close to maturity. They can be turned into cash quickly.",
+   "deepDive": {
+    "concept": "Cash equivalents",
+    "conceptExplain": "Short maturity and low risk are the key features.",
+    "whyCorrect": "An original maturity of three months or less meets the usual test.",
+    "wrongReasons": {
+     "1": "Two years is long-term.",
+     "3": "Inventory is not cash.",
+     "4": "Buildings are long-term assets."
+    }
+   }
+  },
+  {
+   "id": "TE-T2-20",
+   "topic": "T2",
+   "topicName": "Cash & internal control",
+   "format": [
+    "which is correct"
+   ],
+   "stem": "Interest earned on the checking account appears on the bank statement but not in the books. How is it treated on the reconciliation?",
+   "options": [
+    "Subtracted from the bank balance",
+    "Added to the bank balance",
+    "Added to the book balance",
+    "No adjustment"
+   ],
+   "answer": 3,
+   "answerText": "Added to the book balance",
+   "explanation": "The bank has increased the account but the company has not. The company adds it on the book side and records Dr Cash / Cr Interest Revenue.",
+   "deepDive": {
+    "concept": "Book-side adjustments",
+    "conceptExplain": "Bank credits missing from the books increase the book balance.",
+    "whyCorrect": "It is a book-side addition.",
+    "wrongReasons": {
+     "1": "It has no effect on the bank balance.",
+     "2": "The bank balance already includes it.",
+     "4": "The books need to be corrected."
+    }
+   }
+  },
+  {
+   "id": "TE-T3-01",
+   "topic": "T3",
+   "topicName": "Receivables & payables",
+   "format": [
+    "definition"
+   ],
+   "stem": "What is accounts receivable?",
+   "options": [
+    "Amounts customers owe the company from sales on account",
+    "Amounts the company owes suppliers",
+    "Cash held at the bank",
+    "Written promises to pay interest"
+   ],
+   "answer": 1,
+   "answerText": "Amounts customers owe the company from sales on account",
+   "explanation": "Accounts receivable is an asset because the company expects to collect.",
+   "deepDive": {
+    "concept": "Accounts receivable",
+    "conceptExplain": "It arises from credit sales and is usually collected within the credit terms, often 30 days.",
+    "whyCorrect": "It is what customers owe.",
+    "wrongReasons": {
+     "2": "That is accounts payable.",
+     "3": "That is cash.",
+     "4": "That describes notes."
+    }
+   }
+  },
+  {
+   "id": "TE-T3-02",
+   "topic": "T3",
+   "topicName": "Receivables & payables",
+   "format": [
+    "which is correct"
+   ],
+   "stem": "Why is the allowance method preferred over direct write-off?",
+   "options": [
+    "It is simpler to record",
+    "It increases net income",
+    "It avoids estimates",
+    "It matches bad debt expense with the revenue it helped earn"
+   ],
+   "answer": 4,
+   "answerText": "It matches bad debt expense with the revenue it helped earn",
+   "explanation": "The allowance method estimates bad debts in the same period as the related sales. The direct write-off method waits until an account is found uncollectible.",
+   "deepDive": {
+    "concept": "Allowance method",
+    "conceptExplain": "Estimating bad debts follows the matching principle and keeps receivables at a realistic value.",
+    "whyCorrect": "It matches expense to the sales period.",
+    "wrongReasons": {
+     "1": "It requires estimates, so it is not simpler.",
+     "2": "It tends to lower income in the sale period.",
+     "3": "It relies on estimates."
+    }
+   }
+  },
+  {
+   "id": "TE-T3-03",
+   "topic": "T3",
+   "topicName": "Receivables & payables",
+   "format": [
+    "which is correct"
+   ],
+   "stem": "Which entry records the estimate of bad debts under the allowance method?",
+   "options": [
+    "Dr Allowance for Doubtful Accounts / Cr Accounts Receivable",
+    "Dr Bad Debt Expense / Cr Accounts Receivable",
+    "Dr Bad Debt Expense / Cr Allowance for Doubtful Accounts",
+    "Dr Accounts Receivable / Cr Bad Debt Expense"
+   ],
+   "answer": 3,
+   "answerText": "Dr Bad Debt Expense / Cr Allowance for Doubtful Accounts",
+   "explanation": "The estimate is an adjusting entry. The credit goes to a contra account, not directly to Accounts Receivable.",
+   "deepDive": {
+    "concept": "Estimating bad debts",
+    "conceptExplain": "The allowance is a contra asset account that reduces receivables on the balance sheet.",
+    "whyCorrect": "Expense is debited; the allowance is credited.",
+    "wrongReasons": {
+     "1": "That is the write-off entry.",
+     "2": "That is the direct write-off method.",
+     "4": "That would increase receivables."
+    }
+   }
+  },
+  {
+   "id": "TE-T3-04",
+   "topic": "T3",
+   "topicName": "Receivables & payables",
+   "format": [
+    "which is correct"
+   ],
+   "stem": "Under the allowance method, which entry writes off a specific customer's $400 account?",
+   "options": [
+    "Dr Allowance for Doubtful Accounts 400 / Cr Accounts Receivable 400",
+    "Dr Bad Debt Expense 400 / Cr Accounts Receivable 400",
+    "Dr Bad Debt Expense 400 / Cr Allowance for Doubtful Accounts 400",
+    "Dr Accounts Receivable 400 / Cr Allowance for Doubtful Accounts 400"
+   ],
+   "answer": 1,
+   "answerText": "Dr Allowance for Doubtful Accounts 400 / Cr Accounts Receivable 400",
+   "explanation": "The expense was already recorded in the estimate. The write-off just removes the receivable against the allowance.",
+   "deepDive": {
+    "concept": "Writing off accounts",
+    "conceptExplain": "The write-off does not create a new expense.",
+    "whyCorrect": "The allowance absorbs the loss.",
+    "wrongReasons": {
+     "2": "That would double count the expense.",
+     "3": "That is the estimate entry.",
+     "4": "That would add to the receivable."
+    }
+   }
+  },
+  {
+   "id": "TE-T3-05",
+   "topic": "T3",
+   "topicName": "Receivables & payables",
+   "format": [
+    "true statement"
+   ],
+   "stem": "Under the allowance method, writing off a specific uncollectible account:",
+   "options": [
+    "Does not change net realizable value",
+    "Decreases net income",
+    "Increases net realizable value",
+    "Decreases net realizable value"
+   ],
+   "answer": 1,
+   "answerText": "Does not change net realizable value",
+   "explanation": "Both Accounts Receivable and the allowance fall by the same amount. Their difference stays the same.",
+   "deepDive": {
+    "concept": "Net realizable value",
+    "conceptExplain": "Net realizable value = Accounts Receivable - Allowance.",
+    "whyCorrect": "Both parts drop together, so the net stays put.",
+    "wrongReasons": {
+     "2": "The expense was already recorded.",
+     "3": "Nothing is added.",
+     "4": "The net amount does not fall."
+    }
+   }
+  },
+  {
+   "id": "TE-T3-06",
+   "topic": "T3",
+   "topicName": "Receivables & payables",
+   "format": [
+    "calculation"
+   ],
+   "stem": "Credit sales were $200,000 and the company estimates 1.5% will be uncollectible. What is the bad debt expense?",
+   "options": [
+    "$300",
+    "$3,000",
+    "$1,500",
+    "$30,000"
+   ],
+   "answer": 2,
+   "answerText": "$3,000",
+   "explanation": "Using the percentage-of-sales method, the expense is $200,000 x 1.5% = $3,000.",
+   "deepDive": {
+    "concept": "Percentage of sales",
+    "conceptExplain": "This method focuses on the income statement. The existing allowance balance is ignored.",
+    "whyCorrect": "$200,000 x 0.015 = $3,000.",
+    "wrongReasons": {
+     "1": "That moves the decimal one place too far.",
+     "3": "That is 0.75% of sales.",
+     "4": "That is 15%."
+    }
+   }
+  },
+  {
+   "id": "TE-T3-07",
+   "topic": "T3",
+   "topicName": "Receivables & payables",
+   "format": [
+    "calculation"
+   ],
+   "stem": "Accounts Receivable is $60,000 and the company estimates that 5% will not be collected. The allowance has a $800 credit balance before adjusting. What is the bad debt expense?",
+   "options": [
+    "$3,000",
+    "$3,800",
+    "$800",
+    "$2,200"
+   ],
+   "answer": 4,
+   "answerText": "$2,200",
+   "explanation": "The ending allowance should be $60,000 x 5% = $3,000. Since $800 is already there, the expense is $3,000 - $800 = $2,200.",
+   "deepDive": {
+    "concept": "Percentage of receivables",
+    "conceptExplain": "This method sets the ending allowance balance, then adjusts for what is already there.",
+    "whyCorrect": "$3,000 target - $800 existing = $2,200.",
+    "wrongReasons": {
+     "1": "That ignores the existing balance.",
+     "2": "That adds the balance instead of subtracting it.",
+     "3": "That is only the existing balance."
+    }
+   }
+  },
+  {
+   "id": "TE-T3-08",
+   "topic": "T3",
+   "topicName": "Receivables & payables",
+   "format": [
+    "calculation"
+   ],
+   "stem": "Accounts Receivable is $50,000 and the Allowance for Doubtful Accounts has a $2,500 credit balance. What is net realizable value?",
+   "options": [
+    "$47,500",
+    "$52,500",
+    "$50,000",
+    "$2,500"
+   ],
+   "answer": 1,
+   "answerText": "$47,500",
+   "explanation": "Subtract the allowance from receivables: $50,000 - $2,500 = $47,500.",
+   "deepDive": {
+    "concept": "Net realizable value",
+    "conceptExplain": "This is the amount the company expects to collect.",
+    "whyCorrect": "$50,000 - $2,500 = $47,500.",
+    "wrongReasons": {
+     "2": "The allowance is subtracted, not added.",
+     "3": "That ignores the allowance.",
+     "4": "That is only the allowance."
+    }
+   }
+  },
+  {
+   "id": "TE-T3-09",
+   "topic": "T3",
+   "topicName": "Receivables & payables",
+   "format": [
+    "which is correct"
+   ],
+   "stem": "A customer pays an account that was written off earlier. What is the first step in recording the recovery?",
+   "options": [
+    "Dr Cash / Cr Sales Revenue",
+    "Dr Allowance for Doubtful Accounts / Cr Accounts Receivable",
+    "Dr Bad Debt Expense / Cr Cash",
+    "Dr Accounts Receivable / Cr Allowance for Doubtful Accounts"
+   ],
+   "answer": 4,
+   "answerText": "Dr Accounts Receivable / Cr Allowance for Doubtful Accounts",
+   "explanation": "First reverse the write-off, then record the collection (Dr Cash / Cr Accounts Receivable).",
+   "deepDive": {
+    "concept": "Recoveries",
+    "conceptExplain": "The reversal shows that the customer did pay after all.",
+    "whyCorrect": "The write-off is reversed first.",
+    "wrongReasons": {
+     "1": "It is not new revenue.",
+     "2": "That repeats the write-off.",
+     "3": "That makes no sense for a collection."
+    }
+   }
+  },
+  {
+   "id": "TE-T3-10",
+   "topic": "T3",
+   "topicName": "Receivables & payables",
+   "format": [
+    "definition"
+   ],
+   "stem": "In the aging method, how is the allowance estimated?",
+   "options": [
+    "By taking a percentage of total cash sales",
+    "By multiplying net income by a fixed rate",
+    "By writing off the largest accounts",
+    "By grouping receivables by how long they have been unpaid"
+   ],
+   "answer": 4,
+   "answerText": "By grouping receivables by how long they have been unpaid",
+   "explanation": "Older receivables are less likely to be collected, so they get higher percentages.",
+   "deepDive": {
+    "concept": "Aging of receivables",
+    "conceptExplain": "An aging schedule applies a different rate to each age group.",
+    "whyCorrect": "It uses how overdue the accounts are.",
+    "wrongReasons": {
+     "1": "Cash sales do not create receivables.",
+     "2": "Net income is not the base.",
+     "3": "Size alone does not decide."
+    }
+   }
+  },
+  {
+   "id": "TE-T3-11",
+   "topic": "T3",
+   "topicName": "Receivables & payables",
+   "format": [
+    "calculation"
+   ],
+   "stem": "A $6,000 note receivable bears 8% interest for 90 days. Using a 360-day year, how much interest is earned?",
+   "options": [
+    "$480",
+    "$40",
+    "$120",
+    "$1,200"
+   ],
+   "answer": 3,
+   "answerText": "$120",
+   "explanation": "Interest = Principal x Rate x Time = $6,000 x 8% x 90/360 = $120.",
+   "deepDive": {
+    "concept": "Interest formula",
+    "conceptExplain": "Use time as a fraction of a year.",
+    "whyCorrect": "$6,000 x 0.08 x 0.25 = $120.",
+    "wrongReasons": {
+     "1": "That is a full year's interest.",
+     "2": "That is only 30 days' interest.",
+     "4": "The result is ten times too large."
+    }
+   }
+  },
+  {
+   "id": "TE-T3-12",
+   "topic": "T3",
+   "topicName": "Receivables & payables",
+   "format": [
+    "calculation"
+   ],
+   "stem": "A $9,000 note receivable has a 6% rate and a 120-day term (360-day year). What is the maturity value?",
+   "options": [
+    "$9,540",
+    "$9,060",
+    "$9,180",
+    "$9,000"
+   ],
+   "answer": 3,
+   "answerText": "$9,180",
+   "explanation": "Interest is $9,000 x 6% x 120/360 = $180. Maturity value is principal plus interest, or $9,180.",
+   "deepDive": {
+    "concept": "Maturity value",
+    "conceptExplain": "Maturity value = Principal + Interest.",
+    "whyCorrect": "$9,000 + $180 = $9,180.",
+    "wrongReasons": {
+     "1": "That is a full year of interest.",
+     "2": "That is only 40 days of interest.",
+     "4": "That leaves out the interest."
+    }
+   }
+  },
+  {
+   "id": "TE-T3-13",
+   "topic": "T3",
+   "topicName": "Receivables & payables",
+   "format": [
+    "calculation"
+   ],
+   "stem": "On December 1, the company accepted a $10,000, 9%, 60-day note receivable. What interest should be accrued on December 31?",
+   "options": [
+    "$150",
+    "$75",
+    "$900",
+    "$0"
+   ],
+   "answer": 2,
+   "answerText": "$75",
+   "explanation": "One month of interest: $10,000 x 9% x 1/12 = $75. The entry is Dr Interest Receivable 75 / Cr Interest Revenue 75.",
+   "deepDive": {
+    "concept": "Accrued interest",
+    "conceptExplain": "Interest earned but not collected is accrued at period end.",
+    "whyCorrect": "$10,000 x 0.09 x 1/12 = $75.",
+    "wrongReasons": {
+     "1": "That is two months of interest.",
+     "3": "That is a full year of interest.",
+     "4": "Interest has been earned for one month."
+    }
+   }
+  },
+  {
+   "id": "TE-T3-14",
+   "topic": "T3",
+   "topicName": "Receivables & payables",
+   "format": [
+    "which is correct"
+   ],
+   "stem": "A customer fails to pay a note at maturity. No interest has been accrued yet. What does the company usually record?",
+   "options": [
+    "Dr Bad Debt Expense / Cr Notes Receivable",
+    "Dr Cash / Cr Notes Receivable",
+    "No entry",
+    "Dr Accounts Receivable for the maturity value / Cr Notes Receivable and Interest Revenue"
+   ],
+   "answer": 4,
+   "answerText": "Dr Accounts Receivable for the maturity value / Cr Notes Receivable and Interest Revenue",
+   "explanation": "A dishonored note is moved to Accounts Receivable, including the interest earned. The company still expects to collect.",
+   "deepDive": {
+    "concept": "Dishonored notes",
+    "conceptExplain": "The debt still exists, so the company keeps the claim.",
+    "whyCorrect": "The note and the interest become a receivable.",
+    "wrongReasons": {
+     "1": "Not yet deemed uncollectible.",
+     "2": "No cash was received.",
+     "3": "The company must still record the change."
+    }
+   }
+  },
+  {
+   "id": "TE-T3-15",
+   "topic": "T3",
+   "topicName": "Receivables & payables",
+   "format": [
+    "definition"
+   ],
+   "stem": "What does accounts payable represent?",
+   "options": [
+    "Amounts customers owe the company",
+    "Money lent to employees",
+    "The company's cash balance",
+    "Amounts the company owes suppliers for goods or services bought on account"
+   ],
+   "answer": 4,
+   "answerText": "Amounts the company owes suppliers for goods or services bought on account",
+   "explanation": "It is a short-term liability that is usually paid within the credit terms, often 30 days.",
+   "deepDive": {
+    "concept": "Accounts payable",
+    "conceptExplain": "Supplier bills not yet paid are accounts payable.",
+    "whyCorrect": "It is what the company owes suppliers.",
+    "wrongReasons": {
+     "1": "That is accounts receivable.",
+     "2": "That is Advances to Employees.",
+     "3": "Cash is an asset."
+    }
+   }
+  },
+  {
+   "id": "TE-T3-16",
+   "topic": "T3",
+   "topicName": "Receivables & payables",
+   "format": [
+    "which is correct"
+   ],
+   "stem": "The company borrows $20,000 by signing a 12-month note with First Valley Bank. Which entry is correct?",
+   "options": [
+    "Dr Cash 20,000 / Cr Notes Payable 20,000",
+    "Dr Notes Payable 20,000 / Cr Cash 20,000",
+    "Dr Cash 20,000 / Cr Notes Receivable 20,000",
+    "Dr Cash 20,000 / Cr Interest Payable 20,000"
+   ],
+   "answer": 1,
+   "answerText": "Dr Cash 20,000 / Cr Notes Payable 20,000",
+   "explanation": "Cash increases and the company now owes the bank, so Notes Payable increases.",
+   "deepDive": {
+    "concept": "Notes payable",
+    "conceptExplain": "Borrowing creates a liability.",
+    "whyCorrect": "Cash is debited and Notes Payable is credited.",
+    "wrongReasons": {
+     "2": "That reverses the entry.",
+     "3": "The company is the borrower, not the lender.",
+     "4": "No interest has accrued yet."
+    }
+   }
+  },
+  {
+   "id": "TE-T3-17",
+   "topic": "T3",
+   "topicName": "Receivables & payables",
+   "format": [
+    "calculation"
+   ],
+   "stem": "At year-end, the company has a $12,000, 10% note payable that was issued three months ago. How much interest expense should be accrued?",
+   "options": [
+    "$300",
+    "$1,200",
+    "$100",
+    "$3,000"
+   ],
+   "answer": 1,
+   "answerText": "$300",
+   "explanation": "$12,000 x 10% x 3/12 = $300. Dr Interest Expense 300 / Cr Interest Payable 300.",
+   "deepDive": {
+    "concept": "Accrued interest payable",
+    "conceptExplain": "Interest builds up over time even if no payment is made.",
+    "whyCorrect": "$12,000 x 0.10 x 0.25 = $300.",
+    "wrongReasons": {
+     "2": "That is a full year's interest.",
+     "3": "That is only one month.",
+     "4": "That is 25% of the principal."
+    }
+   }
+  },
+  {
+   "id": "TE-T3-18",
+   "topic": "T3",
+   "topicName": "Receivables & payables",
+   "format": [
+    "definition"
+   ],
+   "stem": "What do the terms 2/10, n/30 mean?",
+   "options": [
+    "A 10% discount if paid within 2 days",
+    "A 2% penalty after 30 days",
+    "A 2% discount if paid within 10 days; otherwise the full amount is due in 30 days",
+    "The full amount is due in 10 days, with a 30% discount"
+   ],
+   "answer": 3,
+   "answerText": "A 2% discount if paid within 10 days; otherwise the full amount is due in 30 days",
+   "explanation": "The buyer can save 2% by paying early. Without the discount, the net amount is due within 30 days.",
+   "deepDive": {
+    "concept": "Credit terms",
+    "conceptExplain": "The first numbers set the discount and discount period; n/30 is the net due date.",
+    "whyCorrect": "2% for paying in 10 days; net due in 30.",
+    "wrongReasons": {
+     "1": "The numbers are reversed.",
+     "2": "Terms like these do not impose penalties.",
+     "4": "The discount is not 30%."
+    }
+   }
+  },
+  {
+   "id": "TE-T3-19",
+   "topic": "T3",
+   "topicName": "Receivables & payables",
+   "format": [
+    "calculation"
+   ],
+   "stem": "An invoice for $5,000 has terms 2/10, n/30. The buyer pays on day 8. How much does the buyer pay?",
+   "options": [
+    "$5,000",
+    "$4,500",
+    "$4,990",
+    "$4,900"
+   ],
+   "answer": 4,
+   "answerText": "$4,900",
+   "explanation": "The discount is $5,000 x 2% = $100, so the payment is $4,900.",
+   "deepDive": {
+    "concept": "Purchase discounts",
+    "conceptExplain": "The discount applies when payment falls inside the discount period.",
+    "whyCorrect": "$5,000 - $100 = $4,900.",
+    "wrongReasons": {
+     "1": "Day 8 is within the discount period.",
+     "2": "That is a 10% discount.",
+     "3": "That treats it as a 0.2% discount."
+    }
+   }
+  },
+  {
+   "id": "TE-T3-20",
+   "topic": "T3",
+   "topicName": "Receivables & payables",
+   "format": [
+    "which is correct"
+   ],
+   "stem": "On December 31, $4,000 of a bank loan is due in six months and the rest is due in three years. How is the $4,000 reported?",
+   "options": [
+    "As a long-term liability",
+    "As a current liability",
+    "As equity",
+    "As an expense"
+   ],
+   "answer": 2,
+   "answerText": "As a current liability",
+   "explanation": "The part due within one year is a current liability, even though the loan itself is long-term.",
+   "deepDive": {
+    "concept": "Current portion",
+    "conceptExplain": "Debt due within one year is classified as current.",
+    "whyCorrect": "Six months is within a year.",
+    "wrongReasons": {
+     "1": "That applies only to amounts due after one year.",
+     "3": "Loans are not equity.",
+     "4": "Principal is not an expense."
+    }
+   }
+  },
+  {
+   "id": "TE-T3-21",
+   "topic": "T3",
+   "topicName": "Receivables & payables",
+   "format": [
+    "which is correct"
+   ],
+   "stem": "The company receives $1,200 for a 12-month service contract before doing any work. Which entry is correct?",
+   "options": [
+    "Dr Cash 1,200 / Cr Service Revenue 1,200",
+    "Dr Cash 1,200 / Cr Unearned Revenue 1,200",
+    "Dr Accounts Receivable 1,200 / Cr Unearned Revenue 1,200",
+    "Dr Unearned Revenue 1,200 / Cr Cash 1,200"
+   ],
+   "answer": 2,
+   "answerText": "Dr Cash 1,200 / Cr Unearned Revenue 1,200",
+   "explanation": "No service has been performed, so the company owes it. Revenue is recorded later as the work is done.",
+   "deepDive": {
+    "concept": "Unearned revenue",
+    "conceptExplain": "Cash received in advance is a liability until earned.",
+    "whyCorrect": "The company owes service for the money received.",
+    "wrongReasons": {
+     "1": "That recognizes revenue too early.",
+     "3": "Cash was received, not owed.",
+     "4": "That reverses the entry."
+    }
+   }
+  },
+  {
+   "id": "TE-T3-22",
+   "topic": "T3",
+   "topicName": "Receivables & payables",
+   "format": [
+    "calculation"
+   ],
+   "stem": "Net credit sales were $360,000 and average accounts receivable was $45,000. What is the receivables turnover ratio?",
+   "options": [
+    "0.125 times",
+    "315 times",
+    "45 times",
+    "8 times"
+   ],
+   "answer": 4,
+   "answerText": "8 times",
+   "explanation": "Receivables turnover = net credit sales / average receivables = $360,000 / $45,000 = 8.",
+   "deepDive": {
+    "concept": "Receivables turnover",
+    "conceptExplain": "A higher number means the company collects faster.",
+    "whyCorrect": "$360,000 / $45,000 = 8.",
+    "wrongReasons": {
+     "1": "That divides the wrong way around.",
+     "2": "That subtracts instead of divides.",
+     "3": "That is just the average receivables in thousands."
+    }
+   }
+  },
+  {
+   "id": "TE-T3-23",
+   "topic": "T3",
+   "topicName": "Receivables & payables",
+   "format": [
+    "which is correct"
+   ],
+   "stem": "Performed services on account for Maple Supply for $3,000. Which entry is correct?",
+   "options": [
+    "Dr Cash 3,000 / Cr Service Revenue 3,000",
+    "Dr Accounts Receivable 3,000 / Cr Unearned Revenue 3,000",
+    "Dr Service Revenue 3,000 / Cr Accounts Receivable 3,000",
+    "Dr Accounts Receivable 3,000 / Cr Service Revenue 3,000"
+   ],
+   "answer": 4,
+   "answerText": "Dr Accounts Receivable 3,000 / Cr Service Revenue 3,000",
+   "explanation": "The service was performed, so the revenue is earned. The customer owes the money, so Accounts Receivable is debited.",
+   "deepDive": {
+    "concept": "Revenue on account",
+    "conceptExplain": "Under accrual accounting, revenue is recorded when earned, even if cash comes later.",
+    "whyCorrect": "A receivable is created and revenue is recognized.",
+    "wrongReasons": {
+     "1": "No cash was received.",
+     "2": "The work is done, so the revenue is not unearned.",
+     "3": "That reverses the entry."
+    }
+   }
+  },
+  {
+   "id": "TE-T4-01",
+   "topic": "T4",
+   "topicName": "Merchandising",
+   "format": [
+    "definition"
+   ],
+   "stem": "Under the perpetual inventory system, which entries are made when merchandise is sold on account?",
+   "options": [
+    "Debit Accounts Receivable and credit Sales Revenue for the price; debit Cost of Goods Sold and credit Merchandise Inventory for the cost",
+    "Debit Accounts Receivable and credit Sales Revenue for the price only; the cost is recorded at year-end",
+    "Debit Cost of Goods Sold and credit Sales Revenue; debit Accounts Receivable and credit Merchandise Inventory",
+    "Debit Merchandise Inventory and credit Accounts Payable for the cost; debit Cash and credit Sales Revenue for the price"
+   ],
+   "answer": 1,
+   "answerText": "Debit Accounts Receivable and credit Sales Revenue for the price; debit Cost of Goods Sold and credit Merchandise Inventory for the cost",
+   "explanation": "A perpetual system records two entries at every sale. One shows the revenue and one moves the cost out of inventory.",
+   "deepDive": {
+    "concept": "Perpetual inventory: two entries per sale",
+    "conceptExplain": "With a perpetual system, Merchandise Inventory is updated after every purchase and sale. So each sale needs a revenue entry at the selling price and a cost entry at what the goods cost the company. Together they let you see gross profit on every sale.",
+    "whyCorrect": "It records the revenue at the selling price and then moves the cost from Merchandise Inventory into Cost of Goods Sold.",
+    "wrongReasons": {
+     "2": "Waiting until year-end to record cost is the periodic system. A perpetual system records the cost at the time of the sale.",
+     "3": "Revenue is credited to Sales Revenue only, and inventory is a credit only when goods leave. This pairing mixes up the accounts and their sides.",
+     "4": "This describes buying goods on account and then selling for cash. It does not record the cost of the goods sold."
+    }
+   }
+  },
+  {
+   "id": "TE-T4-02",
+   "topic": "T4",
+   "topicName": "Merchandising",
+   "format": [
+    "calculation"
+   ],
+   "stem": "Goods available for sale were $82,000 ($18,000 of beginning merchandise inventory plus $64,000 of net purchases). Ending merchandise inventory is $21,000. What is the cost of goods sold?",
+   "options": [
+    "$103,000",
+    "$61,000",
+    "$82,000",
+    "$21,000"
+   ],
+   "answer": 2,
+   "answerText": "$61,000",
+   "explanation": "Cost of goods sold is goods available for sale minus ending inventory. $82,000 - $21,000 = $61,000.",
+   "deepDive": {
+    "concept": "Cost of goods sold formula",
+    "conceptExplain": "Goods available for sale are beginning inventory plus net purchases. The part still unsold at year-end stays in Merchandise Inventory. Only the rest has been sold and becomes cost of goods sold.",
+    "whyCorrect": "$82,000 - $21,000 = $61,000.",
+    "wrongReasons": {
+     "1": "$103,000 adds ending inventory instead of subtracting it.",
+     "3": "$82,000 is goods available for sale. You still have to subtract ending inventory.",
+     "4": "$21,000 is the ending inventory, the goods that were not sold."
+    }
+   }
+  },
+  {
+   "id": "TE-T4-03",
+   "topic": "T4",
+   "topicName": "Merchandising",
+   "format": [
+    "definition"
+   ],
+   "stem": "Which of the following is NOT part of the cost of merchandise inventory?",
+   "options": [
+    "Freight paid to bring purchased goods to the store",
+    "The invoice price of the goods, less purchase discounts taken",
+    "The cost of delivering sold goods to customers",
+    "The invoice price of the goods, less purchase returns"
+   ],
+   "answer": 3,
+   "answerText": "The cost of delivering sold goods to customers",
+   "explanation": "Inventory cost includes what it takes to buy the goods and get them to the store. Delivering goods to customers happens after that and is an expense.",
+   "deepDive": {
+    "concept": "Cost of merchandise inventory",
+    "conceptExplain": "Inventory cost is the price paid, adjusted for returns and discounts, plus freight to bring goods to the store. Delivery to customers is Delivery Expense.",
+    "whyCorrect": "Delivery to customers is a selling cost, so it is expensed as Delivery Expense.",
+    "wrongReasons": {
+     "1": "Freight-in is part of the cost of getting the goods ready to sell.",
+     "2": "Discounts taken lower the cost of the goods, so they are part of inventory cost.",
+     "4": "Returns lower the cost of the goods, so they are part of inventory cost."
+    }
+   }
+  },
+  {
+   "id": "TE-T4-04",
+   "topic": "T4",
+   "topicName": "Merchandising",
+   "format": [
+    "calculation"
+   ],
+   "stem": "Purchased merchandise on account for $8,000, terms 2/10, n/30. Merchandise costing $1,500 was returned as defective before payment. The balance was paid within the discount period. How much cash was paid?",
+   "options": [
+    "$6,500",
+    "$7,840",
+    "$6,000",
+    "$6,370"
+   ],
+   "answer": 4,
+   "answerText": "$6,370",
+   "explanation": "After the return, the invoice is $8,000 - $1,500 = $6,500. The 2% discount applies only to this amount, so the payment is $6,500 x 98% = $6,370.",
+   "deepDive": {
+    "concept": "Discounts apply after returns",
+    "conceptExplain": "A purchase return lowers what you owe, so the discount is figured on the remaining balance only. The order matters: subtract returns first, then take the discount on what is left.",
+    "whyCorrect": "$8,000 - $1,500 = $6,500, and $6,500 x 0.98 = $6,370.",
+    "wrongReasons": {
+     "1": "$6,500 is the balance after the return but before the 2% discount was taken.",
+     "2": "$7,840 takes the discount on the full $8,000 ($8,000 x 98%) and ignores the return.",
+     "3": "$6,000 takes off $2,000 in total, but the return was $1,500 and the discount is only 2% of the remaining balance."
+    }
+   }
+  },
+  {
+   "id": "TE-T4-05",
+   "topic": "T4",
+   "topicName": "Merchandising",
+   "format": [
+    "true statement"
+   ],
+   "stem": "Which statement about goods shipped FOB shipping point is correct?",
+   "options": [
+    "The seller owns the goods until they arrive and normally pays the freight",
+    "The buyer owns the goods once they are shipped and normally pays the freight",
+    "The buyer owns the goods only after payment is made, whoever pays the freight",
+    "The carrier owns the goods while they are in transit"
+   ],
+   "answer": 2,
+   "answerText": "The buyer owns the goods once they are shipped and normally pays the freight",
+   "explanation": "FOB shipping point means title passes to the buyer at the seller's dock. The buyer is responsible for the goods and the freight from there.",
+   "deepDive": {
+    "concept": "FOB shipping point",
+    "conceptExplain": "FOB stands for free on board. The point named in the terms is where ownership changes hands. With FOB shipping point, that is when the goods leave the seller, so the buyer carries the risk during shipping.",
+    "whyCorrect": "Title passes when the goods leave the seller, so the buyer owns them in transit and usually pays the freight.",
+    "wrongReasons": {
+     "1": "That describes FOB destination, where the seller keeps ownership until arrival.",
+     "3": "Ownership does not wait for payment. The FOB terms decide when title passes.",
+     "4": "A carrier only delivers the goods. It never takes ownership of them."
+    }
+   }
+  },
+  {
+   "id": "TE-T4-06",
+   "topic": "T4",
+   "topicName": "Merchandising",
+   "format": [
+    "application"
+   ],
+   "stem": "At year-end, Bluebird Traders has goods in transit to a customer under FOB destination terms. Who includes these goods in its ending merchandise inventory?",
+   "options": [
+    "Bluebird Traders, the seller",
+    "The customer, the buyer",
+    "Both companies, so the goods are counted twice",
+    "Neither company until the goods are paid for"
+   ],
+   "answer": 1,
+   "answerText": "Bluebird Traders, the seller",
+   "explanation": "Under FOB destination, title stays with the seller until the goods reach the buyer. So the seller still counts the goods in its inventory.",
+   "deepDive": {
+    "concept": "Ownership in transit",
+    "conceptExplain": "Inventory belongs to whoever has title on the balance sheet date. FOB destination keeps title with the seller until delivery. FOB shipping point would put the goods on the buyer's books instead.",
+    "whyCorrect": "Title has not passed yet, so the goods are still the seller's inventory.",
+    "wrongReasons": {
+     "2": "The buyer does not get title until the goods arrive under FOB destination.",
+     "3": "Goods can never be counted by both parties. That would overstate total inventory.",
+     "4": "Payment does not decide ownership. The shipping terms do."
+    }
+   }
+  },
+  {
+   "id": "TE-T4-07",
+   "topic": "T4",
+   "topicName": "Merchandising",
+   "format": [
+    "calculation"
+   ],
+   "stem": "For the year, sales revenue was $90,000, sales returns and allowances were $4,000, sales discounts were $2,000, and cost of goods sold was $52,000. What is gross profit?",
+   "options": [
+    "$38,000",
+    "$34,000",
+    "$32,000",
+    "$36,000"
+   ],
+   "answer": 3,
+   "answerText": "$32,000",
+   "explanation": "Net sales are $90,000 - $4,000 - $2,000 = $84,000. Gross profit is $84,000 - $52,000 = $32,000.",
+   "deepDive": {
+    "concept": "Gross profit",
+    "conceptExplain": "Gross profit equals net sales minus cost of goods sold. Net sales are sales revenue less the two contra accounts, Sales Returns and Allowances and Sales Discounts.",
+    "whyCorrect": "Net sales of $84,000 less cost of goods sold of $52,000 equals $32,000.",
+    "wrongReasons": {
+     "1": "$38,000 is $90,000 - $52,000. It ignores both contra revenue accounts.",
+     "2": "$34,000 deducts the returns but forgets the sales discounts.",
+     "4": "$36,000 deducts the discounts but forgets the sales returns and allowances."
+    }
+   }
+  },
+  {
+   "id": "TE-T4-08",
+   "topic": "T4",
+   "topicName": "Merchandising",
+   "format": [
+    "calculation"
+   ],
+   "stem": "Net sales were $200,000 and cost of goods sold was $130,000. What is the gross profit percentage?",
+   "options": [
+    "65%",
+    "70%",
+    "53.8%",
+    "35%"
+   ],
+   "answer": 4,
+   "answerText": "35%",
+   "explanation": "Gross profit is $200,000 - $130,000 = $70,000. Divide by net sales: $70,000 / $200,000 = 35%.",
+   "deepDive": {
+    "concept": "Gross profit percentage",
+    "conceptExplain": "The gross profit percentage shows how many cents of each sales dollar are left after paying for the goods. It is gross profit divided by net sales.",
+    "whyCorrect": "$70,000 / $200,000 = 0.35, or 35%.",
+    "wrongReasons": {
+     "1": "65% is cost of goods sold divided by net sales, not gross profit divided by net sales.",
+     "2": "70% reads the $70,000 gross profit as if it were a percent.",
+     "3": "53.8% divides gross profit by cost of goods sold ($70,000 / $130,000) instead of net sales."
+    }
+   }
+  },
+  {
+   "id": "TE-T4-09",
+   "topic": "T4",
+   "topicName": "Merchandising",
+   "format": [
+    "true statement"
+   ],
+   "stem": "Which statement about Sales Discounts is correct?",
+   "options": [
+    "It is a contra revenue account with a normal debit balance",
+    "It is an expense account with a normal debit balance",
+    "It is a liability account with a normal credit balance",
+    "It is a revenue account with a normal credit balance"
+   ],
+   "answer": 1,
+   "answerText": "It is a contra revenue account with a normal debit balance",
+   "explanation": "Sales Discounts reduce Sales Revenue, so it is a contra revenue account. Because revenue is a credit, its contra account has a debit balance.",
+   "deepDive": {
+    "concept": "Contra revenue accounts",
+    "conceptExplain": "Sales Discounts and Sales Returns and Allowances are deducted from Sales Revenue to find net sales. They are the opposite of their parent account, so they increase with debits.",
+    "whyCorrect": "It is deducted from Sales Revenue and increases with a debit.",
+    "wrongReasons": {
+     "2": "It is not an expense. It sits at the top of the income statement and reduces sales.",
+     "3": "No money is owed. A discount given to a customer is not a liability.",
+     "4": "A normal credit balance belongs to Sales Revenue itself, not its contra account."
+    }
+   }
+  },
+  {
+   "id": "TE-T4-10",
+   "topic": "T4",
+   "topicName": "Merchandising",
+   "format": [
+    "journal entry"
+   ],
+   "stem": "Paid $400 freight on merchandise purchased from Oakridge Supply under FOB shipping point terms. Which entry is correct under the perpetual system?",
+   "options": [
+    "Dr Delivery Expense 400 / Cr Cash 400",
+    "Dr Cost of Goods Sold 400 / Cr Cash 400",
+    "Dr Cash 400 / Cr Merchandise Inventory 400",
+    "Dr Merchandise Inventory 400 / Cr Cash 400"
+   ],
+   "answer": 4,
+   "answerText": "Dr Merchandise Inventory 400 / Cr Cash 400",
+   "explanation": "Freight paid to bring goods in is part of the cost of the inventory. So it is debited to Merchandise Inventory.",
+   "deepDive": {
+    "concept": "Freight-in under perpetual inventory",
+    "conceptExplain": "Any cost needed to get goods ready for sale is added to inventory. Freight paid by the buyer on incoming goods is one of these costs. Freight paid to ship goods out to customers is Delivery Expense.",
+    "whyCorrect": "Freight on incoming goods raises the cost of inventory, so Dr Merchandise Inventory 400 / Cr Cash 400.",
+    "wrongReasons": {
+     "1": "Delivery Expense is for shipping goods out to customers, not for goods coming in.",
+     "2": "Cost of Goods Sold is only debited when the goods are sold.",
+     "3": "This reverses the entry and would lower inventory when cash is paid out."
+    }
+   }
+  },
+  {
+   "id": "TE-T4-11",
+   "topic": "T4",
+   "topicName": "Merchandising",
+   "format": [
+    "journal entry"
+   ],
+   "stem": "A customer returned merchandise that had been sold on account for $600 (cost $380). Which entries record the return under the perpetual system?",
+   "options": [
+    "Dr Sales Returns and Allowances 600 / Cr Accounts Receivable 600 only",
+    "Dr Sales Revenue 380 / Cr Accounts Receivable 380; Dr Merchandise Inventory 600 / Cr Cost of Goods Sold 600",
+    "Dr Sales Returns and Allowances 600 / Cr Accounts Receivable 600; Dr Merchandise Inventory 380 / Cr Cost of Goods Sold 380",
+    "Dr Accounts Receivable 600 / Cr Sales Returns and Allowances 600; Dr Cost of Goods Sold 380 / Cr Merchandise Inventory 380"
+   ],
+   "answer": 3,
+   "answerText": "Dr Sales Returns and Allowances 600 / Cr Accounts Receivable 600; Dr Merchandise Inventory 380 / Cr Cost of Goods Sold 380",
+   "explanation": "A return reverses the sale at the selling price and reverses the cost at cost. The goods go back into Merchandise Inventory.",
+   "deepDive": {
+    "concept": "Sales returns",
+    "conceptExplain": "A sales return needs two entries under the perpetual system. One lowers revenue and the customer's balance. The other puts the goods back into inventory and lowers cost of goods sold.",
+    "whyCorrect": "Revenue is reversed at $600 and the cost is reversed at $380.",
+    "wrongReasons": {
+     "1": "Leaving out the second entry would leave the goods missing from inventory and cost of goods sold too high.",
+     "2": "The amounts are swapped. Revenue is reversed at the selling price and inventory returns at cost.",
+     "4": "The sides are backwards. A return lowers Accounts Receivable, so it must be credited."
+    }
+   }
+  },
+  {
+   "id": "TE-T4-12",
+   "topic": "T4",
+   "topicName": "Merchandising",
+   "format": [
+    "calculation"
+   ],
+   "stem": "Merchandise inventory: 100 units at $10 were on hand, then 200 units at $12 were bought. 150 units were sold. Using FIFO, what is the cost of goods sold?",
+   "options": [
+    "$1,800",
+    "$1,600",
+    "$1,700",
+    "$2,200"
+   ],
+   "answer": 2,
+   "answerText": "$1,600",
+   "explanation": "FIFO sells the oldest units first: 100 units at $10 is $1,000, plus 50 units at $12 is $600. The total is $1,600.",
+   "deepDive": {
+    "concept": "FIFO cost of goods sold",
+    "conceptExplain": "First-in, first-out assumes the oldest costs leave inventory first. So cost of goods sold uses the earliest prices and ending inventory holds the latest prices.",
+    "whyCorrect": "100 x $10 + 50 x $12 = $1,600.",
+    "wrongReasons": {
+     "1": "$1,800 is 150 units at $12. That is the LIFO answer.",
+     "3": "$1,700 is the weighted-average answer, 150 units at about $11.33.",
+     "4": "$2,200 uses 100 units at $10 and 100 units at $12, which is 200 units. Only 150 units were sold."
+    }
+   }
+  },
+  {
+   "id": "TE-T4-13",
+   "topic": "T4",
+   "topicName": "Merchandising",
+   "format": [
+    "calculation"
+   ],
+   "stem": "Merchandise inventory: 100 units at $10 were on hand, then 200 units at $12 were bought. 150 units were sold. Using LIFO, what is the cost of goods sold?",
+   "options": [
+    "$1,600",
+    "$1,700",
+    "$1,800",
+    "$1,500"
+   ],
+   "answer": 3,
+   "answerText": "$1,800",
+   "explanation": "LIFO sells the newest units first, so all 150 units come from the $12 purchase. The cost is 150 x $12 = $1,800.",
+   "deepDive": {
+    "concept": "LIFO cost of goods sold",
+    "conceptExplain": "Last-in, first-out assumes the most recent costs leave inventory first. When prices rise, LIFO gives a higher cost of goods sold than FIFO.",
+    "whyCorrect": "150 units x $12 = $1,800.",
+    "wrongReasons": {
+     "1": "$1,600 is the FIFO answer, using the oldest $10 units first.",
+     "2": "$1,700 is the weighted-average answer.",
+     "4": "$1,500 is 150 units at the oldest price of $10 and ignores the newer purchase."
+    }
+   }
+  },
+  {
+   "id": "TE-T4-14",
+   "topic": "T4",
+   "topicName": "Merchandising",
+   "format": [
+    "calculation"
+   ],
+   "stem": "The company had 200 units at $6 and bought 100 more units at $9. It sold 240 units. Using the weighted-average method, what is the cost of the 60 units left in ending inventory?",
+   "options": [
+    "$360",
+    "$540",
+    "$450",
+    "$420"
+   ],
+   "answer": 4,
+   "answerText": "$420",
+   "explanation": "Total cost is 200 x $6 + 100 x $9 = $2,100 for 300 units, an average of $7. Ending inventory is 60 x $7 = $420.",
+   "deepDive": {
+    "concept": "Weighted-average cost",
+    "conceptExplain": "Weighted average divides total cost of goods available by total units to get one average cost per unit. Both cost of goods sold and ending inventory use that same average.",
+    "whyCorrect": "$2,100 / 300 = $7 per unit, and 60 x $7 = $420.",
+    "wrongReasons": {
+     "1": "$360 is 60 units at the older $6 price, which is not the average.",
+     "2": "$540 is 60 units at the newest $9 price, which is not the average.",
+     "3": "$450 uses a simple average of the two prices ($7.50), which ignores how many units were bought at each price."
+    }
+   }
+  },
+  {
+   "id": "TE-T4-15",
+   "topic": "T4",
+   "topicName": "Merchandising",
+   "format": [
+    "true statement"
+   ],
+   "stem": "When purchase prices are rising, which statement comparing FIFO and LIFO is correct?",
+   "options": [
+    "FIFO reports a higher gross profit than LIFO",
+    "FIFO reports a lower ending inventory than LIFO",
+    "LIFO reports a higher gross profit than FIFO",
+    "FIFO and LIFO report the same gross profit"
+   ],
+   "answer": 1,
+   "answerText": "FIFO reports a higher gross profit than LIFO",
+   "explanation": "With rising prices, FIFO charges the older, lower costs to cost of goods sold. That leaves a higher gross profit than LIFO.",
+   "deepDive": {
+    "concept": "FIFO vs LIFO when prices rise",
+    "conceptExplain": "The method changes which costs go to expense and which stay in inventory. Rising prices make FIFO's cost of goods sold lower and its ending inventory higher than LIFO's.",
+    "whyCorrect": "FIFO's lower cost of goods sold means a higher gross profit.",
+    "wrongReasons": {
+     "2": "FIFO's ending inventory holds the newest, higher costs, so it is higher, not lower.",
+     "3": "LIFO charges the newest, higher costs to expense, so its gross profit is lower.",
+     "4": "Different cost flow assumptions give different numbers when prices change."
+    }
+   }
+  },
+  {
+   "id": "TE-T4-16",
+   "topic": "T4",
+   "topicName": "Merchandising",
+   "format": [
+    "application"
+   ],
+   "stem": "Which cost flow method values ending merchandise inventory closest to current replacement cost when prices are rising?",
+   "options": [
+    "LIFO",
+    "FIFO",
+    "Weighted average",
+    "None of the three methods affects inventory value"
+   ],
+   "answer": 2,
+   "answerText": "FIFO",
+   "explanation": "FIFO leaves the most recent purchases in ending inventory. Those costs are closest to today's prices.",
+   "deepDive": {
+    "concept": "Inventory valuation on the balance sheet",
+    "conceptExplain": "Ending inventory under FIFO is made up of the latest purchases. LIFO leaves the oldest costs on the balance sheet, which can look out of date after years of rising prices.",
+    "whyCorrect": "FIFO's ending inventory consists of the newest costs.",
+    "wrongReasons": {
+     "1": "LIFO leaves the oldest costs in inventory, which are the furthest from current prices.",
+     "3": "Weighted average blends old and new costs, so it falls between the two.",
+     "4": "The method chosen changes the ending inventory number."
+    }
+   }
+  },
+  {
+   "id": "TE-T4-17",
+   "topic": "T4",
+   "topicName": "Merchandising",
+   "format": [
+    "calculation"
+   ],
+   "stem": "Sold merchandise on account to Redwood Studio for $3,000, terms 2/10, n/30. Redwood Studio paid within the discount period. How much cash did the company receive?",
+   "options": [
+    "$3,000",
+    "$2,940",
+    "$2,700",
+    "$3,060"
+   ],
+   "answer": 2,
+   "answerText": "$2,940",
+   "explanation": "The discount is 2% of $3,000, or $60. Cash received is $3,000 - $60 = $2,940.",
+   "deepDive": {
+    "concept": "Sales discounts",
+    "conceptExplain": "The seller records the discount in Sales Discounts, a contra revenue account. The entry is Dr Cash 2,940, Dr Sales Discounts 60, Cr Accounts Receivable 3,000.",
+    "whyCorrect": "$3,000 - 2% x $3,000 = $2,940.",
+    "wrongReasons": {
+     "1": "$3,000 would only be received if the customer paid after the discount period.",
+     "3": "$2,700 takes 10% off. The 10 in 2/10 is the number of days.",
+     "4": "$3,060 adds the discount instead of subtracting it."
+    }
+   }
+  },
+  {
+   "id": "TE-T4-18",
+   "topic": "T4",
+   "topicName": "Merchandising",
+   "format": [
+    "definition"
+   ],
+   "stem": "Which statement best describes Cost of Goods Sold?",
+   "options": [
+    "The cost of all merchandise purchased during the period",
+    "The selling price of the merchandise sold to customers",
+    "The cost of merchandise still on hand at the end of the period",
+    "The cost of the merchandise that was sold to customers during the period"
+   ],
+   "answer": 4,
+   "answerText": "The cost of the merchandise that was sold to customers during the period",
+   "explanation": "Cost of Goods Sold is an expense that shows what the company paid for the goods it actually sold. Goods still on hand stay in Merchandise Inventory.",
+   "deepDive": {
+    "concept": "Cost of Goods Sold",
+    "conceptExplain": "Merchandise Inventory is an asset until the goods are sold. When they are sold, their cost moves to the expense account Cost of Goods Sold and is matched with the sales revenue.",
+    "whyCorrect": "It matches the cost of goods sold with the revenue they earned.",
+    "wrongReasons": {
+     "1": "Purchases not yet sold are still inventory, which is an asset.",
+     "2": "The selling price is revenue, not cost.",
+     "3": "Goods on hand at period-end are Merchandise Inventory."
+    }
+   }
+  },
+  {
+   "id": "TE-T4-19",
+   "topic": "T4",
+   "topicName": "Merchandising",
+   "format": [
+    "calculation"
+   ],
+   "stem": "Merchandise Inventory began at $9,000. During the year the company purchased merchandise for $30,000, returned $2,000 of it, and paid $1,500 freight-in. Cost of Goods Sold recorded for the year was $28,000. What is the ending balance of Merchandise Inventory?",
+   "options": [
+    "$10,500",
+    "$9,000",
+    "$12,500",
+    "$8,500"
+   ],
+   "answer": 1,
+   "answerText": "$10,500",
+   "explanation": "Start with $9,000, add $30,000 and $1,500, then subtract the $2,000 return and the $28,000 cost of goods sold. The ending balance is $10,500.",
+   "deepDive": {
+    "concept": "Inventory account roll-forward",
+    "conceptExplain": "Under the perpetual system the Merchandise Inventory account is a running balance. Purchases and freight-in increase it. Returns and cost of goods sold decrease it.",
+    "whyCorrect": "$9,000 + $30,000 - $2,000 + $1,500 - $28,000 = $10,500.",
+    "wrongReasons": {
+     "2": "$9,000 ignores all activity during the year.",
+     "3": "$12,500 forgets to subtract the $2,000 purchase return.",
+     "4": "$8,500 subtracts the freight-in instead of adding it."
+    }
+   }
+  },
+  {
+   "id": "TE-T4-20",
+   "topic": "T4",
+   "topicName": "Merchandising",
+   "format": [
+    "application"
+   ],
+   "stem": "Under terms 2/10, n/30, how much must a buyer pay on Day 20 for a $12,000 invoice dated Day 1?",
+   "options": [
+    "$11,760, because the discount still applies",
+    "$11,880, because half the discount applies",
+    "$12,000, because the discount period has passed",
+    "$12,240, because a late fee is added"
+   ],
+   "answer": 3,
+   "answerText": "$12,000, because the discount period has passed",
+   "explanation": "The 10-day discount period ended on Day 10. Paying on Day 20 means paying the full invoice, which is still due by Day 30.",
+   "deepDive": {
+    "concept": "Reading credit terms",
+    "conceptExplain": "In 2/10, n/30 the first number is the discount percent and the second is the discount period in days. After day 10 the discount is gone, and the full amount is due on day 30.",
+    "whyCorrect": "Day 20 is after the 10-day window, so the full $12,000 is due.",
+    "wrongReasons": {
+     "1": "The 2% discount ended on Day 10, so $11,760 is no longer allowed.",
+     "2": "These terms do not offer partial discounts.",
+     "4": "These terms say nothing about late fees. The invoice amount stays $12,000 until Day 30."
+    }
+   }
+  },
+  {
+   "id": "TE-T4-21",
+   "topic": "T4",
+   "topicName": "Merchandising",
+   "format": [
+    "journal entry"
+   ],
+   "stem": "The perpetual inventory records show $42,000, but a physical count shows $40,500. Which adjusting entry records the shrinkage?",
+   "options": [
+    "Dr Merchandise Inventory 1,500 / Cr Cost of Goods Sold 1,500",
+    "Dr Loss from Theft 42,000 / Cr Merchandise Inventory 42,000",
+    "Dr Cost of Goods Sold 40,500 / Cr Merchandise Inventory 40,500",
+    "Dr Cost of Goods Sold 1,500 / Cr Merchandise Inventory 1,500"
+   ],
+   "answer": 4,
+   "answerText": "Dr Cost of Goods Sold 1,500 / Cr Merchandise Inventory 1,500",
+   "explanation": "Shrinkage means less inventory exists than the records show. The $1,500 difference is written off to Cost of Goods Sold.",
+   "deepDive": {
+    "concept": "Inventory shrinkage",
+    "conceptExplain": "A physical count can reveal lost, damaged, or stolen goods. The adjusting entry lowers Merchandise Inventory to the counted amount and normally charges the difference to Cost of Goods Sold.",
+    "whyCorrect": "$42,000 - $40,500 = $1,500 is expensed and removed from inventory.",
+    "wrongReasons": {
+     "1": "This entry would increase inventory, but the count shows a shortage.",
+     "2": "Only the $1,500 difference is lost, not the entire $42,000.",
+     "3": "The adjustment is the shortage of $1,500, not the counted balance of $40,500."
+    }
+   }
+  },
+  {
+   "id": "TE-T4-22",
+   "topic": "T4",
+   "topicName": "Merchandising",
+   "format": [
+    "true statement"
+   ],
+   "stem": "Which statement about Sales Returns and Allowances is correct?",
+   "options": [
+    "It is an expense account that is added to Cost of Goods Sold",
+    "It is a contra revenue account that is deducted from Sales Revenue",
+    "It is an asset account that is added to Accounts Receivable",
+    "It is a liability account owed to customers"
+   ],
+   "answer": 2,
+   "answerText": "It is a contra revenue account that is deducted from Sales Revenue",
+   "explanation": "Returns and allowances lower the revenue earned from sales. They are tracked in a contra revenue account with a debit balance.",
+   "deepDive": {
+    "concept": "Contra revenue accounts",
+    "conceptExplain": "Keeping returns in a separate account lets managers see how much merchandise comes back. At year-end the balance is deducted from Sales Revenue when finding net sales.",
+    "whyCorrect": "It reduces sales and is shown as a deduction on the income statement.",
+    "wrongReasons": {
+     "1": "Returns are not an expense and do not belong in Cost of Goods Sold.",
+     "3": "It lowers receivables when recorded, so it is not an asset to add.",
+     "4": "A return on account reduces what the customer owes. It does not create a liability."
+    }
+   }
+  },
+  {
+   "id": "TE-T5-01",
+   "topic": "T5",
+   "topicName": "Long-term Assets & Depreciation",
+   "format": [
+    "application"
+   ],
+   "stem": "Which cost should be debited to the Equipment account when a company buys a new machine?",
+   "options": [
+    "The first year's insurance premium on the machine",
+    "Routine oil changes after the machine is in use",
+    "Freight paid to deliver the machine to the company",
+    "Training for employees on how to use the machine"
+   ],
+   "answer": 3,
+   "answerText": "Freight paid to deliver the machine to the company",
+   "explanation": "Costs needed to get an asset to its location and ready for use are capitalized. Freight on delivery qualifies.",
+   "deepDive": {
+    "concept": "Capitalizing asset costs",
+    "conceptExplain": "The cost of a plant asset includes its purchase price plus all reasonable costs to bring it to the place and condition for use, such as freight and installation. Ongoing costs and training are expenses.",
+    "whyCorrect": "Delivery freight is a cost of getting the machine ready for use, so it is added to Equipment.",
+    "wrongReasons": {
+     "1": "Insurance covers a future period, so it is Prepaid Insurance and then Insurance Expense.",
+     "2": "Routine maintenance is Repairs and Maintenance Expense.",
+     "4": "Training is an expense and does not add to the machine's cost."
+    }
+   }
+  },
+  {
+   "id": "TE-T5-02",
+   "topic": "T5",
+   "topicName": "Long-term Assets & Depreciation",
+   "format": [
+    "calculation"
+   ],
+   "stem": "Equipment costing $48,000 has a salvage value of $6,000 and a useful life of 7 years. What is the annual straight-line depreciation?",
+   "options": [
+    "$6,000",
+    "$6,857",
+    "$7,000",
+    "$5,250"
+   ],
+   "answer": 1,
+   "answerText": "$6,000",
+   "explanation": "Depreciable cost is $48,000 - $6,000 = $42,000. Divided by 7 years, annual depreciation is $6,000.",
+   "deepDive": {
+    "concept": "Straight-line depreciation",
+    "conceptExplain": "Straight-line spreads the depreciable cost evenly over the useful life. Depreciable cost is cost minus salvage value.",
+    "whyCorrect": "($48,000 - $6,000) / 7 = $6,000 per year.",
+    "wrongReasons": {
+     "2": "$6,857 divides the full cost by 7 and forgets to subtract salvage value.",
+     "3": "$7,000 divides the depreciable cost by 6 years instead of 7.",
+     "4": "$5,250 comes from dividing $42,000 by 8 years, a life the question did not give."
+    }
+   }
+  },
+  {
+   "id": "TE-T5-03",
+   "topic": "T5",
+   "topicName": "Long-term Assets & Depreciation",
+   "format": [
+    "calculation"
+   ],
+   "stem": "Purchased equipment on October 1 for $30,000. Salvage value is $3,000 and the useful life is 5 years (straight-line). The year ends December 31. What is the depreciation expense for the first year?",
+   "options": [
+    "$5,400",
+    "$1,350",
+    "$1,500",
+    "$4,050"
+   ],
+   "answer": 2,
+   "answerText": "$1,350",
+   "explanation": "Annual depreciation is ($30,000 - $3,000) / 5 = $5,400. The equipment was used for 3 of 12 months, so $5,400 x 3/12 = $1,350.",
+   "deepDive": {
+    "concept": "Partial-year depreciation",
+    "conceptExplain": "When an asset is bought during the year, depreciation is prorated by the number of months it was in use. Start with a full year's amount, then multiply by the months over 12.",
+    "whyCorrect": "$5,400 x 3/12 = $1,350.",
+    "wrongReasons": {
+     "1": "$5,400 is a full year of depreciation, but the asset was used only 3 months.",
+     "3": "$1,500 prorates correctly but forgets to subtract salvage value ($30,000 / 5 x 3/12).",
+     "4": "$4,050 prorates for 9 months, which is the part of the year before the purchase."
+    }
+   }
+  },
+  {
+   "id": "TE-T5-04",
+   "topic": "T5",
+   "topicName": "Long-term Assets & Depreciation",
+   "format": [
+    "calculation"
+   ],
+   "stem": "Equipment cost $40,000, salvage value is $4,000, and useful life is 5 years. Using double-declining-balance, what is the first-year depreciation expense?",
+   "options": [
+    "$16,000",
+    "$7,200",
+    "$14,400",
+    "$8,000"
+   ],
+   "answer": 1,
+   "answerText": "$16,000",
+   "explanation": "The straight-line rate is 20%, so the double rate is 40%. Salvage is not subtracted from the base: $40,000 x 40% = $16,000.",
+   "deepDive": {
+    "concept": "Double-declining-balance",
+    "conceptExplain": "DDB uses twice the straight-line rate and applies it to the book value at the start of each year. Salvage value is not subtracted from the base, but book value may never go below salvage.",
+    "whyCorrect": "40% x $40,000 = $16,000.",
+    "wrongReasons": {
+     "2": "$7,200 is the straight-line amount ($36,000 / 5).",
+     "3": "$14,400 subtracts salvage first ($36,000 x 40%), which DDB does not do.",
+     "4": "$8,000 uses only the 20% straight-line rate on the cost."
+    }
+   }
+  },
+  {
+   "id": "TE-T5-05",
+   "topic": "T5",
+   "topicName": "Long-term Assets & Depreciation",
+   "format": [
+    "calculation"
+   ],
+   "stem": "Using the same equipment (cost $40,000, salvage $4,000, 5-year life, double-declining-balance), what is the second-year depreciation expense?",
+   "options": [
+    "$16,000",
+    "$14,400",
+    "$9,600",
+    "$6,400"
+   ],
+   "answer": 3,
+   "answerText": "$9,600",
+   "explanation": "After year 1 the book value is $40,000 - $16,000 = $24,000. Year 2 depreciation is $24,000 x 40% = $9,600.",
+   "deepDive": {
+    "concept": "DDB uses book value",
+    "conceptExplain": "Each year's DDB expense is the rate times the book value at the start of that year. Book value falls each year, so the expense falls too. Book value may never go below salvage value.",
+    "whyCorrect": "$24,000 x 40% = $9,600.",
+    "wrongReasons": {
+     "1": "$16,000 repeats the first year's amount. The base must be reduced by year 1 depreciation.",
+     "2": "$14,400 applies 40% to the cost less salvage, which is the wrong base.",
+     "4": "$6,400 applies 40% to a book value of $16,000, which was the year 1 expense and not the book value."
+    }
+   }
+  },
+  {
+   "id": "TE-T5-06",
+   "topic": "T5",
+   "topicName": "Long-term Assets & Depreciation",
+   "format": [
+    "calculation"
+   ],
+   "stem": "A delivery truck cost $90,000 and has a salvage value of $9,000. It is expected to be driven 270,000 miles. The truck was driven 20,000 miles this year. Using units-of-activity, what is depreciation expense?",
+   "options": [
+    "$6,667",
+    "$7,500",
+    "$5,400",
+    "$6,000"
+   ],
+   "answer": 4,
+   "answerText": "$6,000",
+   "explanation": "The rate per mile is ($90,000 - $9,000) / 270,000 = $0.30. For 20,000 miles, depreciation is $6,000.",
+   "deepDive": {
+    "concept": "Units-of-activity depreciation",
+    "conceptExplain": "This method links depreciation to use. Find the cost per unit by dividing depreciable cost by total expected units, then multiply by the units used.",
+    "whyCorrect": "$0.30 x 20,000 = $6,000.",
+    "wrongReasons": {
+     "1": "$6,667 divides the full $90,000 by 270,000 miles ($0.333 per mile) and forgets to subtract salvage value.",
+     "2": "$7,500 would need a rate of $0.375 per mile, which does not come from the data.",
+     "3": "$5,400 would need a rate of $0.27 per mile, which does not come from the data."
+    }
+   }
+  },
+  {
+   "id": "TE-T5-07",
+   "topic": "T5",
+   "topicName": "Long-term Assets & Depreciation",
+   "format": [
+    "application"
+   ],
+   "stem": "Equipment with a cost of $20,000 and accumulated depreciation of $14,000 is sold for exactly its book value. What is the result?",
+   "options": [
+    "A gain of $6,000",
+    "No gain or loss is recorded",
+    "A loss of $6,000",
+    "A gain of $14,000"
+   ],
+   "answer": 2,
+   "answerText": "No gain or loss is recorded",
+   "explanation": "Book value is $20,000 - $14,000 = $6,000. When the sale price equals book value, there is no gain or loss.",
+   "deepDive": {
+    "concept": "Disposal at book value",
+    "conceptExplain": "A gain or loss on disposal is the difference between the cash received and the asset's book value. If they are the same, the difference is zero.",
+    "whyCorrect": "The $6,000 received equals the $6,000 book value, so there is nothing to record as a gain or loss.",
+    "wrongReasons": {
+     "1": "A $6,000 gain would mean the equipment was sold for $12,000.",
+     "3": "A $6,000 loss would mean the equipment was sold for nothing.",
+     "4": "$14,000 is accumulated depreciation, which is not the same as a gain."
+    }
+   }
+  },
+  {
+   "id": "TE-T5-08",
+   "topic": "T5",
+   "topicName": "Long-term Assets & Depreciation",
+   "format": [
+    "calculation"
+   ],
+   "stem": "Equipment cost $25,000 with accumulated depreciation of $18,500 was sold for $7,500 cash. What gain or loss resulted from the sale?",
+   "options": [
+    "Loss of $1,000",
+    "Gain of $7,500",
+    "Gain of $6,500",
+    "Gain of $1,000"
+   ],
+   "answer": 4,
+   "answerText": "Gain of $1,000",
+   "explanation": "Book value is $25,000 - $18,500 = $6,500. The company received $7,500, which is $1,000 more than book value, so it is a gain.",
+   "deepDive": {
+    "concept": "Gain on disposal",
+    "conceptExplain": "Compare cash received with book value. If cash is higher, record a gain, which is a credit to Gain on Sale of Equipment. If it is lower, record a loss.",
+    "whyCorrect": "$7,500 - $6,500 = $1,000 gain.",
+    "wrongReasons": {
+     "1": "A loss would mean the cash received was lower than book value.",
+     "2": "$7,500 is the cash received, not the gain.",
+     "3": "$6,500 is the book value, not the gain."
+    }
+   }
+  },
+  {
+   "id": "TE-T5-09",
+   "topic": "T5",
+   "topicName": "Long-term Assets & Depreciation",
+   "format": [
+    "calculation"
+   ],
+   "stem": "Equipment cost $20,000 with accumulated depreciation of $14,000 was sold for $4,500 cash. What was the gain or loss?",
+   "options": [
+    "Gain of $1,500",
+    "Loss of $4,500",
+    "Loss of $1,500",
+    "Gain of $4,500"
+   ],
+   "answer": 3,
+   "answerText": "Loss of $1,500",
+   "explanation": "Book value is $20,000 - $14,000 = $6,000. The cash received of $4,500 is $1,500 less than book value, so there is a loss.",
+   "deepDive": {
+    "concept": "Loss on disposal",
+    "conceptExplain": "When an asset is sold for less than its book value, the shortfall is a loss. It is recorded as Loss on Sale of Equipment, a debit.",
+    "whyCorrect": "$4,500 - $6,000 = -$1,500, a loss.",
+    "wrongReasons": {
+     "1": "Selling below book value cannot produce a gain.",
+     "2": "$4,500 is the cash received, not the loss.",
+     "4": "A gain would need the sale price to be above book value."
+    }
+   }
+  },
+  {
+   "id": "TE-T5-10",
+   "topic": "T5",
+   "topicName": "Long-term Assets & Depreciation",
+   "format": [
+    "journal entry"
+   ],
+   "stem": "Sold equipment for more than its book value. Which entry is correct?",
+   "options": [
+    "Dr Cash, Dr Accumulated Depreciation—Equipment / Cr Equipment, Cr Gain on Sale of Equipment",
+    "Dr Cash, Dr Gain on Sale of Equipment / Cr Equipment, Cr Accumulated Depreciation—Equipment",
+    "Dr Cash, Dr Equipment / Cr Accumulated Depreciation—Equipment, Cr Gain on Sale of Equipment",
+    "Dr Cash, Dr Loss on Sale of Equipment / Cr Equipment, Cr Accumulated Depreciation—Equipment"
+   ],
+   "answer": 1,
+   "answerText": "Dr Cash, Dr Accumulated Depreciation—Equipment / Cr Equipment, Cr Gain on Sale of Equipment",
+   "explanation": "The equipment and its accumulated depreciation are both removed. The extra cash is a gain, which is credited.",
+   "deepDive": {
+    "concept": "Journal entry for a disposal",
+    "conceptExplain": "To dispose of equipment, debit Cash for the amount received, debit Accumulated Depreciation to remove it, and credit Equipment for its cost. The balancing amount is a credit gain or a debit loss.",
+    "whyCorrect": "A gain is a credit, and the asset and its accumulated depreciation are taken off the books.",
+    "wrongReasons": {
+     "2": "A gain must be credited, and accumulated depreciation must be debited to remove it.",
+     "3": "Equipment is credited to remove it, and accumulated depreciation is debited.",
+     "4": "This records a loss, but the sale produced a gain."
+    }
+   }
+  },
+  {
+   "id": "TE-T5-11",
+   "topic": "T5",
+   "topicName": "Long-term Assets & Depreciation",
+   "format": [
+    "true statement"
+   ],
+   "stem": "Which statement about depreciation is correct?",
+   "options": [
+    "It measures the current market value of the asset",
+    "It allocates the cost of a plant asset to expense over its useful life",
+    "It sets aside cash to replace the asset",
+    "It is recorded only when the asset is sold"
+   ],
+   "answer": 2,
+   "answerText": "It allocates the cost of a plant asset to expense over its useful life",
+   "explanation": "Depreciation spreads the cost of an asset across the years that benefit from it. It is an allocation of cost, not a valuation.",
+   "deepDive": {
+    "concept": "Purpose of depreciation",
+    "conceptExplain": "Depreciation follows the matching principle. The cost of a long-lived asset is an expense in the periods in which the asset helps earn revenue.",
+    "whyCorrect": "Depreciation matches the asset's cost with the periods it is used.",
+    "wrongReasons": {
+     "1": "Book value rarely equals market value, because depreciation follows a cost schedule.",
+     "3": "Depreciation is a non-cash expense. It does not put money aside.",
+     "4": "Depreciation is recorded each period, not just at the sale."
+    }
+   }
+  },
+  {
+   "id": "TE-T5-12",
+   "topic": "T5",
+   "topicName": "Long-term Assets & Depreciation",
+   "format": [
+    "true statement"
+   ],
+   "stem": "Which statement about land is correct?",
+   "options": [
+    "Land is depreciated over 20 years",
+    "Land is depreciated using the units-of-activity method",
+    "Land is not depreciated because it does not wear out",
+    "Land is depreciated like a building but with a higher rate"
+   ],
+   "answer": 3,
+   "answerText": "Land is not depreciated because it does not wear out",
+   "explanation": "Land is considered to have an unlimited useful life. So no depreciation expense is recorded for it.",
+   "deepDive": {
+    "concept": "Land and depreciation",
+    "conceptExplain": "Depreciation applies to assets whose usefulness is used up over time, such as buildings, equipment, vehicles, and furniture. Land has an indefinite life, so it stays at cost. Land improvements, such as parking lots, are depreciated.",
+    "whyCorrect": "Land has an unlimited life, so it is not depreciated.",
+    "wrongReasons": {
+     "1": "No fixed 20-year life is assumed for land.",
+     "2": "Units-of-activity is a method for assets that wear out. Land does not.",
+     "4": "Land is not depreciated at any rate."
+    }
+   }
+  },
+  {
+   "id": "TE-T5-13",
+   "topic": "T5",
+   "topicName": "Long-term Assets & Depreciation",
+   "format": [
+    "true statement"
+   ],
+   "stem": "Compare straight-line and double-declining-balance methods for the same asset. Which is correct?",
+   "options": [
+    "Straight-line gives more expense in the early years than double-declining-balance",
+    "Double-declining-balance gives the same expense every year",
+    "The two methods give different total depreciation over the life of the asset",
+    "Straight-line gives the same expense every year, while double-declining-balance gives more expense in the early years"
+   ],
+   "answer": 4,
+   "answerText": "Straight-line gives the same expense every year, while double-declining-balance gives more expense in the early years",
+   "explanation": "DDB front-loads expense because it applies a high rate to a large book value. Straight-line charges equal amounts each year.",
+   "deepDive": {
+    "concept": "Depreciation methods compared",
+    "conceptExplain": "Both methods end with the same total depreciation over the asset's life (cost minus salvage). They differ only in how the expense is spread across the years.",
+    "whyCorrect": "Straight-line is level, while DDB is higher at first and lower later.",
+    "wrongReasons": {
+     "1": "It is the other way around. DDB has more expense early.",
+     "2": "DDB expense falls each year because book value falls.",
+     "3": "Total depreciation over the life is the same, which is cost minus salvage."
+    }
+   }
+  },
+  {
+   "id": "TE-T5-14",
+   "topic": "T5",
+   "topicName": "Long-term Assets & Depreciation",
+   "format": [
+    "journal entry"
+   ],
+   "stem": "Which adjusting entry records annual depreciation on equipment?",
+   "options": [
+    "Dr Depreciation Expense / Cr Accumulated Depreciation—Equipment",
+    "Dr Depreciation Expense / Cr Equipment",
+    "Dr Accumulated Depreciation—Equipment / Cr Depreciation Expense",
+    "Dr Equipment / Cr Accumulated Depreciation—Equipment"
+   ],
+   "answer": 1,
+   "answerText": "Dr Depreciation Expense / Cr Accumulated Depreciation—Equipment",
+   "explanation": "Depreciation is an expense, so it is debited. The credit goes to the contra asset account so that the Equipment account keeps its original cost.",
+   "deepDive": {
+    "concept": "Depreciation adjusting entry",
+    "conceptExplain": "Using Accumulated Depreciation lets the books show both the original cost and the total depreciation taken. The asset's book value is cost minus accumulated depreciation.",
+    "whyCorrect": "Expense is debited and the contra asset account is credited.",
+    "wrongReasons": {
+     "2": "Crediting Equipment would hide the original cost of the asset.",
+     "3": "The sides are reversed. This would reduce expense and accumulated depreciation.",
+     "4": "Debiting Equipment would increase the asset instead of recording an expense."
+    }
+   }
+  },
+  {
+   "id": "TE-T5-15",
+   "topic": "T5",
+   "topicName": "Long-term Assets & Depreciation",
+   "format": [
+    "true statement"
+   ],
+   "stem": "Which statement about double-declining-balance depreciation is correct?",
+   "options": [
+    "Salvage value is subtracted from cost before applying the rate",
+    "Depreciation continues until book value reaches zero",
+    "The rate is the same as the straight-line rate",
+    "Salvage value is ignored when the yearly rate is applied, but the asset is not depreciated below salvage value"
+   ],
+   "answer": 4,
+   "answerText": "Salvage value is ignored when the yearly rate is applied, but the asset is not depreciated below salvage value",
+   "explanation": "The DDB rate applies to book value, not to cost minus salvage. In the last year, depreciation is limited so book value stops at salvage value.",
+   "deepDive": {
+    "concept": "DDB and salvage value",
+    "conceptExplain": "Salvage value does not change the first-year DDB expense. It acts as a floor, though. Once book value equals salvage value, no more depreciation is recorded.",
+    "whyCorrect": "The yearly calculation ignores salvage, but salvage is a floor for book value.",
+    "wrongReasons": {
+     "1": "Subtracting salvage first is how straight-line works, not DDB.",
+     "2": "Depreciation stops at the salvage value, not at zero.",
+     "3": "The DDB rate is double the straight-line rate."
+    }
+   }
+  },
+  {
+   "id": "TE-T5-16",
+   "topic": "T5",
+   "topicName": "Long-term Assets & Depreciation",
+   "format": [
+    "true statement"
+   ],
+   "stem": "Which statement about Accumulated Depreciation—Equipment is correct?",
+   "options": [
+    "It is a contra asset account with a normal credit balance, subtracted from Equipment on the balance sheet",
+    "It is an expense account with a normal debit balance",
+    "It is a liability account that shows the amount owed on equipment",
+    "It is an equity account that increases when equipment is bought"
+   ],
+   "answer": 1,
+   "answerText": "It is a contra asset account with a normal credit balance, subtracted from Equipment on the balance sheet",
+   "explanation": "Accumulated Depreciation holds the total depreciation taken to date. It is subtracted from the asset's cost to show book value.",
+   "deepDive": {
+    "concept": "Contra asset accounts",
+    "conceptExplain": "A contra account is paired with another account and has the opposite balance. Equipment has a debit balance, so its contra account has a credit balance.",
+    "whyCorrect": "It reduces the Equipment account to book value.",
+    "wrongReasons": {
+     "2": "The expense is Depreciation Expense. Accumulated Depreciation is on the balance sheet.",
+     "3": "It does not show a debt. It shows cost already allocated to expense.",
+     "4": "It is not an equity account. Buying equipment does not change it."
+    }
+   }
+  },
+  {
+   "id": "TE-T5-17",
+   "topic": "T5",
+   "topicName": "Long-term Assets & Depreciation",
+   "format": [
+    "application"
+   ],
+   "stem": "Which expenditure should be capitalized (debited to the asset account) rather than expensed?",
+   "options": [
+    "Replacing a worn belt in a machine during routine service",
+    "Repainting an office wall",
+    "A major overhaul that extends the useful life of a machine",
+    "Fixing a minor dent in a company vehicle"
+   ],
+   "answer": 3,
+   "answerText": "A major overhaul that extends the useful life of a machine",
+   "explanation": "An expenditure that increases an asset's useful life or capacity adds future benefit, so it is capitalized. Ordinary repairs only keep the asset in normal working order.",
+   "deepDive": {
+    "concept": "Capital vs. revenue expenditures",
+    "conceptExplain": "A capital expenditure adds to the asset's cost and is depreciated over time. An ordinary repair keeps the asset running and is expensed right away as Repairs and Maintenance Expense.",
+    "whyCorrect": "Extending the useful life benefits many future periods.",
+    "wrongReasons": {
+     "1": "Routine service keeps the asset at its normal level, so it is an expense.",
+     "2": "Repainting is a routine upkeep cost and does not extend the life.",
+     "4": "A minor repair only restores the normal condition, so it is an expense."
+    }
+   }
+  },
+  {
+   "id": "TE-T5-18",
+   "topic": "T5",
+   "topicName": "Long-term Assets & Depreciation",
+   "format": [
+    "calculation"
+   ],
+   "stem": "The company paid $360,000 for land and a building together. The appraised values are $120,000 for the land and $280,000 for the building. How much cost is assigned to the land?",
+   "options": [
+    "$120,000",
+    "$108,000",
+    "$180,000",
+    "$252,000"
+   ],
+   "answer": 2,
+   "answerText": "$108,000",
+   "explanation": "The land is $120,000 of the $400,000 total appraised value, or 30%. So land receives 30% x $360,000 = $108,000.",
+   "deepDive": {
+    "concept": "Lump-sum purchase",
+    "conceptExplain": "When assets are bought together for one price, split the price in proportion to each asset's appraised value. This matters because land is not depreciated and buildings are.",
+    "whyCorrect": "30% x $360,000 = $108,000.",
+    "wrongReasons": {
+     "1": "$120,000 is the appraised value, but the price paid was less than the total appraisal.",
+     "3": "$180,000 splits the price in half, which ignores the appraisals.",
+     "4": "$252,000 is the amount assigned to the building (70%)."
+    }
+   }
+  },
+  {
+   "id": "TE-T5-19",
+   "topic": "T5",
+   "topicName": "Long-term Assets & Depreciation",
+   "format": [
+    "calculation"
+   ],
+   "stem": "Equipment bought on January 2 cost $52,000 with a salvage value of $4,000 and a useful life of 8 years. Using straight-line, what is the book value after 3 full years?",
+   "options": [
+    "$34,000",
+    "$18,000",
+    "$30,000",
+    "$40,000"
+   ],
+   "answer": 1,
+   "answerText": "$34,000",
+   "explanation": "Annual depreciation is ($52,000 - $4,000) / 8 = $6,000. After 3 years, accumulated depreciation is $18,000, so book value is $52,000 - $18,000 = $34,000.",
+   "deepDive": {
+    "concept": "Book value",
+    "conceptExplain": "Book value equals cost minus accumulated depreciation. First find the yearly depreciation, multiply by the years in use, then subtract from cost.",
+    "whyCorrect": "$52,000 - 3 x $6,000 = $34,000.",
+    "wrongReasons": {
+     "2": "$18,000 is accumulated depreciation, not book value.",
+     "3": "$30,000 subtracts the 3 years of depreciation from cost less salvage ($48,000 - $18,000), which leaves out the salvage value.",
+     "4": "$40,000 subtracts only two years of depreciation."
+    }
+   }
+  },
+  {
+   "id": "TE-T5-20",
+   "topic": "T5",
+   "topicName": "Long-term Assets & Depreciation",
+   "format": [
+    "application"
+   ],
+   "stem": "A company's machines wear out mainly based on the number of units they produce, not on the passing of time. Which depreciation method best fits?",
+   "options": [
+    "Straight-line",
+    "Double-declining-balance",
+    "Units-of-activity",
+    "No depreciation is needed"
+   ],
+   "answer": 3,
+   "answerText": "Units-of-activity",
+   "explanation": "Units-of-activity ties depreciation to usage. It spreads the cost based on how much the machine is used.",
+   "deepDive": {
+    "concept": "Choosing a depreciation method",
+    "conceptExplain": "The method should match the pattern in which the asset's benefits are used up. Use straight-line when the benefit is even over time, DDB when it is greater early, and units-of-activity when it follows usage.",
+    "whyCorrect": "When wear depends on output, the method based on output fits best.",
+    "wrongReasons": {
+     "1": "Straight-line assumes equal benefit each year, which does not fit changes in output.",
+     "2": "DDB assumes the benefit is greater in early years, not tied to output.",
+     "4": "Machines that wear out are depreciable assets."
+    }
+   }
+  },
+  {
+   "id": "TE-T6-01",
+   "topic": "T6",
+   "topicName": "Adjusting, Closing & Financial Statements",
+   "format": [
+    "application"
+   ],
+   "stem": "Expenses exceeded revenues for the year, leaving a $9,000 debit balance in Income Summary. What does the closing entry do to Retained Earnings?",
+   "options": [
+    "It increases Retained Earnings by $9,000",
+    "It decreases Retained Earnings by $9,000",
+    "It leaves Retained Earnings unchanged",
+    "It decreases Retained Earnings by $18,000"
+   ],
+   "answer": 2,
+   "answerText": "It decreases Retained Earnings by $9,000",
+   "explanation": "A net loss reduces Retained Earnings. The entry is Dr Retained Earnings 9,000 / Cr Income Summary 9,000.",
+   "deepDive": {
+    "concept": "Closing a net loss",
+    "conceptExplain": "Income Summary is closed into Retained Earnings. A credit balance (profit) adds to it, and a debit balance (loss) takes away from it.",
+    "whyCorrect": "The $9,000 loss is moved out of Income Summary and reduces Retained Earnings by $9,000.",
+    "wrongReasons": {
+     "1": "A loss cannot increase Retained Earnings.",
+     "3": "The loss is moved into Retained Earnings, so it does change.",
+     "4": "The change equals the loss itself, not double."
+    }
+   }
+  },
+  {
+   "id": "TE-T6-02",
+   "topic": "T6",
+   "topicName": "Adjusting, Closing & Financial Statements",
+   "format": [
+    "calculation"
+   ],
+   "stem": "On October 1, the company paid $1,200 for a 12-month insurance policy and debited Prepaid Insurance. What is the adjusting entry amount to Insurance Expense on December 31?",
+   "options": [
+    "$1,200",
+    "$900",
+    "$100",
+    "$300"
+   ],
+   "answer": 4,
+   "answerText": "$300",
+   "explanation": "The policy costs $100 per month. Three months (October to December) have passed, so Insurance Expense is $300.",
+   "deepDive": {
+    "concept": "Prepaid expense adjustment",
+    "conceptExplain": "A prepaid expense is an asset until it is used up. The adjusting entry moves the used portion to expense. Here, Dr Insurance Expense 300 / Cr Prepaid Insurance 300, leaving $900 as an asset.",
+    "whyCorrect": "$1,200 / 12 months x 3 months = $300.",
+    "wrongReasons": {
+     "1": "$1,200 would expense the whole year's premium.",
+     "2": "$900 is the amount still prepaid, not the amount used.",
+     "3": "$100 is only one month of the cost."
+    }
+   }
+  },
+  {
+   "id": "TE-T6-03",
+   "topic": "T6",
+   "topicName": "Adjusting, Closing & Financial Statements",
+   "format": [
+    "calculation"
+   ],
+   "stem": "On September 1, the company received $6,000 for 12 months of service and credited Unearned Revenue. How much service revenue should be recognized for the period ending December 31?",
+   "options": [
+    "$6,000",
+    "$4,000",
+    "$500",
+    "$2,000"
+   ],
+   "answer": 4,
+   "answerText": "$2,000",
+   "explanation": "The fee is $500 per month. Four months (September to December) were earned, so $2,000 is revenue.",
+   "deepDive": {
+    "concept": "Unearned revenue adjustment",
+    "conceptExplain": "Cash received before the work is done is a liability, Unearned Revenue. As service is performed, the earned part moves to revenue: Dr Unearned Revenue 2,000 / Cr Service Revenue 2,000.",
+    "whyCorrect": "$6,000 / 12 x 4 months = $2,000.",
+    "wrongReasons": {
+     "1": "$6,000 would count all 12 months, but only 4 have passed.",
+     "2": "$4,000 is the amount still unearned, not the earned part.",
+     "3": "$500 is only one month of service."
+    }
+   }
+  },
+  {
+   "id": "TE-T6-04",
+   "topic": "T6",
+   "topicName": "Adjusting, Closing & Financial Statements",
+   "format": [
+    "journal entry"
+   ],
+   "stem": "Employees earned $2,400 in wages during the last days of December. They will be paid in January. Which adjusting entry is correct at December 31?",
+   "options": [
+    "Dr Wages Expense 2,400 / Cr Wages Payable 2,400",
+    "Dr Wages Payable 2,400 / Cr Wages Expense 2,400",
+    "Dr Wages Expense 2,400 / Cr Cash 2,400",
+    "Dr Wages Payable 2,400 / Cr Cash 2,400"
+   ],
+   "answer": 1,
+   "answerText": "Dr Wages Expense 2,400 / Cr Wages Payable 2,400",
+   "explanation": "The expense was incurred in December, even though it is not paid yet. So debit the expense and credit a liability.",
+   "deepDive": {
+    "concept": "Accrued expense adjustment",
+    "conceptExplain": "An accrued expense is a cost that has been incurred but not yet paid. The adjusting entry records the expense and the liability now, so December's income statement is complete.",
+    "whyCorrect": "The expense belongs in December, and the company owes the wages.",
+    "wrongReasons": {
+     "2": "The sides are reversed. This would reduce expense and a liability that does not exist yet.",
+     "3": "No cash was paid in December, so Cash cannot be credited.",
+     "4": "This pays a liability that was not recorded before and spends cash that was not spent."
+    }
+   }
+  },
+  {
+   "id": "TE-T6-05",
+   "topic": "T6",
+   "topicName": "Adjusting, Closing & Financial Statements",
+   "format": [
+    "journal entry"
+   ],
+   "stem": "Interest earned on a note receivable has not been received by year-end. Which adjusting entry is correct?",
+   "options": [
+    "Dr Cash / Cr Interest Revenue",
+    "Dr Interest Revenue / Cr Interest Receivable",
+    "Dr Interest Receivable / Cr Interest Revenue",
+    "Dr Interest Expense / Cr Interest Payable"
+   ],
+   "answer": 3,
+   "answerText": "Dr Interest Receivable / Cr Interest Revenue",
+   "explanation": "The interest is earned but not collected. So the company records a receivable and the revenue.",
+   "deepDive": {
+    "concept": "Accrued revenue adjustment",
+    "conceptExplain": "An accrued revenue is revenue earned in the period that has not been recorded or collected yet. The adjusting entry debits a receivable and credits a revenue account.",
+    "whyCorrect": "Interest Receivable (an asset) increases, and Interest Revenue is earned.",
+    "wrongReasons": {
+     "1": "No cash has been received, so Cash cannot be debited.",
+     "2": "This reverses the entry and would remove revenue.",
+     "4": "This records interest the company owes, but here the company is the one earning the interest."
+    }
+   }
+  },
+  {
+   "id": "TE-T6-06",
+   "topic": "T6",
+   "topicName": "Adjusting, Closing & Financial Statements",
+   "format": [
+    "calculation"
+   ],
+   "stem": "Supplies on hand at the start of the year were $1,800. During the year, $3,200 of supplies were purchased and debited to Supplies. A count at year-end shows $1,500 on hand. What is Supplies Expense for the year?",
+   "options": [
+    "$1,500",
+    "$3,500",
+    "$5,000",
+    "$3,200"
+   ],
+   "answer": 2,
+   "answerText": "$3,500",
+   "explanation": "Supplies available were $1,800 + $3,200 = $5,000. After subtracting $1,500 still on hand, $3,500 was used.",
+   "deepDive": {
+    "concept": "Supplies adjustment",
+    "conceptExplain": "Supplies expense is the amount used up, not the amount bought. The adjusting entry is Dr Supplies Expense 3,500 / Cr Supplies 3,500, which leaves $1,500 in the asset account.",
+    "whyCorrect": "$1,800 + $3,200 - $1,500 = $3,500.",
+    "wrongReasons": {
+     "1": "$1,500 is the amount left on hand, not the amount used.",
+     "3": "$5,000 is the supplies available. It forgets the $1,500 left.",
+     "4": "$3,200 is the amount purchased, which does not account for the beginning balance or ending count."
+    }
+   }
+  },
+  {
+   "id": "TE-T6-07",
+   "topic": "T6",
+   "topicName": "Adjusting, Closing & Financial Statements",
+   "format": [
+    "application"
+   ],
+   "stem": "Which account is NOT closed at the end of the accounting year?",
+   "options": [
+    "Service Revenue",
+    "Rent Expense",
+    "Dividends",
+    "Accounts Receivable"
+   ],
+   "answer": 4,
+   "answerText": "Accounts Receivable",
+   "explanation": "Accounts Receivable is a balance sheet (permanent) account, so it carries its balance into the next year. Revenue, expense, and dividend accounts are closed.",
+   "deepDive": {
+    "concept": "Permanent vs. temporary accounts",
+    "conceptExplain": "Temporary accounts (revenues, expenses, Dividends, Income Summary) start each year at zero because they are closed. Permanent accounts (assets, liabilities, and equity accounts like Common Stock and Retained Earnings) keep their balances.",
+    "whyCorrect": "It is a permanent account that continues into the next period.",
+    "wrongReasons": {
+     "1": "Revenue accounts are temporary and are closed to Income Summary.",
+     "2": "Expense accounts are temporary and are closed to Income Summary.",
+     "3": "Dividends is a temporary account closed to Retained Earnings."
+    }
+   }
+  },
+  {
+   "id": "TE-T6-08",
+   "topic": "T6",
+   "topicName": "Adjusting, Closing & Financial Statements",
+   "format": [
+    "true statement"
+   ],
+   "stem": "What is the first step in the closing process?",
+   "options": [
+    "Close the revenue accounts to Income Summary",
+    "Close Retained Earnings to Cash",
+    "Close the asset accounts to Income Summary",
+    "Close Dividends to Income Summary"
+   ],
+   "answer": 1,
+   "answerText": "Close the revenue accounts to Income Summary",
+   "explanation": "The first closing entry debits each revenue account and credits Income Summary. Expenses are closed next.",
+   "deepDive": {
+    "concept": "Order of closing entries",
+    "conceptExplain": "The four closing entries are: revenues to Income Summary, expenses to Income Summary, Income Summary to Retained Earnings, and Dividends to Retained Earnings.",
+    "whyCorrect": "Revenue accounts have credit balances, so they are debited to close and the total goes to Income Summary.",
+    "wrongReasons": {
+     "2": "Retained Earnings is permanent and is not closed to Cash.",
+     "3": "Asset accounts are permanent and are never closed.",
+     "4": "Dividends are closed directly to Retained Earnings, not to Income Summary."
+    }
+   }
+  },
+  {
+   "id": "TE-T6-09",
+   "topic": "T6",
+   "topicName": "Adjusting, Closing & Financial Statements",
+   "format": [
+    "journal entry"
+   ],
+   "stem": "Which entry closes a Dividends account that has a $5,000 debit balance?",
+   "options": [
+    "Dr Income Summary 5,000 / Cr Dividends 5,000",
+    "Dr Retained Earnings 5,000 / Cr Dividends 5,000",
+    "Dr Dividends 5,000 / Cr Retained Earnings 5,000",
+    "Dr Cash 5,000 / Cr Dividends 5,000"
+   ],
+   "answer": 2,
+   "answerText": "Dr Retained Earnings 5,000 / Cr Dividends 5,000",
+   "explanation": "To close a debit-balance account, credit it. The debit goes to Retained Earnings because dividends reduce retained earnings.",
+   "deepDive": {
+    "concept": "Closing Dividends",
+    "conceptExplain": "Dividends are not an expense, so they bypass Income Summary. The balance moves straight to Retained Earnings and lowers it.",
+    "whyCorrect": "Dividends is credited to zero it, and Retained Earnings is debited.",
+    "wrongReasons": {
+     "1": "Dividends are not part of net income, so they are not closed through Income Summary.",
+     "3": "This would add to Dividends instead of closing it.",
+     "4": "Closing does not involve cash. No money moves in a closing entry."
+    }
+   }
+  },
+  {
+   "id": "TE-T6-10",
+   "topic": "T6",
+   "topicName": "Adjusting, Closing & Financial Statements",
+   "format": [
+    "journal entry"
+   ],
+   "stem": "After closing revenues and expenses, Income Summary has a $24,000 credit balance. Which entry closes it?",
+   "options": [
+    "Dr Retained Earnings 24,000 / Cr Income Summary 24,000",
+    "Dr Income Summary 24,000 / Cr Cash 24,000",
+    "Dr Income Summary 24,000 / Cr Retained Earnings 24,000",
+    "Dr Income Summary 24,000 / Cr Common Stock 24,000"
+   ],
+   "answer": 3,
+   "answerText": "Dr Income Summary 24,000 / Cr Retained Earnings 24,000",
+   "explanation": "A credit balance means net income. Debit Income Summary to zero it and credit Retained Earnings to increase it.",
+   "deepDive": {
+    "concept": "Closing Income Summary",
+    "conceptExplain": "Net income from the period increases Retained Earnings. A net loss would do the opposite, with a debit to Retained Earnings and a credit to Income Summary.",
+    "whyCorrect": "Net income increases Retained Earnings, so Retained Earnings is credited.",
+    "wrongReasons": {
+     "1": "This is the entry for a net loss.",
+     "2": "Closing entries do not use Cash, because earnings are not cash.",
+     "4": "Common Stock is changed only by the owners' investments, not by earnings."
+    }
+   }
+  },
+  {
+   "id": "TE-T6-11",
+   "topic": "T6",
+   "topicName": "Adjusting, Closing & Financial Statements",
+   "format": [
+    "application"
+   ],
+   "stem": "A customer buys a $100 gift card for cash. Nothing is delivered yet. Which entry records the sale of the card?",
+   "options": [
+    "Dr Cash 100 / Cr Sales Revenue 100",
+    "Dr Unearned Revenue 100 / Cr Cash 100",
+    "Dr Accounts Receivable 100 / Cr Unearned Revenue 100",
+    "Dr Cash 100 / Cr Unearned Revenue 100"
+   ],
+   "answer": 4,
+   "answerText": "Dr Cash 100 / Cr Unearned Revenue 100",
+   "explanation": "The company has the cash but has not yet delivered anything. It owes the customer goods or services, so the credit is Unearned Revenue.",
+   "deepDive": {
+    "concept": "Gift cards and unearned revenue",
+    "conceptExplain": "Cash received before the work or sale is a liability. Revenue is recorded later, when the card is used.",
+    "whyCorrect": "Cash increases, and Unearned Revenue (a liability) increases until the card is redeemed.",
+    "wrongReasons": {
+     "1": "No goods have been handed over yet, so no revenue is earned.",
+     "2": "That entry reverses the sale, as if the customer were refunded.",
+     "3": "Cash was received, so Accounts Receivable does not fit."
+    }
+   }
+  },
+  {
+   "id": "TE-T6-12",
+   "topic": "T6",
+   "topicName": "Adjusting, Closing & Financial Statements",
+   "format": [
+    "application"
+   ],
+   "stem": "Which item is an example of an accrued expense?",
+   "options": [
+    "Rent paid in advance for next year",
+    "Cash received before services are performed",
+    "Interest on a note payable that has built up but has not been paid",
+    "Equipment bought for cash"
+   ],
+   "answer": 3,
+   "answerText": "Interest on a note payable that has built up but has not been paid",
+   "explanation": "An accrued expense is a cost used in the period but not yet paid. Interest that has built up is recorded as Dr Interest Expense / Cr Interest Payable.",
+   "deepDive": {
+    "concept": "Accrued expenses",
+    "conceptExplain": "An accrual records something that happened before cash moves. Accrued expenses create a liability at year-end.",
+    "whyCorrect": "The interest cost belongs to this period even though no cash has been paid yet.",
+    "wrongReasons": {
+     "1": "Rent paid ahead is a prepaid expense, an asset.",
+     "2": "Cash received early is unearned revenue, not an expense.",
+     "4": "Buying equipment is a purchase of an asset, not an accrued expense."
+    }
+   }
+  },
+  {
+   "id": "TE-T6-13",
+   "topic": "T6",
+   "topicName": "Adjusting, Closing & Financial Statements",
+   "format": [
+    "application"
+   ],
+   "stem": "Which account is reported on the balance sheet rather than the income statement?",
+   "options": [
+    "Insurance Expense",
+    "Prepaid Insurance",
+    "Interest Expense",
+    "Service Revenue"
+   ],
+   "answer": 2,
+   "answerText": "Prepaid Insurance",
+   "explanation": "Prepaid Insurance is an asset, so it is reported on the balance sheet. Expense and revenue accounts are reported on the income statement.",
+   "deepDive": {
+    "concept": "Which statement shows which account",
+    "conceptExplain": "The balance sheet reports assets, liabilities, and equity. The income statement reports revenues, expenses, gains, and losses. Prepaid accounts are assets until they are used.",
+    "whyCorrect": "It is an asset account.",
+    "wrongReasons": {
+     "1": "Insurance Expense is on the income statement.",
+     "3": "Interest Expense is on the income statement.",
+     "4": "Service Revenue is on the income statement."
+    }
+   }
+  },
+  {
+   "id": "TE-T6-14",
+   "topic": "T6",
+   "topicName": "Adjusting, Closing & Financial Statements",
+   "format": [
+    "application"
+   ],
+   "stem": "Which account is never used in an adjusting entry?",
+   "options": [
+    "Cash",
+    "Depreciation Expense",
+    "Interest Payable",
+    "Unearned Revenue"
+   ],
+   "answer": 1,
+   "answerText": "Cash",
+   "explanation": "Adjusting entries update the books for timing. Cash moves are already recorded when they happen, so Cash is not part of an adjusting entry.",
+   "deepDive": {
+    "concept": "Adjusting entries never involve Cash",
+    "conceptExplain": "Adjusting entries fix timing differences between cash and the period. Each one has one income statement account and one balance sheet account, but not Cash.",
+    "whyCorrect": "Cash is recorded when it moves, so an adjustment never touches it.",
+    "wrongReasons": {
+     "2": "Depreciation Expense is debited in the depreciation adjustment.",
+     "3": "Interest Payable is credited when interest is accrued.",
+     "4": "Unearned Revenue is debited when revenue is earned."
+    }
+   }
+  },
+  {
+   "id": "TE-T6-15",
+   "topic": "T6",
+   "topicName": "Adjusting, Closing & Financial Statements",
+   "format": [
+    "application"
+   ],
+   "stem": "Which list shows current assets in the usual balance sheet order, from most liquid to least liquid?",
+   "options": [
+    "Merchandise Inventory, Cash, Accounts Receivable, Prepaid Insurance",
+    "Cash, Accounts Receivable, Merchandise Inventory, Prepaid Insurance",
+    "Cash, Merchandise Inventory, Accounts Receivable, Prepaid Insurance",
+    "Prepaid Insurance, Merchandise Inventory, Accounts Receivable, Cash"
+   ],
+   "answer": 2,
+   "answerText": "Cash, Accounts Receivable, Merchandise Inventory, Prepaid Insurance",
+   "explanation": "Cash comes first. Receivables turn into cash sooner than inventory, which must be sold first. Prepaid items come last.",
+   "deepDive": {
+    "concept": "Order of current assets",
+    "conceptExplain": "Current assets are listed by how quickly they become cash. Cash is first, and prepaid items are last because they are used up, not collected.",
+    "whyCorrect": "Cash, then Accounts Receivable, then Merchandise Inventory, then Prepaid Insurance.",
+    "wrongReasons": {
+     "1": "Inventory is not the most liquid. Cash is.",
+     "3": "Inventory must be sold before it becomes cash, so receivables come before it.",
+     "4": "This is the reverse of the usual order."
+    }
+   }
+  },
+  {
+   "id": "TE-T6-16",
+   "topic": "T6",
+   "topicName": "Adjusting, Closing & Financial Statements",
+   "format": [
+    "application"
+   ],
+   "stem": "In what order are the financial statements usually prepared?",
+   "options": [
+    "Income statement, statement of retained earnings, balance sheet",
+    "Balance sheet, income statement, statement of retained earnings",
+    "Statement of retained earnings, balance sheet, income statement",
+    "Income statement, balance sheet, statement of retained earnings"
+   ],
+   "answer": 1,
+   "answerText": "Income statement, statement of retained earnings, balance sheet",
+   "explanation": "Net income from the income statement feeds the statement of retained earnings. Ending Retained Earnings then feeds the balance sheet.",
+   "deepDive": {
+    "concept": "Order of the statements",
+    "conceptExplain": "Each statement passes a number to the next. Net income goes into Retained Earnings, and ending Retained Earnings goes onto the balance sheet.",
+    "whyCorrect": "The income statement gives net income, the retained earnings statement gives the ending balance, and the balance sheet uses it.",
+    "wrongReasons": {
+     "2": "The balance sheet needs ending Retained Earnings, so it cannot come first.",
+     "3": "The retained earnings statement needs net income, so it cannot come before the income statement.",
+     "4": "The balance sheet needs ending Retained Earnings, so it must follow the retained earnings statement."
+    }
+   }
+  },
+  {
+   "id": "TE-T6-17",
+   "topic": "T6",
+   "topicName": "Adjusting, Closing & Financial Statements",
+   "format": [
+    "definition"
+   ],
+   "stem": "What is the purpose of an adjusted trial balance?",
+   "options": [
+    "To record the closing entries",
+    "To replace the General Ledger",
+    "To check that debits equal credits after the adjusting entries and before the statements are prepared",
+    "To list only the accounts that changed during the year"
+   ],
+   "answer": 3,
+   "answerText": "To check that debits equal credits after the adjusting entries and before the statements are prepared",
+   "explanation": "After adjusting entries are posted, an adjusted trial balance confirms that the ledger is still in balance. The statements are built from it.",
+   "deepDive": {
+    "concept": "Adjusted trial balance",
+    "conceptExplain": "The adjusted trial balance lists every account with its balance after adjustments. It is the source for the financial statements.",
+    "whyCorrect": "It proves debits still equal credits after adjustments, so the statements can be prepared.",
+    "wrongReasons": {
+     "1": "Closing entries come later and are journalized, not listed on this report.",
+     "2": "The ledger stays the book of all accounts. This is only a list of its balances.",
+     "4": "It lists every account balance, not only the changed ones."
+    }
+   }
+  },
+  {
+   "id": "TE-T6-18",
+   "topic": "T6",
+   "topicName": "Adjusting, Closing & Financial Statements",
+   "format": [
+    "calculation"
+   ],
+   "stem": "Current assets are $36,000 and current liabilities are $24,000. What is the current ratio?",
+   "options": [
+    "0.67",
+    "1.0",
+    "2.0",
+    "1.5"
+   ],
+   "answer": 4,
+   "answerText": "1.5",
+   "explanation": "The current ratio equals current assets divided by current liabilities. $36,000 / $24,000 = 1.5.",
+   "deepDive": {
+    "concept": "Current ratio",
+    "conceptExplain": "The current ratio measures the ability to pay short-term debts. A ratio above 1 means the company has more current assets than current liabilities.",
+    "whyCorrect": "$36,000 / $24,000 = 1.5.",
+    "wrongReasons": {
+     "1": "0.67 flips the ratio (liabilities divided by assets).",
+     "2": "1.0 would mean assets equal liabilities, which is not true here.",
+     "3": "2.0 would need current assets of $48,000."
+    }
+   }
+  },
+  {
+   "id": "TE-T6-19",
+   "topic": "T6",
+   "topicName": "Adjusting, Closing & Financial Statements",
+   "format": [
+    "calculation"
+   ],
+   "stem": "Current assets are $60,000 (current ratio 1.5, so current liabilities are $40,000). The company pays $10,000 of Accounts Payable with cash. What is the new current ratio?",
+   "options": [
+    "1.50",
+    "1.25",
+    "2.00",
+    "1.67"
+   ],
+   "answer": 4,
+   "answerText": "1.67",
+   "explanation": "Cash falls to make current assets $50,000, and Accounts Payable falls to make current liabilities $30,000. $50,000 / $30,000 is about 1.67.",
+   "deepDive": {
+    "concept": "Ratio effects of payments",
+    "conceptExplain": "When a company with a ratio above 1 pays a current liability with cash, both parts fall by the same amount. The ratio rises because the denominator falls by a bigger percentage.",
+    "whyCorrect": "$50,000 / $30,000 = 1.67.",
+    "wrongReasons": {
+     "1": "1.50 is the ratio before the payment.",
+     "2": "1.25 ($50,000 / $40,000) lowers cash but forgets to lower the liability.",
+     "3": "2.00 ($60,000 / $30,000) lowers the liability but forgets to lower cash."
+    }
+   }
+  },
+  {
+   "id": "TE-T6-20",
+   "topic": "T6",
+   "topicName": "Adjusting, Closing & Financial Statements",
+   "format": [
+    "calculation"
+   ],
+   "stem": "Current assets are $54,000 and current liabilities are $31,000. What is working capital?",
+   "options": [
+    "$23,000",
+    "$85,000",
+    "$31,000",
+    "$54,000"
+   ],
+   "answer": 1,
+   "answerText": "$23,000",
+   "explanation": "Working capital is current assets minus current liabilities. $54,000 - $31,000 = $23,000.",
+   "deepDive": {
+    "concept": "Working capital",
+    "conceptExplain": "Working capital shows how much of the current assets would be left after paying the current liabilities.",
+    "whyCorrect": "$54,000 - $31,000 = $23,000.",
+    "wrongReasons": {
+     "2": "$85,000 adds the two numbers together.",
+     "3": "$31,000 is only the current liabilities.",
+     "4": "$54,000 is only the current assets."
+    }
+   }
+  },
+  {
+   "id": "TE-T6-21",
+   "topic": "T6",
+   "topicName": "Adjusting, Closing & Financial Statements",
+   "format": [
+    "application"
+   ],
+   "stem": "At year-end, the company failed to record wages that employees earned but had not been paid. What is the effect?",
+   "options": [
+    "Expenses are overstated, net income is understated, and liabilities are overstated",
+    "Expenses are understated, net income is overstated, and liabilities are understated",
+    "Net income is overstated and assets are overstated",
+    "There is no effect on net income"
+   ],
+   "answer": 2,
+   "answerText": "Expenses are understated, net income is overstated, and liabilities are understated",
+   "explanation": "Leaving out the expense makes expenses too low and net income too high. The unrecorded wages mean the liability is too low.",
+   "deepDive": {
+    "concept": "Effects of omitted adjustments",
+    "conceptExplain": "Skipping an accrual hides both an expense and a liability. Because net income is overstated, retained earnings is overstated too.",
+    "whyCorrect": "Expenses and liabilities are both missing from the books.",
+    "wrongReasons": {
+     "1": "This is the opposite of what happens when an expense is omitted.",
+     "3": "Omitting wages does not change assets.",
+     "4": "Expenses are missing, so net income does change."
+    }
+   }
+  },
+  {
+   "id": "TE-T6-22",
+   "topic": "T6",
+   "topicName": "Adjusting, Closing & Financial Statements",
+   "format": [
+    "application"
+   ],
+   "stem": "The company forgot to record depreciation on equipment for the year. What is the effect?",
+   "options": [
+    "Assets are overstated and net income is understated",
+    "Liabilities are overstated and net income is unchanged",
+    "Assets and net income are both overstated",
+    "Assets and net income are both understated"
+   ],
+   "answer": 3,
+   "answerText": "Assets and net income are both overstated",
+   "explanation": "No depreciation expense means expenses are too low, so net income is too high. Accumulated depreciation is also missing, so assets are too high.",
+   "deepDive": {
+    "concept": "Omitting depreciation",
+    "conceptExplain": "Depreciation reduces both net income (through expense) and the book value of assets (through accumulated depreciation). Leaving it out overstates both.",
+    "whyCorrect": "Missing expense raises income, and missing accumulated depreciation raises assets.",
+    "wrongReasons": {
+     "1": "Net income is overstated because an expense is missing.",
+     "2": "Depreciation does not involve liabilities.",
+     "4": "Both are overstated, not understated."
+    }
+   }
+  },
+  {
+   "id": "TE-T6-23",
+   "topic": "T6",
+   "topicName": "Adjusting, Closing & Financial Statements",
+   "format": [
+    "true statement"
+   ],
+   "stem": "Which statement about a post-closing trial balance is correct?",
+   "options": [
+    "It contains revenue and expense accounts",
+    "It contains only permanent accounts",
+    "It contains the Dividends account",
+    "It contains the Income Summary account"
+   ],
+   "answer": 2,
+   "answerText": "It contains only permanent accounts",
+   "explanation": "After closing, all temporary accounts have zero balances. Only balance sheet accounts remain.",
+   "deepDive": {
+    "concept": "Post-closing trial balance",
+    "conceptExplain": "The post-closing trial balance proves that debits equal credits after the closing entries. It lists assets, liabilities, Common Stock, and the updated Retained Earnings.",
+    "whyCorrect": "Temporary accounts have been closed to zero.",
+    "wrongReasons": {
+     "1": "Revenue and expense accounts were closed to zero.",
+     "3": "Dividends was closed to Retained Earnings.",
+     "4": "Income Summary is closed to zero when the closing entries are finished."
+    }
+   }
+  },
+  {
+   "id": "TE-T7-01",
+   "topic": "T7",
+   "topicName": "Corporations, Payroll & Sales Tax",
+   "format": [
+    "journal entry"
+   ],
+   "stem": "Issued 4,000 shares of no-par common stock for $15 per share cash. Which entry is correct?",
+   "options": [
+    "Dr Cash 60,000 / Cr Retained Earnings 60,000",
+    "Dr Common Stock 60,000 / Cr Cash 60,000",
+    "Dr Cash 4,000 / Cr Common Stock 4,000",
+    "Dr Cash 60,000 / Cr Common Stock 60,000"
+   ],
+   "answer": 4,
+   "answerText": "Dr Cash 60,000 / Cr Common Stock 60,000",
+   "explanation": "The corporation received 4,000 x $15 = $60,000. Cash increases, and Common Stock, an equity account, increases by the same amount.",
+   "deepDive": {
+    "concept": "Issuing common stock",
+    "conceptExplain": "When a corporation sells stock to investors, the money received is paid-in capital, recorded in Common Stock. It is separate from Retained Earnings, which comes from profits.",
+    "whyCorrect": "Cash is debited and Common Stock is credited for the total amount received.",
+    "wrongReasons": {
+     "1": "Issuing stock is not earnings, so Retained Earnings is not used.",
+     "2": "This reverses the entry, as if the company bought its stock back.",
+     "3": "The number of shares is not the dollar amount received."
+    }
+   }
+  },
+  {
+   "id": "TE-T7-02",
+   "topic": "T7",
+   "topicName": "Corporations, Payroll & Sales Tax",
+   "format": [
+    "journal entry"
+   ],
+   "stem": "The board declared a $20,000 cash dividend. Which entry is made on the declaration date?",
+   "options": [
+    "Dr Dividends 20,000 / Cr Dividends Payable 20,000",
+    "Dr Dividends 20,000 / Cr Cash 20,000",
+    "Dr Dividends Payable 20,000 / Cr Cash 20,000",
+    "Dr Retained Earnings 20,000 / Cr Common Stock 20,000"
+   ],
+   "answer": 1,
+   "answerText": "Dr Dividends 20,000 / Cr Dividends Payable 20,000",
+   "explanation": "Once declared, the dividend is a debt of the corporation. So Dividends is debited and Dividends Payable is credited.",
+   "deepDive": {
+    "concept": "Declaring dividends",
+    "conceptExplain": "A declared dividend creates a legal liability. The company has not paid yet, so Cash is not used until the payment date.",
+    "whyCorrect": "Declaration creates a liability, Dividends Payable.",
+    "wrongReasons": {
+     "2": "No cash goes out on the declaration date.",
+     "3": "This is the entry for the payment date.",
+     "4": "Common Stock is not changed by a dividend."
+    }
+   }
+  },
+  {
+   "id": "TE-T7-03",
+   "topic": "T7",
+   "topicName": "Corporations, Payroll & Sales Tax",
+   "format": [
+    "journal entry"
+   ],
+   "stem": "The corporation paid the $20,000 dividend that was declared earlier. Which entry is made on the payment date?",
+   "options": [
+    "Dr Dividends 20,000 / Cr Cash 20,000",
+    "Dr Dividends 20,000 / Cr Dividends Payable 20,000",
+    "Dr Dividends Payable 20,000 / Cr Cash 20,000",
+    "Dr Cash 20,000 / Cr Dividends Payable 20,000"
+   ],
+   "answer": 3,
+   "answerText": "Dr Dividends Payable 20,000 / Cr Cash 20,000",
+   "explanation": "The liability set up on the declaration date is now settled. So Dividends Payable is debited and Cash is credited.",
+   "deepDive": {
+    "concept": "Paying dividends",
+    "conceptExplain": "The dividend was already charged to Dividends at declaration. Payment only removes the liability and the cash. It does not change equity a second time.",
+    "whyCorrect": "It settles the liability and reduces cash.",
+    "wrongReasons": {
+     "1": "Dividends was already debited on the declaration date.",
+     "2": "This repeats the declaration entry.",
+     "4": "This would increase cash, but cash is being paid out."
+    }
+   }
+  },
+  {
+   "id": "TE-T7-04",
+   "topic": "T7",
+   "topicName": "Corporations, Payroll & Sales Tax",
+   "format": [
+    "true statement"
+   ],
+   "stem": "Which statement about dividends is correct?",
+   "options": [
+    "Dividends are an expense that appears on the income statement",
+    "Dividends are revenue that appears on the income statement",
+    "Dividends are a distribution of earnings to stockholders and are not an expense",
+    "Dividends are a liability that is created when stock is issued"
+   ],
+   "answer": 3,
+   "answerText": "Dividends are a distribution of earnings to stockholders and are not an expense",
+   "explanation": "Dividends pay stockholders a share of past profits. They do not help earn revenue, so they are not part of net income.",
+   "deepDive": {
+    "concept": "Dividends are not an expense",
+    "conceptExplain": "Dividends reduce Retained Earnings and are shown on the statement of retained earnings. They have no effect on net income.",
+    "whyCorrect": "They reduce retained earnings and are not an expense.",
+    "wrongReasons": {
+     "1": "Expenses are costs of earning revenue. Dividends are a distribution of profit.",
+     "2": "A corporation does not earn revenue by paying dividends.",
+     "4": "The liability arises when dividends are declared, not when stock is issued."
+    }
+   }
+  },
+  {
+   "id": "TE-T7-05",
+   "topic": "T7",
+   "topicName": "Corporations, Payroll & Sales Tax",
+   "format": [
+    "definition"
+   ],
+   "stem": "Which statement best describes Retained Earnings?",
+   "options": [
+    "The cash the corporation has in the bank",
+    "The amount stockholders paid for their shares",
+    "The total of all dividends ever declared",
+    "The accumulated net income of the corporation that has not been paid out as dividends"
+   ],
+   "answer": 4,
+   "answerText": "The accumulated net income of the corporation that has not been paid out as dividends",
+   "explanation": "Retained Earnings is an equity account that grows with net income and shrinks with net losses and dividends.",
+   "deepDive": {
+    "concept": "Retained Earnings",
+    "conceptExplain": "Retained earnings is not cash. It is the part of past profits the corporation has kept for use in the business, and it may be invested in assets of many kinds.",
+    "whyCorrect": "It adds up net income and subtracts dividends since the business began.",
+    "wrongReasons": {
+     "1": "Retained earnings is an equity account, not the Cash asset.",
+     "2": "The amount paid by stockholders is in Common Stock.",
+     "3": "Dividends reduce Retained Earnings, so they are not the balance itself."
+    }
+   }
+  },
+  {
+   "id": "TE-T7-06",
+   "topic": "T7",
+   "topicName": "Corporations, Payroll & Sales Tax",
+   "format": [
+    "calculation"
+   ],
+   "stem": "A corporation has 50,000 shares outstanding and declares a dividend of $0.40 per share. What is the total dividend?",
+   "options": [
+    "$125,000",
+    "$20,000",
+    "$50,000",
+    "$2,000"
+   ],
+   "answer": 2,
+   "answerText": "$20,000",
+   "explanation": "Total dividends equal shares times the dividend per share. 50,000 x $0.40 = $20,000.",
+   "deepDive": {
+    "concept": "Total dividend",
+    "conceptExplain": "A dividend per share applies to every share outstanding. Multiply the two to find the total cash the corporation must pay out.",
+    "whyCorrect": "50,000 x $0.40 = $20,000.",
+    "wrongReasons": {
+     "1": "$125,000 divides the shares by $0.40 instead of multiplying.",
+     "3": "$50,000 is the number of shares, not dollars.",
+     "4": "$2,000 moves the decimal point."
+    }
+   }
+  },
+  {
+   "id": "TE-T7-07",
+   "topic": "T7",
+   "topicName": "Corporations, Payroll & Sales Tax",
+   "format": [
+    "application"
+   ],
+   "stem": "A corporation declared a cash dividend. What is the effect on total stockholders' equity?",
+   "options": [
+    "Total equity decreases on the declaration date, and the later payment date does not change it further",
+    "Total equity is unchanged on the declaration date and decreases when it is paid",
+    "Total equity increases when the dividend is declared",
+    "Total equity is never affected by dividends"
+   ],
+   "answer": 1,
+   "answerText": "Total equity decreases on the declaration date, and the later payment date does not change it further",
+   "explanation": "On declaration, Dividends increases and a liability is created, which reduces equity. Paying the liability later only reduces cash and the liability.",
+   "deepDive": {
+    "concept": "Effects of dividends on equity",
+    "conceptExplain": "Equity falls when the board declares a dividend, because the company now owes the stockholders. The payment simply settles the debt with cash.",
+    "whyCorrect": "Equity falls at declaration, and payment only settles the liability.",
+    "wrongReasons": {
+     "2": "Equity falls at declaration because the liability exists from that date.",
+     "3": "Dividends never increase equity.",
+     "4": "Dividends reduce retained earnings, so equity is affected."
+    }
+   }
+  },
+  {
+   "id": "TE-T7-08",
+   "topic": "T7",
+   "topicName": "Corporations, Payroll & Sales Tax",
+   "format": [
+    "calculation"
+   ],
+   "stem": "A customer returns merchandise that was sold for $200 plus 5% sales tax, paid in cash. How much cash does the company refund?",
+   "options": [
+    "$200",
+    "$10",
+    "$190",
+    "$210"
+   ],
+   "answer": 4,
+   "answerText": "$210",
+   "explanation": "The customer paid $200 plus tax of $10, so the refund is $210. The company no longer owes that $10 to the state.",
+   "deepDive": {
+    "concept": "Sales tax on returns",
+    "conceptExplain": "Sales tax is collected for the state. When goods come back, the tax is returned with the price, and Sales Tax Payable goes down.",
+    "whyCorrect": "$200 + ($200 x 5%) = $210. Dr Sales Returns and Allowances 200 / Dr Sales Tax Payable 10 / Cr Cash 210.",
+    "wrongReasons": {
+     "1": "$200 leaves out the sales tax the customer also paid.",
+     "2": "$10 is only the tax.",
+     "3": "$190 subtracts the tax instead of adding it."
+    }
+   }
+  },
+  {
+   "id": "TE-T7-09",
+   "topic": "T7",
+   "topicName": "Corporations, Payroll & Sales Tax",
+   "format": [
+    "calculation"
+   ],
+   "stem": "An employee earned $2,000 gross pay. FICA is withheld at 7.65% of gross pay. How much FICA tax is withheld?",
+   "options": [
+    "$153.00",
+    "$306.00",
+    "$1,530.00",
+    "$15.30"
+   ],
+   "answer": 1,
+   "answerText": "$153.00",
+   "explanation": "FICA withheld is 7.65% of $2,000, which is $153.00.",
+   "deepDive": {
+    "concept": "FICA withholding",
+    "conceptExplain": "FICA pays for Social Security and Medicare. The employer withholds the employee's part from pay and records it in FICA Taxes Payable.",
+    "whyCorrect": "$2,000 x 0.0765 = $153.00.",
+    "wrongReasons": {
+     "2": "$306.00 doubles the amount by adding the employer's share, but only the employee's share is withheld.",
+     "3": "$1,530.00 uses 76.5%.",
+     "4": "$15.30 uses 0.765%."
+    }
+   }
+  },
+  {
+   "id": "TE-T7-10",
+   "topic": "T7",
+   "topicName": "Corporations, Payroll & Sales Tax",
+   "format": [
+    "calculation"
+   ],
+   "stem": "Gross wages were $5,000. FICA withheld was 7.65% of gross pay, and federal income tax withheld was $600. What is the net pay?",
+   "options": [
+    "$4,400.00",
+    "$4,017.50",
+    "$4,617.50",
+    "$3,635.00"
+   ],
+   "answer": 2,
+   "answerText": "$4,017.50",
+   "explanation": "FICA withheld is $5,000 x 7.65% = $382.50. Net pay is $5,000 - $382.50 - $600 = $4,017.50.",
+   "deepDive": {
+    "concept": "Net pay",
+    "conceptExplain": "Net pay is gross pay less the amounts withheld from the employee. The employer's own payroll taxes are not taken out of the employee's pay.",
+    "whyCorrect": "$5,000 - $382.50 - $600 = $4,017.50.",
+    "wrongReasons": {
+     "1": "$4,400.00 forgets the FICA withholding.",
+     "3": "$4,617.50 forgets the federal income tax withheld.",
+     "4": "$3,635.00 also subtracts the employer's matching FICA, which is not taken from the employee."
+    }
+   }
+  },
+  {
+   "id": "TE-T7-11",
+   "topic": "T7",
+   "topicName": "Corporations, Payroll & Sales Tax",
+   "format": [
+    "journal entry"
+   ],
+   "stem": "The payroll entry for gross wages of $5,000 records FICA withheld of $382.50, federal income tax withheld of $600, and net pay of $4,017.50 paid in cash. Which entry is correct?",
+   "options": [
+    "Dr Wages Expense 4,017.50 / Cr Cash 4,017.50",
+    "Dr Wages Expense 5,000 / Cr Cash 5,000",
+    "Dr Wages Expense 5,000 / Cr FICA Taxes Payable 382.50, Cr Federal Income Taxes Payable 600, Cr Cash 4,017.50",
+    "Dr Cash 5,000 / Cr Wages Expense 4,017.50, Cr FICA Taxes Payable 982.50"
+   ],
+   "answer": 3,
+   "answerText": "Dr Wages Expense 5,000 / Cr FICA Taxes Payable 382.50, Cr Federal Income Taxes Payable 600, Cr Cash 4,017.50",
+   "explanation": "The expense is the full gross wages. The withholdings are liabilities, and the employee receives the remainder in cash.",
+   "deepDive": {
+    "concept": "Recording payroll",
+    "conceptExplain": "Wages Expense is always the gross amount earned. Amounts withheld are owed to the government until they are sent in, so they are credited to payable accounts.",
+    "whyCorrect": "Debits equal credits: 5,000 = 382.50 + 600 + 4,017.50.",
+    "wrongReasons": {
+     "1": "This records only net pay as expense and ignores the withholdings.",
+     "2": "This records the full amount as paid to the employee, ignoring the withholdings.",
+     "4": "This puts cash on the debit side, as if the company received money."
+    }
+   }
+  },
+  {
+   "id": "TE-T7-12",
+   "topic": "T7",
+   "topicName": "Corporations, Payroll & Sales Tax",
+   "format": [
+    "calculation"
+   ],
+   "stem": "Using the same $5,000 payroll, the employer must match FICA at 7.65%. What amount is debited to Payroll Tax Expense for the employer's share?",
+   "options": [
+    "$765.00",
+    "$382.50",
+    "$600.00",
+    "$0"
+   ],
+   "answer": 2,
+   "answerText": "$382.50",
+   "explanation": "The employer's share equals the employee's share, 7.65% x $5,000 = $382.50. It is an expense of the employer.",
+   "deepDive": {
+    "concept": "Employer payroll taxes",
+    "conceptExplain": "Employer payroll taxes are a cost of having employees. The entry is Dr Payroll Tax Expense 382.50 / Cr FICA Taxes Payable 382.50.",
+    "whyCorrect": "$5,000 x 0.0765 = $382.50.",
+    "wrongReasons": {
+     "1": "$765.00 is the combined employee and employer amount, but only the employer's share is expensed.",
+     "3": "$600.00 is the federal income tax withheld, which is not an employer expense.",
+     "4": "The employer does have a payroll tax expense on matching FICA."
+    }
+   }
+  },
+  {
+   "id": "TE-T7-13",
+   "topic": "T7",
+   "topicName": "Corporations, Payroll & Sales Tax",
+   "format": [
+    "calculation"
+   ],
+   "stem": "After the payroll above ($382.50 withheld from employees) and the employer's match, what is the total credit to FICA Taxes Payable?",
+   "options": [
+    "$382.50",
+    "$982.50",
+    "$4,017.50",
+    "$765.00"
+   ],
+   "answer": 4,
+   "answerText": "$765.00",
+   "explanation": "The liability includes both the employee's withholding and the employer's match. $382.50 + $382.50 = $765.00.",
+   "deepDive": {
+    "concept": "FICA Taxes Payable",
+    "conceptExplain": "The company owes the government both shares, so FICA Taxes Payable holds the total until it is sent in.",
+    "whyCorrect": "$382.50 + $382.50 = $765.00.",
+    "wrongReasons": {
+     "1": "$382.50 is only one of the two shares.",
+     "2": "$982.50 adds the income tax withheld, which is recorded in a different account.",
+     "3": "$4,017.50 is the net pay, which is not owed to the government."
+    }
+   }
+  },
+  {
+   "id": "TE-T7-14",
+   "topic": "T7",
+   "topicName": "Corporations, Payroll & Sales Tax",
+   "format": [
+    "true statement"
+   ],
+   "stem": "Which statement about employee tax withholdings is correct?",
+   "options": [
+    "Amounts withheld from employees are expenses of the employer",
+    "Amounts withheld from employees are revenue of the employer",
+    "Amounts withheld from employees are liabilities of the employer until they are sent to the government",
+    "Amounts withheld from employees belong to the employer and are not owed to anyone"
+   ],
+   "answer": 3,
+   "answerText": "Amounts withheld from employees are liabilities of the employer until they are sent to the government",
+   "explanation": "The employer holds the money for the employee and the government. So the amounts are credited to payable accounts.",
+   "deepDive": {
+    "concept": "Withholdings are liabilities",
+    "conceptExplain": "Employee withholdings were earned by the employee but are paid to the government. The employer acts as a collector and records a liability until it sends the money.",
+    "whyCorrect": "The employer owes the withheld amounts to the government.",
+    "wrongReasons": {
+     "1": "The expense is the employee's gross wages, not the withholdings.",
+     "2": "The employer does not earn revenue when withholding.",
+     "4": "The employer must send the money to the government."
+    }
+   }
+  },
+  {
+   "id": "TE-T7-15",
+   "topic": "T7",
+   "topicName": "Corporations, Payroll & Sales Tax",
+   "format": [
+    "journal entry"
+   ],
+   "stem": "Sold merchandise for cash of $1,000 plus 6% sales tax. Which part of the entry records the sales tax?",
+   "options": [
+    "Cr Sales Tax Payable 60",
+    "Cr Sales Revenue 60",
+    "Dr Sales Tax Payable 60",
+    "Dr Sales Returns and Allowances 60"
+   ],
+   "answer": 1,
+   "answerText": "Cr Sales Tax Payable 60",
+   "explanation": "The $60 collected is owed to the state. So the entry credits Sales Tax Payable, along with Dr Cash 1,060 and Cr Sales Revenue 1,000.",
+   "deepDive": {
+    "concept": "Sales tax collected",
+    "conceptExplain": "A seller collects sales tax for the state. It is a liability, not revenue, until the company sends it in.",
+    "whyCorrect": "6% x $1,000 = $60, which the company owes to the state.",
+    "wrongReasons": {
+     "2": "Sales tax is not revenue.",
+     "3": "Debiting would reduce a liability that does not exist yet.",
+     "4": "Returns and allowances are not related to taxes."
+    }
+   }
+  },
+  {
+   "id": "TE-T7-16",
+   "topic": "T7",
+   "topicName": "Corporations, Payroll & Sales Tax",
+   "format": [
+    "calculation"
+   ],
+   "stem": "Sales for the month were $25,000, and the sales tax rate is 7%. What is the Sales Tax Payable collected?",
+   "options": [
+    "$17,500",
+    "$26,750",
+    "$175",
+    "$1,750"
+   ],
+   "answer": 4,
+   "answerText": "$1,750",
+   "explanation": "Sales tax equals the sales amount times the tax rate. $25,000 x 7% = $1,750.",
+   "deepDive": {
+    "concept": "Computing sales tax",
+    "conceptExplain": "The tax is added to the sale at the register and does not count as the company's revenue. The total owed to the state at month-end is the total tax collected.",
+    "whyCorrect": "$25,000 x 0.07 = $1,750.",
+    "wrongReasons": {
+     "1": "$17,500 uses 70%.",
+     "2": "$26,750 is the sales amount plus tax, not just the tax.",
+     "3": "$175 uses 0.7%."
+    }
+   }
+  },
+  {
+   "id": "TE-T7-17",
+   "topic": "T7",
+   "topicName": "Corporations, Payroll & Sales Tax",
+   "format": [
+    "true statement"
+   ],
+   "stem": "Which statement about Sales Tax Payable is correct?",
+   "options": [
+    "It is a revenue account, because the customer paid it",
+    "It is an expense account, because the company pays it to the state",
+    "It is a current liability, because the company collects the tax for the state",
+    "It is an equity account, because it belongs to the owners"
+   ],
+   "answer": 3,
+   "answerText": "It is a current liability, because the company collects the tax for the state",
+   "explanation": "The company collects sales tax on behalf of the state. So it owes the money and records a liability.",
+   "deepDive": {
+    "concept": "Sales tax is a liability",
+    "conceptExplain": "The company is only an agent for the state. The tax is not part of the company's income or expenses.",
+    "whyCorrect": "The company must send the collected tax to the state.",
+    "wrongReasons": {
+     "1": "Customers pay the tax for the state, so it is not the company's revenue.",
+     "2": "The tax is paid by customers, so the company does not bear it as an expense.",
+     "4": "Owners do not own the money. It is owed to the state."
+    }
+   }
+  },
+  {
+   "id": "TE-T7-18",
+   "topic": "T7",
+   "topicName": "Corporations, Payroll & Sales Tax",
+   "format": [
+    "journal entry"
+   ],
+   "stem": "The company sent $1,750 of collected sales tax to the state. Which entry is correct?",
+   "options": [
+    "Dr Sales Tax Payable 1,750 / Cr Cash 1,750",
+    "Dr Sales Tax Payable 1,750 / Cr Sales Revenue 1,750",
+    "Dr Cash 1,750 / Cr Sales Tax Payable 1,750",
+    "Dr Income Taxes Payable 1,750 / Cr Cash 1,750"
+   ],
+   "answer": 1,
+   "answerText": "Dr Sales Tax Payable 1,750 / Cr Cash 1,750",
+   "explanation": "Paying the state settles the liability. So Sales Tax Payable is debited and Cash is credited.",
+   "deepDive": {
+    "concept": "Remitting sales tax",
+    "conceptExplain": "Remitting means sending the money in. The liability that was credited when the tax was collected is debited when it is paid.",
+    "whyCorrect": "The liability is removed and cash falls.",
+    "wrongReasons": {
+     "2": "No revenue is earned by paying the tax.",
+     "3": "This would increase cash and the liability, as when the tax is collected.",
+     "4": "Income Taxes Payable is for taxes on income, not sales tax."
+    }
+   }
+  },
+  {
+   "id": "TE-T7-19",
+   "topic": "T7",
+   "topicName": "Corporations, Payroll & Sales Tax",
+   "format": [
+    "definition"
+   ],
+   "stem": "Which feature of a corporation protects owners' personal property?",
+   "options": [
+    "Unlimited liability, because owners are responsible for all debts",
+    "Limited liability, because the corporation is a separate legal entity",
+    "Unlimited life, because shares can be sold",
+    "Double taxation, because profits are taxed and dividends are taxed"
+   ],
+   "answer": 2,
+   "answerText": "Limited liability, because the corporation is a separate legal entity",
+   "explanation": "A corporation is legally separate from its owners. So creditors can claim the corporation's assets but generally not the stockholders' personal property.",
+   "deepDive": {
+    "concept": "Features of a corporation",
+    "conceptExplain": "Limited liability means a stockholder can lose at most the amount invested. Unlimited life and double taxation are other features, but they do not protect personal property.",
+    "whyCorrect": "The corporation is a separate legal entity, so owners' risk is limited.",
+    "wrongReasons": {
+     "1": "Unlimited liability applies to sole proprietors and general partners, not stockholders.",
+     "3": "Unlimited life is about continuing to exist after owners change, not personal protection.",
+     "4": "Double taxation is a drawback, not a protection."
+    }
+   }
+  },
+  {
+   "id": "TE-T7-20",
+   "topic": "T7",
+   "topicName": "Corporations, Payroll & Sales Tax",
+   "format": [
+    "application"
+   ],
+   "stem": "Which pair correctly matches an account with its normal balance?",
+   "options": [
+    "Retained Earnings: credit, and Dividends: debit",
+    "Retained Earnings: debit, and Dividends: credit",
+    "Common Stock: debit, and Dividends: debit",
+    "Common Stock: credit, and Dividends: credit"
+   ],
+   "answer": 1,
+   "answerText": "Retained Earnings: credit, and Dividends: debit",
+   "explanation": "Retained Earnings is an equity account that increases with a credit. Dividends is a contra equity account that increases with a debit.",
+   "deepDive": {
+    "concept": "Normal balances in equity",
+    "conceptExplain": "Equity accounts usually have credit balances. Dividends reduces equity, so it is the opposite, a debit balance.",
+    "whyCorrect": "Retained Earnings is credit and Dividends is debit.",
+    "wrongReasons": {
+     "2": "This reverses both normal balances.",
+     "3": "Common Stock is credit, not debit.",
+     "4": "Dividends has a debit balance, not a credit."
+    }
+   }
+  }
+ ]
+}

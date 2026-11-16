@@ -1,0 +1,753 @@
+{
+ "meta": {
+  "title": "Game 4 Adjusting Entries Factory (US Principles of Accounting)",
+  "lv1": 50,
+  "lv2": 20,
+  "note": "Perpetual inventory, allowance method, fiscal year ends December 31. For closing and income-tax entries the player picks the main debit and credit accounts.",
+  "generated": "2026-11-15"
+ },
+ "lv1": [
+  {
+   "q": "Insurance premium was debited to Insurance Expense when paid. Part of the coverage is still unused at year-end.",
+   "hint": "Asset increase (debit) / Expense decrease (credit)",
+   "L": "Prepaid Insurance",
+   "R": "Insurance Expense",
+   "fakes": [
+    "Interest Payable",
+    "Unearned Revenue"
+   ]
+  },
+  {
+   "q": "On July 1, paid $24,000 for two years of insurance and debited Insurance Expense. Defer the unexpired part at December 31.",
+   "hint": "Asset increase (debit) / Expense decrease (credit)",
+   "L": "Prepaid Insurance",
+   "R": "Insurance Expense",
+   "fakes": [
+    "Prepaid Rent",
+    "Unearned Revenue"
+   ]
+  },
+  {
+   "q": "Rent paid in advance was debited to Rent Expense. Part of it covers next year. Adjust at year-end.",
+   "hint": "Asset increase (debit) / Expense decrease (credit)",
+   "L": "Prepaid Rent",
+   "R": "Rent Expense",
+   "fakes": [
+    "Unearned Rent",
+    "Rent Receivable"
+   ]
+  },
+  {
+   "q": "Supplies purchased were debited to Supplies Expense. A count shows $350 of supplies still on hand.",
+   "hint": "Asset increase (debit) / Expense decrease (credit)",
+   "L": "Supplies",
+   "R": "Supplies Expense",
+   "fakes": [
+    "Prepaid Advertising",
+    "Office Expense"
+   ]
+  },
+  {
+   "q": "An advertising campaign was paid in advance and debited to Advertising Expense. Part of the campaign runs next year.",
+   "hint": "Asset increase (debit) / Expense decrease (credit)",
+   "L": "Prepaid Advertising",
+   "R": "Advertising Expense",
+   "fakes": [
+    "Prepaid Insurance",
+    "Unearned Revenue"
+   ]
+  },
+  {
+   "q": "Supplies on hand were $900 at the start of the year. No supplies were bought during the year. The year-end count shows $300 on hand. Record the supplies used.",
+   "hint": "Expense increase (debit) / Asset decrease (credit)",
+   "L": "Supplies Expense",
+   "R": "Supplies",
+   "fakes": [
+    "Office Expense",
+    "Prepaid Advertising"
+   ]
+  },
+  {
+   "q": "Prepaid Insurance was set up when the premium was paid. One year of coverage has now expired.",
+   "hint": "Expense increase (debit) / Asset decrease (credit)",
+   "L": "Insurance Expense",
+   "R": "Prepaid Insurance",
+   "fakes": [
+    "Prepaid Rent",
+    "Interest Expense"
+   ]
+  },
+  {
+   "q": "Rent was paid in advance and debited to Prepaid Rent. Several months of that rent have now been used.",
+   "hint": "Expense increase (debit) / Asset decrease (credit)",
+   "L": "Rent Expense",
+   "R": "Prepaid Rent",
+   "fakes": [
+    "Rent Receivable",
+    "Utilities Expense"
+   ]
+  },
+  {
+   "q": "A year of advertising was prepaid and recorded as Prepaid Advertising. Part of it has now run.",
+   "hint": "Expense increase (debit) / Asset decrease (credit)",
+   "L": "Advertising Expense",
+   "R": "Prepaid Advertising",
+   "fakes": [
+    "Supplies Expense",
+    "Prepaid Insurance"
+   ]
+  },
+  {
+   "q": "A client paid in advance for services and the cash was credited to Unearned Revenue. The services have now been performed.",
+   "hint": "Liability decrease (debit) / Revenue increase (credit)",
+   "L": "Unearned Revenue",
+   "R": "Service Revenue",
+   "fakes": [
+    "Accounts Receivable",
+    "Customer Deposits"
+   ]
+  },
+  {
+   "q": "Cash received in advance was credited to Service Revenue. Some of the services have not yet been performed.",
+   "hint": "Revenue decrease (debit) / Liability increase (credit)",
+   "L": "Service Revenue",
+   "R": "Unearned Revenue",
+   "fakes": [
+    "Accounts Receivable",
+    "Customer Deposits"
+   ]
+  },
+  {
+   "q": "Rent received in advance was credited to Unearned Rent. Part of the rent period has now passed.",
+   "hint": "Liability decrease (debit) / Revenue increase (credit)",
+   "L": "Unearned Rent",
+   "R": "Rent Revenue",
+   "fakes": [
+    "Rent Receivable",
+    "Unearned Revenue"
+   ]
+  },
+  {
+   "q": "Rent received in advance was credited to Rent Revenue. Part of it covers next year's rent.",
+   "hint": "Revenue decrease (debit) / Liability increase (credit)",
+   "L": "Rent Revenue",
+   "R": "Unearned Rent",
+   "fakes": [
+    "Rent Receivable",
+    "Rent Expense"
+   ]
+  },
+  {
+   "q": "Customers prepaid annual membership fees, which were credited to Unearned Revenue. Part of the year has passed.",
+   "hint": "Liability decrease (debit) / Revenue increase (credit)",
+   "L": "Unearned Revenue",
+   "R": "Fees Earned",
+   "fakes": [
+    "Customer Deposits",
+    "Cash"
+   ]
+  },
+  {
+   "q": "Interest has been earned on a note receivable but has not been received. Record it at year-end.",
+   "hint": "Asset increase (debit) / Revenue increase (credit)",
+   "L": "Interest Receivable",
+   "R": "Interest Revenue",
+   "fakes": [
+    "Interest Payable",
+    "Notes Receivable"
+   ]
+  },
+  {
+   "q": "A tenant owes December rent that has not been billed or recorded.",
+   "hint": "Asset increase (debit) / Revenue increase (credit)",
+   "L": "Rent Receivable",
+   "R": "Rent Revenue",
+   "fakes": [
+    "Unearned Rent",
+    "Interest Receivable"
+   ]
+  },
+  {
+   "q": "Services were performed for a client but not yet billed or recorded.",
+   "hint": "Asset increase (debit) / Revenue increase (credit)",
+   "L": "Accounts Receivable",
+   "R": "Service Revenue",
+   "fakes": [
+    "Unearned Revenue",
+    "Cash"
+   ]
+  },
+  {
+   "q": "Commissions were earned in December but not yet recorded or collected.",
+   "hint": "Asset increase (debit) / Revenue increase (credit)",
+   "L": "Accounts Receivable",
+   "R": "Commission Revenue",
+   "fakes": [
+    "Unearned Revenue",
+    "Fees Earned"
+   ]
+  },
+  {
+   "q": "Employees have earned salaries that have not been paid at year-end.",
+   "hint": "Expense increase (debit) / Liability increase (credit)",
+   "L": "Salaries Expense",
+   "R": "Salaries Payable",
+   "fakes": [
+    "Wages Payable",
+    "Cash"
+   ]
+  },
+  {
+   "q": "Hourly workers earned wages during the last three days of the year. They will be paid next year.",
+   "hint": "Expense increase (debit) / Liability increase (credit)",
+   "L": "Wages Expense",
+   "R": "Wages Payable",
+   "fakes": [
+    "Salaries Payable",
+    "Payroll Tax Expense"
+   ]
+  },
+  {
+   "q": "Interest of $450 has built up on a note payable but has not been paid.",
+   "hint": "Expense increase (debit) / Liability increase (credit)",
+   "L": "Interest Expense",
+   "R": "Interest Payable",
+   "fakes": [
+    "Notes Payable",
+    "Interest Receivable"
+   ]
+  },
+  {
+   "q": "Electricity was used in December, but the bill has not yet arrived.",
+   "hint": "Expense increase (debit) / Liability increase (credit)",
+   "L": "Utilities Expense",
+   "R": "Utilities Payable",
+   "fakes": [
+    "Salaries Payable",
+    "Telephone Expense"
+   ]
+  },
+  {
+   "q": "The employer's share of FICA tax on accrued wages has not been paid.",
+   "hint": "Expense increase (debit) / Liability increase (credit)",
+   "L": "Payroll Tax Expense",
+   "R": "FICA Taxes Payable",
+   "fakes": [
+    "Wages Expense",
+    "Federal Income Taxes Payable"
+   ]
+  },
+  {
+   "q": "Record the year's depreciation on office equipment.",
+   "hint": "Expense increase (debit) / Contra asset (accumulated depreciation) increase (credit)",
+   "L": "Depreciation Expense",
+   "R": "Accumulated Depreciation—Equipment",
+   "fakes": [
+    "Equipment",
+    "Accumulated Depreciation—Furniture"
+   ]
+  },
+  {
+   "q": "Record the year's depreciation on the company's building.",
+   "hint": "Expense increase (debit) / Contra asset (accumulated depreciation) increase (credit)",
+   "L": "Depreciation Expense",
+   "R": "Accumulated Depreciation—Buildings",
+   "fakes": [
+    "Buildings",
+    "Accumulated Depreciation—Equipment"
+   ]
+  },
+  {
+   "q": "Record the year's depreciation on a delivery van.",
+   "hint": "Expense increase (debit) / Contra asset (accumulated depreciation) increase (credit)",
+   "L": "Depreciation Expense",
+   "R": "Accumulated Depreciation—Vehicles",
+   "fakes": [
+    "Vehicles",
+    "Accumulated Depreciation—Equipment"
+   ]
+  },
+  {
+   "q": "Record the year's depreciation on store furniture.",
+   "hint": "Expense increase (debit) / Contra asset (accumulated depreciation) increase (credit)",
+   "L": "Depreciation Expense",
+   "R": "Accumulated Depreciation—Furniture",
+   "fakes": [
+    "Furniture",
+    "Accumulated Depreciation—Vehicles"
+   ]
+  },
+  {
+   "q": "Estimate bad debts as a percent of credit sales for the year. Record the adjustment.",
+   "hint": "Expense increase (debit) / Contra asset (allowance) increase (credit)",
+   "L": "Bad Debt Expense",
+   "R": "Allowance for Doubtful Accounts",
+   "fakes": [
+    "Accounts Receivable",
+    "Sales Returns and Allowances"
+   ]
+  },
+  {
+   "q": "An aging of Accounts Receivable shows $4,800 will probably not be collected. The allowance has no balance yet.",
+   "hint": "Expense increase (debit) / Contra asset (allowance) increase (credit)",
+   "L": "Bad Debt Expense",
+   "R": "Allowance for Doubtful Accounts",
+   "fakes": [
+    "Miscellaneous Expense",
+    "Accounts Receivable"
+   ]
+  },
+  {
+   "q": "A customer's $400 account is declared uncollectible. Write it off using the allowance method.",
+   "hint": "Contra asset (allowance) decrease (debit) / Asset decrease (credit)",
+   "L": "Allowance for Doubtful Accounts",
+   "R": "Accounts Receivable",
+   "fakes": [
+    "Bad Debt Expense",
+    "Sales Returns and Allowances"
+   ]
+  },
+  {
+   "q": "A physical count shows less merchandise on hand than the perpetual records, cause unknown. Record the shrinkage.",
+   "hint": "Expense increase (debit) / Asset decrease (credit)",
+   "L": "Cost of Goods Sold",
+   "R": "Merchandise Inventory",
+   "fakes": [
+    "Loss from Theft",
+    "Supplies"
+   ]
+  },
+  {
+   "q": "The cash drawer holds $15 less than the register tape shows. The cause is unknown.",
+   "hint": "Cash Over and Short increase (debit) / Asset decrease (credit)",
+   "L": "Cash Over and Short",
+   "R": "Cash",
+   "fakes": [
+    "Miscellaneous Expense",
+    "Petty Cash"
+   ]
+  },
+  {
+   "q": "The cash drawer holds $8 more than the register tape shows. The cause is unknown.",
+   "hint": "Asset increase (debit) / Cash Over and Short increase (credit)",
+   "L": "Cash",
+   "R": "Cash Over and Short",
+   "fakes": [
+    "Miscellaneous Revenue",
+    "Petty Cash"
+   ]
+  },
+  {
+   "q": "At year-end, Cash Over and Short has a debit balance. Close it to Income Summary.",
+   "hint": "Income Summary (debit) / Cash Over and Short decrease (credit)",
+   "L": "Income Summary",
+   "R": "Cash Over and Short",
+   "fakes": [
+    "Miscellaneous Expense",
+    "Retained Earnings"
+   ]
+  },
+  {
+   "q": "At year-end, Cash Over and Short has a credit balance. Close it to Income Summary.",
+   "hint": "Cash Over and Short decrease (debit) / Income Summary (credit)",
+   "L": "Cash Over and Short",
+   "R": "Income Summary",
+   "fakes": [
+    "Miscellaneous Revenue",
+    "Retained Earnings"
+   ]
+  },
+  {
+   "q": "The company estimates its income tax for the year. Record the adjustment.",
+   "hint": "Expense increase (debit) / Liability increase (credit)",
+   "L": "Income Tax Expense",
+   "R": "Income Taxes Payable",
+   "fakes": [
+    "Sales Tax Payable",
+    "Property Tax Expense"
+   ]
+  },
+  {
+   "q": "Close the Income Tax Expense account at year-end.",
+   "hint": "Income Summary (debit) / Expense decrease (credit)",
+   "L": "Income Summary",
+   "R": "Income Tax Expense",
+   "fakes": [
+    "Retained Earnings",
+    "Income Taxes Payable"
+   ]
+  },
+  {
+   "q": "Close the Service Revenue account at year-end.",
+   "hint": "Revenue decrease (debit) / Income Summary increase (credit)",
+   "L": "Service Revenue",
+   "R": "Income Summary",
+   "fakes": [
+    "Retained Earnings",
+    "Unearned Revenue"
+   ]
+  },
+  {
+   "q": "Close the Sales Revenue account at year-end.",
+   "hint": "Revenue decrease (debit) / Income Summary increase (credit)",
+   "L": "Sales Revenue",
+   "R": "Income Summary",
+   "fakes": [
+    "Retained Earnings",
+    "Cost of Goods Sold"
+   ]
+  },
+  {
+   "q": "Close the Rent Revenue account at year-end.",
+   "hint": "Revenue decrease (debit) / Income Summary increase (credit)",
+   "L": "Rent Revenue",
+   "R": "Income Summary",
+   "fakes": [
+    "Retained Earnings",
+    "Unearned Rent"
+   ]
+  },
+  {
+   "q": "Close the Interest Revenue account at year-end.",
+   "hint": "Revenue decrease (debit) / Income Summary increase (credit)",
+   "L": "Interest Revenue",
+   "R": "Income Summary",
+   "fakes": [
+    "Retained Earnings",
+    "Interest Receivable"
+   ]
+  },
+  {
+   "q": "Close the Sales Returns and Allowances account at year-end.",
+   "hint": "Income Summary (debit) / Contra revenue decrease (credit)",
+   "L": "Income Summary",
+   "R": "Sales Returns and Allowances",
+   "fakes": [
+    "Retained Earnings",
+    "Sales Revenue"
+   ]
+  },
+  {
+   "q": "Close the Sales Discounts account at year-end.",
+   "hint": "Income Summary (debit) / Contra revenue decrease (credit)",
+   "L": "Income Summary",
+   "R": "Sales Discounts",
+   "fakes": [
+    "Retained Earnings",
+    "Sales Revenue"
+   ]
+  },
+  {
+   "q": "Close the Cost of Goods Sold account at year-end.",
+   "hint": "Income Summary (debit) / Expense decrease (credit)",
+   "L": "Income Summary",
+   "R": "Cost of Goods Sold",
+   "fakes": [
+    "Retained Earnings",
+    "Merchandise Inventory"
+   ]
+  },
+  {
+   "q": "Close the Salaries Expense account at year-end.",
+   "hint": "Income Summary (debit) / Expense decrease (credit)",
+   "L": "Income Summary",
+   "R": "Salaries Expense",
+   "fakes": [
+    "Retained Earnings",
+    "Salaries Payable"
+   ]
+  },
+  {
+   "q": "Close the Depreciation Expense account at year-end.",
+   "hint": "Income Summary (debit) / Expense decrease (credit)",
+   "L": "Income Summary",
+   "R": "Depreciation Expense",
+   "fakes": [
+    "Retained Earnings",
+    "Accumulated Depreciation—Equipment"
+   ]
+  },
+  {
+   "q": "Close the Advertising Expense account at year-end.",
+   "hint": "Income Summary (debit) / Expense decrease (credit)",
+   "L": "Income Summary",
+   "R": "Advertising Expense",
+   "fakes": [
+    "Retained Earnings",
+    "Prepaid Advertising"
+   ]
+  },
+  {
+   "q": "Income Summary has a credit balance after closing revenues and expenses. Close it.",
+   "hint": "Income Summary (debit) / Equity increase (credit)",
+   "L": "Income Summary",
+   "R": "Retained Earnings",
+   "fakes": [
+    "Dividends",
+    "Common Stock"
+   ]
+  },
+  {
+   "q": "Expenses were larger than revenues, so Income Summary has a debit balance. Close it.",
+   "hint": "Equity decrease (debit) / Income Summary (credit)",
+   "L": "Retained Earnings",
+   "R": "Income Summary",
+   "fakes": [
+    "Dividends",
+    "Common Stock"
+   ]
+  },
+  {
+   "q": "Close the Dividends account at year-end.",
+   "hint": "Equity decrease (debit) / Contra equity decrease (credit)",
+   "L": "Retained Earnings",
+   "R": "Dividends",
+   "fakes": [
+    "Income Summary",
+    "Dividends Payable"
+   ]
+  }
+ ],
+ "lv2": [
+  {
+   "q": "On October 1, paid $18,000 for 24 months of insurance and debited Insurance Expense.\nThe year ends December 31. Defer the unexpired part.",
+   "hint": "Asset increase (debit) / Expense decrease (credit)",
+   "L": "Prepaid Insurance",
+   "R": "Insurance Expense",
+   "fakes": [
+    "Prepaid Rent",
+    "Unearned Revenue"
+   ],
+   "amount": 15750,
+   "calc": "$18,000 ÷ 24 months = $750 per month. Oct-Dec used 3 months, so 21 months remain: $750 × 21 = $15,750."
+  },
+  {
+   "q": "On November 1, paid $9,000 for six months of rent and debited Prepaid Rent.\nThe year ends December 31. Record the rent used.",
+   "hint": "Expense increase (debit) / Asset decrease (credit)",
+   "L": "Rent Expense",
+   "R": "Prepaid Rent",
+   "fakes": [
+    "Rent Receivable",
+    "Utilities Expense"
+   ],
+   "amount": 3000,
+   "calc": "$9,000 ÷ 6 months = $1,500 per month. Nov and Dec are 2 months: $1,500 × 2 = $3,000."
+  },
+  {
+   "q": "Supplies on hand were $1,400 on January 1. During the year, $3,900 of supplies were bought and debited to Supplies.\nThe year-end count shows $1,150 on hand. Record the supplies used.",
+   "hint": "Expense increase (debit) / Asset decrease (credit)",
+   "L": "Supplies Expense",
+   "R": "Supplies",
+   "fakes": [
+    "Office Expense",
+    "Prepaid Advertising"
+   ],
+   "amount": 4150,
+   "calc": "Supplies available = $1,400 + $3,900 = $5,300. Used = $5,300 − $1,150 on hand = $4,150."
+  },
+  {
+   "q": "On September 1, received $7,200 for 12 months of service and credited Unearned Revenue.\nThe year ends December 31. Record the revenue earned.",
+   "hint": "Liability decrease (debit) / Revenue increase (credit)",
+   "L": "Unearned Revenue",
+   "R": "Service Revenue",
+   "fakes": [
+    "Accounts Receivable",
+    "Customer Deposits"
+   ],
+   "amount": 2400,
+   "calc": "$7,200 ÷ 12 months = $600 per month. Sept-Dec is 4 months: $600 × 4 = $2,400."
+  },
+  {
+   "q": "On November 1, received $6,000 for six months of rent and credited Rent Revenue.\nThe year ends December 31. Defer the unearned part.",
+   "hint": "Revenue decrease (debit) / Liability increase (credit)",
+   "L": "Rent Revenue",
+   "R": "Unearned Rent",
+   "fakes": [
+    "Rent Receivable",
+    "Rent Expense"
+   ],
+   "amount": 4000,
+   "calc": "$6,000 ÷ 6 months = $1,000 per month. Nov and Dec earned 2 months, so 4 months remain: $1,000 × 4 = $4,000."
+  },
+  {
+   "q": "The company holds a $15,000 note receivable at 6% dated November 1.\nThe year ends December 31. Record the interest earned.",
+   "hint": "Asset increase (debit) / Revenue increase (credit)",
+   "L": "Interest Receivable",
+   "R": "Interest Revenue",
+   "fakes": [
+    "Interest Payable",
+    "Notes Receivable"
+   ],
+   "amount": 150,
+   "calc": "Interest = $15,000 × 6% × 2/12 = $150."
+  },
+  {
+   "q": "Salaries of $4,500 are paid every Friday for a five-day week.\nDecember 31 falls on a Wednesday. Record the accrued salaries.",
+   "hint": "Expense increase (debit) / Liability increase (credit)",
+   "L": "Salaries Expense",
+   "R": "Salaries Payable",
+   "fakes": [
+    "Wages Payable",
+    "Cash"
+   ],
+   "amount": 2700,
+   "calc": "$4,500 ÷ 5 days = $900 per day. Monday to Wednesday is 3 days: $900 × 3 = $2,700."
+  },
+  {
+   "q": "The company borrowed $30,000 from the bank at 8% on September 1. Interest is paid when the loan matures.\nThe year ends December 31. Record the accrued interest.",
+   "hint": "Expense increase (debit) / Liability increase (credit)",
+   "L": "Interest Expense",
+   "R": "Interest Payable",
+   "fakes": [
+    "Bank Loan Payable",
+    "Notes Payable"
+   ],
+   "amount": 800,
+   "calc": "Interest = $30,000 × 8% × 4/12 = $800."
+  },
+  {
+   "q": "Equipment cost $48,000, has a $6,000 salvage value, and a 7-year life.\nUse straight-line depreciation. Record one year of depreciation.",
+   "hint": "Expense increase (debit) / Contra asset (accumulated depreciation) increase (credit)",
+   "L": "Depreciation Expense",
+   "R": "Accumulated Depreciation—Equipment",
+   "fakes": [
+    "Equipment",
+    "Accumulated Depreciation—Vehicles"
+   ],
+   "amount": 6000,
+   "calc": "Depreciable cost = $48,000 − $6,000 = $42,000. $42,000 ÷ 7 years = $6,000."
+  },
+  {
+   "q": "A vehicle was bought on October 1 for $36,000. It has a $6,000 salvage value and a 5-year life.\nUse straight-line depreciation. The year ends December 31. Record the depreciation.",
+   "hint": "Expense increase (debit) / Contra asset (accumulated depreciation) increase (credit)",
+   "L": "Depreciation Expense",
+   "R": "Accumulated Depreciation—Vehicles",
+   "fakes": [
+    "Vehicles",
+    "Accumulated Depreciation—Equipment"
+   ],
+   "amount": 1500,
+   "calc": "($36,000 − $6,000) ÷ 5 years = $6,000 per year. Oct-Dec is 3 months: $6,000 × 3/12 = $1,500."
+  },
+  {
+   "q": "Credit sales for the year were $400,000. The company estimates that 1.5% of credit sales will not be collected.\nThe allowance already has a $1,200 credit balance. Record bad debts using the percent of sales method.",
+   "hint": "Expense increase (debit) / Contra asset (allowance) increase (credit)",
+   "L": "Bad Debt Expense",
+   "R": "Allowance for Doubtful Accounts",
+   "fakes": [
+    "Accounts Receivable",
+    "Sales Returns and Allowances"
+   ],
+   "amount": 6000,
+   "calc": "Percent of sales ignores the old balance. $400,000 × 1.5% = $6,000."
+  },
+  {
+   "q": "Accounts Receivable is $120,000. The company estimates 4% will be uncollectible.\nThe allowance has a $1,300 credit balance. Record the adjustment using the percent of receivables method.",
+   "hint": "Expense increase (debit) / Contra asset (allowance) increase (credit)",
+   "L": "Bad Debt Expense",
+   "R": "Allowance for Doubtful Accounts",
+   "fakes": [
+    "Accounts Receivable",
+    "Miscellaneous Expense"
+   ],
+   "amount": 3500,
+   "calc": "Needed allowance = $120,000 × 4% = $4,800. Add to the $1,300 credit balance: $4,800 − $1,300 = $3,500."
+  },
+  {
+   "q": "Accounts Receivable is $90,000. The company estimates 5% will be uncollectible.\nThe allowance has a $600 debit balance. Record the adjustment using the percent of receivables method.",
+   "hint": "Expense increase (debit) / Contra asset (allowance) increase (credit)",
+   "L": "Bad Debt Expense",
+   "R": "Allowance for Doubtful Accounts",
+   "fakes": [
+    "Accounts Receivable",
+    "Miscellaneous Expense"
+   ],
+   "amount": 5100,
+   "calc": "Needed allowance = $90,000 × 5% = $4,500 credit. Debit balance of $600 must be covered too: $4,500 + $600 = $5,100."
+  },
+  {
+   "q": "Perpetual records show $86,400 of merchandise inventory. A physical count shows $83,150, cause unknown.\nRecord the inventory shrinkage.",
+   "hint": "Expense increase (debit) / Asset decrease (credit)",
+   "L": "Cost of Goods Sold",
+   "R": "Merchandise Inventory",
+   "fakes": [
+    "Loss from Theft",
+    "Supplies"
+   ],
+   "amount": 3250,
+   "calc": "Records − count = $86,400 − $83,150 = $3,250."
+  },
+  {
+   "q": "Income before income taxes is $64,000. The tax rate is 21%.\nNo taxes have been recorded yet. Record the income tax for the year.",
+   "hint": "Expense increase (debit) / Liability increase (credit)",
+   "L": "Income Tax Expense",
+   "R": "Income Taxes Payable",
+   "fakes": [
+    "Sales Tax Payable",
+    "Property Tax Expense"
+   ],
+   "amount": 13440,
+   "calc": "$64,000 × 21% = $13,440."
+  },
+  {
+   "q": "The company rents out space for $750 per month. The tenant has not paid November or December rent, and nothing is recorded.\nRecord the rent earned.",
+   "hint": "Asset increase (debit) / Revenue increase (credit)",
+   "L": "Rent Receivable",
+   "R": "Rent Revenue",
+   "fakes": [
+    "Unearned Rent",
+    "Interest Receivable"
+   ],
+   "amount": 1500,
+   "calc": "$750 per month × 2 months = $1,500."
+  },
+  {
+   "q": "Total sales revenue for the year is $342,600.\nClose the Sales Revenue account.",
+   "hint": "Revenue decrease (debit) / Income Summary increase (credit)",
+   "L": "Sales Revenue",
+   "R": "Income Summary",
+   "fakes": [
+    "Retained Earnings",
+    "Cost of Goods Sold"
+   ],
+   "amount": 342600,
+   "calc": "The closing entry moves the full credit balance: $342,600."
+  },
+  {
+   "q": "Over the year, Cash Over and Short recorded shortages of $85, $40, and $30, and overages of $25 and $55.\nClose the account.",
+   "hint": "Income Summary (debit) / Cash Over and Short decrease (credit)",
+   "L": "Income Summary",
+   "R": "Cash Over and Short",
+   "fakes": [
+    "Miscellaneous Expense",
+    "Retained Earnings"
+   ],
+   "amount": 75,
+   "calc": "Shortages = $85 + $40 + $30 = $155. Overages = $25 + $55 = $80. Net debit balance = $155 − $80 = $75."
+  },
+  {
+   "q": "Revenues for the year were $215,000 and expenses were $168,500. All revenues and expenses are closed.\nClose Income Summary.",
+   "hint": "Income Summary (debit) / Equity increase (credit)",
+   "L": "Income Summary",
+   "R": "Retained Earnings",
+   "fakes": [
+    "Dividends",
+    "Common Stock"
+   ],
+   "amount": 46500,
+   "calc": "Net income = $215,000 − $168,500 = $46,500."
+  },
+  {
+   "q": "The company declared dividends of $2,500 each quarter during the year.\nClose the Dividends account.",
+   "hint": "Equity decrease (debit) / Contra equity decrease (credit)",
+   "L": "Retained Earnings",
+   "R": "Dividends",
+   "fakes": [
+    "Income Summary",
+    "Dividends Payable"
+   ],
+   "amount": 10000,
+   "calc": "$2,500 × 4 quarters = $10,000."
+  }
+ ]
+}

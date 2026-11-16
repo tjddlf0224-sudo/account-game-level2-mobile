@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<style>html{-webkit-text-size-adjust:100%;text-size-adjust:100%}</style>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net; img-src 'self' data: https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com; frame-src https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com https://*.google.com https://*.doubleclick.net; connect-src 'self' https://pjagaulfivafamhhiveg.supabase.co https://cdn.jsdelivr.net https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://*.google.com;">
+<!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
+     **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
+     이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
+<script src="ja/ja_data.js?v=1"></script>
+<script src="ja/server_ja.js?v=1"></script>
+<link rel="stylesheet" href="ja/ja.css?v=1">
+<script src="safestore.js?v=79"></script>
+<title>理論クイズ | 簿記3級</title>
+<meta name="description" content="簿記3級の理論クイズを解いて、間違えた問題を復習">
+<style>
+  :root{
+    --bg:#020810; --card:#0c1626; --card2:#11203a; --line:rgba(255,255,255,.08);
+    --blue:#00f2ff; --purple:#b44fff; --green:#2ecc71; --red:#ff2d78; --gold:#ffd24a;
+    --txt:#eaf2ff; --dim:rgba(234,242,255,.55);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  
+  /* 본문 글꼴은 전 게임 공통으로 Noto Sans KR 이 먼저다(2026-09-15).
+     전엔 -apple-system 이 앞이라 **웹폰트를 불러놓고도 iOS 에선 애플 기본 글꼴**이
+     나왔다 — 게임 5종·원가의 길과 글자 모양이 달라 보이던 이유다.
+     시스템 글꼴은 뒤에 남겨 웹폰트가 늦거나 막혀도 한글이 깨지지 않게 한다. */
+  body{margin:0;background:var(--bg);color:var(--txt);
+       font-family:'Noto Sans JP', 'Noto Sans KR',-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
+       padding:0 0 calc(40px + var(--ad-banner-h, 0px));
+       min-height:100vh;}
+  .wrap{max-width:640px;margin:0 auto;padding:calc(16px + env(safe-area-inset-top)) 16px 16px;}
+  /* PC 화면: 넓은 빈 공간에 은은한 배경 채우기 + 내용이 짧을 때 세로도 중앙 정렬 */
+  @media (min-width:701px){
+    body{background:
+      radial-gradient(ellipse 50% 40% at 12% 10%, rgba(0,242,255,0.07), transparent 60%),
+      radial-gradient(ellipse 45% 35% at 90% 90%, rgba(180,79,255,0.07), transparent 55%),
+      var(--bg);
+      display:flex; flex-direction:column; justify-content:center;}
+    .wrap{padding-top:16px;max-width:900px;width:100%;}
+    h1{font-size:1.5rem;}
+    h1 .sub{font-size:.85rem;}
+    .qcard{padding:26px 30px;}
+    .qtag{font-size:.8rem;}
+    .qstem{font-size:1.18rem;}
+    .qstem .data{font-size:1.05rem;}
+    .choice{font-size:1.05rem;padding:16px 18px;}
+    .cta{font-size:1.15rem;padding:17px;}
+    .expl{font-size:1rem;padding:16px;}
+  }
+  .top{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+  .back{background:var(--card);border:1px solid var(--line);color:var(--txt);
+        border-radius:12px;padding:9px 13px;font-size:.92rem;text-decoration:none;}
+  h1{font-size:1.2rem;margin:0;}
+  h1 .sub{display:block;font-size:.72rem;color:var(--dim);font-weight:500;margin-top:3px;}
+
+  /* 시작 화면 */
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px;}
+  .panel h2{font-size:.92rem;margin:0 0 12px;color:var(--blue);}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;}
+  .chip{border:1.5px solid var(--line);background:var(--card2);color:var(--txt);
+        border-radius:20px;padding:8px 14px;font-size:.86rem;cursor:pointer;transition:.15s;}
+  .chip.on{border-color:var(--blue);background:rgba(0,242,255,.14);color:var(--blue);}
+  .chip .cnt{opacity:.5;font-size:.78rem;margin-left:4px;}
+  .lens{display:flex;gap:8px;margin-top:10px;}
+  .lens .chip{flex:1;text-align:center;}
+  .cta{display:block;width:100%;border:none;border-radius:14px;padding:15px;
+       font-size:1.05rem;font-weight:700;color:#021;cursor:pointer;
+       background:linear-gradient(90deg,var(--blue),var(--green));margin-top:8px;}
+  .cta:disabled{opacity:.45;}
+  .mini{font-size:.78rem;color:var(--dim);margin-top:10px;line-height:1.5;}
+
+  /* 퀴즈 화면 */
+  #quiz{display:none;}
+  .hud{display:flex;justify-content:space-between;align-items:center;font-size:.82rem;color:var(--dim);margin-bottom:10px;}
+  .hud b{color:var(--gold);}
+  .progress-track{height:6px;background:rgba(255,255,255,.07);border-radius:6px;overflow:hidden;margin-bottom:14px;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--purple));transition:width .3s;}
+  .qcard{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;position:relative;}
+  .qtag{font-size:.72rem;color:var(--blue);margin-bottom:8px;}
+  .qtag .fmt{color:var(--gold);margin-left:6px;}
+  .qsrc{position:absolute;right:14px;bottom:10px;font-size:.62rem;color:var(--sub,#8a95a8);opacity:.55;letter-spacing:.2px;}
+  .qstem{font-size:1.04rem;line-height:1.75;margin-bottom:18px;white-space:pre-wrap;word-break:keep-all;overflow-wrap:break-word;}
+  .qstem .data{display:block;margin-top:4px;padding-left:2px;color:#cfe0f5;font-size:.98rem;}
+
+  /* 스템에 들어가는 원장/T계정 표 */
+  .ledger-group{display:flex;gap:10px;margin:10px 0 18px;flex-wrap:wrap;}
+  .ledger-group .ledger{flex:1;min-width:150px;margin:0;}
+  .ledger{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:10px 0 18px;}
+  .ledger-title{text-align:center;font-weight:700;font-size:.98rem;margin-bottom:8px;padding-bottom:6px;border-bottom:1.5px solid var(--line);}
+  .ledger-body{display:flex;}
+  .ledger-side{flex:1;font-size:.9rem;}
+  .ledger-side.left{border-right:1px solid var(--line);padding-right:10px;}
+  .ledger-side.right{padding-left:10px;}
+  .ledger-row{display:flex;justify-content:space-between;gap:8px;padding:3px 0;font-variant-numeric:tabular-nums;}
+  .ledger-row .lr-date{color:var(--dim);flex:none;width:2.6em;}
+  .ledger-row .lr-label{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .ledger-row .lr-amt{flex:none;text-align:right;white-space:nowrap;}
+  .ledger-group .ledger{overflow-x:auto;}
+  .ledger-total{display:flex;justify-content:space-between;margin-top:6px;padding-top:6px;border-top:1.5px solid var(--line);font-weight:700;font-variant-numeric:tabular-nums;}
+
+  /* 스템에 들어가는 현금영수증 */
+  .receipt{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:10px 0 18px;font-variant-numeric:tabular-nums;}
+  .rcpt-notice{font-size:.66rem;color:var(--dim);text-align:center;margin-bottom:10px;line-height:1.45;}
+  .rcpt-title{text-align:center;font-weight:700;font-size:1rem;letter-spacing:5px;margin-bottom:10px;padding-bottom:9px;border-bottom:1.5px solid var(--line);}
+  .rcpt-row{display:flex;gap:10px;padding:2px 0;font-size:.85rem;}
+  .rcpt-row.rcpt-div{margin-top:7px;padding-top:9px;border-top:1px dashed var(--line);}
+  .rcpt-row.rcpt-big{font-weight:700;font-size:1.02rem;margin-top:3px;}
+  .rcpt-cell{flex:1;display:flex;justify-content:space-between;gap:8px;min-width:0;}
+  .rcpt-l{color:var(--dim);flex:none;}
+  .rcpt-v{text-align:right;flex:1;overflow-wrap:break-word;}
+  .rcpt-footer{text-align:center;font-size:.62rem;color:var(--dim2);margin-top:10px;padding-top:9px;border-top:1px solid var(--line);line-height:1.5;}
+
+  /* 스템에 들어가는 잔액시산표(4열) */
+  .tbal{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:10px 0 18px;overflow-x:auto;}
+  .tbal-head{text-align:center;margin-bottom:8px;}
+  .tbal-head .tbal-title{font-weight:700;font-size:.98rem;}
+  .tbal-head .tbal-meta{font-size:.78rem;color:var(--dim);margin-top:2px;}
+  .tbal table{width:100%;border-collapse:collapse;font-size:.88rem;font-variant-numeric:tabular-nums;}
+  .tbal th{font-size:.72rem;color:var(--dim);font-weight:600;padding:5px 6px;border-bottom:1.5px solid var(--line);}
+  .tbal td{padding:5px 6px;text-align:center;border-bottom:1px dotted var(--line);}
+  .tbal td.num{text-align:right;}
+  .tbal tr.total td{border-top:1.5px solid var(--line);border-bottom:none;font-weight:700;}
+  .choice{display:flex;gap:10px;width:100%;text-align:left;border:1.5px solid var(--line);
+          background:var(--card2);color:var(--txt);border-radius:13px;padding:13px 14px;
+          font-size:.97rem;line-height:1.6;margin-bottom:10px;cursor:pointer;transition:.12s;word-break:keep-all;overflow-wrap:break-word;}
+  .choice .no{flex:none;width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.1);
+              display:flex;align-items:center;justify-content:center;font-size:.8rem;}
+  .choice:active{transform:scale(.99);}
+  .choice.correct{border-color:var(--green);background:rgba(46,204,113,.16);}
+  .choice.correct .no{background:var(--green);color:#021;}
+  .choice.wrong{border-color:var(--red);background:rgba(255,45,120,.16);}
+  .choice.wrong .no{background:var(--red);color:#fff;}
+  .choice[disabled]{cursor:default;}
+  .choice.has-visual{align-items:center;}
+  .t-acc{flex:1;max-width:220px;}
+  .t-acc-label{display:block;text-align:center;font-size:.86rem;font-weight:700;margin-bottom:4px;}
+  .t-acc-line{display:block;border-top:1.5px solid currentColor;opacity:.6;margin-bottom:3px;}
+  .t-acc-body{display:flex;}
+  .t-acc-side{flex:1;min-height:1.3em;font-size:.82rem;padding:0 8px;font-variant-numeric:tabular-nums;}
+  .t-acc-side.debit{text-align:left;border-right:1px solid rgba(255,255,255,.22);}
+  .t-acc-side.credit{text-align:right;}
+  .expl{margin-top:12px;padding:13px;border-radius:13px;background:rgba(0,242,255,.07);
+        border:1px solid rgba(0,242,255,.22);font-size:.94rem;line-height:1.8;display:none;}
+  .expl .verdict{font-weight:700;margin-bottom:8px;}
+  .dd-btn{margin-top:12px;width:100%;padding:10px;border-radius:10px;
+    background:rgba(180,79,255,.12);border:1px solid rgba(180,79,255,.35);
+    color:var(--purple);font-size:.82rem;font-weight:700;cursor:pointer;transition:background .15s;}
+  .dd-btn:hover{background:rgba(180,79,255,.2);}
+  .dd-panel{margin-top:10px;padding:14px 15px;border-radius:12px;
+    background:rgba(180,79,255,.06);border:1px solid rgba(180,79,255,.2);}
+  .dd-block{margin-bottom:18px;}
+  .dd-block:last-child{margin-bottom:0;}
+  .dd-label{font-size:.74rem;font-weight:700;color:var(--purple);margin-bottom:6px;letter-spacing:.02em;}
+  .dd-text{font-size:.92rem;line-height:1.8;color:var(--txt);word-break:keep-all;}
+  .dd-wrong{font-size:.88rem;line-height:1.75;color:var(--dim);margin-top:12px;word-break:keep-all;}
+  .dd-wrong-opt{color:var(--txt);margin-bottom:2px;}
+  /* 차근차근 모드 — 같은 퀴즈 화면에 힌트 줄만 붙인다 */
+  body.step-mode .hud > span:last-child{display:none;}
+  .sq-hints{margin:4px 0 10px;display:flex;flex-direction:column;gap:8px;}
+  .sq-hint{padding:12px 14px;border-radius:12px;background:rgba(255,209,102,.08);border:1px dashed rgba(255,209,102,.45);font-size:.92rem;line-height:1.8;color:var(--txt);}
+  .sq-hint > b{display:block;color:#ffd166;margin-bottom:4px;}
+  .sq-hbtn{align-self:flex-start;min-height:42px;padding:8px 16px;border-radius:12px;border:1.5px dashed rgba(255,209,102,.7);background:none;color:#ffd166;font-size:.92rem;font-weight:700;font-family:inherit;cursor:pointer;}
+  .choice.elim{opacity:.35;text-decoration:line-through;}
+  .sq-again{margin-top:8px;font-weight:700;color:#ffd166;}
+  .step-glow{animation:stepGlow 1s ease-in-out infinite;}
+  @keyframes stepGlow{0%,100%{box-shadow:0 0 0 2px #ffd166,0 0 10px #ffd166;}50%{box-shadow:0 0 0 4px #ffd166,0 0 26px #ffd166;}}
+  .dd-wrong-no{display:inline-block;font-weight:700;color:var(--red);margin-right:2px;}
+  .next-wrap{margin-top:14px;display:none;}
+
+  /* 결과 화면 */
+  #result{display:none;text-align:center;}
+  #result .em{font-size:3rem;display:block;margin:8px 0;}
+  #result .score{font-size:2.4rem;color:var(--gold);font-weight:800;}
+  #result .grade{font-size:1.1rem;margin:6px 0 2px;}
+  .res-row{display:flex;justify-content:space-around;margin:18px 0;font-size:.9rem;}
+  .res-row .v{font-size:1.4rem;font-weight:700;display:block;}
+  .res-note{font-size:.82rem;color:var(--dim);margin-bottom:18px;}
+  .btn-row{display:flex;gap:10px;}
+  .btn-row a,.btn-row button{flex:1;border-radius:13px;padding:13px;font-size:.92rem;font-weight:600;
+      border:1px solid var(--line);background:var(--card2);color:var(--txt);cursor:pointer;text-decoration:none;text-align:center;}
+  .retry-wrong .rw-ico{width:22px;height:22px;vertical-align:-5px;margin-right:6px}   /* 제미나이 아이콘 그리드(2026-10-09) */
+  .retry-wrong{display:block;width:100%;margin:0 0 10px;min-height:50px;border-radius:13px;border:1.5px solid rgba(255,214,0,.55);
+    background:rgba(255,214,0,.12);color:var(--gold);font-size:.95rem;font-weight:700;cursor:pointer;}
+  .btn-row .primary{border:none;background:linear-gradient(90deg,var(--blue),var(--green));color:#021;}
+
+/*FONTUNI*/
+/* ── 폰트 통일 (2026-09-14) ──
+   제목·버튼 = Black Han Sans / 본문 = Noto Sans KR. 둘 다 OFL 이라 상업 배포에 제약이 없다.
+   ⚠ Orbitron 은 **라틴 전용**이라 한글에 쓰면 시스템 폰트로 대체되고 자간만 벌어져
+     "회계 플라이트"처럼 멋없게 나온다(사용자 지적). 숫자·영문 전용으로만 쓴다.
+   Jua 는 게임마다 섞여 있어 걷어냈다. */
+.gtitle, .logo, .ov-title, .overlay-title, h1, h2 { font-family: 'M PLUS Rounded 1c', 'Black Han Sans', 'Noto Sans JP', 'Noto Sans KR', sans-serif !important; }
+
+.ad-slot { margin: 20px auto 8px; max-width: 728px; text-align: center; }
+.ad-slot-label { font-size: .68rem; color: rgba(255,255,255,.35); margin-bottom: 4px; letter-spacing: .05em; }
+
+  /* 日本版 横画面(低い画面)— 2026-11-14 チーム長の目視点検: 844×390 で選択肢 3・4 が画面外。
+     (min-width:701px の PC 向け拡大・縦中央寄せを打ち消し)問題を左・選択肢を右に。長い問題(表つき)は左の欄の中だけスクロール。 */
+  @media (orientation: landscape) and (max-height: 520px){
+    body{display:block;}
+    .wrap{max-width:none;padding:calc(6px + env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 8px max(16px, env(safe-area-inset-left));}
+    .top{margin-bottom:6px;} h1{font-size:1rem;} h1 .sub{display:none;} .back{padding:5px 11px;}
+    #quiz{position:relative;}
+    #quiz .hud{position:absolute;top:-34px;right:0;margin:0;gap:14px;}   /* スコアは見出しの行の右へ(縦の場所をかせぐ) */
+    .progress-track{margin-bottom:8px;}
+    #quiz .qcard{display:grid;grid-template-columns:minmax(0,.75fr) minmax(0,1.35fr);column-gap:14px;align-items:start;padding:10px 14px;}
+    #quiz .qmain{grid-column:1;max-height:calc(100vh - 112px);overflow-y:auto;}
+    #quiz .qopts{grid-column:2;}
+    #quiz .qcard > .expl, #quiz .qcard > .next-wrap{grid-column:1 / -1;}
+    #quiz .qtag{font-size:.7rem;margin-bottom:4px;}
+    #quiz .qstem{font-size:.92rem;line-height:1.6;margin-bottom:4px;}
+    #quiz .choice{font-size:.8rem;line-height:1.35;padding:5px 9px;margin-bottom:5px;gap:8px;}
+    #quiz .choice .no{width:19px;height:19px;font-size:.72rem;}
+  }
+  /* 小さい縦画面(320×568 など)— 4 番目の選択肢が少し画面外だった */
+  @media (orientation: portrait) and (max-height: 600px){
+    .wrap{padding-top:calc(10px + env(safe-area-inset-top));}
+    .top{margin-bottom:8px;} h1 .sub{display:none;} .back{padding:6px 11px;} .hud{margin-bottom:6px;} .progress-track{margin-bottom:8px;}
+    #quiz .qcard{padding:11px;}
+    #quiz .qstem{font-size:.95rem;margin-bottom:10px;line-height:1.6;}
+    #quiz .choice{font-size:.88rem;padding:7px 10px;margin-bottom:6px;line-height:1.4;}
+  }
+</style>
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;800&family=Noto+Sans+JP:wght@400;500;700;900&family=Black+Han+Sans&family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="back" href="index.html">←</a>
+    <h1>📝 理論クイズ <span class="sub">簿記3級 · オリジナル問題</span></h1>
+  </div>
+
+  <!-- 시작 -->
+  <div id="home">
+    <div class="panel">
+      <h2>① 単元を選ぶ</h2>
+      <div class="chips" id="topic-chips"></div>
+    </div>
+    <div class="panel">
+      <h2>② 問題数</h2>
+      <div class="lens" id="len-chips">
+        <div class="chip on" data-len="10">10問</div>
+        <div class="chip" data-len="20">20問</div>
+        <div class="chip" data-len="0">全部</div>
+      </div>
+      <div id="step-host"></div>
+      <button class="cta" id="start-btn">▶ スタート</button>
+      <div class="mini" id="pool-info"></div>
+    </div>
+    <div class="ad-slot" data-adsense style="display:none">
+      <div class="ad-slot-label">広告</div>
+      <ins class="adsbygoogle" style="display:block"
+           data-ad-client="ca-pub-7418287954060066"
+           data-ad-slot="2076355142"
+           data-ad-format="auto" data-full-width-responsive="true"></ins>
+    </div>
+  </div>
+
+  <!-- 퀴즈 -->
+  <div id="quiz">
+    <div class="hud">
+      <span id="hud-prog">1 / 10</span>
+      <span>スコア <b id="hud-score">0</b> · コンボ <b id="hud-combo">0</b></span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+    <div id="quiz-body"></div>
+  </div>
+
+  <!-- 결과 -->
+  <div id="result"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="wrongnote.js?v=79"></script>
+<script src="adsense.js?v=79"></script>
+<script src="growth.js?v=79"></script>
+<script src="streak.js?v=79"></script>
+<script src="examday.js?v=79"></script>
+<script src="remind.js?v=79"></script>
+<script src="readable.js?v=79"></script>
+<script src="stepmode.js?v=79"></script>
+<script src="daylog.js?v=79"></script><script src="amev.js?v=1"></script><script src="skill.js?v=1"></script>
+<script>
+// 로그인 체크
+(function(){ if(!(localStorage.getItem('hub_nickname')||'').trim()){ location.replace('login.html'); } })();
+
+const TOPIC_ORDER=['T1','T2','T3','T4','T5','T6','T7'];
+let BANK=[], META=null, POOL=[], SEL_TOPIC='ALL', SEL_LEN=10;
+
+function esc(s){return (s==null?'':String(s)).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+// 문제 본문(문두) 뒤에 이어지는 자료/보기를 항상 줄바꿈으로 분리해 가독성 향상
+function fmtStem(s){
+  let e=esc(s);
+  // "~지 않은/않는"류(옳지·적절하지·타당하지·해당하지·맞지 않은/않는 등)를
+  // 한 번에 강조 — 앞부분(옳지 등)은 그대로 두고 부정 어미만 굵게+밑줄.
+  e=e.replace(/(誤っている|間違っている|適切でない|でない|当たらない|含まれない|含めない|行わない|成立しない|発見できない|処理しない|記入されない)(?=もの|誤り|費用|資産|補助簿)/g,(m0,neg)=>`<b><u>${neg}</u></b>`);
+
+  const qm=e.indexOf('?');
+  if(qm<0 || qm===e.length-1) return splitBulletsOnly(e);
+  const head=e.slice(0,qm+1);
+  const tail=e.slice(qm+1).trim();
+  if(!tail) return head;
+  const lines=splitTailLines(tail);
+  if(!lines.length) return head;
+  return head + lines.map(l=>`<span class="data">${l}</span>`).join('');
+}
+
+function splitBulletsOnly(e){
+  const b=bulletChar(e);
+  if(!b) return e;
+  const idx=e.indexOf(b);
+  const head=e.slice(0,idx).trim();
+  const items=e.slice(idx).split(b).map(x=>x.trim()).filter(Boolean);
+  return head + items.map(it=>`<span class="data">· ${it}</span>`).join('');
+}
+
+function bulletChar(s){
+  if(s.indexOf('■')>=0) return '■';
+  if(s.indexOf('⦁')>=0) return '⦁';
+  return null;
+}
+
+function splitTailLines(tail){
+  const b=bulletChar(tail);
+  if(b){
+    const idx=tail.indexOf(b);
+    const pre=tail.slice(0,idx).trim();
+    const items=tail.slice(idx).split(b).map(x=>x.trim()).filter(Boolean).map(it=>'· '+it);
+    return pre?[pre,...items]:items;
+  }
+  if(/\(借\)/.test(tail) && /\(貸\)/.test(tail)){
+    const di=tail.lastIndexOf('(貸)');
+    const a=tail.slice(0,di).trim(), c=tail.slice(di).trim();
+    if(a && c) return [a,c];
+  }
+  // ⚠️ 분리 정규식에 (?:^|\s) 경계를 안 넣으면 "회수하다." 같은 평범한 문장까지
+  //    "다."를 목록 마커로 오인식해서 문장을 잘라먹는다(감지용 정규식과 분리용
+  //    정규식이 서로 달라서 생긴 버그, 실사용자 리포트로 발견). 두 정규식을 통일.
+  let m=tail.match(/(?:^|\s)[アイウエオカキクケ]\.\s?/g);
+  if(m && m.length>=2) return splitByMarker(tail, /(?:^|\s)([アイウエオカキクケ])\.\s?/g);
+  m=tail.match(/(?:^|\s)[ABCDEFGH]\.\s?/g);
+  if(m && m.length>=2) return splitByMarker(tail, /(?:^|\s)([ABCDEFGH])\.\s?/g);
+  const colons=(tail.match(/：/g)||[]).length;
+  if(colons>=2){
+    const parts=tail.split(/\s+(?=[^\s：]{1,12}：)/).map(x=>x.trim()).filter(Boolean);
+    if(parts.length>=2) return parts;
+  }
+  return [tail];
+}
+function splitByMarker(tail, re){
+  const parts=tail.split(re);
+  const out=[];
+  const pre=(parts[0]||'').trim();
+  if(pre) out.push(pre);
+  for(let i=1;i<parts.length;i+=2){
+    const marker=parts[i], text=(parts[i+1]||'').trim();
+    if(text) out.push(`${marker}. ${text}`);
+  }
+  return out.length?out:[tail];
+}
+
+function ledgerHtml(t){
+  const side = rows => {
+    const hasDate = rows.some(r=>r.date);
+    return rows.map(r => `<div class="ledger-row">${hasDate?`<span class="lr-date">${esc(r.date||'')}</span>`:''}<span class="lr-label">${esc(r.label)}</span><span class="lr-amt">${esc(r.amount)}</span></div>`).join('');
+  };
+  return `<div class="ledger">
+    <div class="ledger-title">${esc(t.title||'')}</div>
+    <div class="ledger-body">
+      <div class="ledger-side left">${side(t.left)}</div>
+      <div class="ledger-side right">${side(t.right)}</div>
+    </div>
+    ${(t.leftTotal||t.rightTotal)?`<div class="ledger-total"><span>${esc(t.leftTotal)}</span><span>${esc(t.rightTotal)}</span></div>`:''}
+  </div>`;
+}
+
+function trialBalanceHtml(t){
+  const noRef = !!t.noRef;
+  const rows = t.rows.map(r => `<tr><td class="num">${esc(r.debit||'')}</td>${noRef?'':`<td>${esc(r.ref||'')}</td>`}<td>${esc(r.name)}</td><td class="num">${esc(r.credit||'')}</td></tr>`).join('');
+  return `<div class="tbal">
+    <div class="tbal-head"><div class="tbal-title">${esc(t.title||'')}</div><div class="tbal-meta">${esc(t.meta||'')}</div></div>
+    <table>
+      <thead><tr><th>借方</th>${noRef?'':`<th>${esc(t.refLabel||'元丁')}</th>`}<th>勘定科目</th><th>貸方</th></tr></thead>
+      <tbody>${rows}<tr class="total"><td class="num">${esc(t.debitTotal)}</td>${noRef?'':'<td></td>'}<td></td><td class="num">${esc(t.creditTotal)}</td></tr></tbody>
+    </table>
+  </div>`;
+}
+
+function simpleTableHtml(t){
+  const headRow = t.headers.map(h=>`<th>${esc(h)}</th>`).join('');
+  const bodyRows = t.rows.map(r=>`<tr>${r.map(c=>`<td class="num">${esc(c)}</td>`).join('')}</tr>`).join('');
+  return `<div class="tbal">
+    ${t.title?`<div class="tbal-head"><div class="tbal-title">${esc(t.title)}</div></div>`:''}
+    <table><thead><tr>${headRow}</tr></thead><tbody>${bodyRows}</tbody></table>
+  </div>`;
+}
+
+function receiptHtml(t){
+  const rows=t.rows.map(r=>{
+    const cells=r.cells.map(c=>`<div class="rcpt-cell"><span class="rcpt-l">${esc(c.l)}</span><span class="rcpt-v">${esc(c.v)}</span></div>`).join('');
+    return `<div class="rcpt-row${r.divider?' rcpt-div':''}${r.big?' rcpt-big':''}">${cells}</div>`;
+  }).join('');
+  return `<div class="receipt">
+    ${t.notice?`<div class="rcpt-notice">${esc(t.notice)}</div>`:''}
+    <div class="rcpt-title">${esc(t.title||'領収書')}</div>
+    <div class="rcpt-body">${rows}</div>
+    ${t.footer?`<div class="rcpt-footer">${esc(t.footer)}</div>`:''}
+  </div>`;
+}
+
+async function load(){
+  try{
+    const r=await fetch('ja/theory_ja.json');   // 日本版
+    const d=await r.json();
+    BANK=d.questions; META=d.meta;
+  }catch(e){ document.getElementById('pool-info').textContent='問題データを読み込めませんでした。'; return; }
+  renderTopics();
+  bindStart();
+  updatePool();
+}
+
+function renderTopics(){
+  const box=document.getElementById('topic-chips');
+  const counts={}; BANK.forEach(q=>counts[q.topic]=(counts[q.topic]||0)+1);
+  const calcN=BANK.filter(q=>q.format.includes('計算')).length;
+  let html=`<div class="chip on" data-topic="ALL">全部<span class="cnt">${BANK.length}</span></div>`;
+  TOPIC_ORDER.forEach(t=>{
+    html+=`<div class="chip" data-topic="${t}">${esc(META.topics[t])}<span class="cnt">${counts[t]||0}</span></div>`;
+  });
+  html+=`<div class="chip" data-topic="CALC">🧮 計算問題<span class="cnt">${calcN}</span></div>`;
+  box.innerHTML=html;
+  box.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{
+    box.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));
+    c.classList.add('on'); SEL_TOPIC=c.dataset.topic; updatePool();
+  });
+  const lb=document.getElementById('len-chips');
+  lb.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{
+    lb.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));
+    c.classList.add('on'); SEL_LEN=parseInt(c.dataset.len); updatePool();
+  });
+}
+
+function poolFor(){
+  if(SEL_TOPIC==='ALL') return BANK.slice();
+  if(SEL_TOPIC==='CALC') return BANK.filter(q=>q.format.includes('計算'));
+  return BANK.filter(q=>q.topic===SEL_TOPIC);
+}
+function updatePool(){
+  POOL=poolFor();
+  const n=SEL_LEN===0?POOL.length:Math.min(SEL_LEN,POOL.length);
+  document.getElementById('pool-info').textContent=`${POOL.length}問中${n}問を出題 · 間違えた問題は復習ノートに自動で保存されます。`;
+  document.getElementById('start-btn').disabled=POOL.length===0;
+}
+
+function bindStart(){
+  document.getElementById('start-btn').onclick=startQuiz;
+  if(window.StepMode) StepMode.mount({ game: STEP_GAME, host: document.getElementById('step-host'), sub: '選んだ単元で', onStart: startTheoryStep });
+}
+
+/* ── 차근차근 모드(2026-09-24 개편, docs/차근차근모드_기획.md) ──
+   성일님: "기존 게임에서 차근차근 한 단계씩. 갑자기 다른 창이 나오면 어떻게 해."
+   → **같은 퀴즈 화면**(문제 카드·보기 버튼)을 그대로 쓰고, 보기 아래 힌트 줄만 붙인다.
+     힌트 ① 틀린 보기 하나 지우고 왜 틀렸는지 ② 쉬운 개념 설명 ③ 정답 짚기
+     틀려도 정답을 바로 보여 주지 않는다 — 고른 보기가 왜 틀렸는지 보여 주고 다시 고르게.
+     시간 제한·점수 없음. 기록은 StepMode.session(전용 테이블·이 기기 오답노트)만. */
+const STEP_GAME = (typeof GAME_ID !== 'undefined') ? GAME_ID : 'theory';
+let STEPQ = null;
+function startTheoryStep() {
+  if (!window.StepMode || !BANK.length) return;
+  const S = StepMode.session(STEP_GAME);
+  STEPQ = { S, again: {}, hint: 0 };
+  const n = SEL_LEN === 0 ? 20 : SEL_LEN;
+  QUEUE = S.pick(poolFor(), n, q => q.id);
+  qi = 0; score = 0; combo = 0; correctCnt = 0;
+  document.body.classList.add('step-mode');
+  document.getElementById('home').style.display = 'none';
+  document.getElementById('result').style.display = 'none';
+  document.getElementById('quiz').style.display = 'block';
+  showQ();
+}
+/* 오답 해설에 정답이 적혀 있는 문항이 있다("올바른 계산 결과인 180,000원과 다릅니다").
+   다시 고르는 단계에선 정답을 가린다 — 정답 보기 글자(와 '원'을 뗀 숫자)를 ? 로. */
+function maskAns(t, q) {
+  let out = String(t || '');
+  const a = String(q.options[q.answer - 1] || '').trim();
+  [a, a.replace(/円$/, '')].filter(x => x.length >= 2).forEach(x => { out = out.split(x).join('?'); });
+  return out;
+}
+function stepDecorate(q) {
+  STEPQ.hint = 0;
+  STEPQ.S.begin(q.id);
+  document.getElementById('hud-prog').textContent = `🐢 じっくり ${qi + 1} / ${QUEUE.length}`;
+  document.getElementById('expl').insertAdjacentHTML('beforebegin', '<div class="sq-hints" id="sq-hints"></div>');
+  stepHints(q);
+}
+function stepHints(q) {
+  const box = document.getElementById('sq-hints'); if (!box) return;
+  const d = q.deepDive || {}, wr = d.wrongReasons || {};
+  let h = '';
+  if (STEPQ.hint >= 1 && STEPQ.elim != null) h += `<div class="sq-hint"><b>💡 選択肢${STEPQ.elim}は違います。</b>${rd(maskAns(wr[String(STEPQ.elim)] || '', q), 1)}</div>`;
+  if (STEPQ.hint >= 2 && d.conceptExplain) h += `<div class="sq-hint"><b>💡 ${esc(d.concept || 'ポイント')}</b>${rd(d.conceptExplain, 2)}</div>`;
+  if (STEPQ.hint >= 3) h += `<div class="sq-hint"><b>💡 正解に黄色い枠をつけました。</b></div>`;
+  if (STEPQ.hint < 3 && !STEPQ.done) h += `<button class="sq-hbtn" type="button" id="sq-hbtn">${STEPQ.hint < 2 ? '💡 ヒント' + (STEPQ.hint + 1) : '👀 正解を見る'}</button>`;
+  box.innerHTML = h;
+  const b = document.getElementById('sq-hbtn');
+  if (b) b.onclick = () => stepHint(q);
+}
+function stepHint(q) {
+  STEPQ.hint++;
+  STEPQ.S.hint(STEPQ.hint);
+  const wr = (q.deepDive || {}).wrongReasons || {};
+  if (STEPQ.hint === 1) {   // 아직 안 지운·안 고른 오답 중 이유가 있는 것 하나를 지운다
+    const cand = [...document.querySelectorAll('.choice')].map(b => +b.dataset.i).filter(i => i !== q.answer && !document.querySelector(`.choice[data-i="${i}"]`).disabled);
+    const withWhy = cand.filter(i => wr[String(i)]);
+    const pickI = (withWhy.length ? withWhy : cand)[0];
+    if (pickI != null) { STEPQ.elim = pickI; const b = document.querySelector(`.choice[data-i="${pickI}"]`); b.disabled = true; b.classList.add('elim'); }
+  }
+  if (STEPQ.hint === 3) { const b = document.querySelector(`.choice[data-i="${q.answer}"]`); if (b) b.classList.add('step-glow'); }
+  stepHints(q);
+}
+function stepPick(choice, q) {
+  const btn = document.querySelector(`.choice[data-i="${choice}"]`);
+  const expl = document.getElementById('expl');
+  const d = q.deepDive || {}, wr = d.wrongReasons || {};
+  if (choice !== q.answer) {
+    STEPQ.S.wrong();
+    btn.classList.add('wrong'); btn.disabled = true;
+    expl.innerHTML = `<div class="verdict" style="color:var(--red)">✗ 選択肢${choice}は違います</div>` +
+      rd(maskAns(wr[String(choice)] || 'この選択肢は、問われている内容と合いません。', q), 2) +
+      `<div class="sq-again">ほかの選択肢を選んでみましょう。困ったらヒント！</div>`;
+    expl.style.display = 'block';
+    expl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    return;
+  }
+  STEPQ.done = true;
+  document.querySelectorAll('.choice').forEach(b => { b.disabled = true; b.classList.remove('step-glow'); });
+  btn.classList.add('correct');
+  const clean = STEPQ.S.done(q.id, { label: d.concept || q.topicName, q: q.stem, correct: q.answerText, type: q.topicName });
+  if (!clean && !STEPQ.again[q.id]) { STEPQ.again[q.id] = 1; QUEUE.splice(Math.min(QUEUE.length, qi + 4), 0, q); }
+  expl.innerHTML = `<div class="verdict" style="color:var(--green)">✓ 正解です！</div>${rd(d.whyCorrect || q.explanation || '', 2)}` + deepDiveHtml(q);
+  const dd = document.getElementById('dd-toggle'); if (dd) dd.onclick = () => toggleDeepDive(q);
+  expl.style.display = 'block';
+  stepHints(q);
+  const last = qi + 1 >= QUEUE.length;
+  const nb = document.getElementById('next-btn');
+  nb.textContent = last ? '結果を見る 🏁' : '次の問題 →';
+  document.getElementById('next-wrap').style.display = 'block';
+  nb.onclick = () => { qi++; STEPQ.done = false; STEPQ.elim = null; qi >= QUEUE.length ? stepEnd() : showQ(); };
+  expl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+function stepEnd() {
+  const S = STEPQ.S;
+  S.finish(true);
+  const L = S.learned(), A = S.again();
+  const list = arr => arr.slice(0, 5).map(x => '· ' + esc(x)).join('<br>');
+  document.getElementById('quiz').style.display = 'none';
+  const box = document.getElementById('result');
+  box.style.display = 'block';
+  box.innerHTML = `<span class="em">🐢</span>
+    <div class="grade">じっくりモード完了！</div>
+    <div class="res-note" style="text-align:left;line-height:1.8">🌱 今日覚えたこと <b>${L.length}</b>個${L.length ? '<br>' + list(L) : ''}
+      ${A.length ? `<br><br>🔁 もう一度見ること <b>${A.length}</b>個<br>${list(A)}<br><span style="opacity:.7">復習ノートで見直せます。</span>` : ''}</div>
+    <div class="btn-row">
+      <button class="primary" id="sq-again">もう一度</button>
+      <a href="${location.pathname.split('/').pop()}">単元を選ぶ →</a>
+    </div>`;
+  document.getElementById('sq-again').onclick = () => { STEPQ = null; startTheoryStep(); };
+  STEPQ = null;
+  document.body.classList.remove('step-mode');
+  box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── 퀴즈 진행 ──
+let QUEUE=[], qi=0, score=0, combo=0, correctCnt=0;
+let ROUND_WRONG=[];   // 이번 판에 틀린 문제 — 결과화면 '틀린 문제만 다시 풀기'(2026-10-09)
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function startQuiz(){
+    if (window.DayLog) DayLog.hit('act', 'theory', 'start');   // 시작 횟수(끝까지 한 판은 Growth.logPlay → 'finish')
+  const pool=shuffle(poolFor());
+  const n=SEL_LEN===0?pool.length:Math.min(SEL_LEN,pool.length);
+  QUEUE=pool.slice(0,n);
+  qi=0;score=0;combo=0;correctCnt=0;ROUND_WRONG=[];
+  if(window.WrongNote) WrongNote.reset();
+  document.getElementById('home').style.display='none';
+  document.getElementById('result').style.display='none';
+  document.getElementById('quiz').style.display='block';
+  showQ();
+}
+
+function tAccountHtml(v){
+  return `<span class="t-acc">
+    <span class="t-acc-label">${esc(v.account)}</span>
+    <span class="t-acc-line"></span>
+    <span class="t-acc-body">
+      <span class="t-acc-side debit">${v.side==='debit'?esc(v.amount):''}</span>
+      <span class="t-acc-side credit">${v.side==='credit'?esc(v.amount):''}</span>
+    </span>
+  </span>`;
+}
+
+function showQ(){
+  const q=QUEUE[qi];
+  document.getElementById('hud-prog').textContent=`${qi+1} / ${QUEUE.length}`;
+  document.getElementById('hud-score').textContent=score.toLocaleString();
+  document.getElementById('hud-combo').textContent=combo;
+  document.getElementById('prog-fill').style.width=(qi/QUEUE.length*100)+'%';
+  const fmt=q.format&&q.format.length?`<span class="fmt">${q.format.map(esc).join('·')}</span>`:'';
+  let html=`<div class="qcard"><div class="qmain">
+    <div class="qtag">${esc(q.topicName)}${fmt}</div>
+    <div class="qstem">${fmtStem(q.stem)}</div>
+    ${q.stemTAccount ? ledgerHtml(q.stemTAccount) : ''}
+    ${q.stemTAccounts ? `<div class="ledger-group">${q.stemTAccounts.map(ledgerHtml).join('')}</div>` : ''}
+    ${q.stemTrialBalance ? trialBalanceHtml(q.stemTrialBalance) : ''}
+    ${q.stemTable ? simpleTableHtml(q.stemTable) : ''}
+    ${q.stemReceipt ? receiptHtml(q.stemReceipt) : ''}</div><div class="qopts">`;   // 日本版: 横画面で問題(左)・選択肢(右)に分けるための包み(2026-11-14)
+  q.options.forEach((o,i)=>{
+    const body = q.optionsVisual && q.optionsVisual[i] ? tAccountHtml(q.optionsVisual[i]) : `<span>${esc(o)}</span>`;
+    html+=`<button class="choice${q.optionsVisual?' has-visual':''}" data-i="${i+1}"><span class="no">${i+1}</span>${body}</button>`;
+  });
+  html+=`</div><div class="expl" id="expl"></div>
+    <div class="next-wrap" id="next-wrap"><button class="cta" id="next-btn">${qi+1>=QUEUE.length?'結果を見る 🏁':'次の問題 →'}</button></div>
+    ${q.source?`<div class="qsrc">${esc(q.source)}</div>`:''}
+  </div>`;
+  document.getElementById('quiz-body').innerHTML=html;
+  document.querySelectorAll('.choice').forEach(b=>b.onclick=()=>pick(parseInt(b.dataset.i),q));
+  if(STEPQ) stepDecorate(q);
+}
+
+function pick(choice,q){
+  if(STEPQ) return stepPick(choice,q);   // 차근차근 모드: 틀려도 정답을 바로 안 보여 주고 다시 고르게
+  document.querySelectorAll('.choice').forEach(b=>{
+    b.disabled=true;
+    const i=parseInt(b.dataset.i);
+    if(i===q.answer) b.classList.add('correct');
+    else if(i===choice) b.classList.add('wrong');
+  });
+  const ok=choice===q.answer;
+  if(window.Growth) Growth.logTopicAttempt({game:'theory', topic:q.topicName, correct:ok});
+  const expl=document.getElementById('expl');
+  const verdictHtml = ok
+    ? `<div class="verdict" style="color:var(--green)">✓ 正解！</div>${rd(q.explanation,2)}`
+    : `<div class="verdict" style="color:var(--red)">✗ 不正解 — 正解は選択肢${q.answer}</div>${rd(q.explanation,2)}`;
+  expl.innerHTML = verdictHtml + deepDiveHtml(q);
+  if(ok){
+    combo++; correctCnt++;
+    score+=100+(combo-1)*20;
+  }else{
+    combo=0;
+    if(ROUND_WRONG.indexOf(q)<0) ROUND_WRONG.push(q);
+    if(window.WrongNote) WrongNote.add({
+      game:'theory', key:q.id, q:q.stem,
+      correct:q.answerText, wrong:q.options[choice-1]||'',
+      type:q.topicName
+    });
+  }
+  const dd=document.getElementById('dd-toggle');
+  if(dd) dd.onclick=()=>toggleDeepDive(q);
+  document.getElementById('hud-score').textContent=score.toLocaleString();
+  document.getElementById('hud-combo').textContent=combo;
+  expl.style.display='block';
+  document.getElementById('next-wrap').style.display='block';
+  document.getElementById('next-btn').onclick=()=>{ qi++; qi>=QUEUE.length?endQuiz():showQ(); };
+  expl.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+// 긴 해설은 문장마다 줄을 나누고 앞 몇 문장만 먼저 보여 준다(readable.js, 2026-09-23 가독성 요청)
+function rd(t,keep){ return window.Readable ? Readable.html(t||'',{keep:keep}) : esc(t||''); }
+
+function deepDiveHtml(q){
+  if(!q.deepDive) return '';
+  return `<button class="dd-btn" id="dd-toggle">🔍 くわしい解説を見る</button>
+    <div class="dd-panel" id="dd-panel" style="display:none"></div>`;
+}
+
+function toggleDeepDive(q){
+  const panel=document.getElementById('dd-panel');
+  const btn=document.getElementById('dd-toggle');
+  if(!panel) return;
+  const opening = panel.style.display==='none';
+  if(opening && !panel.dataset.built){
+    const d=q.deepDive;
+    const wrongList = q.options.map((o,i)=>{
+      const idx=i+1;
+      if(idx===q.answer) return '';
+      const reason = d.wrongReasons && d.wrongReasons[String(idx)];
+      if(!reason) return '';
+      return `<div class="dd-wrong"><div class="dd-wrong-opt"><span class="dd-wrong-no">選択肢${idx}</span> ${esc(o)}</div>${rd(reason,0)}</div>`;
+    }).join('');
+    panel.innerHTML = `
+      <div class="dd-block"><div class="dd-label">📌 ポイント</div><div class="dd-text">${esc(d.concept||'')}</div></div>
+      <div class="dd-block"><div class="dd-label">💡 やさしい説明</div><div class="dd-text">${rd(d.conceptExplain,2)}</div></div>
+      <div class="dd-block"><div class="dd-label">✅ 正解の解説</div><div class="dd-text">${rd(d.whyCorrect,2)}</div></div>
+      ${wrongList?`<div class="dd-block"><div class="dd-label">❌ 不正解の解説</div>${wrongList}</div>`:''}
+    `;
+    panel.dataset.built='1';
+  }
+  panel.style.display = opening ? 'block' : 'none';
+  btn.textContent = opening ? '🔍 解説をとじる' : '🔍 くわしい解説を見る';
+  if(opening) panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function grade(rate){
+  if(rate>=0.9) return '👑 簿記マスター';
+  if(rate>=0.75) return '🥇 合格圏';
+  if(rate>=0.6) return '🥈 合格まであと少し';
+  if(rate>=0.4) return '🥉 もうひと頑張り';
+  return '📋 基礎固め';
+}
+
+async function endQuiz(){
+  if(window.WrongNote) await WrongNote.flush('theory');
+  // 성장 그래프용 — 이번 판 결과를 이력에 기록 (다른 게임들과 동일)
+  const rate=QUEUE.length?correctCnt/QUEUE.length:0;
+  if(window.Growth) Growth.record({game:'theory', score:score, grade:grade(rate), combo:combo, correct:correctCnt, total:QUEUE.length});
+  if(window.Growth && Growth.logPlay) Growth.logPlay('theory');   // 이론도 판수(play_events)에 남긴다 — 그동안 분석에서 '안 노는 사람'으로 잘못 보였다(분석팀 10/9)
+  // 다른 게임들과 동일하게 N판마다 전면광고 후 결과 표시
+  requestInterstitialIfNeeded(renderResult);
+}
+function renderResult(){
+  const total=QUEUE.length, wrong=total-correctCnt;
+  const rate=total?correctCnt/total:0;
+  document.getElementById('quiz').style.display='none';
+  const box=document.getElementById('result');
+  box.style.display='block';
+  box.innerHTML=`
+    <span class="em">${rate>=0.6?'🎉':'💪'}</span>
+    <div class="score">${score.toLocaleString()}点</div>
+    <div class="grade">${grade(rate)}</div>
+    <div class="res-row">
+      <div>正解率<span class="v" style="color:var(--blue)">${Math.round(rate*100)}%</span></div>
+      <div>正解<span class="v" style="color:var(--green)">${correctCnt}</span></div>
+      <div>不正解<span class="v" style="color:var(--red)">${wrong}</span></div>
+    </div>
+    <div class="res-note">${wrong>0?`間違えた${wrong}問が<b style="color:var(--gold)">復習ノート</b>に保存されました。`:'全問正解です！ 完璧です 👏'}</div>
+    ${ROUND_WRONG.length?`<button class="retry-wrong" onclick="retryWrong()">${window.AdBridge?'<img class="rw-ico" src="../assets/icons/ad_tv.webp" alt="">広告を見て':'<img class="rw-ico" src="../assets/icons/retry_gold.webp" alt="">'}間違えた問題を解き直す (${ROUND_WRONG.length}問)</button>`:''}
+    <div class="btn-row">
+      <button class="primary" onclick="location.reload()">もう一度</button>
+      ${wrong>0?'<a href="review.html">復習ノート →</a>':'<a href="index.html">ホーム →</a>'}
+    </div>`;
+  if(ROUND_WRONG.length && window.AdBridge && window.DayLog) DayLog.hit('ad','theory_retry','rw_offer');
+  box.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* ── 틀린 문제만 다시 풀기(2026-10-09, 성일님 "좋네") ──
+   이론만 푸는 사람은 게임 쪽 보상형(시간 추가 등)을 볼 일이 없다 → 학습을 막지 않고 '더 하고 싶은 사람에게' 주는 보상형.
+   다음 세트·처음부터 다시 풀기는 지금처럼 광고 없이 된다. 앱에서 광고를 못 불러오면 막지 않고 그냥 시작(오프라인만 막음).
+   웹은 광고가 없어 바로 시작. */
+function startWrongRetry(){
+  const list=shuffle(ROUND_WRONG.slice());
+  if(!list.length) return;
+  if (window.DayLog) DayLog.hit('act', 'theory'+'_retry', 'start');
+  QUEUE=list; qi=0;score=0;combo=0;correctCnt=0;ROUND_WRONG=[];
+  if(window.WrongNote) WrongNote.reset();
+  document.getElementById('result').style.display='none';
+  document.getElementById('quiz').style.display='block';
+  showQ();
+  window.scrollTo(0,0);
+}
+function retryWrong(){
+  const Ad=window.AdBridge;
+  if(!Ad || typeof Ad.showRewarded!=='function'){ startWrongRetry(); return; }
+  if(navigator.onLine===false){ Ask.alert('インターネットに接続してから、もう一度タップしてください。'); return; }
+  if(typeof Ad.isRewardedReady==='function' && !Ad.isRewardedReady()){
+    if (window.DayLog) DayLog.hit('ad', 'theory_retry', 'rw_free');
+    startWrongRetry(); return;
+  }
+  let done=false;
+  window.onRewardGranted=function(){ if(done) return; done=true; startWrongRetry(); };
+  window.onRewardedFailed=function(){
+    if(done) return; done=true;
+    if(navigator.onLine===false){ Ask.alert('インターネットに接続してから、もう一度お試しください。'); return; }
+    if (window.DayLog) DayLog.hit('ad', 'theory_retry', 'rw_free');
+    startWrongRetry();
+  };
+  window.__adPlace='theory_retry';
+  try { Ad.showRewarded(); } finally { window.__adPlace=null; }
+}
+
+// ── 광고(전면) — 다른 게임들과 공유 카운터, N판마다 표시 ──
+const AD_GAME_COUNT_KEY='hub_ad_game_count';
+const AD_INTERSTITIAL_EVERY=10;
+function incrementGameCount(){
+  const n=parseInt(localStorage.getItem(AD_GAME_COUNT_KEY)||'0')+1;
+  localStorage.setItem(AD_GAME_COUNT_KEY,String(n)); return n;
+}
+function requestInterstitialIfNeeded(afterFn){
+  if(window.AdBridge && typeof AdBridge.isAdsRemoved==='function' && AdBridge.isAdsRemoved()){ afterFn&&afterFn(); return; }
+  window._adAfterFn=afterFn;
+  const count=incrementGameCount();
+  if(count%AD_INTERSTITIAL_EVERY===0 && window.AdBridge && typeof AdBridge.showInterstitial==='function'){
+    AdBridge.showInterstitial(); // 닫히면 onInterstitialClosed()에서 afterFn 실행
+  } else {
+    /* 광고를 안 띄우고 그냥 넘어가는 길. 예약해 둔 함수를 **반드시 지우고** 부른다 —
+       안 지우면 다음에 뒤늦은 광고 닫힘 신호가 왔을 때 지난 함수가 한 번 더 불린다
+       (결과화면에서 난데없이 화면이 넘어가는 증상, 2026-09-16 정리). */
+    window._adAfterFn = null;
+    afterFn && afterFn();
+  }
+}
+function onInterstitialClosed(){ if(window._adAfterFn){ const f=window._adAfterFn; window._adAfterFn=null; f(); } }
+function onAdsRemoved(){}
+function hideAdPlaceholder(){ if(window.AdBridge && typeof AdBridge.hide==='function') AdBridge.hide(); }
+
+load();
+</script>
+<script src="emoji-icons.js?v=79"></script>
+</body>
+</html>

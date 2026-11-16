@@ -1,0 +1,1695 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
+         **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
+         이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
+    <script src="ja/ja_data.js?v=1"></script>
+<script src="ja/server_ja.js?v=1"></script>
+<link rel="stylesheet" href="ja/ja.css?v=1">
+<script src="safestore.js?v=79"></script><script src="../nickfilter.js?v=2"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<style>html{-webkit-text-size-adjust:100%;text-size-adjust:100%}</style>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="簿記ゲーセン">
+<meta name="theme-color" content="#020810">
+
+<!-- ★ 앱 아이콘 연결 -->
+<!-- iOS 홈 화면 아이콘 -->
+<link rel="apple-touch-icon" href="icon.png">
+<!-- Android / PWA 아이콘 -->
+<link rel="icon" type="image/png" href="icon.png">
+<!-- PWA 매니페스트 -->
+<link rel="manifest" href="manifest.json">
+<title>簿記3級マスター — 5ステージ トレーニング</title>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;800&family=Noto+Sans+JP:wght@400;500;700;900&family=Black+Han+Sans&family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cy: #00f2ff;
+  --pk: #ff2d78;
+  --gd: #ffd600;
+  --gn: #00e676;
+  --pu: #b44fff;
+  --bg: #020810;
+  --panel: rgba(255,255,255,0.04);
+  --border: rgba(255,255,255,0.10);
+
+  /* 광고 배너 높이 — 안드로이드 AdMob 배너 표준 50px */
+
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  width: 100%; height: 100%;
+  overscroll-behavior: none; /* 스크롤 바운스 방지 */
+}
+
+body {
+  font-family: 'Noto Sans JP', 'Noto Sans KR', sans-serif;
+  background: var(--bg);
+  color: white;
+  min-height: 100vh;
+  min-height: 100dvh; /* dynamic viewport height (모바일 주소창 고려) */
+  overflow-x: hidden;
+  /* 하단 광고 공간 확보 */
+
+  background-image:
+    radial-gradient(ellipse 60% 40% at 15% 20%, rgba(0,242,255,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 35% at 85% 80%, rgba(180,79,255,0.07) 0%, transparent 55%),
+    radial-gradient(ellipse 40% 30% at 50% 50%, rgba(255,45,120,0.04) 0%, transparent 60%);
+}
+
+/* ── 별 캔버스 ── */
+#starfield { position:fixed; inset:0; z-index:0; pointer-events:none; }
+
+/* ── AdMob 광고 자리 (하단 고정) ── */
+/* 실제 AdMob SDK는 안드로이드 레이아웃에서 처리.
+   WebView에서 테스트할 때 공간 확인용으로만 사용 */
+
+
+/* ── 레이아웃 ── */
+.wrap {
+  position: relative; z-index: 1;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 60px 40px calc(80px + var(--ad-banner-h, 0px));
+}
+
+/* ── 헤더 ── */
+.hub-header { text-align:center; margin-bottom:64px; }
+.hub-badge {
+  display:inline-block;
+  font-family:'Orbitron', monospace;
+  font-size:0.72rem; letter-spacing:4px; color:rgba(0,242,255,0.6);
+  border:1px solid rgba(0,242,255,0.2);
+  padding:6px 20px; border-radius:50px;
+  margin-bottom:22px;
+  background:rgba(0,242,255,0.04);
+}
+.hub-title {
+  font-family:'M PLUS Rounded 1c', 'Black Han Sans', sans-serif;
+  font-size:3.8rem;
+  line-height:1.1;
+  margin-bottom:14px;
+}
+.hub-title .t1 { color:#fff; }
+.hub-title .t2 {
+  background: linear-gradient(90deg, var(--cy), var(--pu));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+}
+.hub-desc {
+  font-size:1.05rem;
+  color:rgba(255,255,255,0.45);
+  letter-spacing:0.5px;
+}
+
+/* ── 경로 라인 ── */
+.path-line {
+  display:flex; align-items:center; justify-content:center;
+  gap:0; margin-bottom:48px; flex-wrap:wrap;
+}
+.path-step {
+  display:flex; align-items:center; gap:10px;
+  font-family:'Orbitron', monospace;
+  font-size:0.78rem; letter-spacing:1px;
+  color:rgba(255,255,255,0.25);
+  white-space:nowrap;
+}
+.path-step.active { color:var(--cy); }
+.path-dot {
+  width:8px; height:8px; border-radius:50%;
+  background:rgba(255,255,255,0.15);
+  flex-shrink:0;
+}
+.path-step.active .path-dot { background:var(--cy); box-shadow:0 0 10px var(--cy); }
+.path-arrow {
+  width:40px; height:1px;
+  background:linear-gradient(to right, rgba(255,255,255,0.1), rgba(255,255,255,0.2));
+  flex-shrink:0;
+}
+
+.review-entry {
+  display:flex; align-items:center; gap:14px; text-decoration:none;
+  background:linear-gradient(100deg, rgba(180,79,255,.18), rgba(0,242,255,.12));
+  border:1px solid rgba(0,242,255,.28); border-radius:18px;
+  padding:16px 18px; margin-bottom:22px; color:#eaf2ff;
+  transition:transform .15s, box-shadow .15s;
+}
+.review-entry:active { transform:scale(.985); }
+.review-entry .re-icon { font-size:1.7rem; flex:none; }
+.review-entry .re-body { flex:1; }
+.review-entry .re-title { font-weight:700; font-size:1.02rem; letter-spacing:-.2px; }
+.review-entry .re-desc { font-size:.84rem; color:rgba(234,242,255,.6); margin-top:3px; }
+.review-entry .re-go { font-size:1.1rem; color:#00f2ff; flex:none; }
+.theory-entry {
+  background:linear-gradient(100deg, rgba(0,242,255,.16), rgba(46,204,113,.12));
+  border-color:rgba(46,204,113,.32); margin-bottom:12px;
+}
+.theory-entry .re-go { color:#2ecc71; }
+
+/* ── 게임 카드 그리드 ── */
+.games-grid {
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:16px;
+  margin-bottom:60px;
+}
+
+.game-card {
+  position:relative;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:28px 20px 24px;
+  text-decoration:none; color:white;
+  cursor:pointer;
+  transition:transform 0.22s, box-shadow 0.22s, border-color 0.22s, background 0.22s;
+  overflow:hidden;
+  display:flex; flex-direction:column; align-items:center; gap:14px;
+  /* 터치 영역 최소 보장 */
+  min-height: 44px;
+}
+.game-card::before {
+  content:'';
+  position:absolute; inset:0;
+  background:var(--card-glow, rgba(0,242,255,0.06));
+  opacity:0; transition:opacity 0.25s;
+  border-radius:inherit;
+}
+.game-card:hover { transform:translateY(-8px); border-color:var(--card-color, var(--cy)); }
+.game-card:hover::before { opacity:1; }
+.game-card:hover { box-shadow:0 20px 50px var(--card-shadow, rgba(0,242,255,0.2)); }
+
+/* 터치 활성 상태 (모바일 hover 대체) */
+.game-card:active {
+  transform: scale(0.97);
+  border-color: var(--card-color, var(--cy));
+}
+.game-card:active::before { opacity: 1; }
+
+/* 단계별 색상 */
+.card-1 { --card-color:var(--gn);  --card-glow:rgba(0,230,118,0.06);  --card-shadow:rgba(0,230,118,0.2);  }
+.card-2 { --card-color:var(--cy);  --card-glow:rgba(0,242,255,0.06);  --card-shadow:rgba(0,242,255,0.2);  }
+.card-3 { --card-color:var(--pu);  --card-glow:rgba(180,79,255,0.06); --card-shadow:rgba(180,79,255,0.2); }
+.card-4 { --card-color:var(--gd);  --card-glow:rgba(255,214,0,0.06);  --card-shadow:rgba(255,214,0,0.2);  }
+.card-5 { --card-color:var(--pk);  --card-glow:rgba(255,45,120,0.06); --card-shadow:rgba(255,45,120,0.2); }
+
+.card-stage {
+  font-family:'Orbitron', monospace;
+  font-size:0.85rem; letter-spacing:3px;
+  color:var(--card-color, var(--cy));
+  opacity:0.7;
+}
+.card-icon {
+  font-size:3.5rem;
+  filter:drop-shadow(0 0 12px var(--card-color, var(--cy)));
+  transition:transform 0.2s;
+}
+.game-card:hover .card-icon { transform:scale(1.15); }
+
+.card-title {
+  font-family:'M PLUS Rounded 1c', 'Black Han Sans', sans-serif;
+  font-size:1.5rem; text-align:center;
+  color:#fff; line-height:1.35;
+}
+.card-desc {
+  font-size:1rem; color:rgba(255,255,255,0.4);
+  text-align:center; line-height:1.6;
+}
+.card-count {
+  font-family:'Orbitron', monospace;
+  font-size:0.85rem; color:var(--card-color, var(--cy));
+  background:rgba(255,255,255,0.04);
+  padding:4px 14px; border-radius:50px;
+  border:1px solid rgba(255,255,255,0.08);
+  white-space:nowrap;
+}
+.card-best {
+  display:none;   /* 기록 있을 때 JS가 표시 */
+  font-size:0.74rem; color:#ffd24a;
+  margin-top:5px; white-space:nowrap;
+}
+.card-play {
+  display:flex; align-items:center; justify-content:center;
+  width:100%; padding:14px;
+  background:transparent;
+  border:1.5px solid var(--card-color, var(--cy));
+  border-radius:50px;
+  font-family:'M PLUS Rounded 1c', 'Black Han Sans', sans-serif;
+  font-size:1.15rem; color:var(--card-color, var(--cy));
+  transition:background 0.18s, color 0.18s;
+  margin-top:4px;
+  /* 터치 최소 높이 */
+  min-height: 48px;
+}
+.game-card:hover .card-play,
+.game-card:active .card-play {
+  background:var(--card-color, var(--cy));
+  color:#000;
+}
+
+/* ── 스테이지 노드맵 (징검다리 진행경로) ── */
+.stagemap { position:relative; max-width:360px; margin:0 auto 60px; aspect-ratio:400/1000; }
+.stagemap svg.trail { position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
+.trail-dim { fill:none; stroke:rgba(255,255,255,0.12); stroke-width:5; stroke-linecap:round; }
+.trail-lit { fill:none; stroke:var(--gd); stroke-width:5; stroke-linecap:round;
+  filter:drop-shadow(0 0 5px var(--gd)); transition:stroke-dashoffset 1.4s ease .2s; }
+.stagemap .nodes { position:absolute; inset:0; }
+.stage-node {
+  position:absolute; transform:translate(-50%,-50%);
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  text-decoration:none; width:112px;
+}
+.stage-node .disc {
+  position:relative;
+  width:64px; height:64px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.9rem; color:var(--card-color, var(--cy));
+  background:rgba(255,255,255,0.04);
+  border:2px solid var(--card-color, var(--cy));
+  box-shadow:0 0 16px var(--card-glow, rgba(0,242,255,0.35));
+  transition:transform 0.18s;
+}
+.stage-node:active .disc { transform:scale(0.93); }
+.stage-node.cur .disc { animation:nodePulse 1.6s ease-in-out infinite; }
+@keyframes nodePulse {
+  0%,100% { box-shadow:0 0 16px var(--card-glow, rgba(0,242,255,0.35)); }
+  50%     { box-shadow:0 0 32px var(--card-glow, rgba(0,242,255,0.35)); }
+}
+.stage-node.lock .disc {
+  color:rgba(255,255,255,0.3);
+  border-color:rgba(255,255,255,0.15);
+  background:rgba(255,255,255,0.02);
+  box-shadow:none;
+}
+.stage-node.lock .disc .ei { opacity:0.35; }
+.badge {
+  position:absolute; width:24px; height:24px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:#0b0e16; border:1.5px solid rgba(255,255,255,0.18);
+}
+.badge svg { width:13px; height:13px; }
+.stage-node .lock-badge { right:-3px; bottom:-3px; color:rgba(255,255,255,0.6); }
+.stage-node .clear-badge { right:-3px; top:-3px; color:#04240f; background:var(--gn); border-color:var(--gn); box-shadow:0 0 8px var(--gn); }
+.stage-node .n-title { font-family:'M PLUS Rounded 1c', 'Black Han Sans', sans-serif; font-size:0.9rem; color:#fff; text-align:center; line-height:1.25; word-break:keep-all; }   /* 큰 글자 설정에서 '산성/비'처럼 한 글자만 떨어지던 것(2026-09-27 QA) */
+.stage-node.lock .n-title { color:rgba(255,255,255,0.35); }
+.stage-node .n-sub { font-size:0.72rem; color:var(--card-color, var(--cy)); text-align:center; white-space:nowrap; min-height:1.1em; }
+.stage-node.lock .n-sub { color:rgba(255,255,255,0.3); }
+
+/* ── 난이도1/2 뱃지 겸 전환 스위치 (열린 스테이지에만 노출) ── */
+.lv-pill {
+  display:none; align-items:center; gap:3px;
+  background:rgba(0,0,0,0.35); border-radius:50px; padding:2px;
+}
+.lv-pill.show { display:flex; }
+.lv-seg {
+  font-family:'Orbitron', monospace;
+  font-size:0.68rem; letter-spacing:0.5px;
+  padding:3px 8px; border-radius:50px;
+  color:rgba(255,255,255,0.35);
+  cursor:pointer; transition:all 0.15s;
+  min-width:24px; text-align:center;
+}
+.lv-seg.active { background:var(--card-color, var(--cy)); color:#000; font-weight:700; }
+.lv-seg.locked { opacity:0.4; }
+
+/* ── 푸터 ── */
+.hub-footer {
+  text-align:center;
+  padding-top:24px;
+  border-top:1px solid var(--border);
+}
+.hub-footer .footer-title {
+  font-family:'Orbitron', monospace;
+  font-size:0.88rem; letter-spacing:2px;
+  color:rgba(255,255,255,0.55);
+  margin-bottom:8px;
+}
+.hub-footer .footer-title span { color:var(--cy); }
+.hub-footer .footer-copy {
+  font-size:0.76rem;
+  color:rgba(255,255,255,0.2);
+  letter-spacing:0.5px;
+  line-height:1.8;
+}
+.logout-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  background: rgba(255,45,120,0.08);
+  border: 1px solid rgba(255,45,120,0.25);
+  border-radius: 50px;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 2px;
+  color: rgba(255,45,120,0.7);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  margin-top: 8px;
+}
+.logout-btn:hover, .logout-btn:active {
+  background: rgba(255,45,120,0.18);
+  border-color: rgba(255,45,120,0.6);
+  color: #ff2d78;
+}
+
+/* ── 애니메이션 ── */
+@keyframes fadeInUp {
+  from { opacity:0; transform:translateY(24px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.game-card { animation:fadeInUp 0.5s ease both; }
+.card-1 { animation-delay:0.05s; }
+.card-2 { animation-delay:0.12s; }
+.card-3 { animation-delay:0.19s; }
+.card-4 { animation-delay:0.26s; }
+.card-5 { animation-delay:0.33s; }
+
+/* ════════════════════════════════════════════
+   📱 모바일 반응형 (600px 이하 — 스마트폰)
+   ════════════════════════════════════════════ */
+@media (max-width: 600px) {
+
+  .wrap {
+    padding: 32px 16px calc(24px + var(--ad-banner-h, 0px));
+  }
+
+  /* 헤더 */
+  .hub-header { margin-bottom: 32px; }
+  .hub-badge {
+    font-size: 0.6rem; letter-spacing: 2px;
+    padding: 5px 14px;
+    margin-bottom: 14px;
+  }
+  .hub-title { font-size: 2.2rem; margin-bottom: 10px; }
+  .hub-desc { font-size: 0.85rem; }
+
+  /* 경로 라인 — 모바일에서 압축 */
+  .path-line { margin-bottom: 28px; gap: 0; }
+  .path-step { font-size: 0.68rem; letter-spacing: 0.5px; gap: 5px; }
+  .path-dot { width: 6px; height: 6px; }
+  .path-arrow { width: 18px; }
+
+  /* 게임 카드 — 세로 1열로 전환 */
+  .games-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .game-card {
+    flex-direction: row;      /* 가로 배치 */
+    align-items: center;
+    padding: 16px 14px;
+    gap: 12px;
+    border-radius: 16px;
+    /* 애니메이션 비활성화 — 저사양 기기 배려 */
+    animation: none;
+    opacity: 1;
+    transform: none;
+    min-height: 80px;
+  }
+
+  /* 카드 내부 왼쪽: 아이콘+단계 */
+  .card-left {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 2px;
+    flex-shrink: 0;
+    width: 56px;
+  }
+  .card-stage { font-size: 0.6rem; letter-spacing: 1px; }
+  .card-icon  { font-size: 2.2rem; }
+
+  /* 카드 내부 중앙: 텍스트 */
+  .card-body {
+    flex: 1; display: flex; flex-direction: column; gap: 4px;
+    min-width: 0; /* 텍스트 넘침 방지 */
+  }
+  .card-title { font-size: clamp(0.88rem, 3.8vw, 1.1rem); text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card-desc  { font-size: 0.78rem; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card-count { font-size: 0.68rem; align-self: flex-start; white-space: nowrap; }
+
+  /* 카드 내부 오른쪽: 버튼 — 고정 너비로 전 카드 동일하게 */
+  .card-play {
+    width: 72px;
+    min-width: 72px;
+    padding: 0 8px;
+    font-size: 0.9rem;
+    border-radius: 12px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    min-height: 48px;
+    text-align: center;
+  }
+
+  /* hover 효과 제거 (모바일 불필요) */
+  .game-card:hover { transform: none; box-shadow: none; }
+  .game-card:hover .card-icon { transform: none; }
+
+  /* 푸터 */
+  .hub-footer { padding-top: 16px; }
+  .hub-footer .footer-title { font-size: 0.72rem; }
+  .hub-footer .footer-copy  { font-size: 0.65rem; }
+}
+
+/* ── 태블릿 (601px ~ 900px) — 2열 그리드 ── */
+@media (min-width: 601px) and (max-width: 900px) {
+  .wrap { padding: 40px 24px calc(60px + var(--ad-banner-h, 0px)); }
+  .hub-title { font-size: 2.8rem; }
+  .games-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+  .card-5 { grid-column: 1 / -1; max-width: 320px; margin: 0 auto; }
+}
+
+/* ── 상단 유저바 ── */
+.user-bar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 200;
+  display: flex; align-items: center; gap: 10px;
+  /* 캡차시터 웹뷰는 노치/다이나믹아일랜드 아래까지 그려지므로 안전영역만큼 더 밀어준다.
+     (구 네이티브 앱은 웹뷰 자체가 이미 세이프에어리어 안쪽이라 필요 없었다) */
+  padding: calc(12px + env(safe-area-inset-top)) 20px 12px;
+  background: rgba(2,8,16,0.82);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+  /* 닉네임은 학생 본인 이름이다 — 자리 경쟁에서 마지막까지 살아남아야 한다.
+     예전엔 .ub-nick 만 flex:1 이고 나머지가 전부 flex-shrink:0 이라, 폭이 모자라면
+     닉네임이 0 까지 찌그러져 통째로 사라졌다(390px 실측 3~19px). 그룹 칩이 먼저
+     줄어들고(말줄임) 닉네임은 최소 44px 를 지킨다. */
+.user-bar .ub-nick {
+  display: flex; align-items: center; gap: 7px;
+  flex: 1 1 auto; min-width: 44px;
+  overflow: hidden;   /* 안쪽 글자가 밖으로 삐져나와 옆 칩 위에 그려지는 걸 막는다 */
+}
+.user-bar .ub-nick .ub-label {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.58rem; letter-spacing: 2px;
+  color: rgba(0,242,255,0.5); flex-shrink: 0;
+}
+.user-bar .ub-nick .ub-name {
+  font-weight: 700; font-size: 0.92rem;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  color: rgba(255,255,255,0.88);
+}
+.user-bar .ub-group {
+  display: none;
+  align-items: center; gap: 6px;
+  padding: 4px 12px;
+  background: rgba(180,79,255,0.09);
+  border: 1px solid rgba(180,79,255,0.22);
+  border-radius: 50px;
+  font-size: 0.75rem; color: rgba(180,79,255,0.85);
+  white-space: nowrap;
+  max-width: 160px; overflow: hidden; text-overflow: ellipsis;
+  flex: 0 1 auto; min-width: 0;   /* 자리가 모자라면 닉네임보다 먼저 줄어든다 */
+}
+.user-bar .ub-group.show { display: flex; }
+.user-bar .ub-group .ug-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--pu); flex-shrink: 0;
+  animation: blink 2s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1}50%{opacity:0.3} }
+
+.group-mode-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 16px;
+  background: rgba(180,79,255,0.09);
+  border: 1px solid rgba(180,79,255,0.28);
+  border-radius: 50px;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.76rem; letter-spacing: 0.5px;
+  color: var(--pu);
+  cursor: pointer; text-decoration: none;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+  white-space: nowrap; flex-shrink: 0;
+}
+.group-mode-btn:hover, .group-mode-btn:active {
+  background: rgba(180,79,255,0.18);
+  border-color: var(--pu);
+  box-shadow: 0 0 14px rgba(180,79,255,0.22);
+}
+
+/* ── 성장 그래프 버튼(헤더 우측) ── */
+.graph-btn {
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px; flex-shrink: 0;
+  background: rgba(0,242,255,0.09);
+  border: 1px solid rgba(0,242,255,0.28);
+  border-radius: 12px;
+  color: var(--cy); text-decoration: none;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+.graph-btn:hover, .graph-btn:active {
+  background: rgba(0,242,255,0.18);
+  border-color: var(--cy);
+  box-shadow: 0 0 14px rgba(0,242,255,0.25);
+}
+.graph-btn svg { display: block; }
+.graph-btn .gdot {
+  position: absolute; top: -3px; right: -3px;
+  width: 9px; height: 9px; border-radius: 50%;
+  background: #2ecc71; border: 1.5px solid #020810;
+  display: none; box-shadow: 0 0 6px rgba(46,204,113,0.85);
+}
+.graph-btn .gdot.show { display: block; }
+
+.hub-mute-btn {
+  font-family: inherit;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+.hub-mute-btn.muted {
+  background: rgba(255,45,120,0.09);
+  border-color: rgba(255,45,120,0.32);
+  color: var(--pk);
+}
+
+/* 유저바 공간 확보용 패딩 (유저바가 안전영역만큼 커진 만큼 그대로 더해준다)
+   2026-09-14 상단바가 2줄이 되면서 높이 92px → 여유 16px 두고 108px. */
+.wrap { padding-top: calc(108px + env(safe-area-inset-top)) !important; }
+@media (max-width: 600px) {
+  /* 좁은 화면에선 장식용 'PLAYER' 라벨을 감춘다(2026-09-14, 사용자 선택).
+     390px 에서 .ub-nick 이 flex:1 로 폭 0 까지 찌그러지는데 이 라벨은 flex-shrink:0 이라
+     밖으로 삐져나와 옆 그룹 칩 위에 겹쳐 그려졌다. 정작 닉네임은 안 보이고 라벨만 보였다.
+     버튼 글자는 하나도 안 건드린다 — 600px 이상에선 라벨도 그대로 보인다. */
+  .user-bar .ub-nick .ub-label { display: none; }
+  .user-bar { padding-left: 14px; padding-right: 14px; }
+  .group-mode-btn { font-size: 0.7rem; padding: 7px 12px; }
+  .wrap { padding-top: calc(104px + env(safe-area-inset-top)) !important; }   /* 2줄 상단바(≤600px 에선 89px) */
+  .user-bar .ub-group { max-width: 100px; font-size: 0.68rem; }
+}
+
+/* ── 첫 실행 안내(2026-10-09) — 처음 설치해 한 판도 안 한 사람에게만, 허브 맨 위에. 새 창 아니고 허브 안 카드 ── */
+.first-run{display:none;max-width:640px;margin:0 auto 18px;position:relative;border-radius:18px;padding:16px 18px 14px;
+  background:linear-gradient(160deg,rgba(0,242,255,.10),rgba(0,230,118,.06));border:1.5px solid rgba(0,242,255,.45);
+  box-shadow:0 0 0 1px rgba(0,242,255,.08),0 10px 30px rgba(0,0,0,.35);}
+.first-run.show{display:block;}
+.first-run .fr-eyebrow{font-size:.72rem;letter-spacing:1.5px;color:#7ff7ff;font-weight:700;margin-bottom:6px}
+.first-run .fr-row{display:flex;gap:14px;align-items:center}
+.first-run .fr-ico{width:56px;height:56px;flex-shrink:0;border-radius:14px;background:rgba(0,242,255,.12);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 1px rgba(0,242,255,.35)}
+.first-run .fr-ico img{display:block;width:40px;height:40px}   /* 허브 지도의 산성비 스테이지 그림과 같은 것(raincloud.webp) */
+.first-run .fr-title{font-family:'M PLUS Rounded 1c', 'Black Han Sans',sans-serif;font-size:1.25rem;color:#fff;line-height:1.3}
+.first-run .fr-desc{font-size:.84rem;color:rgba(255,255,255,.72);line-height:1.55;margin-top:3px;word-break:keep-all}
+.first-run .fr-go{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;width:100%;min-height:52px;border:none;border-radius:14px;cursor:pointer;
+  background:linear-gradient(135deg,#00f2ff,#00e676);color:#04121a;font-family:'M PLUS Rounded 1c', 'Black Han Sans',sans-serif;font-size:1.12rem;letter-spacing:.5px;
+  box-shadow:0 6px 18px rgba(0,242,255,.28)}
+.first-run .fr-play{width:26px;height:26px;display:block}   /* 제미나이 아이콘 그리드(2026-10-09) */
+.first-run .fr-skip{display:block;margin:8px auto 0;background:none;border:none;color:rgba(255,255,255,.5);font-size:.8rem;padding:6px 10px;cursor:pointer;min-height:36px}
+
+/* ── D-day 카운터 ── */
+.examday-box {
+  max-width: 640px;
+  margin: 0 auto 32px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 16px 20px;
+  display: flex; align-items: center; gap: 16px;
+  flex-wrap: wrap;
+}
+.examday-box .ed-dday {
+  font-family: 'Orbitron', monospace;
+  font-weight: 900;
+  font-size: 1.5rem;
+  color: var(--gd);
+  letter-spacing: 1px;
+  flex-shrink: 0;
+}
+.examday-box .ed-body {
+  flex: 1; min-width: 160px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.examday-box .ed-date {
+  font-size: 0.84rem;
+  color: rgba(255,255,255,0.45);
+  line-height: 1.5;
+}
+.examday-box .ed-note {
+  font-size: 0.72rem; color: rgba(255,255,255,0.42); line-height: 1.5; margin-top: -4px;
+}
+.examday-box .ed-goal {
+  display: flex; align-items: center; gap: 8px;
+}
+.examday-box .ed-goal-bar {
+  flex: 1; height: 8px; border-radius: 50px;
+  background: rgba(255,255,255,0.08);
+  overflow: hidden;
+}
+.examday-box .ed-goal-fill {
+  height: 100%; border-radius: 50px;
+  background: linear-gradient(90deg, var(--cy), var(--gn));
+  transition: width 0.3s;
+  width: 0%;
+}
+.examday-box .ed-goal-txt {
+  font-size: 0.8rem; color: rgba(255,255,255,0.55);
+  white-space: nowrap; flex-shrink: 0;
+}
+.examday-box .ed-set-btn {
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid rgba(255,214,0,0.3);
+  color: var(--gd);
+  border-radius: 50px;
+  padding: 8px 16px;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.76rem; letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.examday-box .ed-set-btn:active,
+.examday-box .ed-set-btn:hover {
+  background: rgba(255,214,0,0.12);
+  border-color: var(--gd);
+}
+@media (max-width: 600px) {
+  .examday-box { padding: 12px 14px; margin-bottom: 20px; gap: 10px; }
+  .examday-box .ed-dday { font-size: 1.15rem; }
+  .examday-box .ed-set-btn { padding: 7px 12px; font-size: 0.7rem; }
+  /* 360px 폰(갤럭시 S9)에서 2px 모자라 '변경'이 다음 줄로 떨어졌다(2026-10-10 실기기) — 글 칸이 최소 폭을 고집하지 않게 */
+  .examday-box { flex-wrap: nowrap; }
+  .examday-box .ed-body { min-width: 0; }
+}
+
+
+/* ── 설정 패널(2026-09-14, 사용자 요청) ──
+   상단바 맨 오른쪽 톱니바퀴에 모아 둔다: 배경음악 · 닉네임 변경 · 로그아웃 ·
+   회원 탈퇴 · 데이터 초기화. 예전엔 음악만 상단바에 있고 나머지는 허브 맨 아래에
+   흩어져 있어서, 스테이지 목록을 끝까지 내려야 로그아웃을 찾을 수 있었다. */
+.set-ov{
+  display:none; position:fixed; inset:0; z-index:9998;
+  background:rgba(2,6,14,0.72); backdrop-filter:blur(6px);
+  align-items:center; justify-content:center; padding:20px;
+}
+.set-ov.show{ display:flex; }
+.set-box{
+  width:min(340px,100%); max-height:86vh; overflow-y:auto;
+  background:#121826; border:1px solid rgba(255,255,255,0.12); border-radius:18px;
+  padding:16px 16px 14px; box-shadow:0 20px 60px rgba(0,0,0,0.5);
+}
+.set-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; }
+.set-title{ font-family:'Orbitron',monospace; font-size:0.72rem; letter-spacing:3px; color:rgba(255,255,255,0.55); }
+.set-x{
+  width:32px; height:32px; border-radius:9px; border:1px solid rgba(255,255,255,0.14);
+  background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.7); font-size:0.9rem; cursor:pointer;
+}
+.set-who{
+  display:flex; align-items:baseline; gap:8px; padding:8px 2px 12px;
+  border-bottom:1px solid rgba(255,255,255,0.08); margin-bottom:10px;
+}
+.set-who-label{ font-family:'Orbitron',monospace; font-size:0.54rem; letter-spacing:2px; color:rgba(255,255,255,0.35); }
+.set-who b{ font-size:0.98rem; color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.set-item{
+  display:flex; align-items:center; gap:12px; width:100%;
+  padding:13px 12px; margin-bottom:7px; min-height:48px;
+  background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.10);
+  border-radius:12px; color:#eaf0ff; font-family:inherit; font-size:0.9rem;
+  text-align:left; cursor:pointer; transition:background .15s, border-color .15s;
+}
+.set-item:active{ background:rgba(255,255,255,0.12); }
+.set-item .set-ico{ font-size:1.05rem; width:22px; text-align:center; flex-shrink:0; }
+.set-item .set-label{ flex:1; min-width:0; }
+.set-item.muted{ color:rgba(255,255,255,0.45); }
+.set-item.danger{ color:#ff5b8a; border-color:rgba(255,45,120,0.28); }
+.set-item.quiet{ color:rgba(255,255,255,0.45); border-color:rgba(255,255,255,0.10); }
+/* 日本版 横画面(低い画面)— 2026-11-14 チーム長の目視点検: 568×320 で「ログアウト」から下が箱の外(箱の中のスクロールでしか見えない)。
+   箱を広げて項目を 2 列に並べ、スクロールなしで全部見えるようにする。 */
+@media (orientation: landscape) and (max-height: 520px) {
+  .set-ov{ padding:10px; }
+  .set-box{ width:min(580px,100%); max-height:none; display:grid; grid-template-columns:1fr 1fr; column-gap:8px; align-content:start; padding:12px 14px 8px; }
+  .set-head, .set-who{ grid-column:1 / -1; }
+  .set-who{ padding:4px 2px 8px; margin-bottom:8px; }
+  .set-item{ min-height:44px; padding:9px 11px; margin-bottom:7px; }
+}
+
+
+@media (max-width: 380px) {
+  .user-bar { gap: 6px; padding-left: 10px; padding-right: 10px; }
+  .user-bar .ub-nick { min-width: 34px; overflow: hidden; }
+  .user-bar .ub-group { max-width: 72px; font-size: 0.64rem; padding: 4px 8px; }
+  .user-bar .group-mode-btn { padding: 7px 9px; font-size: 0.68rem; letter-spacing: 0.3px; }
+  .user-bar .graph-btn { width: 36px; height: 36px; }
+  .user-bar .stk-pill { height: 36px; padding: 0 7px; }
+  .user-bar .stk-pill .stk-d { font-size: 0.7rem; }
+}
+
+/* ── 상단바 2줄 구조 (2026-09-14, 사용자 지시 "닉네임 아랫줄로, 아예 깔끔하게") ──
+   한 줄에 7개(닉네임·그룹칩·급수·연속·👥·📈·⚙️)는 320~390px 에서 물리적으로 무리였다.
+   좁힐수록 닉네임이 먼저 사라지고 그룹 칩은 점 하나만 남는 식으로 계속 무언가를 잃었다.
+   윗줄=조작부(오른쪽 정렬), 아랫줄=누구인지. 이제 어느 폭에서도 아무것도 안 접는다. */
+.user-bar { flex-direction: column; align-items: stretch; gap: 6px; }
+/* 윗줄: 왼쪽에 그룹(아이콘+이름), 오른쪽에 나머지 조작부 */
+.user-bar .ub-controls { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.user-bar .ub-actions { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+/* 그룹 아이콘과 이름을 한 덩어리 링크로 — 아랫줄 닉네임과 세로로 맞는다 */
+.user-bar .ub-grouplink {
+  display: flex; align-items: center; gap: 8px;
+  flex: 0 1 auto; min-width: 0; text-decoration: none;
+}
+.user-bar .ub-grouplink .graph-btn { flex: 0 0 auto; }
+.user-bar .ub-nick {
+  display: flex; align-items: center; gap: 8px;
+  flex: 0 0 auto; min-width: 0; overflow: hidden;
+}
+.user-bar .ub-name { font-size: 0.86rem; }
+.user-bar .ub-group { max-width: none; flex: 0 1 auto; min-width: 0; padding: 3px 10px; font-size: 0.7rem; }
+.user-bar .ub-group #ub-group-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+@media (max-width: 380px) {
+  .user-bar { gap: 5px; padding-left: 12px; padding-right: 12px; }
+  .user-bar .ub-controls { gap: 6px; }
+  .user-bar .graph-btn { width: 38px; height: 38px; }
+}
+
+
+/*FONTUNI*/
+/* ── 폰트 통일 (2026-09-14) ──
+   제목·버튼 = Black Han Sans / 본문 = Noto Sans KR. 둘 다 OFL 이라 상업 배포에 제약이 없다.
+   ⚠ Orbitron 은 **라틴 전용**이라 한글에 쓰면 시스템 폰트로 대체되고 자간만 벌어져
+     "회계 플라이트"처럼 멋없게 나온다(사용자 지적). 숫자·영문 전용으로만 쓴다.
+   Jua 는 게임마다 섞여 있어 걷어냈다. */
+.gtitle, .logo, .ov-title, .overlay-title, h1, h2 { font-family: 'M PLUS Rounded 1c', 'Black Han Sans', 'Noto Sans JP', 'Noto Sans KR', sans-serif !important; }
+
+/* 광고 자리 — adsense.js 가 웹에서만 보이게 한다(기본 display:none). 버튼·링크와 붙지 않게
+   위아래 여백을 넉넉히 두고, "광고" 표시로 콘텐츠와 분명히 구분한다. */
+.ad-slot { margin: 28px auto 10px; max-width: 728px; text-align: center; }
+.ad-slot-label { font-size: .68rem; color: rgba(255,255,255,.35); margin-bottom: 4px; letter-spacing: .05em; }
+
+/* 닉네임을 눌러 바꾸기(2026-09-22 — 웹은 로그인 창 없이 자동 이름으로 시작) */
+.ub-nick-btn{ background:none; border:0; padding:6px 0; margin:-4px 0; min-height:36px;   /* 누르는 영역 25px→36px(2026-09-27 QA), 음수 margin 으로 줄 높이는 그대로 */ color:inherit; font:inherit; cursor:pointer;
+  display:inline-flex; align-items:center; gap:6px; max-width:100%; text-align:left; -webkit-tap-highlight-color:transparent; }
+.ub-nick-btn .ub-edit{ font-size:0.72rem; opacity:.55; flex-shrink:0; }
+.ub-nick-btn .ub-hint{ font-size:0.68rem; color:rgba(0,242,255,.75); white-space:nowrap; flex-shrink:0; }
+.ub-nick-btn:focus-visible{ outline:2px solid rgba(0,242,255,.6); outline-offset:2px; border-radius:6px; }
+</style>
+</head>
+<body>
+
+<canvas id="starfield"></canvas>
+
+<!-- ── 상단 유저바 ── -->
+<div class="user-bar" id="user-bar">
+  <!-- 윗줄 왼쪽: 그룹(아이콘+이름) / 오른쪽: 나머지 조작부
+       아랫줄: 닉네임. 그룹과 이름이 세로로 맞아떨어지게 한 배치다(2026-09-14 사용자 지시). -->
+  <div class="ub-controls">
+    <a class="ub-grouplink" href="#" style="display:none" aria-hidden="true"><!-- 日本版: 반(グループ)機能なし -->
+      <span class="graph-btn">👥</span>
+      <div class="ub-group" id="ub-group-el">
+      <div class="ug-dot"></div>
+      <span id="ub-group-name">—</span>
+      </div>
+    </a>
+    <div class="ub-actions">
+      <!-- 日本版: 級の選択なし(3級のみ) -->
+      <span id="streak-slot"></span>
+      <a class="graph-btn" href="growth.html" title="成長記録" aria-label="成長記録">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+      <polyline points="17 6 23 6 23 12"></polyline>
+      </svg>
+      <span class="gdot" id="growth-dot"></span>
+      </a>
+      <button class="graph-btn" id="settings-btn" onclick="openSettings()" title="設定" aria-label="設定"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2.3"/><path d="M18 12h3M16.24 7.76l2.12-2.12M12 6V3M7.76 7.76L5.64 5.64M6 12H3M7.76 16.24l-2.12 2.12M12 18v3M16.24 16.24l2.12 2.12"/></svg></button>
+    </div>
+  </div>
+  <div class="ub-nick">
+    <button type="button" class="ub-nick-btn" onclick="changeNickname()" title="ニックネーム変更" aria-label="ニックネーム変更"><span class="ub-name" id="ub-name-el">—</span><span class="ub-edit" aria-hidden="true">✏️</span><span class="ub-hint" id="ub-hint" style="display:none">タップして名前を変更</span></button>
+  </div>
+</div>
+
+
+
+<div class="wrap">
+
+  <!-- ── 첫 실행 안내(2026-10-09) — 보일지는 아래 firstRun() 이 정한다 ── -->
+  <div class="first-run" id="first-run">
+    <div class="fr-eyebrow">はじめてですか？ · 1分で終わります</div>
+    <div class="fr-row"><div class="fr-ico"><img src="../assets/icons/raincloud.webp" alt="" width="40" height="40"></div>
+      <div><div class="fr-title">最初は勘定科目レイン</div>
+      <div class="fr-desc">空から落ちてくる言葉から<br>本物の勘定科目だけをタップ！まずはお手本を見ながら覚えましょう</div></div></div>
+    <button class="fr-go" onclick="firstRunGo()"><img class="fr-play" src="../assets/icons/play_dark.webp" alt="" width="26" height="26">すぐスタート</button>
+    <button class="fr-skip" onclick="firstRunSkip()">まず見てみます</button>
+  </div>
+
+  <!-- ── D-day 카운터 ── -->
+  <div class="examday-box" id="examday-box" style="display:none;">
+    <div class="ed-dday" id="ed-dday">D-0</div>
+    <div class="ed-body">
+      <div class="ed-date" id="ed-date">試験日未設定</div>
+      <div class="ed-goal">
+        <div class="ed-goal-bar"><div class="ed-goal-fill" id="ed-goal-fill"></div></div>
+        <div class="ed-goal-txt" id="ed-goal-txt">今日 0/3回</div>
+      </div>
+    </div>
+    <button class="ed-set-btn" id="ed-set-btn" onclick="setExamDate()">📅 試験日を設定</button>
+  </div>
+
+  <div class="path-line">
+    <div class="path-step active"><div class="path-dot"></div>暗記</div>
+    <div class="path-arrow"></div>
+    <div class="path-step active"><div class="path-dot"></div>つなぐ</div>
+    <div class="path-arrow"></div>
+    <div class="path-step active"><div class="path-dot"></div>仕訳</div>
+    <div class="path-arrow"></div>
+    <div class="path-step active"><div class="path-dot"></div>決算</div>
+    <div class="path-arrow"></div>
+    <div class="path-step active"><div class="path-dot"></div>実戦</div>
+  </div>
+
+  <a class="review-entry theory-entry" href="theory.html">
+    <div class="re-icon">📝</div>
+    <div class="re-body">
+      <div class="re-title">理論クイズ</div>
+      <div class="re-desc">オリジナル問題 · テーマ別に解いて解説まで</div>
+    </div>
+    <div class="re-go">▶</div>
+  </a>
+
+  <a class="review-entry" href="review.html">
+    <div class="re-icon">🗂️</div>
+    <div class="re-body">
+      <div class="re-title">復習ノート · 苦手克服</div>
+      <div class="re-desc" id="re-desc">間違えた問題だけをもう一度</div>
+    </div>
+    <div class="re-go">▶</div>
+  </a>
+
+  <div class="stagemap">
+    <svg class="trail" viewBox="0 0 400 1000" preserveAspectRatio="none" aria-hidden="true">
+      <path class="trail-dim" d="M280,90 C280,200 120,180 120,290 C120,400 280,380 280,490 C280,600 120,580 120,690 C120,800 280,780 280,890"/>
+      <path class="trail-lit" id="trail-lit" d="M280,90 C280,200 120,180 120,290 C120,400 280,380 280,490 C280,600 120,580 120,690 C120,800 280,780 280,890"/>
+    </svg>
+    <div class="nodes">
+      <a class="stage-node card-1" id="node-acid" href="game1_acid.html" style="left:70%;top:9%"
+         onclick="return onNodeClick(event,'acid')">
+        <div class="disc">☁️<span class="badge lock-badge" title="ロック中"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><span class="badge clear-badge" title="クリア" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"/></svg></span></div>
+        <div class="n-title">勘定科目レイン</div>
+        <div class="n-sub"></div>
+        <div class="lv-pill" id="lv-pill-acid">
+          <span class="lv-seg" data-lv="1" onclick="onLvSegClick(event,'acid',1)">1</span>
+          <span class="lv-seg locked" data-lv="2" onclick="onLvSegClick(event,'acid',2)">2</span>
+        </div>
+      </a>
+      <a class="stage-node card-2" id="node-memory" href="game2_memory.html" style="left:30%;top:29%"
+         onclick="return onNodeClick(event,'memory')">
+        <div class="disc">🧩<span class="badge lock-badge" title="ロック中"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><span class="badge clear-badge" title="クリア" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"/></svg></span></div>
+        <div class="n-title">記憶の殿堂</div>
+        <div class="n-sub"></div>
+        <div class="lv-pill" id="lv-pill-memory">
+          <span class="lv-seg" data-lv="1" onclick="onLvSegClick(event,'memory',1)">1</span>
+          <span class="lv-seg locked" data-lv="2" onclick="onLvSegClick(event,'memory',2)">2</span>
+        </div>
+      </a>
+      <a class="stage-node card-3" id="node-debit" href="game3_debit.html" style="left:70%;top:49%"
+         onclick="return onNodeClick(event,'debit')">
+        <div class="disc">⚡<span class="badge lock-badge" title="ロック中"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><span class="badge clear-badge" title="クリア" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"/></svg></span></div>
+        <div class="n-title">借方？貸方？</div>
+        <div class="n-sub"></div>
+        <div class="lv-pill" id="lv-pill-debit">
+          <span class="lv-seg" data-lv="1" onclick="onLvSegClick(event,'debit',1)">1</span>
+          <span class="lv-seg locked" data-lv="2" onclick="onLvSegClick(event,'debit',2)">2</span>
+        </div>
+      </a>
+      <a class="stage-node card-4" id="node-factory" href="game4_factory.html" style="left:30%;top:69%"
+         onclick="return onNodeClick(event,'factory')">
+        <div class="disc">🏭<span class="badge lock-badge" title="ロック中"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><span class="badge clear-badge" title="クリア" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"/></svg></span></div>
+        <div class="n-title">決算整理ファクトリー</div>
+        <div class="n-sub"></div>
+        <div class="lv-pill" id="lv-pill-factory">
+          <span class="lv-seg" data-lv="1" onclick="onLvSegClick(event,'factory',1)">1</span>
+          <span class="lv-seg locked" data-lv="2" onclick="onLvSegClick(event,'factory',2)">2</span>
+        </div>
+      </a>
+      <a class="stage-node card-5" id="node-flight" href="game5_flight.html" style="left:70%;top:89%"
+         onclick="return onNodeClick(event,'flight')">
+        <div class="disc">🛩<span class="badge lock-badge" title="ロック中"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><span class="badge clear-badge" title="クリア" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"/></svg></span></div>
+        <div class="n-title">帳簿フライト</div>
+        <div class="n-sub"></div>
+        <div class="lv-pill" id="lv-pill-flight">
+          <span class="lv-seg" data-lv="1" onclick="onLvSegClick(event,'flight',1)">1</span>
+          <span class="lv-seg locked" data-lv="2" onclick="onLvSegClick(event,'flight',2)">2</span>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- 광고(웹만, 앱 WebView 에서는 adsense.js 가 자체적으로 막는다) -->
+  <div class="ad-slot" data-adsense style="display:none">
+    <div class="ad-slot-label">広告</div>
+    <ins class="adsbygoogle" style="display:block"
+         data-ad-client="ca-pub-7418287954060066"
+         data-ad-slot="2076355142"
+         data-ad-format="auto" data-full-width-responsive="true"></ins>
+  </div>
+
+</div>
+
+<script src="daylog.js?v=79"></script><script src="amev.js?v=1"></script><script src="skill.js?v=1"></script><script src="installref.js?v=1"></script><!-- 설치 경로 합계(안드 새 설치 한 번, 11/13 홍보팀) — 다른 저장보다 먼저 읽어야 기존 사용자를 가른다 -->
+<script src="ask.js?v=79"></script>
+<script src="difficulty.js?v=79"></script>
+<script src="adsense.js?v=79"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ── 로그인 체크 & 유저바 초기화 ──
+(function() {
+  const nick = localStorage.getItem('hub_nickname');
+  if (!nick) {
+    // 닉네임 없으면 로그인 페이지로
+    window.location.replace('login.html');
+    return;
+  }
+  // 닉네임 표시
+  document.getElementById('ub-name-el').textContent = nick;
+  // 그룹 표시
+  const gname = localStorage.getItem('hub_group_name');
+  if (gname) {
+    document.getElementById('ub-group-name').textContent = gname;
+    document.getElementById('ub-group-el').classList.add('show');
+  }
+  // 탈퇴 버튼 노출 판정은 openSettings() 에서 한다(패널이 body 맨 끝이라 여기선 아직 없다)
+})();
+
+/* 전역 음소거(hub_muted): 게임별 *_muted 키는 그대로 두고, 없을 때만 이 값을 참조한다.
+   버튼이 상단바 아이콘에서 설정 패널의 글자 행으로 옮겨져서, 이모지만 갈아끼우던
+   예전 방식(textContent 교체)으로는 라벨까지 지워진다 — 아이콘/라벨을 따로 갱신한다. */
+function applyHubMuteUI() {
+  const btn = document.getElementById('hub-mute-btn');
+  if (!btn) return;
+  const muted = localStorage.getItem('hub_muted') === 'true';
+  btn.classList.toggle('muted', muted);
+  const ico = btn.querySelector('.set-ico'), lab = btn.querySelector('.set-label');
+  if (ico) ico.textContent = muted ? '🔇' : '🎵';
+  if (lab) lab.textContent = muted ? 'BGMオフ' : 'BGMオン';
+}
+
+/* ── 설정 패널 열고 닫기 ── */
+function openSettings() {
+  const el = document.getElementById('set-nick');
+  if (el) el.textContent = localStorage.getItem('hub_nickname') || '—';
+  /* 회원 탈퇴는 소셜(Firebase) 계정일 때만 — 애플/구글 심사 요건상 "계정 생성"을
+     제공하면 앱 내 탈퇴 경로도 반드시 있어야 한다.
+     ⚠ 로그인 체크 IIFE 는 페이지 위쪽에서 돌고 이 패널은 body 맨 끝에 있어서,
+        거기서 미리 켜 두면 요소가 아직 없어 조용히 실패한다(실제로 한 번 그랬다).
+        열 때마다 판정하는 게 순서에 안 휘둘린다. */
+  const del = document.getElementById('delete-account-row');
+  if (del) del.style.display = localStorage.getItem('hub_uid') ? '' : 'none';
+  const lr = document.getElementById('lang-row');
+  if (lr) lr.style.display = window.__amJaEmbedded ? '' : 'none';
+  applyHubMuteUI();
+  document.getElementById('settings-ov').classList.add('show');
+}
+/* 韓国語版に戻る(韓国版アプリの中のときだけ) — 日本版の通知(日本語)が韓国語版の人に届かないよう予約を消してから移る */
+async function switchToKorean() {
+  try {
+    const P = window.Capacitor && Capacitor.Plugins && Capacitor.Plugins.LocalNotifications;
+    if (P) {
+      let ids = [7201, 7202, 7203, 7204, 7205];
+      try { const r = await P.getPending(); if (r && r.notifications && r.notifications.length) ids = ids.concat(r.notifications.map(n => n.id)); } catch (e) {}
+      try { await P.cancel({ notifications: ids.map(id => ({ id: id })) }); } catch (e) {}
+    }
+  } catch (e) {}
+  try { (window.__amRawLocalStorage || localStorage).setItem('am_lang', 'ko'); } catch (e) {}
+  location.replace('../index.html');
+}
+function closeSettings() {
+  document.getElementById('settings-ov').classList.remove('show');
+}
+document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeSettings(); });
+function toggleHubMute() {
+  const next = localStorage.getItem('hub_muted') !== 'true';
+  localStorage.setItem('hub_muted', String(next));
+  /* ⚠ 게임마다 자체 🎵 버튼이 있고 그게 `<게임>_muted` 를 쓴다. 게임은 그 키가 있으면
+     그걸 우선 보고, 없을 때만 hub_muted 를 본다. 그래서 여기서 hub_muted 만 바꾸면
+     **한 번이라도 게임 안에서 음소거한 게임은 영영 못 켠다** — 설정엔 '배경음악 켜짐'
+     인데 소리는 안 나는 상태가 된다(2026-09-14 제보). 전역 토글은 말 그대로 전역이어야
+     하므로, 개별 설정을 지워서 모든 게임이 이 값을 따르게 한다. */
+  try {
+    Object.keys(localStorage)
+      .filter(k => /_muted$/.test(k) && k !== 'hub_muted')
+      .forEach(k => localStorage.removeItem(k));
+  } catch (e) {}
+  applyHubMuteUI();
+}
+applyHubMuteUI();
+
+// ── 별 배경 ──
+const canvas = document.getElementById('starfield');
+const ctx = canvas.getContext('2d');
+let stars = [];
+
+// 저사양 기기 감지 — 별 수 줄임
+const isMobile = window.innerWidth <= 600;
+const STAR_COUNT = isMobile ? 80 : 160;
+
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+function mkStar() {
+  return {
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    r: Math.random() * 1.4 + 0.2,
+    v: Math.random() * 0.3 + 0.05,
+    o: Math.random() * 0.6 + 0.2,
+    c: Math.random() > 0.88 ? '#00f2ff' : Math.random() > 0.75 ? '#b44fff' : '#ffffff'
+  };
+}
+function initStars() {
+  stars = Array.from({length: STAR_COUNT}, mkStar);
+}
+function animStars() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  stars.forEach(s => {
+    s.y += s.v;
+    if (s.y > canvas.height) { s.y = -2; s.x = Math.random() * canvas.width; }
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = s.c;
+    ctx.globalAlpha = s.o;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  });
+  requestAnimationFrame(animStars);
+}
+resize();
+initStars();
+animStars();
+window.addEventListener('resize', () => { resize(); initStars(); });
+
+// ── 안드로이드 WebView에서 광고 플레이스홀더 숨김 처리 ──
+// 안드로이드 레이아웃에서 AdView를 직접 올리므로,
+// WebView 안에서는 이 div가 보일 필요 없음.
+// 안드로이드 앱에서 JS 브릿지로 아래를 호출:
+//   webView.evaluateJavascript("hideAdPlaceholder()", null);
+function hideAdPlaceholder() {}
+
+// ── 하단 배너 복구 (허브 = 홈 베이스) ──
+// 배너는 네이티브 View 라서 웹 페이지를 이동해도 상태가 그대로 남는다.
+// 게임은 시작할 때 AdBridge.hide() 하고 결과화면에서 다시 show() 하는데,
+// 플레이 도중 '홈' 버튼으로 나가면 show() 를 못 부르고 나가버린다.
+// 그러면 배너가 앱을 끌 때까지 영영 숨겨진 채로 남는다(이론·그룹·로그인 화면도 hide 만 한다).
+// → 허브로 돌아올 때마다 여기서 다시 켜 준다.
+(function restoreBanner() {
+  try { if (window.AdBridge && typeof AdBridge.show === 'function') AdBridge.show(); } catch (e) {}
+})();
+
+// ── 게임 데이터 초기화(1급 허브 resetLv1Progress()와 동일 취지 — 로컬 기록만 삭제, 닉네임/계정/클라우드 점수는 유지) ──
+async function resetLv2Progress() {
+  if (!await Ask.confirm('5つのゲームに関する端末内の記録(ローカルランキング・ベストスコア・連続記録バッジ)をすべてリセットしますか？\nニックネームとアカウント情報、サーバーに保存されたスコアはそのままです。')) return;
+  ['hub_acid', 'hub_acid_prevRank',
+   'hub_memory', 'hub_memory_myName', 'hub_memory_best', 'hub_memory_prevRank',
+   'accGame_v3', 'accGame_myName', 'hub_debit_prevRank',
+   'hub_factory', 'hub_factory_best', 'hub_factory_prevRank',
+   'hub_flight_hi', 'hub_flight_rank', 'hub_flight_prevRank'
+  ].forEach(function (k) { localStorage.removeItem(k); });
+  await Ask.alert('✅ リセットしました。端末内のゲーム記録をすべて消しました。');
+}
+
+// ── 로그아웃 ──
+async function doLogout() {
+  if (!await Ask.confirm('ログアウトしますか？\nニックネームなどの情報がリセットされます。')) return;
+  // 소셜(Firebase) 로그인 세션이 있으면 그것도 정리 (hub_uid/hub_nickname/hub_avatar 포함)
+  if (window.Auth && Auth.socialAvailable()) { try { await Auth.signOut(); } catch (e) {} }
+  localStorage.removeItem('hub_nickname');
+  localStorage.removeItem('hub_group_id');
+  localStorage.removeItem('hub_group_name');
+  ['acid','memory','debit','factory','flight'].forEach(g =>
+    localStorage.removeItem('hub_' + g + '_myName')
+  );
+  const base = location.pathname.replace(/[^/]*$/, '');
+  window.location.replace(base + 'login.html');
+}
+
+// ── 회원 탈퇴 (소셜 로그인 계정만) — 되돌릴 수 없어서 2단계 탭 확인을 쓴다
+// (이 코드베이스 다른 곳들과 동일 패턴: Android WebView confirm() 이슈와 무관하게
+//  실수로 한 번 누른 것만으로 탈퇴되는 걸 막기 위한 이중 확인). ──
+async function doDeleteAccount() {
+  const btn = event && event.target ? event.target : null;
+  // 한 번 더 탭하는 것만으로는 의도치 않게(연타 등) 눌릴 수 있어서, 되돌릴 수 없는
+  // 작업인 탈퇴만큼은 "탈퇴"라는 글자를 직접 입력해야만 진행되게 한다.
+  const typed = await Ask.prompt('本当にアカウントを削除しますか？\nアカウントとすべての記録が完全に削除されます。\n\n続けるには、下に「削除」と入力してください。');
+  if (typed === null) return;               // 취소
+  if (typed.trim() !== '削除') {
+    await Ask.alert('入力内容が「削除」と一致しないため、削除を中止しました。');
+    return;
+  }
+  if (!window.Auth || !Auth.socialAvailable()) return;
+  try {
+    if (btn) btn.textContent = '削除中...';
+    await Auth.deleteAccount();
+    await Ask.alert('アカウントを削除しました。これまでありがとうございました！');
+    const base = location.pathname.replace(/[^/]*$/, '');
+    window.location.replace(base + 'login.html');
+  } catch (e) {
+    await Ask.alert('アカウントの削除に失敗しました。ネットワークを確認してもう一度お試しください。');
+    if (btn) btn.textContent = '🗑️  アカウント削除';
+  }
+}
+
+// ── 닉네임 변경 (점수·오답노트도 새 이름으로 이전) ──
+const _SB_URL = "https://pjagaulfivafamhhiveg.supabase.co";
+const _SB_KEY = "sb_publishable_yck2tAKApEjVSJOJMVSXuQ_AGaNatuI";
+function _sbClient() {
+  try { return (window.supabase && supabase.createClient) ? supabase.createClient(_SB_URL, _SB_KEY) : null; }
+  catch (e) { return null; }
+}
+/* 이미 서버에 있는 닉네임 — 로그인 창이 없어진 웹에서 학생이 **다른 컴퓨터에서 예전 기록을 이어 하는 유일한 길**이다
+   (2026-09-22, login.html 의 "한 번 더 누르면 이어서 진행"과 같은 규칙). 서버 기록은 건드리지 않고 이 기기의 이름만 바꾼다.
+   지금 쓰던(자동) 이름의 기록은 그 이름으로 남는다. */
+async function switchToExistingName(name){
+  if(!(await Ask.confirm('「'+name+'」はすでに記録があるニックネームです。\n\n以前使っていたご自身のニックネームなら、[OK]をタップして記録を引き継いでください。\n他の人のニックネームなら[キャンセル]して、新しく付けてください。'))) return false;
+  localStorage.setItem('hub_nickname', name);
+  localStorage.removeItem('hub_nick_auto');
+  ['acid','memory','debit','factory'].forEach(function(g){ localStorage.setItem('hub_'+g+'_myName', name); });
+  location.reload();
+  return true;
+}
+async function changeNickname() {
+  const oldName = (localStorage.getItem('hub_nickname') || '').trim();
+  const input = await Ask.prompt('新しいニックネームを入力してください(2〜12文字)', oldName);
+  if (input === null) return;                 // 취소
+  const name = input.trim();
+  if (name.length < 2) { await Ask.alert('2文字以上で入力してください'); return; }
+  if (name.length > 12) { await Ask.alert('12文字以内で入力してください'); return; }
+  if (name === oldName) return;
+  { const why = window.AmNick && AmNick.bad(name); if (why) { await Ask.alert(AmNick.msg ? AmNick.msg(why) : 'このニックネームは使えません。別のニックネームを入力してください'); return; } }
+
+  const db = _sbClient();
+  // 중복 확인(서버에 같은 닉네임의 기록이 있으면 차단)
+  if (db) {
+    try {
+      const { data } = await db.from('scores').select('name').eq('name', name).limit(1);
+      if (data && data.length) {
+        // 日本版: 韓国版だけにある名前(日本版の行がない)は他人の名前 → 引き継ぎではなく「使われています」
+        const { data: mine } = await db.from('scores').select('name,game_id').eq('name', name).limit(50);
+        if (!mine || !mine.length) { await Ask.alert('このニックネームはすでに使われています。別のニックネームを入力してください'); return; }
+        await switchToExistingName(name); return;
+      }
+    } catch (e) { /* 오프라인이면 검사 생략 */ }
+  }
+
+  // 1) 서버 점수(랭킹) 이름 변경 — RPC 우선(supabase_security_migration.sql 적용 후),
+  //    미적용 DB면 기존 직접 update 폴백.
+  //    실패하면 여기서 중단 — 점수는 옛 이름, 오답·성장만 새 이름인 "반쪽 개명" 방지
+  if (db) {
+    try {
+      // 본인 확인 함수 먼저(2026-10-27): 로그인 계정에 묶인 이름은 그 계정만 바꾸고, 성적 이력·오답도 서버에서 같이 옮긴다
+      // (그러면 아래 오답노트·성장 이전은 옮길 게 없어 그냥 지나감). 서버가 토큰을 못 받으면(등록 전) 옛 함수로.
+      const v2 = (window.Auth && Auth.authedRpc) ? await Auth.authedRpc('rename_player_v2', { p_old: oldName, p_new: name }) : { fallback: true };
+      if (!v2.fallback) {
+        if (v2.error) throw v2.error;
+        if (v2.data !== 'ok') {
+          await Ask.alert(v2.data === 'not_owner' ? '⚠️ このニックネームを変更するには、このニックネームのアカウントでログインしてください。' : '⚠️ サーバー側でニックネームの変更が拒否されました。(すでに使われている名前かもしれません)');
+          return;
+        }
+      } else {
+      const { data: renamed, error } = await db.rpc('rename_player', { p_old: oldName, p_new: name });
+      if (error && error.code === 'PGRST202') {
+        // 구스키마(RPC 없음) 폴백
+        const { error: e2 } = await db.from('scores').update({ name: name }).eq('name', oldName);
+        if (e2) throw e2;
+      } else if (error) {
+        throw error;
+      } else if (renamed !== true) {
+        await Ask.alert('⚠️ サーバー側でニックネームの変更が拒否されました。(すでに使われている名前かもしれません)');
+        return;
+      }
+      }
+    } catch (e) {
+      await Ask.alert('⚠️ ネットワークの問題でニックネームを変更できませんでした。しばらくしてからもう一度お試しください。');
+      return;
+    }
+  }
+  // 2) 오답노트(로컬+서버) 이전
+  if (window.WrongNote && WrongNote.rename) { try { await WrongNote.rename(oldName, name); } catch (e) {} }
+  // 2-1) 성장 이력(로컬+서버) 이전
+  if (window.Growth && Growth.rename) { try { await Growth.rename(oldName, name); } catch (e) {} }
+  // 3) 로컬 닉네임/이름 키 갱신
+  localStorage.setItem('hub_nickname', name);
+  localStorage.removeItem('hub_nick_auto');
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.endsWith('_myName') && localStorage.getItem(k) === oldName) localStorage.setItem(k, name);
+  }
+  const el = document.getElementById('ub-name-el');
+  if (el) el.textContent = name;
+  await Ask.alert('✅ ニックネームを「' + name + '」に変更しました。\n以前のスコアと復習ノートも一緒に移動しました。');
+}
+</script>
+
+<script>
+// ── 스테이지 노드맵: 진행 상태(잠김/도전중/クリア) + 징검다리 경로 라이트업 ──
+// 체인 규칙: 이전 스테이지를 열었고(open) クリア했을 때만(cleared) 다음 스테이지가 자동으로 열린다.
+// 광고 시청으로 얻는 hub_adunlock_<id> 는 그 스테이지 하나만 여는 개별 예외이며 체인에는 반영되지 않는다
+// (카파시터 버전과 동일한 규칙).
+const STAGE_GAMES = [
+    { id:'acid',    best:'hub_acid_best'   },
+    { id:'memory',  best:'hub_memory_best' },
+    { id:'debit',   best:'hub_debit_best'  },
+    { id:'factory', best:'hub_factory_best'},
+    { id:'flight',  best:'hub_flight_hi'   },
+];
+
+/* 다음 스테이지가 열리는 기준 점수.
+   실제 플레이 분포의 하위 10% 바로 아래로 잡았다 — 한 판을 제대로 하면 거의 다 넘고,
+   시작하자마자 그만둔 판은 안 넘는다.
+   (판당 하위10%: 산성비 1,340 · 기억 689 · 차변 818 · 공장 810 · 비행 11,700)
+
+   실측 검증(score_history, 정답 수와 대조):
+   · '정답 1~3개'인 판(=거의 안 한 판)의 중앙 점수 — 산성비 120 · 기억 199 · 차변 340 · 공장 390
+     → 그런 판이 문턱을 넘은 경우: 산성비 0/25, 기억 0/42, 차변 0/3, 공장 1/9
+   · 반대로 '제대로 했는데(정답 10개 이상) 문턱 미달'은 5개 게임 모두 0건.
+
+   ⚠ 결산 비행(flight)만 예외다. 정답 1~3개인 판도 중앙 10,700점이 나와서(비행 거리·시간으로도
+     점수가 쌓이는 구조) 문턱 8,000 이 그런 판을 거의 못 거른다(16판 중 13판 통과).
+     **그대로 둔다** — 비행은 체인의 마지막이라 이 값이 다음 스테이지를 여는 데 쓰이지 않고,
+     'クリア' 표시에만 영향을 준다. 뒤에 스테이지가 추가되면 이 값을 먼저 다시 정할 것
+     (점수만 보지 말고 정답 수를 함께 조건에 넣어야 한다). */
+const MIN_CLEAR = { acid: 1000, memory: 500, debit: 600, factory: 600, flight: 8000 };
+
+/* ⚠ 기준을 소급 적용하면 **이미 열려 있던 스테이지를 빼앗는다.**
+   실제로 기준 미달 기록 보유자가 산성비 29명·공장 10명·기억 7명·차변 7명·비행 4명 있다.
+   그래서 처음 한 번, 기록이 있는 게임은 '이미 통과'로 표시해 두고 기준은 앞으로만 적용한다. */
+(function grandfatherUnlocks(){
+    try{
+        if (localStorage.getItem('hub_clear_migrated')) return;
+        STAGE_GAMES.forEach(g => {
+            if (parseInt(localStorage.getItem(g.best) || '0', 10) > 0)
+                localStorage.setItem('hub_cleared_' + g.id, '1');
+        });
+        localStorage.setItem('hub_clear_migrated', '1');
+    }catch(e){}
+})();
+
+function renderStageMap() {
+    let chainOpen = true;
+    let litIndex = -1;
+    STAGE_GAMES.forEach((g, i) => {
+        const best = parseInt(localStorage.getItem(g.best) || '0');
+        const cleared = best >= (MIN_CLEAR[g.id] || 1)
+                     || localStorage.getItem('hub_cleared_' + g.id) === '1';
+        const adUnlocked = localStorage.getItem('hub_adunlock_' + g.id) === '1';
+        // reachedByChain: 광고로 순서를 건너뛰지 않고 자연스럽게 여기까지 이어져 왔는지.
+        // 이게 false인데 adUnlocked 로만 열린 경우, 그 노드는 플레이 가능해도
+        // 경로(trail)는 끊긴 구간까지만 밝혀야 한다 — 안 그러면 건너뛴 잠긴 구간까지 노란색이 새버린다.
+        const reachedByChain = chainOpen;
+        const open = chainOpen || adUnlocked;
+        const el = document.getElementById('node-' + g.id);
+        if (!el) return;
+        el.classList.remove('lock', 'cur', 'done');
+        const lockBadge = el.querySelector('.lock-badge');
+        const clearBadge = el.querySelector('.clear-badge');
+        const sub = el.querySelector('.n-sub');
+        if (!open) {
+            el.classList.add('lock');
+            lockBadge.style.display = 'flex';
+            clearBadge.style.display = 'none';
+            sub.textContent = '';
+        } else if (cleared) {
+            el.classList.add('done');
+            lockBadge.style.display = 'none';
+            clearBadge.style.display = 'flex';
+            sub.textContent = 'ベスト ' + best.toLocaleString() + '点';
+            if (reachedByChain) litIndex = i;
+        } else {
+            el.classList.add('cur');
+            lockBadge.style.display = 'none';
+            clearBadge.style.display = 'none';
+            sub.textContent = '挑戦！';
+            if (reachedByChain) litIndex = i;
+        }
+        renderLvPill(g.id, open);
+        chainOpen = open && cleared;
+    });
+    const lit = document.getElementById('trail-lit');
+    if (lit) {
+        const total = lit.getTotalLength();
+        lit.style.strokeDasharray = total;
+        const frac = litIndex < 0 ? 0 : litIndex / (STAGE_GAMES.length - 1);
+        lit.style.strokeDashoffset = total * (1 - frac);
+    }
+}
+// ── 난이도1/2 뱃지 겸 전환 스위치 (스테이지 노드맵 통합) ──
+// 실제 난이도 선택/해금은 각 게임 자체 시작화면(difficulty.js)에서도 되지만,
+// 허브에서 바로 보고 바로 바꿀 수 있게 뱃지+전환 UI를 노드맵에 붙인다.
+/* 난이도2 가 실제로 없는 게임 — 노드에 1/2 스위치를 띄우지 않는다.
+   단계가 하나뿐인데 "1 2" 가 보이면 잠긴 2단계가 있는 줄 안다(사용자 지적, 2026-09-14).
+   flight: 장부 화면에 보이는 숫자를 그대로 받아쓰는 문제라 난이도2 를 내렸다. */
+const NO_LV2 = ['flight'];
+
+function renderLvPill(gid, open) {
+    const pill = document.getElementById('lv-pill-' + gid);
+    if (!pill) return;
+    if (NO_LV2.indexOf(gid) >= 0) { pill.classList.remove('show'); return; }
+    if (!open || !window.Difficulty) { pill.classList.remove('show'); return; }
+    const unlocked = Difficulty.isUnlocked(gid);
+    const cur = Difficulty.get(gid);
+    const seg1 = pill.querySelector('[data-lv="1"]');
+    const seg2 = pill.querySelector('[data-lv="2"]');
+    if (seg1) seg1.classList.toggle('active', cur === 1);
+    if (seg2) {
+        seg2.classList.toggle('active', cur === 2);
+        seg2.classList.toggle('locked', !unlocked);
+        seg2.textContent = unlocked ? '2' : '2🔒';
+    }
+    pill.classList.add('show');
+}
+// 서버 기록으로 해금이 복원되면 허브의 1/2 스위치도 다시 그린다
+window.addEventListener('difficulty-synced', function () { try { renderStageMap(); } catch (e) {} });
+function onLvSegClick(e, gid, lv) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!window.Difficulty) return;
+    if (lv === 2 && !Difficulty.isUnlocked(gid)) {
+        Ask.alert('難易度1で正答率 ' + Math.round(Difficulty.UNLOCK_ACC * 100) + '%以上になると解放されます！\n(10問以上解いたとき)\n\n' + Difficulty.hint(gid));
+        return;
+    }
+    Difficulty.set(gid, lv);
+    renderLvPill(gid, true);
+}
+
+renderStageMap();
+
+// ── 계정 기준 "내 최고기록" 동기화 ──
+// 기기 localStorage 는 기기가 바뀌면 비어서 "내 최고 0점"으로 보이는 문제가 있었다.
+// 로그인 계정(uid)이 있으면 서버(scores.uid)가 진짜 최고기록을 갖고 있으므로,
+// 우선 로컬 값으로 즉시 렌더(위에서 이미 함)한 뒤, 서버 값이 오면 덮어쓰고 다시 그린다.
+// 로그인 계정(uid)뿐 아니라 "닉네임만 쓰는" 사용자도 대상으로 한다 — 닉네임이 서버 scores의
+// 실질적인 키라서(로그인 계정도 결국 닉네임 unique 제약으로 연결됨) 닉네임 기준으로도 동기화 가능.
+// 그리고 기기에서 계정/닉네임이 바뀌면(로그아웃 후 다른 걸로 로그인 등) 이전 사람 진행상황이
+// 새 사람한테 그대로 보이던 문제가 있었다 — identityKey 를 기억해뒀다가 바뀌면 강제로 리셋한다.
+async function syncBestScoresFromAccount() {
+    try {
+        const uid = window.Auth ? await Auth.currentUid() : null;
+        const nickname = (localStorage.getItem('hub_nickname') || '').trim();
+        const identityKey = uid ? ('uid:' + uid) : (nickname ? ('name:' + nickname) : null);
+        if (!identityKey) return;               // 로그인도 닉네임도 없으면 동기화할 대상이 없음
+
+        const lastIdentity = localStorage.getItem('_synced_identity');
+        const identityChanged = lastIdentity !== null && lastIdentity !== identityKey;
+
+        const db = _sbClient();
+        if (!db) return;
+        let query = db.from('scores').select('game_id, score');
+        query = uid ? query.eq('uid', uid) : query.eq('name', nickname);
+        const { data, error } = await query;
+        if (error) return;                      // 네트워크 실패 시 기존 로컬 값 유지(오프라인 폴백)
+
+        const byGame = {};
+        (data || []).forEach(r => { byGame[r.game_id] = r.score; });
+
+        let changed = false;
+        STAGE_GAMES.forEach(g => {
+            // byGame[g.id] 가 없으면(이 계정/닉네임으로 아직 안 깬 게임) 0으로 — 이전 사람 기록이
+            // 남아있으면 안 되므로 "없으면 그냥 넘어가기"가 아니라 명시적으로 0을 채워야 한다.
+            const serverBest = parseInt(byGame[g.id] || 0, 10) || 0;
+            const localBest = parseInt(localStorage.getItem(g.best) || '0', 10);
+            if (identityChanged || serverBest !== localBest) {
+                localStorage.setItem(g.best, String(serverBest));
+                changed = true;
+            }
+        });
+
+        if (identityChanged) {
+            // 계정/닉네임 전환 — 이전 사람이 광고로 미리 열어둔 스테이지는 새 사람한테 안 넘어가야 함
+            STAGE_GAMES.forEach(g => localStorage.removeItem('hub_adunlock_' + g.id));
+            changed = true;
+        }
+
+        localStorage.setItem('_synced_identity', identityKey);
+        if (changed) renderStageMap();
+    } catch (e) { /* 오프라인이면 기기 값 그대로 사용 */ }
+}
+syncBestScoresFromAccount();
+
+// ── 잠긴 노드 클릭 → 이동 대신 광고 시청으로 즉시 해제 (카파시터의 "확인 후 광고" 동일 규칙) ──
+// Android WebView는 confirm()이 무동작(항상 false)이라 대화상자 대신
+// 이 코드베이스 전반(그룹 나가기·오답노트 비우기 등)과 동일한 2-스텝 탭 확인을 쓴다:
+// 한 번 탭하면 안내만 뜨고, 그 상태에서 한 번 더 탭해야 실제로 광고가 뜬다.
+function onNodeClick(e, gid) {
+    const el = document.getElementById('node-' + gid);
+    if (!el || !el.classList.contains('lock')) return true;
+    e.preventDefault();
+    if (el.dataset.armed === '1') {
+        el.dataset.armed = '';
+        if (el._armTimer) clearTimeout(el._armTimer);
+        el.querySelector('.n-sub').textContent = '';
+        unlockStage(gid);
+    } else {
+        el.dataset.armed = '1';
+        if (window.AdBridge && window.DayLog) DayLog.hit('ad', 'hub_unlock', 'rw_offer');   // 광고 기록(daylog)
+        el.querySelector('.n-sub').textContent = 'もう一度タップすると、広告を見て開けます';
+        el._armTimer = setTimeout(() => {
+            el.dataset.armed = '';
+            el.querySelector('.n-sub').textContent = '';
+        }, 2800);
+    }
+    return false;
+}
+window._unlockTarget = null;
+function unlockStage(gid) {
+    if (!window.AdBridge || typeof AdBridge.showRewarded !== 'function') {
+        // 웹 배포판 등 광고 SDK 자체가 없는 환경 — 광고 실패와 동일하게 그냥 열어준다
+        localStorage.setItem('hub_adunlock_' + gid, '1');
+        renderStageMap();
+        return;
+    }
+    window._unlockTarget = gid;
+    // 광고가 아직 준비 안 됐어도(로딩 중/노필) 시도는 해본다 — 못 띄우면
+    // AdBridge.showRewarded() 가 즉시 onRewardedFailed 를 불러주고, 그건 이미
+    // "광고 실패로 진행을 막지 않는다"로 무조건 열어주게 되어 있다.
+    showRewardedWhenReady();
+}
+/* 광고가 아직 로딩 중이면 최대 5초 기다렸다가 띄운다(2026-09-22). 허브에 막 들어와 누르면 로드가 안 끝나
+   곧장 "광고를 불러오지 못했지만…"으로 넘어가던 것(Android 게임3·게임5 제보). 끝내 준비 안 되면 기존대로 열어 준다. */
+function showRewardedWhenReady() {
+  var t0 = Date.now();
+  (function wait() {
+    if (AdBridge.isRewardedReady && AdBridge.isRewardedReady()) { window.__adPlace = 'hub_unlock'; try { AdBridge.showRewarded(); } finally { window.__adPlace = null; } return; }
+    if (Date.now() - t0 > 5000) { window.__adPlace = 'hub_unlock'; try { AdBridge.showRewarded(); } finally { window.__adPlace = null; } return; }   // 준비 안 됐으면 showRewarded 가 onRewardedFailed 로 열어 준다
+    setTimeout(wait, 250);
+  })();
+}
+
+// Kotlin/Swift → JS 콜백 (게임 화면들과 동일한 이름 규약)
+function onRewardGranted() {
+    if (!window._unlockTarget) return;
+    localStorage.setItem('hub_adunlock_' + window._unlockTarget, '1');
+    window._unlockTarget = null;
+    renderStageMap();
+}
+function onRewardedFailed() {
+    // 광고 실패로 진행을 막지 않는다 — 그냥 열어준다
+    if (!window._unlockTarget) return;
+    if (window.DayLog) DayLog.hit('ad', 'hub_unlock', 'rw_free');
+    localStorage.setItem('hub_adunlock_' + window._unlockTarget, '1');
+    window._unlockTarget = null;
+    renderStageMap();
+    Ask.alert('広告を読み込めませんでしたが、ステージを開きました！');
+}
+</script>
+
+<!-- ── 오답노트: 미니 요약(틀린 문제 수) 표시 (supabase-js는 상단에서 이미 로드됨) ── -->
+<script src="wrongnote.js?v=79"></script>
+<script src="growth.js?v=79"></script>
+<script src="streak.js?v=79"></script>
+<script src="examday.js?v=79"></script>
+<!-- 日本版: event129.js(韓国の試験イベント)なし -->
+<script src="remind.js?v=79"></script>
+<script src="banneroff.js?v=79"></script>
+<script>
+(async function(){
+  try {
+    var items = await WrongNote.list();
+    var el = document.getElementById('re-desc');
+    if (el && items && items.length) {
+      var s = WrongNote.summarize(items);
+      el.textContent = '復習する問題 ' + items.length + '問 · 通算' + s.total + '回不正解';
+      el.style.color = '#ffd24a';
+      // 간격 복습(2026-10-09): 1·3·7일 전에 틀린 문제가 있으면 그걸 먼저 — 2~7일째에 돌아올 구체적인 이유
+      var due = window.Remind && Remind.dueWrongs ? Remind.dueWrongs(0, items) : null;
+      if (due) el.textContent = (due.ago === 1 ? '昨日' : due.ago + '日前に') + 'の不正解 ' + due.n + '問 · 今解き直すと記憶に定着しやすくなります';
+    }
+  } catch(e) {}
+})();
+
+// ── 삭제된 그룹 정리: 서버에 그룹이 없으면 로컬 그룹 정보 제거 ──
+// (그룹 삭제 후 hub_group_id 잔존 → 점수 저장 FK 실패 방지.
+//  조회가 성공했는데 그룹이 없을 때만 정리 — 네트워크 오류 시엔 유지)
+(async function(){
+  try {
+    var gid = localStorage.getItem('hub_group_id');
+    if (!gid) return;
+    var db = _sbClient();
+    if (!db) return;
+    var res = await db.from('groups').select('id').eq('id', gid).maybeSingle();
+    if (res && !res.error && !res.data) {
+      localStorage.removeItem('hub_group_id');
+      localStorage.removeItem('hub_group_name');
+      var el = document.getElementById('ub-group-el');
+      if (el) el.classList.remove('show');
+    }
+  } catch(e) {}
+})();
+
+// ── 성장 그래프 버튼: 기록 있으면 초록 점 + 툴팁 요약 ──
+(async function(){
+  try {
+    var data = await Growth.series();
+    var dot = document.getElementById('growth-dot');
+    var btn = document.querySelector('.graph-btn');
+    if (!dot || !data) return;
+    var totalPlays = 0, bestGrow = 0;
+    Object.keys(data).forEach(function(g){
+      var arr = data[g] || []; totalPlays += arr.length;
+      if (arr.length >= 2){
+        var first = arr[0].score;
+        var best = Math.max.apply(null, arr.map(function(p){return p.score;}));
+        if (best - first > bestGrow) bestGrow = best - first;
+      }
+    });
+    if (totalPlays > 0){
+      dot.classList.add('show');
+      if (btn) btn.title = '成長記録 · 通算' + totalPlays + '回' +
+        (bestGrow > 0 ? ' (ベスト +' + bestGrow.toLocaleString() + '点成長)' : '');
+    }
+  } catch(e) {}
+})();
+
+// ── 시험 D-day 카운터 (순수 클라이언트, localStorage 'hub_examdate') ──
+const DAILY_GOAL_PLAYS = 3; // 목표: 오늘 3판
+function fmtExamDate(d) {
+  return d.getFullYear() + '.' + String(d.getMonth()+1).padStart(2,'0') + '.' + String(d.getDate()).padStart(2,'0');
+}
+async function todayPlayCount() {
+  // growth.js가 기록한 로컬 이력에서 '오늘' 자정 이후 판수를 센다 (game1~5 공용)
+  try {
+    if (!window.Growth || !Growth.series) return 0;
+    var data = await Growth.series();
+    if (!data) return 0;
+    var startOfDay = new Date(); startOfDay.setHours(0,0,0,0);
+    var cnt = 0;
+    Object.keys(data).forEach(function(g){
+      (data[g] || []).forEach(function(p){ if ((p.ts||0) >= startOfDay.getTime()) cnt++; });
+    });
+    return cnt;
+  } catch(e) { return 0; }
+}
+async function renderExamDay() {
+  var box = document.getElementById('examday-box');
+  if (!box) return;
+  box.style.display = 'flex';
+  // 날짜·안내 줄은 examday.js 공용(공식 일정 표 · 직접 설정 우선 · 지나면 다음 회차) — 2026-10-09
+  if (window.ExamDay) ExamDay.render();
+
+  var played = await todayPlayCount();
+  var goalFill = document.getElementById('ed-goal-fill');
+  var goalTxt = document.getElementById('ed-goal-txt');
+  var pct = Math.min(100, Math.round((played / DAILY_GOAL_PLAYS) * 100));
+  if (goalFill) goalFill.style.width = pct + '%';
+  if (goalTxt) goalTxt.textContent = (played >= DAILY_GOAL_PLAYS ? '🎉 ' : '') + '今日 ' + played + '/' + DAILY_GOAL_PLAYS + '回';
+}
+async function setExamDate() {
+  if (window.ExamDay) return ExamDay.edit(renderExamDay);
+}
+renderExamDay();
+
+// ── 첫 실행 안내(2026-10-09, 분석팀 10/9: 새 기기 21%가 아무것도 안 하고 떠남) ──
+// 처음 설치해 한 판도 안 한 사람에게만 한 번. 바로 시작하거나 닫으면, 또는 한 판이라도 끝내면 다시 안 뜬다.
+// 예전부터 하던 사람(이 기기에 판 기록·연속 기록이 있음)은 건너뛴다.
+(function firstRun(){
+  try {
+    if (localStorage.getItem('am_firstrun_done') || localStorage.getItem('am_played_once')) return;
+    var has = false;
+    try {
+      var g = JSON.parse(localStorage.getItem('hub_growth') || '{}');
+      has = Object.keys(g).some(function (u) { return Object.keys(g[u] || {}).some(function (k) { return (g[u][k] || []).length > 0; }); });
+    } catch (e) {}
+    if (has || parseInt(localStorage.getItem('streak_days') || '0', 10) > 0) { localStorage.setItem('am_firstrun_done', 'old'); return; }
+    var el = document.getElementById('first-run');
+    if (!el) return;
+    el.classList.add('show');
+    if (window.DayLog) DayLog.hit('act', 'firstrun', 'view');
+  } catch (e) {}
+})();
+function firstRunGo(){
+  try { localStorage.setItem('am_firstrun_done', 'go'); if (window.DayLog) DayLog.hit('act', 'firstrun', 'go'); } catch (e) {}
+  location.href = 'game1_acid.html?first=1';
+}
+function firstRunSkip(){
+  try { localStorage.setItem('am_firstrun_done', 'skip'); if (window.DayLog) DayLog.hit('act', 'firstrun', 'skip'); } catch (e) {}
+  var el = document.getElementById('first-run'); if (el) el.classList.remove('show');
+}
+
+// 허브 한 번짜리 안내 — 한 번에 하나만(창 두 개를 겹치지 않는다): 시험 뒤 다음 목표 → 저녁 알림 권유(첫 판 뒤 한 번) · 2026-10-09
+setTimeout(async function(){
+  try {
+    if (window.ExamDay && await ExamDay.afterExamOnce('lv2')) return;
+    if (window.Remind) await Remind.offerOnce();
+  } catch(e) {}
+}, 1500);
+</script>
+
+<script src="emoji-icons.js?v=79"></script>
+
+<script>
+  // 스트릭 알약 — 붙일 자리가 있을 때만 뜬다. 0일이면 스스로 숨는다.
+  document.addEventListener('DOMContentLoaded', function(){
+    if (window.Streak) Streak.mountPill('#streak-slot');
+  });
+</script>
+
+<!-- ── 설정 패널 — 상단바 톱니바퀴로 연다 ── -->
+<div class="set-ov" id="settings-ov" onclick="if(event.target===this)closeSettings()">
+  <div class="set-box" role="dialog" aria-modal="true" aria-label="設定">
+    <div class="set-head">
+      <span class="set-title">SETTINGS</span>
+      <button class="set-x" onclick="closeSettings()" aria-label="閉じる">✕</button>
+    </div>
+    <div class="set-who"><span class="set-who-label">PLAYER</span><b id="set-nick">—</b></div>
+
+    <button class="set-item" id="hub-mute-btn" onclick="toggleHubMute()">
+      <span class="set-ico">🎵</span><span class="set-label">BGMオン</span>
+    </button>
+    <button class="set-item" onclick="closeSettings();changeNickname()">
+      <span class="set-ico">✏️</span><span class="set-label">ニックネーム変更</span>
+    </button>
+    <button class="set-item" onclick="closeSettings();doLogout()">
+      <span class="set-ico">⏻</span><span class="set-label">ログアウト</span>
+    </button>
+    <!-- 소셜(Firebase) 계정으로 로그인했을 때만 노출 — 애플/구글 심사 요건상
+         "계정 생성"을 제공하면 앱 내 탈퇴 경로도 반드시 있어야 한다. -->
+    <button class="set-item danger" id="delete-account-row" style="display:none" onclick="closeSettings();doDeleteAccount()">
+      <span class="set-ico">🗑️</span><span class="set-label">アカウント削除</span>
+    </button>
+    <!-- 韓国版アプリの中(www/ja/)のときだけ出す — 韓国語版に戻る(2026-11-14) -->
+    <button class="set-item" id="lang-row" style="display:none" onclick="closeSettings();switchToKorean()">
+      <span class="set-ico">가</span><span class="set-label" data-ko-ok>言語 / 언어 : 한국어로 바꾸기</span>
+    </button>
+    <!-- プライバシーポリシー — 公開ポリシーをアプリの外(システムのブラウザ)で開く。2026-11-16 成一さん「넣어」(韓国版 3b55045、Apple・Play のアプリ内リンク要件) -->
+    <button class="set-item" id="privacy-row" onclick="closeSettings();window.open('https://tjddlf0224-sudo.github.io/boki-gamesen/privacy.html','_blank')">
+      <span class="set-ico">🔒</span><span class="set-label">プライバシーポリシー</span>
+    </button>
+    <button class="set-item quiet" onclick="closeSettings();resetLv2Progress()">
+      <span class="set-ico">🔄</span><span class="set-label">データをリセット</span>
+    </button>
+  </div>
+</div>
+
+<script>
+/* 자동으로 받은 이름이면 "눌러서 바꾸기" 안내를 붙인다 */
+(function(){ try{ if(localStorage.getItem('hub_nick_auto')==='1'){ var h=document.getElementById('ub-hint'); if(h) h.style.display=''; } }catch(e){} })();
+</script>
+</body>
+</html>

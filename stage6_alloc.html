@@ -3,12 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<style>html{-webkit-text-size-adjust:100%;text-size-adjust:100%}</style>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data:; connect-src 'self' https://pjagaulfivafamhhiveg.supabase.co https://cdn.jsdelivr.net;">
 <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
      **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
      이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
-<script src="safestore.js?v=79"></script>
-<script src="readable.js?v=79"></script>
+<script src="safestore.js?v=81"></script>
+<script src="readable.js?v=81"></script>
 <title>배관의 방(보조부문원가 배분) | 전산회계 1급</title>
 <meta name="description" content="파이프 밸브를 잠그고 열며 직접배분법·단계배분법·상호배분법의 차이를 몸으로 익히는 연습">
 <style>
@@ -347,17 +348,17 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="ask.js?v=79"></script>
-<script src="wrongnote.js?v=79"></script>
-<script src="growth.js?v=79"></script>
-<script src="streak.js?v=79"></script>
-<script src="examday.js?v=79"></script>
-<script src="remind.js?v=79"></script>
-<script src="daylog.js?v=79"></script>
-<script src="stepmode.js?v=79"></script>
-<script src="bgm.js?v=79"></script>
-<script src="stagebgm.js?v=79"></script>
-<script>StageBGM.init('bgm_lv1_alloc.mp3?v=79', 'alloc_muted');</script>
+<script src="ask.js?v=81"></script>
+<script src="wrongnote.js?v=81"></script>
+<script src="growth.js?v=81"></script>
+<script src="streak.js?v=81"></script>
+<script src="examday.js?v=81"></script>
+<script src="remind.js?v=81"></script>
+<script src="daylog.js?v=81"></script><script src="amev.js?v=81"></script><script src="skill.js?v=81"></script>
+<script src="stepmode.js?v=81"></script>
+<script src="bgm.js?v=81"></script>
+<script src="stagebgm.js?v=81"></script>
+<script>StageBGM.init('bgm_lv1_alloc.mp3?v=81', 'alloc_muted');</script>
 <script>
 (function(){ if(!(localStorage.getItem('hub_nickname')||'').trim()){ location.replace('login.html'); } })();
 
@@ -830,7 +831,7 @@ function pickAnswer(btn,q){
     ? `<div class="verdict" style="color:var(--green)">✓ 정답!</div>${q.expl}`
     : `<div class="verdict" style="color:var(--red)">✗ 오답</div>${q.expl}`);
   expl.style.display='block';
-  if(ok){ correctCnt++; score+=150; }
+  if(ok){ correctCnt++; score+=150; if(window.Skill) Skill.hit('cost'); }   // 분개 기술 숙련(skill.js) — 원가
   else{
     if(window.WrongNote) WrongNote.add({ game:GAME_ID, key:q.q.slice(0,20), q:q.q,
       correct:(typeof q.correct==='number'?won(q.correct):q.correct), wrong:val, type:'보조부문배분' });
@@ -955,6 +956,7 @@ function stepPick(btn,q){
   ASTEP.done=true;
   document.querySelectorAll('.opt').forEach(b=>{ b.disabled=true; b.classList.remove('al-glow'); });
   btn.classList.add('correct');
+  if(window.Skill) Skill.hit('cost');   // 차근차근도 셈
   const clean=ASTEP.S.done(alKey(q),{ label:q.q.split('\n')[0].slice(0,40), q:q.q, correct:String(q.correct), type:'보조부문배분' });
   if(!clean && !ASTEP.again[alKey(q)]){
     ASTEP.again[alKey(q)]=1;
@@ -1236,8 +1238,8 @@ function showAdPlaceholder(){ if(window.AdBridge && typeof AdBridge.show==='func
 
 bindStart();
 </script>
-<script src="emoji-icons.js?v=79"></script>
+<script src="emoji-icons.js?v=81"></script>
 <!-- 웹 전용 광고(시작·결과 화면만, 앱에선 adsense.js 가 스스로 멈춘다) -->
-<script src="adsense.js?v=79"></script>
+<script src="adsense.js?v=81"></script>
 </body>
 </html>

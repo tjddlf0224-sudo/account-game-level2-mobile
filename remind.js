@@ -193,7 +193,7 @@
     var P = plugin(); if (!P) return false;
     try {
       var perm = await P.checkPermissions();
-      if (perm.display !== 'granted') perm = await P.requestPermissions();
+      if (perm.display !== 'granted') perm = await (window.AmEv && window.AmEv.hold ? window.AmEv.hold(P.requestPermissions()) : P.requestPermissions());   // 권한 창은 app_bg 아님(amev.js)
       if (perm.display !== 'granted') { set(K_ON, '0'); hit('denied'); return false; }
       set(K_ON, '1'); hit('on'); paintRow();
       await schedule();
@@ -207,7 +207,7 @@
     if (!can() || isOn() || get(K_ASKED) === '1' || get(K_PLAYED) !== '1') return false;
     if (!(global.Ask && Ask.confirm)) return false;
     set(K_ASKED, '1'); hit('asked');
-    var yes = await Ask.confirm('하루 한 번, 저녁 7시에 계사니가 알려 드릴까요?\n시험 D-day와 다시 볼 오답을 짧게 알려 드려요.\n허브 오른쪽 위 톱니바퀴(설정)에서 언제든 끌 수 있어요.', { ok: '알림 받기', cancel: '괜찮아요' });
+    var yes = await Ask.confirm('저녁 7시에 계사니가 알려 드릴까요?\n시험 D-day와 다시 볼 오답을 알려 드려요.', { ok: '알림 받기', cancel: '괜찮아요', face: 'clock', note: '설정(톱니바퀴)에서 언제든 끌 수 있어요' });
     if (yes) await turnOn();
     return true;
   }

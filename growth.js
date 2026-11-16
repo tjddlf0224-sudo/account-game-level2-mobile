@@ -69,6 +69,24 @@
   // toISOString()은 UTC 기준이라 한국시간 자정~오전 9시 사이엔 "어제" 날짜가 찍히는 버그가
   // 있었다(2026-09-01 발견) — 광고매출(한국시간 기준)과 날짜가 최대 9시간 어긋나서 DAU와
   // 매출을 같은 날짜로 비교할 수 없게 만듦. +9시간 보정으로 한국시간 날짜를 얻는다.
+  // 통계(접속 dau_events·판수 play_events)를 안 보내는 기기 — 11/4 분석팀 '내 폰 통계 제외'(~/개발팀/넘김/분석팀_내폰_통계제외_2026-11-04.md).
+  // owner_device='1'(성일님 폰, 설정 창 제목 7번 — amev.js) · 시험 광고판(__amTestAds) · 디버그 빌드(Capacitor.DEBUG) · 웹 localhost·file(앱 웹뷰도 localhost 라 웹일 때만).
+  // 학습 기록(score_history·level_rounds·topic_attempts)은 성장 그래프·해금·교사 화면이 쓰므로 그대로 보낸다. 시험 하네스는 __amStatForce.
+  function statOff() {
+    try {
+      if (localStorage.getItem('owner_device') === '1') return true;
+      if (global.__amStatForce) return false;
+      if (global.__amTestAds) return true;
+      if (global.__amTestEnv) return true;   // 스토어 점검·심사 기기(안드 Test Lab·iOS sandboxReceipt, 네이티브가 넣음 — 2026-11-05)
+      if (platform() !== 'web' && global.Capacitor.DEBUG === true) return true;   // 디버그 빌드 — Release·아카이브는 false
+      if (platform() === 'web') {
+        var h = location.hostname;
+        if (!h || h === 'localhost' || h === '127.0.0.1' || location.protocol === 'file:') return true;
+      }
+    } catch (e) { return true; }
+    return false;
+  }
+
   function todayStr() { return new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10); }
 
   function deviceId() {
@@ -94,6 +112,8 @@
   //     visibilitychange(포그라운드 복귀)에서도 불러서 날짜가 바뀌었으면 다시 찍는다.
   function checkDAU() {
     try {
+      if (global.AmEnv && global.AmEnv.pending()) { global.AmEnv.whenReady(checkDAU); return; }   // 점검 기기 판정 기다림(daylog.js AmEnv)
+      if (statOff()) return;
       var today = todayStr();
       if (localStorage.getItem(LS_DAU_DATE) === today) return; // 오늘 이미 기록함
       var db = client();
@@ -114,7 +134,8 @@
   // 여부"가 아니라 "총 몇 판을 했는지"가 목적이라 중복 자체가 데이터임.
   var PLAY_TABLE = 'play_events';
   function logPlay(gameId) {
-    if (!gameId) return;
+    if (gameId && global.AmEnv && global.AmEnv.pending()) { global.AmEnv.whenReady(function () { logPlay(gameId); }); return; }
+    if (!gameId || statOff()) return;
     try {
       var db = client();
       if (!db) return;
@@ -327,7 +348,8 @@
 
   // growth.js는 모든 게임/허브 화면에 공통으로 로드되므로, 로드 시점에 한 번 체크하면
   // 앱 전체에서 자동으로 DAU가 잡힌다(별도 페이지마다 호출부 추가 불필요).
-  checkDAU();
+  // 시험 광고판 표시(__amTestAds)는 capacitor-bridge.js 가 정하는데 게임 화면들은 이 파일을 먼저 읽는다 → 스크립트가 다 읽힌 뒤 확인
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', checkDAU); else checkDAU();
   // 네이티브 앱은 백그라운드에서 며칠씩 살아있어 로드가 다시 안 일어남 — 포그라운드
   // 복귀 시에도 체크(오늘 이미 찍었으면 checkDAU 안에서 곧바로 리턴하므로 비용 없음).
   try {

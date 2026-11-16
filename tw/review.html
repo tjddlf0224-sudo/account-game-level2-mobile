@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
+         **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
+         이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
+    <script src="tw/tw_data.js?v=1"></script>
+<script src="tw/server_tw.js?v=1"></script>
+<link rel="stylesheet" href="tw/tw.css?v=1">
+<script src="safestore.js?v=79"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<style>html{-webkit-text-size-adjust:100%;text-size-adjust:100%}</style>
+<title>錯題本 · 弱點檢查 | 會計電玩館</title>
+<meta name="description" content="只收集答錯的題目重新作答，克服弱點的錯題本">
+<style>
+  :root{
+    --bg:#020810; --card:#0c1626; --card2:#11203a; --line:rgba(255,255,255,.08);
+    --blue:#00f2ff; --purple:#b44fff; --green:#2ecc71; --red:#ff2d78; --gold:#ffd24a;
+    --txt:#eaf2ff; --dim:rgba(234,242,255,.55);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  
+  /* 본문 글꼴은 전 게임 공통으로 Noto Sans KR 이 먼저다(2026-09-15).
+     전엔 -apple-system 이 앞이라 **웹폰트를 불러놓고도 iOS 에선 애플 기본 글꼴**이
+     나왔다 — 게임 5종·원가의 길과 글자 모양이 달라 보이던 이유다.
+     시스템 글꼴은 뒤에 남겨 웹폰트가 늦거나 막혀도 한글이 깨지지 않게 한다. */
+  body{margin:0;background:var(--bg);color:var(--txt);
+       font-family:'Noto Sans TC', 'Noto Sans KR',-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
+       padding:0 0 calc(60px + var(--ad-banner-h, 0px));
+       min-height:100vh;}
+  .wrap{max-width:640px;margin:0 auto;padding:calc(18px + env(safe-area-inset-top)) 16px 18px;}
+  @media (min-width:701px){
+    body{background:
+      radial-gradient(ellipse 50% 40% at 12% 10%, rgba(0,242,255,0.07), transparent 60%),
+      radial-gradient(ellipse 45% 35% at 90% 90%, rgba(180,79,255,0.07), transparent 55%),
+      var(--bg);
+      display:flex; flex-direction:column; justify-content:center;}
+    .wrap{padding-top:16px;max-width:860px;width:100%;}
+    h1{font-size:1.55rem;}
+    h1 .sub{font-size:.85rem;}
+    .panel{padding:22px 26px;}
+    .panel h2{font-size:1.1rem;}
+    .bigstat b{font-size:2.6rem;}
+    .bar-row{font-size:.92rem;}
+    .bar-label{width:130px;}
+    .bar-track{height:16px;}
+    .cta{font-size:1.15rem;padding:17px;}
+    .grp-title{font-size:.95rem;padding:14px 16px;}
+    .item{padding:15px 17px;}
+    .item .q{font-size:1rem;}
+    .item .meta{font-size:.84rem;}
+    .quiz-card{padding:30px 34px;}
+    .quiz-q{font-size:1.25rem;}
+    .choice{font-size:1.05rem;padding:16px 18px;}
+  }
+  .top{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+  .back{background:var(--card);border:1px solid var(--line);color:var(--txt);
+        border-radius:12px;padding:9px 13px;font-size:.92rem;text-decoration:none;}
+  h1{font-size:1.25rem;margin:0;letter-spacing:-.3px;}
+  h1 .sub{display:block;font-size:.72rem;color:var(--dim);font-weight:500;margin-top:3px;}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;
+         padding:16px;margin-bottom:14px;}
+  .panel h2{font-size:.95rem;margin:0 0 12px;color:var(--blue);}
+  .bigstat{display:flex;align-items:baseline;gap:8px;margin-bottom:4px;}
+  .bigstat b{font-size:2rem;color:var(--gold);}
+  .bar-row{display:flex;align-items:center;gap:8px;margin:7px 0;font-size:.82rem;}
+  .bar-label{width:108px;flex:none;color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .bar-track{flex:1;height:14px;background:rgba(255,255,255,.06);border-radius:8px;overflow:hidden;}
+  .bar-fill{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--purple),var(--red));}
+  .bar-num{width:34px;flex:none;text-align:right;color:var(--txt);font-variant-numeric:tabular-nums;}
+  .cta{display:block;width:100%;border:none;border-radius:14px;padding:15px;
+       font-size:1.02rem;font-weight:700;color:#021;cursor:pointer;
+       background:linear-gradient(90deg,var(--blue),var(--green));margin-top:6px;}
+  .cta:disabled{opacity:.4;}
+  .grp-title{font-size:.85rem;color:var(--txt);margin:10px 0 0;padding:12px 13px;
+             background:var(--card);border:1px solid var(--line);border-radius:12px;
+             display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
+  .grp-title .chev{color:var(--dim);transition:transform .18s;font-size:.85rem;}
+  .grp-title.open .chev{transform:rotate(90deg);}
+  .grp-title.open{border-radius:12px 12px 0 0;border-bottom:none;}
+  .grp-body{display:none;border:1px solid var(--line);border-top:none;
+            border-radius:0 0 12px 12px;padding:10px 10px 2px;margin-bottom:8px;}
+  .grp-body.open{display:block;}
+  .grp-body .item{margin-bottom:8px;}
+  .item{background:var(--card2);border:1px solid var(--line);border-radius:12px;
+        padding:12px 13px;margin-bottom:8px;}
+  .item .q{font-size:.9rem;line-height:1.7;margin-bottom:8px;word-break:keep-all;overflow-wrap:break-word;}
+  .item .meta{display:flex;flex-wrap:wrap;gap:6px;font-size:.76rem;}
+  .pill{border-radius:20px;padding:3px 9px;background:rgba(255,255,255,.06);}
+  .pill.ok{color:var(--green);background:rgba(46,204,113,.12);}
+  .pill.no{color:var(--red);background:rgba(255,45,120,.12);}
+  .pill.cnt{color:var(--gold);background:rgba(255,210,74,.12);}
+  .target-account{color:var(--gold);}
+  .empty{text-align:center;color:var(--dim);padding:46px 10px;line-height:1.8;}
+  .empty .em{font-size:2.4rem;display:block;margin-bottom:10px;}
+  .clear-link{display:block;text-align:center;color:var(--dim);font-size:.78rem;
+              margin-top:22px;text-decoration:underline;cursor:pointer;}
+
+  /* 다시풀기 모드 */
+  #quiz{display:none;}
+  .quiz-progress{font-size:.8rem;color:var(--dim);text-align:center;margin-bottom:10px;}
+  .quiz-card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 18px;}
+  .quiz-tag{font-size:.74rem;color:var(--blue);margin-bottom:10px;}
+  .quiz-q{font-size:1.08rem;line-height:1.75;margin-bottom:20px;word-break:keep-all;overflow-wrap:break-word;}
+  .choice{display:block;width:100%;text-align:left;border:1.5px solid var(--line);
+          background:var(--card2);color:var(--txt);border-radius:13px;padding:14px 15px;
+          font-size:.98rem;margin-bottom:10px;cursor:pointer;transition:.15s;}
+  .choice:active{transform:scale(.98);}
+  .choice.correct{border-color:var(--green);background:rgba(46,204,113,.16);}
+  .choice.wrong{border-color:var(--red);background:rgba(255,45,120,.16);}
+  .flashcard .reveal{margin-top:14px;padding:14px;border-radius:13px;
+                     background:rgba(0,242,255,.08);border:1px solid rgba(0,242,255,.25);
+                     font-size:1rem;display:none;}
+  .quiz-next{margin-top:14px;display:none;}
+  .quiz-foot{display:flex;gap:10px;margin-top:14px;}
+  .quiz-foot button{flex:1;border-radius:13px;padding:13px;font-size:.95rem;font-weight:600;
+                    border:1px solid var(--line);background:var(--card2);color:var(--txt);cursor:pointer;}
+  .quiz-foot .keep{color:var(--gold);}
+  .quiz-done{text-align:center;padding:40px 12px;}
+  .quiz-done .em{font-size:3rem;display:block;margin-bottom:12px;}
+
+/*FONTUNI*/
+/* ── 폰트 통일 (2026-09-14) ──
+   제목·버튼 = Black Han Sans / 본문 = Noto Sans KR. 둘 다 OFL 이라 상업 배포에 제약이 없다.
+   ⚠ Orbitron 은 **라틴 전용**이라 한글에 쓰면 시스템 폰트로 대체되고 자간만 벌어져
+     "회계 플라이트"처럼 멋없게 나온다(사용자 지적). 숫자·영문 전용으로만 쓴다.
+   Jua 는 게임마다 섞여 있어 걷어냈다. */
+.gtitle, .logo, .ov-title, .overlay-title, h1, h2 { font-family: 'Noto Sans TC', 'Black Han Sans', 'Noto Sans TC', 'Noto Sans KR', sans-serif !important; }
+
+.ad-slot { margin: 24px auto 8px; max-width: 728px; text-align: center; }
+.ad-slot-label { font-size: .68rem; color: rgba(255,255,255,.35); margin-bottom: 4px; letter-spacing: .05em; }
+/* 숨은 보스 '감사관'(boss.js, 2026-11-03) */
+.boss{background:linear-gradient(135deg,#1a1230,#0c1626);border:1px solid rgba(180,79,255,.35);border-radius:16px;padding:14px 16px;margin-bottom:14px;}
+.boss.open{border-color:rgba(255,210,74,.55);}
+.boss h2{margin:0 0 6px;font-size:1rem;}
+.boss p{margin:0;font-size:.84rem;color:var(--dim);line-height:1.55;}
+.boss .gauge{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.boss .gauge span{font-size:.76rem;border-radius:20px;padding:3px 10px;background:rgba(255,255,255,.06);color:var(--dim);font-variant-numeric:tabular-nums;}
+.boss .gauge span.done{color:var(--green);background:rgba(46,204,113,.12);}
+.boss .title{display:inline-block;margin-top:10px;font-size:.78rem;color:var(--gold);background:rgba(255,210,74,.1);border:1px solid rgba(255,210,74,.35);border-radius:20px;padding:3px 10px;}
+.boss .cta{margin-top:12px;}
+.boss-hud{display:flex;justify-content:space-between;align-items:center;font-size:.82rem;color:var(--dim);margin-bottom:10px;font-variant-numeric:tabular-nums;}
+.boss-hud b{color:var(--gold);}
+</style>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800;900&family=Black+Han+Sans&family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <a class="back" href="index.html">←</a>
+    <script>/* 1급 허브에서 들어왔으면 1급 허브로 돌아간다(2026-09-27 QA) */try{if(localStorage.getItem('hub_level')==='lv1')document.currentScript.previousElementSibling.href='index_lv1.html';}catch(e){}</script>
+    <h1>📝 錯題本
+      <span class="sub" id="who">載入中...</span>
+    </h1>
+  </div>
+
+  <!-- 목록/약점 화면 -->
+  <div id="home">
+    <div id="content"><div class="empty">載入中...</div></div>
+    <div class="ad-slot" data-adsense style="display:none">
+      <div class="ad-slot-label">廣告</div>
+      <ins class="adsbygoogle" style="display:block"
+           data-ad-client="ca-pub-7418287954060066"
+           data-ad-slot="2076355142"
+           data-ad-format="auto" data-full-width-responsive="true"></ins>
+    </div>
+  </div>
+
+  <!-- 다시풀기 화면 -->
+  <div id="quiz">
+    <div class="quiz-progress" id="quiz-progress"></div>
+    <div id="quiz-body"></div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="wrongnote.js?v=79"></script>
+<script src="boss.js?v=1"></script>
+<script src="daylog.js?v=79"></script><script src="amev.js?v=1"></script><script src="skill.js?v=1"></script>
+<script src="adsense.js?v=79"></script>
+<script>
+// 로그인 체크
+(function(){
+  var nick = (localStorage.getItem('hub_nickname')||'').trim();
+  if(!nick){ location.replace('login.html'); return; }
+  document.getElementById('who').textContent = nick + ' 答錯的題目';
+})();
+
+var ITEMS = [];
+var _openGroups = {};   // { gameKey: true } — 펼쳐진 게임 그룹(재렌더돼도 유지)
+
+function toggleGroup(g){
+  _openGroups[g] = !_openGroups[g];
+  var title = document.querySelector('.grp-title[onclick="toggleGroup(\''+g+'\')"]');
+  var body = document.getElementById('grp-'+g);
+  if (title) title.classList.toggle('open', _openGroups[g]);
+  if (body) body.classList.toggle('open', _openGroups[g]);
+}
+
+function esc(s){ return (s==null?'':String(s)).replace(/[&<>"']/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
+/* 문제 본문(q)은 게임이 만든 강조 태그를 포함한다: <b class="target-account">계정과목</b>, <br>.
+   그런데 오답노트는 Supabase(wrong_answers)에서도 읽어오고 그 테이블은 anon insert 가 열려 있어서,
+   q_text 에 임의 HTML 이 들어올 수 있다 → 그대로 innerHTML 하면 저장형 XSS 가 된다.
+   그래서 "전부 이스케이프한 뒤 알려진 강조 태그만 되살리는" 화이트리스트 방식으로 처리한다.
+   (허용 목록에 없는 태그·속성은 전부 문자로 남아 실행되지 않는다) */
+function safeQ(s){
+  return esc(s)
+    .replace(/&lt;b class=&quot;target-account&quot;&gt;/g, '<b class="target-account">')
+    .replace(/&lt;b&gt;/g, '<b>')
+    .replace(/&lt;\/b&gt;/g, '</b>')
+    .replace(/&lt;br\s*\/?&gt;/g, '<br>');
+}
+
+/* onclick="fn('...')" 안에 넣을 문자열 — JS 이스케이프를 먼저 하고 HTML 이스케이프를 나중에 한다.
+   (순서를 뒤집으면 esc 가 만든 &#39; 를 HTML 파서가 ' 로 되돌려 JS 문자열이 깨진다) */
+function jsAttr(s){ return esc(String(s==null?'':s).replace(/\\/g,'\\\\').replace(/'/g,"\\'")); }
+
+function gameName(g){ return (WrongNote.GAME_NAMES[g]||g); }
+// game_id 는 wrong_answers(anon insert 열림)에서 오는 값이라 임의 문자열이 들어올 수 있다.
+// onclick/id 속성에 그대로 넣으면 속성 브레이크아웃 XSS 가 되므로, DOM 용 키는 영숫자/밑줄로만 정규화한다.
+// (표시 텍스트는 esc(gameName())로 별도 처리되고, 목록은 본인 오답만 보여주지만 user_name 이 인증값이 아니라
+//  공격자가 피해자 닉네임으로 행을 심을 수 있어 교차 사용자 저장형 XSS 가 가능 → 반드시 막는다)
+function domKey(g){ return String(g==null?'':g).replace(/[^a-z0-9_]/gi,'_'); }
+
+async function load(){
+  ITEMS = await WrongNote.list();
+  render();
+}
+
+function render(){
+  var box = document.getElementById('content');
+  if(!ITEMS.length){
+    box.innerHTML = bossPanel() + '<div class="empty"><span class="em">🎉</span>'+
+      '目前沒有答錯的題目。<br>遊戲中答錯的題目會自動收在這裡。</div>';
+    return;
+  }
+  var s = WrongNote.summarize(ITEMS);
+
+  // 약점 패널 (게임별 + 유형별 빈도 막대)
+  var maxG = Math.max.apply(null, Object.values(s.byGame));
+  var gameBars = Object.keys(s.byGame).sort(function(a,b){return s.byGame[b]-s.byGame[a];})
+    .map(function(g){ return bar(gameName(g), s.byGame[g], maxG); }).join('');
+
+  var typeKeys = Object.keys(s.byType).sort(function(a,b){return s.byType[b]-s.byType[a];}).slice(0,8);
+  var maxT = typeKeys.length ? Math.max.apply(null, typeKeys.map(function(t){return s.byType[t];})) : 1;
+  var typeBars = typeKeys.map(function(t){ return bar(t, s.byType[t], maxT); }).join('');
+
+  var html = bossPanel() +
+    '<div class="panel">'+
+      '<div class="bigstat"><b>'+s.total+'</b> 次答錯 · '+ITEMS.length+'題</div>'+
+      '<button class="cta" onclick="startQuiz()">▶ 重做答錯的題目</button>'+
+    '</div>'+
+    '<div class="panel"><h2>🎯 各遊戲的弱點</h2>'+gameBars+'</div>'+
+    (typeBars ? '<div class="panel"><h2>🔍 各類型的弱點</h2>'+typeBars+'</div>' : '');
+
+  // 게임별 목록 — 문제 많은(약한) 게임이 위로, 접기/펼치기
+  var byGame = {};
+  ITEMS.forEach(function(r){ (byGame[r.game]=byGame[r.game]||[]).push(r); });
+  Object.keys(byGame).sort(function(a,b){ return byGame[b].length - byGame[a].length; }).forEach(function(g){
+    var dk = domKey(g);
+    var isOpen = _openGroups[dk];
+    html += '<div class="grp-title'+(isOpen?' open':'')+'" onclick="toggleGroup(\''+dk+'\')">'+
+              '<span>'+esc(gameName(g))+' · '+byGame[g].length+'題</span>'+
+              '<span class="chev">▸</span>'+
+            '</div>'+
+            '<div class="grp-body'+(isOpen?' open':'')+'" id="grp-'+dk+'">';
+    byGame[g].forEach(function(r){
+      html +=
+        '<div class="item">'+
+          '<div class="q">'+safeQ(r.q)+'</div>'+
+          '<div class="meta">'+
+            '<span class="pill ok">答案：'+esc(r.correct)+'</span>'+
+            (r.wrong ? '<span class="pill no">你的答案：'+esc(r.wrong)+'</span>' : '')+
+            (r.count>1 ? '<span class="pill cnt">'+r.count+'次</span>' : '')+
+          '</div>'+
+        '</div>';
+    });
+    html += '</div>';
+  });
+
+  html += '<span class="clear-link" onclick="wipe()">清空錯題本</span>';
+  box.innerHTML = html;
+}
+
+/* 숨은 보스 '감사관' 띠 — 정복 수·정복률, 열리면 도전 버튼 */
+function bossPanel(){
+  if(!window.Boss) return '';
+  var st = Boss.state(ITEMS.length), C = Boss.CONFIG;
+  var pct = Math.round(st.rate*100), need = Math.round(C.RATE*100);
+  if(!st.open){
+    return '<div class="boss"><h2>稽核員快來查帳了</h2>'+
+      '<p>在錯題本重做答錯的題目並克服，隱藏對手就會現身。</p>'+
+      '<div class="gauge"><span class="'+(st.n>=C.NEED?'done':'')+'">克服 '+Math.min(st.n,C.NEED)+'/'+C.NEED+'</span>'+
+      '<span class="'+(pct>=need?'done':'')+'">克服率 '+pct+'%/'+need+'%</span></div></div>';
+  }
+  return '<div class="boss open"><h2>稽核員到了！</h2>'+
+    '<p>用你答錯過的題目接受期末稽核。'+C.QN+'題中答對'+C.WIN+'題以上就過關，機會有'+C.LIVES+'次。</p>'+
+    (st.won ? '<div class="title">稱號 · '+esc(st.title)+(st.best?' · 最高 '+st.best+'/'+C.QN:'')+'</div>' : '')+
+    '<button class="cta" onclick="startBoss()">接受稽核</button></div>';
+}
+
+function bar(label, val, max){
+  var pct = max>0 ? Math.round(val/max*100) : 0;
+  return '<div class="bar-row"><div class="bar-label">'+esc(label)+'</div>'+
+         '<div class="bar-track"><div class="bar-fill" style="width:'+pct+'%"></div></div>'+
+         '<div class="bar-num">'+val+'</div></div>';
+}
+
+async function wipe(){
+  // Android WebView는 confirm()이 무동작(항상 false) → 2-스텝 버튼으로 확인
+  var link = document.querySelector('.clear-link');
+  if (link && link.dataset.armed !== '1') {
+    link.dataset.armed = '1';
+    link.textContent = '⚠️ 再點一下就會全部刪除（無法復原）';
+    link.style.color = '#ff2d78';
+    setTimeout(function(){
+      if (!link.isConnected) return;
+      link.dataset.armed = '';
+      link.textContent = '清空錯題本';
+      link.style.color = '';
+    }, 4000);
+    return;
+  }
+  await WrongNote.clearAll();
+  await load();
+}
+
+/* ───────── 다시풀기 모드 ───────── */
+var QUEUE=[], qi=0, solved=0;
+
+var _doneLogged = false;
+function startQuiz(){
+    if (window.DayLog) DayLog.hit('act', 'review', 'start');   // 시작 횟수(끝까지 한 판은 Growth.logPlay → 'finish')
+  QUEUE = ITEMS.slice();
+  // 섞기
+  for(var i=QUEUE.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=QUEUE[i];QUEUE[i]=QUEUE[j];QUEUE[j]=t; }
+  qi=0; solved=0; _doneLogged=false;
+  document.getElementById('home').style.display='none';
+  document.getElementById('quiz').style.display='block';
+  showQ();
+}
+
+function exitQuiz(){
+  document.getElementById('quiz').style.display='none';
+  document.getElementById('home').style.display='block';
+  load();
+}
+
+function showQ(){
+  var prog = document.getElementById('quiz-progress');
+  var body = document.getElementById('quiz-body');
+  if(qi >= QUEUE.length){
+    // 끝까지 푼 판 — 분석에 '다시 풀기 시작 28·끝 0'으로 보이던 것(2026-10-13 분석팀). 판수(play_events)엔 안 넣고 하루 합계만.
+    if (window.DayLog && !_doneLogged) { _doneLogged = true; DayLog.hit('act', 'review', 'finish'); }
+    prog.textContent='';
+    body.innerHTML = '<div class="quiz-card quiz-done"><span class="em">🏁</span>'+
+      '<div style="font-size:1.1rem;margin-bottom:6px;">複習完成！</div>'+
+      '<div style="color:var(--dim);font-size:.9rem;">'+solved+'題答對，已從錯題本移除。</div>'+
+      '<button class="cta" style="margin-top:20px;" onclick="exitQuiz()">回錯題本</button></div>';
+    return;
+  }
+  var r = QUEUE[qi];
+  prog.textContent = (qi+1)+' / '+QUEUE.length;
+
+  if(r.wrong){
+    // 2지선다: 정답 vs 내가 고른 오답
+    var opts = Math.random()<0.5 ? [r.correct, r.wrong] : [r.wrong, r.correct];
+    body.innerHTML =
+      '<div class="quiz-card">'+
+        '<div class="quiz-tag">'+esc(gameName(r.game))+(r.type?' · '+esc(r.type):'')+'</div>'+
+        '<div class="quiz-q">'+safeQ(r.q)+'</div>'+
+        '<button class="choice" data-v="'+esc(opts[0])+'">'+esc(opts[0])+'</button>'+
+        '<button class="choice" data-v="'+esc(opts[1])+'">'+esc(opts[1])+'</button>'+
+        '<div class="quiz-next"><button class="cta" onclick="nextQ()">下一題 →</button></div>'+
+      '</div>';
+    var btns = body.querySelectorAll('.choice');
+    btns.forEach(function(b){ b.onclick = function(){ pick(b, r, btns); }; });
+  } else {
+    // 플래시카드(메모리 등): 뜻 보여주고 외웠으면 완료
+    body.innerHTML =
+      '<div class="quiz-card flashcard">'+
+        '<div class="quiz-tag">'+esc(gameName(r.game))+(r.type?' · '+esc(r.type):'')+'</div>'+
+        '<div class="quiz-q">'+safeQ(r.q)+'</div>'+
+        '<button class="choice" onclick="this.nextElementSibling.style.display=\'block\';this.style.display=\'none\'">👀 看答案</button>'+
+        '<div class="reveal">'+esc(r.correct)+'</div>'+
+        '<div class="quiz-foot">'+
+          '<button class="keep" onclick="nextQ()">還不熟</button>'+
+          '<button onclick="solveCard(\''+jsAttr(r.game)+'\',\''+jsAttr(r.key)+'\')">記住了 ✓</button>'+
+        '</div>'+
+      '</div>';
+  }
+}
+
+async function pick(btn, r, btns){
+  btns.forEach(function(b){ b.disabled=true; });
+  var chosen = btn.getAttribute('data-v');
+  if(chosen === String(r.correct)){
+    btn.classList.add('correct');
+    solved++;
+    if (window.Boss) Boss.conquer(r);           // 정복 기록(숨은 보스 '감사관' 열기용)
+    await WrongNote.resolve(r.game, r.key);   // 맞히면 오답노트에서 제거
+  } else {
+    btn.classList.add('wrong');
+    btns.forEach(function(b){ if(b.getAttribute('data-v')===String(r.correct)) b.classList.add('correct'); });
+  }
+  document.querySelector('.quiz-next').style.display='block';
+}
+
+async function solveCard(game, key){
+  solved++;
+  if (window.Boss) { var _r = QUEUE.find(function(x){ return x.game===game && String(x.key)===String(key); }); if (_r) Boss.conquer(_r); }
+  await WrongNote.resolve(game, key);
+  nextQ();
+}
+
+function nextQ(){ qi++; showQ(); }
+
+/* ───────── 숨은 보스 '감사관' 모드(오답노트 화면 안) ───────── */
+var BQ = [], bi = 0, bOk = 0, bLives = 0;
+function startBoss(){
+  if(!window.Boss) return;
+  BQ = Boss.build(ITEMS); bi = 0; bOk = 0; bLives = Boss.CONFIG.LIVES;
+  if(!BQ.length) return;
+  if (window.DayLog) DayLog.hit('act', 'boss', 'start');
+  document.getElementById('home').style.display='none';
+  document.getElementById('quiz').style.display='block';
+  showBoss();
+}
+function showBoss(){
+  var prog = document.getElementById('quiz-progress'), body = document.getElementById('quiz-body');
+  if(bi >= BQ.length || bLives <= 0){ return endBoss(); }
+  var q = BQ[bi];
+  prog.textContent = '';
+  body.innerHTML =
+    '<div class="quiz-card">'+
+      '<div class="boss-hud"><span>稽核員 · '+(bi+1)+' / '+BQ.length+'</span><span>答對 <b>'+bOk+'</b> · 剩餘機會 <b>'+bLives+'</b></span></div>'+
+      '<div class="quiz-tag">'+esc(gameName(q.game))+(q.type?' · '+esc(q.type):'')+'</div>'+
+      '<div class="quiz-q">'+safeQ(q.q)+'</div>'+
+      q.options.map(function(o){ return '<button class="choice" data-v="'+esc(o)+'">'+esc(o)+'</button>'; }).join('')+
+      '<div class="quiz-next"><button class="cta" onclick="bi++;showBoss()">下一題 →</button></div>'+
+    '</div>';
+  var btns = body.querySelectorAll('.choice');
+  btns.forEach(function(b){ b.onclick = function(){
+    btns.forEach(function(x){ x.disabled = true; });
+    if(b.getAttribute('data-v') === q.correct){ b.classList.add('correct'); bOk++; }
+    else { b.classList.add('wrong'); bLives--; btns.forEach(function(x){ if(x.getAttribute('data-v')===q.correct) x.classList.add('correct'); }); }
+    document.querySelector('.quiz-next').style.display='block';
+  }; });
+}
+function endBoss(){
+  var C = Boss.CONFIG, res = Boss.finish(bOk, BQ.length), body = document.getElementById('quiz-body');
+  if (window.DayLog) DayLog.hit('act', 'boss', res.win ? 'win' : 'lose');
+  document.getElementById('quiz-progress').textContent = '';
+  body.innerHTML = res.win
+    ? '<div class="quiz-card quiz-done"><div style="font-size:1.15rem;margin-bottom:8px;">稽核通過！</div>'+
+      '<div style="color:var(--gold);margin-bottom:6px;">稱號「'+esc(res.title)+'」'+(res.firstWin?'獲得':'保持')+'</div>'+
+      '<div style="color:var(--dim);font-size:.9rem;">'+BQ.length+'題中答對'+bOk+'題 · 最高'+res.best+'題</div>'+
+      '<button class="cta" style="margin-top:20px;" onclick="exitQuiz()">回錯題本</button></div>'
+    : '<div class="quiz-card quiz-done"><div style="font-size:1.1rem;margin-bottom:8px;">稽核發現 '+(C.LIVES - Math.max(0,bLives))+'處缺失…</div>'+
+      '<div style="color:var(--dim);font-size:.9rem;">答對'+bOk+'題（需要'+C.WIN+'題）。多克服一些錯題再來挑戰吧。</div>'+
+      '<button class="cta" style="margin-top:20px;" onclick="startBoss()">再挑戰</button>'+
+      '<button class="keep" style="margin-top:10px;display:block;width:100%;" onclick="exitQuiz()">回錯題本</button></div>';
+}
+
+load();
+</script>
+<script src="emoji-icons.js?v=79"></script>
+</body>
+</html>

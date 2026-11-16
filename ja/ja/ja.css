@@ -1,0 +1,5 @@
+/* 日本版の共通スタイル(全ページの head で読み込む)
+   韓国版は単語の途中で折り返さないよう word-break: keep-all を多用しているが、日本語(かな・漢字)では
+   keep-all だと文の途中で一切折り返せず、カード・吹き出しからはみ出す(320px 幅の記憶の殿堂で確認)。
+   日本語の普通の折り返し(行頭禁則あり)に戻す。 */
+*, *::before, *::after { word-break: normal !important; line-break: strict; }

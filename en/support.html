@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Keeps the game running even where storage is blocked (private browsing, blocked site data).
+         MUST load before any other script - the 2026-09-16 review confirmed that without it
+         none of the 5 games even start. -->
+    <script src="en/en_data.js?v=1"></script>
+<script src="en/server_en.js?v=1"></script>
+<link rel="stylesheet" href="en/en.css?v=1">
+<script src="safestore.js?v=79"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<style>html{-webkit-text-size-adjust:100%;text-size-adjust:100%}</style>
+<title>Ledger Arcade — Support</title>
+<meta name="description" content="Support and contact page for Ledger Arcade, an accounting learning game app.">
+<style>
+  :root{
+    --bg:#0f1226; --card:#1a1f3a; --accent:#5b8cff; --accent2:#7af2c8;
+    --text:#eef1ff; --muted:#a8b0d8; --line:#2a3157;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",Roboto,sans-serif;
+    background:linear-gradient(160deg,#0f1226 0%,#161a35 100%);
+    color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:calc(48px + env(safe-area-inset-top)) 20px calc(80px + max(var(--ad-banner-h, 0px), var(--ad-safe-h, 0px)))}
+  header{text-align:center;margin-bottom:40px}
+  .badge{
+    display:inline-block;font-size:13px;color:var(--accent2);
+    border:1px solid var(--line);border-radius:999px;padding:6px 14px;margin-bottom:18px;
+    letter-spacing:.5px;
+  }
+  h1{font-size:30px;font-weight:800;margin-bottom:10px;letter-spacing:-.5px}
+  .sub{color:var(--muted);font-size:16px}
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:18px;
+    padding:28px 26px;margin-bottom:20px;
+  }
+  .card h2{font-size:19px;margin-bottom:14px;display:flex;align-items:center;gap:9px}
+  .card h2 .dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+  .card p{color:var(--muted);margin-bottom:10px}
+  ul{list-style:none;margin-top:8px}
+  ul li{color:var(--muted);padding:7px 0 7px 26px;position:relative}
+  ul li::before{content:"▸";position:absolute;left:6px;color:var(--accent)}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .contact{
+    display:flex;align-items:center;gap:12px;background:#11152e;
+    border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-top:6px;
+  }
+  .contact .label{color:var(--muted);font-size:14px}
+  .contact .val{font-size:17px;font-weight:700}
+  .faq{border-top:1px solid var(--line);padding:16px 0}
+  .faq:first-of-type{border-top:none;padding-top:4px}
+  .faq .q{font-weight:700;margin-bottom:6px}
+  .faq .a{color:var(--muted)}
+  footer{text-align:center;color:var(--muted);font-size:13px;margin-top:34px;line-height:1.9}
+  footer a{color:var(--muted);text-decoration:underline}
+</style>
+</head>
+<body>
+  <script src="daylog.js?v=79"></script><script src="amev.js?v=1"></script><script src="skill.js?v=1"></script>
+  <div class="wrap">
+    <header>
+      <span class="badge">Customer Support</span>
+      <h1>Ledger Arcade</h1>
+      <p class="sub">Learn accounting with games</p>
+    </header>
+
+    <div class="card">
+      <h2><span class="dot"></span>About the App</h2>
+      <p>Ledger Arcade is an accounting learning app. It helps you pick up key ideas such as
+         journal entries, accounts, and financial statements through quizzes and games.
+         Review and practice again and again, game style.</p>
+      <ul>
+        <li>Journal entry practice and account learning</li>
+        <li>Accounting quizzes by level, with scoring</li>
+        <li>Accounting basics that stick through repetition</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2><span class="dot"></span>Contact Us</h2>
+      <p>To report a bug or make a request, please email the address below.
+         We reply within 2-3 business days.</p>
+      <div class="contact">
+        <span class="label">Email</span>
+        <a class="val" href="mailto:tjddlf0224@gmail.com">tjddlf0224@gmail.com</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="dot"></span>FAQ</h2>
+      <div class="faq">
+        <div class="q">Q. Is the app free?</div>
+        <div class="a">Yes, it is free to use. It includes some ads.</div>
+      </div>
+      <div class="faq">
+        <div class="q">Q. My progress disappeared.</div>
+        <div class="a">Deleting the app can also delete the records saved on your device.
+          If the problem continues, email us above and include your device model.</div>
+      </div>
+      <div class="faq">
+        <div class="q">Q. Can I remove the ads?</div>
+        <div class="a">Ad revenue keeps the app free and lets us keep updating it.
+          We always welcome your feedback.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="dot"></span>Privacy Policy</h2>
+      <p>You can use the app without signing in. To support sign-in, leaderboards, saved progress, and ads,
+         we process some information: your email address (only if you sign in), nickname and learning records, usage statistics
+         (including the install source on Android), and advertising identifiers.</p>
+      <p><a href="https://tjddlf0224-sudo.github.io/ledger-arcade/privacy.html" target="_blank" rel="noopener">Full privacy policy →</a></p>
+    </div>
+
+    <footer>
+      <p style="font-size:12px;margin:0 0 8px">All questions are original.</p>
+      © 2026 Ledger Arcade · Developer Yun<br>
+      Contact: <a href="mailto:tjddlf0224@gmail.com">tjddlf0224@gmail.com</a>
+    </footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!-- 저장소가 막힌 환경(프라이빗 브라우징·사이트데이터 차단)에서도 게임이 돌아가게 한다.
+         **반드시 다른 스크립트보다 먼저** 로드돼야 한다 — 2026-09-16 검토에서
+         이게 없으면 게임 5종이 시작조차 안 되는 것을 확인했다. -->
+    <script src="ja/ja_data.js?v=1"></script>
+<script src="ja/server_ja.js?v=1"></script>
+<link rel="stylesheet" href="ja/ja.css?v=1">
+<script src="safestore.js?v=79"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<style>html{-webkit-text-size-adjust:100%;text-size-adjust:100%}</style>
+<title>簿記ゲーセン — サポート</title>
+<meta name="description" content="簿記学習ゲームアプリ「簿記ゲーセン」のサポート・お問い合わせページです。">
+<style>
+  :root{
+    --bg:#0f1226; --card:#1a1f3a; --accent:#5b8cff; --accent2:#7af2c8;
+    --text:#eef1ff; --muted:#a8b0d8; --line:#2a3157;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",Roboto,sans-serif;
+    background:linear-gradient(160deg,#0f1226 0%,#161a35 100%);
+    color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:calc(48px + env(safe-area-inset-top)) 20px calc(80px + max(var(--ad-banner-h, 0px), var(--ad-safe-h, 0px)))}
+  header{text-align:center;margin-bottom:40px}
+  .badge{
+    display:inline-block;font-size:13px;color:var(--accent2);
+    border:1px solid var(--line);border-radius:999px;padding:6px 14px;margin-bottom:18px;
+    letter-spacing:.5px;
+  }
+  h1{font-size:30px;font-weight:800;margin-bottom:10px;letter-spacing:-.5px}
+  .sub{color:var(--muted);font-size:16px}
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:18px;
+    padding:28px 26px;margin-bottom:20px;
+  }
+  .card h2{font-size:19px;margin-bottom:14px;display:flex;align-items:center;gap:9px}
+  .card h2 .dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+  .card p{color:var(--muted);margin-bottom:10px}
+  ul{list-style:none;margin-top:8px}
+  ul li{color:var(--muted);padding:7px 0 7px 26px;position:relative}
+  ul li::before{content:"▸";position:absolute;left:6px;color:var(--accent)}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .contact{
+    display:flex;align-items:center;gap:12px;background:#11152e;
+    border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-top:6px;
+  }
+  .contact .label{color:var(--muted);font-size:14px}
+  .contact .val{font-size:17px;font-weight:700}
+  .faq{border-top:1px solid var(--line);padding:16px 0}
+  .faq:first-of-type{border-top:none;padding-top:4px}
+  .faq .q{font-weight:700;margin-bottom:6px}
+  .faq .a{color:var(--muted)}
+  footer{text-align:center;color:var(--muted);font-size:13px;margin-top:34px;line-height:1.9}
+  footer a{color:var(--muted);text-decoration:underline}
+</style>
+</head>
+<body>
+  <script src="daylog.js?v=79"></script><script src="amev.js?v=1"></script><script src="skill.js?v=1"></script>
+  <div class="wrap">
+    <header>
+      <span class="badge">サポート · Customer Support</span>
+      <h1>簿記ゲーセン</h1>
+      <p class="sub">ゲームで学ぶ簿記3級アプリ(日商簿記検定3級・2027年度出題範囲に対応)</p>
+    </header>
+
+    <div class="card">
+      <h2><span class="dot"></span>アプリ紹介</h2>
+      <p>「簿記ゲーセン」は、仕訳・勘定科目・財務諸表など簿記3級の重要な考え方を
+         クイズやゲームで楽しく身につけられるように作った、簿記学習アプリです。
+         試験対策や復習を、ゲーム感覚でくり返し行えます。</p>
+      <ul>
+        <li>仕訳の練習と勘定科目の学習</li>
+        <li>難易度別の簿記クイズとスコア機能</li>
+        <li>くり返し学習で自然に身につく簿記の基礎</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2><span class="dot"></span>お問い合わせ</h2>
+      <p>ご利用中の不具合やバグのご報告、ご要望などがありましたら、下記のメールアドレスまでご連絡ください。
+         営業日で2〜3日以内にご返信いたします。</p>
+      <div class="contact">
+        <span class="label">メール</span>
+        <a class="val" href="mailto:tjddlf0224@gmail.com">tjddlf0224@gmail.com</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="dot"></span>よくある質問</h2>
+      <div class="faq">
+        <div class="q">Q. アプリは無料ですか？</div>
+        <div class="a">はい、無料でご利用いただけます。一部に広告が含まれます。</div>
+      </div>
+      <div class="faq">
+        <div class="q">Q. 学習記録が消えてしまいました。</div>
+        <div class="a">アプリを削除すると、端末に保存された記録も一緒に削除されることがあります。
+          問題が続く場合は、端末の機種名を添えて上記のメールアドレスまでお問い合わせください。</div>
+      </div>
+      <div class="faq">
+        <div class="q">Q. 広告を消すことはできますか？</div>
+        <div class="a">広告収益は、アプリを無料で運営し、継続的に更新するために使われています。
+          ご意見はいつでも歓迎します。</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="dot"></span>プライバシーポリシー</h2>
+      <p>ログインしなくても利用できます。ログイン・ランキング・学習記録の保存・広告表示のため、
+         ログイン用メールアドレス、ニックネーム・学習記録、利用統計(Android のインストール経路を含む)、広告識別子など、一部の情報を取り扱います。</p>
+      <p><a href="https://tjddlf0224-sudo.github.io/boki-gamesen/privacy.html" target="_blank" rel="noopener">プライバシーポリシー全文 →</a></p>
+    </div>
+
+    <footer>
+      <p style="font-size:12px;margin:0 0 8px">「日商簿記」は日本商工会議所の登録商標です。本アプリは日本商工会議所とは関係ありません。問題はすべてオリジナルです。</p>
+      © 2026 簿記ゲーセン · 開発者 Yun<br>
+      お問い合わせ: <a href="mailto:tjddlf0224@gmail.com">tjddlf0224@gmail.com</a>
+    </footer>
+  </div>
+</body>
+</html>
